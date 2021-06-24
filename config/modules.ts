@@ -12,6 +12,7 @@ import { NewsletterModule } from '@vue-storefront/core/modules/newsletter'
 import { PaymentBackendMethodsModule } from 'src/modules/payment-backend-methods'
 import { PaymentCashOnDeliveryModule } from 'src/modules/payment-cash-on-delivery'
 import { BudsiesModule } from 'src/modules/budsies'
+import { PaymentPaypalModule } from '../../../modules/paypal'; // Capybara theme
 
 import { registerModule } from '@vue-storefront/core/lib/modules'
 
@@ -30,6 +31,7 @@ export function registerClientModules () {
   registerModule(CmsModule)
   registerModule(NewsletterModule)
   registerModule(BudsiesModule)
+  registerModule(PaymentPaypalModule)
 }
 
 // Deprecated API, will be removed in 2.0

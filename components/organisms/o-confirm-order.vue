@@ -283,7 +283,9 @@
       <MPriceSummary class="totals__element" />
     </div>
     <div class="actions">
+      <paypal-button v-if="paymentDetails.paymentMethod === 'paypal_express' && !$v.orderReview.$invalid" />
       <SfButton
+        v-else
         class="sf-button--full-width actions__button"
         :disabled="$v.orderReview.$invalid || !productsInCart.length"
         @click="placeOrder"
@@ -325,6 +327,7 @@ import APromoCode from 'theme/components/atoms/a-promo-code';
 import { ModalList } from 'theme/store/ui/modals'
 import { createSmoothscroll } from 'theme/helpers';
 import { onlineHelper } from '@vue-storefront/core/helpers';
+import PaypalButton from '@develodesign/vsf-payment-paypal/components/Button'
 
 export default {
   name: 'OConfirmOrder',
@@ -341,7 +344,8 @@ export default {
     SfCollectedProduct,
     SfProperty,
     APromoCode,
-    MPriceSummary
+    MPriceSummary,
+    PaypalButton
   },
   mixins: [OrderReview],
   data () {
