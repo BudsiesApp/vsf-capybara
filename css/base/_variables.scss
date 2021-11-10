@@ -72,12 +72,16 @@ $forms-color-placeholder: #a09999;
     --font-lg: 1.266rem; 
     --font-xl: 1.5rem;
     --font-2xl: 1.875rem; 
+    
     // Colors
-    @include generate-color-variants(--c-black, #535353);
+    // @include generate-color-variants(--c-black, #535353);
+    @include generate-color-variants(--c-black, #4d546c);
     @include generate-color-variants(--c-white, #ffffff);
     @include generate-color-variants(--c-blue, #003e6b);
-    @include generate-color-variants(--_c-green-primary, #18ae0c);
-    @include generate-color-variants(--_c-green-secondary, #81d57b);
+    // @include generate-color-variants(--_c-green-primary, #18ae0c);
+    @include generate-color-variants(--_c-green-primary, #8eba4c);
+    // @include generate-color-variants(--_c-green-secondary, #81d57b);
+    @include generate-color-variants(--_c-green-secondary, #779918);
     @include generate-color-variants(--_c-dark-primary, #535353);
     @include generate-color-variants(--_c-dark-secondary, #a3a3a3);
     @include generate-color-variants(--_c-gray-primary, #72757E);
@@ -89,32 +93,43 @@ $forms-color-placeholder: #a09999;
     @include generate-color-variants(--_c-red-secondary, #f9a284);
     @include generate-color-variants(--_c-yellow-primary, #ecc713);
     @include generate-color-variants(--_c-yellow-secondary, #f6e389);
-    @include generate-color-variants(--_c-blue-primary, #43c5e4);
+    // @include generate-color-variants(--_c-blue-primary, #43c5e4);
+    @include generate-color-variants(--_c-blue-primary, #2fb9f3);
     @include generate-color-variants(--_c-blue-secondary, #c3e8fd);
+
     --c-body: var(--c-white);
     --c-text: var(--c-black);
     --c-text-muted: var(--_c-gray-secondary);
     --c-text-disabled: var(--_c-gray-secondary-lighten);
     --c-link: var(--_c-blue-primary);
     --c-link-hover: var(--_c-blue-primary);
-    --c-footer: var(--c-blue);
+    --c-footer: #6daa30;
     --property-name-color: var(--property-color, var(--c-text));
-    @include assign-color-variants(--c-primary, --_c-blue-primary);
-    --c-primary-variant: var(--_c-blue-primary-darken);
-    @include assign-color-variants(--c-secondary, --_c-blue-secondary);
-    --c-secondary-variant: var(--_c-blue-secondary-darken);
-    @include assign-color-variants(--c-light, --_c-blue-secondary);
+    
+    @include assign-color-variants(--c-primary, --_c-green-primary);
+    --c-primary-variant: var(--_c-green-primary-darken);
+    
+    @include assign-color-variants(--c-secondary, --_c-green-secondary);
+    --c-secondary-variant: var(--_c-green-secondary-darken);
+    
+    @include assign-color-variants(--c-light, --_c-green-secondary);
     --c-light-variant: var(--c-white);
+    
     @include assign-color-variants(--c-gray, --_c-gray-primary);
     --c-gray-variant: var(--_c-gray-secondary);
+    
     @include assign-color-variants(--c-dark, --_c-dark-primary);
     --c-dark-variant: var(--_c-dark-secondary);
+    
     @include assign-color-variants(--c-info, --_c-blue-primary);
     --c-info-variant: var(--_c-blue-secondary);
+    
     @include assign-color-variants(--c-success, --_c-green-secondary);
     --c-success-variant: var(--_c-green-primary);
+    
     @include assign-color-variants(--c-warning, --_c-light-primary);
     --c-warning-variant: var(--_c-light-secondary);
+   
     @include assign-color-variants(--c-danger, --_c-red-secondary);
     --c-danger-variant: var(--_c-red-primary);
   }

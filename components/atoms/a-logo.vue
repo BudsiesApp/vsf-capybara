@@ -6,7 +6,7 @@
   >
     <BaseImage
       src="/assets/logo.png"
-      :aspect-ratio="3.85"
+      :aspect-ratio="2.64"
       :alt="$t(defaultTitle)"
       class="sf-header__logo"
     />

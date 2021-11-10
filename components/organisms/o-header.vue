@@ -291,7 +291,7 @@ export default {
   }
 
   ::v-deep .sf-header {
-    --header-logo-margin: 0 0 var(--spacer-sm) 0;
+    --header-logo-margin: 0 0 0 0;
 
     &__navigation {
       --header-navigation-margin: 0 var(--spacer-base);

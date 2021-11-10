@@ -1,6 +1,5 @@
 <template>
   <footer class="o-footer">
-    <div class="o-footer__logo" />
     <div class="o-footer__slogan">
       Handmade pet keepsakes
     </div>
