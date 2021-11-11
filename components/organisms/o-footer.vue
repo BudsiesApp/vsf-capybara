@@ -1,8 +1,5 @@
 <template>
   <footer class="o-footer">
-    <div class="o-footer__slogan">
-      Handmade pet keepsakes
-    </div>
     <SfFooter :column="6" :multiple="true">
       <SfFooterColumn
         v-for="linkGroup in links"
@@ -187,7 +184,7 @@ export default {
 
 .o-footer {
   background-color: var(--c-footer);
-  padding-bottom: var(--spacer-lg);
+  // padding-bottom: var(--spacer-lg);
   margin-top: calc(var(--spacer-2xl) + var(--spacer-xl));
   &__logo {
     background-image: url(../../assets/logo-footer.png);
@@ -292,7 +289,39 @@ export default {
       }
     }
   }
+
+  .sf-footer {
+    background-image: url(../../assets/footer-bg-mobile.png);
+    background-size: cover;
+    background-position: center 0;
+    background-repeat: no-repeat;
+    padding: 90px 0 50px;
+    position: relative;
+
+    &:before {
+      background: url(../../assets/footer-barbaron.png) no-repeat 0 0;
+      background-size: 44px 70px;
+      height: 70px;
+      width: 44px;
+      content: "";
+      position: absolute;
+      right: 2px;
+      top: -43px;
+    }
+  }
+
   @include for-desktop {
+    .sf-footer {
+      background-image: url(../../assets/footer-bg.png);
+      padding: 225px 0 100px;
+
+      &:before {
+          background-size: auto;
+          height: 278px;
+          width: 173px;
+      }
+    }
+
     max-width: 100%;
     ::v-deep .sf-footer-column__content {
       padding: 0;

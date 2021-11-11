@@ -103,7 +103,7 @@ $forms-color-placeholder: #a09999;
     --c-text-disabled: var(--_c-gray-secondary-lighten);
     --c-link: var(--_c-blue-primary);
     --c-link-hover: var(--_c-blue-primary);
-    --c-footer: #6daa30;
+    --c-footer: transparent;
     --property-name-color: var(--property-color, var(--c-text));
     
     @include assign-color-variants(--c-primary, --_c-green-primary);
