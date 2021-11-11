@@ -88,16 +88,6 @@ export default {
           }
         },
         {
-          label: 'Face Masks',
-          url: {
-            name: 'printed-product',
-            params: {
-              parentSku: 'customPrintedMasks_bundle',
-              slug: 'printed-masks'
-            }
-          }
-        },
-        {
           label: 'Pet Keychains',
           url: {
             name: 'printed-product',
@@ -115,7 +105,7 @@ export default {
         },
         {
           label: 'Accessories',
-          url: '/c/petsies-accessories-11'
+          url: '/c/accessories-for-custom-products-9'
         },
         {
           label: 'Bulk Orders',

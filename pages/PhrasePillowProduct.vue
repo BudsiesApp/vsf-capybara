@@ -50,7 +50,7 @@ export default Vue.extend({
     if (context) context.output.cacheTags.add('product')
 
     const product = await store.dispatch('product/loadProduct', {
-      parentSku: 'petsiesPhrasePillow_bundle',
+      parentSku: 'phrasePillow_bundle',
       childSku: null
     });
 
