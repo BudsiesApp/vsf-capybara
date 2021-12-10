@@ -11,7 +11,7 @@
       </SfButton>
     </div>
 
-    <div class="_cross-sells-list" v-if="crossSellsProducts">
+    <div class="_cross-sells-list" v-if="showCrossSellsSection">
       <div class="products">
         <transition-group
           appear
@@ -34,7 +34,7 @@
       </div>
     </div>
 
-    <div class="_up-sells-list" v-if="upSellsProducts">
+    <div class="_up-sells-list" v-if="showUpSellsSection">
       <header class="sf-heading">
         <h2 class="sf-heading__title">
           Accessorize Your Pet(sies)
@@ -71,8 +71,56 @@ import { SearchQuery } from 'storefront-query-builder';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import Product, { ProductLink } from 'core/modules/catalog/types/Product';
 import { SfButton } from '@storefront-ui/vue';
-import OProductCard from 'theme/components/organisms/o-product-card.vue';
+import { isServer } from '@vue-storefront/core/helpers'
+import store from '@vue-storefront/core/store'
+
 import { prepareCategoryProduct } from 'theme/helpers';
+
+import OProductCard from 'theme/components/organisms/o-product-card.vue';
+
+const getSearchQuery = (skus: string[]) => {
+  let productsQuery = new SearchQuery()
+  productsQuery = productsQuery
+    .applyFilter({ key: 'sku', value: { 'in': skus } })
+    .applyFilter({ key: 'status', value: { 'in': [1] } });
+  if (config.products.listOutOfStockProducts === false) {
+    productsQuery = productsQuery.applyFilter({ key: 'stock.is_in_stock', value: { 'eq': true } });
+  }
+  return productsQuery;
+}
+
+const getProductSkuFromProductLinks = (productLinks: ProductLink[], type: 'crosssell' | 'upsell'): string[] => {
+  if (productLinks.length === 0) {
+    return [];
+  }
+
+  let skus = productLinks
+    .filter(productLink => productLink.link_type === type)
+    .map(productLink => productLink.linked_product_sku)
+
+  if (skus === null || (skus.length === 0)) {
+    return [];
+  }
+
+  return skus;
+}
+
+const fetchProductsList = async (type: 'crosssell' | 'upsell'): Promise<Product[]> => {
+  const currentProduct = store.getters['product/getCurrentProduct'];
+
+  if (!currentProduct) {
+    return [];
+  }
+  const productLinks = currentProduct && currentProduct.product_links ? currentProduct.product_links : [];
+
+  const skus = getProductSkuFromProductLinks(productLinks, type);
+
+  const { items } = await store.dispatch('product/findProducts', {
+    query: getSearchQuery(skus)
+  });
+
+  return items.map((item: Product) => ({ ...prepareCategoryProduct(item), landing_page_url: item.landing_page_url }));
+}
 
 export default Vue.extend({
   name: 'CrossSells',
@@ -89,14 +137,46 @@ export default Vue.extend({
   computed: {
     getCurrentProduct (): Product | null {
       return this.$store.getters['product/getCurrentProduct']
+    },
+    showCrossSellsSection (): boolean {
+      return this.crossSellsProducts.length > 0
+    },
+    showUpSellsSection (): boolean {
+      return this.upSellsProducts.length > 0;
     }
   },
-  async asyncData ({ store, route, context }) {
-    await store.dispatch('product/loadProduct', { parentSku: route.params.parentSku })
+  async serverPrefetch () {
+    await this.$store.dispatch('product/loadProduct', { parentSku: this.$route.params.parentSku });
+    const [crossSellsProducts, upSellsProducts] = await Promise.all([
+      fetchProductsList('crosssell'),
+      fetchProductsList('upsell')
+    ]);
+    (this as any).crossSellsProducts = crossSellsProducts;
+    (this as any).upSellsProducts = upSellsProducts;
   },
   async created () {
-    await this.loadCrossSellsProducts();
-    await this.loadUpSellsProducts();
+    if (isServer) {
+      return;
+    }
+
+    this.crossSellsProducts = this.getProductsList('crosssell');
+    this.upSellsProducts = this.getProductsList('upsell');
+  },
+  async beforeRouteEnter (to, from, next) {
+    if (isServer) {
+      next();
+      return;
+    }
+
+    if (from && from.name && from.name !== to.name) {
+      await store.dispatch('product/loadProduct', { parentSku: to.params.parentSku });
+      await Promise.all([
+        fetchProductsList('crosssell'),
+        fetchProductsList('upsell')
+      ]);
+    }
+
+    next();
   },
   methods: {
     productLinks (): ProductLink[] {
@@ -110,46 +190,25 @@ export default Vue.extend({
 
       return this.getCurrentProduct.product_links;
     },
-    getSearchQuery (skus: string[]) {
-      let productsQuery = new SearchQuery()
-      productsQuery = productsQuery
-        .applyFilter({ key: 'sku', value: { 'in': skus } })
-        .applyFilter({ key: 'status', value: { 'in': [1] } });
-      if (config.products.listOutOfStockProducts === false) {
-        productsQuery = productsQuery.applyFilter({ key: 'stock.is_in_stock', value: { 'eq': true } });
-      }
-      return productsQuery;
-    },
-    async getProductsList (type: string): Promise<Product[]> {
+    getProductsList (type: 'crosssell' | 'upsell'): any[] {
       if (!this.getCurrentProduct) {
         return [];
       }
 
-      const productLinks = this.productLinks();
+      const productLinks = this.getCurrentProduct && this.getCurrentProduct.product_links ? this.getCurrentProduct.product_links : [];
+      const skus = getProductSkuFromProductLinks(productLinks, type).sort((a, b) => a.toLowerCase() > b.toLowerCase() ? 1 : -1);
+      const productsList: Product[] = Object.values(this.$store.getters['product/getProductBySkuDictionary']);
 
-      if (productLinks.length === 0) {
-        return [];
-      }
+      const products: any = skus.map((sku) => {
+        return productsList.find((product) => [product.sku, product.parentSku].includes(sku));
+      }).filter((product) => !!product)
 
-      let skus = productLinks
-        .filter(productLink => productLink.link_type === type)
-        .map(productLink => productLink.linked_product_sku)
-
-      if (skus === null || (skus.length === 0)) {
-        return [];
-      }
-
-      const { items } = await this.$store.dispatch('product/findProducts', {
-        query: this.getSearchQuery(skus)
-      });
-
-      return items.map((item: Product) => ({ ...prepareCategoryProduct(item), landing_page_url: item.landing_page_url }));
-    },
-    async loadCrossSellsProducts () {
-      this.crossSellsProducts = await this.getProductsList('crosssell');
-    },
-    async loadUpSellsProducts () {
-      this.upSellsProducts = await this.getProductsList('upsell');
+      return products.map((product: Product) => (
+        {
+          ...prepareCategoryProduct(product),
+          landing_page_url: product.landing_page_url
+        }
+      ));
     },
     goToCart (): void {
       this.$router.push(localizedRoute('/cart'));
