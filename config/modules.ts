@@ -8,7 +8,6 @@ import { NotificationModule } from '@vue-storefront/core/modules/notification'
 import { UrlModule } from '@vue-storefront/core/modules/url'
 import { BreadcrumbsModule } from '@vue-storefront/core/modules/breadcrumbs'
 import { GoogleTagManagerModule } from 'src/modules/google-tag-manager';
-import { findRouteByPath } from '@vue-storefront/core/modules/url/helpers'
 import { UserModule } from '@vue-storefront/core/modules/user'
 import { NewsletterModule } from '@vue-storefront/core/modules/newsletter'
 import { StoryblokModule } from 'src/modules/vsf-storyblok-module'
@@ -37,13 +36,11 @@ const extendUrlVuex = {
         return result
       }
 
-      const redirectTargetPath = await mappingFallbackForUrlRewrite(context, payload);
-      if (!redirectTargetPath) {
-        return;
-      }
+      const redirectRoute = await mappingFallbackForUrlRewrite(context, payload);
 
-      const routeByPath = findRouteByPath(redirectTargetPath);
-      return routeByPath || forStoryblok(context, { url: redirectTargetPath, params: payload.params })
+      if (redirectRoute) {
+        return redirectRoute;
+      }
     }
   }
 }
