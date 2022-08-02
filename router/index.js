@@ -47,6 +47,24 @@ let routes = [
     component: Checkout,
     props: true
   },
+  {
+    name: 'url-rewrite',
+    path: '/stub',
+    beforeEnter: (to, from, next) => {
+      next(to.path);
+    }
+  },
+  {
+    name: 'pillowSideDesign-product-redirect',
+    path: '/p/phrasePetsies:parentSku?/:slug?/',
+    redirect: (route) => ({
+      name: 'phrase-pillow-customize',
+      query: {
+        back_design: route.query.back_design,
+        front_design: 'phrasePetsies' + route.params.parentSku
+      }
+    })
+  },
   { name: 'legal', path: '/legal/', component: Static },
   { name: 'privacy', path: '/privacy/', component: Static },
   { name: 'my-account', path: '/my-account/', component: MyAccount },
