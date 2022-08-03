@@ -65,6 +65,8 @@ import {
   BaseImage
 } from 'src/modules/budsies';
 
+import getForeversSkuByType from 'theme/helpers/get-forevers-sku-by-type.function';
+
 import ForeversWizardProductTypeStepData from '../../interfaces/forevers-wizard-product-type-step-data.interface';
 
 export default Vue.extend({
@@ -103,21 +105,7 @@ export default Vue.extend({
         return;
       }
 
-      let productSku: string;
-
-      switch (type) {
-        case 'dog':
-          productSku = 'ForeversDog_bundle'
-          break;
-        case 'cat':
-          productSku = 'ForeversCat_bundle'
-          break;
-        case 'other':
-          productSku = 'ForeversOther_bundle'
-          break;
-        default:
-          throw new Error('Unknown product type: ' + type);
-      }
+      const productSku: string = getForeversSkuByType(type);
 
       if (this.value.product?.sku === productSku) {
         this.$emit('next-step');
