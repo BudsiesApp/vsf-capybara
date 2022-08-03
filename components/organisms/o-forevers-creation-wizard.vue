@@ -405,7 +405,10 @@ export default Vue.extend({
     async fillProductByPreselectedParam (preselectedProduct: string): Promise<void> {
       try {
         const preselectedProductSku = getForeversSkuByType(preselectedProduct);
-        if (preselectedProductSku === this.product?.sku) {
+        const sameProductAlreadyExist = preselectedProductSku === this.product?.sku;
+        const anotherProductAlreadyExist = this.product && this.existingPlushieId;
+
+        if (sameProductAlreadyExist || anotherProductAlreadyExist) {
           return;
         }
 
@@ -486,7 +489,15 @@ export default Vue.extend({
       this.customizeStepData.productionTime = productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id].option_selections[0];
     },
     fillSizeByPreselectedParams (type: string, size: string): void {
-      const sizeSku = getForeversSizeSkuBySizeAndType(size, type);
+      let sizeSku: string;
+
+      try {
+        sizeSku = getForeversSizeSkuBySizeAndType(size, type);
+      } catch (error) {
+        Logger.error('Unable to fill product by preselected param: ' + error, 'budsies')();
+        return;
+      }
+
       const sizeOption = this.sizes.find((size) => size.value === sizeSku);
 
       if (!sizeOption) {
