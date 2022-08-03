@@ -98,6 +98,7 @@ import { CustomerImage, getProductDefaultPrice } from 'src/modules/shared';
 import foreversCreationWizardPersistedStateService from 'theme/helpers/forevers-creation-wizard-persisted-state.service';
 import getForeversSizeSkuBySizeAndType from 'theme/helpers/get-forevers-size-sku-by-size-and-type.function';
 import getForeversSkuByType from 'theme/helpers/get-forevers-sku-by-type.function';
+import getForeversTypeByBundleSku from 'theme/helpers/get-forevers-type-by-bundle-sku.function';
 
 import MProductTypeChooseStep from './OForeversCreationWizard/m-product-type-choose-step.vue';
 import MImageUploadStep from './OForeversCreationWizard/m-image-upload-step.vue';
@@ -740,7 +741,15 @@ export default Vue.extend({
     await this.fillProductByPreselectedParam(this.preselectedProduct);
 
     if (this.preselectedSize) {
-      this.fillSizeByPreselectedParams(this.preselectedProduct, this.preselectedSize);
+      let preselectedProduct = this.preselectedProduct;
+
+      try {
+        preselectedProduct = getForeversTypeByBundleSku(this.product?.sku);
+      } catch (error) {
+        Logger.error(error, 'budsies')();
+      }
+
+      this.fillSizeByPreselectedParams(preselectedProduct, this.preselectedSize);
     }
   },
   watch: {
