@@ -111,6 +111,16 @@ let routes = [
     }
   },
   {
+    name: 'forevers-create-alias-3',
+    path: '/plushie/index/precreate/type/forevers/product/:productType/',
+    redirect: (route) => ({
+      name: 'forevers-create',
+      query: {
+        product: route.params.productType
+      }
+    })
+  },
+  {
     name: 'printed-product',
     path: '/printed/p/:sku/',
     component: PrintedProduct,
