@@ -3,7 +3,7 @@
     <o-forevers-creation-wizard
       :artwork-upload-url="artworkUploadUrl"
       :existing-plushie-id="existingPlushieId"
-      :preselected-product="preselectedProduct"
+      :preselected-product-type="preselectedProductType"
       :preselected-size="preselectedSize"
     />
   </div>
@@ -39,7 +39,7 @@ export default Vue.extend({
     existingPlushieId (): string {
       return String(this.$route.query?.id);
     },
-    preselectedProduct (): string | undefined {
+    preselectedProductType (): string | undefined {
       return this.$route.query?.product;
     },
     preselectedSize (): string | undefined {

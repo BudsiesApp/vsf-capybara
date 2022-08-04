@@ -133,7 +133,7 @@ export default Vue.extend({
       type: String,
       default: undefined
     },
-    preselectedProduct: {
+    preselectedProductType: {
       type: String,
       default: undefined
     },
@@ -327,7 +327,7 @@ export default Vue.extend({
         this.isSubmitting = false;
       }
     },
-    async createNewPlushieForPreselectedProduct (
+    async createNewPlushie (
       productSku: string
     ): Promise<ForeversWizardProductTypeStepData> {
       const product = await this.$store.dispatch('product/loadProduct', {
@@ -403,9 +403,11 @@ export default Vue.extend({
 
       this.currentStep = persistedState.currentStepIndex ? persistedState.currentStepIndex : 1;
     },
-    async fillProductByPreselectedParam (preselectedProduct: string): Promise<void> {
+    async fillProductTypeStepDataByPreselectedParam (
+      preselectedProductType: string
+    ): Promise<void> {
       try {
-        const preselectedProductSku = getForeversSkuByType(preselectedProduct);
+        const preselectedProductSku = getForeversSkuByType(preselectedProductType);
         const sameProductAlreadyExist = preselectedProductSku === this.product?.sku;
         const anotherProductAlreadyExist = this.product && this.existingPlushieId;
 
@@ -415,7 +417,7 @@ export default Vue.extend({
 
         this.isProductLoadingForPreselectedParam = true;
 
-        const productTypeStepData = await this.createNewPlushieForPreselectedProduct(preselectedProductSku);
+        const productTypeStepData = await this.createNewPlushie(preselectedProductSku);
         this.onProductTypeStepDataInput(productTypeStepData);
         this.nextStep();
       } catch (error) {
@@ -541,16 +543,16 @@ export default Vue.extend({
       this.customizeStepData.description = cartItem.plushieDescription;
       this.customizeStepData.quantity = cartItem.qty;
     },
-    getPreselectedProductType (): string | undefined {
-      let preselectedProduct = this.preselectedProduct;
+    getProductType (): string | undefined {
+      let productType = this.preselectedProductType;
 
       try {
-        preselectedProduct = getForeversTypeByBundleSku(this.product?.sku);
+        productType = getForeversTypeByBundleSku(this.product?.sku);
       } catch (error) {
         Logger.error(error, 'budsies')();
       }
 
-      return preselectedProduct;
+      return productType;
     },
     async nextStep (): Promise<void> {
       if (this.currentStep === 3) {
@@ -647,10 +649,10 @@ export default Vue.extend({
         await this.persistProductTypeStepData(value);
       }
 
-      const preselectedProduct = this.getPreselectedProductType();
+      const productType = this.getProductType();
 
-      if (this.preselectedSize && preselectedProduct) {
-        this.fillSizeByPreselectedParams(preselectedProduct, this.preselectedSize);
+      if (this.preselectedSize && productType) {
+        this.fillSizeByPreselectedParams(productType, this.preselectedSize);
       }
 
       this.$router.push({ query: { ...this.$route.query, id: value.plushieId?.toString(10) } });
@@ -751,14 +753,14 @@ export default Vue.extend({
       await this.fillPlushieDataFromPersistedState();
     }
 
-    if (this.preselectedProduct) {
-      await this.fillProductByPreselectedParam(this.preselectedProduct);
+    if (this.preselectedProductType) {
+      await this.fillProductTypeStepDataByPreselectedParam(this.preselectedProductType);
     }
 
-    const preselectedProduct = this.getPreselectedProductType();
+    const productType = this.getProductType();
 
-    if (this.preselectedSize && preselectedProduct) {
-      this.fillSizeByPreselectedParams(preselectedProduct, this.preselectedSize);
+    if (this.preselectedSize && productType) {
+      this.fillSizeByPreselectedParams(productType, this.preselectedSize);
     }
   },
   watch: {
