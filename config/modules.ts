@@ -1,4 +1,5 @@
 import { VueStorefrontModule } from '@vue-storefront/core/lib/module'
+import { LocalizedRoute } from '@vue-storefront/core/lib/types'
 import { CatalogModule } from '@vue-storefront/core/modules/catalog'
 import { CatalogNextModule } from '@vue-storefront/core/modules/catalog-next'
 import { CartModule } from '@vue-storefront/core/modules/cart'
@@ -28,14 +29,18 @@ import registerStoryblokComponents from 'theme/components/storyblok'
 
 const extendUrlVuex = {
   actions: {
-    async mapFallbackUrl (context, payload: any) {
+    async mapFallbackUrl (context, payload: any): Promise<LocalizedRoute | undefined> {
       const result = await forStoryblok(context, payload);
 
       if (result) {
         return result
       }
 
-      await mappingFallbackForUrlRewrite(context, payload);
+      const redirectRoute = await mappingFallbackForUrlRewrite(context, payload);
+
+      if (redirectRoute) {
+        return redirectRoute;
+      }
     }
   }
 }

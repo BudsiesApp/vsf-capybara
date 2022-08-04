@@ -1,25 +1,25 @@
 <template>
   <div :style="styles" class="storyblok-button">
-    <SfButton
-      class="_button"
-      :link="link"
+    <sb-router-link
+      class="_button sf-button"
       :class="cssClasses"
-      @click="openLink"
+      :link="itemData.link_url"
+      :is-new-window="shouldOpenInNewWindow"
     >
       {{ itemData.link_text }}
-    </SfButton>
+    </sb-router-link>
   </div>
 </template>
 
 <script lang="ts">
 import { VueConstructor } from 'vue';
 import { InjectType } from 'src/modules/shared';
-import { SfButton } from '@storefront-ui/vue';
-import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 
-import { Blok } from 'src/modules/vsf-storyblok-module/components'
+import {
+  Blok
+} from 'src/modules/vsf-storyblok-module'
+
 import ButtonItemData from './interfaces/button-item-data.interface';
-import getUrlFromLink from './get-url-from-link';
 
 interface InjectedServices {
   window: Window
@@ -27,18 +27,12 @@ interface InjectedServices {
 
 export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServices>).extend({
   name: 'StoryblokButton',
-  components: {
-    SfButton
-  },
   inject: {
     window: { from: 'WindowObject' }
   } as unknown as InjectType<InjectedServices>,
   computed: {
     itemData (): ButtonItemData {
       return this.item as ButtonItemData;
-    },
-    link (): string {
-      return getUrlFromLink(this.itemData.link_url);
     },
     shouldOpenInNewWindow (): boolean {
       return !!this.itemData.target_blank;
@@ -51,29 +45,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
       }
 
       return result;
-    }
-  },
-  methods: {
-    openLink (): void {
-      const url = getUrlFromLink(this.itemData.link_url);
-
-      const isExternalUrl = url.startsWith('//') || url.startsWith('http://') || url.startsWith('https://') || url.startsWith('ftp://');
-
-      if (isExternalUrl) {
-        this.window.open(url, '_blank');
-        return;
-      }
-
-      const route = this.$router.resolve({
-        path: localizedRoute(url)
-      });
-
-      if (this.shouldOpenInNewWindow) {
-        this.window.open(route.href, '_blank');
-        return;
-      }
-
-      this.$router.push(route.location);
     }
   }
 })
@@ -89,6 +60,10 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 
   ._button {
     display: inline-block;
+
+    &:hover {
+      --c-link-hover: var(--button-color, var(--c-light-variant));
+    }
   }
 
   &.-editor-preview-mode {
