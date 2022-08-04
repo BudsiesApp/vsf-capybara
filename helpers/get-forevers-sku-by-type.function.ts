@@ -1,10 +1,12 @@
+import ForeversProductType from 'theme/interfaces/forevers-product-type';
+
 export default function getForeversSkuByType (type: string): string {
   switch (type) {
-    case 'dog':
+    case ForeversProductType.DOG:
       return 'ForeversDog_bundle'
-    case 'cat':
+    case ForeversProductType.CAT:
       return 'ForeversCat_bundle'
-    case 'other':
+    case ForeversProductType.OTHER:
       return 'ForeversOther_bundle'
     default:
       throw new Error('Unknown product type: ' + type);

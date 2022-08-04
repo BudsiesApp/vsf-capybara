@@ -1,3 +1,5 @@
+import ForeversProductType from 'theme/interfaces/forevers-product-type';
+
 const availableSizes = ['small', 'medium', 'large'];
 
 export default function getForeversSizeSkuBySizeAndType (size: string, type: string): string {
@@ -8,13 +10,13 @@ export default function getForeversSizeSkuBySizeAndType (size: string, type: str
   let skuPrefix;
 
   switch (type) {
-    case 'dog':
+    case ForeversProductType.DOG:
       skuPrefix = 'simpleForeversDog'
       break;
-    case 'cat':
+    case ForeversProductType.CAT:
       skuPrefix = 'simpleForeversCat'
       break;
-    case 'other':
+    case ForeversProductType.OTHER:
       skuPrefix = 'simpleForeversOther'
       break;
     default:

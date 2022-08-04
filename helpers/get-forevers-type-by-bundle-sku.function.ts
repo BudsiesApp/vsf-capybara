@@ -1,11 +1,13 @@
+import ForeversProductType from 'theme/interfaces/forevers-product-type';
+
 export default function getForeversTypeByBundleSku (sku?: string): string {
   switch (sku) {
     case 'ForeversDog_bundle':
-      return 'dog'
+      return ForeversProductType.DOG;
     case 'ForeversCat_bundle':
-      return 'cat'
+      return ForeversProductType.CAT;
     case 'ForeversOther_bundle':
-      return 'other'
+      return ForeversProductType.OTHER;
     default:
       throw new Error('Unknown forevers bundle sku: ' + sku);
   }
