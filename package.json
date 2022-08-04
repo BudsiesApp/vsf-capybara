@@ -22,7 +22,7 @@
     "axios": "^0.21",
     "body-scroll-lock": "^3.0.1",
     "exif-js": "^2.3.0",
-    "filepond": "https://github.com/BudsiesApp/filepond#92a4420c7280aebafde6973ce69b3a1fa078397f",
+    "filepond": "https://github.com/BudsiesApp/filepond#4aa1f2526fca7a4b676533780289a2c4b0add185",
     "filepond-plugin-file-validate-size": "^2.2.1",
     "filepond-plugin-file-validate-type": "^1.2.5",
     "filepond-plugin-image-exif-orientation": "^1.0.8",
