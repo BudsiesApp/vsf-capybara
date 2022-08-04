@@ -541,6 +541,17 @@ export default Vue.extend({
       this.customizeStepData.description = cartItem.plushieDescription;
       this.customizeStepData.quantity = cartItem.qty;
     },
+    getPreselectedProductType (): string | undefined {
+      let preselectedProduct = this.preselectedProduct;
+
+      try {
+        preselectedProduct = getForeversTypeByBundleSku(this.product?.sku);
+      } catch (error) {
+        Logger.error(error, 'budsies')();
+      }
+
+      return preselectedProduct;
+    },
     async nextStep (): Promise<void> {
       if (this.currentStep === 3) {
         return;
@@ -634,6 +645,12 @@ export default Vue.extend({
 
       if (!this.existingCartItem) {
         await this.persistProductTypeStepData(value);
+      }
+
+      const preselectedProduct = this.getPreselectedProductType();
+
+      if (this.preselectedSize && preselectedProduct) {
+        this.fillSizeByPreselectedParams(preselectedProduct, this.preselectedSize);
       }
 
       this.$router.push({ query: { ...this.$route.query, id: value.plushieId?.toString(10) } });
@@ -734,21 +751,13 @@ export default Vue.extend({
       await this.fillPlushieDataFromPersistedState();
     }
 
-    if (!this.preselectedProduct) {
-      return;
+    if (this.preselectedProduct) {
+      await this.fillProductByPreselectedParam(this.preselectedProduct);
     }
 
-    await this.fillProductByPreselectedParam(this.preselectedProduct);
+    const preselectedProduct = this.getPreselectedProductType();
 
-    if (this.preselectedSize) {
-      let preselectedProduct = this.preselectedProduct;
-
-      try {
-        preselectedProduct = getForeversTypeByBundleSku(this.product?.sku);
-      } catch (error) {
-        Logger.error(error, 'budsies')();
-      }
-
+    if (this.preselectedSize && preselectedProduct) {
       this.fillSizeByPreselectedParams(preselectedProduct, this.preselectedSize);
     }
   },
