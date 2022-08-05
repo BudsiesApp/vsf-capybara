@@ -509,6 +509,16 @@ export default Vue.extend({
 
       this.customizeStepData.size = sizeOption;
     },
+    fillSizeByPreselectedParamAndCurrentProduct (): void {
+      if (!this.preselectedSize || !this.product) {
+        return;
+      }
+
+      this.fillSizeByPreselectedParams(
+        getForeversTypeByBundleSku(this.product.sku),
+        this.preselectedSize
+      );
+    },
     fillSizeOption (cartItem: CartItem): void {
       const productOption = cartItem.product_option;
       this.customizeStepData.size = undefined;
@@ -542,13 +552,6 @@ export default Vue.extend({
       this.fillSizeOption(cartItem);
       this.customizeStepData.description = cartItem.plushieDescription;
       this.customizeStepData.quantity = cartItem.qty;
-    },
-    getProductType (): string | undefined {
-      try {
-        return getForeversTypeByBundleSku(this.product?.sku);
-      } catch (error) {
-        Logger.error(error, 'budsies')();
-      }
     },
     async nextStep (): Promise<void> {
       if (this.currentStep === 3) {
@@ -645,11 +648,7 @@ export default Vue.extend({
         await this.persistProductTypeStepData(value);
       }
 
-      const productType = this.getProductType();
-
-      if (this.preselectedSize && productType) {
-        this.fillSizeByPreselectedParams(productType, this.preselectedSize);
-      }
+      this.fillSizeByPreselectedParamAndCurrentProduct();
 
       this.$router.push({ query: { ...this.$route.query, id: value.plushieId?.toString(10) } });
     },
@@ -753,11 +752,7 @@ export default Vue.extend({
       await this.fillProductTypeStepDataByPreselectedParam(this.preselectedProductType);
     }
 
-    const productType = this.getProductType();
-
-    if (this.preselectedSize && productType) {
-      this.fillSizeByPreselectedParams(productType, this.preselectedSize);
-    }
+    this.fillSizeByPreselectedParamAndCurrentProduct();
   },
   watch: {
     product: {
