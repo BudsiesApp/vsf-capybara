@@ -544,15 +544,11 @@ export default Vue.extend({
       this.customizeStepData.quantity = cartItem.qty;
     },
     getProductType (): string | undefined {
-      let productType = this.preselectedProductType;
-
       try {
-        productType = getForeversTypeByBundleSku(this.product?.sku);
+        return getForeversTypeByBundleSku(this.product?.sku);
       } catch (error) {
         Logger.error(error, 'budsies')();
       }
-
-      return productType;
     },
     async nextStep (): Promise<void> {
       if (this.currentStep === 3) {
