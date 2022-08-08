@@ -9,7 +9,7 @@
       <SfButton
         class="_button"
         :disabled="isDisabled"
-        @click="createPlushie('dog')"
+        @click="onTypeButtonClickHandler('dog')"
       >
         <BaseImage
           class="_image"
@@ -24,7 +24,7 @@
       <SfButton
         class="_button"
         :disabled="isDisabled"
-        @click="createPlushie('cat')"
+        @click="onTypeButtonClickHandler('cat')"
       >
         <BaseImage
           class="_image"
@@ -39,7 +39,7 @@
       <SfButton
         class="_button"
         :disabled="isDisabled"
-        @click="createPlushie('other')"
+        @click="onTypeButtonClickHandler('other')"
       >
         <BaseImage
           class="_image"
@@ -57,15 +57,10 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 import { SfHeading, SfButton } from '@storefront-ui/vue';
-import { Logger } from '@vue-storefront/core/lib/logger';
-import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
-import ForeversWizardEvents from 'src/modules/shared/types/forevers-wizard-events';
 import {
   BaseImage
 } from 'src/modules/budsies';
-
-import getForeversSkuByType from 'theme/helpers/get-forevers-sku-by-type.function';
 
 import ForeversWizardProductTypeStepData from '../../interfaces/forevers-wizard-product-type-step-data.interface';
 
@@ -89,53 +84,18 @@ export default Vue.extend({
       default: false
     }
   },
-  data () {
-    return {
-      isSubmitting: false
-    }
-  },
   computed: {
     isDisabled (): boolean {
-      return this.disabled || this.isSubmitting;
+      return this.disabled;
     }
   },
   methods: {
-    async createPlushie (type: 'dog' | 'cat' | 'other'): Promise<void> {
+    onTypeButtonClickHandler (type: 'dog' | 'cat' | 'other'): void {
       if (this.disabled) {
         return;
       }
 
-      const productSku: string = getForeversSkuByType(type);
-
-      if (this.value.product?.sku === productSku) {
-        this.$emit('next-step');
-        return;
-      }
-
-      this.isSubmitting = true;
-
-      try {
-        const product = await this.$store.dispatch('product/loadProduct', {
-          parentSku: productSku,
-          childSku: null
-        });
-
-        const [plushieCreationTask] = await Promise.all([
-          await this.$store.dispatch('budsies/createNewPlushie', { productId: product.id })
-        ])
-
-        const plushieId = plushieCreationTask.result;
-
-        const newValue: ForeversWizardProductTypeStepData = { product, plushieId };
-
-        EventBus.$emit(ForeversWizardEvents.TYPE_CHANGE, type);
-        this.$emit('input', newValue);
-        this.$emit('next-step');
-      } catch (error) {
-        Logger.error('Unable to create plushie: ' + error, 'budsies')();
-      } finally {
-        this.isSubmitting = false;
-      }
+      this.$emit('type-choose', type);
     }
   }
 });

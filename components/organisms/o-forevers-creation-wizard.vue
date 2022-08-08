@@ -20,6 +20,7 @@
               :disabled="isProductTypeChooseStepDisabled"
               @input="onProductTypeStepDataInput"
               @next-step="nextStep"
+              @type-choose="onProductTypeChoose"
             />
           </SfStep>
 
@@ -99,6 +100,7 @@ import foreversCreationWizardPersistedStateService from 'theme/helpers/forevers-
 import getForeversSizeSkuBySizeAndType from 'theme/helpers/get-forevers-size-sku-by-size-and-type.function';
 import getForeversSkuByType from 'theme/helpers/get-forevers-sku-by-type.function';
 import getForeversTypeByBundleSku from 'theme/helpers/get-forevers-type-by-bundle-sku.function';
+import ForeversCreatePlushie from 'theme/mixins/forevers-create-plushie';
 
 import MProductTypeChooseStep from './OForeversCreationWizard/m-product-type-choose-step.vue';
 import MImageUploadStep from './OForeversCreationWizard/m-image-upload-step.vue';
@@ -113,7 +115,7 @@ import ForeversWizardCustomizeStepData from '../interfaces/forevers-wizard-custo
 import ForeversCreationWizardPersistedState from '../interfaces/forevers-creation-wizard-persisted-state.interface';
 import SizeOption from '../interfaces/size-option';
 
-export default Vue.extend({
+export default ForeversCreatePlushie.extend({
   name: 'OForeversCreationWizard',
   components: {
     SfSteps,
@@ -173,8 +175,7 @@ export default Vue.extend({
       } as ForeversWizardCustomizeStepData,
 
       isSubmitting: false,
-      isProductLoadingForExistingPlushieId: false,
-      isProductLoadingForPreselectedParam: false
+      isProductLoadingForExistingPlushieId: false
     }
   },
   computed: {
@@ -197,7 +198,7 @@ export default Vue.extend({
     isProductTypeChooseStepDisabled (): boolean {
       return this.isSubmitting ||
        this.isProductLoadingForExistingPlushieId ||
-       this.isProductLoadingForPreselectedParam;
+       this.isPlushieCreatingInProcess;
     },
     skinClass (): string {
       return '-skin-petsies';
@@ -327,24 +328,6 @@ export default Vue.extend({
         this.isSubmitting = false;
       }
     },
-    async createNewPlushie (
-      productSku: string
-    ): Promise<ForeversWizardProductTypeStepData> {
-      const product = await this.$store.dispatch('product/loadProduct', {
-        parentSku: productSku,
-        childSku: null
-      });
-
-      const plushieCreationTask = await this.$store.dispatch(
-        'budsies/createNewPlushie',
-        { productId: product.id }
-      );
-
-      return {
-        product,
-        plushieId: plushieCreationTask.result
-      }
-    },
     fillAddons (cartItem: CartItem): void {
       const productOption = cartItem.product_option;
       this.customizeStepData.addons = [];
@@ -402,29 +385,6 @@ export default Vue.extend({
       this.fillPetInfoStepDataFromPersistedState(persistedState);
 
       this.currentStep = persistedState.currentStepIndex ? persistedState.currentStepIndex : 1;
-    },
-    async fillProductTypeStepDataByPreselectedParam (
-      preselectedProductType: string
-    ): Promise<void> {
-      try {
-        const preselectedProductSku = getForeversSkuByType(preselectedProductType);
-        const sameProductAlreadyExist = preselectedProductSku === this.product?.sku;
-        const anotherProductAlreadyExist = this.product && this.existingPlushieId;
-
-        if (sameProductAlreadyExist || anotherProductAlreadyExist) {
-          return;
-        }
-
-        this.isProductLoadingForPreselectedParam = true;
-
-        const productTypeStepData = await this.createNewPlushie(preselectedProductSku);
-        this.onProductTypeStepDataInput(productTypeStepData);
-        this.nextStep();
-      } catch (error) {
-        Logger.error('Unable to fill product by preselected param: ' + error, 'budsies')();
-      } finally {
-        this.isProductLoadingForPreselectedParam = false;
-      }
     },
     fillProductTypeStepDataFromCartItem (cartItem: CartItem): void {
       this.productTypeStepData.product = cartItem;
@@ -641,6 +601,23 @@ export default Vue.extend({
         await this.persistPetInfoStepData(value);
       }
     },
+    async onProductTypeChoose (value: string): Promise<void> {
+      const productSku: string = getForeversSkuByType(value);
+
+      if (this.product?.sku === productSku) {
+        this.nextStep();
+        return;
+      }
+
+      const productTypeStepData = await this.createPlushie(value);
+
+      if (!productTypeStepData) {
+        return;
+      }
+
+      this.onProductTypeStepDataInput(productTypeStepData);
+      this.nextStep();
+    },
     async onProductTypeStepDataInput (value: ForeversWizardProductTypeStepData): Promise<void> {
       this.productTypeStepData = value;
 
@@ -748,8 +725,8 @@ export default Vue.extend({
       await this.fillPlushieDataFromPersistedState();
     }
 
-    if (this.preselectedProductType) {
-      await this.fillProductTypeStepDataByPreselectedParam(this.preselectedProductType);
+    if (this.preselectedProductType && !this.product) {
+      await this.onProductTypeChoose(this.preselectedProductType);
     }
 
     this.fillSizeByPreselectedParamAndCurrentProduct();
