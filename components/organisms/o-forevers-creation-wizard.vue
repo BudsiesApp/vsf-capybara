@@ -91,7 +91,8 @@ import {
   ImageUploadMethod,
   vuexTypes as budsiesTypes,
   BodypartOption,
-  BodyPartValueContentType
+  BodyPartValueContentType,
+  ForeversWizardEvents
 } from 'src/modules/budsies';
 import ServerError from 'src/modules/shared/types/server-error';
 import { CustomerImage, getProductDefaultPrice } from 'src/modules/shared';
@@ -100,7 +101,6 @@ import foreversCreationWizardPersistedStateService from 'theme/helpers/forevers-
 import getForeversSizeSkuBySizeAndType from 'theme/helpers/get-forevers-size-sku-by-size-and-type.function';
 import getForeversSkuByType from 'theme/helpers/get-forevers-sku-by-type.function';
 import getForeversTypeByBundleSku from 'theme/helpers/get-forevers-type-by-bundle-sku.function';
-import ForeversWizardEvents from 'src/modules/shared/types/forevers-wizard-events';
 
 import MProductTypeChooseStep from './OForeversCreationWizard/m-product-type-choose-step.vue';
 import MImageUploadStep from './OForeversCreationWizard/m-image-upload-step.vue';

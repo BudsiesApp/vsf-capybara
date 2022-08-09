@@ -97,15 +97,14 @@ import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
 import { required, email } from 'vee-validate/dist/rules';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
-import ForeversWizardEvents from 'src/modules/shared/types/forevers-wizard-events';
-
 import { SfHeading, SfButton, SfInput } from '@storefront-ui/vue';
+
+import { ForeversWizardEvents, ProductId } from 'src/modules/budsies';
 
 import MMultiselect from '../../molecules/m-multiselect.vue';
 
 import ForeversWizardPetInfoStepData from '../../interfaces/forevers-wizard-pet-info-step-data.interface';
 import Product from 'core/modules/catalog/types/Product';
-import { ProductId } from 'src/modules/budsies';
 
 extend('required', {
   ...required,
