@@ -17,10 +17,9 @@
           <SfStep name="Type">
             <MProductTypeChooseStep
               :value="productTypeStepData"
-              :disabled="isProductTypeChooseStepDisabled"
-              @input="onProductTypeStepDataInput"
+              :disabled="isBusy"
+              :set-product-type-action="setProductType"
               @next-step="nextStep"
-              @type-choose="onProductTypeChoose"
             />
           </SfStep>
 
@@ -30,7 +29,7 @@
               :artwork-upload-url="artworkUploadUrl"
               :product="activeProduct"
               :plushie-id="plushieId"
-              :disabled="isSubmitting"
+              :disabled="isBusy"
               @input="onImageUploadStepDataInput"
               @next-step="nextStep"
               v-if="plushieId"
@@ -42,7 +41,7 @@
               :value="petInfoStepData"
               :plushie-id="plushieId"
               :product="activeProduct"
-              :disabled="isSubmitting"
+              :disabled="isBusy"
               @next-step="nextStep"
               @input="onPetInfoStepDataInput"
             />
@@ -58,7 +57,7 @@
               :size-bundle-option="sizeBundleOption"
               :sizes="sizes"
               :add-to-cart="onAddToCartHandler"
-              :disabled="isSubmitting"
+              :disabled="isBusy"
               @next-step="nextStep"
             />
           </SfStep>
@@ -80,6 +79,7 @@ import { TranslateResult } from 'vue-i18n';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import i18n from '@vue-storefront/i18n';
 import { setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import * as catalogTypes from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { SfHeading, SfSteps } from '@storefront-ui/vue';
@@ -100,7 +100,7 @@ import foreversCreationWizardPersistedStateService from 'theme/helpers/forevers-
 import getForeversSizeSkuBySizeAndType from 'theme/helpers/get-forevers-size-sku-by-size-and-type.function';
 import getForeversSkuByType from 'theme/helpers/get-forevers-sku-by-type.function';
 import getForeversTypeByBundleSku from 'theme/helpers/get-forevers-type-by-bundle-sku.function';
-import ForeversCreatePlushie from 'theme/mixins/forevers-create-plushie';
+import ForeversWizardEvents from 'src/modules/shared/types/forevers-wizard-events';
 
 import MProductTypeChooseStep from './OForeversCreationWizard/m-product-type-choose-step.vue';
 import MImageUploadStep from './OForeversCreationWizard/m-image-upload-step.vue';
@@ -115,7 +115,7 @@ import ForeversWizardCustomizeStepData from '../interfaces/forevers-wizard-custo
 import ForeversCreationWizardPersistedState from '../interfaces/forevers-creation-wizard-persisted-state.interface';
 import SizeOption from '../interfaces/size-option';
 
-export default ForeversCreatePlushie.extend({
+export default Vue.extend({
   name: 'OForeversCreationWizard',
   components: {
     SfSteps,
@@ -175,7 +175,7 @@ export default ForeversCreatePlushie.extend({
       } as ForeversWizardCustomizeStepData,
 
       isSubmitting: false,
-      isProductLoadingForExistingPlushieId: false
+      isWizardInitializing: false
     }
   },
   computed: {
@@ -195,10 +195,9 @@ export default ForeversCreatePlushie.extend({
 
       return this.imageUploadStepData.customerImages;
     },
-    isProductTypeChooseStepDisabled (): boolean {
+    isBusy (): boolean {
       return this.isSubmitting ||
-       this.isProductLoadingForExistingPlushieId ||
-       this.isPlushieCreatingInProcess;
+       this.isWizardInitializing;
     },
     skinClass (): string {
       return '-skin-petsies';
@@ -328,6 +327,34 @@ export default ForeversCreatePlushie.extend({
         this.isSubmitting = false;
       }
     },
+    async setProductType (type: string): Promise<void> {
+      const productSku: string = getForeversSkuByType(type);
+
+      if (this.productTypeStepData.product?.sku === productSku) {
+        return;
+      }
+
+      const product = await this.$store.dispatch('product/loadProduct', {
+        parentSku: productSku,
+        childSku: null
+      });
+
+      const plushieCreationTask = await this.$store.dispatch('budsies/createNewPlushie', { productId: product.id });
+
+      const plushieId = plushieCreationTask.result;
+
+      this.productTypeStepData = { product, plushieId };
+
+      if (!this.existingCartItem) {
+        await this.persistProductTypeStepData(this.productTypeStepData);
+      }
+
+      this.fillSizeByPreselectedParamAndCurrentProduct();
+
+      EventBus.$emit(ForeversWizardEvents.TYPE_CHANGE, type);
+
+      this.$router.push({ query: { ...this.$route.query, id: plushieId.toString(10) } });
+    },
     fillAddons (cartItem: CartItem): void {
       const productOption = cartItem.product_option;
       this.customizeStepData.addons = [];
@@ -399,20 +426,14 @@ export default ForeversCreatePlushie.extend({
         return;
       }
 
-      this.isProductLoadingForExistingPlushieId = true;
+      const product = await this.$store.dispatch(
+        'product/loadProduct',
+        { parentSku: persistedState.productTypeData.productSku }
+      );
 
-      try {
-        const product = await this.$store.dispatch(
-          'product/loadProduct',
-          { parentSku: persistedState.productTypeData.productSku }
-        );
-
-        this.productTypeStepData = {
-          product,
-          plushieId: persistedState.productTypeData.plushieId
-        }
-      } finally {
-        this.isProductLoadingForExistingPlushieId = false;
+      this.productTypeStepData = {
+        product,
+        plushieId: persistedState.productTypeData.plushieId
       }
     },
     fillImageUploadStepDataFromPersistedState (persistedState?: ForeversCreationWizardPersistedState): void {
@@ -601,34 +622,6 @@ export default ForeversCreatePlushie.extend({
         await this.persistPetInfoStepData(value);
       }
     },
-    async onProductTypeChoose (value: string): Promise<void> {
-      const productSku: string = getForeversSkuByType(value);
-
-      if (this.product?.sku === productSku) {
-        this.nextStep();
-        return;
-      }
-
-      const productTypeStepData = await this.createPlushie(value);
-
-      if (!productTypeStepData) {
-        return;
-      }
-
-      this.onProductTypeStepDataInput(productTypeStepData);
-      this.nextStep();
-    },
-    async onProductTypeStepDataInput (value: ForeversWizardProductTypeStepData): Promise<void> {
-      this.productTypeStepData = value;
-
-      if (!this.existingCartItem) {
-        await this.persistProductTypeStepData(value);
-      }
-
-      this.fillSizeByPreselectedParamAndCurrentProduct();
-
-      this.$router.push({ query: { ...this.$route.query, id: value.plushieId?.toString(10) } });
-    },
     async persistCurrentStep (value: number): Promise<void> {
       if (!this.plushieId) {
         throw new Error('Plushie id is undefined');
@@ -711,25 +704,29 @@ export default ForeversCreatePlushie.extend({
   },
   async created (): Promise<void> {
     this.$store.dispatch('budsies/loadBreeds');
-
-    if (this.existingCartItem) {
-      await this.fillPlushieDataFromCartItem(this.existingCartItem);
-    }
   },
   async beforeMount (): Promise<void> {
-    if (this.existingCartItem) {
-      return;
-    }
+    this.isWizardInitializing = true;
 
-    if (this.existingPlushieId) {
-      await this.fillPlushieDataFromPersistedState();
-    }
+    try {
+      if (this.existingCartItem) {
+        await this.fillPlushieDataFromCartItem(this.existingCartItem);
+        return;
+      }
 
-    if (this.preselectedProductType && !this.product) {
-      await this.onProductTypeChoose(this.preselectedProductType);
-    }
+      if (this.existingPlushieId) {
+        await this.fillPlushieDataFromPersistedState();
+      }
 
-    this.fillSizeByPreselectedParamAndCurrentProduct();
+      if (this.preselectedProductType && !this.product) {
+        await this.setProductType(this.preselectedProductType);
+        this.nextStep();
+      }
+
+      this.fillSizeByPreselectedParamAndCurrentProduct();
+    } finally {
+      this.isWizardInitializing = false;
+    }
   },
   watch: {
     product: {
@@ -786,10 +783,16 @@ export default ForeversCreatePlushie.extend({
       immediate: false
     },
     async existingPlushieId (value: string) {
-      if (this.existingCartItem) {
-        await this.fillPlushieDataFromCartItem(this.existingCartItem);
-      } else if (value) {
-        await this.fillPlushieDataFromPersistedState();
+      this.isWizardInitializing = true;
+
+      try {
+        if (this.existingCartItem) {
+          await this.fillPlushieDataFromCartItem(this.existingCartItem);
+        } else if (value) {
+          await this.fillPlushieDataFromPersistedState();
+        }
+      } finally {
+        this.isWizardInitializing = false;
       }
     }
   }

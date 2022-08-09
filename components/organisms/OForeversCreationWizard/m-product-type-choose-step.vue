@@ -9,7 +9,7 @@
       <SfButton
         class="_button"
         :disabled="isDisabled"
-        @click="onTypeButtonClickHandler('dog')"
+        @click="setProductType('dog')"
       >
         <BaseImage
           class="_image"
@@ -24,7 +24,7 @@
       <SfButton
         class="_button"
         :disabled="isDisabled"
-        @click="onTypeButtonClickHandler('cat')"
+        @click="setProductType('cat')"
       >
         <BaseImage
           class="_image"
@@ -39,7 +39,7 @@
       <SfButton
         class="_button"
         :disabled="isDisabled"
-        @click="onTypeButtonClickHandler('other')"
+        @click="setProductType('other')"
       >
         <BaseImage
           class="_image"
@@ -82,20 +82,36 @@ export default Vue.extend({
     disabled: {
       type: Boolean,
       default: false
+    },
+    setProductTypeAction: {
+      type: Function as PropType<(type: string) => Promise<void>>,
+      required: true
+    }
+  },
+  data () {
+    return {
+      isSubmitting: false
     }
   },
   computed: {
     isDisabled (): boolean {
-      return this.disabled;
+      return this.disabled || this.isSubmitting;
     }
   },
   methods: {
-    onTypeButtonClickHandler (type: 'dog' | 'cat' | 'other'): void {
+    async setProductType (type: 'dog' | 'cat' | 'other'): Promise<void> {
       if (this.disabled) {
         return;
       }
 
-      this.$emit('type-choose', type);
+      this.isSubmitting = true;
+
+      try {
+        await this.setProductTypeAction(type);
+        this.$emit('next-step');
+      } finally {
+        this.isSubmitting = false;
+      }
     }
   }
 });
