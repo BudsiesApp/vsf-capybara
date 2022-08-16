@@ -19,7 +19,7 @@ import { ErrorConverterService } from 'src/modules/budsies'
 import { isServer } from '@vue-storefront/core/helpers'
 import { syncCartWhenLocalStorageChange } from '@vue-storefront/core/modules/cart/helpers'
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
-import { USER_LEAVE_PAGE } from 'src/modules/promotion-platform/types/user-leave-page.event';
+import { USER_LEAVING_WEBSITE } from 'src/modules/promotion-platform';
 
 const windowObject = isServer ? {} : window;
 const errorConverterService = new ErrorConverterService();
@@ -42,11 +42,11 @@ export default {
   },
   mounted () {
     syncCartWhenLocalStorageChange.addEventListener();
-    EventBus.$on(USER_LEAVE_PAGE, this.onUserLeavePage)
+    EventBus.$on(USER_LEAVING_WEBSITE, this.onUserLeavingWebsite)
   },
   beforeDestroy () {
     syncCartWhenLocalStorageChange.removeEventListener();
-    EventBus.$off(USER_LEAVE_PAGE, this.onUserLeavePage);
+    EventBus.$off(USER_LEAVING_WEBSITE, this.onUserLeavingWebsite);
   },
   serverPrefetch () {
     return this.$store.dispatch('backend-settings/fetchSettings');
@@ -58,8 +58,8 @@ export default {
     WindowObject: windowObject
   },
   methods: {
-    onUserLeavePage () {
-      this.$store.dispatch('ui/openModal', { name: ModalList.Leaving })
+    onUserLeavingWebsite () {
+      this.$store.dispatch('ui/openModal', { name: ModalList.WebsiteLeaving })
     }
   }
 };

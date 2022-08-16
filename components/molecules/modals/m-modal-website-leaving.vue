@@ -43,7 +43,7 @@ import Vue from 'vue'
 import { SfModal, SfHeading } from '@storefront-ui/vue';
 
 export default Vue.extend({
-  name: 'MModalLeaving',
+  name: 'MModalWebsiteLeaving',
   components: {
     SfModal,
     SfHeading
