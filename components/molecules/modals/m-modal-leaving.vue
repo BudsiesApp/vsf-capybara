@@ -125,6 +125,6 @@ export default Vue.extend({
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-   }
+  }
 }
 </style>
