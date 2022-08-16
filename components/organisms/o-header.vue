@@ -75,7 +75,7 @@
     </SfHeader>
     <MMenu
       v-show="isMobileMenu"
-      class="mobile-menu"
+      class="mobile-menu mobile-only"
       @close="$store.commit('ui/closeMenu')"
     />
   </div>
