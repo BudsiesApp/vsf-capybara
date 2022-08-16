@@ -47,7 +47,6 @@ export default Vue.extend({
   components: {
     SfModal,
     SfHeading
-
   },
   props: {
     isVisible: {
@@ -91,41 +90,41 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .m-modal-leaving {
-    ._modal {
-        --modal-content-padding: var(--spacer-lg);
-        --modal-width: auto;
-    }
+  ._modal {
+    --modal-content-padding: var(--spacer-lg);
+    --modal-width: auto;
+  }
 
-    ._title {
-        margin-bottom: var(--spacer-sm);
-    }
+  ._title {
+    margin-bottom: var(--spacer-sm);
+  }
 
-    ._subtitle {
-        margin-bottom: var(--spacer-base);
-    }
+  ._subtitle {
+    margin-bottom: var(--spacer-base);
+  }
 
-    ._link {
-        color: var(--c-primary);
-        background: var(--c-light-variant);
-        padding: var(--spacer-xs);
-        border: 2px solid var(--c-primary);
-        transition: 150ms;
+  ._link {
+    color: var(--c-primary);
+    background: var(--c-light-variant);
+    padding: var(--spacer-xs);
+    border: 2px solid var(--c-primary);
+    transition: 150ms;
 
-        &:hover {
-            background: var(--c-light);
-            box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
-        }
+    &:hover {
+      background: var(--c-light);
+      box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
     }
+  }
 
-    ._content {
-        display: flex;
-    }
+  ._content {
+    display: flex;
+  }
 
-    ._column {
-        width: 50%;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-around;
-    }
+  ._column {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+   }
 }
 </style>
