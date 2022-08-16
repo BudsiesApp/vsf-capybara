@@ -1,9 +1,21 @@
 <template>
   <div class="m-modal-leaving">
-    <SfModal :visible="isVisible" @close="closeModal">
-      <SfHeading :title="$t('WHAT? You\'re Leaving!')" :level="1" />
+    <SfModal
+      class="_modal"
+      :visible="isVisible"
+      @close="closeModal"
+    >
+      <SfHeading
+        :title="$t('WHAT? You\'re Leaving!')"
+        :level="1"
+        class="_title"
+      />
 
-      <SfHeading :title="$t('but, but, but... why?')" :level="3" />
+      <SfHeading
+        :title="$t('but, but, but... why?')"
+        :level="3"
+        class="_subtitle"
+      />
 
       <div class="_content">
         <div class="_column">
@@ -12,6 +24,7 @@
 
         <div class="_column">
           <router-link
+            class="_link"
             v-for="link in linkItems"
             :key="link.label"
             :to="link.url"
@@ -77,12 +90,41 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .m-modal-leaving {
+    ._modal {
+        --modal-content-padding: var(--spacer-lg);
+        --modal-width: auto;
+    }
+
+    ._title {
+        margin-bottom: var(--spacer-sm);
+    }
+
+    ._subtitle {
+        margin-bottom: var(--spacer-base);
+    }
+
+    ._link {
+        color: var(--c-primary);
+        background: var(--c-light-variant);
+        padding: var(--spacer-xs);
+        border: 2px solid var(--c-primary);
+        transition: 150ms;
+
+        &:hover {
+            background: var(--c-light);
+            box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+        }
+    }
+
     ._content {
         display: flex;
     }
 
     ._column {
-        flex-grow: 1;
+        width: 50%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
     }
 }
 </style>

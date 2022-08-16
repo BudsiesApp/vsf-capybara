@@ -12,11 +12,14 @@ import config from 'config';
 
 import DefaultLayout from './layouts/Default'
 import MinimalLayout from './layouts/Minimal'
+import { ModalList } from './store/ui/modals';
 
 import { FileProcessingRepositoryFactory, ImageHandlerService, itemFactory } from 'src/modules/file-storage'
 import { ErrorConverterService } from 'src/modules/budsies'
 import { isServer } from '@vue-storefront/core/helpers'
 import { syncCartWhenLocalStorageChange } from '@vue-storefront/core/modules/cart/helpers'
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
+import { USER_LEAVE_PAGE } from 'src/modules/promotion-platform/types/user-leave-page.event';
 
 const windowObject = isServer ? {} : window;
 const errorConverterService = new ErrorConverterService();
@@ -39,9 +42,11 @@ export default {
   },
   mounted () {
     syncCartWhenLocalStorageChange.addEventListener();
+    EventBus.$on(USER_LEAVE_PAGE, this.onUserLeavePage)
   },
   beforeDestroy () {
     syncCartWhenLocalStorageChange.removeEventListener();
+    EventBus.$off(USER_LEAVE_PAGE, this.onUserLeavePage);
   },
   serverPrefetch () {
     return this.$store.dispatch('backend-settings/fetchSettings');
@@ -51,6 +56,11 @@ export default {
     FileProcessingRepositoryFactory: fileProcessingRepositoryFactory,
     ImageHandlerService: imageHandlerService,
     WindowObject: windowObject
+  },
+  methods: {
+    onUserLeavePage () {
+      this.$store.dispatch('ui/openModal', { name: ModalList.Leaving })
+    }
   }
 };
 </script>
