@@ -28,6 +28,7 @@
             v-for="link in linkItems"
             :key="link.label"
             :to="link.url"
+            @click.native="closeModal"
           >
             {{ link.label }}
           </router-link>
