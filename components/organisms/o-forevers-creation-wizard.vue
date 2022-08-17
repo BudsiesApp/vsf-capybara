@@ -17,8 +17,8 @@
           <SfStep name="Type">
             <MProductTypeChooseStep
               :value="productTypeStepData"
-              :disabled="isSubmitting || isProductLoadingForExistingPlushieId"
-              @input="onProductTypeStepDataInput"
+              :disabled="isBusy"
+              :set-product-type-action="setProductType"
               @next-step="nextStep"
             />
           </SfStep>
@@ -29,7 +29,7 @@
               :artwork-upload-url="artworkUploadUrl"
               :product="activeProduct"
               :plushie-id="plushieId"
-              :disabled="isSubmitting"
+              :disabled="isBusy"
               @input="onImageUploadStepDataInput"
               @next-step="nextStep"
               v-if="plushieId"
@@ -41,7 +41,7 @@
               :value="petInfoStepData"
               :plushie-id="plushieId"
               :product="activeProduct"
-              :disabled="isSubmitting"
+              :disabled="isBusy"
               @next-step="nextStep"
               @input="onPetInfoStepDataInput"
             />
@@ -57,7 +57,7 @@
               :size-bundle-option="sizeBundleOption"
               :sizes="sizes"
               :add-to-cart="onAddToCartHandler"
-              :disabled="isSubmitting"
+              :disabled="isBusy"
               @next-step="nextStep"
             />
           </SfStep>
@@ -79,6 +79,7 @@ import { TranslateResult } from 'vue-i18n';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import i18n from '@vue-storefront/i18n';
 import { setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import * as catalogTypes from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { SfHeading, SfSteps } from '@storefront-ui/vue';
@@ -90,11 +91,16 @@ import {
   ImageUploadMethod,
   vuexTypes as budsiesTypes,
   BodypartOption,
-  BodyPartValueContentType
+  BodyPartValueContentType,
+  ForeversWizardEvents
 } from 'src/modules/budsies';
 import ServerError from 'src/modules/shared/types/server-error';
-import foreversCreationWizardPersistedStateService from 'theme/helpers/forevers-creation-wizard-persisted-state.service';
 import { CustomerImage, getProductDefaultPrice } from 'src/modules/shared';
+
+import foreversCreationWizardPersistedStateService from 'theme/helpers/forevers-creation-wizard-persisted-state.service';
+import getForeversSizeSkuBySizeAndType from 'theme/helpers/get-forevers-size-sku-by-size-and-type.function';
+import getForeversSkuByType from 'theme/helpers/get-forevers-sku-by-type.function';
+import getForeversTypeByBundleSku from 'theme/helpers/get-forevers-type-by-bundle-sku.function';
 
 import MProductTypeChooseStep from './OForeversCreationWizard/m-product-type-choose-step.vue';
 import MImageUploadStep from './OForeversCreationWizard/m-image-upload-step.vue';
@@ -126,6 +132,14 @@ export default Vue.extend({
       required: true
     },
     existingPlushieId: {
+      type: String,
+      default: undefined
+    },
+    preselectedProductType: {
+      type: String,
+      default: undefined
+    },
+    preselectedSize: {
       type: String,
       default: undefined
     }
@@ -161,7 +175,7 @@ export default Vue.extend({
       } as ForeversWizardCustomizeStepData,
 
       isSubmitting: false,
-      isProductLoadingForExistingPlushieId: false
+      isWizardInitializing: false
     }
   },
   computed: {
@@ -180,6 +194,10 @@ export default Vue.extend({
       }
 
       return this.imageUploadStepData.customerImages;
+    },
+    isBusy (): boolean {
+      return this.isSubmitting ||
+       this.isWizardInitializing;
     },
     skinClass (): string {
       return '-skin-petsies';
@@ -309,6 +327,34 @@ export default Vue.extend({
         this.isSubmitting = false;
       }
     },
+    async setProductType (type: string): Promise<void> {
+      const productSku: string = getForeversSkuByType(type);
+
+      if (this.productTypeStepData.product?.sku === productSku) {
+        return;
+      }
+
+      const product = await this.$store.dispatch('product/loadProduct', {
+        parentSku: productSku,
+        childSku: null
+      });
+
+      const plushieCreationTask = await this.$store.dispatch('budsies/createNewPlushie', { productId: product.id });
+
+      const plushieId = plushieCreationTask.result;
+
+      this.productTypeStepData = { product, plushieId };
+
+      if (!this.existingCartItem) {
+        await this.persistProductTypeStepData(this.productTypeStepData);
+      }
+
+      this.fillSizeByPreselectedParamAndCurrentProduct();
+
+      EventBus.$emit(ForeversWizardEvents.TYPE_CHANGE, type);
+
+      this.$router.push({ query: { ...this.$route.query, id: plushieId.toString(10) } });
+    },
     fillAddons (cartItem: CartItem): void {
       const productOption = cartItem.product_option;
       this.customizeStepData.addons = [];
@@ -380,20 +426,14 @@ export default Vue.extend({
         return;
       }
 
-      this.isProductLoadingForExistingPlushieId = true;
+      const product = await this.$store.dispatch(
+        'product/loadProduct',
+        { parentSku: persistedState.productTypeData.productSku }
+      );
 
-      try {
-        const product = await this.$store.dispatch(
-          'product/loadProduct',
-          { parentSku: persistedState.productTypeData.productSku }
-        );
-
-        this.productTypeStepData = {
-          product,
-          plushieId: persistedState.productTypeData.plushieId
-        }
-      } finally {
-        this.isProductLoadingForExistingPlushieId = false;
+      this.productTypeStepData = {
+        product,
+        plushieId: persistedState.productTypeData.plushieId
       }
     },
     fillImageUploadStepDataFromPersistedState (persistedState?: ForeversCreationWizardPersistedState): void {
@@ -431,6 +471,34 @@ export default Vue.extend({
       }
 
       this.customizeStepData.productionTime = productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id].option_selections[0];
+    },
+    fillSizeByPreselectedParams (type: string, size: string): void {
+      let sizeSku: string;
+
+      try {
+        sizeSku = getForeversSizeSkuBySizeAndType(size, type);
+      } catch (error) {
+        Logger.error('Unable to fill product by preselected param: ' + error, 'budsies')();
+        return;
+      }
+
+      const sizeOption = this.sizes.find((size) => size.value === sizeSku);
+
+      if (!sizeOption) {
+        return;
+      }
+
+      this.customizeStepData.size = sizeOption;
+    },
+    fillSizeByPreselectedParamAndCurrentProduct (): void {
+      if (!this.preselectedSize || !this.product) {
+        return;
+      }
+
+      this.fillSizeByPreselectedParams(
+        getForeversTypeByBundleSku(this.product.sku),
+        this.preselectedSize
+      );
     },
     fillSizeOption (cartItem: CartItem): void {
       const productOption = cartItem.product_option;
@@ -554,15 +622,6 @@ export default Vue.extend({
         await this.persistPetInfoStepData(value);
       }
     },
-    async onProductTypeStepDataInput (value: ForeversWizardProductTypeStepData): Promise<void> {
-      this.productTypeStepData = value;
-
-      if (!this.existingCartItem) {
-        await this.persistProductTypeStepData(value);
-      }
-
-      this.$router.push({ query: { ...this.$route.query, id: value.plushieId?.toString(10) } });
-    },
     async persistCurrentStep (value: number): Promise<void> {
       if (!this.plushieId) {
         throw new Error('Plushie id is undefined');
@@ -645,14 +704,28 @@ export default Vue.extend({
   },
   async created (): Promise<void> {
     this.$store.dispatch('budsies/loadBreeds');
-
-    if (this.existingCartItem) {
-      await this.fillPlushieDataFromCartItem(this.existingCartItem);
-    }
   },
   async beforeMount (): Promise<void> {
-    if (!this.existingCartItem && this.existingPlushieId) {
-      await this.fillPlushieDataFromPersistedState();
+    this.isWizardInitializing = true;
+
+    try {
+      if (this.existingCartItem) {
+        await this.fillPlushieDataFromCartItem(this.existingCartItem);
+        return;
+      }
+
+      if (this.existingPlushieId) {
+        await this.fillPlushieDataFromPersistedState();
+      }
+
+      if (this.preselectedProductType && !this.product) {
+        await this.setProductType(this.preselectedProductType);
+        this.nextStep();
+      }
+
+      this.fillSizeByPreselectedParamAndCurrentProduct();
+    } finally {
+      this.isWizardInitializing = false;
     }
   },
   watch: {
@@ -710,10 +783,16 @@ export default Vue.extend({
       immediate: false
     },
     async existingPlushieId (value: string) {
-      if (this.existingCartItem) {
-        await this.fillPlushieDataFromCartItem(this.existingCartItem);
-      } else if (value) {
-        await this.fillPlushieDataFromPersistedState();
+      this.isWizardInitializing = true;
+
+      try {
+        if (this.existingCartItem) {
+          await this.fillPlushieDataFromCartItem(this.existingCartItem);
+        } else if (value) {
+          await this.fillPlushieDataFromPersistedState();
+        }
+      } finally {
+        this.isWizardInitializing = false;
       }
     }
   }

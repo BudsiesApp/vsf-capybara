@@ -146,16 +146,15 @@ import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
 import { required } from 'vee-validate/dist/rules';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
-import ForeversWizardEvents from 'src/modules/shared/types/forevers-wizard-events';
-
 import { SfHeading, SfButton } from '@storefront-ui/vue';
 import Product from 'core/modules/catalog/types/Product';
 
-import {
+import { ForeversWizardEvents,
   ImageUploadMethod,
   ProductId,
   ProductValue
 } from 'src/modules/budsies';
+
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage } from 'src/modules/shared';
 
