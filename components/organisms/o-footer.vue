@@ -59,18 +59,14 @@
         </div>
       </div>
     </SfFooter>
-
-    <ABackToTop bottom="20px" right="20px" visibleoffset="200" class="desktop-only" />
   </footer>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import ABackToTop from 'theme/components/atoms/a-back-to-top';
 import MNewsletterSubscription from 'theme/components/molecules/m-newsletter-subscription.vue';
 import { SfFooter, SfList, SfMenuItem, SfInput, SfButton } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
-import { getPathForStaticPage } from 'theme/helpers';
 import config from 'config';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import get from 'lodash-es/get';
@@ -78,7 +74,6 @@ import get from 'lodash-es/get';
 export default {
   name: 'OFooter',
   components: {
-    ABackToTop,
     MNewsletterSubscription,
     SfFooter,
     SfList,
