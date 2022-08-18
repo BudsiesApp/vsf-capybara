@@ -6,7 +6,7 @@
       :visible="visible"
     >
       <SfMegaMenuColumn
-        title="Custom Products"
+        :title="$t('Custom Products')"
       >
         <SfList>
           <SfListItem
@@ -24,7 +24,7 @@
       </SfMegaMenuColumn>
 
       <SfMegaMenuColumn
-        title="Other Products"
+        :title="$t('Other Products')"
       >
         <SfList>
           <SfListItem
@@ -42,11 +42,33 @@
           </SfListItem>
         </SfList>
       </SfMegaMenuColumn>
+
+      <SfMegaMenuColumn
+        :title="$t('Other Useful Links')"
+        class="mobile-only"
+      >
+        <SfList>
+          <SfListItem
+            v-for="item in usefulLinksItems"
+            :key="item.label"
+          >
+            <router-link
+              class="_item-link"
+              :to="item.url"
+              :target="item.target"
+              @click.native="$emit('close')"
+            >
+              <SfMenuItem :label="item.label" />
+            </router-link>
+          </SfListItem>
+        </SfList>
+      </SfMegaMenuColumn>
     </SfMegaMenu>
   </div>
 </template>
 <script>
 import { SfMegaMenu, SfList, SfMenuItem } from '@storefront-ui/vue';
+
 export default {
   components: { SfMegaMenu, SfList, SfMenuItem },
   props: {
@@ -63,15 +85,15 @@ export default {
     return {
       customProductsItems: [
         {
-          label: 'Petsies Stuffed Animals',
+          label: this.$t('Petsies Stuffed Animals'),
           url: '/forevers-pet-plush/'
         },
         {
-          label: 'Pet Shaped Pillows',
+          label: this.$t('Pet Shaped Pillows'),
           url: '/pet-pillow/'
         },
         {
-          label: 'Square Photo Pillows',
+          label: this.$t('Square Photo Pillows'),
           url: {
             name: 'category',
             params: {
@@ -80,25 +102,25 @@ export default {
           }
         },
         {
-          label: 'Pet Socks',
+          label: this.$t('Pet Socks'),
           url: {
             name: 'printed-socks-creation-page'
           }
         },
         {
-          label: 'Face Masks',
+          label: this.$t('Face Masks'),
           url: {
             name: 'printed-masks-creation-page'
           }
         },
         {
-          label: 'Pet Keychains',
+          label: this.$t('Pet Keychains'),
           url: {
             name: 'printed-keychains-creation-page'
           }
         },
         {
-          label: 'Felted Magnets',
+          label: this.$t('Felted Magnets'),
           url: {
             name: 'felted-magnets-creation-page'
           }
@@ -106,7 +128,7 @@ export default {
       ],
       otherProductsItems: [
         {
-          label: 'Gift Boxes',
+          label: this.$t('Gift Boxes'),
           url: {
             name: 'giftbox'
           },
@@ -116,7 +138,7 @@ export default {
           }
         },
         {
-          label: 'Accessories',
+          label: this.$t('Accessories'),
           url: {
             name: 'category',
             params: {
@@ -125,8 +147,23 @@ export default {
           }
         },
         {
-          label: 'Bulk Orders',
+          label: this.$t('Bulk Orders'),
           url: '/bulk-custom-stuffed-animal-manufacture/'
+        }
+      ],
+      usefulLinksItems: [
+        {
+          label: this.$t('Pricing'),
+          url: '/pricing/'
+        },
+        {
+          label: this.$t('About'),
+          url: '/about-petsies/'
+        },
+        {
+          label: this.$t('Blog'),
+          url: '/blog/',
+          target: '_blank'
         }
       ]
     }
