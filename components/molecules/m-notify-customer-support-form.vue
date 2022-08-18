@@ -4,7 +4,7 @@
     <SfInput v-model="email" name="email" :placeholder="$t('Your email')" />
     <SfInput v-model="phone" name="name" :placeholder="$t('Phone (optional)')" />
 
-    <SfButton class="sf-button sf-button--outline">
+    <SfButton class="sf-button sf-button--outline _submit-button">
       {{ $t('Notify Customer Support') }}
     </SfButton>
   </form>
@@ -56,6 +56,7 @@ export default Vue.extend({
 
       try {
         await this.action(this.name, this.email, this.phone);
+        this.$emit('successfully-submitted');
       } finally {
         this.isSubmitting = false;
       }
@@ -63,3 +64,11 @@ export default Vue.extend({
   }
 })
 </script>
+
+<style lang="scss" scoped>
+.m-notify-customer-support-form {
+  ._submit-button {
+    margin: auto;
+  }
+}
+</style>
