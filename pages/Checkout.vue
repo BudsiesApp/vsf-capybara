@@ -40,6 +40,7 @@ import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.functi
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
+import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout/types/order-error.event';
 
 import OBillingAddress from 'theme/components/organisms/o-billing-address';
 import OShipping from 'theme/components/organisms/o-shipping';
@@ -50,7 +51,6 @@ import OOrderSuccess from 'theme/components/organisms/o-order-success';
 import OPersonalDetails from 'theme/components/organisms/o-personal-details';
 import OCartItemsTable from 'theme/components/organisms/o-cart-items-table';
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
-import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout/types/order-error.event';
 import { ModalList } from 'theme/store/ui/modals';
 
 const successParamValue = 'success';

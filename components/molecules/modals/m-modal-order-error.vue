@@ -45,9 +45,9 @@
 <script lang="ts">
 import Vue from 'vue'
 import { SfModal, SfHeading } from '@storefront-ui/vue';
+import { Order } from '@vue-storefront/core/modules/order/types/Order';
 
 import MNotifyCustomerSupportForm from '../m-notify-customer-support-form.vue';
-import { Order } from '@vue-storefront/core/modules/order/types/Order';
 
 export default Vue.extend({
   name: 'MModalOrderError',
