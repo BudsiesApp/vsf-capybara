@@ -1,23 +1,6 @@
 <template>
   <div class="m-modal-order-error">
     <SfModal :visible="isVisible" class="_modal" @close="closeModal" :title="$t('Payment Error :(')">
-      <SfHeading :title="$t('Payment Error :(')" :level="1" class="desktop-only" />
-
-      <p>
-        {{ $t('Uh oh! We got error with your payment.') }}
-      </p>
-
-      <p class="_error-message" v-if="errorReason">
-        {{ errorReason }}
-      </p>
-
-      <p>
-        {{ $t('Could you please check your payment info or') }}
-        <span class="_try-different-method" @click="closeModal">
-          {{ $t('try a different payment method?') }}
-        </span>
-      </p>
-
       <div
         v-if="isFormSubmitted"
         class="_successfully-submitted"
@@ -25,19 +8,38 @@
         {{ $t('Thanks! Our support team will contact you soon to help figure out this payment issue.') }}
       </div>
 
-      <div class="_form-container" v-else>
-        {{ $t('Not sure what\'s causing error? We\'re here to help take your order') }}
+      <template v-else>
+        <SfHeading :title="$t('Payment Error :(')" :level="1" class="desktop-only" />
 
-        <MNotifyCustomerSupportForm
-          class="_form"
-          :prefilled-email="customerEmail"
-          :prefilled-name="customerFullName"
-          :action="onFormSubmit"
-          @successfully-submitted="onFormSuccessfullySubmitted"
-        />
+        <p>
+          {{ $t('Uh oh! We got error with your payment.') }}
+        </p>
 
-        {{ $t('We\'ll look into your error and call or email you back with an alternate method of payment.') }}
-      </div>
+        <p class="_error-message" v-if="errorReason">
+          {{ errorReason }}
+        </p>
+
+        <p>
+          {{ $t('Could you please check your payment info or') }}
+          <span class="_try-different-method" @click="closeModal">
+            {{ $t('try a different payment method?') }}
+          </span>
+        </p>
+
+        <div class="_form-container">
+          {{ $t('Not sure what\'s causing error? We\'re here to help take your order') }}
+
+          <MNotifyCustomerSupportForm
+            class="_form"
+            :prefilled-email="customerEmail"
+            :prefilled-name="customerFullName"
+            :action="onFormSubmit"
+            @successfully-submitted="onFormSuccessfullySubmitted"
+          />
+
+          {{ $t('We\'ll look into your error and call or email you back with an alternate method of payment.') }}
+        </div>
+      </template>
     </SfModal>
   </div>
 </template>
