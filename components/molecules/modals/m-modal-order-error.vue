@@ -6,6 +6,10 @@
         class="_successfully-submitted"
       >
         {{ $t('Thanks! Our support team will contact you soon to help figure out this payment issue.') }}
+
+        <SfButton class="sf-button sf-button--outline _close-button" @click="closeModal">
+          {{ $t('Close') }}
+        </SfButton>
       </div>
 
       <template v-else>
@@ -46,7 +50,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { SfModal, SfHeading } from '@storefront-ui/vue';
+import { SfButton, SfModal, SfHeading } from '@storefront-ui/vue';
 import { Order } from '@vue-storefront/core/modules/order/types/Order';
 
 import MNotifyCustomerSupportForm from '../m-notify-customer-support-form.vue';
@@ -55,6 +59,7 @@ export default Vue.extend({
   name: 'MModalOrderError',
   components: {
     MNotifyCustomerSupportForm,
+    SfButton,
     SfModal,
     SfHeading
   },
@@ -138,6 +143,14 @@ export default Vue.extend({
 
   ._successfully-submitted {
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    ._close-button {
+      margin-top: var(--spacer-base);
+    }
   }
 
   ._form {
