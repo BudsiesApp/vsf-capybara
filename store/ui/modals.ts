@@ -11,7 +11,8 @@ export enum ModalList {
   OrderConfirmation = 'm-modal-order-confirmation',
   Newsletter = 'm-modal-newsletter',
   AmazonPayOrderDetails = 'm-modal-amazonpay-order-details',
-  WebsiteLeaving = 'm-modal-website-leaving'
+  WebsiteLeaving = 'm-modal-website-leaving',
+  OrderError = 'm-modal-order-error'
 }
 
 /**
@@ -27,7 +28,8 @@ export const modalComponents = new Map([
   [ModalList.OrderConfirmation, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-order-confirmation.vue')],
   [ModalList.Newsletter, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-newsletter.vue')],
   [ModalList.AmazonPayOrderDetails, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-amazonpay-order-details.vue')],
-  [ModalList.WebsiteLeaving, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-website-leaving.vue')]
+  [ModalList.WebsiteLeaving, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-website-leaving.vue')],
+  [ModalList.OrderError, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-order-error.vue')]
 ])
 
 /**
