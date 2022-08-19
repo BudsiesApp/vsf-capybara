@@ -40,7 +40,7 @@ import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.functi
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
-import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout/types/order-error.event';
+import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 
 import OBillingAddress from 'theme/components/organisms/o-billing-address';
 import OShipping from 'theme/components/organisms/o-shipping';
