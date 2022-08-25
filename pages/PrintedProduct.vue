@@ -44,7 +44,8 @@ export default Vue.extend({
   },
   data () {
     return {
-      isRouterLeaving: false
+      isRouterLeaving: false,
+      isProductDesignSelectedByForm: false
     };
   },
   computed: {
@@ -110,12 +111,22 @@ export default Vue.extend({
         return;
       }
 
+      this.isProductDesignSelectedByForm = true;
+
       this.$router.push({ query: { ...this.$route.query, product_design: value } });
     }
   },
   watch: {
     sku: async function () {
       await this.loadData();
+    },
+    productDesign () {
+      if (this.isProductDesignSelectedByForm || !document.scrollingElement) {
+        this.isProductDesignSelectedByForm = false;
+        return;
+      }
+
+      document.scrollingElement.scrollTop = 0;
     }
   },
   metaInfo () {
