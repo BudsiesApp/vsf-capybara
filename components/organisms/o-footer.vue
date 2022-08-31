@@ -13,7 +13,6 @@
         <SfList>
           <SfListItem v-for="link in linkGroup.children" :key="link.name">
             <router-link
-              v-if="link.link"
               :to="localizedRoute(link.link)"
               :target="link.target"
               :event="link.event ? link.event : 'click'"
