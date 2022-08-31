@@ -12,15 +12,15 @@
       >
         <SfList>
           <SfListItem v-for="link in linkGroup.children" :key="link.name">
-            <router-link v-if="link.link" :to="localizedRoute(link.link)" :target="link.target" exact>
+            <router-link
+              :to="localizedRoute(link.link)"
+              :target="link.target"
+              :event="link.event ? link.event : 'click'"
+              @click.native="onLinkClick(link)"
+              exact
+            >
               <SfMenuItem class="sf-footer__menu-item" :label="link.name" />
             </router-link>
-            <SfMenuItem
-              v-else-if="link.clickHandler"
-              class="sf-footer__menu-item"
-              :label="link.name"
-              @click="link.clickHandler"
-            />
           </SfListItem>
         </SfList>
       </SfFooterColumn>
@@ -174,9 +174,13 @@ export default {
           children: [
             {
               name: this.$t('My account'),
-              ...this.isLoggedIn
-                ? { link: { name: 'my-account' } }
-                : { clickHandler: () => this.openModal({ name: ModalList.Auth, payload: 'login' }) }
+              link: { name: 'my-account' },
+              event: this.isLoggedIn ? 'click' : 'false',
+              clickHandler: () => {
+                if (!this.isLoggedIn) {
+                  this.openModal({ name: ModalList.Auth, payload: 'login' })
+                }
+              }
             },
             { name: this.$t('My Cart'), link: { name: 'detailed-cart' } },
             { name: this.$t('Rising Starts'), link: '/rising-stars/' }
@@ -203,6 +207,13 @@ export default {
     }),
     showLanguageSwitcher () {
       this.openModal({ name: ModalList.LanguageSwitcher })
+    },
+    onLinkClick (link) {
+      if (!link.clickHandler) {
+        return;
+      }
+
+      link.clickHandler();
     }
   }
 };
