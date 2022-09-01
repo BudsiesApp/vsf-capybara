@@ -24,6 +24,8 @@ const CrossSells = () =>
   import(/* webpackChunkName: "vsf-cross-sells" */ 'theme/pages/CrossSells');
 const GiftCards = () =>
   import(/* webpackChunkName: "vsf-gift-cards" */ 'theme/pages/GiftCards');
+const BlanketProduct = () =>
+  import(/* webpackChunkName: "vsf-blankets" */ 'theme/pages/BlanketProduct');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -265,6 +267,26 @@ let routes = [
         childSku: 'gift_box_dog'
       }
     }
+  },
+  {
+    name: 'renaissance-blankets',
+    path: '/blankets/index/create/type/renaissance-blankets/',
+    component: BlanketProduct,
+    props: (route) => ({
+      sku: 'customRenaissanceBlankets_bundle',
+      existingPlushieId: route.query.existingPlushieId,
+      productDesign: route.query.product_design
+    })
+  },
+  {
+    name: 'cut-out-blankets',
+    path: '/blankets/index/create/type/cut-out-blankets/',
+    component: BlanketProduct,
+    props: (route) => ({
+      sku: 'customCutOutBlankets_bundle',
+      existingPlushieId: route.query.existingPlushieId,
+      productDesign: route.query.product_design
+    })
   }
 ];
 
