@@ -40,6 +40,7 @@
                   class="_design-selector"
                   :value="selectedDesign"
                   :design-products="designProductOptions"
+                  :disabled="isDisabled"
                   field-name="design-product-sku"
                   @input="onDesignSelect"
                 />
@@ -190,7 +191,7 @@ import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helper
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import { getProductGallery as getGalleryByProduct, setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 
-import { ProductValue } from 'src/modules/budsies';
+import { ProductValue, Dictionary } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage, getProductDefaultPrice, InjectType, ServerError } from 'src/modules/shared';
 import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
@@ -273,35 +274,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     ...mapGetters({
       getProductGallery: 'product/getProductGallery'
     }),
-    availableDesignsProducts (): Product[] { // TODO
-      const availableDesignsProducts: Product[] = [];
-
-      if (!this.designBundleOption) {
-        return availableDesignsProducts;
-      }
-
-      for (const productLink of this.designBundleOption.product_links) {
-        if (productLink.product) {
-          availableDesignsProducts.push(productLink.product);
-        }
-      }
-
-      return availableDesignsProducts;
-    },
-    availableSizeProducts (): Product[] { // TODO
-      const availableSizeProducts: Product[] = [];
-
-      if (!this.sizeBundleOption) {
-        return availableSizeProducts;
-      }
-
-      for (const productLink of this.sizeBundleOption.product_links) {
-        if (productLink.product) {
-          availableSizeProducts.push(productLink.product);
-        }
-      }
-
-      return availableSizeProducts;
+    availableDesignsProductDictionary (): Dictionary<Product> {
+      return this.getProductsByBundleOption(this.designBundleOption);
     },
     backendProductId (): ProductValue {
       switch (this.product.id) {
@@ -367,8 +341,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           sku: product.sku,
           name: product.name,
           thumbnail: getThumbnailForProduct(product as any),
-          price: 0, // TODO
-          images: [], // TODO
+          price: 0,
+          images: [],
           optionId: this.designBundleOption.option_id.toString(),
           optionValueId: productLink.id.toString()
         })
@@ -440,9 +414,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         return;
       }
 
-      return this.availableDesignsProducts.find(
-        (item) => item.sku === this.selectedDesign
-      );
+      return this.availableDesignsProductDictionary[this.selectedDesign];
     },
     selectedDesignProductPrice (): { regular: number | string, special: number | string } {
       if (!this.selectedDesignProduct) {
@@ -452,15 +424,19 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return getProductDefaultPrice(this.selectedDesignProduct, {}, false);
     },
     selectedSizeProduct (): Product | undefined {
-      if (!this.selectedSizeOption) {
+      if (!this.selectedSizeOption || !this.sizeBundleOption) {
         return;
       }
 
-      return this.availableSizeProducts.find(
-        (item) => item.sku === this.sizeBundleOption?.product_links.find(
-          (productLink) => productLink.id === this.selectedSizeOption
-        )?.product?.sku
+      const productLink = this.sizeBundleOption.product_links.find(
+        (productLink) => productLink.id === this.selectedSizeOption
       );
+
+      if (!productLink) {
+        return;
+      }
+
+      return productLink.product;
     },
     shortDescription (): string | undefined {
       if (!this.selectedDesignProduct || !this.selectedDesignProduct.short_description) {
@@ -509,9 +485,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return this.customerImage?.id;
     }
   },
-  created (): void {
-    this.fillDefaultSelectedSizeOption();
-  },
   methods: {
     ...mapMutations('product', {
       setBundleOptionValue: PRODUCT_SET_BUNDLE_OPTION
@@ -549,7 +522,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           Logger.error(err, 'budsies')();
         }
 
-        this.onSuccess(diffLog);
+        this.onSuccessAddToCart(diffLog);
       } catch (err) {
         Logger.error(err, 'budsies')();
 
@@ -594,6 +567,25 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       return `${productLink.product.name} $${finalDesignPrice + finalSizePrice}`
     },
+    getProductsByBundleOption (bundleOption: BundleOption | undefined): Dictionary<Product> {
+      const products: Dictionary<Product> = {};
+
+      if (!bundleOption) {
+        return products;
+      }
+
+      for (const productLink of bundleOption.product_links) {
+        const product = productLink.product;
+
+        if (!product) {
+          continue;
+        }
+
+        products[product.sku] = product;
+      }
+
+      return products;
+    },
     onArtworkAdd (value: Item): void {
       this.customerImage = {
         id: value.id,
@@ -613,7 +605,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         action1: { label: this.$t('OK') }
       });
     },
-    onSuccess (diffLog: any): void { // TODO
+    onSuccessAddToCart (diffLog: any): void {
       this.resetData();
 
       if (!diffLog || !diffLog.clientNotifications) {
@@ -630,6 +622,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           { root: true }
         );
       });
+    },
+    onSuccessExistingCartItemUpdate (): void {
+      this.resetData();
+
+      this.$router.push({ name: 'detailed-cart' });
     },
     onSubmit (): void {
       if (!this.existingCartItem) {
@@ -696,6 +693,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
           Logger.error(err, 'budsies')();
         }
+
+        this.onSuccessExistingCartItemUpdate();
       } catch (err) {
         Logger.error(err, 'budsies')();
 
