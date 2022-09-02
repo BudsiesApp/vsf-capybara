@@ -204,9 +204,15 @@ const printedProductSkus = [
   'customFeltedMagnets_bundle'
 ]
 
+const blanketProductsSkus = [
+  'customRenaissanceBlankets_bundle',
+  'customCutOutBlankets_bundle'
+]
+
 const editableProductsSkus = [
   ...foreversProductsSkus,
-  ...printedProductSkus
+  ...printedProductSkus,
+  ...blanketProductsSkus
 ];
 
 export default {
@@ -336,13 +342,26 @@ export default {
       if (foreversProductsSkus.includes(product.sku)) {
         this.$router.push({ name: 'forevers-create', query: { id: product.plushieId } });
       } else if (printedProductSkus.includes(product.sku)) {
-        this.$router.push({ name: 'printed-product',
+        this.$router.push({
+          name: 'printed-product',
           params: { sku: product.sku },
           query: {
-            product_design: this.getPrintedProductDesign(product),
+            product_design: this.getProductDesign(product),
             existingPlushieId: product.plushieId
           }
         });
+      } else if (blanketProductsSkus.includes(product.sku)) {
+        const routeName = product.sku === 'customCutOutBlankets_bundle'
+          ? 'cut-out-blankets'
+          : 'renaissance-blankets';
+
+        this.$router.push({
+          name: routeName,
+          query: {
+            product_design: this.getProductDesign(product),
+            existingPlushieId: product.plushieId
+          }
+        })
       }
     },
     getProductOptions (product) {
@@ -441,7 +460,7 @@ export default {
 
       return text.substring(0, maxLength) + '...';
     },
-    getPrintedProductDesign (product) {
+    getProductDesign (product) {
       const selectedBundleOptions = getSelectedBundleOptions(product);
       const productBundleOptions = product.bundle_options.filter((option) => option.title.toLowerCase() === 'product');
       const selectedBundleOptionsValues = getBundleOptionsValues(selectedBundleOptions, productBundleOptions);

@@ -184,6 +184,7 @@ import { SfButton, SfHeading, SfSelect } from '@storefront-ui/vue';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
+import { getSelectedBundleOptions } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions';
 import { PRODUCT_SET_BUNDLE_OPTION } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { BundleOption, BundleOptionsProductLink } from '@vue-storefront/core/modules/catalog/types/BundleOption';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -485,6 +486,14 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return this.customerImage?.id;
     }
   },
+  created () {
+    if (this.existingCartItem) {
+      this.fillExistingCartItemData(this.existingCartItem);
+      return;
+    }
+
+    this.fillDefaultSelectedSizeOption();
+  },
   methods: {
     ...mapMutations('product', {
       setBundleOptionValue: PRODUCT_SET_BUNDLE_OPTION
@@ -551,7 +560,42 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     fillEmptyCustomerImage (): void {
       this.customerImage = undefined;
+      this.artworkUploadInitialItems = [];
       this.clearArtworkUploader();
+    },
+    fillExistingCartItemCustomerImage (cartItem: CartItem): void {
+      if (!cartItem.customerImages?.length) {
+        this.fillEmptyCustomerImage();
+        return;
+      }
+
+      this.customerImage = cartItem.customerImages[0];
+      this.artworkUploadInitialItems = cartItem.customerImages;
+    },
+    fillExistingCartItemSize (cartItem: CartItem): void {
+      if (!this.sizeBundleOption) {
+        this.fillDefaultSelectedSizeOption();
+        return;
+      }
+
+      const selectedBundleOptions = getSelectedBundleOptions(cartItem);
+      const selectedSizeOptions = selectedBundleOptions.find(
+        (option) => option.option_id === this.sizeBundleOption.option_id
+      );
+
+      if (!selectedSizeOptions || !selectedSizeOptions.option_selections[0]) {
+        return;
+      }
+
+      this.selectedSizeOption = selectedSizeOptions.option_selections[0].toString();
+    },
+    fillExistingCartItemData (cartItem: CartItem): void {
+      this.fillExistingCartItemCustomerImage(cartItem);
+      this.fillExistingCartItemSize(cartItem);
+      this.fillExistingQuantity(cartItem);
+    },
+    fillExistingQuantity (cartItem: CartItem): void {
+      this.quantity = cartItem.qty;
     },
     getArtworkUploader (): InstanceType<typeof MArtworkUpload> | undefined {
       return this.$refs['artwork-upload'] as InstanceType<typeof MArtworkUpload> | undefined;
@@ -607,6 +651,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     onSuccessAddToCart (diffLog: any): void {
       this.resetData();
+      this.scrollToTop();
 
       if (!diffLog || !diffLog.clientNotifications) {
         return;
@@ -639,7 +684,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.fillDefaultSelectedSizeOption();
       this.fillEmptyCustomerImage();
       this.onDesignSelect(undefined);
-      this.scrollToTop();
     },
     scrollToTop (): void {
       if (!document.scrollingElement) {
@@ -705,6 +749,15 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
   },
   watch: {
+    existingCartItem (newValue?: CartItem, oldValue?: CartItem) {
+      if (oldValue && !newValue) {
+        this.resetData();
+      }
+
+      if (newValue) {
+        this.fillExistingCartItemData(newValue);
+      }
+    },
     selectedSizeOption: {
       immediate: true,
       handler (val: string | undefined, oldVal: string | undefined) {
