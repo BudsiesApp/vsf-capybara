@@ -119,6 +119,10 @@ export default {
           url: '/custom-pillows/'
         },
         {
+          label: 'Custom Blankets',
+          url: '/custom-blankets/'
+        },
+        {
           label: 'Custom Socks',
           url: {
             name: 'printed-socks-creation-page'

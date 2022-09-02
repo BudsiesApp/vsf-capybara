@@ -254,6 +254,18 @@ export default {
           }
         },
         {
+          label: this.$t('Pet Photo Blankets'),
+          url: {
+            name: 'cut-out-blankets'
+          }
+        },
+        {
+          label: this.$t('Renaissance Blankets'),
+          url: {
+            name: 'renaissance-blankets'
+          }
+        },
+        {
           label: 'Socks',
           url: {
             name: 'printed-socks-creation-page'
