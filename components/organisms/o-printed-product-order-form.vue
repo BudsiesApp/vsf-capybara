@@ -225,6 +225,8 @@ import { Bodypart, BodypartOption, ExtraPhotoAddon, ProductValue } from 'src/mod
 import ServerError from 'src/modules/shared/types/server-error';
 import { CustomerImage, getProductDefaultPrice, InjectType } from 'src/modules/shared';
 
+import GalleryProductImages from '../interfaces/gallery-product-images.interface';
+
 import ACustomPrice from '../atoms/a-custom-price.vue';
 import ACustomProductQuantity from '../atoms/a-custom-product-quantity.vue';
 import MProductDescriptionStory from '../molecules/m-product-description-story.vue';
@@ -244,11 +246,6 @@ extend('required', {
 
 interface InjectedServices {
   imageHandlerService: ImageHandlerService
-}
-
-export interface GalleryProductImages {
-  sku: string,
-  images: ZoomGalleryImage[]
 }
 
 export interface SelectOption {

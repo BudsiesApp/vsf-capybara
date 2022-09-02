@@ -178,12 +178,25 @@
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
 import { required } from 'vee-validate/dist/rules';
 import Vue, { PropType, VueConstructor } from 'vue'
+import { mapGetters, mapMutations } from 'vuex';
 import { SfButton, SfHeading, SfSelect } from '@storefront-ui/vue';
+import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
+import { PRODUCT_SET_BUNDLE_OPTION } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
+import { BundleOption, BundleOptionsProductLink } from '@vue-storefront/core/modules/catalog/types/BundleOption';
+import Product from '@vue-storefront/core/modules/catalog/types/Product';
+import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
-import Product, { ProductLink } from '@vue-storefront/core/modules/catalog/types/Product';
 import { getProductGallery as getGalleryByProduct, setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
+
+import { ProductValue } from 'src/modules/budsies';
+import { ImageHandlerService, Item } from 'src/modules/file-storage';
+import { CustomerImage, getProductDefaultPrice, InjectType, ServerError } from 'src/modules/shared';
+import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
+
+import DesignProduct from '../interfaces/design-product.interface';
+import GalleryProductImages from '../interfaces/gallery-product-images.interface';
 
 import ACustomPrice from '../atoms/a-custom-price.vue';
 import ACustomProductQuantity from '../atoms/a-custom-product-quantity.vue';
@@ -191,18 +204,6 @@ import MArtworkUpload from '../molecules/m-artwork-upload.vue';
 import MDesignSelector from '../molecules/m-design-selector.vue';
 import MProductDescriptionStory from '../molecules/m-product-description-story.vue';
 import MZoomGallery from '../molecules/m-zoom-gallery.vue';
-import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
-import { CustomerImage, getProductDefaultPrice, InjectType } from 'src/modules/shared';
-import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
-import { mapGetters, mapMutations } from 'vuex';
-import { GalleryProductImages } from './o-printed-product-order-form.vue';
-import { BundleOption, BundleOptionsProductLink } from '@vue-storefront/core/modules/catalog/types/BundleOption';
-import DesignProduct from '../interfaces/design-product.interface';
-import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
-import { ProductValue } from 'src/modules/budsies';
-import { ImageHandlerService, Item } from 'src/modules/file-storage';
-import { PRODUCT_SET_BUNDLE_OPTION } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
-import ServerError from 'src/modules/shared/types/server-error';
 
 extend('required', {
   ...required,
