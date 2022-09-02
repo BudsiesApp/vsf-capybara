@@ -40,7 +40,7 @@ export default Vue.extend({
   methods: {
     async loadStory (): Promise<void> {
       if (!this.storyFullSlug) {
-        throw new Error('\'storyFullSlug\' property is not defined');
+        return;
       }
 
       await this.$store.dispatch(`storyblok/loadStory`, {

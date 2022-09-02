@@ -287,6 +287,26 @@ let routes = [
       existingPlushieId: route.query.existingPlushieId,
       productDesign: route.query.product_design
     })
+  },
+  {
+    name: 'cut-out-blankets-category',
+    path: '/blankets/cut-out-design/',
+    redirect: {
+      name: 'category',
+      params: {
+        slug: 'cut-out-design-98'
+      }
+    }
+  },
+  {
+    name: 'renaissance-blankets-category',
+    path: '/blankets/renaissance-design/',
+    redirect: {
+      name: 'category',
+      params: {
+        slug: 'renaissance-design-99'
+      }
+    }
   }
 ];
 
