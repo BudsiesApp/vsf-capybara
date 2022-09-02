@@ -58,12 +58,7 @@
 
               <div class="_upload-photo-hint">
                 {{
-                  $t(
-                    `We recommend using clear images of your pet’s
-                    face in the position you would like them to be in on the image.
-                    Our designer will stylize, but not fully alter,
-                    the image you upload.`
-                  )
+                  $t('We recommend using clear images of your pet’s face in the position you would like them to be in on the image. Our designer will stylize, but not fully alter, the image you upload.')
                 }}
               </div>
 
