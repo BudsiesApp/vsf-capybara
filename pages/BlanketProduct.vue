@@ -1,6 +1,13 @@
 <template>
   <div id="blanket-product" itemscope itemtype="http://schema.org/Product">
-    //
+    <o-blanket-product-order-form
+      v-if="getCurrentProduct"
+      :artwork-upload-url="artworkUploadUrl"
+      :product="getCurrentProduct"
+      :selected-design="productDesign"
+      :existing-cart-item="existingCartItem"
+      @design-selected="onDesignSelected"
+    />
   </div>
 </template>
 
@@ -14,10 +21,12 @@ import CartItem from 'core/modules/cart/types/CartItem';
 
 import Product from 'core/modules/catalog/types/Product';
 
+import OBlanketProductOrderForm from 'theme/components/organisms/o-blanket-product-order-form.vue';
+
 export default Vue.extend({
   name: 'BlanketProduct',
   components: {
-    //
+    OBlanketProductOrderForm
   },
   props: {
     sku: {
@@ -91,7 +100,7 @@ export default Vue.extend({
 
       catalogHooksExecutors.productPageVisited(product);
     },
-    onStyleSelected (value?: string): void {
+    onDesignSelected (value?: string): void {
       if (value === this.productDesign) {
         return;
       }
