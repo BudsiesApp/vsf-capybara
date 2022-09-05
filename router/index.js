@@ -194,11 +194,11 @@ let routes = [
     })
   },
   {
-    name: 'felted-keychains-creation-page',
-    path: '/plushie/index/feltedKeychains/',
+    name: 'felted-ornaments-creation-page',
+    path: '/plushie/index/feltedOrnaments/',
     component: PrintedProduct,
     props: route => ({
-      sku: 'customFeltedKeychains_bundle',
+      sku: 'customFeltedOrnaments_bundle',
       productDesign: route.query.product_design
     })
   },
