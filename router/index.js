@@ -294,7 +294,7 @@ let routes = [
     redirect: {
       name: 'category',
       params: {
-        slug: 'cut-out-design-98'
+        slug: 'cut-out-design-114'
       }
     }
   },
@@ -304,7 +304,7 @@ let routes = [
     redirect: {
       name: 'category',
       params: {
-        slug: 'renaissance-design-99'
+        slug: 'renaissance-design-115'
       }
     }
   }
