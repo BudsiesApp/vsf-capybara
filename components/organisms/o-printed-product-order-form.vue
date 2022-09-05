@@ -260,7 +260,7 @@ export interface SelectOption {
 }
 
 const feltedMagnetSku = 'customFeltedMagnets_bundle';
-const feltedKeychainsSku = 'customFeltedKeychains_bundle';
+const feltedOrnamentsSku = 'customFeltedOrnaments_bundle';
 
 export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   name: 'OPrintedProductOrderForm',
@@ -432,7 +432,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         case 446:
           return ProductValue.FELTED_MAGNETS;
         case 448:
-          return ProductValue.FELTED_KEYCHAINS;
+          return ProductValue.FELTED_ORNAMENTS;
         default:
           throw new Error(
             `Can't resolve Backend product ID for Magento '${this.product.id}' product ID`
@@ -577,7 +577,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     isFeltedProduct () {
       const skus = [this.product.parentSku, this.product.sku];
-      return skus.includes(feltedMagnetSku) || skus.includes(feltedKeychainsSku);
+      return skus.includes(feltedMagnetSku) || skus.includes(feltedOrnamentsSku);
     }
   },
   methods: {
