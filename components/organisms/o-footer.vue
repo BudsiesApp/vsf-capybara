@@ -105,6 +105,10 @@ export default {
         {
           name: 'pinterest',
           url: 'https://www.pinterest.com/petsies/'
+        },
+        {
+          name: 'tiktok',
+          url: 'https://www.tiktok.com/@mypetsies'
         }
       ]
     };
@@ -288,17 +292,29 @@ export default {
       height: 42px;
       width: 42px;
       margin-right: var(--spacer-base);
+
       &.-facebook {
         background-position: -1px -1px;
       }
+
       &.-instagram {
         background-position: -45px -1px;
       }
+
       &.-twitter {
         background-position: -89px -1px;
       }
+
       &.-pinterest {
         background-position: -133px -1px;
+      }
+
+      &.-tiktok {
+        background-position: -177px -1px;
+      }
+
+      &:last-child {
+        margin-right: 0;
       }
     }
   }
