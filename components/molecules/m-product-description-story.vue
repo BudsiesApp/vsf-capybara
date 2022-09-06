@@ -1,6 +1,13 @@
 <template>
   <div class="m-product-description-story" v-if="showStory">
-    <Blok v-if="showStory" :item="story.content" class="_story" />
+    <a-custom-heading
+      v-if="title"
+      class="_description-heading"
+      :title="title"
+      :level="3"
+    />
+
+    <Blok :item="story.content" class="_story" />
   </div>
 </template>
 
@@ -10,6 +17,8 @@ import { StoryblokStories } from 'src/modules/vsf-storyblok-module/types/State';
 import { components } from 'src/modules/vsf-storyblok-module/components';
 
 import StoryMixin from 'theme/mixins/story';
+
+import ACustomHeading from '../atoms/a-custom-heading.vue';
 
 const storyParentFolderName = 'product-descriptions';
 
@@ -23,9 +32,14 @@ export default StoryMixin.extend({
     backupProductSku: {
       type: String as PropType<string | undefined>,
       default: undefined
+    },
+    title: {
+      type: String as PropType<string | undefined>,
+      default: undefined
     }
   },
   components: {
+    ACustomHeading,
     Blok: components.block
   },
   computed: {
@@ -61,6 +75,8 @@ export default StoryMixin.extend({
 
 <style lang="scss" scoped>
 .m-product-description-story {
-
+  ._description-heading {
+    margin-top: var(--spacer-xl);
+  }
 }
 </style>

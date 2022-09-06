@@ -156,6 +156,7 @@ export default {
           children: [
             { name: this.$t('Custom Forevers'), link: '/forevers-pet-plush/' },
             { name: this.$t('Custom Pillows'), link: '/custom-pillows/' },
+            { name: this.$t('Custom Blankets'), link: '/custom-blankets/' },
             { name: this.$t('Custom Socks'), link: { name: 'printed-socks-creation-page' } },
             { name: this.$t('Custom Face Masks'), link: { name: 'printed-masks-creation-page' } },
             { name: this.$t('Custom Pet Keychains'), link: { name: 'printed-keychains-creation-page' } },
