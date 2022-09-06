@@ -32,6 +32,7 @@
               :srcsets="getImageSrcSets(image, 'thumb')"
               :alt="image.alt"
               :title="image.title"
+              :aspect-ratio="1.0"
             />
           </div>
         </div>
@@ -52,6 +53,7 @@
             :srcsets="getImageSrcSets(stageImage, 'stage')"
             :alt="stageImage.alt"
             :title="stageImage.title"
+            :aspect-ratio="1.0"
           />
         </div>
       </div>
@@ -150,7 +152,7 @@ export default Vue.extend({
       }
     },
     shouldInitThumbnailsSlider: function (): boolean {
-      return this.fShouldInitThumbnailsSlider
+      return this.fShouldInitThumbnailsSlider;
     }
   },
   created () {
@@ -249,11 +251,7 @@ export default Vue.extend({
             position: relative;
             cursor: pointer;
             padding-top: 100%;
-            margin-bottom: var(--spacer-2xs);
-
-            &:first-child {
-                margin-top: 0;
-            }
+            margin-bottom: 8.1%;
         }
 
         ._thumbnail-item-content-wrapper {
@@ -271,6 +269,18 @@ export default Vue.extend({
 
             .slick-slide {
               border: none;
+
+              &:first-child {
+                ._thumbnail-item {
+                  margin-top: 0;
+                }
+              }
+
+              &:last-child {
+                ._thumbnail-item {
+                    margin-bottom: 0;
+                }
+              }
             }
         }
     }
