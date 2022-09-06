@@ -813,6 +813,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     flex-direction: column;
   }
 
+  ._price {
+    margin-top: var(--spacer-base);
+  }
+
   ._zoom-gallery-container,
   ._form-container {
     flex-grow: 1;
