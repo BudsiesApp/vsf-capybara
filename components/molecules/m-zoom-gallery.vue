@@ -27,6 +27,7 @@
           <div class="_thumbnail-item-content-wrapper">
             <BaseImage
               class="_image"
+              object-fit="cover"
               :src="getImageSrc(image, 'thumb')"
               :srcsets="getImageSrcSets(image, 'thumb')"
               :alt="image.alt"
@@ -247,7 +248,8 @@ export default Vue.extend({
             display: block !important;
             position: relative;
             cursor: pointer;
-            padding-top: 108.1%;
+            padding-top: 100%;
+            margin-bottom: var(--spacer-2xs);
 
             &:first-child {
                 margin-top: 0;
