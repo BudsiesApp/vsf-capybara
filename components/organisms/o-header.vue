@@ -73,11 +73,6 @@
         </div>
       </template>
     </SfHeader>
-    <MMenu
-      v-show="isMobileMenu"
-      class="mobile-menu mobile-only"
-      @close="$store.commit('ui/closeMenu')"
-    />
   </div>
 </template>
 
@@ -153,20 +148,9 @@ export default {
     ...mapState({
       isSearchPanelVisible: state => state.ui.searchpanel
     }),
-    ...mapState('ui', ['isMobileMenu']),
     ...mapGetters('user', ['isLoggedIn']),
     activeIcon () {
       return this.isLoggedIn ? 'account' : '';
-    }
-  },
-  watch: {
-    async isMobileMenu (status) {
-      if (this.isMobileMenu) {
-        // we can't add this style to body because sfui also add/remove overflow to body and there may be conflict
-        document.documentElement.style.overflow = 'hidden'
-      } else {
-        document.documentElement.style.overflow = ''
-      }
     }
   }
 };
@@ -256,31 +240,8 @@ export default {
     }
   }
 
-  .mobile-menu {
-    position: relative;
-    opacity: 1;
-    visibility: visible;
-    z-index: 12;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    flex-grow: 1;
-    --mega-menu-aside-menu-height: calc(100vh - var(--bottom-navigation-height));
-
-    &::v-deep {
-      .sf-mega-menu__menu {
-        overflow: visible;
-      }
-    }
-  }
-
   @include for-desktop {
     --header-box-shadow: 0px -2px 10px rgba(var(--c-dark-base), 0.15);
-
-    .mobile-menu {
-      opacity: 0;
-      visibility: hidden;
-    }
 
     .sf-header {
       display: block;
