@@ -14,6 +14,7 @@
         class="_product-full-description"
         :product-sku="getCurrentProduct.sku"
         :backup-product-sku="getCurrentProduct.parentSku"
+        :title="$t('Additional Details').toString()"
       />
 
       <div class="product__bottom">
@@ -251,6 +252,12 @@ export default {
 
   ._product-full-description {
     margin-top: var(--spacer-xl);
+
+    ::v-deep {
+      .a-custom-heading {
+        margin-bottom: var(--spacer-sm);
+      }
+    }
   }
 
   @include for-desktop {

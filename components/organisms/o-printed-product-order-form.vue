@@ -194,6 +194,7 @@
     <MProductDescriptionStory
       :product-sku="selectedStyle ? selectedStyle : product.sku"
       :backup-product-sku="product.parentSku"
+      :title="$t('Product Details').toString()"
     />
   </div>
 </template>

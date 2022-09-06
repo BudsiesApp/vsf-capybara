@@ -164,8 +164,10 @@
     </div>
 
     <m-product-description-story
+      class="_description-story"
       :product-sku="selectedDesign ? selectedDesign : product.sku"
       :backup-product-sku="product.parentSku"
+      :title="$t('Product Details').toString()"
     />
   </div>
 </template>
@@ -859,6 +861,14 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   ._upload-photo-hint {
     font-size: var(--font-xs);
     margin-top: var(--spacer-xs);
+  }
+
+  ._description-story {
+    ::v-deep {
+      .a-custom-heading {
+        margin-bottom: calc(-1 * var(--spacer-xl));
+      }
+    }
   }
 
   @media (min-width: $tablet-min) {
