@@ -1,7 +1,8 @@
 interface UploaderData {
   uid: number,
   allowMultiple: boolean,
-  hasUploadedFiles: boolean
+  hasUploadedFiles: boolean,
+  isMaxFilesCountReached: boolean
 };
 
 interface ArtworkUploadStoreState {
@@ -42,7 +43,7 @@ export const artworkUploadStore = {
   getters: {
     firstAvailablePageDropUploaderUid (state: ArtworkUploadStoreState): number | undefined {
       const uploader = state.activeUploaders.find((uploaderData) => {
-        return uploaderData.allowMultiple || !uploaderData.hasUploadedFiles;
+        return (uploaderData.allowMultiple && !uploaderData.isMaxFilesCountReached) || !uploaderData.hasUploadedFiles;
       })
 
       return uploader?.uid;
