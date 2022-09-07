@@ -51,6 +51,7 @@
           :upload-url="artworkUploadUrl"
           :allow-multiple="true"
           :initial-items="initialItems"
+          :max-files="6"
           v-if="backendProductId"
           @file-added="onArtworkAdd"
           @file-removed="onArtworkRemove"
