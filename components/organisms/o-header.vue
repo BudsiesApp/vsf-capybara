@@ -136,9 +136,15 @@ export default {
           }
         },
         {
-          label: 'Felted Magnets',
+          label: 'Pet Magnets',
           url: {
             name: 'felted-magnets-creation-page'
+          }
+        },
+        {
+          label: 'Pet Ornaments',
+          url: {
+            name: 'felted-ornaments-creation-page'
           }
         },
         {

@@ -132,9 +132,15 @@ export default {
           }
         },
         {
-          label: this.$t('Felted Magnets'),
+          label: this.$t('Pet Magnets'),
           url: {
             name: 'felted-magnets-creation-page'
+          }
+        },
+        {
+          label: this.$t('Pet Ornaments'),
+          url: {
+            name: 'felted-ornaments-creation-page'
           }
         }
       ],
