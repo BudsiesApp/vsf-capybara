@@ -5,6 +5,8 @@
     :class="cssClasses"
     :style="styles"
   >
+    <editor-block-icons :item="itemData" />
+
     <script type="application/ld+json">
       {{ ratingDataString }}
     </script>

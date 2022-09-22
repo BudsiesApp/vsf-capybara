@@ -1,5 +1,7 @@
 <template>
   <div class="storyblok-product" v-if="product">
+    <editor-block-icons :item="itemData" />
+
     <router-link
       class=""
       :to="link"

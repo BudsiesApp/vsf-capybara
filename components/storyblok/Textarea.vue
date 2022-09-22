@@ -4,6 +4,8 @@
     :class="cssClasses"
     :style="styles"
   >
+    <editor-block-icons :item="itemData" />
+
     <sb-rich-text v-if="itemData.content" :text="itemData.content" />
   </div>
 </template>

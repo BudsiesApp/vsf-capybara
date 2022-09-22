@@ -1,5 +1,7 @@
 <template>
   <div :style="styles" class="storyblok-button">
+    <editor-block-icons :item="itemData" />
+
     <sb-router-link
       class="_button sf-button"
       :class="cssClasses"

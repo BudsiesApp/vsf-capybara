@@ -4,6 +4,8 @@
     :class="cssClasses"
     :style="styles"
   >
+    <editor-block-icons :item="itemData" />
+
     <sb-router-link
       class="_link"
       :link="itemData.link_url"
