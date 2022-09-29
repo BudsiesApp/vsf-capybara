@@ -1,9 +1,7 @@
 <template>
   <footer class="o-footer">
     <div class="o-footer__logo" />
-    <div class="o-footer__slogan">
-      Handmade pet keepsakes
-    </div>
+
     <SfFooter :column="6" :multiple="true">
       <SfFooterColumn
         v-for="linkGroup in links"
@@ -24,39 +22,38 @@
           </SfListItem>
         </SfList>
       </SfFooterColumn>
-      <SfFooterColumn title="Get more @Petsies cuteness" class="social-column">
-        <MNewsletterSubscription />
-        <div class="social-icon">
-          <a
-            :href="item.url"
-            v-for="item in social"
-            :key="item.name + ';' + item.url"
-            class="social-icon__link"
-            :class="'-' + item.name"
-            target="_blank"
-          />
-        </div>
+      <SfFooterColumn :title="$t('Contact')" class="contact-column">
+        <SfList>
+          <SfListItem>
+            <a href="mailto:info@stuffedanimalpros.com">
+              <SfMenuItem class="sf-footer__menu-item" :label="$t('info@stuffedanimalpros.com')" />
+            </a>
+          </SfListItem>
+
+          <SfListItem>
+            <a href="tel:855-758-7443">
+              <SfMenuItem class="sf-footer__menu-item" label="855-758-7443" />
+            </a>
+          </SfListItem>
+
+          <SfListItem>
+            <SfMenuItem class="sf-footer__menu-item" label="M-F, 9-4 EST" />
+          </SfListItem>
+        </SfList>
       </SfFooterColumn>
 
-      <div class="_additional-information">
-        <router-link to="//support.mypetsies.com/support/home" target="_blank" exact>
-          <SfMenuItem
-            class="sf-footer__menu-item"
-            :label="$t('Contact Us')"
-          />
-        </router-link>
+      <div class="o-footer__slogan">
+        {{ $t('Proud member of the Budsies family of huggable brands.') }}
+      </div>
 
-        <div class="_legal-information">
-          ©{{ new Date().getFullYear() }} Budsies Co LLC. All Rights Reserved.
-          |
-          <router-link to="/terms-of-service" exact>
-            {{ $t('Terms of Service') }}
-          </router-link>
-          |
-          <router-link to="/privacy-policy" exact>
-            {{ $t('Privacy Policy') }}
-          </router-link>
-        </div>
+      <div class="_brand-section">
+        <a class="_brand-item -selfies" target="_blank" :href="selfiesLink" />
+        <a class="_brand-item -budsies" target="_blank" :href="budsiesLink" />
+        <a class="_brand-item -petsies" target="_blank" :href="petsiesLink" />
+      </div>
+
+      <div class="_copyright">
+        {{ $t('Copyright {year}. Budsies Co LLC. All Rights Reserved.', {year: new Date().getFullYear}) }}
       </div>
     </SfFooter>
   </footer>
@@ -129,82 +126,50 @@ export default {
           children: [
             {
               name: this.$t('About'),
-              link: '/about-petsies/'
+              link: '/about/'
             },
             {
-              name: this.$t('Blog'),
-              link: '/blog/',
-              target: '_blank'
+              name: this.$t('Our Team'),
+              link: '/team/'
             },
             {
-              name: this.$t('Refund & Return Policy'),
-              link: '/craftsmanship-promise/'
+              name: this.$t('Privacy Policy'),
+              link: '/privacy-policy/'
             },
             {
-              name: this.$t('Media'),
-              link: '//support.mypetsies.com/support/solutions/folders/13000003990',
-              target: '_blank'
-            },
-            {
-              name: this.$t('How it Works'),
-              link: '/how-it-works/'
+              name: this.$t('Terms of Service'),
+              link: '/terms-of-service/'
             }
           ]
         },
         services: {
-          name: this.$t('Services'),
+          name: this.$t('Custom Plush'),
           children: [
-            { name: this.$t('Custom Forevers'), link: '/forevers-pet-plush/' },
-            { name: this.$t('Custom Pillows'), link: '/custom-pillows/' },
-            { name: this.$t('Custom Blankets'), link: '/custom-blankets/' },
-            { name: this.$t('Custom Socks'), link: { name: 'printed-socks-creation-page' } },
-            { name: this.$t('Custom Face Masks'), link: { name: 'printed-masks-creation-page' } },
-            { name: this.$t('Custom Keychains'), link: { name: 'printed-keychains-creation-page' } },
-            { name: this.$t('Custom Magnets'), link: { name: 'felted-magnets-creation-page' } },
-            { name: this.$t('Custom Ornaments'), link: { name: 'felted-ornaments-creation-page' } },
-            { name: this.$t('Custom Bulk'), link: '/bulk-custom-stuffed-animal-manufacture/' },
-            { name: this.$t('Gift Cards'), link: { name: 'gift-cards' } },
-            { name: this.$t('Gift Box'), link: { name: 'giftbox' } },
-            { name: this.$t('Accessories'),
-              link: {
-                name: 'category',
-                params: {
-                  slug: 'petsies-accessories-11'
-                }
-              }
-            }
+            { name: this.$t('Services'), link: '/stuffed-animals/' },
+            { name: this.$t('Reviews'), link: '/reviews/' },
+            { name: this.$t('Pricing'), link: '/custom-plush-pricing/' },
+            { name: this.$t('How to Order'), link: { name: '/how-to-order/' } }
           ]
         },
         account: {
-          name: this.$t('Account'),
-          children: [
-            {
-              name: this.$t('My account'),
-              link: { name: 'my-account' },
-              event: this.isLoggedIn ? 'click' : 'false',
-              clickHandler: () => {
-                if (!this.isLoggedIn) {
-                  this.openModal({ name: ModalList.Auth, payload: 'login' })
-                }
-              }
-            },
-            { name: this.$t('My Cart'), link: { name: 'detailed-cart' } },
-            { name: this.$t('Rising Starts'), link: '/rising-stars/' }
-          ]
-        },
-        quickLInks: {
           name: this.$t('Quick Links'),
           children: [
-            { name: this.$t('Veterinarians'), link: '/partners/' },
-            { name: this.$t('Become a Partner'), link: '/partners/' },
-            { name: this.$t('Resellers'), link: '/partners/' },
-            { name: this.$t('Affiliates'), link: '/affiliate-home/' },
-            { name: this.$t('Corporate Buying'), link: '/partners/' },
-            { name: this.$t('FAQ'), link: '//support.mypetsies.com/support/home', target: '_blank' },
-            { name: this.$t('Referral Rewards'), link: '//referrals.mypetsies.com/', target: '_blank' }
+            { name: this.$t('FAQs'), link: '/faqs/' },
+            { name: this.$t('NDA'), link: '/nda/' },
+            { name: this.$t('Production Times'), link: '/production-times/' },
+            { name: this.$t('Shipping/Freight'), link: '/shipping/' }
           ]
         }
       };
+    },
+    selfiesLink () {
+      return `https://${config.budsiesDomain}/selfies-services/`;
+    },
+    budsiesLink () {
+      return `https://${config.budsiesDomain}/`;
+    },
+    petsiesLink () {
+      return `https://${config.petsiesDomain}/`;
     }
   },
   methods: {
@@ -233,17 +198,20 @@ export default {
   padding-bottom: var(--spacer-lg);
   margin-top: calc(var(--spacer-2xl) + var(--spacer-xl));
   &__logo {
-    background-image: url(../../assets/logo-footer.png);
-    height: 121px;
-    margin: -60px auto 0;
-    width: 127px;
+    background: url(../../assets/logo-footer.png) no-repeat;
+    background-size: 100% auto;
+    display: block;
+    margin: -55px auto 0;
+    height: 112px;
+    width: 100px;
   }
   &__slogan {
     text-align: center;
     color: var(--c-light-variant);
-    font-family: var(--font-family-intro);
-    font-size: var(--font-2xl);
-    margin: var(--spacer-base) 0;
+    font-family: var(--font-family-secondary);
+    font-size: var(--font-xl);
+    margin: var(--spacer-xl) 0 var(--spacer-sm);
+    width: 100%;
   }
   .m-newsletter-subscription {
     margin-top: var(--spacer-xs);
@@ -323,14 +291,39 @@ export default {
     }
   }
 
-  ._additional-information {
-    align-items: center;
-    box-sizing: border-box;
+  ._brand-section {
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    margin-top: var(--spacer-xl);
-    padding: 0 var(--spacer-xl);
+    flex-wrap: nowrap;
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: var(--spacer-base);
+    width: 100%;
+
+    ._brand-item {
+      align-self: center;
+      flex: 0 0 calc(25% - 1px);
+      height: 60px;
+      width: 28%;
+      background-size: 50%;
+      background-position: center;
+      background-repeat: no-repeat;
+
+      &.-budsies {
+        background-image: url(/assets/footer/budsies-logo.png);
+      }
+
+      &.-petsies {
+        background-image: url(/assets/footer/petsies-logo.png);
+      }
+
+      &.-selfies {
+        background-image: url(/assets/footer/selfies-logo.png);
+      }
+    }
+  }
+
+  ._copyright {
+    font-size: var(--font-xs);
     text-align: center;
     width: 100%;
   }
