@@ -5,8 +5,8 @@
     class="a-logo"
   >
     <BaseImage
-      src="/assets/logo.png"
-      :aspect-ratio="3.85"
+      src="/assets/logo-header-big.png"
+      :aspect-ratio="2.22"
       :alt="$t(defaultTitle)"
       class="sf-header__logo"
     />

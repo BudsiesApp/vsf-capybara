@@ -19,40 +19,29 @@
       </template>
       <template #navigation>
         <SfHeaderNavigationItem
-          @mouseover="isHoveredMenu = true"
-          @mouseleave="isHoveredMenu = false"
+          v-for="item in menuItems"
+          :key="item.label"
+          :class="{'-dropdown': item.isDropdown}"
         >
-          <div class="o-header__submenu">
-            Products
-          </div>
-          <MMenu
-            :visible="isHoveredMenu && !isSearchPanelVisible"
-            @close="isHoveredMenu = false"
-          />
-        </SfHeaderNavigationItem>
-        <SfHeaderNavigationItem>
-          <router-link
-            :to="{ name: 'gift-cards' }"
-          >
-            Gift Cards
+          <router-link v-if="item.link" class="o-header__submenu" :to="item.link">
+            {{ item.label }}
           </router-link>
-        </SfHeaderNavigationItem>
-        <SfHeaderNavigationItem>
-          <router-link
-            to="/reviews/"
-          >
-            Reviews
-          </router-link>
-        </SfHeaderNavigationItem>
-        <SfHeaderNavigationItem>
-          <router-link
-            to="/pricing/"
-          >
-            Pricing
-          </router-link>
-        </SfHeaderNavigationItem>
 
-        <MCtaButton />
+          <div v-else class="o-header__submenu">
+            {{ item.label }}
+
+            <div class="_submenu-dropdown" v-if="item.isDropdown">
+              <div class="_dropdown-item" v-for="dropdownItem in item.dropdownItems" :key="dropdownItem.label">
+                <router-link
+                  :to="dropdownItem.link"
+                  class="_item-link"
+                >
+                  {{ dropdownItem.label }}
+                </router-link>
+              </div>
+            </div>
+          </div>
+        </SfHeaderNavigationItem>
       </template>
       <template #search>
         <div />
@@ -104,52 +93,64 @@ export default {
     return {
       isHoveredMenu: false,
       isDropdownOpen: false,
-      dropdownActions: [
+      menuItems: [
         {
-          label: 'Custom Petsies',
-          url: '/forevers-pet-plush/'
+          label: this.$t('About'),
+          link: '/about/'
         },
         {
-          label: 'Custom Pillows',
-          url: '/custom-pillows/'
+          label: this.$t('Custom Plush'),
+          isDropdown: true,
+          dropdownItems: [
+            {
+              label: this.$t('Mascots'),
+              link: '/mascot-stuffed-animals/'
+            },
+            {
+              label: this.$t('Book Authors'),
+              link: '/book-character-dolls/'
+            },
+            {
+              label: this.$t('Brands & Logos'),
+              link: '/branded-stuffed-animals/'
+            },
+            {
+              label: this.$t('Non Profits'),
+              link: '/non-profit-stuffed-animals/'
+            },
+            {
+              label: this.$t('Shows & Events'),
+              link: '/party-stuffed-animals/'
+            },
+            {
+              label: this.$t('Promotional'),
+              link: '/promotional-stuffed-animals/'
+            },
+            {
+              label: this.$t('Art & Designs'),
+              link: '/design-stuffed-animals/'
+            },
+            {
+              label: this.$t('Crowdfund'),
+              link: '/crowdfund-stuffed-animals/'
+            }
+          ]
         },
         {
-          label: 'Custom Blankets',
-          url: '/custom-blankets/'
+          label: this.$t('Custom Pillow'),
+          link: '/custom-pillows/'
         },
         {
-          label: 'Custom Socks',
-          url: {
-            name: 'printed-socks-creation-page'
-          }
+          label: this.$t('How To Order'),
+          link: '/how-to-order/'
         },
         {
-          label: 'Face Masks',
-          url: {
-            name: 'printed-masks-creation-page'
-          }
+          label: this.$t('Reviews'),
+          link: '/reviews/'
         },
         {
-          label: 'Pet Keychains',
-          url: {
-            name: 'printed-keychains-creation-page'
-          }
-        },
-        {
-          label: 'Pet Magnets',
-          url: {
-            name: 'felted-magnets-creation-page'
-          }
-        },
-        {
-          label: 'Pet Ornaments',
-          url: {
-            name: 'felted-ornaments-creation-page'
-          }
-        },
-        {
-          label: 'Gift Box',
-          url: { name: 'giftbox' }
+          label: this.$t('Pricing'),
+          link: '/custom-plush-pricing/'
         }
       ]
     }
@@ -179,7 +180,7 @@ export default {
 
 .o-header {
   --header-navigation-item-margin: 0;
-  --header-navigation-item-padding: var(--spacer-lg) var(--spacer-xs);
+  --header-navigation-item-padding: var(--spacer-lg) var(--spacer-sm);
   box-sizing: border-box;
 
   ._header {
@@ -206,6 +207,30 @@ export default {
   }
 
   .sf-header-navigation-item {
+    position: relative;
+    flex: unset;
+
+    ._submenu-dropdown {
+      position: absolute;
+      opacity: 0;
+      visibility: hidden;
+      background: var(--c-primary);
+      width: 100%;
+      top: 100%;
+
+      ._dropdown-item {
+        padding: var(--spacer-xs) 0;
+
+        ._item-link {
+          color: var(--c-white);
+        }
+
+        &:hover {
+          background-color: var(--c-light);
+        }
+      }
+    }
+
     &::after {
       bottom: 0;
       width: 0;
@@ -216,13 +241,19 @@ export default {
     }
 
     &:hover {
-      .m-menu {
+      ._submenu-dropdown {
         opacity: 1;
         visibility: visible;
       }
 
       &::after {
         width: 100%;
+      }
+    }
+
+    &.-dropdown {
+      &:hover {
+        background: var(--c-primary);
       }
     }
   }
@@ -235,12 +266,12 @@ export default {
     display: none;
   }
 
-  ::v-deep .sf-header {
+::v-deep .sf-header {
     --header-logo-margin: 0 0 var(--spacer-sm) 0;
 
     &__navigation {
       --header-navigation-margin: 0 var(--spacer-base);
-      justify-content: space-evenly;
+      justify-content: flex-end;
       flex-grow: 2;
     }
 

@@ -6,6 +6,7 @@
     <SfIcon
       icon="account"
       size="xs"
+      color="white"
       class="sf-header__icon"
       :class="{
         'sf-header__icon--is-active': isLoggedIn

@@ -5,6 +5,7 @@
   >
     <SfIcon
       size="xs"
+      color="white"
       :icon="floatingIcon ? 'add_to_cart' : 'empty_cart'"
       :class="floatingIcon ? 'sf-bottom-navigation__floating-icon' : 'sf-header__icon'"
       :aria-label="$t('Open Cart')"
