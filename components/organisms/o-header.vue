@@ -42,6 +42,10 @@
             </div>
           </div>
         </SfHeaderNavigationItem>
+
+        <SfButton class="_instant-quote">
+          {{ $t('Instant Quote') }}
+        </SfButton>
       </template>
       <template #search>
         <div />
@@ -66,7 +70,7 @@
 </template>
 
 <script>
-import { SfHeader, SfOverlay } from '@storefront-ui/vue';
+import { SfButton, SfHeader, SfOverlay } from '@storefront-ui/vue';
 import ALogo from 'theme/components/atoms/a-logo';
 import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import AMicrocartIcon from 'theme/components/atoms/a-microcart-icon';
@@ -87,7 +91,8 @@ export default {
     OSearch,
     MMenu,
     SfOverlay,
-    MCtaButton
+    MCtaButton,
+    SfButton
   },
   data () {
     return {
@@ -179,6 +184,7 @@ export default {
 }
 
 .o-header {
+  --header-navigation-item-font-size: var(--font-sm);
   --header-navigation-item-margin: 0;
   --header-navigation-item-padding: var(--spacer-lg) var(--spacer-sm);
   box-sizing: border-box;
@@ -204,6 +210,11 @@ export default {
         --menu-item-label-color: var(--c-primary);
       }
     }
+  }
+
+  ._instant-quote {
+    font-size: var(--header-navigation-item-font-size);
+    margin-left: var(--spacer-sm);
   }
 
   .sf-header-navigation-item {
@@ -272,12 +283,17 @@ export default {
     &__navigation {
       --header-navigation-margin: 0 var(--spacer-base);
       justify-content: flex-end;
+      align-items: center;
       flex-grow: 2;
     }
 
     &__actions {
       justify-content: space-between;
     }
+  }
+
+  @media screen and (max-width: $desktop-xl-min) {
+    --header-navigation-item-font-size: var(--font-xs);
   }
 
   @include for-desktop {
