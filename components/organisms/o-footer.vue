@@ -181,6 +181,15 @@ export default {
     width: 100px;
   }
 
+  &__slogan {
+    text-align: center;
+    color: var(--c-light-variant);
+    font-family: var(--font-family-secondary);
+    font-size: var(--font-xl);
+    margin: var(--spacer-xl) 0 var(--spacer-sm);
+    width: 100%;
+  }
+
   .m-newsletter-subscription {
     margin-top: var(--spacer-xs);
   }
