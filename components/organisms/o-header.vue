@@ -176,6 +176,8 @@ export default {
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .a-logo {
+  --header-logo-height: 4rem;
+
   margin-right: var(--spacer-lg);
 }
 
@@ -280,7 +282,7 @@ export default {
   }
 
 ::v-deep .sf-header {
-    --header-logo-margin: 0 0 var(--spacer-sm) 0;
+    --header-logo-margin: 0;
 
     &__navigation {
       --header-navigation-margin: 0 var(--spacer-base);

@@ -12,7 +12,7 @@
         :is-active="isActive(item.icon)"
         @click.native="item.onClick"
       />
-      <ALogo />
+      <ALogo :is-small="true" />
 
       <ADetailedCartIcon class="sf-header__action" />
 
@@ -148,7 +148,8 @@ export default {
   }
   ::v-deep .sf-header {
       &__logo {
-        --header-logo-height: 1.5rem;
+        --header-logo-height: 1.8rem;
+        --header-logo-margin: 0;
       }
     }
   ::v-deep .sf-bottom-navigation {
@@ -163,7 +164,7 @@ export default {
     }
   }
 
-  @media (min-width: 375px) {
+  @media (min-width: 450px) {
     .a-logo {
       display: block;
     }
