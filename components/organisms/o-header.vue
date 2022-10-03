@@ -44,7 +44,9 @@
         </SfHeaderNavigationItem>
 
         <SfButton class="_instant-quote">
-          {{ $t('Instant Quote') }}
+          <router-link :to="{name: 'bulk-quote'}">
+            {{ $t('Instant Quote') }}
+          </router-link>
         </SfButton>
       </template>
       <template #search>
@@ -211,6 +213,8 @@ export default {
   }
 
   ._instant-quote {
+    --c-link: var(--c-white);
+
     font-size: var(--header-navigation-item-font-size);
     margin-left: var(--spacer-sm);
   }

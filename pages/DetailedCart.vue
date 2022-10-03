@@ -30,9 +30,11 @@
                   <div class="collected-product__properties" v-if="getPlushieName(product)">
                     {{ getPlushieName(product) | htmlDecode }}
                   </div>
+
                   <div class="collected-product__properties" v-if="getPlushieDesc(product)">
                     {{ getPlushieDesc(product) | htmlDecode }}
                   </div>
+
                   <div class="collected-product__properties">
                     <div
                       v-for="option in getBundleProductOptions(product)"
@@ -46,6 +48,7 @@
                       />
                       {{ option }}
                     </div>
+
                     <template v-for="option in getProductOptions(product)">
                       <SfProperty
                         v-if="isCustomOption(product, option)"
@@ -53,6 +56,7 @@
                         :name="option.label"
                         :value="option.value"
                       />
+
                       <div
                         v-else
                         :key="option.label"
@@ -62,6 +66,7 @@
                     </template>
                   </div>
                 </template>
+
                 <template #input>
                   <SfQuantitySelector
                     :qty="product.qty"
@@ -69,13 +74,16 @@
                     @input="changeProductQuantity(product, $event)"
                   />
                 </template>
+
                 <template #price>
                   <div />
                 </template>
+
                 <template #actions>
                   <SfButton v-if="showEditButton(product.sku)" class="sf-button--text actions__button" @click="editHandler(product)">
                     Edit
                   </SfButton>
+
                   <SfButton
                     class="sf-button--text sf-collected-product__remove sf-collected-product__remove--text actions__button"
                     @click="removeHandler(product)"
@@ -83,6 +91,7 @@
                     Remove
                   </SfButton>
                 </template>
+
                 <template #remove>
                   <SfPrice
                     v-if="getProductRegularPrice(product)"
@@ -90,38 +99,32 @@
                     :special="getProductSpecialPrice(product)"
                   />
                 </template>
+
                 <template #more-actions>
                   <div />
                 </template>
               </SfCollectedProduct>
             </transition-group>
-            <div class="_dropdown-container">
+
+            <div class="_buttons-container">
               <SfButton
-                class="color-secondary"
-                @click.prevent.self="isDropdownOpen = !isDropdownOpen"
+                class="color-secondary _button"
               >
-                Order More
+                <router-link :to="{name: 'bulk-quote'}">
+                  Add Another Design
+                </router-link>
               </SfButton>
-              <SfDropdown
-                :is-open="isDropdownOpen"
-                @click:close="isDropdownOpen = false"
+
+              <SfButton
+                class="color-secondary _button"
               >
-                <SfList>
-                  <SfListItem
-                    v-for="action in dropdownActions"
-                    :key="action.label"
-                  >
-                    <router-link
-                      :to="action.url"
-                      @click.native="onDropdownActionClick(action)"
-                    >
-                      {{ action.label }}
-                    </router-link>
-                  </SfListItem>
-                </SfList>
-              </SfDropdown>
+                <router-link :to="{name: 'plushie-creation'}">
+                  Order Another Sample
+                </router-link>
+              </SfButton>
             </div>
           </div>
+
           <div v-else key="empty-cart" class="empty-cart">
             <SfHeading
               title="Your cart is empty"
@@ -129,6 +132,7 @@
               subtitle="Looks like you haven’t added any items to the cart yet. Start
                 shopping to fill it in."
             />
+
             <SfButton
               class="sf-button--full-width color-primary empty-cart__button"
               @click="processStartShopping"
@@ -138,22 +142,11 @@
           </div>
         </transition>
       </div>
+
       <div v-if="totalItems" class="detailed-cart__aside">
         <OrderSummary
           :is-updating-quantity="isUpdatingQuantity"
         />
-
-        <div class="_shipping-handling-block">
-          <SfHeading :level="3" title="Shipping &amp; Handling" />
-          <p>Once completed, your order will ship via USPS</p>
-          <ul>
-            <li>Petsies: (<strong>US</strong>) $13.95, $5.95 for each additional; (<strong>International</strong>) $25.95, $5.95 for each additional</li>
-            <li>Pillows: <strong>(US</strong>) starting at $9.95;&nbsp;(<strong>International)</strong> $20.95</li>
-            <li>Petsies Socks, Masks &amp; Keychains: (<strong>US</strong>) $4.95; (<strong>International</strong>)&nbsp;$9.95</li>
-            <li>Read more about rates&nbsp;<a href="http://support.mypetsies.com/support/solutions/articles/13000017023-shipping-handling-fees" target="_blank">here</a>. Rates determined by weight</li>
-            <li>Tracking number will be emailed to you at time of shipment</li>
-          </ul>
-        </div>
       </div>
     </div>
   </div>
@@ -235,67 +228,6 @@ export default {
     return {
       isUpdatingQuantity: false,
       isDropdownOpen: false,
-      dropdownActions: [
-        {
-          label: 'Petsies',
-          url: '/forevers-pet-plush/'
-        },
-        {
-          label: 'Pet Pillow',
-          url: '/pet-pillow/'
-        },
-        {
-          label: 'Photo Pillow',
-          url: {
-            name: 'category',
-            params: {
-              slug: 'custom-photo-pillows-80'
-            }
-          }
-        },
-        {
-          label: this.$t('Pet Photo Blankets'),
-          url: {
-            name: 'cut-out-blankets'
-          }
-        },
-        {
-          label: this.$t('Renaissance Blankets'),
-          url: {
-            name: 'renaissance-blankets'
-          }
-        },
-        {
-          label: 'Socks',
-          url: {
-            name: 'printed-socks-creation-page'
-          }
-        },
-        {
-          label: 'Face Masks',
-          url: {
-            name: 'printed-masks-creation-page'
-          }
-        },
-        {
-          label: 'Pet Keychains',
-          url: {
-            name: 'printed-keychains-creation-page'
-          }
-        },
-        {
-          label: 'Pet Magnets',
-          url: {
-            name: 'felted-magnets-creation-page'
-          }
-        },
-        {
-          label: 'Pet Ornaments',
-          url: {
-            name: 'felted-ornaments-creation-page'
-          }
-        }
-      ],
       isMounted: false,
       syncQuantityDebounced: undefined
     };
@@ -355,6 +287,9 @@ export default {
       }
 
       return this.truncate(product.plushieDescription, 150, 50);
+    },
+    goToBulkQuotePage () {
+      // this.$router.push({name: })
     },
     editHandler (product) {
       if (foreversProductsSkus.includes(product.sku)) {
@@ -532,6 +467,16 @@ export default {
     border: 2px solid var(--c-secondary);
     border-bottom-color: var(--c-primary);
     animation: rotate 1s linear infinite;
+  }
+}
+
+._buttons-container {
+  // display: flex;
+  // flex-direction: column;
+
+  ._button {
+    --c-link: var(--c-primary);
+    margin-top: var(--spacer-base);
   }
 }
 
