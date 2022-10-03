@@ -15,15 +15,25 @@
       <ALogo />
 
       <ADetailedCartIcon class="sf-header__action" />
+
+      <AAccountIcon class="sf-header__action" />
+
+      <SfButton class="_bulk-quote-button">
+        <router-link :to="{name: 'bulk-quote'}">
+          {{ $t('Get Quote') }}
+        </router-link>
+      </SfButton>
     </SfBottomNavigation>
   </div>
 </template>
 
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
+import { SfBottomNavigation, SfButton } from '@storefront-ui/vue'
+
 import { ModalList } from 'theme/store/ui/modals'
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
-import { SfBottomNavigation } from '@storefront-ui/vue';
+import AAccountIcon from 'theme/components/atoms/a-account-icon.vue';
 import ALogo from 'theme/components/atoms/a-logo.vue';
 import OMobileMenu from 'theme/components/organisms/o-mobile-menu.vue';
 
@@ -33,14 +43,14 @@ export default {
     SfBottomNavigation,
     ALogo,
     ADetailedCartIcon,
-    OMobileMenu
+    AAccountIcon,
+    OMobileMenu,
+    SfButton
   },
   data () {
     return {
       navigationItems: [
-        { icon: 'list', label: '', onClick: this.goToMenu },
-        // { icon: 'search', label: '', onClick: this.goToSearch },
-        { icon: 'account', label: '', onClick: this.goToAccount }
+        { icon: 'list', label: '', onClick: this.goToMenu }
       ]
     }
   },
@@ -113,6 +123,7 @@ export default {
 
 .o-top-navigation {
   --bottom-navigation-background: var(--c-blue);
+  --header-action-margin: 0 0 0 var(--spacer-sm);
 
   position: relative;
   min-height: var(--bottom-navigation-height);
@@ -124,6 +135,11 @@ export default {
 
   .a-logo {
     display: none;
+  }
+
+  ._bulk-quote-button {
+    --c-link: var(--c-white);
+    --c-link-hover: var(--c-white);
   }
 
   .a-microcart-icon {

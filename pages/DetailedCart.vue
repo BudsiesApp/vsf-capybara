@@ -471,11 +471,9 @@ export default {
 }
 
 ._buttons-container {
-  // display: flex;
-  // flex-direction: column;
-
   ._button {
     --c-link: var(--c-primary);
+    --c-link-hover: var(--c-primary);
     margin-top: var(--spacer-base);
   }
 }
