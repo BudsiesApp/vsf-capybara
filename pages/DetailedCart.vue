@@ -496,29 +496,7 @@ export default {
       position: static;
     }
   }
-  ._dropdown-container {
-    display: inline-block;
-    position: relative;
-    margin: var(--spacer-lg) auto;
-    align-self: center;
-    .sf-button {
-      --button-font-size: var(--font-sm);
-      --button-font-line-height: 1;
-    }
-    .sf-dropdown {
-      left: 0;
-      --dropdown-background: var(--c-primary);
-      --c-link: var(--c-light-variant);
-      --c-link-hover: var(--c-light-variant);
-      --list-item-padding: var(--spacer-xs) var(--spacer-sm);
 
-      .sf-list__item {
-        &:hover {
-          background-color: var(--c-light);
-        }
-      }
-    }
-  }
   .sf-quantity-selector {
     ::v-deep {
       .sf-quantity-selector__button {
@@ -526,6 +504,7 @@ export default {
       }
     }
   }
+
   &__main {
     padding: 0 var(--spacer-sm);
     position: relative;
@@ -535,6 +514,7 @@ export default {
       padding: 0;
     }
   }
+
   &__aside {
     box-sizing: border-box;
     width: 100%;
@@ -546,22 +526,28 @@ export default {
       line-height: 1.6;
     }
   }
+
   @include for-desktop {
     display: flex;
+
     .sf-collected-product {
       .sf-price {
         flex-direction: row;
       }
+
       ::v-deep &__details {
         flex-grow: 3;
       }
+
       ::v-deep &__actions {
         flex-grow: 1;
       }
     }
+
     &__main {
       flex: 1;
     }
+
     &__aside {
       flex: 0 0 26.8125rem;
       margin: 0 0 0 var(--spacer-xl);
@@ -571,6 +557,7 @@ export default {
 .collected-product-list {
   text-align: left;
 }
+
 .collected-product {
   --collected-product-padding: var(--spacer-sm) 0;
   --collected-product-title-font-size: var(--font-sm);
@@ -593,26 +580,31 @@ export default {
       display: inline-block;
     }
   }
+
   &__properties > div {
     margin-bottom: var(--spacer-xs);
   }
+
   @include for-mobile {
     --collected-product-remove-bottom: var(--spacer-sm);
     &:first-of-type {
       border: none;
     }
   }
+
   @include for-desktop {
     --collected-product-padding: var(--spacer-lg) 0;
     --collected-product-title-font-size: var(--font-base);
   }
 }
+
 .actions {
   &__button {
     margin-bottom: var(--spacer-xs);
     align-self: flex-start;
   }
 }
+
 .empty-cart {
   --heading-title-color: var(--c-primary);
   --heading-title-margin: var(--spacer-2xl) 0 var(--spacer-base) 0;
@@ -622,6 +614,7 @@ export default {
   flex: 1;
   align-items: center;
   flex-direction: column;
+
   @include for-desktop {
     &__button {
       --button-width: 20.9375rem;
