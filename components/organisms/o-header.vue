@@ -79,7 +79,6 @@ import AMicrocartIcon from 'theme/components/atoms/a-microcart-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
 import OSearch from 'theme/components/organisms/o-search';
 import { mapState, mapGetters } from 'vuex';
-import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
 export default {
   name: 'OHeader',
@@ -91,7 +90,6 @@ export default {
     ADetailedCartIcon,
     OSearch,
     SfOverlay,
-    MCtaButton,
     SfButton
   },
   data () {
@@ -271,10 +269,6 @@ export default {
         background: var(--c-primary);
       }
     }
-  }
-
-  .m-cta-button {
-    align-self: center;
   }
 
   .sf-header {
