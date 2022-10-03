@@ -294,6 +294,12 @@ export default {
     &__actions {
       justify-content: space-between;
     }
+
+    &__icon {
+      &:hover {
+        --icon-color: var(--c-secondary);
+      }
+    }
   }
 
   @media screen and (max-width: $desktop-l-min) {
