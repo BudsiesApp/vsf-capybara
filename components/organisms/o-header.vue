@@ -77,7 +77,6 @@ import AMicrocartIcon from 'theme/components/atoms/a-microcart-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
 import OSearch from 'theme/components/organisms/o-search';
 import { mapState, mapGetters } from 'vuex';
-import MMenu from 'theme/components/molecules/m-menu';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
 export default {
@@ -89,7 +88,6 @@ export default {
     AMicrocartIcon,
     ADetailedCartIcon,
     OSearch,
-    MMenu,
     SfOverlay,
     MCtaButton,
     SfButton
@@ -289,6 +287,21 @@ export default {
 
     &__actions {
       justify-content: space-between;
+    }
+  }
+
+  @media screen and (max-width: $desktop-l-min) {
+    --header-action-margin: 0 0 0 var(--spacer-sm);
+
+    .a-logo {
+      margin-right: var(--spacer-xs);
+      max-width: 10%;
+    }
+
+    ::v-deep .sf-header {
+      &__navigation {
+        --header-navigation-margin: 0 0 0 var(--spacer-sm);
+      }
     }
   }
 

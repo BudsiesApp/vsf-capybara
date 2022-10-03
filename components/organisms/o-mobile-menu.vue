@@ -42,11 +42,11 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .o-mobile-menu {
-  position: fixed;
-  top: 0;
-  left: 0;
+  position: absolute;
+  top: 100%;
+  left: var(--spacer-sm);
   z-index: 12;
-  height: 100%;
+  border-radius: 5px;
 
   ._mobile-menu {
     position: relative;
@@ -55,9 +55,6 @@ export default Vue.extend({
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    top: var(--bottom-navigation-height);
-    height: calc(100% - var(--bottom-navigation-height));
-    --mega-menu-aside-menu-height: auto;
 
     &::v-deep {
       .sf-mega-menu__menu {

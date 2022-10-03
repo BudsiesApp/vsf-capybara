@@ -1,76 +1,27 @@
 <template>
   <div class="m-menu sf-mega-menu bg-white">
-    <SfMegaMenu
-      ref="menu"
-      :title="title"
-      :visible="visible"
-    >
-      <SfMegaMenuColumn
-        :title="$t('Custom Products')"
+    <SfList>
+      <SfListItem
+        v-for="item in menuItems"
+        :key="item.label"
+        class="_list-item"
       >
-        <SfList>
-          <SfListItem
-            v-for="item in customProductsItems"
-            :key="item.label"
-          >
-            <router-link
-              :to="item.url"
-              @click.native="$emit('close')"
-            >
-              <SfMenuItem :label="item.label" />
-            </router-link>
-          </SfListItem>
-        </SfList>
-      </SfMegaMenuColumn>
-
-      <SfMegaMenuColumn
-        :title="$t('Other Products')"
-      >
-        <SfList>
-          <SfListItem
-            v-for="item in otherProductsItems"
-            :key="item.label"
-          >
-            <router-link
-              class="_item-link"
-              :to="item.url"
-              :class="{'-active': item.isActive && item.isActive()}"
-              @click.native="$emit('close')"
-            >
-              <SfMenuItem :label="item.label" />
-            </router-link>
-          </SfListItem>
-        </SfList>
-      </SfMegaMenuColumn>
-
-      <SfMegaMenuColumn
-        :title="$t('Other Useful Links')"
-        class="mobile-only"
-      >
-        <SfList>
-          <SfListItem
-            v-for="item in usefulLinksItems"
-            :key="item.label"
-          >
-            <router-link
-              class="_item-link"
-              :to="item.url"
-              :target="item.target"
-              @click.native="$emit('close')"
-            >
-              <SfMenuItem :label="item.label" />
-            </router-link>
-          </SfListItem>
-        </SfList>
-      </SfMegaMenuColumn>
-    </SfMegaMenu>
+        <router-link
+          :to="item.link"
+          class="_link"
+          @click.native="$emit('close')"
+        >
+          {{ item.label }}
+        </router-link>
+      </SfListItem>
+    </SfList>
   </div>
 </template>
 <script>
-import { SfMegaMenu, SfList, SfMenuItem } from '@storefront-ui/vue';
+import { SfList } from '@storefront-ui/vue';
 
 export default {
-  components: { SfMegaMenu, SfList, SfMenuItem },
+  components: { SfList },
   props: {
     visible: {
       type: Boolean,
@@ -83,113 +34,33 @@ export default {
   },
   data () {
     return {
-      customProductsItems: [
-        {
-          label: this.$t('Petsies Stuffed Animals'),
-          url: '/forevers-pet-plush/'
-        },
-        {
-          label: this.$t('Pet Shaped Pillows'),
-          url: '/pet-pillow/'
-        },
-        {
-          label: this.$t('Square Photo Pillows'),
-          url: {
-            name: 'category',
-            params: {
-              slug: 'custom-photo-pillows-80'
-            }
-          }
-        },
-        {
-          label: this.$t('Pet Photo Blankets'),
-          url: {
-            name: 'cut-out-blankets'
-          }
-        },
-        {
-          label: this.$t('Renaissance Blankets'),
-          url: {
-            name: 'renaissance-blankets'
-          }
-        },
-        {
-          label: this.$t('Pet Socks'),
-          url: {
-            name: 'printed-socks-creation-page'
-          }
-        },
-        {
-          label: this.$t('Face Masks'),
-          url: {
-            name: 'printed-masks-creation-page'
-          }
-        },
-        {
-          label: this.$t('Pet Keychains'),
-          url: {
-            name: 'printed-keychains-creation-page'
-          }
-        },
-        {
-          label: this.$t('Pet Magnets'),
-          url: {
-            name: 'felted-magnets-creation-page'
-          }
-        },
-        {
-          label: this.$t('Pet Ornaments'),
-          url: {
-            name: 'felted-ornaments-creation-page'
-          }
-        }
-      ],
-      otherProductsItems: [
-        {
-          label: this.$t('Gift Boxes'),
-          url: {
-            name: 'giftbox'
-          },
-          isActive: () => {
-            return this.$route.name === 'configurable-product' &&
-             this.$route.params?.parentSku === 'gift_box';
-          }
-        },
-        {
-          label: this.$t('Accessories'),
-          url: {
-            name: 'category',
-            params: {
-              slug: 'petsies-accessories-11'
-            }
-          }
-        },
-        {
-          label: this.$t('Bulk Orders'),
-          url: '/bulk-custom-stuffed-animal-manufacture/'
-        }
-      ],
-      usefulLinksItems: [
-        {
-          label: this.$t('Pricing'),
-          url: '/pricing/'
-        },
+      menuItems: [
         {
           label: this.$t('About'),
-          url: '/about-petsies/'
+          link: '/about/'
         },
         {
-          label: this.$t('Blog'),
-          url: '/blog/',
-          target: '_blank'
+          label: this.$t('Custom Plush'),
+          link: '/stuffed-animals/'
+        },
+        {
+          label: this.$t('Custom Pillows'),
+          link: '/custom-pillows/'
+        },
+        {
+          label: this.$t('How To Order'),
+          link: '/how-to-order/'
+        },
+        {
+          label: this.$t('Reviews'),
+          link: '/reviews/'
+        },
+        {
+          label: this.$t('Pricing'),
+          link: '/custom-plush-pricing/'
         }
       ]
     }
-  },
-  async mounted () {
-    await this.$nextTick();
-    this.$refs.menu.active = this.$refs.menu.items;
-    this.$refs.menu._computedWatchers.isMobile = undefined;
   }
 }
 </script>
@@ -210,37 +81,30 @@ export default {
     --menu-item-font-weight: bold;
   }
 
-  ._item-link {
-    &.-active {
-      --menu-item-font-weight: bold;
+  ._list-item {
+    --list-item-color: var(--c-white);
+  --list-item-border: none;
+    --list-item-padding: var(--spacer-xs) var(--spacer-sm);
+    background-color: var(--c-primary);
+    font-family: var(--font-family-primary);
+
+    &:hover {
+      background-color: var(--c-light);
+    }
+
+    &:first-child {
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+    }
+
+    &:last-child {
+      border-bottom-left-radius: 5px;
+      border-bottom-right-radius: 5px;
     }
   }
 
-  .sf-menu-item {
-    --menu-item-label-color: var(--c-dark);
-  }
-
-  .sf-mega-menu {
-    @include for-mobile {
-      overflow: auto;
-    }
-  }
-
-  .sf-mega-menu__menu {
-    @include for-desktop {
-      flex-wrap: wrap;
-      flex: 0 1 auto;
-    }
-  }
-
-  .sf-mega-menu__content {
-    @include for-desktop {
-      --mega-menu-content-padding: var(--spacer-xl) var(--spacer-sm);
-    }
-  }
-
-  .sf-bar {
-    display: none;
+  ._link {
+    color: var(--c-white);
   }
 }
 </style>
