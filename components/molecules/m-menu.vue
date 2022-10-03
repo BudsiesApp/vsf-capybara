@@ -83,7 +83,7 @@ export default {
 
   ._list-item {
     --list-item-color: var(--c-white);
-  --list-item-border: none;
+    --list-item-border: none;
     --list-item-padding: var(--spacer-xs) var(--spacer-sm);
     background-color: var(--c-primary);
     font-family: var(--font-family-primary);

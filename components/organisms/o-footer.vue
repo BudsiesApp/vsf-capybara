@@ -84,32 +84,6 @@ export default {
       default: ''
     }
   },
-  data () {
-    return {
-      social: [
-        {
-          name: 'facebook',
-          url: 'https://www.facebook.com/petsies/'
-        },
-        {
-          name: 'instagram',
-          url: 'https://www.instagram.com/petsies/'
-        },
-        {
-          name: 'twitter',
-          url: 'https://twitter.com/petsiesofficial/'
-        },
-        {
-          name: 'pinterest',
-          url: 'https://www.pinterest.com/petsies/'
-        },
-        {
-          name: 'tiktok',
-          url: 'https://www.tiktok.com/@mypetsies'
-        }
-      ]
-    };
-  },
   computed: {
     ...mapGetters('user', ['isLoggedIn']),
     multistoreEnabled () {
@@ -121,7 +95,7 @@ export default {
     },
     links () {
       return {
-        about: {
+        company: {
           name: 'Company',
           children: [
             {
@@ -142,7 +116,7 @@ export default {
             }
           ]
         },
-        services: {
+        customPlush: {
           name: this.$t('Custom Plush'),
           children: [
             { name: this.$t('Services'), link: '/stuffed-animals/' },
@@ -151,7 +125,7 @@ export default {
             { name: this.$t('How to Order'), link: { name: '/how-to-order/' } }
           ]
         },
-        account: {
+        quickLinks: {
           name: this.$t('Quick Links'),
           children: [
             { name: this.$t('FAQs'), link: '/faqs/' },
@@ -197,6 +171,7 @@ export default {
   background-color: var(--c-footer);
   padding-bottom: var(--spacer-lg);
   margin-top: calc(var(--spacer-2xl) + var(--spacer-xl));
+
   &__logo {
     background: url(../../assets/logo-footer.png) no-repeat;
     background-size: 100% auto;
@@ -205,17 +180,11 @@ export default {
     height: 112px;
     width: 100px;
   }
-  &__slogan {
-    text-align: center;
-    color: var(--c-light-variant);
-    font-family: var(--font-family-secondary);
-    font-size: var(--font-xl);
-    margin: var(--spacer-xl) 0 var(--spacer-sm);
-    width: 100%;
-  }
+
   .m-newsletter-subscription {
     margin-top: var(--spacer-xs);
   }
+
   ::v-deep .sf-menu-item {
     --menu-item-font-size: var(--font-sm);
     --menu-item-label-color: var(--c-light-variant);
@@ -228,6 +197,7 @@ export default {
       --icon-color: var(--c-light-variant);
     }
   }
+
   .sf-footer {
     --footer-width: 1272px;
     --footer-padding: 0 var(--spacer-sm);
@@ -236,57 +206,21 @@ export default {
 
     --footer-column-title-font-size: --h4-font-size;
   }
+
   ::v-deep .sf-footer-column__content {
     padding: 0 var(--spacer-xl);
   }
+
   .sf-list {
     &__item {
       --list-item-margin: var(--spacer-2xs) 0;
     }
   }
+
   ::v-deep .sf-chevron {
     &__bar {
       &:after {
         --chevron-color: var(--c-light-variant);
-      }
-    }
-  }
-  .social-column {
-    flex-basis: auto;
-  }
-  .social-icon {
-    display: flex;
-    justify-content: flex-start;
-    padding: var(--spacer-sm) 0;
-    &__link {
-      background-image: url(../../assets/footer-socials.png);
-      display: block;
-      height: 42px;
-      width: 42px;
-      margin-right: var(--spacer-base);
-
-      &.-facebook {
-        background-position: -1px -1px;
-      }
-
-      &.-instagram {
-        background-position: -45px -1px;
-      }
-
-      &.-twitter {
-        background-position: -89px -1px;
-      }
-
-      &.-pinterest {
-        background-position: -133px -1px;
-      }
-
-      &.-tiktok {
-        background-position: -177px -1px;
-      }
-
-      &:last-child {
-        margin-right: 0;
       }
     }
   }
@@ -326,16 +260,6 @@ export default {
     font-size: var(--font-xs);
     text-align: center;
     width: 100%;
-  }
-
-  ._legal-information {
-    color: var(--c-light-variant);
-    font-size: var(--font-xs);
-    margin-top: var(--spacer-xs);
-
-    a {
-      color: inherit;
-    }
   }
 
   @include for-desktop {
