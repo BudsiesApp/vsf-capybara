@@ -288,9 +288,6 @@ export default {
 
       return this.truncate(product.plushieDescription, 150, 50);
     },
-    goToBulkQuotePage () {
-      // this.$router.push({name: })
-    },
     editHandler (product) {
       if (foreversProductsSkus.includes(product.sku)) {
         this.$router.push({ name: 'forevers-create', query: { id: product.plushieId } });
@@ -517,14 +514,6 @@ export default {
 
   &__aside {
     box-sizing: border-box;
-    width: 100%;
-
-    ._shipping-handling-block {
-      margin: var(--spacer-xl) 0;
-      padding: 0 var(--spacer-xl);
-      font-size: var(--font-xs);
-      line-height: 1.6;
-    }
   }
 
   @include for-desktop {
