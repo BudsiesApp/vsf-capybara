@@ -53,7 +53,7 @@
       </div>
 
       <div class="_copyright">
-        {{ $t('Copyright {year}. Budsies Co LLC. All Rights Reserved.', {year: new Date().getFullYear}) }}
+        {{ $t('Copyright {year}. Budsies Co LLC. All Rights Reserved.', {year: new Date().getFullYear()}) }}
       </div>
     </SfFooter>
   </footer>
@@ -137,13 +137,13 @@ export default {
       };
     },
     selfiesLink () {
-      return `https://${config.budsiesDomain}/selfies-services/`;
+      return `https://${config.budsies.domain}/selfies-services/`;
     },
     budsiesLink () {
-      return `https://${config.budsiesDomain}/`;
+      return `https://${config.budsies.domain}/`;
     },
     petsiesLink () {
-      return `https://${config.petsiesDomain}/`;
+      return `https://${config.petsies.domain}/`;
     }
   },
   methods: {
