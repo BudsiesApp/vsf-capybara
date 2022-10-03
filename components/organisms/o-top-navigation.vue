@@ -147,11 +147,11 @@ export default {
     padding: var(--spacer-sm) var(--spacer-xs);
   }
   ::v-deep .sf-header {
-      &__logo {
-        --header-logo-height: 1.8rem;
-        --header-logo-margin: 0;
-      }
+    &__logo {
+      --header-logo-height: 1.8rem;
+      --header-logo-margin: 0;
     }
+  }
   ::v-deep .sf-bottom-navigation {
     top: auto;
     bottom: auto;

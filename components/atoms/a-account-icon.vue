@@ -39,3 +39,13 @@ export default {
   }
 };
 </script>
+
+<style lang="scss" scoped>
+.a-account-icon {
+  ::v-deep .sf-header__icon {
+    &:hover {
+      --icon-color: var(--c-secondary);
+    }
+  }
+}
+</style>

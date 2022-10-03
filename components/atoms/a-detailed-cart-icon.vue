@@ -1,6 +1,6 @@
 <template>
   <SfButton
-    class="sf-button--pure a-microcart-icon"
+    class="sf-button--pure a-microcart-icon a-detailed-cart-icon"
     @click="openDetailedCart"
   >
     <SfIcon
@@ -47,8 +47,13 @@ export default {
 <style lang="scss" scoped>
 .a-detailed-cart-icon {
   position: relative;
-  .sf-header__icon {
+
+  ::v-deep .sf-header__icon {
     cursor: pointer;
+
+    &:hover {
+      --icon-color: var(--c-secondary);
+    }
   }
 }
 </style>
