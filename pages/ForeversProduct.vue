@@ -58,10 +58,10 @@ export default Vue.extend({
     }
   },
   metaInfo () {
+    const productName = this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name || 'Forevers';
+
     return {
-      title: htmlDecode(
-        this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name
-      ),
+      title: htmlDecode(productName),
       meta: this.getCurrentProduct?.meta_description
         ? [
           {
