@@ -251,6 +251,8 @@ export default {
   ::v-deep .sf-menu-item {
     --menu-item-font-size: var(--font-sm);
     --menu-item-label-color: var(--c-light-variant);
+    --menu-item-font-family: var(--font-family-primary);
+
     &:hover {
       --menu-item-label-color: var(--c-light-variant);
     }

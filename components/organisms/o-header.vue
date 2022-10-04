@@ -180,7 +180,6 @@ export default {
 .o-header {
   --header-navigation-item-margin: 0;
   --header-navigation-item-padding: var(--spacer-lg) var(--spacer-xs);
-  --header-navigation-item-color: var(--c-dark);
   box-sizing: border-box;
 
   ._header {
@@ -213,7 +212,7 @@ export default {
     }
 
     &:hover > *:not(.sf-mega-menu) {
-      --header-navigation-item-color: var(--c-primary);
+      --header-navigation-item-color: var(--c-white);
     }
 
     &:hover {

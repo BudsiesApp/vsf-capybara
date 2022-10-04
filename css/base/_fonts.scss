@@ -64,32 +64,24 @@
 }
 
 $path: "/assets/fonts/";
-$font-name: "Avenir";
-$font-weights: (300, 500, 800);
 
-@each $font-weight in $font-weights {
-  $font-path: $path + $font-name + "_" + $font-weight;
-  @include font-face($font-name, $font-path, $font-weight, normal);
-}
+$font-path: $path + "Gotham-Rounded-Bold";
+@include font-face("Gotham-Rounded-Bold", $font-path, 800, normal);
 
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
-  @each $font-weight in $font-weights {
-    $font-path: $path + $font-name + "_" + $font-weight;
-    @include font-face($font-name, $font-path, $font-weight, normal, svg);
-  }
+  @include font-face("Gotham-Rounded-Bold", $font-path, 800, normal, svg);
 }
 
-$font-path: $path + $font-name + "_500_italic";
-@include font-face($font-name, $font-path, 500, italic);
+$font-path: $path + "Gotham-Rounded-Medium";
+@include font-face("Gotham-Rounded-Medium", $font-path, 400, normal);
 
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
-  $font-path: $path + $font-name + "_500_italic";
-  @include font-face($font-name, $font-path, 500, italic, svg);
+  @include font-face("Gotham-Rounded-Medium", $font-path, 400, normal, svg);
 }
 
-$font-path: $path + "Roselina-Script";
-@include font-face("Roselina", $font-path, 400, normal);
+$font-path: $path + "Titillium-Web-Regular";
+@include font-face("Titillium Web", $font-path, 400, normal);
 
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
-  @include font-face("Roselina", $font-path, 400, normal, svg);
+  @include font-face("Titillium Web", $font-path, 400, normal, svg);
 }
