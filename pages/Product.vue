@@ -96,6 +96,18 @@ export default {
       getCurrentCustomOptions: 'product/getCurrentCustomOptions',
       promotedOffers: 'promoted/getPromotedOffers'
     }),
+    categoryName () {
+      if (!this.getCurrentProduct ||
+          !this.getCurrentProduct.category ||
+          !this.getCurrentProduct.category.length
+      ) {
+        return;
+      }
+
+      return this.getCurrentProduct.category[0]
+        ? this.getCurrentProduct.category[0].name
+        : undefined;
+    },
     isOnline () {
       return onlineHelper.isOnline;
     },
@@ -224,10 +236,11 @@ export default {
   },
   metaInfo () {
     const description = this.getCurrentProduct?.meta_description || this.getCurrentProduct?.short_description;
+    const categoryName = this.categoryName ? ` - ${this.categoryName}` : '';
 
     return {
       title: htmlDecode(
-        this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name
+        `${this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name}${categoryName}`
       ),
       meta: description
         ? [
