@@ -1,5 +1,9 @@
 <template>
-  <div class="storyblok-newsletter-subscribe-form" :style="styles" :class="cssClasses">
+  <div
+    class="storyblok-newsletter-subscribe-form"
+    :style="styles"
+    :class="cssClasses"
+  >
     <editor-block-icons :item="itemData" />
 
     <MNewsletterSubscription

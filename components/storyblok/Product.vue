@@ -1,5 +1,9 @@
 <template>
-  <div class="storyblok-product" v-if="product">
+  <div
+    class="storyblok-product"
+    :class="cssClasses"
+    v-if="product"
+  >
     <editor-block-icons :item="itemData" />
 
     <router-link

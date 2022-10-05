@@ -1,5 +1,9 @@
 <template>
-  <div class="storyblok-heading" :class="cssClasses" :style="styles">
+  <div
+    class="storyblok-heading"
+    :class="cssClasses"
+    :style="styles"
+  >
     <editor-block-icons :item="itemData" />
 
     <div class="_container">

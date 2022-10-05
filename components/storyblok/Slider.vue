@@ -1,5 +1,8 @@
 <template>
-  <div class="storyblok-slider">
+  <div
+    class="storyblok-slider"
+    :class="cssClasses"
+  >
     <editor-block-icons :item="itemData" />
 
     <MZoomGallery

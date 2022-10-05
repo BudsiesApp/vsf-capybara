@@ -1,6 +1,7 @@
 <template>
   <div class="storyblok-buttons" :style="styles" :class="cssClasses">
     <editor-block-icons :item="itemData" />
+
     <Button
       v-for="button in buttons"
       :key="button._uid"

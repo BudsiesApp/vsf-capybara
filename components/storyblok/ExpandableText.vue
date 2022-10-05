@@ -1,5 +1,9 @@
 <template>
-  <p ref="expandableTextBlock" class="expandable-text-block">
+  <p
+    ref="expandableTextBlock"
+    class="expandable-text-block"
+    :class="cssClasses"
+  >
     <editor-block-icons :item="itemData" />
 
     {{ content }}
