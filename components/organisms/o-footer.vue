@@ -137,13 +137,13 @@ export default {
       };
     },
     selfiesLink () {
-      return `https://${config.budsies.domain}/selfies-services/`;
+      return `https://${config.budsies.budsiesStoreDomain}/selfies-services/`;
     },
     budsiesLink () {
-      return `https://${config.budsies.domain}/`;
+      return `https://${config.budsies.budsiesStoreDomain}/`;
     },
     petsiesLink () {
-      return `https://${config.petsies.domain}/`;
+      return `https://${config.budsies.petsiesStoreDomain}/`;
     }
   },
   methods: {
