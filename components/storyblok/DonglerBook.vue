@@ -4,6 +4,8 @@
     :class="cssClasses"
     :style="styles"
   >
+    <editor-block-icons :item="itemData" />
+
     <SfHeading
       :level="2"
       :title="$t('Receive a Free Drawing & Storybook')"

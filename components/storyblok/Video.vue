@@ -1,5 +1,11 @@
 <template>
-  <div class="storyblok-video" :class="cssClasses" :style="styles">
+  <div
+    class="storyblok-video"
+    :class="cssClasses"
+    :style="styles"
+  >
+    <editor-block-icons :item="itemData" />
+
     <StreamingVideo
       class="_embedded-video"
       :aspect-ratio="itemData.aspect_ratio"

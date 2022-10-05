@@ -4,6 +4,8 @@
     :class="cssClasses"
     :style="styles"
   >
+    <editor-block-icons :item="itemData" />
+
     <div class="_intro-column _image-column">
       <BaseImage
         :srcsets="imageSources"

@@ -1,5 +1,11 @@
 <template>
-  <div class="storyblok-heading" :class="cssClasses" :style="styles">
+  <div
+    class="storyblok-heading"
+    :class="cssClasses"
+    :style="styles"
+  >
+    <editor-block-icons :item="itemData" />
+
     <div class="_container">
       <div class="_intro" v-if="isCustomStyled && itemData.intro_text">
         {{ itemData.intro_text }}

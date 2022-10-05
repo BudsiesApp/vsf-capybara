@@ -1,9 +1,15 @@
 <template>
-  <MZoomGallery
+  <div
     class="storyblok-slider"
-    :images="slides"
-    :horizontal-thumbnails="isHorizontalThumbnails"
-  />
+    :class="cssClasses"
+  >
+    <editor-block-icons :item="itemData" />
+
+    <MZoomGallery
+      :images="slides"
+      :horizontal-thumbnails="isHorizontalThumbnails"
+    />
+  </div>
 </template>
 
 <script lang="ts">
