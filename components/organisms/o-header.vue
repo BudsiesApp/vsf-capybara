@@ -214,6 +214,7 @@ export default {
 
   ._instant-quote {
     --c-link: var(--c-white);
+    --c-link-hover: var(--c-white);
 
     font-size: var(--header-navigation-item-font-size);
     margin-left: var(--spacer-sm);
