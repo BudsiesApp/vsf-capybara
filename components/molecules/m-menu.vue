@@ -7,6 +7,7 @@
     >
       <SfMegaMenuColumn
         :title="$t('Custom Products')"
+        class="_custom-products"
       >
         <SfList>
           <SfListItem
@@ -108,14 +109,6 @@ export default {
           label: this.$t('About'),
           link: '/about/'
         },
-        // {
-        //   label: this.$t('Custom Plush'),
-        //   link: '/stuffed-animals/'
-        // },
-        // {
-        //   label: this.$t('Custom Pillows'),
-        //   link: '/custom-pillows/'
-        // },
         {
           label: this.$t('How To Order'),
           link: '/how-to-order/'
@@ -140,6 +133,7 @@ export default {
 </script>
 <style lang="scss">
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
+
 .m-menu {
   padding: 0;
   position: absolute;
@@ -175,6 +169,12 @@ export default {
     @include for-desktop {
       flex-wrap: wrap;
       flex: 0 1 auto;
+
+      .sf-mega-menu-column._custom-products {
+        .sf-mega-menu-column__title {
+          display: none;
+        }
+      }
     }
   }
 
