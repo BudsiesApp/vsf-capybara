@@ -10,11 +10,10 @@
         :is-active="isActive(item.icon)"
         @click.native="item.onClick"
       />
+
       <ALogo :is-small="true" />
 
       <ADetailedCartIcon class="sf-header__action" />
-
-      <AAccountIcon class="sf-header__action" />
 
       <SfButton class="_bulk-quote-button">
         <router-link :to="{name: 'bulk-quote'}">
@@ -31,7 +30,6 @@ import { SfBottomNavigation, SfButton } from '@storefront-ui/vue'
 
 import { ModalList } from 'theme/store/ui/modals'
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
-import AAccountIcon from 'theme/components/atoms/a-account-icon.vue';
 import ALogo from 'theme/components/atoms/a-logo.vue';
 
 export default {
@@ -40,13 +38,13 @@ export default {
     SfBottomNavigation,
     ALogo,
     ADetailedCartIcon,
-    AAccountIcon,
     SfButton
   },
   data () {
     return {
       navigationItems: [
-        { icon: 'list', label: '', onClick: this.goToMenu }
+        { icon: 'list', label: '', onClick: this.goToMenu },
+        { icon: 'account', label: '', onClick: this.goToAccount }
       ]
     }
   },
