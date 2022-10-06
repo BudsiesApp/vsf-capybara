@@ -17,11 +17,13 @@
       <template #logo>
         <ALogo />
       </template>
+
       <template #navigation>
         <SfHeaderNavigationItem
           v-for="item in menuItems"
           :key="item.label"
-          :class="{'-dropdown': item.isDropdown}"
+          @mouseover="onNavigationItemMouseOver(item)"
+          @mouseleave="onNavigationItemMouseLeave"
         >
           <router-link v-if="item.link" class="o-header__submenu" :to="item.link">
             {{ item.label }}
@@ -30,16 +32,10 @@
           <div v-else class="o-header__submenu">
             {{ item.label }}
 
-            <div class="_submenu-dropdown" v-if="item.isDropdown">
-              <div class="_dropdown-item" v-for="dropdownItem in item.dropdownItems" :key="dropdownItem.label">
-                <router-link
-                  :to="dropdownItem.link"
-                  class="_item-link"
-                >
-                  {{ dropdownItem.label }}
-                </router-link>
-              </div>
-            </div>
+            <MMenu
+              :visible="isHoveredMenu && !isSearchPanelVisible"
+              @close="isHoveredMenu = false"
+            />
           </div>
         </SfHeaderNavigationItem>
 
@@ -73,12 +69,14 @@
 
 <script>
 import { SfButton, SfHeader, SfOverlay } from '@storefront-ui/vue';
+import { mapState, mapGetters } from 'vuex';
+
 import ALogo from 'theme/components/atoms/a-logo';
 import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import AMicrocartIcon from 'theme/components/atoms/a-microcart-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
 import OSearch from 'theme/components/organisms/o-search';
-import { mapState, mapGetters } from 'vuex';
+import MMenu from 'theme/components/molecules/m-menu';
 
 export default {
   name: 'OHeader',
@@ -90,12 +88,12 @@ export default {
     ADetailedCartIcon,
     OSearch,
     SfOverlay,
-    SfButton
+    SfButton,
+    MMenu
   },
   data () {
     return {
       isHoveredMenu: false,
-      isDropdownOpen: false,
       menuItems: [
         {
           label: this.$t('About'),
@@ -140,7 +138,7 @@ export default {
           ]
         },
         {
-          label: this.$t('Custom Pillow'),
+          label: this.$t('Custom Pillows'),
           link: '/custom-pillows/'
         },
         {
@@ -165,6 +163,18 @@ export default {
     ...mapGetters('user', ['isLoggedIn']),
     activeIcon () {
       return this.isLoggedIn ? 'account' : '';
+    }
+  },
+  methods: {
+    onNavigationItemMouseOver (item) {
+      if (!item.isDropdown) {
+        return;
+      }
+
+      this.isHoveredMenu = true;
+    },
+    onNavigationItemMouseLeave () {
+      this.isHoveredMenu = false;
     }
   }
 };
@@ -221,29 +231,7 @@ export default {
   }
 
   .sf-header-navigation-item {
-    position: relative;
     flex: unset;
-
-    ._submenu-dropdown {
-      position: absolute;
-      opacity: 0;
-      visibility: hidden;
-      background: var(--c-primary);
-      width: 100%;
-      top: 100%;
-
-      ._dropdown-item {
-        padding: var(--spacer-xs) 0;
-
-        ._item-link {
-          color: var(--c-white);
-        }
-
-        &:hover {
-          background-color: var(--c-light);
-        }
-      }
-    }
 
     &::after {
       bottom: 0;
@@ -255,19 +243,13 @@ export default {
     }
 
     &:hover {
-      ._submenu-dropdown {
+      .m-menu {
         opacity: 1;
         visibility: visible;
       }
 
       &::after {
         width: 100%;
-      }
-    }
-
-    &.-dropdown {
-      &:hover {
-        background: var(--c-primary);
       }
     }
   }

@@ -4,6 +4,9 @@
     :class="{ 'storyblok-preview-mode': isStoryblokPreviewMode }"
   >
     <MLoader />
+
+    <o-mobile-menu />
+
     <div id="viewport">
       <div class="_floating-elements">
         <PromotionPlatformBanner />
@@ -36,6 +39,7 @@ import OModal from 'theme/components/organisms/o-modal';
 import OTopNavigation from 'theme/components/organisms/o-top-navigation';
 import MLoader from 'theme/components/molecules/m-loader';
 import ONotification from 'theme/components/organisms/o-notification';
+import OMobileMenu from 'theme/components/organisms/o-mobile-menu';
 import MCookieNotification from 'theme/components/molecules/m-cookie-notification';
 import MOfflineBadge from 'theme/components/molecules/m-offline-badge';
 import { isServer } from '@vue-storefront/core/helpers';
@@ -56,7 +60,8 @@ export default {
     MCookieNotification,
     MOfflineBadge,
     OTopNavigation,
-    OModal
+    OModal,
+    OMobileMenu
   },
   data () {
     return {

@@ -1,8 +1,6 @@
 <template>
   <div class="o-top-navigation">
     <SfBottomNavigation class="_bottom-navigation">
-      <o-mobile-menu />
-
       <SfBottomNavigationItem
         v-for="item in navigationItems"
         :key="item.icon"
@@ -35,7 +33,6 @@ import { ModalList } from 'theme/store/ui/modals'
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
 import AAccountIcon from 'theme/components/atoms/a-account-icon.vue';
 import ALogo from 'theme/components/atoms/a-logo.vue';
-import OMobileMenu from 'theme/components/organisms/o-mobile-menu.vue';
 
 export default {
   name: 'OTopNavigation',
@@ -44,7 +41,6 @@ export default {
     ALogo,
     ADetailedCartIcon,
     AAccountIcon,
-    OMobileMenu,
     SfButton
   },
   data () {

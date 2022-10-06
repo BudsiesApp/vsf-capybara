@@ -1,27 +1,57 @@
 <template>
   <div class="m-menu sf-mega-menu bg-white">
-    <SfList>
-      <SfListItem
-        v-for="item in menuItems"
-        :key="item.label"
-        class="_list-item"
+    <SfMegaMenu
+      ref="menu"
+      :title="title"
+      :visible="visible"
+    >
+      <SfMegaMenuColumn
+        :title="$t('Custom Products')"
       >
-        <router-link
-          :to="item.link"
-          class="_link"
-          @click.native="$emit('close')"
-        >
-          {{ item.label }}
-        </router-link>
-      </SfListItem>
-    </SfList>
+        <SfList>
+          <SfListItem
+            v-for="item in customProductsItems"
+            :key="item.label"
+            :class="{'mobile-only': item.mobileOnly}"
+          >
+            <router-link
+              :to="item.link"
+              @click.native="$emit('close')"
+            >
+              <SfMenuItem :label="item.label" />
+            </router-link>
+          </SfListItem>
+        </SfList>
+      </SfMegaMenuColumn>
+
+      <SfMegaMenuColumn
+        :title="$t('Other Useful Links')"
+        class="mobile-only"
+      >
+        <SfList>
+          <SfListItem
+            v-for="item in usefulLinksItems"
+            :key="item.label"
+          >
+            <router-link
+              class="_item-link"
+              :to="item.link"
+              :target="item.target"
+              @click.native="$emit('close')"
+            >
+              <SfMenuItem :label="item.label" />
+            </router-link>
+          </SfListItem>
+        </SfList>
+      </SfMegaMenuColumn>
+    </SfMegaMenu>
   </div>
 </template>
 <script>
-import { SfList } from '@storefront-ui/vue';
+import { SfMegaMenu, SfList, SfMenuItem } from '@storefront-ui/vue';
 
 export default {
-  components: { SfList },
+  components: { SfMegaMenu, SfList, SfMenuItem },
   props: {
     visible: {
       type: Boolean,
@@ -34,19 +64,58 @@ export default {
   },
   data () {
     return {
-      menuItems: [
+      customProductsItems: [
+        {
+          label: this.$t('Custom Pillows'),
+          link: '/custom-pillows/',
+          mobileOnly: true
+        },
+        {
+          label: this.$t('Mascots'),
+          link: '/mascot-stuffed-animals/'
+        },
+        {
+          label: this.$t('Book Authors'),
+          link: '/book-character-dolls/'
+        },
+        {
+          label: this.$t('Brands & Logos'),
+          link: '/branded-stuffed-animals/'
+        },
+        {
+          label: this.$t('Non Profits'),
+          link: '/non-profit-stuffed-animals/'
+        },
+        {
+          label: this.$t('Shows & Events'),
+          link: '/party-stuffed-animals/'
+        },
+        {
+          label: this.$t('Promotional'),
+          link: '/promotional-stuffed-animals/'
+        },
+        {
+          label: this.$t('Art & Designs'),
+          link: '/design-stuffed-animals/'
+        },
+        {
+          label: this.$t('Crowdfund'),
+          link: '/crowdfund-stuffed-animals/'
+        }
+      ],
+      usefulLinksItems: [
         {
           label: this.$t('About'),
           link: '/about/'
         },
-        {
-          label: this.$t('Custom Plush'),
-          link: '/stuffed-animals/'
-        },
-        {
-          label: this.$t('Custom Pillows'),
-          link: '/custom-pillows/'
-        },
+        // {
+        //   label: this.$t('Custom Plush'),
+        //   link: '/stuffed-animals/'
+        // },
+        // {
+        //   label: this.$t('Custom Pillows'),
+        //   link: '/custom-pillows/'
+        // },
         {
           label: this.$t('How To Order'),
           link: '/how-to-order/'
@@ -61,6 +130,11 @@ export default {
         }
       ]
     }
+  },
+  async mounted () {
+    await this.$nextTick();
+    this.$refs.menu.active = this.$refs.menu.items;
+    this.$refs.menu._computedWatchers.isMobile = undefined;
   }
 }
 </script>
@@ -81,30 +155,37 @@ export default {
     --menu-item-font-weight: bold;
   }
 
-  ._list-item {
-    --list-item-color: var(--c-white);
-    --list-item-border: none;
-    --list-item-padding: var(--spacer-xs) var(--spacer-sm);
-    background-color: var(--c-primary);
-    font-family: var(--font-family-primary);
-
-    &:hover {
-      background-color: var(--c-light);
-    }
-
-    &:first-child {
-      border-top-left-radius: 5px;
-      border-top-right-radius: 5px;
-    }
-
-    &:last-child {
-      border-bottom-left-radius: 5px;
-      border-bottom-right-radius: 5px;
+  ._item-link {
+    &.-active {
+      --menu-item-font-weight: bold;
     }
   }
 
-  ._link {
-    color: var(--c-white);
+  .sf-menu-item {
+    --menu-item-label-color: var(--c-dark);
+  }
+
+  .sf-mega-menu {
+    @include for-mobile {
+      overflow: auto;
+    }
+  }
+
+  .sf-mega-menu__menu {
+    @include for-desktop {
+      flex-wrap: wrap;
+      flex: 0 1 auto;
+    }
+  }
+
+  .sf-mega-menu__content {
+    @include for-desktop {
+      --mega-menu-content-padding: var(--spacer-xl) var(--spacer-sm);
+    }
+  }
+
+  .sf-bar {
+    display: none;
   }
 }
 </style>
