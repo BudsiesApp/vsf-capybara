@@ -258,7 +258,7 @@ export default {
     display: none;
   }
 
-::v-deep .sf-header {
+  ::v-deep .sf-header {
     --header-logo-margin: 0;
 
     &__navigation {
