@@ -19,24 +19,48 @@
       </template>
 
       <template #navigation>
-        <SfHeaderNavigationItem
-          v-for="item in menuItems"
-          :key="item.label"
-          @mouseover="onNavigationItemMouseOver(item)"
-          @mouseleave="onNavigationItemMouseLeave"
-        >
-          <router-link v-if="item.link" class="o-header__submenu" :to="item.link">
-            {{ item.label }}
+        <SfHeaderNavigationItem>
+          <router-link class="o-header__submenu" to="/about/">
+            {{ $t('About') }}
           </router-link>
+        </SfHeaderNavigationItem>
 
-          <div v-else class="o-header__submenu">
-            {{ item.label }}
-
-            <MMenu
-              :visible="isHoveredMenu && !isSearchPanelVisible"
-              @close="isHoveredMenu = false"
-            />
+        <SfHeaderNavigationItem
+          @mouseover="isHoveredMenu = true"
+          @mouseleave="isHoveredMenu = false"
+        >
+          <div class="o-header__submenu">
+            {{ $t('Custom Plush') }}
           </div>
+
+          <MMenu
+            :visible="isHoveredMenu && !isSearchPanelVisible"
+            @close="isHoveredMenu = false"
+          />
+        </SfHeaderNavigationItem>
+
+        <SfHeaderNavigationItem>
+          <router-link class="o-header__submenu" to="/custom-pillows/">
+            {{ $t('Custom Pillows') }}
+          </router-link>
+        </SfHeaderNavigationItem>
+
+        <SfHeaderNavigationItem>
+          <router-link class="o-header__submenu" to="/how-to-order/">
+            {{ $t('How To Order') }}
+          </router-link>
+        </SfHeaderNavigationItem>
+
+        <SfHeaderNavigationItem>
+          <router-link class="o-header__submenu" to="/reviews/">
+            {{ $t('Reviews') }}
+          </router-link>
+        </SfHeaderNavigationItem>
+
+        <SfHeaderNavigationItem>
+          <router-link class="o-header__submenu" to="/custom-plush-pricing/">
+            {{ $t('Pricing') }}
+          </router-link>
         </SfHeaderNavigationItem>
 
         <SfButton class="_instant-quote">
@@ -93,67 +117,7 @@ export default {
   },
   data () {
     return {
-      isHoveredMenu: false,
-      menuItems: [
-        {
-          label: this.$t('About'),
-          link: '/about/'
-        },
-        {
-          label: this.$t('Custom Plush'),
-          isDropdown: true,
-          dropdownItems: [
-            {
-              label: this.$t('Mascots'),
-              link: '/mascot-stuffed-animals/'
-            },
-            {
-              label: this.$t('Book Authors'),
-              link: '/book-character-dolls/'
-            },
-            {
-              label: this.$t('Brands & Logos'),
-              link: '/branded-stuffed-animals/'
-            },
-            {
-              label: this.$t('Non Profits'),
-              link: '/non-profit-stuffed-animals/'
-            },
-            {
-              label: this.$t('Shows & Events'),
-              link: '/party-stuffed-animals/'
-            },
-            {
-              label: this.$t('Promotional'),
-              link: '/promotional-stuffed-animals/'
-            },
-            {
-              label: this.$t('Art & Designs'),
-              link: '/design-stuffed-animals/'
-            },
-            {
-              label: this.$t('Crowdfund'),
-              link: '/crowdfund-stuffed-animals/'
-            }
-          ]
-        },
-        {
-          label: this.$t('Custom Pillows'),
-          link: '/custom-pillows/'
-        },
-        {
-          label: this.$t('How To Order'),
-          link: '/how-to-order/'
-        },
-        {
-          label: this.$t('Reviews'),
-          link: '/reviews/'
-        },
-        {
-          label: this.$t('Pricing'),
-          link: '/custom-plush-pricing/'
-        }
-      ]
+      isHoveredMenu: false
     }
   },
   computed: {
@@ -163,18 +127,6 @@ export default {
     ...mapGetters('user', ['isLoggedIn']),
     activeIcon () {
       return this.isLoggedIn ? 'account' : '';
-    }
-  },
-  methods: {
-    onNavigationItemMouseOver (item) {
-      if (!item.isDropdown) {
-        return;
-      }
-
-      this.isHoveredMenu = true;
-    },
-    onNavigationItemMouseLeave () {
-      this.isHoveredMenu = false;
     }
   }
 };
