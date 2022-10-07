@@ -17,42 +17,57 @@
       <template #logo>
         <ALogo />
       </template>
+
       <template #navigation>
+        <SfHeaderNavigationItem>
+          <router-link class="o-header__submenu" to="/about/">
+            {{ $t('About') }}
+          </router-link>
+        </SfHeaderNavigationItem>
+
         <SfHeaderNavigationItem
           @mouseover="isHoveredMenu = true"
           @mouseleave="isHoveredMenu = false"
         >
           <div class="o-header__submenu">
-            Products
+            {{ $t('Custom Plush') }}
           </div>
+
           <MMenu
             :visible="isHoveredMenu && !isSearchPanelVisible"
             @close="isHoveredMenu = false"
           />
         </SfHeaderNavigationItem>
+
         <SfHeaderNavigationItem>
-          <router-link
-            :to="{ name: 'gift-cards' }"
-          >
-            Gift Cards
-          </router-link>
-        </SfHeaderNavigationItem>
-        <SfHeaderNavigationItem>
-          <router-link
-            to="/reviews/"
-          >
-            Reviews
-          </router-link>
-        </SfHeaderNavigationItem>
-        <SfHeaderNavigationItem>
-          <router-link
-            to="/pricing/"
-          >
-            Pricing
+          <router-link class="o-header__submenu" to="/custom-pillows/">
+            {{ $t('Custom Pillows') }}
           </router-link>
         </SfHeaderNavigationItem>
 
-        <MCtaButton />
+        <SfHeaderNavigationItem>
+          <router-link class="o-header__submenu" to="/how-to-order/">
+            {{ $t('How To Order') }}
+          </router-link>
+        </SfHeaderNavigationItem>
+
+        <SfHeaderNavigationItem>
+          <router-link class="o-header__submenu" to="/reviews/">
+            {{ $t('Reviews') }}
+          </router-link>
+        </SfHeaderNavigationItem>
+
+        <SfHeaderNavigationItem>
+          <router-link class="o-header__submenu" to="/custom-plush-pricing/">
+            {{ $t('Pricing') }}
+          </router-link>
+        </SfHeaderNavigationItem>
+
+        <SfButton class="_instant-quote">
+          <router-link :to="{name: 'bulk-quote'}">
+            {{ $t('Instant Quote') }}
+          </router-link>
+        </SfButton>
       </template>
       <template #search>
         <div />
@@ -77,15 +92,15 @@
 </template>
 
 <script>
-import { SfHeader, SfOverlay } from '@storefront-ui/vue';
+import { SfButton, SfHeader, SfOverlay } from '@storefront-ui/vue';
+import { mapState, mapGetters } from 'vuex';
+
 import ALogo from 'theme/components/atoms/a-logo';
 import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import AMicrocartIcon from 'theme/components/atoms/a-microcart-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
 import OSearch from 'theme/components/organisms/o-search';
-import { mapState, mapGetters } from 'vuex';
 import MMenu from 'theme/components/molecules/m-menu';
-import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
 export default {
   name: 'OHeader',
@@ -96,62 +111,13 @@ export default {
     AMicrocartIcon,
     ADetailedCartIcon,
     OSearch,
-    MMenu,
     SfOverlay,
-    MCtaButton
+    SfButton,
+    MMenu
   },
   data () {
     return {
-      isHoveredMenu: false,
-      isDropdownOpen: false,
-      dropdownActions: [
-        {
-          label: 'Custom Petsies',
-          url: '/forevers-pet-plush/'
-        },
-        {
-          label: 'Custom Pillows',
-          url: '/custom-pillows/'
-        },
-        {
-          label: 'Custom Blankets',
-          url: '/custom-blankets/'
-        },
-        {
-          label: 'Custom Socks',
-          url: {
-            name: 'printed-socks-creation-page'
-          }
-        },
-        {
-          label: 'Face Masks',
-          url: {
-            name: 'printed-masks-creation-page'
-          }
-        },
-        {
-          label: 'Pet Keychains',
-          url: {
-            name: 'printed-keychains-creation-page'
-          }
-        },
-        {
-          label: 'Pet Magnets',
-          url: {
-            name: 'felted-magnets-creation-page'
-          }
-        },
-        {
-          label: 'Pet Ornaments',
-          url: {
-            name: 'felted-ornaments-creation-page'
-          }
-        },
-        {
-          label: 'Gift Box',
-          url: { name: 'giftbox' }
-        }
-      ]
+      isHoveredMenu: false
     }
   },
   computed: {
@@ -170,6 +136,8 @@ export default {
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .a-logo {
+  --header-logo-height: 4rem;
+
   margin-right: var(--spacer-lg);
 }
 
@@ -178,8 +146,9 @@ export default {
 }
 
 .o-header {
+  --header-navigation-item-font-size: var(--font-sm);
   --header-navigation-item-margin: 0;
-  --header-navigation-item-padding: var(--spacer-lg) var(--spacer-xs);
+  --header-navigation-item-padding: var(--spacer-lg) var(--spacer-sm);
   box-sizing: border-box;
 
   ._header {
@@ -205,7 +174,17 @@ export default {
     }
   }
 
+  ._instant-quote {
+    --c-link: var(--c-white);
+    --c-link-hover: var(--c-white);
+
+    font-size: var(--header-navigation-item-font-size);
+    margin-left: var(--spacer-sm);
+  }
+
   .sf-header-navigation-item {
+    flex: unset;
+
     &::after {
       bottom: 0;
       width: 0;
@@ -227,26 +206,42 @@ export default {
     }
   }
 
-  .m-cta-button {
-    align-self: center;
-  }
-
   .sf-header {
     display: none;
   }
 
   ::v-deep .sf-header {
-    --header-logo-margin: 0 0 var(--spacer-sm) 0;
+    --header-logo-margin: 0;
 
     &__navigation {
       --header-navigation-margin: 0 var(--spacer-base);
-      justify-content: space-evenly;
+      justify-content: flex-end;
+      align-items: center;
       flex-grow: 2;
     }
 
     &__actions {
       justify-content: space-between;
     }
+  }
+
+  @media screen and (max-width: $desktop-l-min) {
+    --header-action-margin: 0 0 0 var(--spacer-sm);
+
+    .a-logo {
+      margin-right: var(--spacer-xs);
+      max-width: 10%;
+    }
+
+    ::v-deep .sf-header {
+      &__navigation {
+        --header-navigation-margin: 0 0 0 var(--spacer-sm);
+      }
+    }
+  }
+
+  @media screen and (max-width: $desktop-xl-min) {
+    --header-navigation-item-font-size: var(--font-xs);
   }
 
   @include for-desktop {

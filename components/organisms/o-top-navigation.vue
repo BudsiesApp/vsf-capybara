@@ -10,25 +10,27 @@
         :is-active="isActive(item.icon)"
         @click.native="item.onClick"
       />
-      <ALogo />
 
-      <MCtaButton size="small" />
+      <ALogo :is-small="true" />
 
       <ADetailedCartIcon class="sf-header__action" />
+
+      <SfButton class="_bulk-quote-button">
+        <router-link :to="{name: 'bulk-quote'}">
+          {{ $t('Get Quote') }}
+        </router-link>
+      </SfButton>
     </SfBottomNavigation>
   </div>
 </template>
 
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
+import { SfBottomNavigation, SfButton } from '@storefront-ui/vue'
+
 import { ModalList } from 'theme/store/ui/modals'
-import AHomeIcon from 'theme/components/atoms/a-home-icon';
-import ASearchIcon from 'theme/components/atoms/a-search-icon';
-import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
-import { SfBottomNavigation } from '@storefront-ui/vue';
 import ALogo from 'theme/components/atoms/a-logo.vue';
-import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
 export default {
   name: 'OTopNavigation',
@@ -36,13 +38,12 @@ export default {
     SfBottomNavigation,
     ALogo,
     ADetailedCartIcon,
-    MCtaButton
+    SfButton
   },
   data () {
     return {
       navigationItems: [
         { icon: 'list', label: '', onClick: this.goToMenu },
-        // { icon: 'search', label: '', onClick: this.goToSearch },
         { icon: 'account', label: '', onClick: this.goToAccount }
       ]
     }
@@ -115,6 +116,9 @@ export default {
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .o-top-navigation {
+  --bottom-navigation-background: var(--c-blue);
+  --header-action-margin: 0 0 0 var(--spacer-sm);
+
   position: relative;
   min-height: var(--bottom-navigation-height);
   z-index: 10;
@@ -127,15 +131,21 @@ export default {
     display: none;
   }
 
+  ._bulk-quote-button {
+    --c-link: var(--c-white);
+    --c-link-hover: var(--c-white);
+  }
+
   .a-microcart-icon {
     margin: 0;
     padding: var(--spacer-sm) var(--spacer-xs);
   }
   ::v-deep .sf-header {
-      &__logo {
-        --header-logo-height: 1.5rem;
-      }
+    &__logo {
+      --header-logo-height: 1.8rem;
+      --header-logo-margin: 0;
     }
+  }
   ::v-deep .sf-bottom-navigation {
     top: auto;
     bottom: auto;
@@ -144,10 +154,11 @@ export default {
     justify-content: space-between;
     .sf-bottom-navigation-item {
       cursor: pointer;
+      --icon-color: var(--c-white);
     }
   }
 
-  @media (min-width: 375px) {
+  @media (min-width: 450px) {
     .a-logo {
       display: block;
     }

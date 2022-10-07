@@ -8,6 +8,10 @@
             --button-background: var(--c-light);
         }
 
+        &:hover {
+            --button-color: var(--c-white);
+        }
+
         &:active {
             --button-background: var(--c-secondary-variant);
         }

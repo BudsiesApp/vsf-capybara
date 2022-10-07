@@ -4,7 +4,9 @@
     :class="{ 'storyblok-preview-mode': isStoryblokPreviewMode }"
   >
     <MLoader />
-    <OMobileMenu />
+
+    <o-mobile-menu />
+
     <div id="viewport">
       <div class="_floating-elements">
         <PromotionPlatformBanner />

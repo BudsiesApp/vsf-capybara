@@ -7,34 +7,16 @@
     >
       <SfMegaMenuColumn
         :title="$t('Custom Products')"
+        class="_custom-products"
       >
         <SfList>
           <SfListItem
             v-for="item in customProductsItems"
             :key="item.label"
+            :class="{'mobile-only': item.mobileOnly}"
           >
             <router-link
-              :to="item.url"
-              @click.native="$emit('close')"
-            >
-              <SfMenuItem :label="item.label" />
-            </router-link>
-          </SfListItem>
-        </SfList>
-      </SfMegaMenuColumn>
-
-      <SfMegaMenuColumn
-        :title="$t('Other Products')"
-      >
-        <SfList>
-          <SfListItem
-            v-for="item in otherProductsItems"
-            :key="item.label"
-          >
-            <router-link
-              class="_item-link"
-              :to="item.url"
-              :class="{'-active': item.isActive && item.isActive()}"
+              :to="item.link"
               @click.native="$emit('close')"
             >
               <SfMenuItem :label="item.label" />
@@ -54,7 +36,7 @@
           >
             <router-link
               class="_item-link"
-              :to="item.url"
+              :to="item.link"
               :target="item.target"
               @click.native="$emit('close')"
             >
@@ -85,103 +67,59 @@ export default {
     return {
       customProductsItems: [
         {
-          label: this.$t('Petsies Stuffed Animals'),
-          url: '/forevers-pet-plush/'
+          label: this.$t('Custom Pillows'),
+          link: '/custom-pillows/',
+          mobileOnly: true
         },
         {
-          label: this.$t('Pet Shaped Pillows'),
-          url: '/pet-pillow/'
+          label: this.$t('Mascots'),
+          link: '/mascot-stuffed-animals/'
         },
         {
-          label: this.$t('Square Photo Pillows'),
-          url: {
-            name: 'category',
-            params: {
-              slug: 'custom-photo-pillows-80'
-            }
-          }
+          label: this.$t('Book Authors'),
+          link: '/book-character-dolls/'
         },
         {
-          label: this.$t('Pet Photo Blankets'),
-          url: {
-            name: 'cut-out-blankets'
-          }
+          label: this.$t('Brands & Logos'),
+          link: '/branded-stuffed-animals/'
         },
         {
-          label: this.$t('Renaissance Blankets'),
-          url: {
-            name: 'renaissance-blankets'
-          }
+          label: this.$t('Non Profits'),
+          link: '/non-profit-stuffed-animals/'
         },
         {
-          label: this.$t('Pet Socks'),
-          url: {
-            name: 'printed-socks-creation-page'
-          }
+          label: this.$t('Shows & Events'),
+          link: '/party-stuffed-animals/'
         },
         {
-          label: this.$t('Face Masks'),
-          url: {
-            name: 'printed-masks-creation-page'
-          }
+          label: this.$t('Promotional'),
+          link: '/promotional-stuffed-animals/'
         },
         {
-          label: this.$t('Pet Keychains'),
-          url: {
-            name: 'printed-keychains-creation-page'
-          }
+          label: this.$t('Art & Designs'),
+          link: '/design-stuffed-animals/'
         },
         {
-          label: this.$t('Pet Magnets'),
-          url: {
-            name: 'felted-magnets-creation-page'
-          }
-        },
-        {
-          label: this.$t('Pet Ornaments'),
-          url: {
-            name: 'felted-ornaments-creation-page'
-          }
-        }
-      ],
-      otherProductsItems: [
-        {
-          label: this.$t('Gift Boxes'),
-          url: {
-            name: 'giftbox'
-          },
-          isActive: () => {
-            return this.$route.name === 'configurable-product' &&
-             this.$route.params?.parentSku === 'gift_box';
-          }
-        },
-        {
-          label: this.$t('Accessories'),
-          url: {
-            name: 'category',
-            params: {
-              slug: 'petsies-accessories-11'
-            }
-          }
-        },
-        {
-          label: this.$t('Bulk Orders'),
-          url: '/bulk-custom-stuffed-animal-manufacture/'
+          label: this.$t('Crowdfund'),
+          link: '/crowdfund-stuffed-animals/'
         }
       ],
       usefulLinksItems: [
         {
-          label: this.$t('Pricing'),
-          url: '/pricing/'
-        },
-        {
           label: this.$t('About'),
-          url: '/about-petsies/'
+          link: '/about/'
         },
         {
-          label: this.$t('Blog'),
-          url: '/blog/',
-          target: '_blank'
+          label: this.$t('How To Order'),
+          link: '/how-to-order/'
+        },
+        {
+          label: this.$t('Reviews'),
+          link: '/reviews/'
+        },
+        {
+          label: this.$t('Pricing'),
+          link: '/custom-plush-pricing/'
         }
       ]
     }
@@ -195,6 +133,7 @@ export default {
 </script>
 <style lang="scss">
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
+
 .m-menu {
   padding: 0;
   position: absolute;
@@ -230,6 +169,12 @@ export default {
     @include for-desktop {
       flex-wrap: wrap;
       flex: 0 1 auto;
+
+      .sf-mega-menu-column._custom-products {
+        .sf-mega-menu-column__title {
+          display: none;
+        }
+      }
     }
   }
 

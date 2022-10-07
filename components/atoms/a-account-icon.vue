@@ -6,6 +6,7 @@
     <SfIcon
       icon="account"
       size="xs"
+      color="white"
       class="sf-header__icon"
       :class="{
         'sf-header__icon--is-active': isLoggedIn
@@ -38,3 +39,13 @@ export default {
   }
 };
 </script>
+
+<style lang="scss" scoped>
+.a-account-icon {
+  ::v-deep .sf-header__icon {
+    &:hover {
+      --icon-color: var(--c-secondary);
+    }
+  }
+}
+</style>

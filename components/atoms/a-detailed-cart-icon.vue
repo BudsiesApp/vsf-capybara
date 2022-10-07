@@ -1,10 +1,11 @@
 <template>
   <SfButton
-    class="sf-button--pure a-microcart-icon"
+    class="sf-button--pure a-microcart-icon a-detailed-cart-icon"
     @click="openDetailedCart"
   >
     <SfIcon
       size="xs"
+      color="white"
       :icon="floatingIcon ? 'add_to_cart' : 'empty_cart'"
       :class="floatingIcon ? 'sf-bottom-navigation__floating-icon' : 'sf-header__icon'"
       :aria-label="$t('Open Cart')"
@@ -46,8 +47,13 @@ export default {
 <style lang="scss" scoped>
 .a-detailed-cart-icon {
   position: relative;
-  .sf-header__icon {
+
+  ::v-deep .sf-header__icon {
     cursor: pointer;
+
+    &:hover {
+      --icon-color: var(--c-secondary);
+    }
   }
 }
 </style>
