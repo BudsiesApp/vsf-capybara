@@ -36,7 +36,12 @@
                   {{ data }}
                 </template>
               </SfTableData>
-              <SfTableData class="orders__view orders__element--right" />
+
+              <SfTableData class="orders__view orders__element--right">
+                <SfButton class="sf-button--text color-secondary" @click.native="setActiveOrder(order)">
+                  {{ $t('VIEW') }}
+                </SfButton>
+              </SfTableData>
             </SfTableRow>
           </SfTable>
         </template>
@@ -95,7 +100,11 @@ export default {
       this.$store.dispatch('ui/openModal', { name: ModalList.FeatureNotImplemented })
     },
     setActiveOrder (order) {
-      this.activeOrder = order ? this.ordersHistory.find(item => { return order.order_id.endsWith(item.increment_id) }) : null
+      this.activeOrder = order
+        ? this.ordersHistory.find(item => {
+          return order.order_id.toString() === item.increment_id.toString()
+        })
+        : null
     },
     onStartShoppingButtonClick () {
       this.$router.push('/');
