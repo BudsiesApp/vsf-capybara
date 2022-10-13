@@ -26,6 +26,8 @@ const GiftCards = () =>
   import(/* webpackChunkName: "vsf-gift-cards" */ 'theme/pages/GiftCards');
 const BlanketProduct = () =>
   import(/* webpackChunkName: "vsf-blankets" */ 'theme/pages/BlanketProduct');
+const Bulksample = () =>
+  import(/* webpackChunkName: "vsf-bulksample" */ 'theme/pages/Bulksample');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -305,6 +307,16 @@ let routes = [
       name: 'category',
       params: {
         slug: 'renaissance-design-115'
+      }
+    }
+  },
+  {
+    name: 'bulksample',
+    path: '/bulksample/',
+    component: Bulksample,
+    props: () => {
+      return {
+        sku: 'CustomBulkSample_bundle'
       }
     }
   }
