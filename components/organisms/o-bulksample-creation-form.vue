@@ -66,7 +66,7 @@
       <validation-provider
         v-slot="{ errors }"
         :name="$t('\'Size\'')"
-        rules="required"
+        rules="required|between:6,16"
         tag="div"
         class="_step-container"
       >
@@ -283,7 +283,7 @@
 
 <script lang="ts">
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
-import { required } from 'vee-validate/dist/rules';
+import { required, between } from 'vee-validate/dist/rules';
 import Vue, { PropType, VueConstructor } from 'vue'
 import { SfButton, SfHeading, SfSelect, SfDivider, SfInput } from '@storefront-ui/vue'
 import { Logger } from '@vue-storefront/core/lib/logger';
@@ -309,6 +309,11 @@ extend('required', {
   message: 'The {_field_} field is required'
 });
 
+extend('between', {
+  ...between,
+  message: 'The {_field_} field must be between {min} and {max}'
+});
+
 interface CustomerType {
   id: number,
   value: string,
@@ -319,7 +324,7 @@ interface InjectedServices {
   imageHandlerService: ImageHandlerService
 }
 
-const sizeFromDescriptionRegex = /Size: (\d)/;
+const sizeFromDescriptionRegex = /Size: (\d{1,2})/;
 
 export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   props: {
