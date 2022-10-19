@@ -1,272 +1,283 @@
 <template>
   <validation-observer
     v-slot="{ passes }"
-    tag="form"
-    class="o-bulksample-creation-form"
-    @submit.prevent="() => passes(() => onFormSubmit())"
+    slim
   >
-    <SfHeading
-      :level="1"
-      :title="$t('Bulk Plush Sample Order Form')"
-      class="_main-heading"
-    />
-
-    <validation-provider
-      v-slot="{ errors }"
-      :name="$t('\'Artwork\'')"
-      rules="required"
-      tag="div"
-      class="_step-container"
+    <form
+      class="o-bulksample-creation-form"
+      @submit.prevent="() => passes(() => onFormSubmit())"
     >
       <SfHeading
-        :level="3"
-        :title="$t('STEP {number}', {number: 1})"
-        class="_step-number"
+        :level="1"
+        :title="$t('Bulk Plush Sample Order Form')"
+        class="_main-heading"
       />
 
-      <SfHeading
-        :level="3"
-        :title="$t('Please upload your awesome design')"
-        class="_step-title -required"
-      />
-
-      <span class="_order-hint">
-        {{ $t('Please order each unique design as a separate Bulk Plush Sample') }}
-      </span>
-
-      <m-artwork-upload
-        :allow-multiple="true"
-        :disabled="isDisabled"
-        :product-id="backendProductId"
-        :upload-url="artworkUploadUrl"
-        @file-added="onArtworkAdd"
-        @file-removed="onArtworkRemove"
-      />
-
-      <div class="_error-text">
-        {{ errors[0] }}
-      </div>
-
-      <span class="_artwork-hint">
-        {{ $t('One image is typically sufficient, but you may upload up to three images of your design') }}
-      </span>
-    </validation-provider>
-
-    <SfDivider />
-
-    <validation-provider
-      v-slot="{ errors }"
-      :name="$t('\'Size\'')"
-      rules="required"
-      tag="div"
-      class="_step-container"
-    >
-      <SfHeading
-        :level="3"
-        :title="$t('STEP {number}', {number: 2})"
-        class="_step-number"
-      />
-
-      <SfInput
-        v-model="size"
-        class="-required"
-        :label="$t('Size in inches')"
-        :disabled="isDisabled"
-        :error-message="errors[0]"
-        :valid="!errors.length"
-      />
-    </validation-provider>
-
-    <SfDivider />
-
-    <div class="_step-container">
       <validation-provider
         v-slot="{ errors }"
-        :name="$t('\'Name\'')"
+        :name="$t('\'Artwork\'')"
         rules="required"
         tag="div"
-        class="_step-subsection"
+        class="_step-container"
       >
         <SfHeading
           :level="3"
-          :title="$t('STEP {number}', {number: 3})"
+          :title="$t('STEP {number}', {number: 1})"
+          class="_step-number"
+        />
+
+        <SfHeading
+          :level="3"
+          :title="$t('Please upload your awesome design')"
+          class="_step-title -required"
+        />
+
+        <span class="_order-hint">
+          {{ $t('Please order each unique design as a separate Bulk Plush Sample') }}
+        </span>
+
+        <input
+          type="hidden"
+          name="uploaded_artwork_ids[]"
+          v-model="customerImages"
+        >
+
+        <m-artwork-upload
+          :allow-multiple="true"
+          :disabled="isDisabled"
+          :product-id="backendProductId"
+          :upload-url="artworkUploadUrl"
+          :initial-items="artworkUploadInitialItems"
+          @file-added="onArtworkAdd"
+          @file-removed="onArtworkRemove"
+        />
+
+        <div class="_error-text">
+          {{ errors[0] }}
+        </div>
+
+        <span class="_artwork-hint">
+          {{ $t('One image is typically sufficient, but you may upload up to three images of your design') }}
+        </span>
+      </validation-provider>
+
+      <SfDivider />
+
+      <validation-provider
+        v-slot="{ errors }"
+        :name="$t('\'Size\'')"
+        rules="required"
+        tag="div"
+        class="_step-container"
+      >
+        <SfHeading
+          :level="3"
+          :title="$t('STEP {number}', {number: 2})"
           class="_step-number"
         />
 
         <SfInput
-          v-model="name"
+          v-model="size"
           class="-required"
-          :label="$t('Name')"
+          :label="$t('Size in inches')"
           :disabled="isDisabled"
           :error-message="errors[0]"
           :valid="!errors.length"
         />
-
-        <span class="_input-hint">
-          {{ $t('This could be the name of your character or name of your project (e.g., \'Danny the Dolphin\')') }}
-        </span>
       </validation-provider>
 
-      <validation-provider
-        v-slot="{ errors }"
-        :name="$t('\'Description\'')"
-        rules="required"
-        tag="div"
-        class="_step-subsection"
-      >
-        <SfHeading
-          :level="3"
-          :title="$t('Describe Your Bulk Plush Sample')"
-          class="_step-title -required -subsection"
-        />
+      <SfDivider />
 
-        <textarea
-          name="description"
-          rows="5"
-          v-model="description"
-          :placeholder="$t('Dark blue octopus with 8 legs and one large white eye')"
-          :disabled="isDisabled"
-        />
-
-        <div class="_error-text">
-          {{ errors[0] }}
-        </div>
-
-        <span class="_input-hint">
-          {{ $t('Please provide a description of the design to help us most accurately create the Bulk Plush Sample') }}
-        </span>
-      </validation-provider>
-
-      <validation-provider
-        v-if="colorPaletteBodypart"
-        v-slot="{ errors }"
-        :name="$t('\'Colors\'')"
-        rules="required"
-        tag="div"
-        class="_step-subsection"
-      >
-        <SfHeading
-          :level="3"
-          :title="$t('Color Palette')"
-          class="_step-title -required -subsection"
-        />
-
-        <span class="_subtitle">
-          {{ $t('Please select the colors of your design to help us accurately bring your character to life.') }}
-        </span>
-
-        <m-bodypart-option-configurator
-          v-model="color"
-          :name="colorPaletteBodypart.name"
-          :max-values="colorPaletteBodypart.maxValues"
-          :options="colorPaletteOptions"
-          :disabled="isDisabled"
-        />
-
-        <div class="_error-text">
-          {{ errors[0] }}
-        </div>
-
-        <span class="_input-hint">
-          {{ $t('Click an existing color to deselect it.') }}
-        </span>
-
-        <br>
-
-        <span class="_input-hint">
-          {{ $t('Please note any special requests in the description above') }}
-        </span>
-      </validation-provider>
-    </div>
-
-    <SfDivider />
-
-    <div class="_step-container">
-      <SfHeading
-        :level="3"
-        :title="$t('STEP {number}', {number: 4})"
-        class="_step-number"
-      />
-
-      <SfHeading
-        :level="3"
-        :title="$t('Upgrade Your Bulk Plush Sample (optional)')"
-        class="_step-title"
-      />
-
-      <m-addons-selector
-        v-model="selectedAddons"
-        :addons="addons"
-        :disabled="isDisabled"
-      />
-    </div>
-
-    <SfDivider />
-
-    <div class="_step-container">
-      <SfHeading
-        :level="3"
-        :title="$t('STEP {number}', {number: 5})"
-        class="_step-number"
-      />
-
-      <SfHeading
-        :level="3"
-        :title="$t('Which of the following best describes you?')"
-        class="_step-title"
-      />
-
-      <SfSelect
-        v-model="customerType"
-        :disabled="isDisabled"
-        class="sf-select--underlined"
-      >
-        <SfSelectOption
-          v-for="option in customerTypeOptions"
-          :key="option.id"
-          :value="option.value"
+      <div class="_step-container">
+        <validation-provider
+          v-slot="{ errors }"
+          :name="$t('\'Name\'')"
+          rules="required"
+          tag="div"
+          class="_step-subsection"
         >
-          {{ option.title }}
-        </SfSelectOption>
-      </SfSelect>
-    </div>
+          <SfHeading
+            :level="3"
+            :title="$t('STEP {number}', {number: 3})"
+            class="_step-number"
+          />
 
-    <validation-provider
-      v-if="showEmailStep"
-      v-slot="{ errors }"
-      :name="$t('\'E-mail\'')"
-      rules="required"
-      tag="div"
-    >
+          <SfInput
+            v-model="plushieName"
+            class="-required"
+            :label="$t('Name')"
+            :disabled="isDisabled"
+            :error-message="errors[0]"
+            :valid="!errors.length"
+          />
+
+          <span class="_input-hint">
+            {{ $t('This could be the name of your character or name of your project (e.g., \'Danny the Dolphin\')') }}
+          </span>
+        </validation-provider>
+
+        <validation-provider
+          v-slot="{ errors }"
+          :name="$t('\'Description\'')"
+          rules="required"
+          tag="div"
+          class="_step-subsection"
+        >
+          <SfHeading
+            :level="3"
+            :title="$t('Describe Your Bulk Plush Sample')"
+            class="_step-title -required -subsection"
+          />
+
+          <textarea
+            name="description"
+            rows="5"
+            v-model="description"
+            :placeholder="$t('Dark blue octopus with 8 legs and one large white eye')"
+            :disabled="isDisabled"
+          />
+
+          <div class="_error-text">
+            {{ errors[0] }}
+          </div>
+
+          <span class="_input-hint">
+            {{ $t('Please provide a description of the design to help us most accurately create the Bulk Plush Sample') }}
+          </span>
+        </validation-provider>
+
+        <validation-provider
+          v-if="colorPaletteBodypart"
+          v-slot="{ errors }"
+          :name="$t('\'Colors\'')"
+          rules="required"
+          tag="div"
+          class="_step-subsection"
+        >
+          <SfHeading
+            :level="3"
+            :title="$t('Color Palette')"
+            class="_step-title -required -subsection"
+          />
+
+          <span class="_subtitle">
+            {{ $t('Please select the colors of your design to help us accurately bring your character to life.') }}
+          </span>
+
+          <m-bodypart-option-configurator
+            v-model="color"
+            :name="colorPaletteBodypart.code"
+            :max-values="colorPaletteBodypart.maxValues"
+            :options="colorPaletteOptions"
+            :disabled="isDisabled"
+            type="bodypart"
+          />
+
+          <div class="_error-text">
+            {{ errors[0] }}
+          </div>
+
+          <span class="_input-hint">
+            {{ $t('Click an existing color to deselect it.') }}
+          </span>
+
+          <br>
+
+          <span class="_input-hint">
+            {{ $t('Please note any special requests in the description above') }}
+          </span>
+        </validation-provider>
+      </div>
+
       <SfDivider />
 
       <div class="_step-container">
         <SfHeading
           :level="3"
-          :title="$t('STEP {number}', {number: 6})"
+          :title="$t('STEP {number}', {number: 4})"
           class="_step-number"
         />
 
-        <SfInput
-          :label="$t('Enter your email address')"
-          v-model="email"
-          class="-required"
-          :disabled="isDisabled"
-          :error="errors[0]"
-          :valid="!errors.length"
+        <SfHeading
+          :level="3"
+          :title="$t('Upgrade Your Bulk Plush Sample (optional)')"
+          class="_step-title"
         />
 
-        <span class="_input-hint">
-          {{ $t('Sometimes our team has questions about your design') }}
-        </span>
+        <m-addons-selector
+          v-model="selectedAddons"
+          :addons="addons"
+          :disabled="isDisabled"
+        />
       </div>
-    </validation-provider>
 
-    <div class="_buttons-container">
-      <SfButton type="submit">
-        {{ $t('SAVE') }}
-      </SfButton>
-    </div>
+      <SfDivider />
+
+      <div class="_step-container">
+        <SfHeading
+          :level="3"
+          :title="$t('STEP {number}', {number: 5})"
+          class="_step-number"
+        />
+
+        <SfHeading
+          :level="3"
+          :title="$t('Which of the following best describes you?')"
+          class="_step-title"
+        />
+
+        <SfSelect
+          v-model="customerType"
+          :disabled="isDisabled"
+          class="sf-select--underlined"
+        >
+          <SfSelectOption
+            v-for="option in customerTypeOptions"
+            :key="option.id"
+            :value="option.value"
+          >
+            {{ option.title }}
+          </SfSelectOption>
+        </SfSelect>
+      </div>
+
+      <validation-provider
+        v-if="showEmailStep"
+        v-slot="{ errors }"
+        :name="$t('\'E-mail\'')"
+        rules="required"
+        tag="div"
+      >
+        <SfDivider />
+
+        <div class="_step-container">
+          <SfHeading
+            :level="3"
+            :title="$t('STEP {number}', {number: 6})"
+            class="_step-number"
+          />
+
+          <SfInput
+            :label="$t('Enter your email address')"
+            v-model="email"
+            class="-required"
+            :disabled="isDisabled"
+            :error-message="errors[0]"
+            :valid="!errors.length"
+          />
+
+          <span class="_input-hint">
+            {{ $t('Sometimes our team has questions about your design') }}
+          </span>
+        </div>
+      </validation-provider>
+
+      <div class="_buttons-container">
+        <SfButton type="submit" :disabled="isDisabled">
+          {{ $t('SAVE') }}
+        </SfButton>
+      </div>
+    </form>
   </validation-observer>
 </template>
 
@@ -276,11 +287,14 @@ import { required } from 'vee-validate/dist/rules';
 import Vue, { PropType, VueConstructor } from 'vue'
 import { SfButton, SfHeading, SfSelect, SfDivider, SfInput } from '@storefront-ui/vue'
 import { Logger } from '@vue-storefront/core/lib/logger';
-import { getProductGallery as getGalleryByProduct } from '@vue-storefront/core/modules/catalog/helpers';
+import { getProductGallery as getGalleryByProduct, setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
+import * as catalogTypes from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { BundleOption } from '@vue-storefront/core/modules/catalog/types/BundleOption';
+import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
+import i18n from '@vue-storefront/i18n';
 
-import { Bodypart, BodypartOption, BodypartValue, ProductId, ProductValue } from 'src/modules/budsies';
+import { Bodypart, BodypartOption, BodypartValue, ProductId, ProductValue, vuexTypes as budsiesTypes, ImageUploadMethod } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage, getProductDefaultPrice, ServerError } from 'src/modules/shared';
 
@@ -305,6 +319,8 @@ interface InjectedServices {
   imageHandlerService: ImageHandlerService
 }
 
+const sizeFromDescriptionRegex = /Size: (\d)/;
+
 export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   props: {
     artworkUploadUrl: {
@@ -315,8 +331,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       type: Object as PropType<Product>,
       required: true
     },
-    plushieId: {
-      type: Number as PropType<number | undefined>,
+    existingPlushieId: {
+      type: String,
       default: undefined
     }
   },
@@ -391,6 +407,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     bodyparts (): Bodypart[] {
       return this.$store.getters['budsies/getProductBodyparts'](this.product.id);
     },
+    cartItems (): CartItem[] {
+      return this.$store.getters['cart/getCartItems']
+    },
     colorPaletteBodypart (): Bodypart | undefined {
       return this.bodyparts.find((bodypart) => {
         return bodypart.name.toLowerCase() === 'color palette';
@@ -398,7 +417,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     colorPaletteOptions (): BodypartOption[] {
       if (!this.colorPaletteBodypart) {
-        return;
+        return [];
       }
 
       const bodypartsValues: BodypartValue[] =
@@ -425,8 +444,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       return result;
     },
+    getBodypartOptions (): (id: string) => BodypartOption[] {
+      return this.$store.getters['budsies/getBodypartOptions']
+    },
     isDisabled (): boolean {
-      return this.fIsDisabled || this.isSubmitting;
+      return this.isSubmitting;
     },
     customerTypeOptions (): CustomerType[] {
       return [
@@ -437,26 +459,38 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         }
       ]
     },
-    showEmailStep (): boolean {
-      return true; // TODO
+    existingCartItem (): CartItem | undefined {
+      if (!this.existingPlushieId) {
+        return;
+      }
+
+      return this.cartItems.find((item) => item.plushieId === this.existingPlushieId);
     }
   },
   data () {
     return {
       size: '',
-      name: '',
+      plushieName: '',
       description: '',
       customerType: undefined,
-      color: undefined as BodypartOption | undefined,
+      color: undefined as BodypartOption[] | undefined,
       selectedAddons: [] as number [],
       customerImages: [] as CustomerImage[],
-      email: ''
+      email: '',
+      showEmailStep: false,
+      plushieId: undefined as number | undefined,
+      artworkUploadInitialItems: [] as CustomerImage[],
+      isSubmitting: false
     }
   },
   methods: {
     async addToCart (): Promise<void> {
       if (this.isSubmitting) {
         return;
+      }
+
+      if (!this.plushieId) {
+        this.plushieId = await this.createPlushie();
       }
 
       this.isSubmitting = true;
@@ -466,14 +500,22 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         { product: this.product, bundleOptions: this.$store.state.product.current_bundle_options }
       );
 
+      this.$store.commit(
+        budsiesTypes.SN_BUDSIES + '/' + budsiesTypes.CUSTOMER_EMAIL_SET,
+        { email: this.email }
+      );
+
       try {
         try {
           await this.$store.dispatch('cart/addItem', {
             productToAdd: Object.assign({}, this.product, {
-              qty: this.customizeStepData.quantity,
               bodyparts: this.getBodypartsData(),
-              uploadMethod: this.imageUploadStepData.uploadMethod,
-              customerImages: this.customerImages
+              plushieDescription: `Size: ${this.size} ${this.description}`, // TODO
+              plushieName: this.plushieName,
+              customerImages: this.customerImages,
+              customerType: this.customerType,
+              plushieId: this.plushieId.toString(),
+              uploadMethod: ImageUploadMethod.NOW
             })
           });
         } catch (error) {
@@ -484,11 +526,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           Logger.error(error, 'budsies')();
         }
 
-        this.goToCrossSells();
-
-        if (!this.plushieId) {
-          throw new Error('Plushie Id is undefined');
-        }
+        this.$router.push({ name: 'detailed-cart' });
       } catch (error) {
         Logger.error(error, 'budsies')();
 
@@ -496,6 +534,85 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       } finally {
         this.isSubmitting = false;
       }
+    },
+    async createPlushie (): Promise<number> {
+      if (!this.product) {
+        throw new Error('Current product is not set!');
+      }
+
+      const task = await this.$store.dispatch('budsies/createNewPlushie', { productId: this.product.id });
+      return task.result;
+    },
+    fillAddonsDataFromCartItem (existingCartItem: CartItem): void {
+      const productOption = existingCartItem.product_option;
+
+      if (!this.addonsBundleOption || !productOption) {
+        return;
+      }
+
+      if (!productOption.extension_attributes.bundle_options[this.addonsBundleOption.option_id]) {
+        return;
+      }
+
+      const selectedAddonsProductOption =
+       productOption.extension_attributes.bundle_options[this.addonsBundleOption.option_id];
+
+      this.selectedAddons = selectedAddonsProductOption.option_selections;
+    },
+    fillBodypartsFromCartItem (existingCartItem: CartItem): void {
+      this.color = undefined;
+
+      if (!existingCartItem.bodyparts || !this.colorPaletteBodypart) {
+        return;
+      }
+
+      const cartItemColorBodypart =
+       existingCartItem.bodyparts[this.colorPaletteBodypart.id];
+
+      this.color = this.colorPaletteOptions.filter((option: BodypartOption) => {
+        return cartItemColorBodypart.includes(option.id) ||
+        cartItemColorBodypart.includes(Number(option.id))
+      });
+    },
+    fillCustomerImagesFromCartItem (existingCartItem: CartItem): void {
+      this.customerImages = existingCartItem.customerImages || [];
+      this.artworkUploadInitialItems = [ ...this.customerImages ];
+    },
+    fillPlushieDataFromCartItem (existingCartItem: CartItem): void {
+      this.plushieName = existingCartItem.plushieName || '';
+      this.customerType = (existingCartItem as any).customerType; // todo
+      this.size = this.getSizeFromExistingCartItem(existingCartItem);
+      this.description = this.getDescriptionFromExistingCartItem(existingCartItem);
+
+      this.fillCustomerImagesFromCartItem(existingCartItem);
+      this.fillAddonsDataFromCartItem(existingCartItem);
+      this.fillBodypartsFromCartItem(existingCartItem);
+    },
+    getBodypartsData (): Record<string, string[]> {
+      let data: Record<string, string[]> = {};
+
+      if (!this.colorPaletteBodypart || !this.color) {
+        return data;
+      }
+
+      data[this.colorPaletteBodypart.id] = this.color.map(item => item.id);
+
+      return data;
+    },
+    getSizeFromExistingCartItem (existingCartItem: CartItem): string {
+      if (!existingCartItem.plushieDescription) {
+        return '';
+      }
+
+      const match = existingCartItem.plushieDescription.match(sizeFromDescriptionRegex);
+      if (!match || !match[1]) {
+        return '';
+      }
+
+      return match[1];
+    },
+    getDescriptionFromExistingCartItem (existingCartItem: CartItem): string {
+      return existingCartItem.plushieDescription?.replace(sizeFromDescriptionRegex, '').trim() || '';
     },
     onArtworkAdd (value: Item): void {
       this.customerImages.push({
@@ -512,8 +629,113 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       this.customerImages.splice(index, 1);
     },
+    onFailure (message: any): void {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'danger',
+        message: message,
+        action1: { label: i18n.t('OK') }
+      });
+    },
     onFormSubmit (): void {
-      //
+      if (!this.existingCartItem) {
+        void this.addToCart();
+      } else {
+        void this.updateExistingCartItem();
+      }
+    },
+    prefillEmail (): void {
+      const customerEmail = this.$store.getters['budsies/getPrefilledCustomerEmail'];
+      if (customerEmail) {
+        this.email = customerEmail;
+        this.showEmailStep = false;
+      }
+    },
+    setBundleOptionValue (optionId: number, optionQty: number, optionSelections: number[]): void {
+      this.$store.commit('product' + '/' + catalogTypes.PRODUCT_SET_BUNDLE_OPTION, { optionId, optionQty, optionSelections });
+    },
+    async updateClientAndServerItem (payload: {
+      product: CartItem,
+      forceUpdateServerItem?: boolean,
+      forceClientState?: boolean
+    }): Promise<void> {
+      await this.$store.dispatch('cart/updateClientAndServerItem', payload);
+    },
+    async updateExistingCartItem (): Promise<void> {
+      if (!this.existingCartItem) {
+        throw new Error('Cart Item not found!');
+      }
+
+      if (!this.existingPlushieId) {
+        throw new Error('Plushie ID is not defined!');
+      }
+
+      this.isSubmitting = true;
+
+      try {
+        try {
+          await this.updateClientAndServerItem({
+            product: Object.assign({}, this.existingCartItem, {
+              bodyparts: this.getBodypartsData(),
+              plushieDescription: `Size: ${this.size} ${this.description}`, // TODO
+              plushieName: this.plushieName,
+              customerImages: this.customerImages,
+              customerType: this.customerType,
+              plushieId: this.existingPlushieId,
+              uploadMethod: ImageUploadMethod.NOW,
+              product_option: setBundleProductOptionsAsync(
+                null,
+                {
+                  product: this.existingCartItem,
+                  bundleOptions: this.$store.state.product.current_bundle_options
+                }
+              )
+            }),
+            forceUpdateServerItem: true
+          });
+        } catch (error) {
+          if (error instanceof ServerError) {
+            throw error;
+          }
+
+          Logger.error(error, 'budsies')();
+        }
+
+        this.$router.push({ name: 'detailed-cart' });
+      } catch (error) {
+        Logger.error(error, 'budsies')();
+
+        this.onFailure('Unexpected error: ' + error);
+      } finally {
+        this.isSubmitting = false;
+      }
+    }
+  },
+  created (): void {
+    this.prefillEmail();
+
+    if (this.existingCartItem) {
+      this.fillPlushieDataFromCartItem(this.existingCartItem)
+    }
+  },
+  beforeMount (): void {
+    this.$bus.$once('budsies-store-synchronized', this.prefillEmail);
+  },
+  beforeDestroy (): void {
+    this.$bus.$off('budsies-store-synchronized', this.prefillEmail);
+  },
+  watch: {
+    selectedAddons: {
+      handler (newValue: number[]) {
+        if (!this.addonsBundleOption) {
+          return;
+        }
+
+        this.setBundleOptionValue(
+          this.addonsBundleOption.option_id,
+          1,
+          newValue
+        );
+      }
     }
   }
 })

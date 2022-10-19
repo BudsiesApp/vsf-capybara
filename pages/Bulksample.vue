@@ -3,7 +3,8 @@
     <o-bulksample-creation-form
       :artwork-upload-url="artworkUploadUrl"
       :product="getCurrentProduct"
-      v-if="getCurrentProduct"
+      :existing-plushie-id="existingPlushieId"
+      v-if="showCreationForm"
     />
   </div>
 </template>
@@ -22,6 +23,10 @@ export default Vue.extend({
     sku: {
       type: String,
       required: true
+    },
+    existingPlushieId: {
+      type: String,
+      default: undefined
     }
   },
   components: {
@@ -38,11 +43,15 @@ export default Vue.extend({
       }
 
       return product;
+    },
+    showCreationForm (): boolean {
+      return !!this.getCurrentProduct && this.isProductDataLoaded;
     }
   },
   data () {
     return {
-      isRouterLeaving: false
+      isRouterLeaving: false,
+      isProductDataLoaded: false
     };
   },
   async serverPrefetch () {
@@ -53,6 +62,8 @@ export default Vue.extend({
   async mounted () {
     if (!this.getCurrentProduct) {
       await this.loadData();
+    } else {
+      this.isProductDataLoaded = true;
     }
   },
   beforeDestroy () {
@@ -78,6 +89,8 @@ export default Vue.extend({
       ]);
 
       catalogHooksExecutors.productPageVisited(product);
+
+      this.isProductDataLoaded = true;
     }
   }
 })

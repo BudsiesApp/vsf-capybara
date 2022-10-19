@@ -314,9 +314,10 @@ let routes = [
     name: 'bulksample',
     path: '/bulksample/',
     component: Bulksample,
-    props: () => {
+    props: (route) => {
       return {
-        sku: 'CustomBulkSample_bundle'
+        sku: 'CustomBulkSample_bundle',
+        existingPlushieId: route.query.existingPlushieId
       }
     }
   }

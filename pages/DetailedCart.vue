@@ -184,28 +184,10 @@ import { htmlDecode } from '@vue-storefront/core/filters';
 
 const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
 
-const foreversProductsSkus = [
-  'ForeversDog_bundle',
-  'ForeversCat_bundle',
-  'ForeversOther_bundle'
-]
-
-const printedProductSkus = [
-  'customPrintedSocks_bundle',
-  'customPrintedMasks_bundle',
-  'customPrintedKeychains_bundle',
-  'customFeltedMagnets_bundle'
-]
-
-const blanketProductsSkus = [
-  'customRenaissanceBlankets_bundle',
-  'customCutOutBlankets_bundle'
-]
+const bulkSampleProductSkus = ['CustomBulkSample_bundle']
 
 const editableProductsSkus = [
-  ...foreversProductsSkus,
-  ...printedProductSkus,
-  ...blanketProductsSkus
+  ...bulkSampleProductSkus
 ];
 
 export default {
@@ -289,29 +271,8 @@ export default {
       return this.truncate(product.plushieDescription, 150, 50);
     },
     editHandler (product) {
-      if (foreversProductsSkus.includes(product.sku)) {
-        this.$router.push({ name: 'forevers-create', query: { id: product.plushieId } });
-      } else if (printedProductSkus.includes(product.sku)) {
-        this.$router.push({
-          name: 'printed-product',
-          params: { sku: product.sku },
-          query: {
-            product_design: this.getProductDesign(product),
-            existingPlushieId: product.plushieId
-          }
-        });
-      } else if (blanketProductsSkus.includes(product.sku)) {
-        const routeName = product.sku === 'customCutOutBlankets_bundle'
-          ? 'cut-out-blankets'
-          : 'renaissance-blankets';
-
-        this.$router.push({
-          name: routeName,
-          query: {
-            product_design: this.getProductDesign(product),
-            existingPlushieId: product.plushieId
-          }
-        })
+      if (bulkSampleProductSkus.includes(product.sku)) {
+        this.$router.push({ name: 'bulksample', query: { existingPlushieId: product.plushieId } })
       }
     },
     getProductOptions (product) {
