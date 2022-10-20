@@ -547,7 +547,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           value: '0',
           title: 'Small Business'
         }
-      ]
+      ] // TODO load from API
     },
     customerTypeStepNumber (): 5 | 4 {
       return this.showAddonsStep ? 5 : 4;
@@ -580,7 +580,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         if (!productLink.product) {
           return;
         }
-        console.log(productLink);
+
         options.push({
           id: productLink.id,
           value: productLink.id,
@@ -614,7 +614,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       size: '',
       plushieName: '',
       description: '',
-      customerType: undefined,
+      customerType: undefined as string | undefined,
       color: undefined as BodypartOption[] | undefined,
       selectedAddons: [] as number [],
       customerImages: [] as CustomerImage[],
@@ -743,7 +743,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     fillPlushieDataFromCartItem (existingCartItem: CartItem): void {
       this.plushieName = existingCartItem.plushieName || '';
-      this.customerType = (existingCartItem as any).customerType; // todo
+      this.customerType = existingCartItem.customerType;
 
       this.fillSizeFromCartItem(existingCartItem);
       this.fillDescriptionFromCartItem(existingCartItem);
@@ -973,6 +973,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 .o-bulksample-creation-form {
     --divider-margin: 0 0 var(--spacer-xl);
     --divider-border-color: rgba(0, 0, 0, 0.1);
+    --divider-display: none;
 
     padding: var(--spacer-xl) 0;
 
@@ -989,7 +990,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         flex-direction: column;
         align-items: center;
         max-width: 760px;
-        margin: 0 auto var(--spacer-xl);
+        margin: 0 auto var(--spacer-2xl);
+        text-align: center;
     }
 
     ._step-number {
@@ -1055,9 +1057,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
     .sf-input {
         --input-margin: 0;
-        --input-width: 70%;
+        --input-width: 100%;
 
-        min-width: 15rem;
+        text-align: start;
 
         &.-required {
             --input-label-required: " *";
@@ -1065,9 +1067,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
 
     .sf-select {
-        width: 70%;
+      --select-padding: 0;
 
-        min-width: 15rem;
+        width: 100%;
     }
 
     textarea {
@@ -1082,6 +1084,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     ._agreement {
       margin-top: var(--spacer-xl);
       font-size: var(--font-sm);
+      text-align: start;
 
       ::v-deep {
         .sf-checkbox {
@@ -1103,10 +1106,28 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         justify-content: center;
     }
 
-    @include for-desktop {
-        ._step-number {
-            margin-bottom: var(--spacer-base);
-        }
+    @media screen and (min-width: $mobile-max) {
+      --divider-display: block;
+
+      ._step-container {
+        margin-bottom: var(--spacer-xl);
+      }
+
+      .sf-input {
+        --input-width: 70%;
+
+        min-width: 15rem;
+      }
+
+      .sf-select {
+        --select-padding: 0 0 calc(var(--font-xs) * 1.2) 0;
+
+        width: 70%;
+        min-width: 15rem;
+      }
+      ._step-number {
+        margin-bottom: var(--spacer-base);
+      }
     }
 }
 </style>
