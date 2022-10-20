@@ -184,7 +184,8 @@ import { htmlDecode } from '@vue-storefront/core/filters';
 
 const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
 
-const bulkSampleProductSkus = ['CustomBulkSample_bundle']
+const pillowSampleProductSku = 'pillowBulkSample_bundle';
+const bulkSampleProductSkus = ['CustomBulkSample_bundle', pillowSampleProductSku];
 
 const editableProductsSkus = [
   ...bulkSampleProductSkus
@@ -272,7 +273,10 @@ export default {
     },
     editHandler (product) {
       if (bulkSampleProductSkus.includes(product.sku)) {
-        this.$router.push({ name: 'bulksample', query: { existingPlushieId: product.plushieId } })
+        const routeName = product.sku === pillowSampleProductSku
+          ? 'pillow-sample'
+          : 'plush-sample';
+        this.$router.push({ name: routeName, query: { existingPlushieId: product.plushieId } })
       }
     },
     getProductOptions (product) {

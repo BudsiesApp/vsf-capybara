@@ -9,7 +9,7 @@
     >
       <SfHeading
         :level="1"
-        :title="$t('Bulk Plush Sample Order Form')"
+        :title="mainTitleText"
         class="_main-heading"
       />
 
@@ -33,7 +33,7 @@
         />
 
         <span class="_order-hint">
-          {{ $t('Please order each unique design as a separate Bulk Plush Sample') }}
+          {{ orderHintText }}
         </span>
 
         <input
@@ -48,6 +48,7 @@
           :product-id="backendProductId"
           :upload-url="artworkUploadUrl"
           :initial-items="artworkUploadInitialItems"
+          :max-files="3"
           @file-added="onArtworkAdd"
           @file-removed="onArtworkRemove"
         />
@@ -66,7 +67,7 @@
       <validation-provider
         v-slot="{ errors }"
         :name="$t('\'Size\'')"
-        rules="required|between:6,16"
+        :rules="sizeFieldRules"
         tag="div"
         class="_step-container"
       >
@@ -76,7 +77,30 @@
           class="_step-number"
         />
 
+        <template v-if="isPillowSample">
+          <SfHeading
+            :level="3"
+            :title="$t('Size in inches')"
+            class="_step-title -required"
+          />
+
+          <SfSelect
+            v-model="pillowSize"
+            :disabled="isDisabled"
+            class="sf-select--underlined"
+          >
+            <SfSelectOption
+              v-for="sizeOption in pillowSizeOptions"
+              :key="sizeOption.id"
+              :value="sizeOption.value"
+            >
+              {{ sizeOption.title }}
+            </SfSelectOption>
+          </SfSelect>
+        </template>
+
         <SfInput
+          v-else
           v-model="size"
           class="-required"
           :label="$t('Size in inches')"
@@ -125,7 +149,7 @@
         >
           <SfHeading
             :level="3"
-            :title="$t('Describe Your Bulk Plush Sample')"
+            :title="descriptionTitleText"
             class="_step-title -required -subsection"
           />
 
@@ -142,12 +166,12 @@
           </div>
 
           <span class="_input-hint">
-            {{ $t('Please provide a description of the design to help us most accurately create the Bulk Plush Sample') }}
+            {{ descriptionHintText }}
           </span>
         </validation-provider>
 
         <validation-provider
-          v-if="colorPaletteBodypart"
+          v-if="showColorPalette"
           v-slot="{ errors }"
           :name="$t('\'Colors\'')"
           rules="required"
@@ -289,9 +313,9 @@ import { SfButton, SfHeading, SfSelect, SfDivider, SfInput } from '@storefront-u
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { getProductGallery as getGalleryByProduct, setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 import * as catalogTypes from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
-import { BundleOption } from '@vue-storefront/core/modules/catalog/types/BundleOption';
+import { BundleOption, BundleOptionsProductLink } from '@vue-storefront/core/modules/catalog/types/BundleOption';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
-import Product from '@vue-storefront/core/modules/catalog/types/Product';
+import Product, { ProductLink } from '@vue-storefront/core/modules/catalog/types/Product';
 import i18n from '@vue-storefront/i18n';
 
 import { Bodypart, BodypartOption, BodypartValue, ProductId, ProductValue, vuexTypes as budsiesTypes, ImageUploadMethod } from 'src/modules/budsies';
@@ -303,6 +327,7 @@ import AddonOption from '../interfaces/addon-option.interface';
 import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
 import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
 import MBodypartOptionConfigurator from 'theme/components/molecules/m-bodypart-option-configurator.vue';
+import { TranslateResult } from 'vue-i18n';
 
 extend('required', {
   ...required,
@@ -324,6 +349,12 @@ interface InjectedServices {
   imageHandlerService: ImageHandlerService
 }
 
+interface PillowSizeOption {
+  id: number | string,
+  value: number | string,
+  title: string
+}
+
 const sizeFromDescriptionRegex = /Size: (\d{1,2})/;
 
 export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
@@ -339,6 +370,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     existingPlushieId: {
       type: String,
       default: undefined
+    },
+    isPillowSample: {
+      type: Boolean,
+      default: false
     }
   },
   inject: {
@@ -449,6 +484,16 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       return result;
     },
+    descriptionHintText (): TranslateResult {
+      return this.isPillowSample
+        ? this.$t('Please provide a description of the design to help us most accurately create the Bulk Pillow Sample')
+        : this.$t('Please provide a description of the design to help us most accurately create the Bulk Plush Sample');
+    },
+    descriptionTitleText (): TranslateResult {
+      return this.isPillowSample
+        ? this.$t('Describe Your Bulk Pillow Sample')
+        : this.$t('Describe Your Bulk Plush Sample');
+    },
     getBodypartOptions (): (id: string) => BodypartOption[] {
       return this.$store.getters['budsies/getBodypartOptions']
     },
@@ -470,6 +515,52 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       }
 
       return this.cartItems.find((item) => item.plushieId === this.existingPlushieId);
+    },
+    mainTitleText (): TranslateResult {
+      return this.isPillowSample
+        ? this.$t('Bulk Pillow Sample Order Form')
+        : this.$t('Bulk Plush Sample Order Form')
+    },
+    orderHintText (): TranslateResult {
+      return this.isPillowSample
+        ? this.$t('Please order each unique design as a separate Bulk Pillow Sample')
+        : this.$t('Please order each unique design as a separate Bulk Plush Sample')
+    },
+    pillowSizeOptions (): PillowSizeOption[] {
+      const options: PillowSizeOption[] = [];
+
+      if (!this.productBundleOption) {
+        return options;
+      }
+
+      this.productBundleOption.product_links.forEach((productLink) => {
+        if (!productLink.product) {
+          return;
+        }
+        console.log(productLink);
+        options.push({
+          id: productLink.id,
+          value: productLink.id,
+          title: this.getPillowSizeTitle(productLink).toString()
+        });
+      })
+
+      return options;
+    },
+    productBundleOption (): BundleOption | undefined {
+      if (!this.product.bundle_options) {
+        return;
+      }
+
+      return this.product.bundle_options.find((bundleOption) => bundleOption.title.toLowerCase() === 'product');
+    },
+    sizeFieldRules (): string {
+      return this.isPillowSample
+        ? 'required'
+        : 'required|between:6,16';
+    },
+    showColorPalette (): boolean {
+      return !this.isPillowSample && !!this.colorPaletteBodypart;
     }
   },
   data () {
@@ -485,7 +576,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       showEmailStep: false,
       plushieId: undefined as number | undefined,
       artworkUploadInitialItems: [] as CustomerImage[],
-      isSubmitting: false
+      isSubmitting: false,
+      pillowSize: undefined as string | undefined
     }
   },
   methods: {
@@ -512,16 +604,23 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       try {
         try {
+          const data: any = {
+            plushieDescription: this.isPillowSample
+              ? this.description
+              : `Size: ${this.size} ${this.description}`,
+            plushieName: this.plushieName,
+            customerImages: this.customerImages,
+            customerType: this.customerType,
+            plushieId: this.plushieId.toString(),
+            uploadMethod: ImageUploadMethod.NOW
+          }
+
+          if (!this.isPillowSample) {
+            data.bodyparts = this.getBodypartsData();
+          }
+
           await this.$store.dispatch('cart/addItem', {
-            productToAdd: Object.assign({}, this.product, {
-              bodyparts: this.getBodypartsData(),
-              plushieDescription: `Size: ${this.size} ${this.description}`, // TODO
-              plushieName: this.plushieName,
-              customerImages: this.customerImages,
-              customerType: this.customerType,
-              plushieId: this.plushieId.toString(),
-              uploadMethod: ImageUploadMethod.NOW
-            })
+            productToAdd: Object.assign({}, this.product, data)
           });
         } catch (error) {
           if (error instanceof ServerError) {
@@ -574,6 +673,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       const cartItemColorBodypart =
        existingCartItem.bodyparts[this.colorPaletteBodypart.id];
 
+      if (!cartItemColorBodypart) {
+        return;
+      }
+
       this.color = this.colorPaletteOptions.filter((option: BodypartOption) => {
         return cartItemColorBodypart.includes(option.id) ||
         cartItemColorBodypart.includes(Number(option.id))
@@ -583,15 +686,34 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.customerImages = existingCartItem.customerImages || [];
       this.artworkUploadInitialItems = [ ...this.customerImages ];
     },
+    fillDescriptionFromCartItem (existingCartItem: CartItem): void {
+      if (this.isPillowSample) {
+        this.description = existingCartItem.plushieDescription || '';
+        return;
+      }
+
+      this.description = this.getDescriptionFromExistingCartItem(existingCartItem);
+    },
     fillPlushieDataFromCartItem (existingCartItem: CartItem): void {
       this.plushieName = existingCartItem.plushieName || '';
       this.customerType = (existingCartItem as any).customerType; // todo
-      this.size = this.getSizeFromExistingCartItem(existingCartItem);
-      this.description = this.getDescriptionFromExistingCartItem(existingCartItem);
 
+      this.fillSizeFromCartItem(existingCartItem);
+      this.fillDescriptionFromCartItem(existingCartItem);
       this.fillCustomerImagesFromCartItem(existingCartItem);
       this.fillAddonsDataFromCartItem(existingCartItem);
       this.fillBodypartsFromCartItem(existingCartItem);
+    },
+    fillSizeFromCartItem (existingCartItem: CartItem): void {
+      this.size = '';
+      this.pillowSize = undefined;
+
+      if (this.isPillowSample) {
+        this.pillowSize = this.getPillowSizeFromCartItem(existingCartItem);
+        return;
+      }
+
+      this.size = this.getSizeFromExistingCartItem(existingCartItem);
     },
     getBodypartsData (): Record<string, string[]> {
       let data: Record<string, string[]> = {};
@@ -603,6 +725,38 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       data[this.colorPaletteBodypart.id] = this.color.map(item => item.id);
 
       return data;
+    },
+    getPillowSizeFromCartItem (existingCartItem: CartItem): string | undefined {
+      if (!this.productBundleOption) {
+        return;
+      }
+
+      const pillowSizeBundleOption =
+       existingCartItem.product_option?.extension_attributes.bundle_options[this.productBundleOption.option_id];
+
+      if (!pillowSizeBundleOption) {
+        return;
+      }
+
+      const selectedOption = pillowSizeBundleOption.option_selections[0];
+
+      if (selectedOption === undefined) {
+        return;
+      }
+
+      return selectedOption.toString();
+    },
+    getPillowSizeTitle (sizeProductLink: BundleOptionsProductLink): TranslateResult {
+      switch (sizeProductLink.sku) {
+        case 'simplePillowBulkSample_small':
+          return this.$t('12" small');
+        case 'simplePillowBulkSample_medium':
+          return this.$t('16" medium');
+        case 'simplePillowBulkSample_large':
+          return this.$t('18" large');
+        default:
+          throw new Error('Wrong pillow size sku!');
+      }
     },
     getSizeFromExistingCartItem (existingCartItem: CartItem): string {
       if (!existingCartItem.plushieDescription) {
@@ -678,23 +832,30 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       try {
         try {
+          const data: any = {
+            plushieDescription: this.isPillowSample
+              ? this.description
+              : `Size: ${this.size} ${this.description}`,
+            plushieName: this.plushieName,
+            customerImages: this.customerImages,
+            customerType: this.customerType,
+            plushieId: this.existingPlushieId,
+            uploadMethod: ImageUploadMethod.NOW,
+            product_option: setBundleProductOptionsAsync(
+              null,
+              {
+                product: this.existingCartItem,
+                bundleOptions: this.$store.state.product.current_bundle_options
+              }
+            )
+          }
+
+          if (!this.isPillowSample) {
+            data.bodyparts = this.getBodypartsData();
+          }
+
           await this.updateClientAndServerItem({
-            product: Object.assign({}, this.existingCartItem, {
-              bodyparts: this.getBodypartsData(),
-              plushieDescription: `Size: ${this.size} ${this.description}`, // TODO
-              plushieName: this.plushieName,
-              customerImages: this.customerImages,
-              customerType: this.customerType,
-              plushieId: this.existingPlushieId,
-              uploadMethod: ImageUploadMethod.NOW,
-              product_option: setBundleProductOptionsAsync(
-                null,
-                {
-                  product: this.existingCartItem,
-                  bundleOptions: this.$store.state.product.current_bundle_options
-                }
-              )
-            }),
+            product: Object.assign({}, this.existingCartItem, data),
             forceUpdateServerItem: true
           });
         } catch (error) {
@@ -740,6 +901,19 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           1,
           newValue
         );
+      }
+    },
+    pillowSize: {
+      handler (newValue: number | string) {
+        if (!this.productBundleOption) {
+          return;
+        }
+
+        this.setBundleOptionValue(
+          this.productBundleOption.option_id,
+          1,
+          newValue ? [Number(newValue)] : []
+        )
       }
     }
   }

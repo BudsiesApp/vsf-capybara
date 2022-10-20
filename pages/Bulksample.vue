@@ -4,6 +4,7 @@
       :artwork-upload-url="artworkUploadUrl"
       :product="getCurrentProduct"
       :existing-plushie-id="existingPlushieId"
+      :is-pillow-sample="isPillowSample"
       v-if="showCreationForm"
     />
   </div>
@@ -27,6 +28,10 @@ export default Vue.extend({
     existingPlushieId: {
       type: String,
       default: undefined
+    },
+    isPillowSample: {
+      type: Boolean,
+      default: false
     }
   },
   components: {

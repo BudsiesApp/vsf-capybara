@@ -311,13 +311,49 @@ let routes = [
     }
   },
   {
-    name: 'bulksample',
-    path: '/bulksample/',
+    name: 'plush-sample',
+    path: '/bulk-samples/create/',
     component: Bulksample,
     props: (route) => {
       return {
         sku: 'CustomBulkSample_bundle',
         existingPlushieId: route.query.existingPlushieId
+      }
+    }
+  },
+  {
+    name: 'pillow-sample',
+    path: '/bulk-pillow-samples/create/',
+    component: Bulksample,
+    props: (route) => {
+      return {
+        sku: 'pillowBulkSample_bundle',
+        existingPlushieId: route.query.existingPlushieId,
+        isPillowSample: true
+      }
+    }
+  },
+  {
+    name: 'plush-sample-alias-1',
+    path: '/plushie/index/create/id/:plushieId/type/bulk-sample/',
+    redirect: (route) => {
+      return {
+        name: 'plush-sample',
+        query: {
+          existingPlushieId: route.params.plushieId
+        }
+      }
+    }
+  },
+  {
+    name: 'pillow-sample-alias-1',
+    path: '/plushie/index/create/id/:plushieId/type/bulk-pillow-sample/',
+    redirect: (route) => {
+      return {
+        name: 'pillow-sample',
+        query: {
+          existingPlushieId: route.params.plushieId
+        }
       }
     }
   }
