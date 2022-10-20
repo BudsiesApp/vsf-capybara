@@ -215,7 +215,7 @@
 
       <SfDivider />
 
-      <div class="_step-container">
+      <div class="_step-container" v-if="showAddonsStep">
         <SfHeading
           :level="3"
           :title="$t('STEP {number}', {number: 4})"
@@ -240,7 +240,7 @@
       <div class="_step-container">
         <SfHeading
           :level="3"
-          :title="$t('STEP {number}', {number: 5})"
+          :title="$t('STEP {number}', {number: customerTypeStepNumber})"
           class="_step-number"
         />
 
@@ -277,7 +277,7 @@
         <div class="_step-container">
           <SfHeading
             :level="3"
-            :title="$t('STEP {number}', {number: 6})"
+            :title="$t('STEP {number}', {number: emailStepNumber})"
             class="_step-number"
           />
 
@@ -494,6 +494,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         ? this.$t('Describe Your Bulk Pillow Sample')
         : this.$t('Describe Your Bulk Plush Sample');
     },
+    emailStepNumber (): 5 | 6 {
+      return this.showAddonsStep ? 6 : 5;
+    },
     getBodypartOptions (): (id: string) => BodypartOption[] {
       return this.$store.getters['budsies/getBodypartOptions']
     },
@@ -508,6 +511,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           title: 'Small Business'
         }
       ]
+    },
+    customerTypeStepNumber (): 5 | 4 {
+      return this.showAddonsStep ? 5 : 4;
     },
     existingCartItem (): CartItem | undefined {
       if (!this.existingPlushieId) {
@@ -558,6 +564,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return this.isPillowSample
         ? 'required'
         : 'required|between:6,16';
+    },
+    showAddonsStep (): boolean {
+      return this.addons.length > 0;
     },
     showColorPalette (): boolean {
       return !this.isPillowSample && !!this.colorPaletteBodypart;
