@@ -1,4 +1,6 @@
 .sf-select {
+    --input-error-message-font-family: var(--font-family-primary);
+
     &__overlay {
         --overlay-z-index: 20
     }

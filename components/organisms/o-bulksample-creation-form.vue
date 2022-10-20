@@ -86,6 +86,8 @@
 
           <SfSelect
             v-model="pillowSize"
+            :valid="!errors.length"
+            :error-message="errors[0]"
             :disabled="isDisabled"
             class="sf-select--underlined"
           >
@@ -265,12 +267,8 @@
         </SfSelect>
       </div>
 
-      <validation-provider
+      <template
         v-if="showEmailStep"
-        v-slot="{ errors }"
-        :name="$t('\'E-mail\'')"
-        rules="required"
-        tag="div"
       >
         <SfDivider />
 
@@ -281,20 +279,58 @@
             class="_step-number"
           />
 
-          <SfInput
-            :label="$t('Enter your email address')"
-            v-model="email"
-            class="-required"
-            :disabled="isDisabled"
-            :error-message="errors[0]"
-            :valid="!errors.length"
-          />
+          <validation-provider
+            v-slot="{ errors }"
+            :name="$t('\'E-mail\'')"
+            rules="required"
+            slim
+          >
+            <SfInput
+              :label="$t('Enter your email address')"
+              v-model="email"
+              class="-required"
+              :disabled="isDisabled"
+              :error-message="errors[0]"
+              :valid="!errors.length"
+            />
+          </validation-provider>
 
           <span class="_input-hint">
             {{ $t('Sometimes our team has questions about your design') }}
           </span>
+
+          <validation-provider
+            :rules="{ required: { allowFalse: false } }"
+            :name="$t('Agreement')"
+            v-slot="{errors}"
+            slim
+          >
+            <SfCheckbox
+              class="_agreement"
+              :disabled="isDisabled"
+              v-model="agreement"
+            >
+              <template #label>
+                <span>
+                  {{ $t('I agree to ') }}
+
+                  <a href="" target="_blank">{{ $t('Bulk Order Customer Agreement') }}</a>,
+
+                  <a href="/terms-of-service/">{{ $t('Terms of Service') }}</a>, and
+
+                  <a href="/privacy-policy/">{{ $t('Privacy Policy') }}</a>.
+
+                  {{ $t('I understand that Stuffed Animal Pros happily takes care of all tears, defects, and shipping damage with a refund, replacement, or repair.') }}
+                </span>
+              </template>
+            </SfCheckbox>
+
+            <div class="_error-text">
+              {{ errors[0] }}
+            </div>
+          </validation-provider>
         </div>
-      </validation-provider>
+      </template>
 
       <div class="_buttons-container">
         <SfButton type="submit" :disabled="isDisabled">
@@ -309,13 +345,14 @@
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
 import { required, between } from 'vee-validate/dist/rules';
 import Vue, { PropType, VueConstructor } from 'vue'
-import { SfButton, SfHeading, SfSelect, SfDivider, SfInput } from '@storefront-ui/vue'
+import { TranslateResult } from 'vue-i18n';
+import { SfButton, SfCheckbox, SfHeading, SfSelect, SfDivider, SfInput } from '@storefront-ui/vue'
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { getProductGallery as getGalleryByProduct, setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 import * as catalogTypes from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { BundleOption, BundleOptionsProductLink } from '@vue-storefront/core/modules/catalog/types/BundleOption';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
-import Product, { ProductLink } from '@vue-storefront/core/modules/catalog/types/Product';
+import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import i18n from '@vue-storefront/i18n';
 
 import { Bodypart, BodypartOption, BodypartValue, ProductId, ProductValue, vuexTypes as budsiesTypes, ImageUploadMethod } from 'src/modules/budsies';
@@ -327,7 +364,6 @@ import AddonOption from '../interfaces/addon-option.interface';
 import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
 import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
 import MBodypartOptionConfigurator from 'theme/components/molecules/m-bodypart-option-configurator.vue';
-import { TranslateResult } from 'vue-i18n';
 
 extend('required', {
   ...required,
@@ -389,7 +425,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     MArtworkUpload,
     MBodypartOptionConfigurator,
     ValidationProvider,
-    ValidationObserver
+    ValidationObserver,
+    SfCheckbox
   },
   computed: {
     addons (): AddonOption[] {
@@ -582,11 +619,12 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       selectedAddons: [] as number [],
       customerImages: [] as CustomerImage[],
       email: '',
-      showEmailStep: false,
+      showEmailStep: true,
       plushieId: undefined as number | undefined,
       artworkUploadInitialItems: [] as CustomerImage[],
       isSubmitting: false,
-      pillowSize: undefined as string | undefined
+      pillowSize: undefined as string | undefined,
+      agreement: false
     }
   },
   methods: {
@@ -1003,28 +1041,17 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         font-size: var(--font-xs);
         margin-top: var(--spacer-xs);
         height: calc(var(--font-xs) * 1.2);
+        font-weight: var(--font-medium);
     }
 
     .m-artwork-upload {
         margin: var(--spacer-sm) 0 var(--spacer-xl);
         width: 100%;
-        // max-width: 45rem;
-        // min-width: 25rem;
     }
 
     .m-bodypart-option-configurator {
         text-align: center;
     }
-
-    // textarea,
-    // .sf-input,
-    // .sf-select {
-    //     --input-width: 50%;
-    //     --input-margin: 0;
-
-    //     max-width: 30rem;
-    //     min-width: 15rem;
-    // }
 
     .sf-input {
         --input-margin: 0;
@@ -1050,6 +1077,24 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         padding: 0.5em;
         font-family: var(--font-family-primary);
         resize: vertical;
+    }
+
+    ._agreement {
+      margin-top: var(--spacer-xl);
+      font-size: var(--font-sm);
+
+      ::v-deep {
+        .sf-checkbox {
+          &__container {
+            align-items: flex-start;
+          }
+
+          &__checkmark {
+            flex-shrink: 0;
+            margin-right: var(--spacer-sm);
+          }
+        }
+      }
     }
 
     ._buttons-container {
