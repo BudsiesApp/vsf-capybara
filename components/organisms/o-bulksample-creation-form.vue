@@ -595,7 +595,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         return;
       }
 
-      return this.product.bundle_options.find((bundleOption) => bundleOption.title.toLowerCase() === 'product');
+      return this.product.bundle_options.find(
+        (bundleOption) => bundleOption.title.toLowerCase() === 'product'
+      );
     },
     sizeFieldRules (): string {
       return this.isPillowSample
