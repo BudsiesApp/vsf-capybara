@@ -269,70 +269,66 @@
         </SfSelect>
       </div>
 
-      <template
-        v-if="showEmailStep"
-      >
-        <SfDivider />
+      <SfDivider v-show="showEmailStep" />
 
-        <div class="_step-container">
-          <SfHeading
-            :level="3"
-            :title="$t('STEP {number}', {number: emailStepNumber})"
-            class="_step-number"
+      <div v-show="showEmailStep" class="_step-container">
+        <SfHeading
+          :level="3"
+          :title="$t('STEP {number}', {number: emailStepNumber})"
+          class="_step-number"
+        />
+
+        <validation-provider
+          v-slot="{ errors }"
+          :name="$t('\'E-mail\'')"
+          rules="required"
+          slim
+        >
+          <SfInput
+            :label="$t('Enter your email address')"
+            v-model="email"
+            class="-required"
+            :disabled="isDisabled"
+            :error-message="errors[0]"
+            :valid="!errors.length"
           />
+        </validation-provider>
 
-          <validation-provider
-            v-slot="{ errors }"
-            :name="$t('\'E-mail\'')"
-            rules="required"
-            slim
+        <span class="_input-hint">
+          {{ $t('Sometimes our team has questions about your design') }}
+        </span>
+
+        <validation-provider
+          :rules="{ required: { allowFalse: false } }"
+          :name="$t('Agreement')"
+          v-slot="{errors}"
+          slim
+        >
+          <SfCheckbox
+            class="_agreement"
+            :disabled="isDisabled"
+            v-model="agreement"
           >
-            <SfInput
-              :label="$t('Enter your email address')"
-              v-model="email"
-              class="-required"
-              :disabled="isDisabled"
-              :error-message="errors[0]"
-              :valid="!errors.length"
-            />
-          </validation-provider>
+            <template #label>
+              <span>
+                {{ $t('I agree to ') }}
 
-          <span class="_input-hint">
-            {{ $t('Sometimes our team has questions about your design') }}
-          </span>
+                <a href="" target="_blank">{{ $t('Bulk Order Customer Agreement') }}</a>,
 
-          <validation-provider
-            :rules="{ required: { allowFalse: false } }"
-            :name="$t('Agreement')"
-            v-slot="{errors}"
-            slim
-          >
-            <SfCheckbox
-              class="_agreement"
-              :disabled="isDisabled"
-              v-model="agreement"
-            >
-              <template #label>
-                <span>
-                  {{ $t('I agree to ') }}
+                <a href="/terms-of-service/">{{ $t('Terms of Service') }}</a>, and
 
-                  <a href="" target="_blank">{{ $t('Bulk Order Customer Agreement') }}</a>,
+                <a href="/privacy-policy/">{{ $t('Privacy Policy') }}</a>.
 
-                  <a href="/terms-of-service/">{{ $t('Terms of Service') }}</a>, and
+                {{ $t('I understand that Stuffed Animal Pros happily takes care of all tears, defects, and shipping damage with a refund, replacement, or repair.') }}
+              </span>
+            </template>
+          </SfCheckbox>
 
-                  <a href="/privacy-policy/">{{ $t('Privacy Policy') }}</a>.
-
-                  {{ $t('I understand that Stuffed Animal Pros happily takes care of all tears, defects, and shipping damage with a refund, replacement, or repair.') }}
-                </span>
-              </template>
-            </SfCheckbox>
-
-            <div class="_error-text">
-              {{ errors[0] }}
-            </div>
-          </validation-provider>
-        </div>
-      </template>
+          <div class="_error-text">
+            {{ errors[0] }}
+          </div>
+        </validation-provider>
+      </div>
 
       <div class="_buttons-container">
         <SfButton type="submit" :disabled="isDisabled">
