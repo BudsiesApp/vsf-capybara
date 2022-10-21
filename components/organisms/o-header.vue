@@ -46,6 +46,12 @@
         </SfHeaderNavigationItem>
 
         <SfHeaderNavigationItem>
+          <router-link class="o-header__submenu" to="/custom-keychains/">
+            {{ $t('Custom Keychains') }}
+          </router-link>
+        </SfHeaderNavigationItem>
+
+        <SfHeaderNavigationItem>
           <router-link class="o-header__submenu" to="/how-to-order/">
             {{ $t('How To Order') }}
           </router-link>

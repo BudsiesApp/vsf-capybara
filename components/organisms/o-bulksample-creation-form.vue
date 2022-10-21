@@ -64,55 +64,57 @@
 
       <SfDivider />
 
-      <validation-provider
-        v-slot="{ errors }"
-        :name="$t('\'Size\'')"
-        :rules="sizeFieldRules"
-        tag="div"
-        class="_step-container"
-      >
-        <SfHeading
-          :level="3"
-          :title="$t('STEP {number}', {number: 2})"
-          class="_step-number"
-        />
-
-        <template v-if="isPillowSample">
+      <template v-if="showPillowSizeSelector || showSimpleSizeInput">
+        <validation-provider
+          v-slot="{ errors }"
+          :name="$t('\'Size\'')"
+          :rules="sizeFieldRules"
+          tag="div"
+          class="_step-container"
+        >
           <SfHeading
             :level="3"
-            :title="$t('Size in inches')"
-            class="_step-title -required"
+            :title="$t('STEP {number}', {number: 2})"
+            class="_step-number"
           />
 
-          <SfSelect
-            v-model="pillowSize"
-            :valid="!errors.length"
-            :error-message="errors[0]"
-            :disabled="isDisabled"
-            class="sf-select--underlined"
-          >
-            <SfSelectOption
-              v-for="sizeOption in pillowSizeOptions"
-              :key="sizeOption.id"
-              :value="sizeOption.value"
+          <template v-if="showPillowSizeSelector">
+            <SfHeading
+              :level="3"
+              :title="$t('Size in inches')"
+              class="_step-title -required"
+            />
+
+            <SfSelect
+              v-model="pillowSize"
+              :valid="!errors.length"
+              :error-message="errors[0]"
+              :disabled="isDisabled"
+              class="sf-select--underlined"
             >
-              {{ sizeOption.title }}
-            </SfSelectOption>
-          </SfSelect>
-        </template>
+              <SfSelectOption
+                v-for="sizeOption in pillowSizeOptions"
+                :key="sizeOption.id"
+                :value="sizeOption.value"
+              >
+                {{ sizeOption.title }}
+              </SfSelectOption>
+            </SfSelect>
+          </template>
 
-        <SfInput
-          v-else
-          v-model="size"
-          class="-required"
-          :label="$t('Size in inches')"
-          :disabled="isDisabled"
-          :error-message="errors[0]"
-          :valid="!errors.length"
-        />
-      </validation-provider>
+          <SfInput
+            v-else-if="showSimpleSizeInput"
+            v-model="size"
+            class="-required"
+            :label="$t('Size in inches')"
+            :disabled="isDisabled"
+            :error-message="errors[0]"
+            :valid="!errors.length"
+          />
+        </validation-provider>
 
-      <SfDivider />
+        <SfDivider />
+      </template>
 
       <div class="_step-container">
         <validation-provider
@@ -124,7 +126,7 @@
         >
           <SfHeading
             :level="3"
-            :title="$t('STEP {number}', {number: 3})"
+            :title="$t('STEP {number}', {number: nameStepNumber})"
             class="_step-number"
           />
 
@@ -220,13 +222,13 @@
       <div class="_step-container" v-if="showAddonsStep">
         <SfHeading
           :level="3"
-          :title="$t('STEP {number}', {number: 4})"
+          :title="$t('STEP {number}', {number: addonsStepNumber})"
           class="_step-number"
         />
 
         <SfHeading
           :level="3"
-          :title="$t('Upgrade Your Bulk Plush Sample (optional)')"
+          :title="addonsTitleText"
           class="_step-title"
         />
 
@@ -359,6 +361,8 @@ import { Bodypart, BodypartOption, BodypartValue, ProductId, ProductValue, vuexT
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage, getProductDefaultPrice, ServerError } from 'src/modules/shared';
 
+import BulksampleProduct from 'theme/interfaces/bulksample-product.type';
+
 import AddonOption from '../interfaces/addon-option.interface';
 
 import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
@@ -407,8 +411,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       type: String,
       default: undefined
     },
-    isPillowSample: {
-      type: Boolean,
+    type: {
+      type: String as PropType<BulksampleProduct>,
       default: false
     }
   },
@@ -465,6 +469,15 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       return this.product.bundle_options.find((option: BundleOption) => option.title.toLowerCase() === 'addons');
     },
+    addonsStepNumber (): number {
+      return this.nameStepNumber + 1;
+    },
+    addonsTitleText (): TranslateResult {
+      return this.$t(
+        'Upgrade Your Bulk {productName} Sample (optional)',
+        { productName: this.productNameByType }
+      )
+    },
     backendProductId (): string | undefined {
       if (!this.product) {
         return undefined;
@@ -475,6 +488,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           return ProductValue.BULK_SAMPLE;
         case ProductId.BULK_PILLOW_SAMPLE:
           return ProductValue.PILLOW_BULK_SAMPLE;
+        case ProductId.BULK_KEYCHAIN_SAMPLE:
+          return ProductValue.KEYCHAIN_BULK_SAMPLE;
         default:
           throw new Error(
             `Can't resolve Backend product ID for Magento '${this.product.id}' product ID`
@@ -522,17 +537,19 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return result;
     },
     descriptionHintText (): TranslateResult {
-      return this.isPillowSample
-        ? this.$t('Please provide a description of the design to help us most accurately create the Bulk Pillow Sample')
-        : this.$t('Please provide a description of the design to help us most accurately create the Bulk Plush Sample');
+      return this.$t(
+        'Please provide a description of the design to help us most accurately create the Bulk {productName} Sample',
+        { productName: this.productNameByType }
+      )
     },
     descriptionTitleText (): TranslateResult {
-      return this.isPillowSample
-        ? this.$t('Describe Your Bulk Pillow Sample')
-        : this.$t('Describe Your Bulk Plush Sample');
+      return this.$t(
+        'Describe Your Bulk {productName} Sample',
+        { productName: this.productNameByType }
+      );
     },
-    emailStepNumber (): 5 | 6 {
-      return this.showAddonsStep ? 6 : 5;
+    emailStepNumber (): number {
+      return this.customerTypeStepNumber + 1;
     },
     getBodypartOptions (): (id: string) => BodypartOption[] {
       return this.$store.getters['budsies/getBodypartOptions']
@@ -549,8 +566,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         }
       ] // TODO load from API
     },
-    customerTypeStepNumber (): 5 | 4 {
-      return this.showAddonsStep ? 5 : 4;
+    customerTypeStepNumber (): number {
+      return this.showAddonsStep ? this.addonsStepNumber + 1 : this.nameStepNumber + 1;
     },
     existingCartItem (): CartItem | undefined {
       if (!this.existingPlushieId) {
@@ -560,14 +577,19 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return this.cartItems.find((item) => item.plushieId === this.existingPlushieId);
     },
     mainTitleText (): TranslateResult {
-      return this.isPillowSample
-        ? this.$t('Bulk Pillow Sample Order Form')
-        : this.$t('Bulk Plush Sample Order Form')
+      return this.$t(
+        'Bulk {productName} Sample Order Form',
+        { productName: this.productNameByType }
+      )
+    },
+    nameStepNumber (): number {
+      return this.showPillowSizeSelector || this.showSimpleSizeInput ? 3 : 2;
     },
     orderHintText (): TranslateResult {
-      return this.isPillowSample
-        ? this.$t('Please order each unique design as a separate Bulk Pillow Sample')
-        : this.$t('Please order each unique design as a separate Bulk Plush Sample')
+      return this.$t(
+        'Please order each unique design as a separate Bulk {productName} Sample',
+        { productName: this.productNameByType }
+      )
     },
     pillowSizeOptions (): PillowSizeOption[] {
       const options: PillowSizeOption[] = [];
@@ -599,8 +621,20 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         (bundleOption) => bundleOption.title.toLowerCase() === 'product'
       );
     },
+    productNameByType (): TranslateResult {
+      switch (this.type) {
+        case BulksampleProduct.PLUSH:
+          return this.$t('Plush');
+        case BulksampleProduct.PILLOW:
+          return this.$t('Pillow');
+        case BulksampleProduct.KEYCHAIN:
+          return this.$t('Keychain');
+        default:
+          return '';
+      }
+    },
     sizeFieldRules (): string {
-      return this.isPillowSample
+      return this.type === BulksampleProduct.PILLOW
         ? 'required'
         : 'required|between:6,16';
     },
@@ -608,7 +642,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return this.addons.length > 0;
     },
     showColorPalette (): boolean {
-      return !this.isPillowSample && !!this.colorPaletteBodypart;
+      return this.type === BulksampleProduct.PLUSH && !!this.colorPaletteBodypart;
+    },
+    showPillowSizeSelector (): boolean {
+      return this.type === BulksampleProduct.PILLOW;
+    },
+    showSimpleSizeInput (): boolean {
+      return this.type === BulksampleProduct.PLUSH;
     }
   },
   data () {
@@ -654,9 +694,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       try {
         try {
           const data: any = {
-            plushieDescription: this.isPillowSample
-              ? this.description
-              : `Size: ${this.size} ${this.description}`,
             plushieName: this.plushieName,
             customerImages: this.customerImages,
             customerType: this.customerType,
@@ -664,8 +701,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
             uploadMethod: ImageUploadMethod.NOW
           }
 
-          if (!this.isPillowSample) {
+          if (this.type === BulksampleProduct.PLUSH) {
             data.bodyparts = this.getBodypartsData();
+            data.plushieDescription = `Size: ${this.size} ${this.description}`;
+          } else {
+            data.plushieDescription = this.description;
           }
 
           await this.$store.dispatch('cart/addItem', {
@@ -736,12 +776,12 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.artworkUploadInitialItems = [ ...this.customerImages ];
     },
     fillDescriptionFromCartItem (existingCartItem: CartItem): void {
-      if (this.isPillowSample) {
-        this.description = existingCartItem.plushieDescription || '';
+      if (this.type === BulksampleProduct.PLUSH) {
+        this.description = this.getDescriptionFromExistingCartItem(existingCartItem);
         return;
       }
 
-      this.description = this.getDescriptionFromExistingCartItem(existingCartItem);
+      this.description = existingCartItem.plushieDescription || '';
     },
     fillPlushieDataFromCartItem (existingCartItem: CartItem): void {
       this.plushieName = existingCartItem.plushieName || '';
@@ -757,7 +797,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.size = '';
       this.pillowSize = undefined;
 
-      if (this.isPillowSample) {
+      if (this.type === BulksampleProduct.KEYCHAIN) {
+        return;
+      }
+
+      if (this.type === BulksampleProduct.PILLOW) {
         this.pillowSize = this.getPillowSizeFromCartItem(existingCartItem);
         return;
       }
@@ -882,9 +926,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       try {
         try {
           const data: any = {
-            plushieDescription: this.isPillowSample
-              ? this.description
-              : `Size: ${this.size} ${this.description}`,
             plushieName: this.plushieName,
             customerImages: this.customerImages,
             customerType: this.customerType,
@@ -899,8 +940,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
             )
           }
 
-          if (!this.isPillowSample) {
+          if (this.type === BulksampleProduct.PLUSH) {
             data.bodyparts = this.getBodypartsData();
+            data.plushieDescription = `Size: ${this.size} ${this.description}`;
+          } else {
+            data.plushieDescription = this.description;
           }
 
           await this.updateClientAndServerItem({

@@ -4,7 +4,7 @@
       :artwork-upload-url="artworkUploadUrl"
       :product="getCurrentProduct"
       :existing-plushie-id="existingPlushieId"
-      :is-pillow-sample="isPillowSample"
+      :type="type"
       v-if="showCreationForm"
     />
   </div>
@@ -12,10 +12,12 @@
 
 <script lang="ts">
 import config from 'config';
-import Vue from 'vue'
+import Vue, { PropType } from 'vue'
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
+
+import BulksampleProduct from 'theme/interfaces/bulksample-product.type';
 
 import OBulksampleCreationForm from 'theme/components/organisms/o-bulksample-creation-form.vue';
 
@@ -29,9 +31,9 @@ export default Vue.extend({
       type: String,
       default: undefined
     },
-    isPillowSample: {
-      type: Boolean,
-      default: false
+    type: {
+      type: String as PropType<BulksampleProduct>,
+      required: true
     }
   },
   components: {

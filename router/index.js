@@ -1,3 +1,5 @@
+import BulksampleProduct from 'theme/interfaces/bulksample-product.type';
+
 const ErrorPage = () =>
   import(/* webpackChunkName: "vsf-error" */ 'theme/pages/Error');
 const Product = () =>
@@ -317,7 +319,8 @@ let routes = [
     props: (route) => {
       return {
         sku: 'CustomBulkSample_bundle',
-        existingPlushieId: route.query.existingPlushieId
+        existingPlushieId: route.query.existingPlushieId,
+        type: BulksampleProduct.PLUSH
       }
     }
   },
@@ -326,10 +329,23 @@ let routes = [
     path: '/bulk-pillow-samples/create/',
     component: Bulksample,
     props: (route) => {
+      console.log('BulksampleProduct.PILLOW', BulksampleProduct);
       return {
         sku: 'pillowBulkSample_bundle',
         existingPlushieId: route.query.existingPlushieId,
-        isPillowSample: true
+        type: BulksampleProduct.PILLOW
+      }
+    }
+  },
+  {
+    name: 'keychain-sample',
+    path: '/bulk-keychain-samples/create/',
+    component: Bulksample,
+    props: (route) => {
+      return {
+        sku: 'keychainBulkSample_bundle',
+        existingPlushieId: route.query.existingPlushieId,
+        type: BulksampleProduct.KEYCHAIN
       }
     }
   },
@@ -351,6 +367,18 @@ let routes = [
     redirect: (route) => {
       return {
         name: 'pillow-sample',
+        query: {
+          existingPlushieId: route.params.plushieId
+        }
+      }
+    }
+  },
+  {
+    name: 'keychain-sample-alias-1',
+    path: '/plushie/index/create/id/:plushieId/type/bulk-keychain-sample/',
+    redirect: (route) => {
+      return {
+        name: 'keychain-sample',
         query: {
           existingPlushieId: route.params.plushieId
         }
