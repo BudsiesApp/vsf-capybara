@@ -5,15 +5,27 @@
       :title="title"
       :visible="visible"
     >
-      <SfMegaMenuColumn
-        :title="$t('Custom Products')"
-        class="_custom-products"
-      >
+      <SfMegaMenuColumn :title="$t('Custom Plush Products')">
         <SfList>
           <SfListItem
-            v-for="item in customProductsItems"
+            v-for="item in customPlushProductsItems"
             :key="item.label"
-            :class="{'mobile-only': item.mobileOnly}"
+          >
+            <router-link
+              :to="item.link"
+              @click.native="$emit('close')"
+            >
+              <SfMenuItem :label="item.label" />
+            </router-link>
+          </SfListItem>
+        </SfList>
+      </SfMegaMenuColumn>
+
+      <SfMegaMenuColumn :title="$t('Other Custom Products')">
+        <SfList>
+          <SfListItem
+            v-for="item in otherCustomProductsItems"
+            :key="item.label"
           >
             <router-link
               :to="item.link"
@@ -65,12 +77,7 @@ export default {
   },
   data () {
     return {
-      customProductsItems: [
-        {
-          label: this.$t('Custom Pillows'),
-          link: '/custom-pillows/',
-          mobileOnly: true
-        },
+      customPlushProductsItems: [
         {
           label: this.$t('Mascots'),
           link: '/mascot-stuffed-animals/'
@@ -102,6 +109,16 @@ export default {
         {
           label: this.$t('Crowdfund'),
           link: '/crowdfund-stuffed-animals/'
+        }
+      ],
+      otherCustomProductsItems: [
+        {
+          label: this.$t('Custom Pillows'),
+          link: '/custom-pillows/'
+        },
+        {
+          label: this.$t('Custom Keychains'),
+          link: '/custom-keychains/'
         }
       ],
       usefulLinksItems: [
@@ -169,12 +186,6 @@ export default {
     @include for-desktop {
       flex-wrap: wrap;
       flex: 0 1 auto;
-
-      .sf-mega-menu-column._custom-products {
-        .sf-mega-menu-column__title {
-          display: none;
-        }
-      }
     }
   }
 

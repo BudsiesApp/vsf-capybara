@@ -30,25 +30,13 @@
           @mouseleave="isHoveredMenu = false"
         >
           <div class="o-header__submenu">
-            {{ $t('Custom Plush') }}
+            {{ $t('Products') }}
           </div>
 
           <MMenu
             :visible="isHoveredMenu && !isSearchPanelVisible"
             @close="isHoveredMenu = false"
           />
-        </SfHeaderNavigationItem>
-
-        <SfHeaderNavigationItem>
-          <router-link class="o-header__submenu" to="/custom-pillows/">
-            {{ $t('Custom Pillows') }}
-          </router-link>
-        </SfHeaderNavigationItem>
-
-        <SfHeaderNavigationItem>
-          <router-link class="o-header__submenu" to="/custom-keychains/">
-            {{ $t('Custom Keychains') }}
-          </router-link>
         </SfHeaderNavigationItem>
 
         <SfHeaderNavigationItem>
