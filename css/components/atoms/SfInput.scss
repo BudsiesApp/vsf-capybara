@@ -1,6 +1,7 @@
 .sf-input {
     --input-font-family: var(--font-family-primary);
     --input-label-font-family: var(--font-family-primary);
+    --input-error-message-font-family: var(--font-family-primary);
 
     input {
         &:focus {

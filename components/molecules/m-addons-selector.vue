@@ -188,7 +188,7 @@ export default Vue.extend({
       transition: background-color .15s cubic-bezier(0.65, 0.05, 0.35, 1);
 
       &.sf-checkbox--is-active {
-        background: var(--c-secondary);
+        background: var(--c-light);
       }
     }
 

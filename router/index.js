@@ -1,3 +1,5 @@
+import BulksampleProduct from 'theme/interfaces/bulksample-product.type';
+
 const ErrorPage = () =>
   import(/* webpackChunkName: "vsf-error" */ 'theme/pages/Error');
 const Product = () =>
@@ -26,6 +28,8 @@ const GiftCards = () =>
   import(/* webpackChunkName: "vsf-gift-cards" */ 'theme/pages/GiftCards');
 const BlanketProduct = () =>
   import(/* webpackChunkName: "vsf-blankets" */ 'theme/pages/BlanketProduct');
+const Bulksample = () =>
+  import(/* webpackChunkName: "vsf-bulksample" */ 'theme/pages/Bulksample');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -305,6 +309,79 @@ let routes = [
       name: 'category',
       params: {
         slug: 'renaissance-design-115'
+      }
+    }
+  },
+  {
+    name: 'plush-sample',
+    path: '/bulk-samples/create/',
+    component: Bulksample,
+    props: (route) => {
+      return {
+        sku: 'CustomBulkSample_bundle',
+        existingPlushieId: route.query.existingPlushieId,
+        type: BulksampleProduct.PLUSH
+      }
+    }
+  },
+  {
+    name: 'pillow-sample',
+    path: '/bulk-pillow-samples/create/',
+    component: Bulksample,
+    props: (route) => {
+      console.log('BulksampleProduct.PILLOW', BulksampleProduct);
+      return {
+        sku: 'pillowBulkSample_bundle',
+        existingPlushieId: route.query.existingPlushieId,
+        type: BulksampleProduct.PILLOW
+      }
+    }
+  },
+  {
+    name: 'keychain-sample',
+    path: '/bulk-keychain-samples/create/',
+    component: Bulksample,
+    props: (route) => {
+      return {
+        sku: 'keychainBulkSample_bundle',
+        existingPlushieId: route.query.existingPlushieId,
+        type: BulksampleProduct.KEYCHAIN
+      }
+    }
+  },
+  {
+    name: 'plush-sample-alias-1',
+    path: '/plushie/index/create/id/:plushieId/type/bulk-sample/',
+    redirect: (route) => {
+      return {
+        name: 'plush-sample',
+        query: {
+          existingPlushieId: route.params.plushieId
+        }
+      }
+    }
+  },
+  {
+    name: 'pillow-sample-alias-1',
+    path: '/plushie/index/create/id/:plushieId/type/bulk-pillow-sample/',
+    redirect: (route) => {
+      return {
+        name: 'pillow-sample',
+        query: {
+          existingPlushieId: route.params.plushieId
+        }
+      }
+    }
+  },
+  {
+    name: 'keychain-sample-alias-1',
+    path: '/plushie/index/create/id/:plushieId/type/bulk-keychain-sample/',
+    redirect: (route) => {
+      return {
+        name: 'keychain-sample',
+        query: {
+          existingPlushieId: route.params.plushieId
+        }
       }
     }
   }
