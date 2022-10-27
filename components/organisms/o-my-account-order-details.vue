@@ -183,7 +183,7 @@ export default {
     }
   },
   methods: {
-    getOrderedProducts () {
+    async getOrderedProducts () {
       let arrayOfSKUs = []
       this.order.items.forEach(product => {
         if (arrayOfSKUs.indexOf(product.sku) === -1) {
@@ -191,13 +191,24 @@ export default {
         }
       })
 
-      let searchQuery = new SearchQuery()
+      let searchQuery = new SearchQuery();
       searchQuery = searchQuery.applyFilter({ key: 'configurable_children.sku.keyword', value: { 'in': arrayOfSKUs } })
-      this.$store.dispatch('product/findProducts', { query: searchQuery, start: 0, size: this.order.items.length, updateState: false }, { root: true }).then((resp) => {
-        resp.items.forEach(responseItem => {
-          let relatedProduct = this.order.items.find(item => { return item.sku === responseItem.sku })
-          this.products.push(Object.assign({}, relatedProduct, responseItem))
-        })
+
+      const result = await this.$store.dispatch(
+        'product/findProducts',
+        {
+          query: searchQuery,
+          start: 0,
+          size: this.order.items.length,
+          updateState: false
+        },
+        { root: true }
+      );
+
+      this.order.items.forEach(orderItem => {
+        let responseItem = result.items.find(item => { return item.sku === orderItem.sku });
+
+        this.products.push(Object.assign({}, orderItem, responseItem))
       })
     },
     getThumbnailForProduct (product) {

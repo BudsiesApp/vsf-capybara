@@ -137,7 +137,7 @@ export default {
   },
   beforeDestroy () {
     this.$bus.$off('order-after-placed', this.onOrderAfterPlacedHandler);
-    Event.$off(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
+    EventBus.$off(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
   },
   methods: {
     activateHashSection () {
