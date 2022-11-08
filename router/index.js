@@ -30,6 +30,8 @@ const BlanketProduct = () =>
   import(/* webpackChunkName: "vsf-blankets" */ 'theme/pages/BlanketProduct');
 const Bulksample = () =>
   import(/* webpackChunkName: "vsf-bulksample" */ 'theme/pages/Bulksample');
+const BulkorderConfirmation = () =>
+import(/* webpackChunkName: "vsf-bulkorder-confirmation" */ 'theme/pages/BulkorderConfirmation');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -384,6 +386,11 @@ let routes = [
         }
       }
     }
+  },
+  {
+    name: 'bulkorder-confirmation',
+    path: '/bulkorder/confirmation/',
+    component: BulkorderConfirmation
   }
 ];
 

@@ -86,6 +86,9 @@ body {
   line-height: #{$line-height-base};
   margin: 0;
   padding: 0;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+
   a {
     text-decoration: none;
     color: var(--c-link);
