@@ -1,7 +1,7 @@
 <template>
   <div class="a-ordered-heading">
     <SfHeading>
-      <template #title="{title}">
+      <template #title>
         <component
           :is="`h${level}`"
           class="sf-heading__title"

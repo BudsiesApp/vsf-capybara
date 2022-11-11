@@ -28,7 +28,12 @@
         class="_title -required"
       />
 
-      <SfInput :label="$t('Project Name')" v-model="name" :disabled="isDisabled" />
+      <SfInput
+        :label="$t('Project Name')"
+        v-model="name"
+        :disabled="isDisabled"
+        class="sf-input--required"
+      />
 
       <span class="_hint">
         {{ $t('This could be the name of your character or name of your project(e.g., \'Danny the Dolphin\')') }}
@@ -64,17 +69,29 @@
         {{ $t('Best price breaks occur at volumes of 100, 500, and 1,000.') }}
       </span>
 
-      <SfInput :label="$t('Quantity')" :disabled="isDisabled" v-model="quantity" />
+      <SfInput
+        :label="$t('Quantity')"
+        :disabled="isDisabled"
+        class="sf-input--required"
+        v-model="quantity"
+      />
 
       <div class="_additional-quantity" v-show="showAdditionalQuantity">
         <span class="_quantity-helper">
           {{ $t('Don\'t worry, we will quote you the quantity you enter and the quantity with the next price break. However, you can also enter another quantity below and we\'ll quote you both!') }}
         </span>
 
-        <SfInput :label="$t('Also quote this quantity:')" :disabled="isDisabled" v-model="additionalQuantity" />
+        <SfInput
+          :label="$t('Also quote this quantity:')"
+          :disabled="isDisabled"
+          v-model="additionalQuantity"
+        />
       </div>
 
-      <SfButton class="sf-button--text">
+      <SfButton
+        class="sf-button--text _quantity-button"
+        @click="showAdditionalQuantity = !showAdditionalQuantity"
+      >
         {{ quantityButtonText }}
       </SfButton>
     </div>
@@ -88,25 +105,34 @@
       />
 
       <SfRadio
-        :value="0"
+        value="0"
         :label="$t('No firm deadline - the sooner the better!')"
         v-model="deadline"
       />
 
       <SfRadio
-        :value="1"
+        value="1"
         :label="$t('I need them for a specific date')"
         v-model="deadline"
       />
 
-      date selector
+      <div
+        class="sf-input _deadline-input"
+        :class="{'--required': deadline && deadline !== '0'}"
+      >
+        <input
+          v-model="deadlineDate"
+          type="date"
+          :disabled="!deadline || deadline === '0'"
+        >
+      </div>
     </div>
 
     <div class="_section">
       <AOrderedHeading
         :order="6"
         :level="3"
-        :title="$t('Do you have a deadline for delivery?')"
+        :title="$t('Which country is the plush being delivered to?')"
         class="_title -required"
       />
 
@@ -129,7 +155,7 @@
       </SfSelect>
     </div>
 
-    <div class="_section">
+    <div class="_section --half">
       <AOrderedHeading
         :order="7"
         :level="3"
@@ -137,13 +163,30 @@
         class="_title -required"
       />
 
-      <SfInput :label="$t('First Name')" />
+      <div class="_content --half">
+        <SfInput
+          :label="$t('First Name')"
+          v-model="customerFirstName"
+          class="sf-input--required"
+        />
 
-      <SfInput :label="$t('Last Name')" />
+        <SfInput
+          :label="$t('Last Name')"
+          v-model="customerLastName"
+        />
 
-      <SfInput :label="$t('Your e-mail address')" />
+        <SfInput
+          :label="$t('Your e-mail address')"
+          v-model="customerEmail"
+          class="sf-input--required"
+        />
 
-      <SfInput :label="$t('Phone number')" />
+        <SfInput
+          :label="$t('Phone number')"
+          v-model="customerPhone"
+          class="sf-input--required"
+        />
+      </div>
     </div>
 
     <div class="_section">
@@ -159,46 +202,61 @@
       </div>
 
       <SfSelect
-        v-model="country"
+        v-model="customerType"
         :should-lock-scroll-on-open="isMobile"
         class="sf-select--underlined"
       >
         <SfSelectOption
-          v-for="item in countries"
-          :key="item.code"
-          :value="item.code"
+          v-for="item in customerTypeOptions"
+          :key="item.id"
+          :value="item.value"
         >
-          {{ item.name }}
+          {{ item.title }}
         </SfSelectOption>
       </SfSelect>
     </div>
+
+    <MCheckbox
+      v-model="agreement"
+      :disabled="isDisabled"
+      :label="$t('I have read and agree to the Bulk Order Customer Agreement')"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue';
-import { SfInput, SfRadio, SfSelect } from '@storefront-ui/vue';
+import Vue, { PropType, VueConstructor } from 'vue';
+import { TranslateResult } from 'vue-i18n';
+import { SfButton, SfInput, SfRadio, SfSelect } from '@storefront-ui/vue';
 import {
   mapMobileObserver,
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
+import Product from 'core/modules/catalog/types/Product';
+import { ProductId, ProductValue } from 'src/modules/budsies';
+import { ImageHandlerService, Item } from 'src/modules/file-storage';
+import { CustomerImage } from 'src/modules/shared';
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
+import CustomerType from 'theme/components/interfaces/customer-type.interface';
 
 import AOrderedHeading from 'theme/components/atoms/a-ordered-heading.vue';
 import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
 import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
-import { CustomerImage } from 'src/modules/shared';
-import { TranslateResult } from 'vue-i18n';
-import Product from 'core/modules/catalog/types/Product';
 
-const Countries = require('@vue-storefront/i18n/resource/countries.json')
+const Countries = require('@vue-storefront/i18n/resource/countries.json');
 
-export default Vue.extend({
+interface InjectedServices {
+  imageHandlerService: ImageHandlerService
+}
+
+export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   name: 'MBaseForm',
   components: {
     AOrderedHeading,
+    MArtworkUpload,
     MCheckbox,
+    SfButton,
     SfInput,
     SfRadio,
     SfSelect
@@ -221,6 +279,9 @@ export default Vue.extend({
       required: true
     }
   },
+  inject: {
+    imageHandlerService: { from: 'ImageHandlerService' }
+  },
   data () {
     return {
       countries: Countries,
@@ -229,6 +290,14 @@ export default Vue.extend({
   },
   computed: {
     ...mapMobileObserver(),
+    agreement: {
+      get (): boolean {
+        return this.value.agreement;
+      },
+      set (value: boolean) {
+        this.updateValue({ agreement: value })
+      }
+    },
     artworkUploadInitialItems (): CustomerImage[] {
       return []; // todo
     },
@@ -238,16 +307,33 @@ export default Vue.extend({
       }
 
       switch (this.product.id) {
-        // case ProductId.BULK_PLUSH_SAMPLE:
-        //   return ProductValue.BULK_SAMPLE;
-        // case ProductId.BULK_PILLOW_SAMPLE:
-        //   return ProductValue.PILLOW_BULK_SAMPLE;
-        // case ProductId.BULK_KEYCHAIN_SAMPLE:
-        //   return ProductValue.KEYCHAIN_BULK_SAMPLE;
+        case ProductId.BULK_PLUSH_SAMPLE:
+          return ProductValue.BULK_SAMPLE;
+        case ProductId.BULK_PILLOW_SAMPLE:
+          return ProductValue.PILLOW_BULK_SAMPLE;
+        case ProductId.BULK_KEYCHAIN_SAMPLE:
+          return ProductValue.KEYCHAIN_BULK_SAMPLE;
         default:
           throw new Error(
             `Can't resolve Backend product ID for Magento '${this.product.id}' product ID`
           );
+      }
+    },
+    customerTypeOptions (): CustomerType[] {
+      return [
+        {
+          id: 0,
+          value: '0',
+          title: 'Small Business'
+        }
+      ] // TODO load from API
+    },
+    customerType: {
+      get (): string | undefined {
+        return this.value.customerType
+      },
+      set (value: string) {
+        this.updateValue({ customerType: value });
       }
     },
     name: {
@@ -267,7 +353,7 @@ export default Vue.extend({
       }
     },
     quantity: {
-      get (): number {
+      get (): number | undefined {
         return this.value.quantity;
       },
       set (value: number) {
@@ -275,7 +361,7 @@ export default Vue.extend({
       }
     },
     additionalQuantity: {
-      get (): number {
+      get (): number | undefined {
         return this.value.additionalQuantity;
       },
       set (value: number) {
@@ -283,11 +369,19 @@ export default Vue.extend({
       }
     },
     deadline: {
-      get (): Date | undefined {
+      get (): '0' | '1' | undefined {
         return this.value.deadline;
       },
-      set (value: Date | undefined) {
+      set (value: '0' | '1' | undefined) {
         this.updateValue({ deadline: value });
+      }
+    },
+    deadlineDate: {
+      get (): string | undefined {
+        return this.value.deadlineDate;
+      },
+      set (value: any) {
+        this.updateValue({ deadlineDate: value })
       }
     },
     country: {
@@ -337,13 +431,30 @@ export default Vue.extend({
     }
   },
   methods: {
-    onArtworkAdd (): void {
-      // todo
+    onArtworkAdd (value: Item): void {
+      const customerImages = [...this.value.customerImages];
+
+      customerImages.push({
+        id: value.id,
+        url: this.imageHandlerService.getOriginalImageUrl(value.url)
+      });
+
+      this.updateValue({ customerImages })
     },
-    onArtworkRemove (): void {
-      // todo
+    onArtworkRemove (storageItemId: string): void {
+      const customerImages = [...this.value.customerImages];
+
+      const index = customerImages.findIndex(({ id }) => id === storageItemId);
+
+      if (index === -1) {
+        return;
+      }
+
+      customerImages.splice(index, 1);
+
+      this.updateValue({ customerImages });
     },
-    updateValue (value: Record<string, any>): void {
+    updateValue (value: Partial<BulkordersBaseFormData>): void {
       this.$emit('input', { ...this.value, ...value })
     }
   },
@@ -353,8 +464,86 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .m-base-form {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
 
+    ._section {
+        margin-bottom: var(--spacer-2xl);
+        display: flex;
+        flex-direction: column;
+
+        ._title {
+            margin-bottom: var(--spacer-base);
+        }
+
+        ._content {
+          display: flex;
+
+          &.--half {
+          flex-direction: row;
+          flex-wrap: wrap;
+
+          .sf-input {
+            flex-basis: 40%;
+            flex-grow: 1;
+
+            &:nth-child(odd) {
+              margin-right: var(--spacer-sm);
+            }
+          }
+        }
+        }
+    }
+
+    ._hint {
+      font-size: var(--font-xs);
+    }
+
+    .sf-input {
+      &--required {
+        --input-label-required: " *"
+      }
+    }
+
+    textarea {
+      box-sizing: border-box;
+      border: 1px solid var(--c-light);
+      width: 100%;
+      padding: 0.5em;
+      font-family: var(--font-family-primary);
+      resize: vertical;
+    }
+
+    ._quantity-helper {
+      margin-bottom: var(--spacer-sm);
+    }
+
+    ._additional-quantity {
+      display: flex;
+      flex-direction: column;
+    }
+
+    ._quantity-button {
+      align-self: flex-start;
+    }
+
+    ._deadline-input {
+      margin-top: var(--spacer-sm);
+      position: relative;
+
+      &.--required {
+        &::before {
+          content: '*';
+          color: var(--c-primary);
+          font-size: var(--font-base);
+          position: absolute;
+          top: 0;
+          left: 0;
+        }
+      }
+    }
 }
 </style>

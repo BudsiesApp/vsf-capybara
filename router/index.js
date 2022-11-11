@@ -30,6 +30,8 @@ const BlanketProduct = () =>
   import(/* webpackChunkName: "vsf-blankets" */ 'theme/pages/BlanketProduct');
 const Bulksample = () =>
   import(/* webpackChunkName: "vsf-bulksample" */ 'theme/pages/Bulksample');
+const KeychainQuote = () =>
+  import(/* webpackChunkName: "vsf-keychain-quote" */ 'theme/pages/KeychainQuote');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -384,6 +386,11 @@ let routes = [
         }
       }
     }
+  },
+  {
+    name: 'keychain-quote',
+    path: '/keychain-quote/',
+    component: KeychainQuote
   }
 ];
 
