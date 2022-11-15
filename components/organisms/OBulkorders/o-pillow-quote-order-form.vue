@@ -36,6 +36,10 @@
               {{ sizeOption.title }}
             </SfSelectOption>
           </SfSelect>
+
+          <div class="_error-text" v-if="$v.pillowSize.$anyError">
+            {{ $t('This field is required') }}
+          </div>
         </div>
       </template>
     </m-base-form>
@@ -51,6 +55,7 @@
 <script lang="ts">
 import { PropType } from 'vue';
 import { TranslateResult } from 'vue-i18n';
+import { required } from 'vuelidate/lib/validators';
 import { SfButton, SfSelect } from '@storefront-ui/vue';
 
 import Product from 'core/modules/catalog/types/Product';
@@ -226,6 +231,11 @@ export default BulkorderBaseFormPersistanceState.extend({
         this.savePersistedState();
       }
     }
+  },
+  validations: {
+    pillowSize: {
+      required
+    }
   }
 })
 </script>
@@ -255,6 +265,14 @@ export default BulkorderBaseFormPersistanceState.extend({
         ._title {
             margin-bottom: var(--spacer-base);
         }
+    }
+
+    ._error-text {
+        color: var(--c-danger-variant);
+        font-size: var(--font-xs);
+        margin-top: var(--spacer-xs);
+        height: calc(var(--font-xs) * 1.2);
+        font-weight: var(--font-medium);
     }
   }
   </style>
