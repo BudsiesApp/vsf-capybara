@@ -73,6 +73,8 @@
       </div>
     </div>
 
+    <slot name="bodyparts" />
+
     <div class="_section">
       <AOrderedHeading
         :order="4"
@@ -175,6 +177,8 @@
         </div>
       </div>
     </div>
+
+    <slot name="size" />
 
     <div class="_section">
       <AOrderedHeading
