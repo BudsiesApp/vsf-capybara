@@ -10,11 +10,11 @@
       v-model="bulkordersBaseFormData"
     >
       <template #size>
-        <div class="_size-section">
+        <div class="_section">
           <AOrderedHeading
             :order="6"
             :level="3"
-            :title="$t('What’s your preferred size?')"
+            :title="$t('What\'s your preferred size?')"
             class="_title -required"
           />
 
@@ -227,6 +227,16 @@ export default Vue.extend({
     ._button-container {
       display: flex;
       justify-content: center;
+    }
+
+    ._section {
+        margin-bottom: var(--spacer-2xl);
+        display: flex;
+        flex-direction: column;
+
+        ._title {
+            margin-bottom: var(--spacer-base);
+        }
     }
   }
   </style>

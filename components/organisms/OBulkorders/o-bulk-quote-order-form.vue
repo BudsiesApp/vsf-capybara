@@ -9,44 +9,45 @@
       :artwork-upload-url="artworkUploadUrl"
       v-model="bulkordersBaseFormData"
     >
-      <template #bodyparts>
-        <AOrderedHeading
-          :order="4"
-          :level="3"
-          :title="$t('Color Pallette')"
-          class="_title -required"
-        />
+      <template #bodyparts v-if="colorPaletteBodypart">
+        <div class="_section">
+          <AOrderedHeading
+            :order="4"
+            :level="3"
+            :title="$t('Color Pallette')"
+            class="_title -required"
+          />
 
-        <span class="_subtitle">
-          {{ $t('Please select the colors of your design to help us accurately bring your character to life.') }}
-        </span>
+          <span class="_subtitle">
+            {{ $t('Please select the colors of your design to help us accurately bring your character to life.') }}
+          </span>
 
-        <m-bodypart-option-configurator
-          v-model="color"
-          :name="colorPaletteBodypart.code"
-          :max-values="colorPaletteBodypart.maxValues"
-          :options="colorPaletteOptions"
-          :disabled="isDisabled"
-          type="bodypart"
-        />
+          <m-bodypart-option-configurator
+            v-model="color"
+            :name="colorPaletteBodypart.code"
+            :max-values="colorPaletteBodypart.maxValues"
+            :options="colorPaletteOptions"
+            :disabled="isDisabled"
+            type="bodypart"
+            class="_color-pallette"
+          />
 
-        <div class="_error-text">
+          <div class="_error-text">
           <!-- {{  }} -->
+          </div>
+
+          <span class="_input-hint">
+            {{ $t('Click an existing color to deselect it.') }}
+          </span>
+
+          <span class="_input-hint">
+            {{ $t('Please note any special requests in the description above') }}
+          </span>
         </div>
-
-        <span class="_input-hint">
-          {{ $t('Click an existing color to deselect it.') }}
-        </span>
-
-        <br>
-
-        <span class="_input-hint">
-          {{ $t('Please note any special requests in the description above') }}
-        </span>
       </template>
 
       <template #size>
-        <div class="_size-section">
+        <div class="_section">
           <AOrderedHeading
             :order="7"
             :level="3"
@@ -76,7 +77,7 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue';
-import { SfButton, SfHeading, SfInput, SfSelect } from '@storefront-ui/vue';
+import { SfButton, SfHeading, SfInput } from '@storefront-ui/vue';
 
 import Product from 'core/modules/catalog/types/Product';
 import { product } from 'core/modules/url/test/unit/helpers/data';
@@ -84,6 +85,7 @@ import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-
 import { Bodypart, BodypartOption, BodypartValue, BulkorderQuoteProductId } from 'src/modules/budsies';
 
 import MBaseForm from './m-base-form.vue';
+import MBodypartOptionConfigurator from '../../molecules/m-bodypart-option-configurator.vue';
 import AOrderedHeading from '../../atoms/a-ordered-heading.vue';
 
 export default Vue.extend({
@@ -99,9 +101,12 @@ export default Vue.extend({
     }
   },
   components: {
+    AOrderedHeading,
     MBaseForm,
+    MBodypartOptionConfigurator,
     SfButton,
-    SfHeading
+    SfHeading,
+    SfInput
   },
   data () {
     const bulkordersBaseFormData: BulkordersBaseFormData = {
@@ -224,7 +229,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.o-pillow-quote-order-form {
+.o-bulk-quote-order-form {
       padding: var(--spacer-lg);
 
       ._title {
@@ -245,7 +250,7 @@ export default Vue.extend({
     }
 
     ._input-hint {
-        margin-top: var(--spacer-sm);
+        text-align: center;
         font-weight: 600;
     }
 
@@ -255,6 +260,24 @@ export default Vue.extend({
         margin-top: var(--spacer-xs);
         height: calc(var(--font-xs) * 1.2);
         font-weight: var(--font-medium);
+    }
+
+    ._section {
+        margin-bottom: var(--spacer-2xl);
+        display: flex;
+        flex-direction: column;
+
+        ._title {
+            margin-bottom: var(--spacer-base);
+        }
+    }
+
+    ._subtitle {
+        text-align: center;
+    }
+
+    ._color-pallette {
+      text-align: center;
     }
 }
 </style>

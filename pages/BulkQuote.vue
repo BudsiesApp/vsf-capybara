@@ -62,6 +62,8 @@ export default {
       }
     );
 
+    await store.dispatch('budsies/loadProductBodyparts', { productId: product.id })
+
     if (isServer) {
       await store.dispatch('product/setCurrent', product);
     }
@@ -115,7 +117,7 @@ export default {
       box-sizing: border-box;
       padding: var(--spacer-lg) 1rem 0;
 
-      .o-pillow-quote-order-form {
+      .o-bulk-quote-order-form {
         max-width: 760px;
         margin: 0 auto;
       }
