@@ -34,8 +34,8 @@
             class="_color-pallette"
           />
 
-          <div class="_error-text">
-          <!-- {{  }} -->
+          <div class="_error-text" v-if="$v.color.$anyError">
+            {{ $t('This field is required') }}
           </div>
 
           <span class="_input-hint">
@@ -63,6 +63,8 @@
 
           <SfInput
             :label="$t('Size')"
+            :valid="!$v.bulkSize || !$v.bulkSize.$anyError"
+            :error="$t('This field is required')"
             v-model="bulkSize"
           />
         </div>
@@ -79,6 +81,7 @@
 
 <script lang="ts">
 import { PropType } from 'vue';
+import { required } from 'vuelidate/lib/validators';
 import { SfButton, SfHeading, SfInput } from '@storefront-ui/vue';
 
 import Product from 'core/modules/catalog/types/Product';
@@ -257,6 +260,14 @@ export default BulkorderBaseFormPersistanceState.extend({
       handler (): void {
         this.savePersistedState();
       }
+    }
+  },
+  validations: {
+    bulkSize: {
+      required
+    },
+    color: {
+      required
     }
   }
 })
