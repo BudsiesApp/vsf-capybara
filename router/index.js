@@ -32,6 +32,8 @@ const Bulksample = () =>
   import(/* webpackChunkName: "vsf-bulksample" */ 'theme/pages/Bulksample');
 const BulkorderConfirmation = () =>
 import(/* webpackChunkName: "vsf-bulkorder-confirmation" */ 'theme/pages/BulkorderConfirmation');
+const BulkorderQuotation = () =>
+import(/* webpackChunkName: "vsf-bulkorder-quotation" */ 'theme/pages/BulkorderQuotation');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -391,6 +393,42 @@ let routes = [
     name: 'bulkorder-confirmation',
     path: '/bulkorder/confirmation/',
     component: BulkorderConfirmation
+  },
+  {
+    name: 'bulkorder-quotation-plushie',
+    path: '/bulkorder/quotation/',
+    component: BulkorderQuotation,
+    props: (route) => {
+      return {
+        bulkorderId: route.query.bulkorderId,
+        sampleSku: 'CustomBulkSample_bundle',
+        sampleType: BulksampleProduct.PLUSH
+      }
+    }
+  },
+  {
+    name: 'bulkorder-quotation-pillow',
+    path: '/bulkorder/quotation/',
+    component: BulkorderQuotation,
+    props: (route) => {
+      return {
+        bulkorderId: route.query.bulkorderId,
+        sampleSku: 'pillowBulkSample_bundle',
+        sampleType: BulksampleProduct.PILLOW
+      }
+    }
+  },
+  {
+    name: 'bulkorder-quotation-keychain',
+    path: '/bulkorder/quotation/',
+    component: BulkorderQuotation,
+    props: (route) => {
+      return {
+        bulkorderId: route.query.bulkorderId,
+        sampleSku: 'keychainBulkSample_bundle',
+        sampleType: BulksampleProduct.KEYCHAIN
+      }
+    }
   }
 ];
 
