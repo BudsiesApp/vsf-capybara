@@ -36,6 +36,8 @@ const PillowQuote = () =>
   import(/* webpackChunkName: "vsf-pillow-quote" */ 'theme/pages/PillowQuote');
 const BulkQuote = () =>
   import(/* webpackChunkName: "vsf-bulk-quote" */ 'theme/pages/BulkQuote');
+const BulkorderConfirmation = () =>
+import(/* webpackChunkName: "vsf-bulkorder-confirmation" */ 'theme/pages/BulkorderConfirmation');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -405,6 +407,11 @@ let routes = [
     name: 'bulk-quote',
     path: '/bulk-quote/',
     component: BulkQuote
+  },
+  {
+    name: 'bulkorder-confirmation',
+    path: '/bulkorder/confirmation/',
+    component: BulkorderConfirmation
   }
 ];
 
