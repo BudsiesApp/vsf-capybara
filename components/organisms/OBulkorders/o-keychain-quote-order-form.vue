@@ -27,8 +27,9 @@ import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-
 import { BulkorderQuoteProductId } from 'src/modules/budsies';
 
 import MBaseForm from './m-base-form.vue';
+import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
 
-export default Vue.extend({
+export default BulkorderBaseFormPersistanceState.extend({
   name: 'OKeychainQuoteOrderForm',
   props: {
     product: {
@@ -73,9 +74,27 @@ export default Vue.extend({
       return this.isSubmitting;
     }
   },
+  async beforeMount (): Promise<void> {
+    const state = await this.getPersistedState();
+
+    if (!state) {
+      return;
+    }
+
+    this.bulkordersBaseFormData = { ...this.bulkordersBaseFormData, ...state };
+  },
   methods: {
     getBaseFormComponent (): InstanceType<typeof MBaseForm> | undefined {
       return this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
+    },
+    getDataToPersist () {
+      return {
+        country: this.bulkordersBaseFormData.country,
+        customerFirstName: this.bulkordersBaseFormData.customerFirstName,
+        customerEmail: this.bulkordersBaseFormData.customerEmail,
+        customerPhone: this.bulkordersBaseFormData.customerPhone,
+        customerLastName: this.bulkordersBaseFormData.customerLastName
+      }
     },
     async onSubmit (): Promise<void> {
       const form = this.getBaseFormComponent();
@@ -85,21 +104,6 @@ export default Vue.extend({
       }
 
       this.isSubmitting = true;
-      // (int)$request->product_id,
-      //           (int)$request->qty,
-      //           (int)$request->size,
-      //           $request->project_name,
-      //           $request->description,
-      //           $request->uploaded_artwork_ids,
-      //           $request->email,
-      //           $request->phone,
-      //           (int)$request->country_id,
-      //           $request->first_name,
-      //           $lastName,
-      //           $request->body_parts ?? [],
-      //           (int)$request->alternative_qty ?? null,
-      //           $request->deadline_date ?? null,
-      //           $clientTypeId
 
       try {
         await this.$store.dispatch(
@@ -122,6 +126,28 @@ export default Vue.extend({
         );
       } finally {
         this.isSubmitting = false;
+      }
+    }
+  },
+  watch: {
+    'bulkordersBaseFormData.customerFirstName': {
+      handler (): void {
+        this.savePersistedState()
+      }
+    },
+    'bulkordersBaseFormData.customerEmail': {
+      handler (): void {
+        this.savePersistedState();
+      }
+    },
+    'bulkordersBaseFormData.country': {
+      handler (): void {
+        this.savePersistedState();
+      }
+    },
+    'bulkordersBaseFormData.customerPhone': {
+      handler (): void {
+        this.savePersistedState();
       }
     }
   }

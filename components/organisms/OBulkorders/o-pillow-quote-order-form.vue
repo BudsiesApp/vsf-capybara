@@ -56,8 +56,9 @@ import { SfButton, SfSelect } from '@storefront-ui/vue';
 import Product from 'core/modules/catalog/types/Product';
 import { BundleOption, BundleOptionsProductLink } from 'core/modules/catalog/types/BundleOption';
 import { product } from 'core/modules/url/test/unit/helpers/data';
-import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 import { BulkorderQuoteProductId } from 'src/modules/budsies';
+import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
+import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
 
 import MBaseForm from './m-base-form.vue';
 import AOrderedHeading from '../../atoms/a-ordered-heading.vue';
@@ -68,7 +69,7 @@ interface PillowSizeOption {
   title: string
 }
 
-export default Vue.extend({
+export default BulkorderBaseFormPersistanceState.extend({
   name: 'OPillowQuoteOrderForm',
   props: {
     product: {
@@ -149,6 +150,15 @@ export default Vue.extend({
     getBaseFormComponent (): InstanceType<typeof MBaseForm> | undefined {
       return this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
     },
+    getDataToPersist () {
+      return {
+        country: this.bulkordersBaseFormData.country,
+        customerFirstName: this.bulkordersBaseFormData.customerFirstName,
+        customerEmail: this.bulkordersBaseFormData.customerEmail,
+        customerPhone: this.bulkordersBaseFormData.customerPhone,
+        customerLastName: this.bulkordersBaseFormData.customerLastName
+      }
+    },
     getPillowSizeTitle (sizeProductLink: BundleOptionsProductLink): TranslateResult {
       switch (sizeProductLink.sku) {
         case 'simplePillowBulkSample_small':
@@ -169,21 +179,6 @@ export default Vue.extend({
       }
 
       this.isSubmitting = true;
-      // (int)$request->product_id,
-      //           (int)$request->qty,
-      //           (int)$request->size,
-      //           $request->project_name,
-      //           $request->description,
-      //           $request->uploaded_artwork_ids,
-      //           $request->email,
-      //           $request->phone,
-      //           (int)$request->country_id,
-      //           $request->first_name,
-      //           $lastName,
-      //           $request->body_parts ?? [],
-      //           (int)$request->alternative_qty ?? null,
-      //           $request->deadline_date ?? null,
-      //           $clientTypeId
 
       try {
         await this.$store.dispatch(
@@ -207,6 +202,28 @@ export default Vue.extend({
         );
       } finally {
         this.isSubmitting = false;
+      }
+    }
+  },
+  watch: {
+    'bulkordersBaseFormData.customerFirstName': {
+      handler (): void {
+        this.savePersistedState()
+      }
+    },
+    'bulkordersBaseFormData.customerEmail': {
+      handler (): void {
+        this.savePersistedState();
+      }
+    },
+    'bulkordersBaseFormData.country': {
+      handler (): void {
+        this.savePersistedState();
+      }
+    },
+    'bulkordersBaseFormData.customerPhone': {
+      handler (): void {
+        this.savePersistedState();
       }
     }
   }

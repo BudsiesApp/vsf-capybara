@@ -83,14 +83,15 @@ import { SfButton, SfHeading, SfInput } from '@storefront-ui/vue';
 
 import Product from 'core/modules/catalog/types/Product';
 import { product } from 'core/modules/url/test/unit/helpers/data';
-import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 import { Bodypart, BodypartOption, BodypartValue, BulkorderQuoteProductId } from 'src/modules/budsies';
+import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
+import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
 
 import MBaseForm from './m-base-form.vue';
 import MBodypartOptionConfigurator from '../../molecules/m-bodypart-option-configurator.vue';
 import AOrderedHeading from '../../atoms/a-ordered-heading.vue';
 
-export default Vue.extend({
+export default BulkorderBaseFormPersistanceState.extend({
   name: 'OBulkQuoteOrderForm',
   props: {
     product: {
@@ -192,6 +193,15 @@ export default Vue.extend({
 
       return data;
     },
+    getDataToPersist () {
+      return {
+        country: this.bulkordersBaseFormData.country,
+        customerFirstName: this.bulkordersBaseFormData.customerFirstName,
+        customerEmail: this.bulkordersBaseFormData.customerEmail,
+        customerPhone: this.bulkordersBaseFormData.customerPhone,
+        customerLastName: this.bulkordersBaseFormData.customerLastName
+      }
+    },
     async onSubmit (): Promise<void> {
       const form = this.getBaseFormComponent();
 
@@ -224,6 +234,28 @@ export default Vue.extend({
         );
       } finally {
         this.isSubmitting = false;
+      }
+    }
+  },
+  watch: {
+    'bulkordersBaseFormData.customerFirstName': {
+      handler (): void {
+        this.savePersistedState()
+      }
+    },
+    'bulkordersBaseFormData.customerEmail': {
+      handler (): void {
+        this.savePersistedState();
+      }
+    },
+    'bulkordersBaseFormData.country': {
+      handler (): void {
+        this.savePersistedState();
+      }
+    },
+    'bulkordersBaseFormData.customerPhone': {
+      handler (): void {
+        this.savePersistedState();
       }
     }
   }
