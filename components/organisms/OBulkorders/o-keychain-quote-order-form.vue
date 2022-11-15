@@ -3,6 +3,7 @@
     <SfHeading :level="1" :title="$t('Keychain Bulk Order Quote')" class="_title" />
 
     <m-base-form
+      ref="baseForm"
       :product="product"
       :is-disabled="isDisabled"
       :artwork-upload-url="artworkUploadUrl"
@@ -23,6 +24,7 @@ import { SfButton, SfHeading } from '@storefront-ui/vue';
 
 import Product from 'core/modules/catalog/types/Product';
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
+import { BulkorderQuoteProductId } from 'src/modules/budsies';
 
 import MBaseForm from './m-base-form.vue';
 
@@ -72,8 +74,55 @@ export default Vue.extend({
     }
   },
   methods: {
-    onSubmit (): void {
-      //
+    getBaseFormComponent (): InstanceType<typeof MBaseForm> | undefined {
+      return this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
+    },
+    async onSubmit (): Promise<void> {
+      const form = this.getBaseFormComponent();
+
+      if (this.isDisabled || !form || !form.getValidationState()) {
+        return;
+      }
+
+      this.isSubmitting = true;
+      // (int)$request->product_id,
+      //           (int)$request->qty,
+      //           (int)$request->size,
+      //           $request->project_name,
+      //           $request->description,
+      //           $request->uploaded_artwork_ids,
+      //           $request->email,
+      //           $request->phone,
+      //           (int)$request->country_id,
+      //           $request->first_name,
+      //           $lastName,
+      //           $request->body_parts ?? [],
+      //           (int)$request->alternative_qty ?? null,
+      //           $request->deadline_date ?? null,
+      //           $clientTypeId
+
+      try {
+        await this.$store.dispatch(
+          'budsies/createBulkorder',
+          {
+            product_id: BulkorderQuoteProductId.KEYCHAIN,
+            qty: this.bulkordersBaseFormData.quantity,
+            project_name: this.bulkordersBaseFormData.name,
+            description: this.bulkordersBaseFormData.description,
+            uploaded_artworks_ids: this.bulkordersBaseFormData.customerImages.map((image) => image.id),
+            email: this.bulkordersBaseFormData.customerEmail,
+            phone: this.bulkordersBaseFormData.customerPhone,
+            country_id: this.bulkordersBaseFormData.country,
+            first_name: this.bulkordersBaseFormData.customerFirstName,
+            last_name: this.bulkordersBaseFormData.customerLastName,
+            alternative_qty: this.bulkordersBaseFormData.additionalQuantity,
+            deadline_date: this.bulkordersBaseFormData.deadlineDate,
+            client_type_id: this.bulkordersBaseFormData.customerType
+          }
+        );
+      } finally {
+        this.isSubmitting = false;
+      }
     }
   }
 })

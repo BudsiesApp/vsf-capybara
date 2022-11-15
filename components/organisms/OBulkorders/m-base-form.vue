@@ -18,6 +18,13 @@
         @file-added="onArtworkAdd"
         @file-removed="onArtworkRemove"
       />
+
+      <div
+        class="_error-text"
+        v-if="$v.value.customerImages && $v.value.customerImages.$error"
+      >
+        {{ $t('Please provide your artwork to continue.') }}
+      </div>
     </div>
 
     <div class="_section">
@@ -33,6 +40,8 @@
         v-model="name"
         :disabled="isDisabled"
         class="sf-input--required"
+        :valid="!$v.value.name || !$v.value.name.$error"
+        :error-message="$t('This field should not be blank.')"
       />
 
       <span class="_hint">
@@ -55,6 +64,13 @@
         :placeholder="$t('Give us any additional direction as we create your plush prototype')"
         :disabled="isDisabled"
       />
+
+      <div
+        class="_error-text"
+        v-if="$v.value.description && $v.value.description.$error"
+      >
+        {{ $t('This field should not be blank.') }}
+      </div>
     </div>
 
     <div class="_section">
@@ -72,9 +88,27 @@
       <SfInput
         :label="$t('Quantity')"
         :disabled="isDisabled"
-        class="sf-input--required"
+        class="sf-input--required -quantity"
         v-model="quantity"
+        :valid="!$v.value.quantity || !$v.value.quantity.$error"
       />
+
+      <div
+        class="_error-text"
+        v-if="$v.value.quantity && $v.value.quantity.$error"
+      >
+        <template v-if="!$v.value.quantity || !$v.value.quantity.required">
+          {{ $t('This field is required') }}
+        </template>
+
+        <template v-else>
+          {{ $t('For orders less than 50, please upload your character to our sister company') }}
+
+          <a :href="budsiesStoreDomain" target="_blank">
+            Budsies.com
+          </a>
+        </template>
+      </div>
 
       <div class="_additional-quantity" v-show="showAdditionalQuantity">
         <span class="_quantity-helper">
@@ -117,6 +151,13 @@
       />
 
       <div
+        class="_error-text"
+        v-if="$v.value.deadline && $v.value.deadline.$error"
+      >
+        {{ $t('This field is required') }}
+      </div>
+
+      <div
         class="sf-input _deadline-input"
         :class="{'--required': deadline && deadline !== '0'}"
       >
@@ -125,6 +166,13 @@
           type="date"
           :disabled="!deadline || deadline === '0'"
         >
+
+        <div
+          class="_error-text"
+          v-if="$v.value.deadlineDate && $v.value.deadlineDate.$error"
+        >
+          {{ $t('This field is required') }}
+        </div>
       </div>
     </div>
 
@@ -153,6 +201,13 @@
           {{ item.name }}
         </SfSelectOption>
       </SfSelect>
+
+      <div
+        class="_error-text"
+        v-if="$v.value.country && $v.value.country.$error"
+      >
+        {{ $t('This field is required') }}
+      </div>
     </div>
 
     <div class="_section --half">
@@ -168,6 +223,8 @@
           :label="$t('First Name')"
           v-model="customerFirstName"
           class="sf-input--required"
+          :valid="!$v.value.customerFirstName || !$v.value.customerFirstName.$error"
+          :error-message="$t('Field is required')"
         />
 
         <SfInput
@@ -179,12 +236,20 @@
           :label="$t('Your e-mail address')"
           v-model="customerEmail"
           class="sf-input--required"
+          :valid="!$v.value.customerEmail || !$v.value.customerEmail.$error"
+          :error-message="
+            $v.value.customerEmail && $v.value.customerEmail.required
+              ? $t('Please, enter correct Email')
+              : $t('Field is required')
+          "
         />
 
         <SfInput
           :label="$t('Phone number')"
           v-model="customerPhone"
           class="sf-input--required"
+          :valid="!$v.value.customerPhone || !$v.value.customerPhone.$error"
+          :error-message="$t('Field is required')"
         />
       </div>
     </div>
@@ -221,11 +286,20 @@
       :disabled="isDisabled"
       :label="$t('I have read and agree to the Bulk Order Customer Agreement')"
     />
+
+    <div
+      class="_error-text"
+      v-if="$v.value.agreement && $v.value.agreement.$error"
+    >
+      {{ $t('This field is required') }}
+    </div>
   </div>
 </template>
 
 <script lang="ts">
+import config from 'config';
 import Vue, { PropType, VueConstructor } from 'vue';
+import { required, requiredIf, minValue, email, sameAs } from 'vuelidate/lib/validators';
 import { TranslateResult } from 'vue-i18n';
 import { SfButton, SfInput, SfRadio, SfSelect } from '@storefront-ui/vue';
 import {
@@ -318,6 +392,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
             `Can't resolve Backend product ID for Magento '${this.product.id}' product ID`
           );
       }
+    },
+    budsiesStoreDomain (): string {
+      return `https://${config.budsies.budsiesStoreDomain}`;
     },
     customerTypeOptions (): CustomerType[] {
       return [
@@ -431,6 +508,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
   },
   methods: {
+    getValidationState (): boolean {
+      this.$v.$touch();
+      return !this.$v.$invalid;
+    },
     onArtworkAdd (value: Item): void {
       const customerImages = [...this.value.customerImages];
 
@@ -460,12 +541,58 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   },
   beforeDestroy () {
     unMapMobileObserver();
+  },
+  validations (): any {
+    const isDeadlineDateRequired = requiredIf(() => this.deadline === '1');
+
+    return {
+      value: {
+        customerImages: {
+          required
+        },
+        name: {
+          required
+        },
+        description: {
+          required
+        },
+        quantity: {
+          required,
+          minValue: minValue(50)
+        },
+        deadline: {
+          required
+        },
+        deadlineDate: {
+          required: isDeadlineDateRequired
+        },
+        country: {
+          required
+        },
+        customerFirstName: {
+          required
+        },
+        customerEmail: {
+          required,
+          email
+        },
+        customerPhone: {
+          required
+        },
+        agreement: {
+          sameAs: sameAs(() => true)
+        }
+      }
+    }
   }
 })
 </script>
 
 <style lang="scss" scoped>
 .m-base-form {
+    --select-margin: 0;
+    --select-padding: 0;
+
     text-align: left;
     display: flex;
     flex-direction: column;
@@ -485,6 +612,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           &.--half {
           flex-direction: row;
           flex-wrap: wrap;
+          align-items: center;
 
           .sf-input {
             flex-basis: 40%;
@@ -492,6 +620,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
             &:nth-child(odd) {
               margin-right: var(--spacer-sm);
+            }
+
+            &:nth-child(1),
+            &:nth-child(2) {
+              margin-bottom: var(--spacer-sm);
             }
           }
         }
@@ -505,6 +638,16 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     .sf-input {
       &--required {
         --input-label-required: " *"
+      }
+
+      &.-quantity {
+        --input-margin: 0;
+
+        &::v-deep {
+          .sf-input__error-message {
+            display: none;
+          }
+        }
       }
     }
 
@@ -524,10 +667,19 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     ._additional-quantity {
       display: flex;
       flex-direction: column;
+      margin-top: var(--spacer-sm);
     }
 
     ._quantity-button {
       align-self: flex-start;
+      margin-top: var(--spacer-sm);
+    }
+
+    ._error-text {
+      color: var(--c-danger-variant);
+      font-size: var(--font-xs);
+      margin-top: var(--spacer-sm);
+      height: calc(var(--font-xs) * 1.2);
     }
 
     ._deadline-input {
