@@ -78,7 +78,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue';
+import { PropType } from 'vue';
 import { SfButton, SfHeading, SfInput } from '@storefront-ui/vue';
 
 import Product from 'core/modules/catalog/types/Product';

@@ -49,7 +49,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue';
+import { PropType } from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { SfButton, SfSelect } from '@storefront-ui/vue';
 
