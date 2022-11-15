@@ -77,7 +77,7 @@
 
     <div class="_section">
       <AOrderedHeading
-        :order="4"
+        :order="quantityStepOrder"
         :level="3"
         :title="$t('What quantity are you interested in?')"
         class="_title -required"
@@ -134,7 +134,7 @@
 
     <div class="_section">
       <AOrderedHeading
-        :order="5"
+        :order="deadlineStepOrder"
         :level="3"
         :title="$t('Do you have a deadline for delivery?')"
         class="_title -required"
@@ -182,7 +182,7 @@
 
     <div class="_section">
       <AOrderedHeading
-        :order="6"
+        :order="countryStepOrder"
         :level="3"
         :title="$t('Which country is the plush being delivered to?')"
         class="_title -required"
@@ -216,7 +216,7 @@
 
     <div class="_section --half">
       <AOrderedHeading
-        :order="7"
+        :order="customerInfoStepOrder"
         :level="3"
         :title="$t('Customer Information')"
         class="_title -required"
@@ -260,7 +260,7 @@
 
     <div class="_section">
       <AOrderedHeading
-        :order="8"
+        :order="customerTypeStepOrder"
         :level="3"
         :title="$t('Last question')"
         class="_title"
@@ -355,6 +355,14 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     value: {
       type: Object as PropType<BulkordersBaseFormData>,
       required: true
+    },
+    hasSize: {
+      type: Boolean,
+      default: false
+    },
+    hasBodyparts: {
+      type: Boolean,
+      default: false
     }
   },
   inject: {
@@ -408,6 +416,23 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           title: 'Small Business'
         }
       ] // TODO load from API
+    },
+    quantityStepOrder (): number {
+      return this.hasBodyparts ? 5 : 4;
+    },
+    deadlineStepOrder (): number {
+      return this.quantityStepOrder + 1;
+    },
+    countryStepOrder (): number {
+      return this.hasSize
+        ? this.deadlineStepOrder + 2
+        : this.deadlineStepOrder + 1;
+    },
+    customerInfoStepOrder (): number {
+      return this.countryStepOrder + 1;
+    },
+    customerTypeStepOrder (): number {
+      return this.customerInfoStepOrder + 1;
     },
     customerType: {
       get (): string | undefined {

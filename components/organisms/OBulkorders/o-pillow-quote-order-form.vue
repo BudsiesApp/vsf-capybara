@@ -7,6 +7,7 @@
       :product="product"
       :is-disabled="isDisabled"
       :artwork-upload-url="artworkUploadUrl"
+      :has-size="true"
       v-model="bulkordersBaseFormData"
     >
       <template #size>

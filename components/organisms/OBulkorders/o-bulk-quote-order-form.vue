@@ -7,6 +7,8 @@
       :product="product"
       :is-disabled="isDisabled"
       :artwork-upload-url="artworkUploadUrl"
+      :has-size="true"
+      :has-bodyparts="true"
       v-model="bulkordersBaseFormData"
     >
       <template #bodyparts v-if="colorPaletteBodypart">
