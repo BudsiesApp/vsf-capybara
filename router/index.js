@@ -396,36 +396,36 @@ let routes = [
   },
   {
     name: 'bulkorder-quotation-plushie',
-    path: '/bulkorder/quotation/',
+    path: '/bulkorder/quotation/plushie/',
     component: BulkorderQuotation,
     props: (route) => {
       return {
-        bulkorderId: route.query.bulkorderId,
-        sampleSku: 'CustomBulkSample_bundle',
+        bulkorderId: +route.query.bulkorderId,
+        size: +route.query.size,
         sampleType: BulksampleProduct.PLUSH
       }
     }
   },
   {
     name: 'bulkorder-quotation-pillow',
-    path: '/bulkorder/quotation/',
+    path: '/bulkorder/quotation/pillow/',
     component: BulkorderQuotation,
     props: (route) => {
       return {
-        bulkorderId: route.query.bulkorderId,
-        sampleSku: 'pillowBulkSample_bundle',
+        bulkorderId: +route.query.bulkorderId,
+        size: +route.query.size,
         sampleType: BulksampleProduct.PILLOW
       }
     }
   },
   {
     name: 'bulkorder-quotation-keychain',
-    path: '/bulkorder/quotation/',
+    path: '/bulkorder/quotation/keychain/',
     component: BulkorderQuotation,
     props: (route) => {
       return {
-        bulkorderId: route.query.bulkorderId,
-        sampleSku: 'keychainBulkSample_bundle',
+        bulkorderId: +route.query.bulkorderId,
+        size: +route.query.size,
         sampleType: BulksampleProduct.KEYCHAIN
       }
     }
