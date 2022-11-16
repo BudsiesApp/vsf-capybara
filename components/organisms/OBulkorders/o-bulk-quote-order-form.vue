@@ -86,7 +86,7 @@ import { SfButton, SfHeading, SfInput } from '@storefront-ui/vue';
 
 import Product from 'core/modules/catalog/types/Product';
 import { product } from 'core/modules/url/test/unit/helpers/data';
-import { Bodypart, BodypartOption, BodypartValue, BulkorderQuoteProductId } from 'src/modules/budsies';
+import { Bodypart, BodypartOption, BodypartValue, BulkorderQuoteProductId, BulkOrderStatus } from 'src/modules/budsies';
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
 
@@ -215,7 +215,7 @@ export default BulkorderBaseFormPersistanceState.extend({
       this.isSubmitting = true;
 
       try {
-        await this.$store.dispatch(
+        const bulkOrderId = await this.$store.dispatch(
           'budsies/createBulkorder',
           {
             product_id: BulkorderQuoteProductId.PLUSHIE,
@@ -235,6 +235,16 @@ export default BulkorderBaseFormPersistanceState.extend({
             body_parts: this.getBodypartsData()
           }
         );
+
+        const status: BulkOrderStatus = await this.$store.dispatch('budsies/getBulkOrderStatus', bulkOrderId);
+
+        switch (status) {
+          case BulkOrderStatus.WAITING_FOR_QUOTE:
+            this.$router.push({ name: 'bulkorder-confirmation' });
+            break;
+          default:
+            // TODO redirect to quote page with bulkOrderId as param
+        }
       } finally {
         this.isSubmitting = false;
       }

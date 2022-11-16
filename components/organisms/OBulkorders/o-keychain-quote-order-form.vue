@@ -24,7 +24,7 @@ import { SfButton, SfHeading } from '@storefront-ui/vue';
 
 import Product from 'core/modules/catalog/types/Product';
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
-import { BulkorderQuoteProductId } from 'src/modules/budsies';
+import { BulkorderQuoteProductId, BulkOrderStatus } from 'src/modules/budsies';
 
 import MBaseForm from './m-base-form.vue';
 import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
@@ -106,7 +106,7 @@ export default BulkorderBaseFormPersistanceState.extend({
       this.isSubmitting = true;
 
       try {
-        await this.$store.dispatch(
+        const bulkOrderId = await this.$store.dispatch(
           'budsies/createBulkorder',
           {
             product_id: BulkorderQuoteProductId.KEYCHAIN,
@@ -124,6 +124,16 @@ export default BulkorderBaseFormPersistanceState.extend({
             client_type_id: this.bulkordersBaseFormData.customerType
           }
         );
+
+        const status: BulkOrderStatus = await this.$store.dispatch('budsies/getBulkOrderStatus', bulkOrderId);
+
+        switch (status) {
+          case BulkOrderStatus.WAITING_FOR_QUOTE:
+            this.$router.push({ name: 'bulkorder-confirmation' });
+            break;
+          default:
+            // TODO redirect to quote page with bulkOrderId as param
+        }
       } finally {
         this.isSubmitting = false;
       }
