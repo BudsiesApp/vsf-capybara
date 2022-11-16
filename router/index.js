@@ -331,7 +331,6 @@ let routes = [
     path: '/bulk-pillow-samples/create/',
     component: Bulksample,
     props: (route) => {
-      console.log('BulksampleProduct.PILLOW', BulksampleProduct);
       return {
         sku: 'pillowBulkSample_bundle',
         existingPlushieId: route.query.existingPlushieId,

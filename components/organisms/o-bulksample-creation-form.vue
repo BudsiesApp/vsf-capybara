@@ -353,7 +353,7 @@ import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import i18n from '@vue-storefront/i18n';
 
-import { Bodypart, BodypartOption, BodypartValue, ProductId, ProductValue, vuexTypes as budsiesTypes, ImageUploadMethod } from 'src/modules/budsies';
+import { Bodypart, BodypartOption, BodypartValue, ProductId, ProductValue, vuexTypes as budsiesTypes, ImageUploadMethod, Dictionary } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage, getProductDefaultPrice, ServerError } from 'src/modules/shared';
 
@@ -376,7 +376,7 @@ extend('between', {
 });
 
 interface CustomerType {
-  id: number,
+  id: string,
   value: string,
   title: string
 }
@@ -554,13 +554,16 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return this.isSubmitting;
     },
     customerTypeOptions (): CustomerType[] {
-      return [
-        {
-          id: 0,
-          value: '0',
-          title: 'Small Business'
-        }
-      ] // TODO load from API
+      const customerTypes: Dictionary<string> = this.$store.getters['budsies/getCustomerTypes'];
+
+      return Object.entries(customerTypes)
+        .map(([key, value]) => {
+          return {
+            id: key,
+            value: key,
+            title: value
+          }
+        });
     },
     customerTypeStepNumber (): number {
       return this.showAddonsStep ? this.addonsStepNumber + 1 : this.nameStepNumber + 1;
