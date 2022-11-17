@@ -360,6 +360,7 @@ import { CustomerImage, getProductDefaultPrice, ServerError } from 'src/modules/
 import BulksampleProduct from 'theme/interfaces/bulksample-product.type';
 
 import AddonOption from '../interfaces/addon-option.interface';
+import CustomerType from '../interfaces/customer-type.interface';
 
 import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
 import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
@@ -374,12 +375,6 @@ extend('between', {
   ...between,
   message: 'The {_field_} field must be between {min} and {max}'
 });
-
-interface CustomerType {
-  id: string,
-  value: string,
-  title: string
-}
 
 interface InjectedServices {
   imageHandlerService: ImageHandlerService
@@ -554,7 +549,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return this.isSubmitting;
     },
     customerTypeOptions (): CustomerType[] {
-      const customerTypes: Dictionary<string> = this.$store.getters['budsies/getCustomerTypes'];
+      const customerTypes: Dictionary<string> | undefined = this.$store.getters['budsies/getCustomerTypes'];
+
+      if (!customerTypes) {
+        return [];
+      }
 
       return Object.entries(customerTypes)
         .map(([key, value]) => {

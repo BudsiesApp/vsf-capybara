@@ -1,0 +1,342 @@
+<template>
+  <div class="o-bulk-quote-order-form">
+    <SfHeading :level="1" :title="$t('Bulk Order Quote')" class="_title" />
+
+    <m-base-form
+      ref="baseForm"
+      :product="product"
+      :is-disabled="isDisabled"
+      :artwork-upload-url="artworkUploadUrl"
+      :has-size="true"
+      :has-bodyparts="true"
+      v-model="bulkordersBaseFormData"
+    >
+      <template #bodyparts v-if="colorPaletteBodypart">
+        <div class="_section">
+          <AOrderedHeading
+            :order="4"
+            :level="3"
+            :title="$t('Color Pallette')"
+            class="_title -required"
+          />
+
+          <span class="_subtitle">
+            {{ $t('Please select the colors of your design to help us accurately bring your character to life.') }}
+          </span>
+
+          <m-bodypart-option-configurator
+            v-model="color"
+            :name="colorPaletteBodypart.code"
+            :max-values="colorPaletteBodypart.maxValues"
+            :options="colorPaletteOptions"
+            :disabled="isDisabled"
+            type="bodypart"
+            class="_color-pallette"
+          />
+
+          <div class="_error-text" v-if="$v.color.$anyError">
+            {{ $t('This field is required') }}
+          </div>
+
+          <span class="_input-hint">
+            {{ $t('Click an existing color to deselect it.') }}
+          </span>
+
+          <span class="_input-hint">
+            {{ $t('Please note any special requests in the description above') }}
+          </span>
+        </div>
+      </template>
+
+      <template #size>
+        <div class="_section">
+          <AOrderedHeading
+            :order="7"
+            :level="3"
+            :title="$t('What’s your preferred size?')"
+            class="_title"
+          />
+
+          <div class="_helper">
+            {{ $t('Typical sizes are 6" (small), 8" (regular), 12" (large), and 16" (maximum). It\'s OK if you’re not sure.') }}
+          </div>
+
+          <SfInput
+            :label="$t('Size')"
+            :valid="!$v.bulkSize || !$v.bulkSize.$anyError"
+            :error="$t('This field is required')"
+            class="sf-input--required"
+            v-model="bulkSize"
+          />
+        </div>
+      </template>
+    </m-base-form>
+
+    <div class="_button-container">
+      <SfButton @click="onSubmit" :disabled="isDisabled">
+        {{ $t('Get My Quote') }}
+      </SfButton>
+    </div>
+  </div>
+</template>
+
+<script lang="ts">
+import { PropType } from 'vue';
+import { required } from 'vuelidate/lib/validators';
+import { SfButton, SfHeading, SfInput } from '@storefront-ui/vue';
+
+import Product from 'core/modules/catalog/types/Product';
+import { product } from 'core/modules/url/test/unit/helpers/data';
+import { Bodypart, BodypartOption, BodypartValue, BulkorderQuoteProductId, BulkOrderStatus } from 'src/modules/budsies';
+import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
+import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
+
+import MBaseForm from './m-base-form.vue';
+import MBodypartOptionConfigurator from '../../molecules/m-bodypart-option-configurator.vue';
+import AOrderedHeading from '../../atoms/a-ordered-heading.vue';
+
+export default BulkorderBaseFormPersistanceState.extend({
+  name: 'OBulkQuoteOrderForm',
+  props: {
+    product: {
+      type: Object as PropType<Product>,
+      required: true
+    },
+    artworkUploadUrl: {
+      type: String,
+      required: true
+    }
+  },
+  components: {
+    AOrderedHeading,
+    MBaseForm,
+    MBodypartOptionConfigurator,
+    SfButton,
+    SfHeading,
+    SfInput
+  },
+  data () {
+    const bulkordersBaseFormData: BulkordersBaseFormData = {
+      name: '',
+      description: '',
+      quantity: undefined,
+      additionalQuantity: undefined,
+      deadline: undefined,
+      deadlineDate: undefined,
+      country: '',
+      customerFirstName: '',
+      customerLastName: undefined,
+      customerEmail: '',
+      customerPhone: '',
+      customerImages: [],
+      customerType: undefined,
+      agreement: false
+    }
+
+    return {
+      bulkordersBaseFormData,
+      isSubmitting: false,
+      bulkSize: undefined as string | undefined,
+      color: undefined as BodypartOption[] | undefined
+    }
+  },
+  computed: {
+    bodyparts (): Bodypart[] {
+      return this.$store.getters['budsies/getProductBodyparts'](this.product.id);
+    },
+    colorPaletteBodypart (): Bodypart | undefined {
+      return this.bodyparts.find((bodypart) => {
+        return bodypart.name.toLowerCase() === 'color palette';
+      })
+    },
+    colorPaletteOptions (): BodypartOption[] {
+      if (!this.colorPaletteBodypart) {
+        return [];
+      }
+
+      const bodypartsValues: BodypartValue[] =
+       this.$store.getters['budsies/getBodypartBodypartsValues'](this.colorPaletteBodypart.id);
+
+      if (!bodypartsValues.length) {
+        return [];
+      }
+
+      const result: BodypartOption[] = [];
+
+      for (const bodypartValue of bodypartsValues) {
+        result.push({
+          id: bodypartValue.id,
+          label: bodypartValue.name,
+          value: bodypartValue.code,
+          isSelected: false,
+          contentTypeId: bodypartValue.contentTypeId,
+          color: bodypartValue.color,
+          image: bodypartValue.image,
+          group: 'default'
+        });
+      }
+
+      return result;
+    },
+    isDisabled (): boolean {
+      return this.isSubmitting;
+    }
+  },
+  async beforeMount (): Promise<void> {
+    const state = await this.getPersistedState();
+
+    if (!state) {
+      return;
+    }
+
+    this.bulkordersBaseFormData = { ...this.bulkordersBaseFormData, ...state };
+  },
+  methods: {
+    getBaseFormComponent (): InstanceType<typeof MBaseForm> | undefined {
+      return this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
+    },
+    getBodypartsData (): string[] {
+      if (!this.color) {
+        return [];
+      }
+
+      return this.color.map(item => item.id);
+    },
+    getDataToPersist () {
+      return {
+        country: this.bulkordersBaseFormData.country,
+        customerFirstName: this.bulkordersBaseFormData.customerFirstName,
+        customerEmail: this.bulkordersBaseFormData.customerEmail,
+        customerPhone: this.bulkordersBaseFormData.customerPhone,
+        customerLastName: this.bulkordersBaseFormData.customerLastName
+      }
+    },
+    async onSubmit (): Promise<void> {
+      const form = this.getBaseFormComponent();
+
+      if (this.isDisabled || !form || !form.getValidationState()) {
+        return;
+      }
+
+      this.isSubmitting = true;
+
+      try {
+        const bulkOrderId = await this.$store.dispatch(
+          'budsies/createBulkorder',
+          {
+            product_id: BulkorderQuoteProductId.PLUSHIE,
+            size: this.bulkSize,
+            qty: this.bulkordersBaseFormData.quantity,
+            project_name: this.bulkordersBaseFormData.name,
+            description: this.bulkordersBaseFormData.description,
+            uploaded_artwork_ids: this.bulkordersBaseFormData.customerImages.map((image) => image.id),
+            email: this.bulkordersBaseFormData.customerEmail,
+            phone: this.bulkordersBaseFormData.customerPhone,
+            country_id: this.bulkordersBaseFormData.country,
+            first_name: this.bulkordersBaseFormData.customerFirstName,
+            last_name: this.bulkordersBaseFormData.customerLastName,
+            alternative_qty: this.bulkordersBaseFormData.additionalQuantity || '',
+            deadline_date: this.bulkordersBaseFormData.deadlineDate,
+            client_type_id: this.bulkordersBaseFormData.customerType || '',
+            body_parts: this.getBodypartsData(),
+            agreement: this.bulkordersBaseFormData.agreement
+          }
+        );
+
+        const status: BulkOrderStatus = await this.$store.dispatch('budsies/getBulkOrderStatus', bulkOrderId);
+
+        switch (status) {
+          case BulkOrderStatus.WAITING_FOR_QUOTE:
+            this.$router.push({ name: 'bulkorder-confirmation' });
+            break;
+          default:
+            // TODO redirect to quote page with bulkOrderId as param
+        }
+      } finally {
+        this.isSubmitting = false;
+      }
+    }
+  },
+  watch: {
+    'bulkordersBaseFormData.customerFirstName': {
+      handler (): void {
+        this.savePersistedState()
+      }
+    },
+    'bulkordersBaseFormData.customerEmail': {
+      handler (): void {
+        this.savePersistedState();
+      }
+    },
+    'bulkordersBaseFormData.country': {
+      handler (): void {
+        this.savePersistedState();
+      }
+    },
+    'bulkordersBaseFormData.customerPhone': {
+      handler (): void {
+        this.savePersistedState();
+      }
+    }
+  },
+  validations: {
+    bulkSize: {
+      required
+    },
+    color: {
+      required
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.o-bulk-quote-order-form {
+      padding: var(--spacer-lg);
+
+      ._title {
+        margin-bottom: var(--spacer-2xl);
+      }
+
+      .m-base-form {
+        margin-bottom: var(--spacer-lg);
+      }
+
+      ._button-container {
+        display: flex;
+        justify-content: center;
+      }
+
+    ._input-hint {
+        text-align: center;
+        font-weight: 600;
+    }
+
+    ._error-text {
+        color: var(--c-danger-variant);
+        font-size: var(--font-xs);
+        margin-top: var(--spacer-xs);
+        height: calc(var(--font-xs) * 1.2);
+        font-weight: var(--font-medium);
+    }
+
+    ._section {
+        margin-bottom: var(--spacer-2xl);
+        display: flex;
+        flex-direction: column;
+
+        ._title {
+            margin-bottom: var(--spacer-base);
+        }
+    }
+
+    ._subtitle {
+        text-align: center;
+    }
+
+    ._color-pallette {
+      text-align: center;
+      margin: var(--spacer-base) 0;
+    }
+}
+</style>

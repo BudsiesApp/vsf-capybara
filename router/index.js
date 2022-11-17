@@ -30,6 +30,12 @@ const BlanketProduct = () =>
   import(/* webpackChunkName: "vsf-blankets" */ 'theme/pages/BlanketProduct');
 const Bulksample = () =>
   import(/* webpackChunkName: "vsf-bulksample" */ 'theme/pages/Bulksample');
+const KeychainQuote = () =>
+  import(/* webpackChunkName: "vsf-keychain-quote" */ 'theme/pages/KeychainQuote');
+const PillowQuote = () =>
+  import(/* webpackChunkName: "vsf-pillow-quote" */ 'theme/pages/PillowQuote');
+const BulkQuote = () =>
+  import(/* webpackChunkName: "vsf-bulk-quote" */ 'theme/pages/BulkQuote');
 const BulkorderConfirmation = () =>
 import(/* webpackChunkName: "vsf-bulkorder-confirmation" */ 'theme/pages/BulkorderConfirmation');
 
@@ -385,6 +391,21 @@ let routes = [
         }
       }
     }
+  },
+  {
+    name: 'keychain-quote',
+    path: '/keychain-quote/',
+    component: KeychainQuote
+  },
+  {
+    name: 'pillow-quote',
+    path: '/pillow-quote/',
+    component: PillowQuote
+  },
+  {
+    name: 'bulk-quote',
+    path: '/bulk-quote/',
+    component: BulkQuote
   },
   {
     name: 'bulkorder-confirmation',
