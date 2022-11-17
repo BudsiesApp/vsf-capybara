@@ -11,7 +11,7 @@
     />
 
     <div class="_button-container">
-      <SfButton @click="onSubmit">
+      <SfButton @click="onSubmit" :disabled="isDisabled">
         {{ $t('Get My Quote') }}
       </SfButton>
     </div>
@@ -113,15 +113,16 @@ export default BulkorderBaseFormPersistanceState.extend({
             qty: this.bulkordersBaseFormData.quantity,
             project_name: this.bulkordersBaseFormData.name,
             description: this.bulkordersBaseFormData.description,
-            uploaded_artworks_ids: this.bulkordersBaseFormData.customerImages.map((image) => image.id),
+            uploaded_artwork_ids: this.bulkordersBaseFormData.customerImages.map((image) => image.id),
             email: this.bulkordersBaseFormData.customerEmail,
             phone: this.bulkordersBaseFormData.customerPhone,
             country_id: this.bulkordersBaseFormData.country,
             first_name: this.bulkordersBaseFormData.customerFirstName,
             last_name: this.bulkordersBaseFormData.customerLastName,
-            alternative_qty: this.bulkordersBaseFormData.additionalQuantity,
+            alternative_qty: this.bulkordersBaseFormData.additionalQuantity || '',
             deadline_date: this.bulkordersBaseFormData.deadlineDate,
-            client_type_id: this.bulkordersBaseFormData.customerType
+            client_type_id: this.bulkordersBaseFormData.customerType || '',
+            agreement: this.bulkordersBaseFormData.agreement
           }
         );
 

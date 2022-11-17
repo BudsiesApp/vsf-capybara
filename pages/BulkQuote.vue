@@ -62,7 +62,10 @@ export default {
       }
     );
 
-    await store.dispatch('budsies/loadProductBodyparts', { productId: product.id })
+    await Promise.all([
+      store.dispatch('budsies/loadProductBodyparts', { productId: product.id }),
+      store.dispatch('budsies/fetchCustomerTypes')
+    ]);
 
     if (isServer) {
       await store.dispatch('product/setCurrent', product);

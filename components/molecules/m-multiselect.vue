@@ -7,41 +7,43 @@
     }"
     @keydown.enter.capture="onEnterPressed"
   >
-    <multiselect
-      class="_input"
-      :id="inputId"
-      v-model="selectedOption"
-      :options="allOptions"
-      :placeholder="placeholder"
-      :label="labelField"
-      :track-by="idField"
-      :allow-empty="!required"
-      :show-labels="false"
-      :show-pointer="true"
-      :preserve-search="shouldPreserveSearch"
-      :max-height="190"
-      open-direction="below"
-      :disabled="disabled"
-      ref="multiselect"
-      @open="isOpen = !isOpen"
-      @close="onClose"
-    >
-      <template #caret>
-        <SfChevron class="_chevron" />
-      </template>
-    </multiselect>
+    <div class="_wrapper">
+      <multiselect
+        class="_input"
+        :id="inputId"
+        v-model="selectedOption"
+        :options="allOptions"
+        :placeholder="placeholder"
+        :label="labelField"
+        :track-by="idField"
+        :allow-empty="!required"
+        :show-labels="false"
+        :show-pointer="true"
+        :preserve-search="shouldPreserveSearch"
+        :max-height="190"
+        open-direction="below"
+        :disabled="disabled"
+        ref="multiselect"
+        @open="isOpen = !isOpen"
+        @close="onClose"
+      >
+        <template #caret>
+          <SfChevron class="_chevron" />
+        </template>
+      </multiselect>
 
-    <label
-      :for="inputId"
-      class="m-multiselect__label"
-      :class="{
-        '--required': required,
-        '--compact': selectedOption || isOpen
-      }"
-      v-if="label"
-    >
-      {{ label }}
-    </label>
+      <label
+        :for="inputId"
+        class="m-multiselect__label"
+        :class="{
+          '--required': required,
+          '--compact': selectedOption || isOpen
+        }"
+        v-if="label"
+      >
+        {{ label }}
+      </label>
+    </div>
 
     <div class="m-multiselect__error-message">
       <transition name="fade">
@@ -319,14 +321,22 @@ export default Vue.extend({
     transform: translateY(-50%);
   }
 
+  ._wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    margin: 0 0 var(--spacer-xs) 0;
+  }
+
   ::v-deep .multiselect {
     &__tags {
       border-radius: 0;
       border: none;
       @include border(--input-border, 0 0 1px 0, solid, var(--c-light));
-      min-height: 49px;
+      min-height: var(--tags-min-height, 49px);
       padding-left: 0;
       padding-top: var(--spacer-sm);
+      padding-bottom: var(--spacer-xs);
       background: none;
     }
 
@@ -356,11 +366,15 @@ export default Vue.extend({
 
     &__input, &__single {
       margin-bottom: 0;
-      min-height: 32px;
+      min-height: 31px;
       font-size: var(--font-lg);
       font-weight: var(--font-normal);
       background: none;
       padding: 0;
+    }
+
+    &__single {
+      padding-top: 6px;
     }
 
     &__option {
@@ -432,10 +446,6 @@ export default Vue.extend({
   &.--focused {
     --input-border-color: var(--c-primary);
     --input-label-color: var(--c-primary);
-
-    .m-multiselect__label {
-
-    }
   }
 
   &.--invalid {

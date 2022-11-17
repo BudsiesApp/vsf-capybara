@@ -54,12 +54,14 @@ export default {
   async asyncData ({ store, route, context }): Promise<void> {
     if (context) context.output.cacheTags.add('product')
 
-    const product = await store.dispatch('product/loadProduct',
-      {
-        parentSku: keychainQuoteProductSku,
-        setCurrent: false
-      }
-    );
+    const [product, _] = await Promise.all([
+      store.dispatch('product/loadProduct',
+        {
+          parentSku: keychainQuoteProductSku,
+          setCurrent: false
+        }
+      ), store.dispatch('budsies/fetchCustomerTypes')
+    ]);
 
     if (isServer) {
       await store.dispatch('product/setCurrent', product);

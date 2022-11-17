@@ -13,7 +13,6 @@
         :disabled="isDisabled"
         :product-id="backendProductId"
         :upload-url="artworkUploadUrl"
-        :initial-items="artworkUploadInitialItems"
         :max-files="3"
         @file-added="onArtworkAdd"
         @file-removed="onArtworkRemove"
@@ -32,7 +31,7 @@
         :order="2"
         :level="3"
         :title="$t('Project Name')"
-        class="_title -required"
+        class="_title"
       />
 
       <SfInput
@@ -80,10 +79,10 @@
         :order="quantityStepOrder"
         :level="3"
         :title="$t('What quantity are you interested in?')"
-        class="_title -required"
+        class="_title"
       />
 
-      <span class="_quantity-helper">
+      <span class="_helper">
         {{ $t('Best price breaks occur at volumes of 100, 500, and 1,000.') }}
       </span>
 
@@ -113,7 +112,7 @@
       </div>
 
       <div class="_additional-quantity" v-show="showAdditionalQuantity">
-        <span class="_quantity-helper">
+        <span class="_helper">
           {{ $t('Don\'t worry, we will quote you the quantity you enter and the quantity with the next price break. However, you can also enter another quantity below and we\'ll quote you both!') }}
         </span>
 
@@ -185,26 +184,25 @@
         :order="countryStepOrder"
         :level="3"
         :title="$t('Which country is the plush being delivered to?')"
-        class="_title -required"
+        class="_title"
       />
 
       <div class="_helper">
         {{ $t('This helps us estimate freight costs.') }}
       </div>
 
-      <SfSelect
+      <MMultiselect
         v-model="country"
-        :should-lock-scroll-on-open="isMobile"
-        class="sf-select--underlined"
-      >
-        <SfSelectOption
-          v-for="item in countries"
-          :key="item.code"
-          :value="item.code"
-        >
-          {{ item.name }}
-        </SfSelectOption>
-      </SfSelect>
+        name="countries"
+        :label="$t('Country')"
+        :required="true"
+        id-field="code"
+        label-field="name"
+        :options="countries"
+        :valid="!$v.value.country || !$v.value.country.$error"
+        :error-message="$t('Field is required')"
+        :disabled="isDisabled"
+      />
 
       <div
         class="_error-text"
@@ -219,7 +217,7 @@
         :order="customerInfoStepOrder"
         :level="3"
         :title="$t('Customer Information')"
-        class="_title -required"
+        class="_title"
       />
 
       <div class="_content --half">
@@ -312,7 +310,7 @@ import {
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
 import Product from 'core/modules/catalog/types/Product';
-import { ProductId, ProductValue } from 'src/modules/budsies';
+import { Dictionary, ProductId, ProductValue } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage } from 'src/modules/shared';
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
@@ -321,6 +319,7 @@ import CustomerType from 'theme/components/interfaces/customer-type.interface';
 import AOrderedHeading from 'theme/components/atoms/a-ordered-heading.vue';
 import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
 import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
+import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
 
 const Countries = require('@vue-storefront/i18n/resource/countries.json');
 
@@ -334,6 +333,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     AOrderedHeading,
     MArtworkUpload,
     MCheckbox,
+    MMultiselect,
     SfButton,
     SfInput,
     SfRadio,
@@ -384,9 +384,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         this.updateValue({ agreement: value })
       }
     },
-    artworkUploadInitialItems (): CustomerImage[] {
-      return []; // todo
-    },
     backendProductId (): string | undefined {
       if (!this.product) {
         return undefined;
@@ -409,13 +406,20 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return `https://${config.budsies.budsiesStoreDomain}`;
     },
     customerTypeOptions (): CustomerType[] {
-      return [
-        {
-          id: 0,
-          value: '0',
-          title: 'Small Business'
-        }
-      ] // TODO load from API
+      const customerTypes: Dictionary<string> | undefined = this.$store.getters['budsies/getCustomerTypes'];
+
+      if (!customerTypes) {
+        return [];
+      }
+
+      return Object.entries(customerTypes)
+        .map(([key, value]) => {
+          return {
+            id: key,
+            value: key,
+            title: value
+          }
+        });
     },
     quantityStepOrder (): number {
       return this.hasBodyparts ? 5 : 4;
@@ -633,6 +637,16 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
         ._title {
             margin-bottom: var(--spacer-base);
+
+            &.-required {
+              ::v-deep .sf-heading__title {
+                &::after {
+                    content: "*";
+                    color: var(--c-warning);
+                    margin-left: -0.3em;
+                }
+              }
+            }
         }
 
         ._content {
@@ -689,7 +703,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       resize: vertical;
     }
 
-    ._quantity-helper {
+    ._helper {
       margin-bottom: var(--spacer-sm);
     }
 
@@ -722,6 +736,19 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           font-size: var(--font-base);
           position: absolute;
           top: 0;
+          left: 0;
+        }
+      }
+    }
+
+    .m-multiselect {
+      --tags-min-height: 56px;
+
+      width: 100%;
+      margin: 0;
+
+      &::v-deep {
+        .m-multiselect__label {
           left: 0;
         }
       }
