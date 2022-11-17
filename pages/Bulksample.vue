@@ -92,7 +92,8 @@ export default Vue.extend({
       });
 
       await Promise.all([
-        this.$store.dispatch('budsies/loadProductBodyparts', { productId: product.id })
+        this.$store.dispatch('budsies/loadProductBodyparts', { productId: product.id }),
+        this.$store.dispatch('budsies/fetchCustomerTypes')
       ]);
 
       catalogHooksExecutors.productPageVisited(product);

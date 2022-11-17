@@ -1,5 +1,5 @@
 export default interface CustomerType {
-  id: number,
+  id: string,
   value: string,
   title: string
 }
