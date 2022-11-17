@@ -549,7 +549,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return this.isSubmitting;
     },
     customerTypeOptions (): CustomerType[] {
-      const customerTypes: Dictionary<string> = this.$store.getters['budsies/getCustomerTypes'];
+      const customerTypes: Dictionary<string> | undefined = this.$store.getters['budsies/getCustomerTypes'];
+
+      if (!customerTypes) {
+        return [];
+      }
 
       return Object.entries(customerTypes)
         .map(([key, value]) => {
