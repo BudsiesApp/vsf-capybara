@@ -81,6 +81,9 @@ export default Vue.extend({
       return product;
     }
   },
+  async serverPrefetch () {
+    await (this as any).loadData();
+  },
   async beforeMount () {
     if (!this.isDataLoaded) {
       await this.loadData();

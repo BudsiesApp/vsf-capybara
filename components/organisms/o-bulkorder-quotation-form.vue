@@ -90,9 +90,11 @@
         :disabled="isDisabled"
       />
 
-      <SfButton>
-        {{ orderBulkSampleButtonTitle }}
-      </SfButton>
+      <div class="_submit-button-container">
+        <SfButton class="_quote-submit-button" :disabled="isDisabled" @click="submit">
+          {{ orderBulkSampleButtonTitle }}
+        </SfButton>
+      </div>
     </div>
   </div>
 </template>
@@ -263,6 +265,29 @@ export default (Vue as VueConstructor<Vue>).extend({
       this.quoteId = this.quotes[0] ? this.quotes[0].id + '' : undefined;
 
       this.isDataLoaded = true;
+    },
+    async submit (): Promise<void> {
+      if (this.isDisabled || !this.quoteId) {
+        return;
+      }
+
+      const include3dRendering = false;
+
+      this.isSubmitting = true;
+
+      try {
+        await this.$store.dispatch(
+          'budsies/chooseQuote',
+          {
+            quoteId: this.quoteId,
+            include3dRendering
+          }
+        );
+
+        this.$router.push({ name: 'detailed-cart' });
+      } finally {
+        this.isSubmitting = false;
+      }
     }
   }
 })
@@ -270,6 +295,10 @@ export default (Vue as VueConstructor<Vue>).extend({
 
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
+
+$quote-background-color: #e9f0d8;
+$sample-background-color: #e4f5f1;
+$promt-color: #8eba4c;
 
 .o-bulkorder-quotation-form{
   ._subtitle {
@@ -285,6 +314,22 @@ export default (Vue as VueConstructor<Vue>).extend({
 
     @media (min-width: $tablet-min) {
       flex-direction: row;
+    }
+  }
+
+  ._prompt {
+    text-align: right;
+    color: $promt-color;
+    font-style: italic;
+    font-weight: var(--font-bold);
+  }
+
+  ._compare-to {
+    margin-top: var(--spacer-sm);
+    margin-right: var(--spacer-xl);
+
+    @media (min-width: $tablet-min) {
+      margin-right: var(--spacer-3xl);
     }
   }
 
@@ -336,6 +381,36 @@ export default (Vue as VueConstructor<Vue>).extend({
 
     @media (min-width: $tablet-min) {
       width: 45%;
+    }
+  }
+
+  ._order-bulk-sample-action {
+    margin-top: var(--spacer-lg);
+    padding: var(--spacer-lg);
+    background-color: $sample-background-color;
+  }
+
+  ._submit-button-container {
+    display: flex;
+    justify-content: center;
+
+    ._quote-submit-button {
+      margin-top: var(--spacer-2xl);
+      margin-bottom: var(--spacer-xl);
+    }
+  }
+
+  .sf-radio {
+    --radio-background: #{$quote-background-color};
+  }
+
+  ::v-deep{
+    .m-addons-selector {
+      ._addon-input {
+        &.sf-checkbox--is-active {
+          background-color: var(--c-blue);
+        }
+      }
     }
   }
 }
