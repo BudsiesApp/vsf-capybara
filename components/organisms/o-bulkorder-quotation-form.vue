@@ -9,7 +9,7 @@
     />
 
     <p>
-      <slot name="intro" />
+      {{ $t('Excellent news! Based on your requirements, we are able to calculate your hassle-free custom ' + subtitleProductName + ' quote.') }}
     </p>
 
     <SfHeading
@@ -21,7 +21,7 @@
       <slot name="productionTime" />
     </p>
 
-    <ul>
+    <ul class="_quotes-list">
       <li v-for="quote in quotes" :key="quote.id">
         <SfRadio
           class="_quote-input"
@@ -72,6 +72,12 @@
         {{ $t('Compare to') }} $750!
       </p>
 
+      <m-addons-selector
+        v-model="selectedAddons"
+        :addons="addons"
+        :disabled="isDisabled"
+      />
+
       <SfButton>
         {{ orderBulkSampleButtonTitle }}
       </SfButton>
@@ -82,8 +88,15 @@
 <script lang="ts">
 import Vue, { PropType, VueConstructor } from 'vue'
 import { SfButton, SfHeading, SfRadio } from '@storefront-ui/vue'
+import { getProductGallery as getGalleryByProduct } from '@vue-storefront/core/modules/catalog/helpers';
+import { getProductDefaultPrice } from 'src/modules/shared';
 
+import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
+import BulksampleProduct from 'theme/interfaces/bulksample-product.type';
 import { BulkorderQuote } from 'src/modules/budsies';
+import Product from '@vue-storefront/core/modules/catalog/types/Product';
+import AddonOption from '../interfaces/addon-option.interface';
+import { BundleOption } from '@vue-storefront/core/modules/catalog/types/BundleOption';
 
 export default (Vue as VueConstructor<Vue>).extend({
   props: {
@@ -95,41 +108,131 @@ export default (Vue as VueConstructor<Vue>).extend({
       type: Number,
       required: true
     },
-    sampleProductPrice: {
-      type: String,
+    sampleType: {
+      type: String as PropType<BulksampleProduct>,
       required: true
     },
-    sampleProductName: {
-      type: String,
+    sampleProduct: {
+      type: Object as PropType<Product>,
       required: true
     },
     productionTimeStorySlug: {
       type: String,
       required: true
-    },
-    showCompareTo: {
-      type: Boolean
     }
   },
   data () {
     return {
-      quoteId: undefined
+      quoteId: undefined,
+      selectedAddons: [] as number [],
+      isSubmitting: false
     }
   },
   components: {
+    MAddonsSelector,
     SfButton,
     SfHeading,
     SfRadio
   },
   computed: {
+    isDisabled (): boolean {
+      return this.isSubmitting;
+    },
     formTitle (): string {
+      if (this.sampleType === BulksampleProduct.PLUSH) {
+        return this.$t('Bulk Quote');
+      }
+
       return this.$t(`Bulk ${this.sampleProductName} Quote`);
+    },
+    subtitleProductName (): string {
+      switch (this.sampleType) {
+        case BulksampleProduct.PLUSH:
+        case BulksampleProduct.KEYCHAIN:
+          return 'stuffed animal';
+        case BulksampleProduct.PILLOW:
+          return 'pillow';
+        default:
+          return '';
+      }
+    },
+    showCompareTo (): boolean {
+      switch (this.sampleType) {
+        case BulksampleProduct.PLUSH:
+        case BulksampleProduct.KEYCHAIN:
+          return true;
+        default:
+          return false;
+      }
     },
     orderBulkSampleTitle (): string {
       return this.$t('Next Step: Get your sample - just') + ` ${this.sampleProductPrice}`;
     },
     orderBulkSampleButtonTitle (): string {
       return this.$t(`Get Your Custom ${this.sampleProductName} Sample`);
+    },
+    sampleProductName (): string {
+      switch (this.sampleType) {
+        case BulksampleProduct.PLUSH:
+          return 'Plush';
+        case BulksampleProduct.PILLOW:
+          return 'Pillow';
+        case BulksampleProduct.KEYCHAIN:
+          return 'Keychain';
+        default:
+          return '';
+      }
+    },
+    sampleProductPrice (): string {
+      let price = 0;
+
+      if (this.sampleProduct) {
+        price = getProductDefaultPrice(this.sampleProduct, {}, false).regular;
+      }
+
+      return '$' + price.toString();
+    },
+    addons (): AddonOption[] {
+      if (!this.addonsBundleOption) {
+        return []
+      }
+
+      let result: AddonOption[] = [];
+      for (const productLink of this.addonsBundleOption.product_links) {
+        if (!productLink.product) {
+          continue;
+        }
+
+        if (productLink.sku.indexOf('sneak_peek') > -1) {
+          continue;
+        }
+
+        const images: string[] = getGalleryByProduct(productLink.product).map((i: any) => i.src);
+        const price = getProductDefaultPrice(productLink.product, {}, false);
+
+        result.push({
+          id: Number(productLink.product.id),
+          sku: productLink.product.sku,
+          name: productLink.product.name,
+          description: productLink.product.short_description || '',
+          price: price.special ? price.special : price.regular,
+          images: images,
+          optionId: this.addonsBundleOption.option_id,
+          optionValueId: ((typeof productLink.id === 'number') ? productLink.id : Number.parseInt(productLink.id, 10) as number),
+          videoUrl: (productLink.product as any).video_url
+        });
+      }
+
+      return result;
+    },
+    addonsBundleOption (): BundleOption | undefined {
+      if (!this.sampleProduct || !this.sampleProduct.bundle_options) {
+        return;
+      }
+
+      return this.sampleProduct.bundle_options.find(
+        (option: BundleOption) => option.title.toLowerCase() === 'addons'
+      );
     }
   },
   async beforeMount () {
@@ -153,6 +256,8 @@ export default (Vue as VueConstructor<Vue>).extend({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .o-bulkorder-quotation-form{
-    // styles
+    ._quotes-list {
+      list-style: none;
+    }
 }
 </style>

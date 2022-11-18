@@ -3,9 +3,8 @@
     <o-bulkorder-quotation-form
       :quotes="quotes"
       :size="size"
-      :sample-product-name="sampleProductName"
-      :sample-product-price="sampleProductPrice"
-      :show-compare-to="showCompareTo"
+      :sample-type="sampleType"
+      :sample-product="sampleProduct"
       :production-time-story-slug="productionTimeStorySlug"
     />
   </div>
@@ -50,27 +49,6 @@ export default Vue.extend({
     quotes (): BulkorderQuote[] {
       return this.$store.getters['budsies/getBulkorderQuotes'](this.bulkorderId);
     },
-    sampleProductName (): string {
-      switch (this.sampleType) {
-        case BulksampleProduct.PLUSH:
-          return 'Plush';
-        case BulksampleProduct.PILLOW:
-          return 'Pillow';
-        case BulksampleProduct.KEYCHAIN:
-          return 'Keychain';
-        default:
-          return '';
-      }
-    },
-    sampleProductPrice (): string {
-      let price = 0;
-
-      if (this.sampleProduct && this.sampleProduct.final_price) {
-        price = this.sampleProduct.final_price;
-      }
-
-      return '$' + price.toString();
-    },
     productionTimeStorySlug (): string {
       let sampleProductPart = '_';
 
@@ -83,15 +61,6 @@ export default Vue.extend({
       }
 
       return `info/bulk${sampleProductPart}quote_production_time_text`;
-    },
-    showCompareTo (): boolean {
-      switch (this.sampleType) {
-        case BulksampleProduct.PLUSH:
-        case BulksampleProduct.KEYCHAIN:
-          return true;
-        default:
-          return false;
-      }
     },
     sampleProductSku (): string | undefined {
       switch (this.sampleType) {
