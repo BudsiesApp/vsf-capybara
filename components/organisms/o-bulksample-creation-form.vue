@@ -353,13 +353,14 @@ import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import i18n from '@vue-storefront/i18n';
 
-import { Bodypart, BodypartOption, BodypartValue, ProductId, ProductValue, vuexTypes as budsiesTypes, ImageUploadMethod } from 'src/modules/budsies';
+import { Bodypart, BodypartOption, BodypartValue, ProductId, ProductValue, vuexTypes as budsiesTypes, ImageUploadMethod, Dictionary } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage, getProductDefaultPrice, ServerError } from 'src/modules/shared';
 
 import BulksampleProduct from 'theme/interfaces/bulksample-product.type';
 
 import AddonOption from '../interfaces/addon-option.interface';
+import CustomerType from '../interfaces/customer-type.interface';
 
 import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
 import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
@@ -374,12 +375,6 @@ extend('between', {
   ...between,
   message: 'The {_field_} field must be between {min} and {max}'
 });
-
-interface CustomerType {
-  id: number,
-  value: string,
-  title: string
-}
 
 interface InjectedServices {
   imageHandlerService: ImageHandlerService
@@ -554,13 +549,20 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return this.isSubmitting;
     },
     customerTypeOptions (): CustomerType[] {
-      return [
-        {
-          id: 0,
-          value: '0',
-          title: 'Small Business'
-        }
-      ] // TODO load from API
+      const customerTypes: Dictionary<string> | undefined = this.$store.getters['budsies/getCustomerTypes'];
+
+      if (!customerTypes) {
+        return [];
+      }
+
+      return Object.entries(customerTypes)
+        .map(([key, value]) => {
+          return {
+            id: key,
+            value: key,
+            title: value
+          }
+        });
     },
     customerTypeStepNumber (): number {
       return this.showAddonsStep ? this.addonsStepNumber + 1 : this.nameStepNumber + 1;
