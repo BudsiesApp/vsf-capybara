@@ -1,67 +1,79 @@
 <template>
-  <div
-    class="o-bulkorder-quotation-form"
-  >
+  <div class="o-bulkorder-quotation-form">
     <SfHeading
       :level="1"
       :title="formTitle"
-      class="_main-heading"
+      class="_title"
     />
 
-    <p>
+    <p class="_subtitle">
       {{ $t('Excellent news! Based on your requirements, we are able to calculate your hassle-free custom ' + subtitleProductName + ' quote.') }}
     </p>
 
-    <SfHeading
-      :level="2"
-      :title="$t('Select Your Preferred Quantity')"
-    />
+    <div class="_quotation-container">
+      <div class="_bulkorder-description">
+        <div class="_artwork">
+          <img :src="bulkorderInfo.mainImage">
+        </div>
+        <div class="_description">
+          {{ bulkorderInfo.description }}
+        </div>
+      </div>
+      <div class="_quotes-selector">
+        <SfHeading
+          :level="2"
+          :title="$t('Select Your Preferred Quantity')"
+        />
 
-    <p class="_production-time">
-      <slot name="productionTime" />
-    </p>
+        <p class="_production-time">
+          <slot name="productionTime" />
+        </p>
 
-    <ul class="_quotes-list">
-      <li v-for="quote in quotes" :key="quote.id">
-        <SfRadio
-          class="_quote-input"
-          :value="quote.id + ''"
-          v-model="quoteId"
-        >
-          <template #label>
-            {{ $t('Quantity') }} {{ quote.qty }}, {{ $t('Size') }} {{ size }}
-          </template>
-          <template #description>
-            <div class="_quote-description">
-              <div class="_quote-description-row">
-                <div>
-                  {{ $t('Plush production') }}:
+        <ul class="_quotes-list">
+          <li v-for="quote in quotes" :key="quote.id">
+            <SfRadio
+              class="_quote-input"
+              :value="quote.id + ''"
+              v-model="quoteId"
+            >
+              <template #label>
+                <div class="_quote-title">
+                  {{ $t('Quantity') }} {{ quote.qty }}, {{ $t('Size') }} {{ bulkorderInfo.size }}"
                 </div>
-                <div class="_price">
-                  {{ getPrice(quote.productionPrice) }}
+              </template>
+              <template #description>
+                <div class="_quote-description">
+                  <div class="_quote-description-row">
+                    <div>
+                      {{ $t('Plush production') }}:
+                    </div>
+                    <div class="_price">
+                      {{ getPrice(quote.productionPrice) }}
+                    </div>
+                  </div>
+                  <div class="_quote-description-row">
+                    <div>
+                      {{ $t('Shipping/Delivery') }}:
+                    </div>
+                    <div class="_price">
+                      {{ getPrice(quote.shippingPrice) }}
+                    </div>
+                  </div>
+                  <div class="_quote-description-row -marked">
+                    <div>
+                      {{ $t('Total') }}:
+                    </div>
+                    <div class="_price">
+                      {{ getPrice(quote.shippingPrice + quote.productionPrice) }}/pc
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div class="_quote-description-row">
-                <div>
-                  {{ $t('Shipping/Delivery') }}:
-                </div>
-                <div class="_price">
-                  {{ getPrice(quote.shippingPrice) }}
-                </div>
-              </div>
-              <div class="_quote-description-row -marked">
-                <div>
-                  {{ $t('Total') }}:
-                </div>
-                <div class="_price">
-                  {{ getPrice(quote.shippingPrice + quote.productionPrice) }}/pc
-                </div>
-              </div>
-            </div>
-          </template>
-        </SfRadio>
-      </li>
-    </ul>
+              </template>
+            </SfRadio>
+          </li>
+        </ul>
+      </div>
+    </div>
 
     <div class="_order-bulk-sample-action">
       <SfHeading
@@ -92,24 +104,16 @@ import { getProductGallery as getGalleryByProduct } from '@vue-storefront/core/m
 import { getProductDefaultPrice } from 'src/modules/shared';
 
 import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
-import BulksampleProduct from 'theme/interfaces/bulksample-product.type';
-import { BulkorderQuote } from 'src/modules/budsies';
+import BulkorderProduct from 'theme/interfaces/bulkorder-product.type';
+import { BulkorderQuote, BulkOrderInfo } from 'src/modules/budsies';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import AddonOption from '../interfaces/addon-option.interface';
 import { BundleOption } from '@vue-storefront/core/modules/catalog/types/BundleOption';
 
 export default (Vue as VueConstructor<Vue>).extend({
   props: {
-    quotes: {
-      type: Array as PropType<BulkorderQuote[]>,
-      required: true
-    },
-    size: {
-      type: Number,
-      required: true
-    },
-    sampleType: {
-      type: String as PropType<BulksampleProduct>,
+    bulkorderInfo: {
+      type: Object as PropType<BulkOrderInfo>,
       required: true
     },
     sampleProduct: {
@@ -125,6 +129,7 @@ export default (Vue as VueConstructor<Vue>).extend({
     return {
       quoteId: undefined,
       selectedAddons: [] as number [],
+      isDataLoaded: false,
       isSubmitting: false
     }
   },
@@ -135,31 +140,34 @@ export default (Vue as VueConstructor<Vue>).extend({
     SfRadio
   },
   computed: {
+    quotes (): BulkorderQuote[] {
+      return this.$store.getters['budsies/getBulkorderQuotes'](this.bulkorderInfo.id);
+    },
     isDisabled (): boolean {
       return this.isSubmitting;
     },
     formTitle (): string {
-      if (this.sampleType === BulksampleProduct.PLUSH) {
+      if (this.bulkorderInfo.bulkorderProductId === BulkorderProduct.PLUSHIE) {
         return this.$t('Bulk Quote');
       }
 
       return this.$t(`Bulk ${this.sampleProductName} Quote`);
     },
     subtitleProductName (): string {
-      switch (this.sampleType) {
-        case BulksampleProduct.PLUSH:
-        case BulksampleProduct.KEYCHAIN:
+      switch (this.bulkorderInfo.bulkorderProductId) {
+        case BulkorderProduct.PLUSHIE:
+        case BulkorderProduct.KEYCHAIN:
           return 'stuffed animal';
-        case BulksampleProduct.PILLOW:
+        case BulkorderProduct.PILLOW:
           return 'pillow';
         default:
           return '';
       }
     },
     showCompareTo (): boolean {
-      switch (this.sampleType) {
-        case BulksampleProduct.PLUSH:
-        case BulksampleProduct.KEYCHAIN:
+      switch (this.bulkorderInfo.bulkorderProductId) {
+        case BulkorderProduct.PLUSHIE:
+        case BulkorderProduct.KEYCHAIN:
           return true;
         default:
           return false;
@@ -172,12 +180,12 @@ export default (Vue as VueConstructor<Vue>).extend({
       return this.$t(`Get Your Custom ${this.sampleProductName} Sample`);
     },
     sampleProductName (): string {
-      switch (this.sampleType) {
-        case BulksampleProduct.PLUSH:
+      switch (this.bulkorderInfo.bulkorderProductId) {
+        case BulkorderProduct.PLUSHIE:
           return 'Plush';
-        case BulksampleProduct.PILLOW:
+        case BulkorderProduct.PILLOW:
           return 'Pillow';
-        case BulksampleProduct.KEYCHAIN:
+        case BulkorderProduct.KEYCHAIN:
           return 'Keychain';
         default:
           return '';
@@ -236,18 +244,26 @@ export default (Vue as VueConstructor<Vue>).extend({
     }
   },
   async beforeMount () {
-    this.loadStories();
+    if (!this.isDataLoaded) {
+      await this.loadData();
+    }
   },
   methods: {
     getPrice (price: number): string {
       return '$' + price.toFixed(2);
     },
-    loadStories (): void {
-      this.$store.dispatch(`storyblok/loadStory`, { fullSlug: this.productionTimeStorySlug });
+    async loadData (): Promise<void> {
+      await Promise.all([
+        this.$store.dispatch(`storyblok/loadStory`, { fullSlug: this.productionTimeStorySlug }),
+        this.$store.dispatch('budsies/loadBulkorderQuotes', {
+          bulkorderId: this.bulkorderInfo.id
+        })
+      ]);
+
+      this.quoteId = this.quotes[0] ? this.quotes[0].id + '' : undefined;
+
+      this.isDataLoaded = true;
     }
-  },
-  created (): void {
-    // this.quoteId = this.quotes[0] ?? this.quotes[0].id;
   }
 })
 </script>
@@ -256,8 +272,71 @@ export default (Vue as VueConstructor<Vue>).extend({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .o-bulkorder-quotation-form{
+  ._subtitle {
+    text-align: center;
+  }
+
+  ._quotation-container {
+    margin-top: var(--spacer-lg);
+    display: flex;
+    column-gap: var(--spacer-lg);
+    flex-direction: column;
+    justify-content: center;
+
+    @media (min-width: $tablet-min) {
+      flex-direction: row;
+    }
+  }
+
+  ._quotes-selector {
     ._quotes-list {
       list-style: none;
     }
+
+    ._quote-title {
+      font-weight: var(--font-bold);
+    }
+
+    ._quote-description {
+      margin-top: var(--spacer-xs);
+      font-size: var(--font-xs);
+    }
+
+    ._quote-description-row {
+      margin-top: var(--spacer-2xs);
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+
+      &.-marked {
+        font-weight: var(--font-bold);
+      }
+
+      &.-marked > ._price {
+        border-top: solid 1px var(--c-text);
+      }
+
+      @media (min-width: $desktop-min) {
+        width: 50%;
+      }
+    }
+  }
+
+  ._bulkorder-description {
+    width: 100%;
+
+    ._description {
+      text-align: center;
+      margin-top: var(--spacer-sm);
+    }
+
+    ._artwork > img {
+      width: 100%;
+    }
+
+    @media (min-width: $tablet-min) {
+      width: 45%;
+    }
+  }
 }
 </style>

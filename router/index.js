@@ -415,38 +415,24 @@ let routes = [
     component: BulkorderConfirmation
   },
   {
-    name: 'bulkorder-quotation-plushie',
-    path: '/bulkorder/quotation/plushie/',
+    name: 'bulkorder-quotation',
+    path: '/bulkorder/quotation/:bulkorderId/',
     component: BulkorderQuotation,
     props: (route) => {
       return {
-        bulkorderId: +route.query.bulkorderId,
-        size: +route.query.size,
-        sampleType: BulksampleProduct.PLUSH
+        bulkorderId: +route.params.bulkorderId
       }
     }
   },
   {
-    name: 'bulkorder-quotation-pillow',
-    path: '/bulkorder/quotation/pillow/',
-    component: BulkorderQuotation,
-    props: (route) => {
+    name: 'bulkorder-quotation-alias',
+    path: '/bulkorder/quote/index/bulkorder_id/:bulkorderId/',
+    redirect: (route) => {
       return {
-        bulkorderId: +route.query.bulkorderId,
-        size: +route.query.size,
-        sampleType: BulksampleProduct.PILLOW
-      }
-    }
-  },
-  {
-    name: 'bulkorder-quotation-keychain',
-    path: '/bulkorder/quotation/keychain/',
-    component: BulkorderQuotation,
-    props: (route) => {
-      return {
-        bulkorderId: +route.query.bulkorderId,
-        size: +route.query.size,
-        sampleType: BulksampleProduct.KEYCHAIN
+        name: 'bulkorder-quotation',
+        params: {
+          bulkorderId: +route.params.bulkorderId
+        }
       }
     }
   }

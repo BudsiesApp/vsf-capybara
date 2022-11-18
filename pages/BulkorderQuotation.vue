@@ -1,23 +1,22 @@
 <template>
   <div id="bulkorder-quotation">
     <o-bulkorder-quotation-form
-      :quotes="quotes"
-      :size="size"
-      :sample-type="sampleType"
+      :bulkorder-info="bulkorderInfo"
       :sample-product="sampleProduct"
       :production-time-story-slug="productionTimeStorySlug"
+      v-if="isDataLoaded"
     />
   </div>
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue';
+import Vue from 'vue';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 
-import BulksampleProduct from 'theme/interfaces/bulksample-product.type';
-import { BulkorderQuote } from 'src/modules/budsies';
+import BulkorderProduct from 'theme/interfaces/bulkorder-product.type';
+import { BulkOrderInfo } from 'src/modules/budsies';
 import OBulkorderQuotationForm from 'theme/components/organisms/o-bulkorder-quotation-form.vue';
 
 export default Vue.extend({
@@ -29,46 +28,44 @@ export default Vue.extend({
     bulkorderId: {
       type: Number,
       required: true
-    },
-    size: {
-      type: Number,
-      required: true
-    },
-    sampleType: {
-      type: String as PropType<BulksampleProduct>,
-      required: true
     }
   },
   data () {
     return {
       isRouterLeaving: false,
-      isDataLoaded: false
+      isDataLoaded: false,
+      bulkorderInfo: undefined as BulkOrderInfo | undefined
     };
   },
   computed: {
-    quotes (): BulkorderQuote[] {
-      return this.$store.getters['budsies/getBulkorderQuotes'](this.bulkorderId);
-    },
-    productionTimeStorySlug (): string {
+    productionTimeStorySlug (): string | undefined {
+      if (!this.bulkorderInfo) {
+        return undefined;
+      }
+
       let sampleProductPart = '_';
 
-      if (this.sampleType === BulksampleProduct.PILLOW) {
+      if (this.bulkorderInfo.bulkorderProductId === BulkorderProduct.PILLOW) {
         sampleProductPart = '_pillow_';
       }
 
-      if (this.sampleType === BulksampleProduct.KEYCHAIN) {
+      if (this.bulkorderInfo.bulkorderProductId === BulkorderProduct.KEYCHAIN) {
         sampleProductPart = '_keychain_';
       }
 
       return `info/bulk${sampleProductPart}quote_production_time_text`;
     },
     sampleProductSku (): string | undefined {
-      switch (this.sampleType) {
-        case BulksampleProduct.PLUSH:
+      if (!this.bulkorderInfo) {
+        return undefined;
+      }
+
+      switch (this.bulkorderInfo.bulkorderProductId) {
+        case BulkorderProduct.PLUSHIE:
           return 'CustomBulkSample_bundle';
-        case BulksampleProduct.PILLOW:
+        case BulkorderProduct.PILLOW:
           return 'pillowBulkSample_bundle';
-        case BulksampleProduct.KEYCHAIN:
+        case BulkorderProduct.KEYCHAIN:
           return 'keychainBulkSample_bundle';
         default:
           return undefined;
@@ -102,15 +99,12 @@ export default Vue.extend({
   },
   methods: {
     async loadData (): Promise<void> {
-      await Promise.all([
-        this.$store.dispatch('budsies/loadBulkorderQuotes', {
-          bulkorderId: this.bulkorderId
-        }),
-        this.$store.dispatch('product/loadProduct', {
-          parentSku: this.sampleProductSku,
-          setCurrent: true
-        })
-      ]);
+      this.bulkorderInfo = await this.$store.dispatch('budsies/getBulkOrderInfo', this.bulkorderId);
+
+      await this.$store.dispatch('product/loadProduct', {
+        parentSku: this.sampleProductSku,
+        setCurrent: true
+      });
 
       this.isDataLoaded = true;
     }
@@ -122,6 +116,13 @@ export default Vue.extend({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 #bulkorder-quotation {
-  // styles
+  box-sizing: border-box;
+  padding: var(--spacer-lg) 1rem 0;
+
+  @media (min-width: $tablet-min) {
+    max-width: 1272px;
+    width: 100%;
+    margin: 0 auto;
+  }
 }
 </style>
