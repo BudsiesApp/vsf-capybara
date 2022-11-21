@@ -19,14 +19,14 @@
           {{ bulkorderInfo.description }}
         </div>
       </div>
-      <div class="_quotes-selector">
+      <div class="_quotes-selector" v-if="!isQuoteSelectionDisabled">
         <SfHeading
           :level="2"
           :title="$t('Select Your Preferred Quantity')"
         />
 
         <p class="_production-time">
-          <slot name="productionTime" />
+          <Blok :item="productionTimeStoryContent" v-if="productionTimeStoryContent" />
         </p>
 
         <ul class="_quotes-list">
@@ -67,6 +67,11 @@
                       {{ getPrice(quote.shippingPrice + quote.productionPrice) }}/pc
                     </div>
                   </div>
+                  <div class="_quote-description-row" v-if="getSavingsForQuote(quote)">
+                    <div class="_prompt">
+                      {{ getSavingsForQuote(quote) }}
+                    </div>
+                  </div>
                 </div>
               </template>
             </SfRadio>
@@ -75,13 +80,18 @@
       </div>
     </div>
 
-    <div class="_order-bulk-sample-action">
+    <div class="_order-bulk-sample-action" v-if="!isQuoteSelectionDisabled">
       <SfHeading
         :title="orderBulkSampleTitle"
         :level="2"
       />
+
       <p class="_compare-to _prompt" v-if="showCompareTo">
         {{ $t('Compare to') }} $750!
+      </p>
+
+      <p class="_order-notices">
+        <Blok :item="orderNoticesStoryContent" v-if="orderNoticesStoryContent" />
       </p>
 
       <m-addons-selector
@@ -96,6 +106,31 @@
         </SfButton>
       </div>
     </div>
+
+    <div class="_send-message-to-manager" v-if="!isQuoteSelectionDisabled">
+      <SfHeading
+        title="Still have questions?"
+        :level="4"
+      />
+      <SfButton
+        class="_send-message-to-manager-btn"
+        v-if="!isShowSendMessageToManagerForm"
+        @click="isShowSendMessageToManagerForm = !isShowSendMessageToManagerForm"
+      >
+        {{ orderBulkSampleButtonTitle }}
+      </SfButton>
+    </div>
+
+    <SfHeading
+      class="_notification-title"
+      v-if="isQuoteSelectionDisabled"
+      :title="notificationTitle"
+      :level="2"
+    />
+
+    <p class="_more-info" v-if="moreInfoStoryContent">
+      <Blok :item="moreInfoStoryContent" />
+    </p>
   </div>
 </template>
 
@@ -104,13 +139,16 @@ import Vue, { PropType, VueConstructor } from 'vue'
 import { SfButton, SfHeading, SfRadio } from '@storefront-ui/vue'
 import { getProductGallery as getGalleryByProduct } from '@vue-storefront/core/modules/catalog/helpers';
 import { getProductDefaultPrice } from 'src/modules/shared';
+import { components } from 'src/modules/vsf-storyblok-module/components';
 
 import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
 import BulkorderProduct from 'theme/interfaces/bulkorder-product.type';
-import { BulkorderQuote, BulkOrderInfo } from 'src/modules/budsies';
+import { BulkorderQuote, BulkOrderInfo, BulkOrderStatus } from 'src/modules/budsies';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import AddonOption from '../interfaces/addon-option.interface';
 import { BundleOption } from '@vue-storefront/core/modules/catalog/types/BundleOption';
+import { ItemData } from '../../../../modules/vsf-storyblok-module';
+import { StoryblokStories } from '../../../../modules/vsf-storyblok-module/types/State';
 
 export default (Vue as VueConstructor<Vue>).extend({
   props: {
@@ -121,10 +159,6 @@ export default (Vue as VueConstructor<Vue>).extend({
     sampleProduct: {
       type: Object as PropType<Product>,
       required: true
-    },
-    productionTimeStorySlug: {
-      type: String,
-      required: true
     }
   },
   data () {
@@ -132,14 +166,16 @@ export default (Vue as VueConstructor<Vue>).extend({
       quoteId: undefined,
       selectedAddons: [] as number [],
       isDataLoaded: false,
-      isSubmitting: false
+      isSubmitting: false,
+      isShowSendMessageToManagerForm: false
     }
   },
   components: {
     MAddonsSelector,
     SfButton,
     SfHeading,
-    SfRadio
+    SfRadio,
+    Blok: components.block
   },
   computed: {
     quotes (): BulkorderQuote[] {
@@ -147,6 +183,47 @@ export default (Vue as VueConstructor<Vue>).extend({
     },
     isDisabled (): boolean {
       return this.isSubmitting;
+    },
+    isQuoteSelectionDisabled (): boolean {
+      return this.bulkorderInfo.statusId !== 1;
+    },
+    notificationTitle (): string {
+      switch (this.bulkorderInfo.statusId) {
+        case 2:
+          return 'Our manager will contact you soon!';
+        case 3:
+          return 'Your order is in progress.';
+        default:
+          return '';
+      }
+    },
+    productionTimeStorySlug (): string {
+      let sampleProductPart = '_';
+
+      if (this.bulkorderInfo.bulkorderProductId === BulkorderProduct.PILLOW) {
+        sampleProductPart = '_pillow_';
+      }
+
+      if (this.bulkorderInfo.bulkorderProductId === BulkorderProduct.KEYCHAIN) {
+        sampleProductPart = '_keychain_';
+      }
+
+      return `info/bulk${sampleProductPart}quote_production_time_text`;
+    },
+    productionTimeStoryContent (): ItemData | undefined {
+      return this.getStoryContent(this.productionTimeStorySlug);
+    },
+    moreInfoStorySlug (): string {
+      return 'blocks/bulk_order_quotation_page_more_info';
+    },
+    moreInfoStoryContent (): ItemData | undefined {
+      return this.getStoryContent(this.moreInfoStorySlug);
+    },
+    orderNoticesStorySlug (): string {
+      return 'blocks/bulk_order_quotation_page_order_notices';
+    },
+    orderNoticesStoryContent (): ItemData | undefined {
+      return this.getStoryContent(this.orderNoticesStorySlug);
     },
     formTitle (): string {
       if (this.bulkorderInfo.bulkorderProductId === BulkorderProduct.PLUSHIE) {
@@ -254,9 +331,32 @@ export default (Vue as VueConstructor<Vue>).extend({
     getPrice (price: number): string {
       return '$' + price.toFixed(2);
     },
+    getSavingsForQuote (quote: BulkorderQuote): string {
+      const quoteIndex = this.quotes.indexOf(quote);
+
+      if (quoteIndex < 1 || !this.quotes.hasOwnProperty(quoteIndex - 1)) {
+        return '';
+      }
+
+      const previousQuote = this.quotes[quoteIndex - 1];
+      const savings = quote.qty * previousQuote.getFinalPrice() - quote.getTotalPrice();
+
+      return `Save $${savings.toFixed(2)}!`;
+    },
+    getStoryContent (slug: string): ItemData | undefined {
+      const story = this.$store.state.storyblok.stories[slug] ? this.$store.state.storyblok.stories[slug] : undefined;
+
+      if (!story?.story?.content) {
+        return undefined;
+      }
+
+      return story.story.content;
+    },
     async loadData (): Promise<void> {
       await Promise.all([
-        this.$store.dispatch(`storyblok/loadStory`, { fullSlug: this.productionTimeStorySlug }),
+        this.$store.dispatch('storyblok/loadStory', { fullSlug: this.productionTimeStorySlug }),
+        this.$store.dispatch('storyblok/loadStory', { fullSlug: this.moreInfoStorySlug }),
+        this.$store.dispatch('storyblok/loadStory', { fullSlug: this.orderNoticesStorySlug }),
         this.$store.dispatch('budsies/loadBulkorderQuotes', {
           bulkorderId: this.bulkorderInfo.id
         })
@@ -309,6 +409,10 @@ $promt-color: #8eba4c;
 .o-bulkorder-quotation-form{
   ._subtitle {
     text-align: center;
+  }
+
+  ._notification-title {
+    margin: var(--spacer-lg) 0;
   }
 
   ._quotation-container {
@@ -371,10 +475,16 @@ $promt-color: #8eba4c;
         width: 50%;
       }
     }
+
+    ._quote-description-row > ._prompt {
+      text-align: right;
+      width: 100%;
+    }
   }
 
   ._bulkorder-description {
     width: 100%;
+    text-align: center;
 
     ._description {
       text-align: center;
@@ -382,7 +492,7 @@ $promt-color: #8eba4c;
     }
 
     ._artwork > img {
-      width: 100%;
+      max-width: 100%;
     }
 
     @media (min-width: $tablet-min) {

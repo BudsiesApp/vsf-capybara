@@ -3,7 +3,6 @@
     <o-bulkorder-quotation-form
       :bulkorder-info="bulkorderInfo"
       :sample-product="sampleProduct"
-      :production-time-story-slug="productionTimeStorySlug"
       v-if="isDataLoaded"
     />
   </div>
@@ -38,23 +37,6 @@ export default Vue.extend({
     };
   },
   computed: {
-    productionTimeStorySlug (): string | undefined {
-      if (!this.bulkorderInfo) {
-        return undefined;
-      }
-
-      let sampleProductPart = '_';
-
-      if (this.bulkorderInfo.bulkorderProductId === BulkorderProduct.PILLOW) {
-        sampleProductPart = '_pillow_';
-      }
-
-      if (this.bulkorderInfo.bulkorderProductId === BulkorderProduct.KEYCHAIN) {
-        sampleProductPart = '_keychain_';
-      }
-
-      return `info/bulk${sampleProductPart}quote_production_time_text`;
-    },
     sampleProductSku (): string | undefined {
       if (!this.bulkorderInfo) {
         return undefined;
