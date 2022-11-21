@@ -271,6 +271,10 @@ export default (Vue as VueConstructor<Vue>).extend({
         return;
       }
 
+      if (!this.$store.getters['cart/getCartToken']) {
+        await this.$store.dispatch('cart/connect', { guestCart: true });
+      }
+
       const include3dRendering = false;
 
       this.isSubmitting = true;
@@ -283,6 +287,8 @@ export default (Vue as VueConstructor<Vue>).extend({
             include3dRendering
           }
         );
+
+        await this.$store.dispatch('cart/synchronizeCart', { forceClientState: false, forceSync: true });
 
         this.$router.push({ name: 'detailed-cart' });
       } finally {
