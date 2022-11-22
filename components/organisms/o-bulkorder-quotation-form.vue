@@ -19,13 +19,14 @@
           {{ bulkorderInfo.description }}
         </div>
       </div>
-      <div class="_quotes-selector" v-if="!isQuoteSelectionDisabled">
+      <div class="_quotes-selector">
         <SfHeading
+          v-if="!isQuoteSelectionDisabled"
           :level="2"
           :title="$t('Select Your Preferred Quantity')"
         />
 
-        <p class="_production-time">
+        <p class="_production-time" v-if="!isQuoteSelectionDisabled">
           <Blok :item="productionTimeStoryContent" v-if="productionTimeStoryContent" />
         </p>
 
@@ -35,6 +36,7 @@
               class="_quote-input"
               :value="quote.id + ''"
               v-model="quoteId"
+              :disabled="isBulkOrderInProgress"
             >
               <template #label>
                 <div class="_quote-title">
@@ -101,7 +103,7 @@
       />
 
       <div class="_submit-button-container">
-        <SfButton class="_quote-submit-button" :disabled="isDisabled" @click="submit">
+        <SfButton class="_quote-submit-button" :disabled="isDisabled" @click="submitQuote">
           {{ orderBulkSampleButtonTitle }}
         </SfButton>
       </div>
@@ -109,16 +111,42 @@
 
     <div class="_send-message-to-manager" v-if="!isQuoteSelectionDisabled">
       <SfHeading
+        class="_send-message-to-manager-title"
         title="Still have questions?"
         :level="4"
       />
       <SfButton
-        class="_send-message-to-manager-btn"
+        class="sf-button sf-button--outline"
         v-if="!isShowSendMessageToManagerForm"
         @click="isShowSendMessageToManagerForm = !isShowSendMessageToManagerForm"
       >
-        {{ orderBulkSampleButtonTitle }}
+        Speak with Sales Representative
       </SfButton>
+      <div v-if="isShowSendMessageToManagerForm && !isQuestionSubmitted">
+        <p>Your dedicated bulk concierge is happy to help answer any final questions or concerns about your order.</p>
+        <textarea
+          class="_send-message-to-manager-textarea"
+          v-model="question"
+          placeholder="Please type your question here or confirm your phone number (and best time to reach you) for your salesperson to call you back!"
+          rows="2"
+        />
+        <div
+          class="_error-text"
+          v-if="$v.question && $v.question.$error"
+        >
+          {{ $t('Please enter a message') }}
+        </div>
+        <SfButton
+          class="sf-button sf-button--outline _send-message-to-manager-submit"
+          :disabled="isDisabled"
+          @click="submitQuestion"
+        >
+          Submit
+        </SfButton>
+      </div>
+      <p v-if="isQuestionSubmitted">
+        Thanks! Please allow 1-2 business days for a response.
+      </p>
     </div>
 
     <SfHeading
@@ -138,17 +166,16 @@
 import Vue, { PropType, VueConstructor } from 'vue'
 import { SfButton, SfHeading, SfRadio } from '@storefront-ui/vue'
 import { getProductGallery as getGalleryByProduct } from '@vue-storefront/core/modules/catalog/helpers';
+import Product from '@vue-storefront/core/modules/catalog/types/Product';
+import { BundleOption } from '@vue-storefront/core/modules/catalog/types/BundleOption';
+import { required } from 'vuelidate/lib/validators';
+
 import { getProductDefaultPrice } from 'src/modules/shared';
 import { components } from 'src/modules/vsf-storyblok-module/components';
-
+import { ItemData } from 'src/modules/vsf-storyblok-module';
+import { BulkorderQuote, BulkOrderInfo, BulkOrderStatus, BulkorderQuoteProductId } from 'src/modules/budsies';
 import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
-import BulkorderProduct from 'theme/interfaces/bulkorder-product.type';
-import { BulkorderQuote, BulkOrderInfo, BulkOrderStatus } from 'src/modules/budsies';
-import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import AddonOption from '../interfaces/addon-option.interface';
-import { BundleOption } from '@vue-storefront/core/modules/catalog/types/BundleOption';
-import { ItemData } from '../../../../modules/vsf-storyblok-module';
-import { StoryblokStories } from '../../../../modules/vsf-storyblok-module/types/State';
 
 export default (Vue as VueConstructor<Vue>).extend({
   props: {
@@ -163,11 +190,13 @@ export default (Vue as VueConstructor<Vue>).extend({
   },
   data () {
     return {
-      quoteId: undefined,
-      selectedAddons: [] as number [],
+      quoteId: undefined as number,
+      selectedAddons: [] as number[],
+      question: undefined as string,
       isDataLoaded: false,
       isSubmitting: false,
-      isShowSendMessageToManagerForm: false
+      isShowSendMessageToManagerForm: false,
+      isQuestionSubmitted: false
     }
   },
   components: {
@@ -178,20 +207,23 @@ export default (Vue as VueConstructor<Vue>).extend({
     Blok: components.block
   },
   computed: {
-    quotes (): BulkorderQuote[] {
+    quotes (): BulkorderQuote[] | undefined {
       return this.$store.getters['budsies/getBulkorderQuotes'](this.bulkorderInfo.id);
     },
     isDisabled (): boolean {
       return this.isSubmitting;
     },
     isQuoteSelectionDisabled (): boolean {
-      return this.bulkorderInfo.statusId !== 1;
+      return this.bulkorderInfo.statusId !== BulkOrderStatus.DRAFT;
+    },
+    isBulkOrderInProgress (): boolean {
+      return this.bulkorderInfo.statusId === BulkOrderStatus.IN_PROGRESS;
     },
     notificationTitle (): string {
       switch (this.bulkorderInfo.statusId) {
-        case 2:
+        case BulkOrderStatus.WAITING_FOR_QUOTE:
           return 'Our manager will contact you soon!';
-        case 3:
+        case BulkOrderStatus.IN_PROGRESS:
           return 'Your order is in progress.';
         default:
           return '';
@@ -200,11 +232,11 @@ export default (Vue as VueConstructor<Vue>).extend({
     productionTimeStorySlug (): string {
       let sampleProductPart = '_';
 
-      if (this.bulkorderInfo.bulkorderProductId === BulkorderProduct.PILLOW) {
+      if (this.bulkorderInfo.bulkorderProductId === BulkorderQuoteProductId.PILLOW) {
         sampleProductPart = '_pillow_';
       }
 
-      if (this.bulkorderInfo.bulkorderProductId === BulkorderProduct.KEYCHAIN) {
+      if (this.bulkorderInfo.bulkorderProductId === BulkorderQuoteProductId.KEYCHAIN) {
         sampleProductPart = '_keychain_';
       }
 
@@ -226,7 +258,7 @@ export default (Vue as VueConstructor<Vue>).extend({
       return this.getStoryContent(this.orderNoticesStorySlug);
     },
     formTitle (): string {
-      if (this.bulkorderInfo.bulkorderProductId === BulkorderProduct.PLUSHIE) {
+      if (this.bulkorderInfo.bulkorderProductId === BulkorderQuoteProductId.PLUSHIE) {
         return this.$t('Bulk Quote');
       }
 
@@ -234,10 +266,10 @@ export default (Vue as VueConstructor<Vue>).extend({
     },
     subtitleProductName (): string {
       switch (this.bulkorderInfo.bulkorderProductId) {
-        case BulkorderProduct.PLUSHIE:
-        case BulkorderProduct.KEYCHAIN:
+        case BulkorderQuoteProductId.PLUSHIE:
+        case BulkorderQuoteProductId.KEYCHAIN:
           return 'stuffed animal';
-        case BulkorderProduct.PILLOW:
+        case BulkorderQuoteProductId.PILLOW:
           return 'pillow';
         default:
           return '';
@@ -245,8 +277,8 @@ export default (Vue as VueConstructor<Vue>).extend({
     },
     showCompareTo (): boolean {
       switch (this.bulkorderInfo.bulkorderProductId) {
-        case BulkorderProduct.PLUSHIE:
-        case BulkorderProduct.KEYCHAIN:
+        case BulkorderQuoteProductId.PLUSHIE:
+        case BulkorderQuoteProductId.KEYCHAIN:
           return true;
         default:
           return false;
@@ -260,11 +292,11 @@ export default (Vue as VueConstructor<Vue>).extend({
     },
     sampleProductName (): string {
       switch (this.bulkorderInfo.bulkorderProductId) {
-        case BulkorderProduct.PLUSHIE:
+        case BulkorderQuoteProductId.PLUSHIE:
           return 'Plush';
-        case BulkorderProduct.PILLOW:
+        case BulkorderQuoteProductId.PILLOW:
           return 'Pillow';
-        case BulkorderProduct.KEYCHAIN:
+        case BulkorderQuoteProductId.KEYCHAIN:
           return 'Keychain';
         default:
           return '';
@@ -322,9 +354,25 @@ export default (Vue as VueConstructor<Vue>).extend({
       );
     }
   },
+  validations (): any {
+    return {
+      question: {
+        required
+      }
+    }
+  },
+  async serverPrefetch () {
+    await (this as any).loadData();
+  },
   async beforeMount () {
-    if (!this.isDataLoaded) {
+    if (this.quotes === undefined) {
       await this.loadData();
+    } else {
+      this.isDataLoaded = true;
+    }
+
+    if (this.quotes && this.quotes.length && !this.isBulkOrderInProgress) {
+      this.quoteId = this.quotes[0].id + '';
     }
   },
   methods: {
@@ -339,7 +387,10 @@ export default (Vue as VueConstructor<Vue>).extend({
       }
 
       const previousQuote = this.quotes[quoteIndex - 1];
-      const savings = quote.qty * previousQuote.getFinalPrice() - quote.getTotalPrice();
+      const previousQuoteFinalPrice = previousQuote.productionPrice + previousQuote.shippingPrice;
+      const quoteFinalPrice = quote.productionPrice + quote.shippingPrice;
+
+      const savings = quote.qty * previousQuoteFinalPrice - quote.qty * quoteFinalPrice;
 
       return `Save $${savings.toFixed(2)}!`;
     },
@@ -352,32 +403,36 @@ export default (Vue as VueConstructor<Vue>).extend({
 
       return story.story.content;
     },
+    get3dRenderingAddonOptionValueId (): number | undefined {
+      const renderingAddon: AddonOption = this.addons.find((addon: AddonOption) => addon.sku.indexOf('3d_rendering') > -1);
+
+      return renderingAddon ? renderingAddon.optionValueId : undefined;
+    },
     async loadData (): Promise<void> {
       await Promise.all([
         this.$store.dispatch('storyblok/loadStory', { fullSlug: this.productionTimeStorySlug }),
         this.$store.dispatch('storyblok/loadStory', { fullSlug: this.moreInfoStorySlug }),
-        this.$store.dispatch('storyblok/loadStory', { fullSlug: this.orderNoticesStorySlug }),
-        this.$store.dispatch('budsies/loadBulkorderQuotes', {
-          bulkorderId: this.bulkorderInfo.id
-        })
+        this.$store.dispatch('storyblok/loadStory', { fullSlug: this.orderNoticesStorySlug })
       ]);
 
-      this.quoteId = this.quotes[0] ? this.quotes[0].id + '' : undefined;
+      await this.$store.dispatch('budsies/loadBulkorderQuotes', {
+        bulkorderId: this.bulkorderInfo.id
+      });
 
       this.isDataLoaded = true;
     },
-    async submit (): Promise<void> {
-      if (this.isDisabled || !this.quoteId) {
+    async submitQuote (): Promise<void> {
+      if (this.isSubmitting || !this.quoteId) {
         return;
       }
+
+      this.isSubmitting = true;
 
       if (!this.$store.getters['cart/getCartToken']) {
         await this.$store.dispatch('cart/connect', { guestCart: true });
       }
 
-      const include3dRendering = false;
-
-      this.isSubmitting = true;
+      const include3dRendering = this.selectedAddons.includes(this.get3dRenderingAddonOptionValueId());
 
       try {
         await this.$store.dispatch(
@@ -391,6 +446,29 @@ export default (Vue as VueConstructor<Vue>).extend({
         await this.$store.dispatch('cart/synchronizeCart', { forceClientState: false, forceSync: true });
 
         this.$router.push({ name: 'detailed-cart' });
+      } finally {
+        this.isSubmitting = false;
+      }
+    },
+    async submitQuestion (): Promise<void> {
+      this.$v.$touch();
+
+      if (this.$v.$invalid || this.isSubmitting) {
+        return;
+      }
+
+      this.isSubmitting = true;
+
+      try {
+        await this.$store.dispatch(
+          'budsies/sendBulkOrderQuestion',
+          {
+            bulkOrderId: this.bulkorderInfo.id,
+            questionText: this.question
+          }
+        );
+
+        this.isQuestionSubmitted = true;
       } finally {
         this.isSubmitting = false;
       }
@@ -411,7 +489,8 @@ $promt-color: #8eba4c;
     text-align: center;
   }
 
-  ._notification-title {
+  ._notification-title,
+  ._send-message-to-manager-title {
     margin: var(--spacer-lg) 0;
   }
 
@@ -444,6 +523,8 @@ $promt-color: #8eba4c;
   }
 
   ._quotes-selector {
+    width: 100%;
+
     ._quotes-list {
       list-style: none;
     }
@@ -480,6 +561,18 @@ $promt-color: #8eba4c;
       text-align: right;
       width: 100%;
     }
+
+    .sf-heading {
+      margin-top: var(--spacer-sm);
+    }
+
+    @media (min-width: $desktop-min) {
+      width: 45%;
+
+      .sf-heading {
+        margin-top: 0;
+      }
+    }
   }
 
   ._bulkorder-description {
@@ -513,6 +606,31 @@ $promt-color: #8eba4c;
     ._quote-submit-button {
       margin-top: var(--spacer-2xl);
       margin-bottom: var(--spacer-xl);
+    }
+  }
+
+  ._send-message-to-manager {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: var(--spacer-xl);
+    text-align: center;
+
+    ._send-message-to-manager-submit,
+    ._send-message-to-manager-textarea {
+      margin: var(--spacer-sm) auto;
+    }
+
+    ._send-message-to-manager-textarea {
+      width: 75%;
+      padding: var(--spacer-sm);
+    }
+
+    ._error-text {
+      color: var(--c-danger-variant);
+      font-size: var(--font-xs);
+      margin: var(--spacer-sm) 0;
+      height: calc(var(--font-xs) * 1.2);
     }
   }
 

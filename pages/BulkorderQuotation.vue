@@ -14,8 +14,7 @@ import Vue from 'vue';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 
-import BulkorderProduct from 'theme/interfaces/bulkorder-product.type';
-import { BulkOrderInfo } from 'src/modules/budsies';
+import { BulkOrderInfo, BulkorderQuoteProductId } from 'src/modules/budsies';
 import OBulkorderQuotationForm from 'theme/components/organisms/o-bulkorder-quotation-form.vue';
 
 export default Vue.extend({
@@ -32,8 +31,7 @@ export default Vue.extend({
   data () {
     return {
       isRouterLeaving: false,
-      isDataLoaded: false,
-      bulkorderInfo: undefined as BulkOrderInfo | undefined
+      isDataLoaded: false
     };
   },
   computed: {
@@ -43,11 +41,11 @@ export default Vue.extend({
       }
 
       switch (this.bulkorderInfo.bulkorderProductId) {
-        case BulkorderProduct.PLUSHIE:
+        case BulkorderQuoteProductId.PLUSHIE:
           return 'CustomBulkSample_bundle';
-        case BulkorderProduct.PILLOW:
+        case BulkorderQuoteProductId.PILLOW:
           return 'pillowBulkSample_bundle';
-        case BulkorderProduct.KEYCHAIN:
+        case BulkorderQuoteProductId.KEYCHAIN:
           return 'keychainBulkSample_bundle';
         default:
           return undefined;
@@ -61,14 +59,19 @@ export default Vue.extend({
       }
 
       return product;
+    },
+    bulkorderInfo (): BulkOrderInfo | undefined {
+      return this.$store.getters['budsies/getBulkorderInfo'];
     }
   },
   async serverPrefetch () {
     await (this as any).loadData();
   },
   async beforeMount () {
-    if (!this.isDataLoaded) {
+    if (!this.bulkorderInfo) {
       await this.loadData();
+    } else {
+      this.isDataLoaded = true;
     }
   },
   beforeDestroy () {
@@ -84,7 +87,7 @@ export default Vue.extend({
   },
   methods: {
     async loadData (): Promise<void> {
-      this.bulkorderInfo = await this.$store.dispatch('budsies/getBulkOrderInfo', this.bulkorderId);
+      await this.$store.dispatch('budsies/loadBulkOrderInfo', this.bulkorderId);
 
       await this.$store.dispatch('product/loadProduct', {
         parentSku: this.sampleProductSku,

@@ -223,7 +223,7 @@ export default BulkorderBaseFormPersistanceState.extend({
             this.$router.push({ name: 'bulkorder-confirmation' });
             break;
           default:
-            // TODO redirect to quote page with bulkOrderId as param
+            this.$router.push({ name: 'bulkorder-quotation', params: { bulkorderId: +bulkOrderId } });
         }
       } finally {
         this.isSubmitting = false;
