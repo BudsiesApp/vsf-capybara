@@ -40,7 +40,7 @@
             >
               <template #label>
                 <div class="_quote-title">
-                  {{ $t('Quantity') }} {{ quote.qty }}, {{ $t('Size') }} {{ bulkorderInfo.size }}"
+                  {{ $t('Quantity') }} {{ quote.qty }}{{ sizeLabel }}
                 </div>
               </template>
               <template #description>
@@ -218,6 +218,13 @@ export default (Vue as VueConstructor<Vue>).extend({
     },
     isBulkOrderInProgress (): boolean {
       return this.bulkorderInfo.statusId === BulkOrderStatus.IN_PROGRESS;
+    },
+    sizeLabel (): string {
+      if (!this.bulkorderInfo.size) {
+        return '';
+      }
+
+      return ', ' + this.$t('Size') + ': ' + this.bulkorderInfo.size + '"';
     },
     notificationTitle (): string {
       switch (this.bulkorderInfo.statusId) {

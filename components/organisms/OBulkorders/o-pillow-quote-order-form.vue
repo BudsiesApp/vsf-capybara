@@ -9,6 +9,8 @@
       :artwork-upload-url="artworkUploadUrl"
       :has-size="true"
       v-model="bulkordersBaseFormData"
+      :show-calculation-animation="isSubmitting"
+      @calculation-animation-finished="redirect"
     >
       <template #size>
         <div class="_section">
@@ -60,8 +62,7 @@ import { SfButton, SfSelect } from '@storefront-ui/vue';
 
 import Product from 'core/modules/catalog/types/Product';
 import { BundleOption, BundleOptionsProductLink } from 'core/modules/catalog/types/BundleOption';
-import { product } from 'core/modules/url/test/unit/helpers/data';
-import { BulkorderQuoteProductId, BulkOrderStatus } from 'src/modules/budsies';
+import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo } from 'src/modules/budsies';
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
 
@@ -117,6 +118,9 @@ export default BulkorderBaseFormPersistanceState.extend({
     }
   },
   computed: {
+    bulkOrderInfo (): BulkOrderInfo | undefined {
+      return this.$store.getters['budsies/getBulkorderInfo'];
+    },
     isDisabled (): boolean {
       return this.isSubmitting;
     },
@@ -134,7 +138,7 @@ export default BulkorderBaseFormPersistanceState.extend({
 
         options.push({
           id: productLink.id,
-          value: productLink.id,
+          value: this.getPillowSizeValue(productLink),
           title: this.getPillowSizeTitle(productLink).toString()
         });
       })
@@ -185,6 +189,18 @@ export default BulkorderBaseFormPersistanceState.extend({
           throw new Error('Wrong pillow size sku!');
       }
     },
+    getPillowSizeValue (sizeProductLink: BundleOptionsProductLink): number {
+      switch (sizeProductLink.sku) {
+        case 'simplePillowBulkSample_small':
+          return 12;
+        case 'simplePillowBulkSample_medium':
+          return 16;
+        case 'simplePillowBulkSample_large':
+          return 18;
+        default:
+          throw new Error('Wrong pillow size sku!');
+      }
+    },
     async onSubmit (): Promise<void> {
       const form = this.getBaseFormComponent();
 
@@ -216,17 +232,30 @@ export default BulkorderBaseFormPersistanceState.extend({
           }
         );
 
-        const status: BulkOrderStatus = await this.$store.dispatch('budsies/getBulkOrderStatus', bulkOrderId);
+        await this.$store.dispatch('budsies/loadBulkOrderInfo', bulkOrderId);
 
-        switch (status) {
-          case BulkOrderStatus.WAITING_FOR_QUOTE:
-            this.$router.push({ name: 'bulkorder-confirmation' });
-            break;
-          default:
-            this.$router.push({ name: 'bulkorder-quotation', params: { bulkorderId: +bulkOrderId } });
+        if (!this.bulkOrderInfo || this.bulkOrderInfo.id !== bulkOrderId) {
+          throw new Error('Unable to resolve status for created BulkOrder');
         }
-      } finally {
+      } catch (e) {
         this.isSubmitting = false;
+
+        throw e;
+      }
+    },
+    redirect (): void {
+      this.isSubmitting = false;
+
+      if (!this.bulkOrderInfo) {
+        return;
+      }
+
+      switch (this.bulkOrderInfo.statusId) {
+        case BulkOrderStatus.WAITING_FOR_QUOTE:
+          this.$router.push({ name: 'bulkorder-confirmation' });
+          break;
+        default:
+          this.$router.push({ name: 'bulkorder-quotation', params: { bulkorderId: this.bulkOrderInfo.id } });
       }
     }
   },

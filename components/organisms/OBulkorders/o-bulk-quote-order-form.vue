@@ -9,7 +9,9 @@
       :artwork-upload-url="artworkUploadUrl"
       :has-size="true"
       :has-bodyparts="true"
+      :show-calculation-animation="isSubmitting"
       v-model="bulkordersBaseFormData"
+      @calculation-animation-finished="redirect"
     >
       <template #bodyparts v-if="colorPaletteBodypart">
         <div class="_section">
@@ -86,14 +88,14 @@ import { required } from 'vuelidate/lib/validators';
 import { SfButton, SfHeading, SfInput } from '@storefront-ui/vue';
 
 import Product from 'core/modules/catalog/types/Product';
-import { product } from 'core/modules/url/test/unit/helpers/data';
-import { Bodypart, BodypartOption, BodypartValue, BulkorderQuoteProductId, BulkOrderStatus } from 'src/modules/budsies';
+import { Bodypart, BodypartOption, BodypartValue, BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo } from 'src/modules/budsies';
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
 
 import MBaseForm from './m-base-form.vue';
 import MBodypartOptionConfigurator from '../../molecules/m-bodypart-option-configurator.vue';
 import AOrderedHeading from '../../atoms/a-ordered-heading.vue';
+import { Dictionary } from 'vue-router/types/router';
 
 export default BulkorderBaseFormPersistanceState.extend({
   name: 'OBulkQuoteOrderForm',
@@ -141,6 +143,9 @@ export default BulkorderBaseFormPersistanceState.extend({
     }
   },
   computed: {
+    bulkOrderInfo (): BulkOrderInfo | undefined {
+      return this.$store.getters['budsies/getBulkorderInfo'];
+    },
     bodyparts (): Bodypart[] {
       return this.$store.getters['budsies/getProductBodyparts'](this.product.id);
     },
@@ -195,12 +200,12 @@ export default BulkorderBaseFormPersistanceState.extend({
     getBaseFormComponent (): InstanceType<typeof MBaseForm> | undefined {
       return this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
     },
-    getBodypartsData (): string[] {
-      if (!this.color) {
-        return [];
+    getBodypartsData (): Dictionary<[]> {
+      if (!this.color || !this.colorPaletteBodypart) {
+        return {};
       }
 
-      return this.color.map(item => item.id);
+      return { [this.colorPaletteBodypart.id]: this.color.map(item => item.id) };
     },
     getDataToPersist () {
       return {
@@ -243,17 +248,30 @@ export default BulkorderBaseFormPersistanceState.extend({
           }
         );
 
-        const status: BulkOrderStatus = await this.$store.dispatch('budsies/getBulkOrderStatus', bulkOrderId);
+        await this.$store.dispatch('budsies/loadBulkOrderInfo', bulkOrderId);
 
-        switch (status) {
-          case BulkOrderStatus.WAITING_FOR_QUOTE:
-            this.$router.push({ name: 'bulkorder-confirmation' });
-            break;
-          default:
-            this.$router.push({ name: 'bulkorder-quotation', params: { bulkorderId: +bulkOrderId } });
+        if (!this.bulkOrderInfo || this.bulkOrderInfo.id !== bulkOrderId) {
+          throw new Error('Unable to resolve status for created BulkOrder');
         }
-      } finally {
+      } catch (e) {
         this.isSubmitting = false;
+
+        throw e;
+      }
+    },
+    redirect (): void {
+      this.isSubmitting = false;
+
+      if (!this.bulkOrderInfo) {
+        return;
+      }
+
+      switch (this.bulkOrderInfo.statusId) {
+        case BulkOrderStatus.WAITING_FOR_QUOTE:
+          this.$router.push({ name: 'bulkorder-confirmation' });
+          break;
+        default:
+          this.$router.push({ name: 'bulkorder-quotation', params: { bulkorderId: this.bulkOrderInfo.id } });
       }
     }
   },

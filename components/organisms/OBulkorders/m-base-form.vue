@@ -295,6 +295,21 @@
     >
       {{ $t('This field is required') }}
     </div>
+
+    <SfModal class="_quotation-calculating-modal" :visible="showUnicorn" :cross="false" :persistent="true">
+      <SfHeading :level="2" :title="$t('Quotation Engine in Progress')" />
+      <video
+        class="_quotation-calculating-modal-video"
+        autoplay
+        loop
+        muted
+        playsinline
+      >
+        <source src="/assets/video/bulkorder/quotation-calculating-unicorn.mp4" type="video/mp4">
+      </video>
+      <SfLoader />
+      <p>{{ calculationAnimationStepTitle }}</p>
+    </SfModal>
   </div>
 </template>
 
@@ -303,7 +318,7 @@ import config from 'config';
 import Vue, { PropType, VueConstructor } from 'vue';
 import { required, requiredIf, minValue, email, sameAs } from 'vuelidate/lib/validators';
 import { TranslateResult } from 'vue-i18n';
-import { SfButton, SfInput, SfRadio, SfSelect } from '@storefront-ui/vue';
+import { SfButton, SfInput, SfRadio, SfSelect, SfModal, SfHeading, SfLoader } from '@storefront-ui/vue';
 import {
   mapMobileObserver,
   unMapMobileObserver
@@ -312,7 +327,6 @@ import {
 import Product from 'core/modules/catalog/types/Product';
 import { Dictionary, ProductId, ProductValue } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
-import { CustomerImage } from 'src/modules/shared';
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 import CustomerType from 'theme/components/interfaces/customer-type.interface';
 
@@ -337,7 +351,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     SfButton,
     SfInput,
     SfRadio,
-    SfSelect
+    SfSelect,
+    SfModal,
+    SfHeading,
+    SfLoader
   },
   props: {
     product: {
@@ -363,6 +380,14 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     hasBodyparts: {
       type: Boolean,
       default: false
+    },
+    showCalculationAnimation: {
+      type: Boolean,
+      default: false
+    },
+    calculationAnimationStepDelay: {
+      type: Number,
+      default: 2000
     }
   },
   inject: {
@@ -371,7 +396,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   data () {
     return {
       countries: Countries,
-      showAdditionalQuantity: false
+      showAdditionalQuantity: false,
+      showUnicorn: false,
+      unicornStepIndex: 1
     }
   },
   computed: {
@@ -538,6 +565,18 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return this.showAdditionalQuantity
         ? this.$t('Remove')
         : this.$t('Not Sure?');
+    },
+    calculationAnimationStepTitle (): string {
+      switch (this.unicornStepIndex) {
+        case 1:
+          return 'Analyzing plushification';
+        case 2:
+          return 'Consulting unicorn fairies';
+        case 3:
+          return 'Calculating unicorn gallops required for delivery';
+        default:
+          return '';
+      } ;
     }
   },
   methods: {
@@ -570,6 +609,20 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     updateValue (value: Partial<BulkordersBaseFormData>): void {
       this.$emit('input', { ...this.value, ...value })
+    },
+    goToNextStep (): void {
+      setTimeout(
+        () => {
+          this.unicornStepIndex++;
+
+          if (this.unicornStepIndex < 4) {
+            this.goToNextStep();
+          } else {
+            this.$emit('calculation-animation-finished');
+          }
+        },
+        this.calculationAnimationStepDelay
+      )
     }
   },
   beforeDestroy () {
@@ -617,11 +670,25 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         }
       }
     }
+  },
+  watch: {
+    showCalculationAnimation: {
+      handler (newValue: boolean): void {
+        this.showUnicorn = newValue;
+        this.unicornStepIndex = 1;
+
+        if (this.showUnicorn) {
+          this.goToNextStep();
+        }
+      }
+    }
   }
 })
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+
 .m-base-form {
     --select-margin: 0;
     --select-padding: 0;
@@ -753,5 +820,38 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         }
       }
     }
+
+  ._quotation-calculating-modal {
+    text-align: center;
+
+    ._quotation-calculating-modal-video {
+      margin: var(--spacer-sm) 0;
+      height: 200px;
+    }
+
+    ::v-deep {
+      .sf-modal {
+        &__content {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+      }
+
+      .sf-bar {
+        &__icon {
+          display: none;
+        }
+      }
+    }
+
+    .sf-loader {
+      margin: var(--spacer-lg) 0;
+    }
+
+    @media (min-width: $desktop-min) {
+      --modal-width: 40em;
+    }
+  }
 }
 </style>
