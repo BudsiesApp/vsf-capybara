@@ -16,6 +16,7 @@ import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/stor
 
 import { BulkOrderInfo, BulkorderQuoteProductId } from 'src/modules/budsies';
 import OBulkorderQuotationForm from 'theme/components/organisms/o-bulkorder-quotation-form.vue';
+import { isServer } from '@vue-storefront/core/helpers';
 
 export default Vue.extend({
   name: 'BulkorderQuotation',
@@ -61,8 +62,17 @@ export default Vue.extend({
       return product;
     },
     bulkorderInfo (): BulkOrderInfo | undefined {
-      return this.$store.getters['budsies/getBulkorderInfo'];
+      const info = this.$store.getters['budsies/getBulkorderInfo'];
+
+      if (!info || info.id !== this.bulkorderId) {
+        return undefined;
+      }
+
+      return info;
     }
+  },
+  async mounted (): Promise<void> {
+    await this.setCurrentProduct();
   },
   async serverPrefetch () {
     await (this as any).loadData();
@@ -89,12 +99,25 @@ export default Vue.extend({
     async loadData (): Promise<void> {
       await this.$store.dispatch('budsies/loadBulkOrderInfo', this.bulkorderId);
 
-      await this.$store.dispatch('product/loadProduct', {
+      const product = await this.$store.dispatch('product/loadProduct', {
         parentSku: this.sampleProductSku,
-        setCurrent: true
+        setCurrent: false
       });
 
+      if (isServer) {
+        await this.$store.dispatch('product/setCurrent', product);
+      }
+
       this.isDataLoaded = true;
+    },
+    async setCurrentProduct (): Promise<void> {
+      if (this.sampleProduct) {
+        return;
+      }
+
+      const product = this.$store.getters['product/getProductBySkuDictionary'][this.sampleProductSku];
+
+      await this.$store.dispatch('product/setCurrent', product);
     }
   }
 })
