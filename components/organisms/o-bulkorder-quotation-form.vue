@@ -489,11 +489,6 @@ $promt-color: #8eba4c;
     text-align: center;
   }
 
-  ._notification-title,
-  ._send-message-to-manager-title {
-    // margin: var(--spacer-lg) 0;
-  }
-
   ._quotation-container {
     margin-top: var(--spacer-xl);
     display: flex;
