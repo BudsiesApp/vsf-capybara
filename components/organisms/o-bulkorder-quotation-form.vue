@@ -26,9 +26,9 @@
           :title="$t('Select Your Preferred Quantity')"
         />
 
-        <p class="_production-time" v-if="!isQuoteSelectionDisabled">
+        <div class="_production-time" v-if="!isQuoteSelectionDisabled">
           <Blok :item="productionTimeStoryContent" v-if="productionTimeStoryContent" />
-        </p>
+        </div>
 
         <ul class="_quotes-list">
           <li v-for="quote in quotes" :key="quote.id">
@@ -116,7 +116,7 @@
         :level="4"
       />
       <SfButton
-        class="sf-button sf-button--outline"
+        class="_message-submit-button sf-button sf-button--outline"
         v-if="!isShowSendMessageToManagerForm"
         @click="isShowSendMessageToManagerForm = !isShowSendMessageToManagerForm"
       >
@@ -491,19 +491,15 @@ $promt-color: #8eba4c;
 
   ._notification-title,
   ._send-message-to-manager-title {
-    margin: var(--spacer-lg) 0;
+    // margin: var(--spacer-lg) 0;
   }
 
   ._quotation-container {
-    margin-top: var(--spacer-lg);
+    margin-top: var(--spacer-xl);
     display: flex;
     column-gap: var(--spacer-lg);
     flex-direction: column;
     justify-content: center;
-
-    @media (min-width: $tablet-min) {
-      flex-direction: row;
-    }
   }
 
   ._prompt {
@@ -516,17 +512,15 @@ $promt-color: #8eba4c;
   ._compare-to {
     margin-top: var(--spacer-sm);
     margin-right: var(--spacer-xl);
-
-    @media (min-width: $tablet-min) {
-      margin-right: var(--spacer-3xl);
-    }
   }
 
   ._quotes-selector {
+    margin-top: var(--spacer-xl);
     width: 100%;
 
     ._quotes-list {
       list-style: none;
+      padding-left: 0;
     }
 
     ._quote-title {
@@ -551,27 +545,11 @@ $promt-color: #8eba4c;
       &.-marked > ._price {
         border-top: solid 1px var(--c-text);
       }
-
-      @media (min-width: $desktop-min) {
-        width: 50%;
-      }
     }
 
     ._quote-description-row > ._prompt {
       text-align: right;
       width: 100%;
-    }
-
-    .sf-heading {
-      margin-top: var(--spacer-sm);
-    }
-
-    @media (min-width: $desktop-min) {
-      width: 45%;
-
-      .sf-heading {
-        margin-top: 0;
-      }
     }
   }
 
@@ -587,25 +565,17 @@ $promt-color: #8eba4c;
     ._artwork > img {
       max-width: 100%;
     }
-
-    @media (min-width: $tablet-min) {
-      width: 45%;
-    }
   }
 
   ._order-bulk-sample-action {
-    margin-top: var(--spacer-lg);
+    margin-top: var(--spacer-xl);
     padding: var(--spacer-lg);
     background-color: $sample-background-color;
-  }
 
-  ._submit-button-container {
-    display: flex;
-    justify-content: center;
-
-    ._quote-submit-button {
-      margin-top: var(--spacer-2xl);
-      margin-bottom: var(--spacer-xl);
+    ._submit-button-container {
+      display: flex;
+      justify-content: center;
+      margin-top: var(--spacer-lg);
     }
   }
 
@@ -626,12 +596,20 @@ $promt-color: #8eba4c;
       padding: var(--spacer-sm);
     }
 
+    ._message-submit-button {
+      margin-top: var(--spacer-sm);
+    }
+
     ._error-text {
       color: var(--c-danger-variant);
       font-size: var(--font-xs);
       margin: var(--spacer-sm) 0;
       height: calc(var(--font-xs) * 1.2);
     }
+  }
+
+  ._more-info {
+    margin-top: var(--spacer-sm);
   }
 
   .sf-radio {
@@ -645,6 +623,57 @@ $promt-color: #8eba4c;
           background-color: var(--c-blue);
         }
       }
+    }
+  }
+
+  @media (min-width: $tablet-min) {
+    ._quotation-container {
+      flex-direction: row;
+    }
+
+    ._compare-to {
+      margin-right: var(--spacer-3xl);
+    }
+
+    ._quotes-selector {
+      margin-top: 0;
+      width: 50%;
+    }
+
+    ._bulkorder-description {
+      width: 50%;
+    }
+  }
+
+  @media (min-width: $desktop-min) {
+    ._quotation-container {
+      margin-top: var(--spacer-2xl);
+    }
+
+    ._quotes-selector {
+      ._quote-description-row {
+          width: 50%;
+      }
+    }
+
+    ._order-bulk-sample-action {
+      margin-top: var(--spacer-2xl);
+
+      ._submit-button-container {
+        margin-top: var(--spacer-xl);
+      }
+    }
+
+    ._send-message-to-manager {
+      margin-top: var(--spacer-2xl);
+
+      ._message-submit-button {
+        margin-top: var(--spacer-lg);
+      }
+    }
+
+    ._more-info {
+      margin-top: var(--spacer-xl);
     }
   }
 }
