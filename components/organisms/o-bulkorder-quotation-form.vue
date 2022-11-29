@@ -240,7 +240,7 @@ export default (Vue as VueConstructor<Vue>).extend({
         sampleProductPart = '_keychain_';
       }
 
-      return `info/bulk${sampleProductPart}quote_production_time_text`;
+      return `blocks/bulk${sampleProductPart}quote_production_time_text`;
     },
     productionTimeStoryContent (): ItemData | undefined {
       return this.getStoryContent(this.productionTimeStorySlug);
