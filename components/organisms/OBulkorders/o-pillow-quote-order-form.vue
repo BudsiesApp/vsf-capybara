@@ -55,6 +55,7 @@
 </template>
 
 <script lang="ts">
+import i18n from '@vue-storefrnt/i18n';
 import { PropType } from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { required } from 'vuelidate/lib/validators';
@@ -68,7 +69,6 @@ import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-
 
 import MBaseForm from './m-base-form.vue';
 import AOrderedHeading from '../../atoms/a-ordered-heading.vue';
-import i18n from '@vue-storefront/i18n';
 
 interface PillowSizeOption {
   id: number | string,

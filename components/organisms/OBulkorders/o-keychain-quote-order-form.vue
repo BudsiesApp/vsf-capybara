@@ -21,6 +21,7 @@
 </template>
 
 <script lang="ts">
+import i18n from '@vue-storefront/i18n';
 import { PropType } from 'vue';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 
@@ -30,7 +31,6 @@ import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo } from 'src/mod
 
 import MBaseForm from './m-base-form.vue';
 import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
-import i18n from '@vue-storefront/i18n';
 
 export default BulkorderBaseFormPersistanceState.extend({
   name: 'OKeychainQuoteOrderForm',

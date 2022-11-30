@@ -83,6 +83,8 @@
 </template>
 
 <script lang="ts">
+import i18n from '@vue-storefront/i18n';
+import { Dictionary } from 'vue-router/types/router';
 import { PropType } from 'vue';
 import { required } from 'vuelidate/lib/validators';
 import { SfButton, SfHeading, SfInput } from '@storefront-ui/vue';
@@ -95,8 +97,6 @@ import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-
 import MBaseForm from './m-base-form.vue';
 import MBodypartOptionConfigurator from '../../molecules/m-bodypart-option-configurator.vue';
 import AOrderedHeading from '../../atoms/a-ordered-heading.vue';
-import { Dictionary } from 'vue-router/types/router';
-import i18n from '@vue-storefront/i18n';
 
 export default BulkorderBaseFormPersistanceState.extend({
   name: 'OBulkQuoteOrderForm',

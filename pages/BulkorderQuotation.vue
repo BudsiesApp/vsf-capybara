@@ -11,12 +11,12 @@
 <script lang="ts">
 import Vue from 'vue';
 
+import { isServer } from '@vue-storefront/core/helpers';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 
 import { BulkOrderInfo, BulkorderQuoteProductId } from 'src/modules/budsies';
 import OBulkorderQuotationForm from 'theme/components/organisms/o-bulkorder-quotation-form.vue';
-import { isServer } from '@vue-storefront/core/helpers';
 
 export default Vue.extend({
   name: 'BulkorderQuotation',
