@@ -46,7 +46,7 @@ export default (Vue as VueConstructor<Vue>).extend({
   data () {
     return {
       animationStepIndex: 1,
-      stepTimeoutIdentificator: undefined as number | undefined
+      stepTimeoutIdentifier: undefined as number | undefined
     }
   },
   computed: {
@@ -63,7 +63,7 @@ export default (Vue as VueConstructor<Vue>).extend({
   },
   methods: {
     goToNextStep (): void {
-      this.stepTimeoutIdentificator = setTimeout(
+      this.stepTimeoutIdentifier = setTimeout(
         () => {
           this.animationStepIndex++;
 
@@ -77,8 +77,8 @@ export default (Vue as VueConstructor<Vue>).extend({
       )
     },
     clearAnimationTimeout (): void {
-      if (this.stepTimeoutIdentificator) {
-        clearTimeout(this.stepTimeoutIdentificator);
+      if (this.stepTimeoutIdentifier) {
+        clearTimeout(this.stepTimeoutIdentifier);
       }
     }
   },
