@@ -55,7 +55,7 @@
 </template>
 
 <script lang="ts">
-import i18n from '@vue-storefrnt/i18n';
+import i18n from '@vue-storefront/i18n';
 import { PropType } from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { required } from 'vuelidate/lib/validators';
