@@ -38,6 +38,8 @@ const BulkQuote = () =>
   import(/* webpackChunkName: "vsf-bulk-quote" */ 'theme/pages/BulkQuote');
 const BulkorderConfirmation = () =>
 import(/* webpackChunkName: "vsf-bulkorder-confirmation" */ 'theme/pages/BulkorderConfirmation');
+const BulkorderQuotation = () =>
+import(/* webpackChunkName: "vsf-bulkorder-quotation" */ 'theme/pages/BulkorderQuotation');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -411,6 +413,28 @@ let routes = [
     name: 'bulkorder-confirmation',
     path: '/bulkorder/confirmation/',
     component: BulkorderConfirmation
+  },
+  {
+    name: 'bulkorder-quotation',
+    path: '/bulkorder/quotation/:bulkorderId/',
+    component: BulkorderQuotation,
+    props: (route) => {
+      return {
+        bulkorderId: +route.params.bulkorderId
+      }
+    }
+  },
+  {
+    name: 'bulkorder-quotation-alias',
+    path: '/bulkorder/quote/index/bulkorder_id/:bulkorderId/',
+    redirect: (route) => {
+      return {
+        name: 'bulkorder-quotation',
+        params: {
+          bulkorderId: +route.params.bulkorderId
+        }
+      }
+    }
   }
 ];
 
