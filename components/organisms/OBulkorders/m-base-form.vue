@@ -44,7 +44,7 @@
       />
 
       <span class="_hint">
-        {{ $t('This could be the name of your character or name of your project(e.g., \'Danny the Dolphin\')') }}
+        {{ $t('This could be the name of your character or name of your project (e.g., \'Danny the Dolphin\')') }}
       </span>
     </div>
 
