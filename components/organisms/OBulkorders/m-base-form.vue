@@ -286,8 +286,17 @@
     <MCheckbox
       v-model="agreement"
       :disabled="isDisabled"
-      :label="$t('I have read and agree to the Bulk Order Customer Agreement')"
-    />
+    >
+      <template #label>
+        <div class="sf-checkbox__label">
+          {{ $t('I have read and agree to the') }}
+
+          <a href="/assets/bulkOrder/Standard_Bulk_Order_Customer_Agreement.pdf" target="_blank">
+            {{ $t('Bulk Order Customer Agreement') }}
+          </a>
+        </div>
+      </template>
+    </MCheckbox>
 
     <div
       class="_error-text"
