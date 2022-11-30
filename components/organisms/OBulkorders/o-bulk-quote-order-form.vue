@@ -236,7 +236,7 @@ export default BulkorderBaseFormPersistanceState.extend({
       const form = this.getBaseFormComponent();
       this.$v.$touch();
 
-      if (this.isDisabled || !form || !form.getValidationState()) {
+      if (this.isDisabled || !form || !form.getValidationState() || this.$v.$invalid) {
         return;
       }
 
