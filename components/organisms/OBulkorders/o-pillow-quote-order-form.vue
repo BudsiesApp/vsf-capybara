@@ -9,6 +9,8 @@
       :artwork-upload-url="artworkUploadUrl"
       :has-size="true"
       v-model="bulkordersBaseFormData"
+      :show-calculation-animation="showCalculationAnimation"
+      @calculation-animation-finished="onCalculationAnimationFinished"
     >
       <template #size>
         <div class="_section">
@@ -53,15 +55,15 @@
 </template>
 
 <script lang="ts">
+import i18n from '@vue-storefrnt/i18n';
 import { PropType } from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { required } from 'vuelidate/lib/validators';
-import { SfButton, SfSelect } from '@storefront-ui/vue';
+import { SfButton, SfSelect, SfHeading } from '@storefront-ui/vue';
 
 import Product from 'core/modules/catalog/types/Product';
 import { BundleOption, BundleOptionsProductLink } from 'core/modules/catalog/types/BundleOption';
-import { product } from 'core/modules/url/test/unit/helpers/data';
-import { BulkorderQuoteProductId, BulkOrderStatus } from 'src/modules/budsies';
+import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo } from 'src/modules/budsies';
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
 
@@ -90,7 +92,8 @@ export default BulkorderBaseFormPersistanceState.extend({
     MBaseForm,
     SfButton,
     AOrderedHeading,
-    SfSelect
+    SfSelect,
+    SfHeading
   },
   data () {
     const bulkordersBaseFormData: BulkordersBaseFormData = {
@@ -113,10 +116,15 @@ export default BulkorderBaseFormPersistanceState.extend({
     return {
       bulkordersBaseFormData,
       isSubmitting: false,
-      pillowSize: undefined
+      pillowSize: undefined,
+      showCalculationAnimation: false,
+      onCalculationAnimationFinished: () => {}
     }
   },
   computed: {
+    bulkOrderInfo (): BulkOrderInfo | undefined {
+      return this.$store.getters['budsies/getBulkorderInfo'];
+    },
     isDisabled (): boolean {
       return this.isSubmitting;
     },
@@ -134,7 +142,7 @@ export default BulkorderBaseFormPersistanceState.extend({
 
         options.push({
           id: productLink.id,
-          value: productLink.id,
+          value: this.getPillowSizeValue(productLink),
           title: this.getPillowSizeTitle(productLink).toString()
         });
       })
@@ -185,6 +193,18 @@ export default BulkorderBaseFormPersistanceState.extend({
           throw new Error('Wrong pillow size sku!');
       }
     },
+    getPillowSizeValue (sizeProductLink: BundleOptionsProductLink): number {
+      switch (sizeProductLink.sku) {
+        case 'simplePillowBulkSample_small':
+          return 12;
+        case 'simplePillowBulkSample_medium':
+          return 16;
+        case 'simplePillowBulkSample_large':
+          return 18;
+        default:
+          throw new Error('Wrong pillow size sku!');
+      }
+    },
     async onSubmit (): Promise<void> {
       const form = this.getBaseFormComponent();
 
@@ -192,6 +212,26 @@ export default BulkorderBaseFormPersistanceState.extend({
         return;
       }
 
+      this.showCalculationAnimation = true;
+
+      const calculationAnimationPromise = new Promise<void>((resolve) => {
+        this.onCalculationAnimationFinished = resolve;
+      });
+
+      Promise.all([
+        calculationAnimationPromise,
+        this.submitBulkorder()
+      ]).then(() => {
+        this.redirect();
+      }).catch((error) => {
+        this.onFailure(error.message);
+
+        throw error;
+      }).finally(() => {
+        this.showCalculationAnimation = false;
+      });
+    },
+    async submitBulkorder (): Promise<void> {
       this.isSubmitting = true;
 
       try {
@@ -216,18 +256,36 @@ export default BulkorderBaseFormPersistanceState.extend({
           }
         );
 
-        const status: BulkOrderStatus = await this.$store.dispatch('budsies/getBulkOrderStatus', bulkOrderId);
+        await this.$store.dispatch('budsies/loadBulkOrderInfo', bulkOrderId);
 
-        switch (status) {
-          case BulkOrderStatus.WAITING_FOR_QUOTE:
-            this.$router.push({ name: 'bulkorder-confirmation' });
-            break;
-          default:
-            this.$router.push({ name: 'bulkorder-quotation', params: { bulkorderId: +bulkOrderId } });
+        if (!this.bulkOrderInfo || this.bulkOrderInfo.id !== bulkOrderId) {
+          throw new Error('Unable to resolve status for created BulkOrder');
         }
+      } catch (e) {
+        throw e;
       } finally {
         this.isSubmitting = false;
       }
+    },
+    redirect (): void {
+      if (!this.bulkOrderInfo) {
+        return;
+      }
+
+      switch (this.bulkOrderInfo.statusId) {
+        case BulkOrderStatus.WAITING_FOR_QUOTE:
+          this.$router.push({ name: 'bulkorder-confirmation' });
+          break;
+        default:
+          this.$router.push({ name: 'bulkorder-quotation', params: { bulkorderId: this.bulkOrderInfo.id } });
+      }
+    },
+    onFailure (message: any): void {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'danger',
+        message: message,
+        action1: { label: i18n.t('OK') }
+      });
     }
   },
   watch: {

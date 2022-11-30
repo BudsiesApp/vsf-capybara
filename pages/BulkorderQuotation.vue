@@ -11,6 +11,7 @@
 <script lang="ts">
 import Vue from 'vue';
 
+import { isServer } from '@vue-storefront/core/helpers';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 
@@ -61,8 +62,17 @@ export default Vue.extend({
       return product;
     },
     bulkorderInfo (): BulkOrderInfo | undefined {
-      return this.$store.getters['budsies/getBulkorderInfo'];
+      const info = this.$store.getters['budsies/getBulkorderInfo'];
+
+      if (!info || info.id !== this.bulkorderId) {
+        return undefined;
+      }
+
+      return info;
     }
+  },
+  async mounted (): Promise<void> {
+    await this.setCurrentProduct();
   },
   async serverPrefetch () {
     await (this as any).loadData();
@@ -89,12 +99,25 @@ export default Vue.extend({
     async loadData (): Promise<void> {
       await this.$store.dispatch('budsies/loadBulkOrderInfo', this.bulkorderId);
 
-      await this.$store.dispatch('product/loadProduct', {
+      const product = await this.$store.dispatch('product/loadProduct', {
         parentSku: this.sampleProductSku,
-        setCurrent: true
+        setCurrent: false
       });
 
+      if (isServer) {
+        await this.$store.dispatch('product/setCurrent', product);
+      }
+
       this.isDataLoaded = true;
+    },
+    async setCurrentProduct (): Promise<void> {
+      if (this.sampleProduct) {
+        return;
+      }
+
+      const product = this.$store.getters['product/getProductBySkuDictionary'][this.sampleProductSku];
+
+      await this.$store.dispatch('product/setCurrent', product);
     }
   }
 })

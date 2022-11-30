@@ -9,7 +9,9 @@
       :artwork-upload-url="artworkUploadUrl"
       :has-size="true"
       :has-bodyparts="true"
+      :show-calculation-animation="showCalculationAnimation"
       v-model="bulkordersBaseFormData"
+      @calculation-animation-finished="onCalculationAnimationFinished"
     >
       <template #bodyparts v-if="colorPaletteBodypart">
         <div class="_section">
@@ -81,13 +83,14 @@
 </template>
 
 <script lang="ts">
+import i18n from '@vue-storefront/i18n';
+import { Dictionary } from 'vue-router/types/router';
 import { PropType } from 'vue';
 import { required } from 'vuelidate/lib/validators';
 import { SfButton, SfHeading, SfInput } from '@storefront-ui/vue';
 
 import Product from 'core/modules/catalog/types/Product';
-import { product } from 'core/modules/url/test/unit/helpers/data';
-import { Bodypart, BodypartOption, BodypartValue, BulkorderQuoteProductId, BulkOrderStatus } from 'src/modules/budsies';
+import { Bodypart, BodypartOption, BodypartValue, BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo } from 'src/modules/budsies';
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
 
@@ -137,10 +140,15 @@ export default BulkorderBaseFormPersistanceState.extend({
       bulkordersBaseFormData,
       isSubmitting: false,
       bulkSize: undefined as string | undefined,
-      color: undefined as BodypartOption[] | undefined
+      color: undefined as BodypartOption[] | undefined,
+      showCalculationAnimation: false,
+      onCalculationAnimationFinished: () => {}
     }
   },
   computed: {
+    bulkOrderInfo (): BulkOrderInfo | undefined {
+      return this.$store.getters['budsies/getBulkorderInfo'];
+    },
     bodyparts (): Bodypart[] {
       return this.$store.getters['budsies/getProductBodyparts'](this.product.id);
     },
@@ -195,12 +203,12 @@ export default BulkorderBaseFormPersistanceState.extend({
     getBaseFormComponent (): InstanceType<typeof MBaseForm> | undefined {
       return this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
     },
-    getBodypartsData (): string[] {
-      if (!this.color) {
-        return [];
+    getBodypartsData (): Dictionary<[]> {
+      if (!this.color || !this.colorPaletteBodypart) {
+        return {};
       }
 
-      return this.color.map(item => item.id);
+      return { [this.colorPaletteBodypart.id]: this.color.map(item => item.id) };
     },
     getDataToPersist () {
       return {
@@ -218,6 +226,26 @@ export default BulkorderBaseFormPersistanceState.extend({
         return;
       }
 
+      this.showCalculationAnimation = true;
+
+      const calculationAnimationPromise = new Promise<void>((resolve) => {
+        this.onCalculationAnimationFinished = resolve;
+      });
+
+      Promise.all([
+        calculationAnimationPromise,
+        this.submitBulkorder()
+      ]).then(() => {
+        this.redirect();
+      }).catch((error) => {
+        this.onFailure(error.message);
+
+        throw error;
+      }).finally(() => {
+        this.showCalculationAnimation = false;
+      });
+    },
+    async submitBulkorder (): Promise<void> {
       this.isSubmitting = true;
 
       try {
@@ -243,18 +271,36 @@ export default BulkorderBaseFormPersistanceState.extend({
           }
         );
 
-        const status: BulkOrderStatus = await this.$store.dispatch('budsies/getBulkOrderStatus', bulkOrderId);
+        await this.$store.dispatch('budsies/loadBulkOrderInfo', bulkOrderId);
 
-        switch (status) {
-          case BulkOrderStatus.WAITING_FOR_QUOTE:
-            this.$router.push({ name: 'bulkorder-confirmation' });
-            break;
-          default:
-            this.$router.push({ name: 'bulkorder-quotation', params: { bulkorderId: +bulkOrderId } });
+        if (!this.bulkOrderInfo || this.bulkOrderInfo.id !== bulkOrderId) {
+          throw new Error('Unable to resolve status for created BulkOrder');
         }
+      } catch (e) {
+        throw e;
       } finally {
         this.isSubmitting = false;
       }
+    },
+    redirect (): void {
+      if (!this.bulkOrderInfo) {
+        return;
+      }
+
+      switch (this.bulkOrderInfo.statusId) {
+        case BulkOrderStatus.WAITING_FOR_QUOTE:
+          this.$router.push({ name: 'bulkorder-confirmation' });
+          break;
+        default:
+          this.$router.push({ name: 'bulkorder-quotation', params: { bulkorderId: this.bulkOrderInfo.id } });
+      }
+    },
+    onFailure (message: any): void {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'danger',
+        message: message,
+        action1: { label: i18n.t('OK') }
+      });
     }
   },
   watch: {
