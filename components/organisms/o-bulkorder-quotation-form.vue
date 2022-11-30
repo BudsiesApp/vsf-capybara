@@ -7,7 +7,7 @@
     />
 
     <p class="_subtitle">
-      {{ $t('Excellent news! Based on your requirements, we are able to calculate your hassle-free custom ' + subtitleProductName + ' quote.') }}
+      {{ $t('Excellent news! Based on your requirements, we are able to calculate your hassle-free custom {subtitleProductName} quote.', {subtitleProductName}) }}
     </p>
 
     <div class="_quotation-container">
@@ -120,14 +120,14 @@
         v-if="!isShowSendMessageToManagerForm"
         @click="isShowSendMessageToManagerForm = !isShowSendMessageToManagerForm"
       >
-        Speak with Sales Representative
+        {{ $t('Speak with Sales Representative') }}
       </SfButton>
       <div v-if="isShowSendMessageToManagerForm && !isQuestionSubmitted">
-        <p>Your dedicated bulk concierge is happy to help answer any final questions or concerns about your order.</p>
+        <p>{{ $t('Your dedicated bulk concierge is happy to help answer any final questions or concerns about your order.') }}</p>
         <textarea
           class="_send-message-to-manager-textarea"
           v-model="question"
-          placeholder="Please type your question here or confirm your phone number (and best time to reach you) for your salesperson to call you back!"
+          :placeholder="$t('Please type your question here or confirm your phone number (and best time to reach you) for your salesperson to call you back!')"
           rows="2"
         />
         <div
@@ -145,7 +145,7 @@
         </SfButton>
       </div>
       <p v-if="isQuestionSubmitted">
-        Thanks! Please allow 1-2 business days for a response.
+        {{ $t('Thanks! Please allow 1-2 business days for a response.') }}
       </p>
     </div>
 
