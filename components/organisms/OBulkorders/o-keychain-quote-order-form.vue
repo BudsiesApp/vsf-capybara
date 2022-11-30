@@ -21,9 +21,9 @@
 </template>
 
 <script lang="ts">
-import i18n from '@vue-storefront/i18n';
 import { PropType } from 'vue';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
+import i18n from '@vue-storefront/i18n';
 
 import Product from 'core/modules/catalog/types/Product';
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';

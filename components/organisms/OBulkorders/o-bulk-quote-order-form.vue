@@ -32,11 +32,12 @@
             :max-values="colorPaletteBodypart.maxValues"
             :options="colorPaletteOptions"
             :disabled="isDisabled"
+            compact-mode
             type="bodypart"
             class="_color-pallette"
           />
 
-          <div class="_error-text" v-if="$v.color.$anyError">
+          <div class="_error-text -center" v-if="$v.color.$error">
             {{ $t('This field is required') }}
           </div>
 
@@ -65,12 +66,22 @@
 
           <SfInput
             :label="$t('Size')"
-            :valid="!$v.bulkSize || !$v.bulkSize.$anyError"
-            :error="$t('This field is required')"
+            :valid="!$v.bulkSize || !$v.bulkSize.$error"
+            :error-message="$t('This field is required')"
             class="sf-input--required"
             v-model="bulkSize"
           />
         </div>
+      </template>
+
+      <template #quantity-helper>
+        <span class="_helper">
+          {{ $t('Need less than 50? Order directly from our sister brand, Budsies. Budsies specializes in one-off or low quantity production at a simple, flat price. You\'ll automatically get discounts of 10-20% when you add qty 10 or 20 to your cart.') }}
+        </span>
+
+        <a :href="budsiesStoreDomain" target="_blank">
+          {{ $t('Visit Budsies!') }}
+        </a>
       </template>
     </m-base-form>
 
@@ -83,14 +94,14 @@
 </template>
 
 <script lang="ts">
-import i18n from '@vue-storefront/i18n';
-import { Dictionary } from 'vue-router/types/router';
+import config from 'config';
 import { PropType } from 'vue';
 import { required } from 'vuelidate/lib/validators';
 import { SfButton, SfHeading, SfInput } from '@storefront-ui/vue';
+import i18n from '@vue-storefront/i18n';
 
 import Product from 'core/modules/catalog/types/Product';
-import { Bodypart, BodypartOption, BodypartValue, BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo } from 'src/modules/budsies';
+import { Bodypart, BodypartOption, BodypartValue, BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo, Dictionary } from 'src/modules/budsies';
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
 
@@ -188,6 +199,9 @@ export default BulkorderBaseFormPersistanceState.extend({
     },
     isDisabled (): boolean {
       return this.isSubmitting;
+    },
+    budsiesStoreDomain (): string {
+      return `https://${config.budsies.budsiesStoreDomain}`;
     }
   },
   async beforeMount (): Promise<void> {
@@ -203,7 +217,7 @@ export default BulkorderBaseFormPersistanceState.extend({
     getBaseFormComponent (): InstanceType<typeof MBaseForm> | undefined {
       return this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
     },
-    getBodypartsData (): Dictionary<[]> {
+    getBodypartsData (): Dictionary<string[]> {
       if (!this.color || !this.colorPaletteBodypart) {
         return {};
       }
@@ -221,8 +235,9 @@ export default BulkorderBaseFormPersistanceState.extend({
     },
     async onSubmit (): Promise<void> {
       const form = this.getBaseFormComponent();
+      this.$v.$touch();
 
-      if (this.isDisabled || !form || !form.getValidationState()) {
+      if (this.isDisabled || !form || !form.getValidationState() || this.$v.$invalid) {
         return;
       }
 
@@ -364,6 +379,11 @@ export default BulkorderBaseFormPersistanceState.extend({
         margin-top: var(--spacer-xs);
         height: calc(var(--font-xs) * 1.2);
         font-weight: var(--font-medium);
+
+        &.-center {
+          text-align: center;
+          margin-bottom: var(--spacer-sm);
+        }
     }
 
     ._section {

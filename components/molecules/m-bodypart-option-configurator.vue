@@ -1,7 +1,7 @@
 <template>
   <div
     class="m-bodypart-option-configurator"
-    :class="{ '-disabled': disabled }"
+    :class="{ '-disabled': disabled, '-compact': compactMode }"
   >
     <div class="_options-groups-container">
       <div class="_group-item" v-for="group in optionsGroups" :key="group">
@@ -78,6 +78,10 @@ export default Vue.extend({
       default: () => []
     },
     disabled: {
+      type: Boolean,
+      default: false
+    },
+    compactMode: {
       type: Boolean,
       default: false
     }
@@ -279,6 +283,12 @@ $bodypart-item-width: 145px;
       > label {
        cursor: default;
       }
+    }
+  }
+
+  &.-compact {
+    ._visual-selector {
+      row-gap: var(--spacer-sm);
     }
   }
 

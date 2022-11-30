@@ -39,7 +39,7 @@
             </SfSelectOption>
           </SfSelect>
 
-          <div class="_error-text" v-if="$v.pillowSize.$anyError">
+          <div class="_error-text" v-if="$v.pillowSize.$error">
             {{ $t('This field is required') }}
           </div>
         </div>
@@ -207,8 +207,9 @@ export default BulkorderBaseFormPersistanceState.extend({
     },
     async onSubmit (): Promise<void> {
       const form = this.getBaseFormComponent();
+      this.$v.$touch();
 
-      if (this.isDisabled || !form || !form.getValidationState()) {
+      if (this.isDisabled || !form || !form.getValidationState() || this.$v.$invalid) {
         return;
       }
 
