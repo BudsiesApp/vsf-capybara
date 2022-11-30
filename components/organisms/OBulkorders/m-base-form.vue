@@ -295,6 +295,11 @@
     >
       {{ $t('This field is required') }}
     </div>
+
+    <MBulkordersCalculationAnimation
+      :show-calculation-animation="showCalculationAnimation"
+      @calculation-animation-finished="onCalculationAnimationFinished"
+    />
   </div>
 </template>
 
@@ -312,7 +317,6 @@ import {
 import Product from 'core/modules/catalog/types/Product';
 import { Dictionary, ProductId, ProductValue } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
-import { CustomerImage } from 'src/modules/shared';
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 import CustomerType from 'theme/components/interfaces/customer-type.interface';
 
@@ -320,6 +324,7 @@ import AOrderedHeading from 'theme/components/atoms/a-ordered-heading.vue';
 import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
 import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
+import MBulkordersCalculationAnimation from './m-calculation-animation.vue';
 
 const Countries = require('@vue-storefront/i18n/resource/countries.json');
 
@@ -337,7 +342,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     SfButton,
     SfInput,
     SfRadio,
-    SfSelect
+    SfSelect,
+    MBulkordersCalculationAnimation
   },
   props: {
     product: {
@@ -361,6 +367,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       default: false
     },
     hasBodyparts: {
+      type: Boolean,
+      default: false
+    },
+    showCalculationAnimation: {
       type: Boolean,
       default: false
     }
@@ -570,6 +580,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     updateValue (value: Partial<BulkordersBaseFormData>): void {
       this.$emit('input', { ...this.value, ...value })
+    },
+    onCalculationAnimationFinished (): void {
+      this.$emit('calculation-animation-finished');
     }
   },
   beforeDestroy () {
@@ -622,136 +635,138 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+
 .m-base-form {
-    --select-margin: 0;
-    --select-padding: 0;
+  --select-margin: 0;
+  --select-padding: 0;
 
-    text-align: left;
-    display: flex;
-    flex-direction: column;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
 
-    ._section {
-        margin-bottom: var(--spacer-2xl);
-        display: flex;
-        flex-direction: column;
-
-        ._title {
-            margin-bottom: var(--spacer-base);
-
-            &.-required {
-              ::v-deep .sf-heading__title {
-                &::after {
-                    content: "*";
-                    color: var(--c-warning);
-                    margin-left: -0.3em;
-                }
-              }
-            }
-        }
-
-        ._content {
-          display: flex;
-
-          &.--half {
-          flex-direction: row;
-          flex-wrap: wrap;
-          align-items: center;
-
-          .sf-input {
-            flex-basis: 40%;
-            flex-grow: 1;
-
-            &:nth-child(odd) {
-              margin-right: var(--spacer-sm);
-            }
-
-            &:nth-child(1),
-            &:nth-child(2) {
-              margin-bottom: var(--spacer-sm);
-            }
-          }
-        }
-        }
-    }
-
-    ._hint {
-      font-size: var(--font-xs);
-    }
-
-    .sf-input {
-      &--required {
-        --input-label-required: " *"
-      }
-
-      &.-quantity {
-        --input-margin: 0;
-
-        &::v-deep {
-          .sf-input__error-message {
-            display: none;
-          }
-        }
-      }
-    }
-
-    textarea {
-      box-sizing: border-box;
-      border: 1px solid var(--c-light);
-      width: 100%;
-      padding: 0.5em;
-      font-family: var(--font-family-primary);
-      resize: vertical;
-    }
-
-    ._helper {
-      margin-bottom: var(--spacer-sm);
-    }
-
-    ._additional-quantity {
+  ._section {
+      margin-bottom: var(--spacer-2xl);
       display: flex;
       flex-direction: column;
-      margin-top: var(--spacer-sm);
-    }
 
-    ._quantity-button {
-      align-self: flex-start;
-      margin-top: var(--spacer-sm);
-    }
+      ._title {
+          margin-bottom: var(--spacer-base);
 
-    ._error-text {
-      color: var(--c-danger-variant);
-      font-size: var(--font-xs);
-      margin-top: var(--spacer-sm);
-      height: calc(var(--font-xs) * 1.2);
-    }
+          &.-required {
+            ::v-deep .sf-heading__title {
+              &::after {
+                  content: "*";
+                  color: var(--c-warning);
+                  margin-left: -0.3em;
+              }
+            }
+          }
+      }
 
-    ._deadline-input {
-      margin-top: var(--spacer-sm);
-      position: relative;
+      ._content {
+        display: flex;
 
-      &.--required {
-        &::before {
-          content: '*';
-          color: var(--c-primary);
-          font-size: var(--font-base);
-          position: absolute;
-          top: 0;
-          left: 0;
+        &.--half {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+
+        .sf-input {
+          flex-basis: 40%;
+          flex-grow: 1;
+
+          &:nth-child(odd) {
+            margin-right: var(--spacer-sm);
+          }
+
+          &:nth-child(1),
+          &:nth-child(2) {
+            margin-bottom: var(--spacer-sm);
+          }
         }
       }
+      }
+  }
+
+  ._hint {
+    font-size: var(--font-xs);
+  }
+
+  .sf-input {
+    &--required {
+      --input-label-required: " *"
     }
 
-    .m-multiselect {
-      --tags-min-height: 56px;
-
-      width: 100%;
-      margin: 0;
+    &.-quantity {
+      --input-margin: 0;
 
       &::v-deep {
-        .m-multiselect__label {
-          left: 0;
+        .sf-input__error-message {
+          display: none;
         }
       }
     }
+  }
+
+  textarea {
+    box-sizing: border-box;
+    border: 1px solid var(--c-light);
+    width: 100%;
+    padding: 0.5em;
+    font-family: var(--font-family-primary);
+    resize: vertical;
+  }
+
+  ._helper {
+    margin-bottom: var(--spacer-sm);
+  }
+
+  ._additional-quantity {
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--spacer-sm);
+  }
+
+  ._quantity-button {
+    align-self: flex-start;
+    margin-top: var(--spacer-sm);
+  }
+
+  ._error-text {
+    color: var(--c-danger-variant);
+    font-size: var(--font-xs);
+    margin-top: var(--spacer-sm);
+    height: calc(var(--font-xs) * 1.2);
+  }
+
+  ._deadline-input {
+    margin-top: var(--spacer-sm);
+    position: relative;
+
+    &.--required {
+      &::before {
+        content: '*';
+        color: var(--c-primary);
+        font-size: var(--font-base);
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+    }
+  }
+
+  .m-multiselect {
+    --tags-min-height: 56px;
+
+    width: 100%;
+    margin: 0;
+
+    &::v-deep {
+      .m-multiselect__label {
+        left: 0;
+      }
+    }
+  }
 }
 </style>
