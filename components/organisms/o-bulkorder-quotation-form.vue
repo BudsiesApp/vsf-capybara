@@ -443,7 +443,7 @@ export default (Vue as VueConstructor<Vue>).extend({
 
       try {
         await this.$store.dispatch(
-          'budsies/chooseQuote',
+          'budsies/chooseBulkOrderQuote',
           {
             quoteId: this.quoteId,
             include3dRendering
