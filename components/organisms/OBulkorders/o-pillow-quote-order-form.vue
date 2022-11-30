@@ -57,6 +57,7 @@ import { PropType } from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { required } from 'vuelidate/lib/validators';
 import { SfButton, SfSelect } from '@storefront-ui/vue';
+import i18n from '@vue-storefront/i18n';
 
 import Product from 'core/modules/catalog/types/Product';
 import { BundleOption, BundleOptionsProductLink } from 'core/modules/catalog/types/BundleOption';
@@ -227,7 +228,7 @@ export default BulkorderBaseFormPersistanceState.extend({
             // TODO redirect to quote page with bulkOrderId as param
         }
       } catch (error) {
-        this.onFailure(error);
+        this.onFailure(this.$t('Something went wrong'));
       } finally {
         this.isSubmitting = false;
       }
@@ -236,7 +237,7 @@ export default BulkorderBaseFormPersistanceState.extend({
       this.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
         message: message,
-        action1: { label: this.$t('OK') }
+        action1: { label: i18n.t('OK') }
       });
     }
   },
