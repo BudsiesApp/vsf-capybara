@@ -9,9 +9,9 @@
       :artwork-upload-url="artworkUploadUrl"
       :has-size="true"
       :has-bodyparts="true"
-      :show-calculation-animation="isSubmitting"
+      :show-calculation-animation="showCalculationAnimation"
       v-model="bulkordersBaseFormData"
-      @calculation-animation-finished="redirect"
+      @calculation-animation-finished="onCalculationAnimationFinished"
     >
       <template #bodyparts v-if="colorPaletteBodypart">
         <div class="_section">
@@ -96,6 +96,7 @@ import MBaseForm from './m-base-form.vue';
 import MBodypartOptionConfigurator from '../../molecules/m-bodypart-option-configurator.vue';
 import AOrderedHeading from '../../atoms/a-ordered-heading.vue';
 import { Dictionary } from 'vue-router/types/router';
+import i18n from '@vue-storefront/i18n';
 
 export default BulkorderBaseFormPersistanceState.extend({
   name: 'OBulkQuoteOrderForm',
@@ -139,7 +140,9 @@ export default BulkorderBaseFormPersistanceState.extend({
       bulkordersBaseFormData,
       isSubmitting: false,
       bulkSize: undefined as string | undefined,
-      color: undefined as BodypartOption[] | undefined
+      color: undefined as BodypartOption[] | undefined,
+      showCalculationAnimation: false,
+      onCalculationAnimationFinished: () => {}
     }
   },
   computed: {
@@ -217,6 +220,26 @@ export default BulkorderBaseFormPersistanceState.extend({
       }
     },
     async onSubmit (): Promise<void> {
+      this.showCalculationAnimation = true;
+
+      const calculationAnimationPromise = new Promise<void>((resolve) => {
+        this.onCalculationAnimationFinished = resolve;
+      });
+
+      Promise.all([
+        calculationAnimationPromise,
+        this.submitBulkorder()
+      ]).then(() => {
+        this.redirect();
+      }).catch((error) => {
+        this.onFailure(error.message);
+
+        throw error;
+      }).finally(() => {
+        this.showCalculationAnimation = false;
+      });
+    },
+    async submitBulkorder (): Promise<void> {
       const form = this.getBaseFormComponent();
 
       if (this.isDisabled || !form || !form.getValidationState()) {
@@ -257,11 +280,11 @@ export default BulkorderBaseFormPersistanceState.extend({
         this.isSubmitting = false;
 
         throw e;
+      } finally {
+        this.isSubmitting = false;
       }
     },
     redirect (): void {
-      this.isSubmitting = false;
-
       if (!this.bulkOrderInfo) {
         return;
       }
@@ -273,6 +296,13 @@ export default BulkorderBaseFormPersistanceState.extend({
         default:
           this.$router.push({ name: 'bulkorder-quotation', params: { bulkorderId: this.bulkOrderInfo.id } });
       }
+    },
+    onFailure (message: any): void {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'danger',
+        message: message,
+        action1: { label: i18n.t('OK') }
+      });
     }
   },
   watch: {

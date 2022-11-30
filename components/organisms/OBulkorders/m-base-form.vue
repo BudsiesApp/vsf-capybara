@@ -296,20 +296,10 @@
       {{ $t('This field is required') }}
     </div>
 
-    <SfModal class="_quotation-calculating-modal" :visible="showUnicorn" :cross="false" :persistent="true">
-      <SfHeading :level="2" :title="$t('Quotation Engine in Progress')" />
-      <video
-        class="_quotation-calculating-modal-video"
-        autoplay
-        loop
-        muted
-        playsinline
-      >
-        <source src="/assets/video/bulkorder/quotation-calculating-unicorn.mp4" type="video/mp4">
-      </video>
-      <SfLoader />
-      <p>{{ calculationAnimationStepTitle }}</p>
-    </SfModal>
+    <MBulkordersCalculationAnimation
+      :show-calculation-animation="showCalculationAnimation"
+      @calculation-animation-finished="onCalculationAnimationFinished"
+    />
   </div>
 </template>
 
@@ -318,7 +308,7 @@ import config from 'config';
 import Vue, { PropType, VueConstructor } from 'vue';
 import { required, requiredIf, minValue, email, sameAs } from 'vuelidate/lib/validators';
 import { TranslateResult } from 'vue-i18n';
-import { SfButton, SfInput, SfRadio, SfSelect, SfModal, SfHeading, SfLoader } from '@storefront-ui/vue';
+import { SfButton, SfInput, SfRadio, SfSelect } from '@storefront-ui/vue';
 import {
   mapMobileObserver,
   unMapMobileObserver
@@ -334,6 +324,7 @@ import AOrderedHeading from 'theme/components/atoms/a-ordered-heading.vue';
 import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
 import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
+import MBulkordersCalculationAnimation from './m-calculation-animation.vue';
 
 const Countries = require('@vue-storefront/i18n/resource/countries.json');
 
@@ -352,9 +343,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     SfInput,
     SfRadio,
     SfSelect,
-    SfModal,
-    SfHeading,
-    SfLoader
+    MBulkordersCalculationAnimation
   },
   props: {
     product: {
@@ -384,10 +373,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     showCalculationAnimation: {
       type: Boolean,
       default: false
-    },
-    calculationAnimationStepDelay: {
-      type: Number,
-      default: 2000
     }
   },
   inject: {
@@ -396,9 +381,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   data () {
     return {
       countries: Countries,
-      showAdditionalQuantity: false,
-      showUnicorn: false,
-      unicornStepIndex: 1
+      showAdditionalQuantity: false
     }
   },
   computed: {
@@ -565,18 +548,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return this.showAdditionalQuantity
         ? this.$t('Remove')
         : this.$t('Not Sure?');
-    },
-    calculationAnimationStepTitle (): string {
-      switch (this.unicornStepIndex) {
-        case 1:
-          return 'Analyzing plushification';
-        case 2:
-          return 'Consulting unicorn fairies';
-        case 3:
-          return 'Calculating unicorn gallops required for delivery';
-        default:
-          return '';
-      } ;
     }
   },
   methods: {
@@ -610,19 +581,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     updateValue (value: Partial<BulkordersBaseFormData>): void {
       this.$emit('input', { ...this.value, ...value })
     },
-    goToNextStep (): void {
-      setTimeout(
-        () => {
-          this.unicornStepIndex++;
-
-          if (this.unicornStepIndex < 4) {
-            this.goToNextStep();
-          } else {
-            this.$emit('calculation-animation-finished');
-          }
-        },
-        this.calculationAnimationStepDelay
-      )
+    onCalculationAnimationFinished (): void {
+      this.$emit('calculation-animation-finished');
     }
   },
   beforeDestroy () {
@@ -670,18 +630,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         }
       }
     }
-  },
-  watch: {
-    showCalculationAnimation: {
-      handler (newValue: boolean): void {
-        this.showUnicorn = newValue;
-        this.unicornStepIndex = 1;
-
-        if (this.showUnicorn) {
-          this.goToNextStep();
-        }
-      }
-    }
   }
 })
 </script>
@@ -690,167 +638,134 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .m-base-form {
-    --select-margin: 0;
-    --select-padding: 0;
+  --select-margin: 0;
+  --select-padding: 0;
 
-    text-align: left;
-    display: flex;
-    flex-direction: column;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
 
-    ._section {
-        margin-bottom: var(--spacer-2xl);
-        display: flex;
-        flex-direction: column;
-
-        ._title {
-            margin-bottom: var(--spacer-base);
-
-            &.-required {
-              ::v-deep .sf-heading__title {
-                &::after {
-                    content: "*";
-                    color: var(--c-warning);
-                    margin-left: -0.3em;
-                }
-              }
-            }
-        }
-
-        ._content {
-          display: flex;
-
-          &.--half {
-          flex-direction: row;
-          flex-wrap: wrap;
-          align-items: center;
-
-          .sf-input {
-            flex-basis: 40%;
-            flex-grow: 1;
-
-            &:nth-child(odd) {
-              margin-right: var(--spacer-sm);
-            }
-
-            &:nth-child(1),
-            &:nth-child(2) {
-              margin-bottom: var(--spacer-sm);
-            }
-          }
-        }
-        }
-    }
-
-    ._hint {
-      font-size: var(--font-xs);
-    }
-
-    .sf-input {
-      &--required {
-        --input-label-required: " *"
-      }
-
-      &.-quantity {
-        --input-margin: 0;
-
-        &::v-deep {
-          .sf-input__error-message {
-            display: none;
-          }
-        }
-      }
-    }
-
-    textarea {
-      box-sizing: border-box;
-      border: 1px solid var(--c-light);
-      width: 100%;
-      padding: 0.5em;
-      font-family: var(--font-family-primary);
-      resize: vertical;
-    }
-
-    ._helper {
-      margin-bottom: var(--spacer-sm);
-    }
-
-    ._additional-quantity {
+  ._section {
+      margin-bottom: var(--spacer-2xl);
       display: flex;
       flex-direction: column;
-      margin-top: var(--spacer-sm);
-    }
 
-    ._quantity-button {
-      align-self: flex-start;
-      margin-top: var(--spacer-sm);
-    }
+      ._title {
+          margin-bottom: var(--spacer-base);
 
-    ._error-text {
-      color: var(--c-danger-variant);
-      font-size: var(--font-xs);
-      margin-top: var(--spacer-sm);
-      height: calc(var(--font-xs) * 1.2);
-    }
+          &.-required {
+            ::v-deep .sf-heading__title {
+              &::after {
+                  content: "*";
+                  color: var(--c-warning);
+                  margin-left: -0.3em;
+              }
+            }
+          }
+      }
 
-    ._deadline-input {
-      margin-top: var(--spacer-sm);
-      position: relative;
+      ._content {
+        display: flex;
 
-      &.--required {
-        &::before {
-          content: '*';
-          color: var(--c-primary);
-          font-size: var(--font-base);
-          position: absolute;
-          top: 0;
-          left: 0;
+        &.--half {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+
+        .sf-input {
+          flex-basis: 40%;
+          flex-grow: 1;
+
+          &:nth-child(odd) {
+            margin-right: var(--spacer-sm);
+          }
+
+          &:nth-child(1),
+          &:nth-child(2) {
+            margin-bottom: var(--spacer-sm);
+          }
         }
       }
+      }
+  }
+
+  ._hint {
+    font-size: var(--font-xs);
+  }
+
+  .sf-input {
+    &--required {
+      --input-label-required: " *"
     }
 
-    .m-multiselect {
-      --tags-min-height: 56px;
-
-      width: 100%;
-      margin: 0;
+    &.-quantity {
+      --input-margin: 0;
 
       &::v-deep {
-        .m-multiselect__label {
-          left: 0;
-        }
-      }
-    }
-
-  ._quotation-calculating-modal {
-    text-align: center;
-
-    ._quotation-calculating-modal-video {
-      margin: var(--spacer-sm) 0;
-      height: 200px;
-    }
-
-    ::v-deep {
-      .sf-modal {
-        &__content {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-        }
-      }
-
-      .sf-bar {
-        &__icon {
+        .sf-input__error-message {
           display: none;
         }
       }
     }
+  }
 
-    .sf-loader {
-      margin: var(--spacer-lg) 0;
+  textarea {
+    box-sizing: border-box;
+    border: 1px solid var(--c-light);
+    width: 100%;
+    padding: 0.5em;
+    font-family: var(--font-family-primary);
+    resize: vertical;
+  }
+
+  ._helper {
+    margin-bottom: var(--spacer-sm);
+  }
+
+  ._additional-quantity {
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--spacer-sm);
+  }
+
+  ._quantity-button {
+    align-self: flex-start;
+    margin-top: var(--spacer-sm);
+  }
+
+  ._error-text {
+    color: var(--c-danger-variant);
+    font-size: var(--font-xs);
+    margin-top: var(--spacer-sm);
+    height: calc(var(--font-xs) * 1.2);
+  }
+
+  ._deadline-input {
+    margin-top: var(--spacer-sm);
+    position: relative;
+
+    &.--required {
+      &::before {
+        content: '*';
+        color: var(--c-primary);
+        font-size: var(--font-base);
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
     }
+  }
 
-    @media (min-width: $desktop-min) {
-      --modal-width: 40em;
+  .m-multiselect {
+    --tags-min-height: 56px;
+
+    width: 100%;
+    margin: 0;
+
+    &::v-deep {
+      .m-multiselect__label {
+        left: 0;
+      }
     }
   }
 }

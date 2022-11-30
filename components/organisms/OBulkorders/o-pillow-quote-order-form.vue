@@ -9,8 +9,8 @@
       :artwork-upload-url="artworkUploadUrl"
       :has-size="true"
       v-model="bulkordersBaseFormData"
-      :show-calculation-animation="isSubmitting"
-      @calculation-animation-finished="redirect"
+      :show-calculation-animation="showCalculationAnimation"
+      @calculation-animation-finished="onCalculationAnimationFinished"
     >
       <template #size>
         <div class="_section">
@@ -68,6 +68,7 @@ import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-
 
 import MBaseForm from './m-base-form.vue';
 import AOrderedHeading from '../../atoms/a-ordered-heading.vue';
+import i18n from '@vue-storefront/i18n';
 
 interface PillowSizeOption {
   id: number | string,
@@ -114,7 +115,9 @@ export default BulkorderBaseFormPersistanceState.extend({
     return {
       bulkordersBaseFormData,
       isSubmitting: false,
-      pillowSize: undefined
+      pillowSize: undefined,
+      showCalculationAnimation: false,
+      onCalculationAnimationFinished: () => {}
     }
   },
   computed: {
@@ -202,6 +205,26 @@ export default BulkorderBaseFormPersistanceState.extend({
       }
     },
     async onSubmit (): Promise<void> {
+      this.showCalculationAnimation = true;
+
+      const calculationAnimationPromise = new Promise<void>((resolve) => {
+        this.onCalculationAnimationFinished = resolve;
+      });
+
+      Promise.all([
+        calculationAnimationPromise,
+        this.submitBulkorder()
+      ]).then(() => {
+        this.redirect();
+      }).catch((error) => {
+        this.onFailure(error.message);
+
+        throw error;
+      }).finally(() => {
+        this.showCalculationAnimation = false;
+      });
+    },
+    async submitBulkorder (): Promise<void> {
       const form = this.getBaseFormComponent();
 
       if (this.isDisabled || !form || !form.getValidationState()) {
@@ -241,11 +264,11 @@ export default BulkorderBaseFormPersistanceState.extend({
         this.isSubmitting = false;
 
         throw e;
+      } finally {
+        this.isSubmitting = false;
       }
     },
     redirect (): void {
-      this.isSubmitting = false;
-
       if (!this.bulkOrderInfo) {
         return;
       }
@@ -257,6 +280,13 @@ export default BulkorderBaseFormPersistanceState.extend({
         default:
           this.$router.push({ name: 'bulkorder-quotation', params: { bulkorderId: this.bulkOrderInfo.id } });
       }
+    },
+    onFailure (message: any): void {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'danger',
+        message: message,
+        action1: { label: i18n.t('OK') }
+      });
     }
   },
   watch: {
