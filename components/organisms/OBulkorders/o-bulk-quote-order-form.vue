@@ -32,6 +32,7 @@
             :max-values="colorPaletteBodypart.maxValues"
             :options="colorPaletteOptions"
             :disabled="isDisabled"
+            compact-mode
             type="bodypart"
             class="_color-pallette"
           />
@@ -402,12 +403,6 @@ export default BulkorderBaseFormPersistanceState.extend({
     ._color-pallette {
       text-align: center;
       margin: var(--spacer-base) 0;
-
-      ::v-deep {
-        ._visual-selector {
-          row-gap: var(--spacer-sm);
-        }
-      }
     }
 }
 </style>
