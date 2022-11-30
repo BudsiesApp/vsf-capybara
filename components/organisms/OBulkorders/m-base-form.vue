@@ -291,7 +291,7 @@
         <div class="sf-checkbox__label">
           {{ $t('I have read and agree to the') }}
 
-          <a href="/assets/bulkOrder/Standard_Bulk_Order_Customer_Agreement.pdf" target="_blank">
+          <a href="/media/bulkOrder/agreement/Standard_Bulk_Order_Customer_Agreement.pdf" target="_blank">
             {{ $t('Bulk Order Customer Agreement') }}
           </a>
         </div>
