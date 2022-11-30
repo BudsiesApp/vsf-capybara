@@ -58,7 +58,7 @@
 import { PropType } from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { required } from 'vuelidate/lib/validators';
-import { SfButton, SfSelect } from '@storefront-ui/vue';
+import { SfButton, SfSelect, SfHeading } from '@storefront-ui/vue';
 
 import Product from 'core/modules/catalog/types/Product';
 import { BundleOption, BundleOptionsProductLink } from 'core/modules/catalog/types/BundleOption';
@@ -92,7 +92,8 @@ export default BulkorderBaseFormPersistanceState.extend({
     MBaseForm,
     SfButton,
     AOrderedHeading,
-    SfSelect
+    SfSelect,
+    SfHeading
   },
   data () {
     const bulkordersBaseFormData: BulkordersBaseFormData = {
@@ -205,6 +206,12 @@ export default BulkorderBaseFormPersistanceState.extend({
       }
     },
     async onSubmit (): Promise<void> {
+      const form = this.getBaseFormComponent();
+
+      if (this.isDisabled || !form || !form.getValidationState()) {
+        return;
+      }
+
       this.showCalculationAnimation = true;
 
       const calculationAnimationPromise = new Promise<void>((resolve) => {
@@ -225,12 +232,6 @@ export default BulkorderBaseFormPersistanceState.extend({
       });
     },
     async submitBulkorder (): Promise<void> {
-      const form = this.getBaseFormComponent();
-
-      if (this.isDisabled || !form || !form.getValidationState()) {
-        return;
-      }
-
       this.isSubmitting = true;
 
       try {
@@ -261,8 +262,6 @@ export default BulkorderBaseFormPersistanceState.extend({
           throw new Error('Unable to resolve status for created BulkOrder');
         }
       } catch (e) {
-        this.isSubmitting = false;
-
         throw e;
       } finally {
         this.isSubmitting = false;

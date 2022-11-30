@@ -220,6 +220,12 @@ export default BulkorderBaseFormPersistanceState.extend({
       }
     },
     async onSubmit (): Promise<void> {
+      const form = this.getBaseFormComponent();
+
+      if (this.isDisabled || !form || !form.getValidationState()) {
+        return;
+      }
+
       this.showCalculationAnimation = true;
 
       const calculationAnimationPromise = new Promise<void>((resolve) => {
@@ -240,12 +246,6 @@ export default BulkorderBaseFormPersistanceState.extend({
       });
     },
     async submitBulkorder (): Promise<void> {
-      const form = this.getBaseFormComponent();
-
-      if (this.isDisabled || !form || !form.getValidationState()) {
-        return;
-      }
-
       this.isSubmitting = true;
 
       try {
@@ -277,8 +277,6 @@ export default BulkorderBaseFormPersistanceState.extend({
           throw new Error('Unable to resolve status for created BulkOrder');
         }
       } catch (e) {
-        this.isSubmitting = false;
-
         throw e;
       } finally {
         this.isSubmitting = false;
