@@ -228,7 +228,7 @@ export default BulkorderBaseFormPersistanceState.extend({
             // TODO redirect to quote page with bulkOrderId as param
         }
       } catch (error) {
-        this.onFailure(this.$t('Something went wrong'));
+        this.onFailure((error as Error).message);
       } finally {
         this.isSubmitting = false;
       }

@@ -230,7 +230,7 @@ export default BulkorderBaseFormPersistanceState.extend({
       const form = this.getBaseFormComponent();
       this.$v.$touch();
 
-      if (this.isDisabled || !form || !form.getValidationState() || this.$v.$invalid) {
+      if (this.isDisabled || !form || !form.getValidationState()) {
         return;
       }
 
@@ -269,7 +269,7 @@ export default BulkorderBaseFormPersistanceState.extend({
             // TODO redirect to quote page with bulkOrderId as param
         }
       } catch (error) {
-        this.onFailure(this.$t('Something went wrong'));
+        this.onFailure((error as Error).message);
       } finally {
         this.isSubmitting = false;
       }
