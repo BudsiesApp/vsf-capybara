@@ -135,9 +135,18 @@ export default BulkorderBaseFormPersistanceState.extend({
           default:
             // TODO redirect to quote page with bulkOrderId as param
         }
+      } catch (error) {
+        this.onFailure(error);
       } finally {
         this.isSubmitting = false;
       }
+    },
+    onFailure (message: any): void {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'danger',
+        message: message,
+        action1: { label: this.$t('OK') }
+      });
     }
   },
   watch: {

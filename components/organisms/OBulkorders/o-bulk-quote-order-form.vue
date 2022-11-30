@@ -34,7 +34,7 @@
             class="_color-pallette"
           />
 
-          <div class="_error-text" v-if="$v.color.$anyError">
+          <div class="_error-text -center" v-if="$v.color.$error">
             {{ $t('This field is required') }}
           </div>
 
@@ -63,12 +63,22 @@
 
           <SfInput
             :label="$t('Size')"
-            :valid="!$v.bulkSize || !$v.bulkSize.$anyError"
-            :error="$t('This field is required')"
+            :valid="!$v.bulkSize || !$v.bulkSize.$error"
+            :error-message="$t('This field is required')"
             class="sf-input--required"
             v-model="bulkSize"
           />
         </div>
+      </template>
+
+      <template #quantity-helper>
+        <span class="_helper">
+          {{ $t('Need less than 50? Order directly from our sister brand, Budsies. Budsies specializes in one-off or low quantity production at a simple, flat price. You\'ll automatically get discounts of 10-20% when you add qty 10 or 20 to your cart.') }}
+        </span>
+
+        <a :href="budsiesStoreDomain" target="_blank">
+          {{ $t('Visit Budsies!') }}
+        </a>
       </template>
     </m-base-form>
 
@@ -81,6 +91,7 @@
 </template>
 
 <script lang="ts">
+import config from 'config';
 import { PropType } from 'vue';
 import { required } from 'vuelidate/lib/validators';
 import { SfButton, SfHeading, SfInput } from '@storefront-ui/vue';
@@ -180,6 +191,9 @@ export default BulkorderBaseFormPersistanceState.extend({
     },
     isDisabled (): boolean {
       return this.isSubmitting;
+    },
+    budsiesStoreDomain (): string {
+      return `https://${config.budsies.budsiesStoreDomain}`;
     }
   },
   async beforeMount (): Promise<void> {
@@ -213,8 +227,9 @@ export default BulkorderBaseFormPersistanceState.extend({
     },
     async onSubmit (): Promise<void> {
       const form = this.getBaseFormComponent();
+      this.$v.$touch();
 
-      if (this.isDisabled || !form || !form.getValidationState()) {
+      if (this.isDisabled || !form || !form.getValidationState() || this.$v.$invalid) {
         return;
       }
 
@@ -252,9 +267,18 @@ export default BulkorderBaseFormPersistanceState.extend({
           default:
             // TODO redirect to quote page with bulkOrderId as param
         }
+      } catch (error) {
+        this.onFailure(error);
       } finally {
         this.isSubmitting = false;
       }
+    },
+    onFailure (message: any): void {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'danger',
+        message: message,
+        action1: { label: this.$t('OK') }
+      });
     }
   },
   watch: {
@@ -318,6 +342,11 @@ export default BulkorderBaseFormPersistanceState.extend({
         margin-top: var(--spacer-xs);
         height: calc(var(--font-xs) * 1.2);
         font-weight: var(--font-medium);
+
+        &.-center {
+          text-align: center;
+          margin-bottom: var(--spacer-sm);
+        }
     }
 
     ._section {
@@ -337,6 +366,12 @@ export default BulkorderBaseFormPersistanceState.extend({
     ._color-pallette {
       text-align: center;
       margin: var(--spacer-base) 0;
+
+      ::v-deep {
+        ._visual-selector {
+          row-gap: var(--spacer-sm);
+        }
+      }
     }
 }
 </style>

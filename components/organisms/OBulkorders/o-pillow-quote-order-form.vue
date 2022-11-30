@@ -37,7 +37,7 @@
             </SfSelectOption>
           </SfSelect>
 
-          <div class="_error-text" v-if="$v.pillowSize.$anyError">
+          <div class="_error-text" v-if="$v.pillowSize.$error">
             {{ $t('This field is required') }}
           </div>
         </div>
@@ -187,8 +187,9 @@ export default BulkorderBaseFormPersistanceState.extend({
     },
     async onSubmit (): Promise<void> {
       const form = this.getBaseFormComponent();
+      this.$v.$touch();
 
-      if (this.isDisabled || !form || !form.getValidationState()) {
+      if (this.isDisabled || !form || !form.getValidationState() || this.$v.$invalid) {
         return;
       }
 
@@ -225,9 +226,18 @@ export default BulkorderBaseFormPersistanceState.extend({
           default:
             // TODO redirect to quote page with bulkOrderId as param
         }
+      } catch (error) {
+        this.onFailure(error);
       } finally {
         this.isSubmitting = false;
       }
+    },
+    onFailure (message: any): void {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'danger',
+        message: message,
+        action1: { label: this.$t('OK') }
+      });
     }
   },
   watch: {

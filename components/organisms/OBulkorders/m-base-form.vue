@@ -86,6 +86,8 @@
         {{ $t('Best price breaks occur at volumes of 100, 500, and 1,000.') }}
       </span>
 
+      <slot name="quantity-helper" />
+
       <SfInput
         :label="$t('Quantity')"
         :disabled="isDisabled"
@@ -203,13 +205,6 @@
         :error-message="$t('Field is required')"
         :disabled="isDisabled"
       />
-
-      <div
-        class="_error-text"
-        v-if="$v.value.country && $v.value.country.$error"
-      >
-        {{ $t('This field is required') }}
-      </div>
     </div>
 
     <div class="_section --half">
@@ -251,7 +246,12 @@
           v-model="customerPhone"
           class="sf-input--required"
           :valid="!$v.value.customerPhone || !$v.value.customerPhone.$error"
-          :error-message="$t('Field is required')"
+          :error-message="
+            $v.value.customerPhone && $v.value.customerPhone.required
+              ? $t('Please, enter valid phone number')
+              : $t('Field is required')
+          "
+          @blur="() => $v.value.customerPhone && $v.value.customerPhone.$touch()"
         />
       </div>
     </div>
@@ -301,7 +301,7 @@
 <script lang="ts">
 import config from 'config';
 import Vue, { PropType, VueConstructor } from 'vue';
-import { required, requiredIf, minValue, email, sameAs } from 'vuelidate/lib/validators';
+import { required, requiredIf, minValue, email, sameAs, helpers } from 'vuelidate/lib/validators';
 import { TranslateResult } from 'vue-i18n';
 import { SfButton, SfInput, SfRadio, SfSelect } from '@storefront-ui/vue';
 import {
@@ -326,6 +326,8 @@ const Countries = require('@vue-storefront/i18n/resource/countries.json');
 interface InjectedServices {
   imageHandlerService: ImageHandlerService
 }
+
+const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/);
 
 export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   name: 'MBaseForm',
@@ -610,7 +612,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           email
         },
         customerPhone: {
-          required
+          required,
+          phoneValidator
         },
         agreement: {
           sameAs: sameAs(() => true)

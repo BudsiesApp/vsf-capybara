@@ -439,7 +439,7 @@ export default Vue.extend({
       var(--font-medium),
       var(--font-xs),
       1.2,
-      var(--font-family-secondary)
+      var(--font-family-primary)
     );
   }
 
