@@ -1,7 +1,11 @@
 <template>
-  <div class="o-mobile-menu">
+  <div
+    class="o-mobile-menu"
+    v-show="isMobileMenu"
+    @click.self="onMenuCloseHandler"
+    ref="mobile-menu"
+  >
     <MMenu
-      v-show="isMobileMenu"
       class="_mobile-menu mobile-only"
       @close="onMenuCloseHandler"
     />
@@ -11,6 +15,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapState } from 'vuex'
+import { disableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
 
 import MMenu from '../molecules/m-menu.vue';
 
@@ -31,9 +36,15 @@ export default Vue.extend({
     isMobileMenu (): void {
       if (this.isMobileMenu) {
         // we can't add this style to body because sfui also add/remove overflow to body and there may be conflict
-        document.documentElement.style.overflow = 'hidden'
+        document.documentElement.style.overflow = 'hidden';
+
+        this.$nextTick(() => {
+          disableBodyScroll(this.$refs['mobile-menu']);
+        })
       } else {
-        document.documentElement.style.overflow = ''
+        document.documentElement.style.overflow = '';
+
+        clearAllBodyScrollLocks();
       }
     }
   }
@@ -45,8 +56,10 @@ export default Vue.extend({
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 12;
+  z-index: 250;
   height: 100%;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
 
   ._mobile-menu {
     position: relative;
@@ -55,8 +68,9 @@ export default Vue.extend({
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    top: var(--bottom-navigation-height);
-    height: calc(100% - var(--bottom-navigation-height));
+    top: 0;
+    height: 100%;
+    max-width: 80%;
     --mega-menu-aside-menu-height: auto;
 
     &::v-deep {
