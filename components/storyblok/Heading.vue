@@ -12,6 +12,7 @@
       </div>
 
       <SfHeading
+        :id="headingId"
         class="_heading"
         :level="headingSize"
         :title="itemData.title"
@@ -23,6 +24,7 @@
 <script lang="ts">
 import { SfHeading } from '@storefront-ui/vue';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
+import getHeaderId from 'src/modules/vsf-storyblok-module/helpers/get-header-id';
 import HeadingData from './interfaces/heading-data.interface';
 
 export default Blok.extend({
@@ -55,6 +57,9 @@ export default Blok.extend({
     },
     isCustomStyled (): boolean {
       return !!this.itemData.is_custom_styled;
+    },
+    headingId (): string {
+      return getHeaderId(this.headingSize, [{ type: 'text', text: this.itemData.title }]);
     }
   }
 });
