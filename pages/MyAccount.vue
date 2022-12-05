@@ -17,8 +17,8 @@
         <SfContentPage :title="$t('My profile')">
           <OMyAccountProfile />
         </SfContentPage>
-        <SfContentPage :title="$t('Shipping details')">
-          <OMyAccountShippingDetails />
+        <SfContentPage :title="$t('Address Book')">
+          <OMyAccountAddressBook />
         </SfContentPage>
       </SfContentCategory>
       <SfContentPage :title="$t('Log out')" />
@@ -35,9 +35,8 @@
 import MyAccount from '@vue-storefront/core/pages/MyAccount';
 
 import OMyAccountProfile from 'theme/components/organisms/o-my-account-profile';
-import OMyAccountShippingDetails from 'theme/components/organisms/o-my-account-shipping-details'
+import OMyAccountAddressBook from 'theme/components/organisms/o-my-account-address-book';
 import OMyAccountOrdersHistory from 'theme/components/organisms/o-my-account-orders-history';
-import OMyAccountPlaceholder from 'theme/components/organisms/o-my-account-placeholder';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { SfBreadcrumbs, SfContentPages } from '@storefront-ui/vue';
 
@@ -46,9 +45,8 @@ export default {
     SfBreadcrumbs,
     SfContentPages,
     OMyAccountProfile,
-    OMyAccountShippingDetails,
-    OMyAccountOrdersHistory,
-    OMyAccountPlaceholder
+    OMyAccountAddressBook,
+    OMyAccountOrdersHistory
   },
   mixins: [MyAccount],
   data () {

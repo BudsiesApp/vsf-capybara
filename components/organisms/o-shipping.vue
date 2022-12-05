@@ -113,6 +113,7 @@
         :disabled="isFormFieldsDisabled"
         @change="onChangeCountry"
       />
+
       <SfInput
         v-model.trim="shipping.phoneNumber"
         :required="isPhoneNumberRequired"
