@@ -66,27 +66,8 @@ export default Vue.extend({
     justify-content: flex-start;
     align-items: flex-end;
 
-    // @include for-desktop {
-    //   flex-direction: row;
-    //   justify-content: flex-end;
-    //   align-items: center;
-    // }
-
     ._action-item {
         margin-bottom: var(--spacer-sm);
-    }
-  }
-
-  ._button-delete {
-    --button-background: var(--c-light);
-    --button-color: var(--c-dark-variant);
-
-    &:hover {
-      --button-background: var(--_c-light-primary);
-    }
-
-    @include for-desktop {
-      margin: 0 0 0 var(--spacer-base);
     }
   }
 

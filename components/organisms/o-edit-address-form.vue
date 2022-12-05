@@ -1,11 +1,5 @@
 <template>
   <div class="o-edit-address-form">
-    <!-- <o-address-form
-      :action-button-text="$t('Save Changes')"
-      :submit-action="onFormSubmit"
-      :existing-address="address"
-    /> -->
-
     <o-base-address-form
       v-model="existingAddress"
       :is-form-fields-disabled="isSubmitting"
@@ -26,9 +20,10 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import { TranslateResult } from 'vue-i18n';
 import { SfButton } from '@storefront-ui/vue';
+import i18n from '@vue-storefront/i18n';
 
-import OAddressForm from './o-address-form.vue';
 import OBaseAddressForm from './o-base-address-form.vue';
 
 export default Vue.extend({
@@ -74,6 +69,8 @@ export default Vue.extend({
         await this.updateAddress();
 
         this.$emit('address-update');
+      } catch (error) {
+        this.onFailure(this.$t('Unable to update address'));
       } finally {
         this.isSubmitting = false;
       }
@@ -99,6 +96,13 @@ export default Vue.extend({
     },
     onCancelButtonClick (): void {
       this.$emit('cancel');
+    },
+    onFailure (message: TranslateResult): void {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'danger',
+        message,
+        action1: { label: i18n.t('OK') }
+      });
     }
   }
 })

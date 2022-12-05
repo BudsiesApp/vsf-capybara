@@ -20,7 +20,9 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import { TranslateResult } from 'vue-i18n';
 import { SfButton } from '@storefront-ui/vue';
+import i18n from '@vue-storefront/i18n';
 
 import OBaseAddressForm from './o-base-address-form.vue';
 
@@ -74,9 +76,18 @@ export default Vue.extend({
       try {
         await this.$store.dispatch('budsies/createNewAddress', { address: addressToCreate });
         this.$emit('address-added');
+      } catch (error) {
+        this.onFailure(this.$t('Unable to add new address'));
       } finally {
         this.isSubmitting = false;
       }
+    },
+    onFailure (message: TranslateResult): void {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'danger',
+        message,
+        action1: { label: i18n.t('OK') }
+      });
     },
     onValidationStateChange (isValid: boolean): void {
       this.isFormValid = isValid;
