@@ -17,7 +17,7 @@
       <SfCheckbox
         v-if="hasBillingData()"
         v-model="sendToBillingAddress"
-        class="form__element form__checkbox"
+        class="form__element form__checkbox -always-enabled"
         name="sendToBillingAddress"
         :label="$t('Use my billing data')"
         :disabled="isFormFieldsDisabled"
@@ -243,29 +243,11 @@ export default {
       }
     };
 
-    const rulesForInvoice = {
-      company: {
-        required,
-        unicodeAlphaNum
-      },
-      taxId: {
-        required,
-        minLength: minLength(3)
+    return {
+      payment: {
+        ...rules
       }
     };
-
-    return this.generateInvoice
-      ? {
-        payment: {
-          ...rules,
-          ...rulesForInvoice
-        }
-      }
-      : {
-        payment: {
-          ...rules
-        }
-      };
   },
   data: () => {
     return {
@@ -386,7 +368,12 @@ export default {
     getPaymentCountry (after, before) {
       this.fCanShowStateSelector = false;
 
-      if (after && before) {
+      if (
+        after &&
+        before &&
+        !this.sendToBillingAddress &&
+        !this.sendToShippingAddress
+      ) {
         this.payment.state = '';
       }
 
