@@ -1,12 +1,17 @@
 <template>
-  <div
-    v-if="shouldShowImageBanner"
-    :data-campaign-id="itemData.campaign_id"
-    class="promotion-platform-image-banner-container"
-    :class="cssClasses"
-    :style="styles"
-    v-html="imageBannerContent"
-  />
+  <div class="promotion-platform-image-banner-wrapper"
+       :class="cssClasses"
+       :style="styles"
+  >
+    <editor-block-icons :item="itemData" />
+
+    <div
+      class="promotion-platform-image-banner-container"
+      v-if="shouldShowImageBanner"
+      :data-campaign-id="itemData.campaign_id"
+      v-html="imageBannerContent"
+    />
+  </div>
 </template>
 
 <script lang="ts">
@@ -47,7 +52,10 @@ export default Blok.extend({
         return false;
       }
 
-      if (this.itemData.campaign_id && this.promoCampaignId && this.itemData.campaign_id != this.promoCampaignId) {
+      if (this.itemData.campaign_id &&
+        this.promoCampaignId &&
+        +this.itemData.campaign_id !== +this.promoCampaignId
+      ) {
         return false;
       }
 
@@ -65,13 +73,15 @@ export default Blok.extend({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
-.promotion-platform-image-banner-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 15px;
+.promotion-platform-image-banner-wrapper {
+  .promotion-platform-image-banner-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+  }
 
-  ::v-deep {
+::v-deep {
     .show-for-medium-up {
       display: none;
     }

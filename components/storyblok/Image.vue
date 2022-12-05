@@ -4,6 +4,8 @@
     :style="styles"
     class="storyblok-image"
   >
+    <editor-block-icons :item="itemData" />
+
     <CoolLightBox
       :items="getLightboxItems()"
       :index="lightboxIndexValue"
