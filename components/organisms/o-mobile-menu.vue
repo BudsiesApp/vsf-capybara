@@ -1,14 +1,17 @@
 <template>
   <div
     class="o-mobile-menu"
-    v-show="isMobileMenu"
+    v-show="show"
     @click.self="onMenuCloseHandler"
     ref="mobile-menu"
   >
-    <MMenu
-      class="_mobile-menu mobile-only"
-      @close="onMenuCloseHandler"
-    />
+    <transition name="slide" @after-leave="show = false">
+      <MMenu
+        v-show="isMobileMenu"
+        class="_mobile-menu mobile-only"
+        @close="onMenuCloseHandler"
+      />
+    </transition>
   </div>
 </template>
 
@@ -24,6 +27,11 @@ export default Vue.extend({
   components: {
     MMenu
   },
+  data () {
+    return {
+      show: false
+    };
+  },
   computed: {
     ...mapState('ui', ['isMobileMenu'])
   },
@@ -35,6 +43,8 @@ export default Vue.extend({
   watch: {
     isMobileMenu (): void {
       if (this.isMobileMenu) {
+        this.show = true;
+
         // we can't add this style to body because sfui also add/remove overflow to body and there may be conflict
         document.documentElement.style.overflow = 'hidden';
 
@@ -60,6 +70,16 @@ export default Vue.extend({
   height: 100%;
   width: 100%;
   background-color: rgba(0, 0, 0, 0.5);
+
+  .slide-enter-active,
+  .slide-leave-active {
+      transition: all 0.25s linear 0s;
+  }
+
+  .slide-enter,
+  .slide-leave-to  {
+      transform: translateX(-100%);
+  }
 
   ._mobile-menu {
     position: relative;
