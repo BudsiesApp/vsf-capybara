@@ -1,7 +1,7 @@
 <template>
   <div class="o-base-address-form form">
     <SfInput
-      v-model.trim="firstName"
+      v-model="firstName"
       class="form__element form__element--half"
       name="first-name"
       :label="$t('First name')"
@@ -17,7 +17,7 @@
     />
 
     <SfInput
-      v-model.trim="lastName"
+      v-model="lastName"
       class="form__element form__element--half form__element--half-even"
       name="last-name"
       :label="$t('Last name')"
@@ -29,7 +29,7 @@
     />
 
     <SfInput
-      v-model.trim="streetAddress"
+      v-model="streetAddress"
       class="form__element"
       name="street-address"
       :label="$t('Address')"
@@ -41,7 +41,7 @@
     />
 
     <SfInput
-      v-model.trim="city"
+      v-model="city"
       class="form__element form__element--half"
       name="city"
       :label="$t('City')"
@@ -54,7 +54,7 @@
 
     <SfInput
       v-if="!isSelectedCountryHasStates"
-      v-model.trim="state"
+      v-model="state"
       class="form__element form__element--half form__element--half-even"
       name="state"
       :label="$t('State / Province')"
@@ -63,7 +63,7 @@
 
     <MMultiselect
       v-if="isSelectedCountryHasStates && canShowStateSelector"
-      v-model.trim="state"
+      v-model="state"
       class="form__element form__element--half form__element--half-even form__select"
       name="state"
       :label="$t('State / Province')"
@@ -77,7 +77,7 @@
     />
 
     <SfInput
-      v-model.trim="zipCode"
+      v-model="zipCode"
       class="form__element form__element--half"
       name="zipCode"
       :label="$t('Zip-code')"
@@ -108,7 +108,7 @@
     />
 
     <SfInput
-      v-model.trim="phoneNumber"
+      v-model="phoneNumber"
       :required="isPhoneNumberRequired"
       :valid="!$v.phoneNumber || !$v.phoneNumber.$error"
       :error-message="$t('Field is required')"
