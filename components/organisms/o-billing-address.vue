@@ -168,7 +168,7 @@
   </div>
 </template>
 <script>
-import { required, requiredIf, minLength } from 'vuelidate/lib/validators';
+import { required, requiredIf, minLength, helpers } from 'vuelidate/lib/validators';
 import { mapGetters } from 'vuex';
 import {
   unicodeAlpha,
@@ -192,6 +192,8 @@ import {
 const States = require('@vue-storefront/i18n/resource/states.json');
 
 const addressKeys = ['firstName', 'lastName', 'phoneNumber', 'country', 'city', 'state', 'streetAddress', 'zipCode'];
+
+const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/);
 
 export default {
   name: 'OBillingAddress',
@@ -239,7 +241,8 @@ export default {
         required
       },
       phoneNumber: {
-        required: requiredIf(function () { return this.isPhoneNumberRequired })
+        required: requiredIf(function () { return this.isPhoneNumberRequired }),
+        phoneValidator
       }
     };
 
