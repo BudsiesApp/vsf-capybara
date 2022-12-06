@@ -68,7 +68,6 @@ export function registerClientModules () {
   registerModule(GoogleTagManagerModule)
   registerModule(Braintree)
   registerModule(PromotionPlatformModule)
-  registerModule(GiftCardModule)
   registerModule(PaymentBackendMethodsModule)
   registerModule(PaymentAffirm)
   registerModule(UrlRewriteModule)
