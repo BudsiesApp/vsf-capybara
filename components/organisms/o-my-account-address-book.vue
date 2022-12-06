@@ -312,6 +312,11 @@ export default {
 ._button-row {
   display: flex;
   justify-content: flex-end;
+  margin-top: var(--spacer-lg);
+}
+
+._shipping {
+  margin-bottom: var(--spacer-base);
 }
 
 </style>

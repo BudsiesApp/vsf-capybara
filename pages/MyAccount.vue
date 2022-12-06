@@ -7,6 +7,7 @@
         </router-link>
       </template>
     </SfBreadcrumbs>
+
     <SfContentPages
       :title="$t('My Account')"
       :active="activePage"
@@ -17,11 +18,14 @@
         <SfContentPage :title="$t('My profile')">
           <OMyAccountProfile />
         </SfContentPage>
+
         <SfContentPage :title="$t('Address Book')">
           <OMyAccountAddressBook />
         </SfContentPage>
+
+        <SfContentPage :title="$t('Log out')" />
       </SfContentCategory>
-      <SfContentPage :title="$t('Log out')" />
+
       <SfContentCategory :title="$t('Order details')">
         <SfContentPage :title="$t('Order history')">
           <OMyAccountOrdersHistory />
@@ -89,6 +93,7 @@ export default {
 
 #my-account {
   box-sizing: border-box;
+
   @include for-desktop {
     max-width: 1272px;
     width: 100%;
@@ -98,16 +103,24 @@ export default {
 }
 .my-account {
   --content-pages-height: auto;
+
   ::v-deep {
     .sf-content-pages__content,
     .sf-content-pages__sidebar {
       height: min-content;
     }
   }
+
   @include for-mobile {
+    --content-pages-section-margin: 0 0 var(--spacer-base) 0;
     --content-pages-sidebar-category-title-font-weight: var(--font-normal);
-    --content-pages-sidebar-category-title-margin: var(--spacer-sm) var(--spacer-sm) var(--spacer-sm) var(--spacer-base);
+    --content-pages-sidebar-category-title-margin: var(--spacer-xl) var(--spacer-sm) 0 var(--spacer-base);
+
+    ._section {
+      margin-bottom: var(--spacer-base);
+    }
   }
+
   @include for-desktop {
     --content-pages-sidebar-category-title-margin: var(--spacer-xl) 0 0 0;
   }
