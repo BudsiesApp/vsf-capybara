@@ -123,7 +123,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { required, requiredIf, minLength } from 'vuelidate/lib/validators';
+import { required, requiredIf, minLength, helpers } from 'vuelidate/lib/validators';
 import { SfInput } from '@storefront-ui/vue';
 import { unicodeAlpha, unicodeAlphaNum } from '@vue-storefront/core/helpers/validators';
 
@@ -131,6 +131,8 @@ import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
 
 const Countries = require('@vue-storefront/i18n/resource/countries.json');
 const States = require('@vue-storefront/i18n/resource/states.json');
+
+const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/);
 
 export default Vue.extend({
   name: 'OBaseAddressForm',
@@ -346,7 +348,8 @@ export default Vue.extend({
         unicodeAlpha
       },
       phoneNumber: {
-        required: requiredIf(isPhoneNumberRequired)
+        required: requiredIf(isPhoneNumberRequired),
+        phoneValidator
       }
     }
   }
