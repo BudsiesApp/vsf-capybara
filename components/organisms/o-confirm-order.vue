@@ -179,7 +179,6 @@
       class="sf-heading--left sf-heading--no-underline title"
     />
     <div class="form">
-      <OGiftCardPayment :cart-items="cartItems" />
       <div class="form__radio-group">
         <component
           v-for="method in paymentMethods"
@@ -253,7 +252,6 @@ import {
 } from '@storefront-ui/vue';
 import MPriceSummary from 'theme/components/molecules/m-price-summary';
 import APromoCode from 'theme/components/atoms/a-promo-code';
-import OGiftCardPayment from './o-gift-card-payment.vue';
 
 import { onlineHelper } from '@vue-storefront/core/helpers';
 import { ProductId } from 'src/modules/budsies';
@@ -271,7 +269,6 @@ export default {
     APromoCode,
     MPriceSummary,
     OCartItemsTable,
-    OGiftCardPayment,
     SfRadio,
     SfIcon,
     SfImage,
