@@ -112,7 +112,6 @@ export default {
   }
 
   @include for-mobile {
-    --content-pages-section-margin: 0 0 var(--spacer-base) 0;
     --content-pages-sidebar-category-title-font-weight: var(--font-normal);
     --content-pages-sidebar-category-title-margin: var(--spacer-xl) var(--spacer-sm) 0 var(--spacer-base);
   }
