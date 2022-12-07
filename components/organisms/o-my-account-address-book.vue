@@ -11,109 +11,112 @@
           <section class="_default-addresses">
             <SfHeading :title="$t('Default Addresses')" :level="3" class="_title" />
 
-            <section class="_shipping" v-if="defaultShippingAddress">
-              <SfHeading :title="$t('Shipping')" :level="4" class="_subtitle" />
+            <div class="_section-content">
+              <section class="_shipping" v-if="defaultShippingAddress">
+                <SfHeading :title="$t('Shipping')" :level="4" class="_subtitle" />
 
-              <m-address-item
-                :address="defaultShippingAddress"
-                class="_default-address"
-              >
-                <template #actions>
-                  <SfButton
-                    class="_action-item sf-button--text"
-                    @click="changeAddress(defaultShippingAddress)"
-                  >
-                    {{ $t('Edit') }}
-                  </SfButton>
+                <m-address-item
+                  :address="defaultShippingAddress"
+                  class="_default-address"
+                >
+                  <template #actions>
+                    <SfButton
+                      class="_action-item sf-button--text"
+                      @click="changeAddress(defaultShippingAddress)"
+                    >
+                      {{ $t('Edit') }}
+                    </SfButton>
 
-                  <SfButton
-                    class="_action-item sf-button--text"
-                    v-if="!defaultShippingAddress.default_billing"
-                    @click="setAddressAsDefaultForBilling(defaultShippingAddress)"
-                  >
-                    {{ $t('Set as default Billing address') }}
-                  </SfButton>
-                </template>
-              </m-address-item>
-            </section>
+                    <SfButton
+                      class="_action-item sf-button--text"
+                      v-if="!defaultShippingAddress.default_billing"
+                      @click="setAddressAsDefaultForBilling(defaultShippingAddress)"
+                    >
+                      {{ $t('Set as default Billing address') }}
+                    </SfButton>
+                  </template>
+                </m-address-item>
+              </section>
 
-            <section class="_billing" v-if="defaultBillingAddress">
-              <SfHeading :title="$t('Billing')" :level="4" class="_subtitle" />
+              <section class="_billing" v-if="defaultBillingAddress">
+                <SfHeading :title="$t('Billing')" :level="4" class="_subtitle" />
 
-              <m-address-item
-                :address="defaultBillingAddress"
-                class="_default-address"
-              >
-                <template #actions>
-                  <SfButton
-                    class="_action-item sf-button--text"
-                    @click="changeAddress(defaultBillingAddress)"
-                  >
-                    {{ $t('Edit') }}
-                  </SfButton>
+                <m-address-item
+                  :address="defaultBillingAddress"
+                  class="_default-address"
+                >
+                  <template #actions>
+                    <SfButton
+                      class="_action-item sf-button--text"
+                      @click="changeAddress(defaultBillingAddress)"
+                    >
+                      {{ $t('Edit') }}
+                    </SfButton>
 
-                  <SfButton
-                    class="_action-item sf-button--text"
-                    v-if="!defaultBillingAddress.default_shipping"
-                    @click="setAddressAsDefaultForShipping(defaultBillingAddress)"
-                  >
-                    {{ $t('Set as default Shipping address') }}
-                  </SfButton>
-                </template>
-              </m-address-item>
-            </section>
+                    <SfButton
+                      class="_action-item sf-button--text"
+                      v-if="!defaultBillingAddress.default_shipping"
+                      @click="setAddressAsDefaultForShipping(defaultBillingAddress)"
+                    >
+                      {{ $t('Set as default Shipping address') }}
+                    </SfButton>
+                  </template>
+                </m-address-item>
+              </section>
 
-            <span v-if="!defaultShippingAddress && !defaultBillingAddress">
-              {{ $t('You have no default address entries in your address book.') }}
-            </span>
+              <span v-if="!defaultShippingAddress && !defaultBillingAddress">
+                {{ $t('You have no default address entries in your address book.') }}
+              </span>
+            </div>
           </section>
 
-          <section>
+          <section class="_additional-addresses">
             <SfHeading :title="$t('Additional Addresses')" :level="3" class="_title" />
 
-            <div
-              class="shipping-list"
-              v-if="!!additionalAddresses.length"
-            >
-              <m-address-item
-                :address="address" v-for="(address) in additionalAddresses"
-                :key="address.id"
+            <div class="_section-content">
+              <div
+                v-if="!!additionalAddresses.length"
               >
-                <template #actions>
-                  <SfButton
-                    class="_action-item sf-button--text"
-                    @click="changeAddress(address)"
-                  >
-                    {{ $t('Edit') }}
-                  </SfButton>
+                <m-address-item
+                  :address="address" v-for="(address) in additionalAddresses"
+                  :key="address.id"
+                >
+                  <template #actions>
+                    <SfButton
+                      class="_action-item sf-button--text"
+                      @click="changeAddress(address)"
+                    >
+                      {{ $t('Edit') }}
+                    </SfButton>
 
-                  <SfButton
-                    class="_action-item sf-button--text"
-                    @click="removeAddress(address)"
-                  >
-                    {{ $t('Remove') }}
-                  </SfButton>
+                    <SfButton
+                      class="_action-item sf-button--text"
+                      @click="removeAddress(address)"
+                    >
+                      {{ $t('Remove') }}
+                    </SfButton>
 
-                  <SfButton
-                    class="_action-item sf-button--text"
-                    @click="setAddressAsDefaultForBilling(address)"
-                  >
-                    {{ $t('Set as default Billing address') }}
-                  </SfButton>
+                    <SfButton
+                      class="_action-item sf-button--text"
+                      @click="setAddressAsDefaultForBilling(address)"
+                    >
+                      {{ $t('Set as default Billing address') }}
+                    </SfButton>
 
-                  <SfButton
-                    class="_action-item sf-button--text"
-                    @click="setAddressAsDefaultForShipping(address)"
-                  >
-                    {{ $t('Set as default Shipping address') }}
-                  </SfButton>
-                </template>
-              </m-address-item>
+                    <SfButton
+                      class="_action-item sf-button--text"
+                      @click="setAddressAsDefaultForShipping(address)"
+                    >
+                      {{ $t('Set as default Shipping address') }}
+                    </SfButton>
+                  </template>
+                </m-address-item>
+              </div>
+
+              <span v-else>
+                {{ $t('You have no additional address entries in your address book.') }}
+              </span>
             </div>
-
-            <span v-else>
-              {{ $t('You have no additional address entries in your address book.') }}
-            </span>
           </section>
 
           <div class="_button-row">
@@ -308,38 +311,43 @@ export default {
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-.shipping-list {
-  margin: 0 0 var(--spacer-base) 0;
-}
+.o-my-account-address-book {
+  --heading-padding: 0;
 
-._default-addresses {
-  margin-bottom: var(--spacer-xl);
-}
+  ._section-content {
+    margin-top: var(--spacer-base);
+  }
 
-._title {
-  margin-bottom: var(--spacer-base);
-}
+  .tab-orphan {
+    @include for-mobile {
+      --tabs-content-border-width: 0;
+      --tabs-title-display: none;
+      --tabs-content-padding: 0;
+    }
+  }
 
-.tab-orphan {
-  @include for-mobile {
-    --tabs-content-border-width: 0;
-    --tabs-title-display: none;
-    --tabs-content-padding: 0;
+  ._default-address {
+    border: none;
+    padding: 0;
+    margin-top: var(--spacer-sm);
+  }
+
+  ._billing {
+    margin-top: var(--spacer-base);
+  }
+
+  ._button-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--spacer-lg);
+  }
+
+  ._shipping {
+    margin-top: var(--spacer-base);
+  }
+
+  ._additional-addresses {
+    margin-top: var(--spacer-xl);
   }
 }
-
-._default-address {
-  border: none;
-}
-
-._button-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: var(--spacer-lg);
-}
-
-._shipping {
-  margin-bottom: var(--spacer-base);
-}
-
 </style>
