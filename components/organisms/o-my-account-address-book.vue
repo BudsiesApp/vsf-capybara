@@ -138,7 +138,7 @@
           <o-edit-address-form
             v-model="editedAddress"
             @address-update="onAddressUpdate"
-            @cancel="onCancel"
+            @cancel="onCancelEditing"
           />
         </SfTab>
       </SfTabs>
@@ -186,7 +186,9 @@ export default {
         state: '',
         zipCode: '',
         country: '',
-        phoneNumber: ''
+        phoneNumber: '',
+        defaultShipping: false,
+        defaultBilling: false
       },
       countries: Countries,
       state: State.LIST
@@ -234,15 +236,36 @@ export default {
         city: address.city,
         state: address.region.region,
         country: address.country_id,
-        phoneNumber: address.telephone
+        phoneNumber: address.telephone,
+        defaultBilling: address.default_billing,
+        defaultShipping: address.default_shipping
       };
       this.state = State.EDIT;
     },
+    clearEditedAddress () {
+      this.editedAddress = {
+        firstName: '',
+        lastName: '',
+        streetAddress: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: '',
+        phoneNumber: '',
+        defaultShipping: false,
+        defaultBilling: false
+      }
+    },
     async onAddressUpdate () {
       this.state = State.LIST;
+      this.clearEditedAddress();
     },
     onCancel () {
       this.state = State.LIST;
+    },
+    onCancelEditing () {
+      this.onCancel();
+      this.clearEditedAddress();
     },
     removeAddress (address) {
       this.$store.dispatch('budsies/removeAddress', { address: { id: address.id } });
