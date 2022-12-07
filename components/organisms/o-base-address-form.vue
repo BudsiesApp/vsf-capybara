@@ -111,7 +111,11 @@
       v-model="phoneNumber"
       :required="isPhoneNumberRequired"
       :valid="!$v.phoneNumber || !$v.phoneNumber.$error"
-      :error-message="$t('Field is required')"
+      :error-message="
+        !$v.phoneNumber || !$v.phoneNumber.required
+          ? $t('Field is required')
+          : $t('Please, enter valid phone number')
+      "
       class="form__element"
       name="phone"
       :label="$t('Phone number')"

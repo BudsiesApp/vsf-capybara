@@ -135,7 +135,11 @@
         v-model.trim="payment.phoneNumber"
         :required="isPhoneNumberRequired"
         :valid="!$v.payment.phoneNumber.$error"
-        :error-message="$t('Field is required')"
+        :error-message="
+          !$v.payment.phoneNumber || !$v.payment.phoneNumber.required
+            ? $t('Field is required')
+            : $t('Please, enter valid phone number')
+        "
         class="form__element"
         name="phone"
         :label="$t('Phone number')"

@@ -118,7 +118,11 @@
         v-model.trim="shipping.phoneNumber"
         :required="isPhoneNumberRequired"
         :valid="!$v.shipping.phoneNumber.$error"
-        :error-message="$t('Field is required')"
+        :error-message="
+          !$v.shipping.phoneNumber || !$v.shipping.phoneNumber.required
+            ? $t('Field is required')
+            : $t('Please, enter valid phone number')
+        "
         class="form__element"
         name="phone"
         :label="$t('Phone number')"
