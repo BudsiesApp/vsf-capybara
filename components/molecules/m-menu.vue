@@ -17,7 +17,7 @@
               :to="item.url"
               @click.native="$emit('close')"
             >
-              <SfMenuItem :label="item.label" />
+              <SfMenuItem :label="item.label" icon="" />
             </router-link>
           </SfListItem>
         </SfList>
@@ -37,7 +37,7 @@
               :class="{'-active': item.isActive && item.isActive()}"
               @click.native="$emit('close')"
             >
-              <SfMenuItem :label="item.label" />
+              <SfMenuItem :label="item.label" icon="" />
             </router-link>
           </SfListItem>
         </SfList>
@@ -58,7 +58,7 @@
               :target="item.target"
               @click.native="$emit('close')"
             >
-              <SfMenuItem :label="item.label" />
+              <SfMenuItem :label="item.label" icon="" />
             </router-link>
           </SfListItem>
         </SfList>
