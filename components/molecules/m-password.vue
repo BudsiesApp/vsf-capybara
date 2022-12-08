@@ -3,7 +3,7 @@
     <SfInput
       v-model="password"
       type="password"
-      class="form__element sf-input--required"
+      class="_input sf-input--required"
       name="password"
       :has-show-password="true"
       :label="$t('Password')"
@@ -13,13 +13,13 @@
           ? $t('Field is required')
           : $t('Password must have at least 6 symbols.')
       "
-      @blur="$v.value.password.$touch()"
+      @blur="() => $v.value.password && $v.value.password.$touch()"
     />
 
     <SfInput
       v-model="repeatPassword"
       type="password"
-      class="form__element sf-input--required"
+      class="_input sf-input--required"
       name="password-confirm"
       :has-show-password="true"
       :label="$t('Repeat password')"
@@ -29,7 +29,7 @@
           ? $t('Field is required')
           : $t('Passwords must be identical.')
       "
-      @blur="$v.value.repeatPassword.$touch()"
+      @blur="() => $v.value.repeatPassword && $v.value.repeatPassword.$touch()"
     />
   </div>
 </template>
@@ -77,14 +77,31 @@ export default Vue.extend({
     }
   },
   validations: {
-    password: {
-      required,
-      minLength: minLength(6)
-    },
-    repeatPassword: {
-      required,
-      sameAsPassword: sameAs('password')
+    value: {
+      password: {
+        required,
+        minLength: minLength(6)
+      },
+      repeatPassword: {
+        required,
+        sameAsPassword: sameAs('password')
+      }
+    }
+  },
+  methods: {
+    getIsPasswordValid (): boolean {
+      this.$v.$touch();
+
+      return !this.$v.$invalid;
     }
   }
 });
 </script>
+
+<style lang="scss">
+.m-password {
+  ._input {
+    margin: var(--password-inputs-margin, var(--spacer-base) 0);
+  }
+}
+</style>
