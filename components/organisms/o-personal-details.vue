@@ -22,7 +22,7 @@
         :label="$t('First name')"
         :required="true"
         :valid="!$v.personalDetails.firstName.$error"
-        :error-message=" $t('Field is required')"
+        :error-message="$t('Field is required')"
         @blur="$v.personalDetails.firstName.$touch()"
       />
       <SfInput
