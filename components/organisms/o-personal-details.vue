@@ -59,42 +59,8 @@
           />
         </div>
         <template v-if="createAccount">
-          <SfInput
-            v-model="password"
-            type="password"
-            class="form__element"
-            name="password"
-            :has-show-password="true"
-            :label="$t('Password')"
-            :required="true"
-            :valid="!$v.password.$error"
-            :error-message="
-              !$v.password.required
-                ? $t('Field is required')
-                : !$v.password.minLength
-                  ? $t('Password must have at least 8 letters.')
-                  : $t(
-                    'Password must contain at least 3 different character classes: lower case, upper case, digits, special characters.'
-                  )
-            "
-            @blur="$v.password.$touch()"
-          />
-          <SfInput
-            v-model="rPassword"
-            type="password"
-            class="form__element"
-            name="password-confirm"
-            :has-show-password="true"
-            :label="$t('Repeat password')"
-            :required="true"
-            :valid="!$v.rPassword.$error"
-            :error-message="
-              !$v.rPassword.required
-                ? $t('Field is required')
-                : $t('Passwords must be identical.')
-            "
-            @blur="$v.rPassword.$touch()"
-          />
+          <m-password ref="password" v-model="passwordData" />
+
           <div class="form__element form__group">
             <SfCheckbox
               v-model="acceptConditions"
@@ -149,8 +115,10 @@ import { required, minLength, email, sameAs } from 'vuelidate/lib/validators';
 import { PersonalDetails } from '@vue-storefront/core/modules/checkout/components/PersonalDetails';
 import { SfInput, SfButton, SfHeading, SfCheckbox } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
-import APromoCode from 'theme/components/atoms/a-promo-code'
 import { mapActions } from 'vuex';
+
+import APromoCode from 'theme/components/atoms/a-promo-code'
+import MPassword from 'theme/components/molecules/m-password'
 
 export default {
   name: 'OPersonalDetails',
@@ -159,7 +127,8 @@ export default {
     SfInput,
     SfButton,
     SfHeading,
-    SfCheckbox
+    SfCheckbox,
+    MPassword
   },
   mixins: [PersonalDetails],
   validations: {
@@ -175,26 +144,6 @@ export default {
         required,
         email
       }
-    },
-    password: {
-      required,
-      minLength: minLength(8),
-      complex: value => {
-        // Check if minimum 3 different classes of characters are used in password.
-        // Classes of characters: lower case, upper case, digits and special characters.
-        return (
-          [
-            /(?=[a-z])/.test(value),
-            /(?=[A-Z])/.test(value),
-            /(?=[0-9])/.test(value),
-            /(?=\W)/.test(value)
-          ].filter(result => result).length >= 3
-        );
-      }
-    },
-    rPassword: {
-      required,
-      sameAsPassword: sameAs('password')
     },
     acceptConditions: {
       required
@@ -221,8 +170,9 @@ export default {
       let isInvalid = false;
 
       if (this.createAccount) {
+        const isPasswordValid = this.$refs.password.getIsPasswordValid();
         this.$v.$touch();
-        isInvalid = this.$v.$invalid;
+        isInvalid = this.$v.$invalid || !isPasswordValid;
       } else {
         this.$v.personalDetails.$touch();
         isInvalid = this.$v.personalDetails.$invalid;
@@ -237,6 +187,14 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
+
+.o-personal-details {
+  --password-inputs-margin: 0 0 var(--spacer-sm) 0;
+
+  .m-password {
+    flex: 0 0 100%;
+  }
+}
 
 .title {
   --heading-padding: var(--spacer-base) 0;
