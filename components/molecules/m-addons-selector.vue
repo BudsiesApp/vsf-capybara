@@ -18,8 +18,9 @@
         name="upgrades[]"
         class="_addon-input"
         :value="addon.optionValueId"
-        v-model="selectedValues"
+        :selected="selectedValues"
         :disabled="disabled"
+        @change="onSelectedValuesChange"
       >
         <template #label>
           <div class="_addon-wrapper">
@@ -34,6 +35,15 @@
                 <strong>
                   + {{ addon.price | price() }}
                 </strong>
+              </div>
+
+              <div class="_addon-options" v-if="showCustomOptionsForAddon(addon)">
+                <div class="_addon-option-item" v-for="option in getCustomOptionsForAddon(addon)" :key="option.option_id">
+                  <SfInput
+                    :value="getValueForCustomOption(option.sku, addon.optionValueId)"
+                    @input="onCustomOptionInput($event, option.sku, addon.optionValueId)"
+                  />
+                </div>
               </div>
             </div>
 
@@ -60,9 +70,10 @@ import urlParser from 'js-video-url-parser';
 
 import { StreamingVideo } from 'src/modules/shared';
 
-import MCheckbox from './m-checkbox.vue';
-
 import AddonOption from '../interfaces/addon-option.interface';
+import SelectedAddon from '../interfaces/selected-addon.interface';
+
+import MCheckbox from './m-checkbox.vue';
 
 let instanceId = 0;
 
@@ -82,7 +93,7 @@ export default Vue.extend({
       default: false
     },
     value: {
-      type: Array as PropType<number[]>,
+      type: Array as PropType<SelectedAddon[]>,
       default: () => []
     }
   },
@@ -99,7 +110,7 @@ export default Vue.extend({
     },
     selectedValues: {
       get: function (): number[] {
-        return this.value;
+        return this.value.map(({ addonOptionValueId }) => addonOptionValueId);
       },
       set: function (value: number[]) {
         this.$emit('input', value);
@@ -107,6 +118,11 @@ export default Vue.extend({
     }
   },
   methods: {
+    getCustomOptionsForAddon (addon: AddonOption): any[] {
+      const options: any[] = [];
+
+      return options;
+    },
     getInputId (addon: AddonOption): string {
       return `design-product-${this.instanceId}-${addon.id}`;
     },
@@ -126,6 +142,17 @@ export default Vue.extend({
       result['--addon-image-hover'] = `url(${item.images[1]})`;
 
       return result;
+    },
+    getValueForCustomOption (optionSku: string, addonOptionValueId: number): string {
+      const selectedAddon = this.value.find(
+        (selectedAddon) => selectedAddon.addonOptionValueId === addonOptionValueId
+      );
+
+      if (!selectedAddon) {
+        return '';
+      }
+
+      return selectedAddon.optionsValues[optionSku] ? selectedAddon.optionsValues[optionSku] : '';
     },
     getVideoId (addon: AddonOption): string | undefined {
       if (!addon.videoUrl) {
@@ -153,8 +180,50 @@ export default Vue.extend({
 
       return info.provider;
     },
+    onSelectedValuesChange (selectedValues: number[]): void {
+      const updatedValue: SelectedAddon[] = [];
+
+      selectedValues.forEach((value) => {
+        const selectedAddonIndex = this.value.findIndex(({ addonOptionValueId }) => addonOptionValueId === value);
+
+        if (selectedAddonIndex === -1) {
+          updatedValue.push({
+            addonOptionValueId: value,
+            optionsValues: {}
+          })
+        } else {
+          updatedValue.push(this.value[selectedAddonIndex]);
+        }
+      });
+
+      this.$emit('input', updatedValue);
+    },
+    onCustomOptionInput (value: string, optionSku: string, addonOptionValueId: number) {
+      const selectedAddonIndex = this.value.findIndex((selectedAddon) => selectedAddon.addonOptionValueId === addonOptionValueId);
+      const selectedAddon = selectedAddonIndex > -1 ? this.value[selectedAddonIndex] : undefined;
+
+      const optionValues = selectedAddon?.optionsValues || {};
+
+      const updatedSelectedAddon: SelectedAddon = {
+        addonOptionValueId,
+        optionsValues: {
+          ...optionValues,
+          optionSku: value
+        }
+      }
+
+      if (!selectedAddon) {
+        this.$emit('input', [...this.value, updatedSelectedAddon]);
+        return;
+      }
+
+      this.$emit('input', [...this.value].splice(selectedAddonIndex, 1, updatedSelectedAddon));
+    },
     shouldShowVideo (addonId: number): boolean {
       return !!this.showVideoFlags[addonId];
+    },
+    showCustomOptionsForAddon (addon: AddonOption): boolean {
+      return this.getCustomOptionsForAddon(addon).length > 0 && this.selectedValues.includes(addon.optionValueId);
     },
     switchToVideo (event: Event, addon: AddonOption): void {
       if (!addon.videoUrl) {
