@@ -122,7 +122,7 @@ export default {
             { name: this.$t('Services'), link: '/stuffed-animals/' },
             { name: this.$t('Reviews'), link: '/reviews/' },
             { name: this.$t('Pricing'), link: '/custom-plush-pricing/' },
-            { name: this.$t('How to Order'), link: { name: '/how-to-order/' } }
+            { name: this.$t('How to Order'), link: '/how-to-order/' }
           ]
         },
         quickLinks: {
