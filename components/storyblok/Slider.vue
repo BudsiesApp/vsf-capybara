@@ -114,6 +114,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 .storyblok-slider {
+  @include storyblok-default-margin;
   @include display-property-handling;
 }
 </style>

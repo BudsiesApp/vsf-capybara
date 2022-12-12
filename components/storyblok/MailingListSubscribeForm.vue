@@ -47,3 +47,12 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 
 })
 </script>
+<style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+
+.storyblok-mailing-list-subscribe-form {
+  @include storyblok-default-margin;
+  @include display-property-handling;
+}
+</style>

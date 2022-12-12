@@ -47,6 +47,7 @@ export default Blok.extend({
     }
   }
 
+  @include storyblok-default-margin;
   @include display-property-handling;
 }
 </style>

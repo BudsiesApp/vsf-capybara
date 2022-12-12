@@ -86,6 +86,7 @@ export default Blok.extend({
 
 <style lang="scss" scoped>
 .storyblok-category {
-
+  @include storyblok-default-margin;
+  @include display-property-handling;
 }
 </style>

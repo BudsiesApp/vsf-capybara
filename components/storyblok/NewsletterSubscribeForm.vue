@@ -30,6 +30,7 @@ export default Blok.extend({
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 .storyblok-newsletter-subscribe-form {
+  @include storyblok-default-margin;
   @include display-property-handling;
 }
 </style>

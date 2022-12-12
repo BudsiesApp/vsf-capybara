@@ -117,10 +117,13 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 .expandable-text-block {
+  margin-bottom: 0;
+
   ._link {
       margin-left: 0.5em;
   }
 
+  @include storyblok-default-margin;
   @include display-property-handling;
 }
 </style>

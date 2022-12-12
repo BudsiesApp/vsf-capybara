@@ -197,6 +197,7 @@ $transition-zoom-in-time: 0.5s;
     }
   }
 
+  @include storyblok-default-margin;
   @include display-property-handling;
 }
 </style>

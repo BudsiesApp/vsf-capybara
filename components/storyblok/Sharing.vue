@@ -40,6 +40,7 @@ export default Blok.extend({
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 .storyblok-sharing {
+  @include storyblok-default-margin;
   @include display-property-handling;
 }
 </style>
