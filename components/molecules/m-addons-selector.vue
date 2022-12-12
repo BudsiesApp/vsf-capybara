@@ -113,13 +113,8 @@ export default Vue.extend({
     skinClass (): string {
       return `-skin-petsies`;
     },
-    selectedValues: {
-      get: function (): number[] {
-        return this.value.map(({ addonOptionValueId }) => addonOptionValueId);
-      },
-      set: function (value: number[]) {
-        this.$emit('input', value);
-      }
+    selectedValues (): number[] {
+      return this.value.map(({ addonOptionValueId }) => addonOptionValueId);
     }
   },
   methods: {
