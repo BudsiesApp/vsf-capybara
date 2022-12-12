@@ -74,9 +74,12 @@ export default Blok.extend({
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 $intro-left-margin: 1em;
+$margin-top: 2em;
+$margin-bottom: 1em;
 
 .storyblok-heading {
-  --heading-title-margin: 1.4em 0 .7em 0;
+  --heading-title-margin: #{$margin-top} #{$margin-bottom} 0;
+  --heading-padding: 0;
   text-align: center;
 
   ._heading {
@@ -84,15 +87,19 @@ $intro-left-margin: 1em;
   }
 
   &.-first-item {
-    --heading-title-margin: 0 0 .7em 0;
+    --heading-title-margin: 0 0 #{$margin-bottom} 0;
+  }
+
+  &.-last-item {
+    --heading-title-margin: 0;
   }
 
   &.-custom-styled {
     overflow: hidden;
     margin-left: 1em;
     margin-right: 1em;
-    margin-top: 1.4em;
-    padding: var(--heading-padding, var(--spacer-xs) 0 var(--spacer-xs) 0);
+    margin-top: $margin-top;
+    margin-bottom: $margin-bottom;
     text-align: center;
 
     ._container {
@@ -138,6 +145,10 @@ $intro-left-margin: 1em;
 
     &.-first-item {
       margin-top: 0;
+    }
+
+    &.-last-item {
+      margin-bottom: 0;
     }
 
     &.-aligned-left {
