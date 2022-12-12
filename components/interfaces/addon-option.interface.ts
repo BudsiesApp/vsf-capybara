@@ -7,5 +7,6 @@ export default interface AddonOption {
   images: string[],
   optionId: number,
   optionValueId: number,
-  videoUrl?: string
+  videoUrl?: string,
+  customOptions?: any[]
 }

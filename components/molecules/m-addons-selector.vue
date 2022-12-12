@@ -40,8 +40,11 @@
               <div class="_addon-options" v-if="showCustomOptionsForAddon(addon)">
                 <div class="_addon-option-item" v-for="option in getCustomOptionsForAddon(addon)" :key="option.option_id">
                   <SfInput
-                    :value="getValueForCustomOption(option.sku, addon.optionValueId)"
-                    @input="onCustomOptionInput($event, option.sku, addon.optionValueId)"
+                    class="_custom-option-field"
+                    :value="getValueForCustomOption(option.product_sku, addon.optionValueId)"
+                    :label="option.title"
+                    :name="option.title"
+                    @input="onCustomOptionInput($event, option.product_sku, addon.optionValueId)"
                   />
                 </div>
               </div>
@@ -66,6 +69,7 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue';
+import { SfInput } from '@storefront-ui/vue';
 import urlParser from 'js-video-url-parser';
 
 import { StreamingVideo } from 'src/modules/shared';
@@ -81,6 +85,7 @@ export default Vue.extend({
   name: 'MAddonsSelector',
   components: {
     MCheckbox,
+    SfInput,
     StreamingVideo
   },
   props: {
@@ -119,9 +124,7 @@ export default Vue.extend({
   },
   methods: {
     getCustomOptionsForAddon (addon: AddonOption): any[] {
-      const options: any[] = [];
-
-      return options;
+      return addon.customOptions || [];
     },
     getInputId (addon: AddonOption): string {
       return `design-product-${this.instanceId}-${addon.id}`;
@@ -208,7 +211,7 @@ export default Vue.extend({
         addonOptionValueId,
         optionsValues: {
           ...optionValues,
-          optionSku: value
+          [optionSku]: value
         }
       }
 
@@ -217,7 +220,10 @@ export default Vue.extend({
         return;
       }
 
-      this.$emit('input', [...this.value].splice(selectedAddonIndex, 1, updatedSelectedAddon));
+      const valueForUpdate = [...this.value];
+      valueForUpdate.splice(selectedAddonIndex, 1, updatedSelectedAddon);
+
+      this.$emit('input', valueForUpdate);
     },
     shouldShowVideo (addonId: number): boolean {
       return !!this.showVideoFlags[addonId];
@@ -325,6 +331,22 @@ export default Vue.extend({
         ._image {
           background-image: var(--addon-image-hover, var(--addon-image-regular));
         }
+      }
+    }
+  }
+
+  ._custom-option-field {
+    --input-border-color: var(--c-white);
+
+    margin-top: var(--spacer-sm);
+
+    ::v-deep {
+      input {
+        position: relative;
+        opacity: 1;
+        left: 0;
+        width: 100%;
+        height: 100%;
       }
     }
   }
