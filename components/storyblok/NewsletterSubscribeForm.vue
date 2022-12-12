@@ -4,7 +4,7 @@
     :style="styles"
     :class="cssClasses"
   >
-    <editor-block-icons :item="itemData" />
+    <editor-block-icons :item="item" />
 
     <MNewsletterSubscription
       name="storyblock-newsletter-subscription-form"
