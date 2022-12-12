@@ -280,6 +280,7 @@ import ProductionTimeOption from '../../interfaces/production-time-option.interf
 import ForeversWizardCustomizeStepData from '../../interfaces/forevers-wizard-customize-step-data.interface';
 import getProductionTimeOptions from '../../../helpers/get-production-time-options';
 import SizeOption from 'theme/components/interfaces/size-option';
+import SelectedAddon from 'theme/components/interfaces/selected-addon.interface';
 
 extend('required', {
   ...required,
@@ -364,10 +365,10 @@ export default Vue.extend({
       }
     },
     selectedAddons: {
-      get (): number[] {
+      get (): SelectedAddon[] {
         return this.value.addons;
       },
-      set (value: number[]): void {
+      set (value: SelectedAddon[]): void {
         const newValue = { ...this.value, addons: value };
         this.$emit('input', newValue);
       }
@@ -433,7 +434,8 @@ export default Vue.extend({
           images: images,
           optionId: this.addonsBundleOption.option_id,
           optionValueId: ((typeof productLink.id === 'number') ? productLink.id : Number.parseInt(productLink.id, 10) as number),
-          videoUrl: (productLink.product as any).video_url
+          videoUrl: (productLink.product as any).video_url,
+          customOptions: productLink.product?.custom_options
         });
       }
 

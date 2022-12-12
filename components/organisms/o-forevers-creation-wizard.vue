@@ -114,6 +114,7 @@ import ForeversWizardPetInfoStepData from '../interfaces/forevers-wizard-pet-inf
 import ForeversWizardCustomizeStepData from '../interfaces/forevers-wizard-customize-step-data.interface';
 import ForeversCreationWizardPersistedState from '../interfaces/forevers-creation-wizard-persisted-state.interface';
 import SizeOption from '../interfaces/size-option';
+import SelectedAddon from '../interfaces/selected-addon.interface';
 
 export default Vue.extend({
   name: 'OForeversCreationWizard',
@@ -366,8 +367,13 @@ export default Vue.extend({
       if (!productOption.extension_attributes.bundle_options[this.addonsBundleOption.option_id]) {
         return;
       }
-
-      this.customizeStepData.addons = productOption.extension_attributes.bundle_options[this.addonsBundleOption.option_id].option_selections.map((selection: number) => selection);
+      const optionSelections = productOption.extension_attributes.bundle_options[this.addonsBundleOption.option_id].option_selections;
+      this.customizeStepData.addons = optionSelections.map((selection: number) => {
+        return {
+          addonOptionValueId: selection,
+          optionsValues: {}
+        }
+      });
     },
     fillBodypartsValues (cartItem: CartItem): void {
       this.customizeStepData.bodypartsValues = {};
@@ -741,7 +747,7 @@ export default Vue.extend({
 
     },
     'customizeStepData.addons': {
-      handler (newValue: number[]) {
+      handler (newValue: SelectedAddon[]) {
         if (!this.addonsBundleOption) {
           return
         }
@@ -749,7 +755,7 @@ export default Vue.extend({
         this.setBundleOptionValue(
           this.addonsBundleOption.option_id,
           1,
-          newValue
+          newValue.map(({ addonOptionValueId }) => addonOptionValueId)
         );
       },
       immediate: false
