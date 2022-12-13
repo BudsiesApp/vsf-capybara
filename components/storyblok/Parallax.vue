@@ -8,7 +8,7 @@
     >
       <template #content>
         <div class="_content">
-          <sb-render v-for="child in (itemData.content || [])" :item="child" :key="child.uuid" />
+          <sb-render v-for="child in (itemData.content || [])" :item="child" :key="child._uid" />
         </div>
       </template>
     </m-parallax-section>
