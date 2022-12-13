@@ -1,6 +1,6 @@
 <template>
   <div
-    class="storyblok-product"
+    class="storyblok-product layout-regular-component"
     :class="cssClasses"
     v-if="product"
   >

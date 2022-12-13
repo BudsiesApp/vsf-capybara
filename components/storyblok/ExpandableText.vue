@@ -1,7 +1,7 @@
 <template>
   <p
     ref="expandableTextBlock"
-    class="expandable-text-block"
+    class="expandable-text-block layout-regular-component"
     :class="cssClasses"
   >
     <editor-block-icons :item="itemData" />
@@ -123,7 +123,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
       margin-left: 0.5em;
   }
 
-  @include storyblok-default-margin;
   @include display-property-handling;
 }
 </style>

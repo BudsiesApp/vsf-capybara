@@ -1,6 +1,6 @@
 <template>
   <div
-    class="storyblok-textarea"
+    class="storyblok-textarea layout-regular-component"
     :class="cssClasses"
     :style="styles"
   >
@@ -62,7 +62,6 @@ export default Blok.extend({
     }
   }
 
-  @include storyblok-default-margin;
   @include display-property-handling;
 }
 </style>

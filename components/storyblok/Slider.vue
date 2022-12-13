@@ -1,6 +1,6 @@
 <template>
   <div
-    class="storyblok-slider"
+    class="storyblok-slider layout-regular-component"
     :class="cssClasses"
   >
     <editor-block-icons :item="itemData" />
@@ -114,7 +114,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 .storyblok-slider {
-  @include storyblok-default-margin;
   @include display-property-handling;
 }
 </style>

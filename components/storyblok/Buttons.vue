@@ -1,5 +1,5 @@
 <template>
-  <div class="storyblok-buttons" :style="styles" :class="cssClasses">
+  <div class="storyblok-buttons layout-regular-component" :style="styles" :class="cssClasses">
     <editor-block-icons :item="itemData" />
 
     <Button
@@ -52,7 +52,6 @@ export default Blok.extend({
     }
   }
 
-  @include storyblok-default-margin;
   @include display-property-handling;
 }
 </style>

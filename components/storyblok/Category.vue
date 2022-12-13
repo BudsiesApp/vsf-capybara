@@ -1,5 +1,5 @@
 <template>
-  <div class="storyblok-category row" v-if="products.length">
+  <div class="storyblok-category layout-regular-component" v-if="products.length">
     <div v-for="product in productsList" :key="product.sku" class="col-xs-12" :class="[colSizeLg]">
       <product :product="product" />
     </div>
@@ -86,7 +86,6 @@ export default Blok.extend({
 
 <style lang="scss" scoped>
 .storyblok-category {
-  @include storyblok-default-margin;
   @include display-property-handling;
 }
 </style>
