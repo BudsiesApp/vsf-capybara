@@ -41,15 +41,27 @@ export default Blok.extend({
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 .storyblok-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: center;
+  gap: 1em;
   width: 100%;
 
   ._button-item {
     display: inline-block;
-    margin-left: 1em;
+  }
 
-    &:first-child {
-      margin-left: 0;
-    }
+  &.-align-left {
+    justify-content: start;
+  }
+
+  &.-align-center {
+    justify-content: center;
+  }
+
+  &.-align-right {
+    justify-content: end;
   }
 
   @include display-property-handling;
