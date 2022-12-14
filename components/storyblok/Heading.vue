@@ -1,6 +1,6 @@
 <template>
   <div
-    class="storyblok-heading"
+    class="storyblok-heading layout-heading-component"
     :class="cssClasses"
     :style="styles"
   >
