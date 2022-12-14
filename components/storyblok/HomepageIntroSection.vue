@@ -1,7 +1,7 @@
 <template>
   <div
     class="storyblok-homepage-intro-section"
-    :class="cssClasses"
+    :class="[...cssClasses, skinClass]"
     :style="styles"
   >
     <editor-block-icons :item="itemData" />
@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts">
-import { VueConstructor } from 'vue';
+import Vue, { VueConstructor } from 'vue';
 import { mapGetters } from 'vuex';
 import { nl2br, BaseImage, ImageSourceItem } from 'src/modules/budsies';
 
@@ -72,14 +72,19 @@ import {
 import HomepageIntroSectionData from './interfaces/homepage-intro-section-data.interface';
 import generateBreakpointsSpecs from './generate-breakpoints-specs';
 import generateImageSourcesList from './generate-image-sources-list';
+import ThemeSkin from 'theme/mixins/theme-skin';
 
 interface InjectedServices {
   componentWidthCalculator: ComponentWidthCalculator,
   window: Window
 }
 
-export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServices>).extend({
+export default (Vue as VueConstructor<InstanceType<typeof Blok> & InstanceType<typeof ThemeSkin> & InjectedServices>).extend({
   name: 'StoryblokHomepageIntroSection',
+  mixins: [
+    Blok,
+    ThemeSkin
+  ],
   components: {
     BaseImage,
     SfHeading
@@ -191,13 +196,13 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     }
   }
 
+  &.-skin-bulkorders {
+    display: flex;
+    flex-direction: column;
+  }
+
   @media (min-width: $tablet-min) {
     ._content {
-      padding: 0 5% 0 55%;
-      position: absolute;
-      top: 0;
-      left: 0;
-
       ._title-block {
         .sf-heading__title {
           text-align: left;
@@ -206,6 +211,25 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
         ._button-row {
           text-align: left;
         }
+      }
+    }
+
+    &.-skin-bulkorders {
+      justify-content: space-between;
+      align-items: center;
+      flex-direction: row;
+
+      ._intro-column {
+        flex: 1;
+      }
+    }
+
+    &.-skin-petsies {
+      ._content {
+        padding: 0 5% 0 55%;
+        position: absolute;
+        top: 0;
+        left: 0;
       }
     }
   }
