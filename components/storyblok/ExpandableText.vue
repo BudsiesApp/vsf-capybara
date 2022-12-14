@@ -1,5 +1,5 @@
 <template>
-  <p
+  <div
     ref="expandableTextBlock"
     class="expandable-text-block layout-regular-component"
     :class="cssClasses"
@@ -19,7 +19,7 @@
       @click.stop="toggleState"
       v-if="isShrinkable"
     >show less</a>
-  </p>
+  </div>
 </template>
 
 <script lang="ts">
@@ -117,8 +117,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 .expandable-text-block {
-  margin-bottom: 0;
-
   ._link {
       margin-left: 0.5em;
   }
