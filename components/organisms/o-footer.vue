@@ -19,11 +19,12 @@
               @click.native="onLinkClick(link)"
               exact
             >
-              <SfMenuItem class="sf-footer__menu-item" :label="link.name" />
+              <SfMenuItem class="sf-footer__menu-item" :label="link.name" icon="" />
             </router-link>
           </SfListItem>
         </SfList>
       </SfFooterColumn>
+
       <SfFooterColumn title="Get more @Petsies cuteness" class="social-column">
         <MNewsletterSubscription />
         <div class="social-icon">
@@ -43,6 +44,7 @@
           <SfMenuItem
             class="sf-footer__menu-item"
             :label="$t('Contact Us')"
+            icon=""
           />
         </router-link>
 
