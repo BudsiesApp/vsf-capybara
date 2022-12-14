@@ -1,6 +1,6 @@
 <template>
   <div
-    class="sf-dongler-book"
+    class="sf-dongler-book layout-regular-component"
     :class="cssClasses"
     :style="styles"
   >

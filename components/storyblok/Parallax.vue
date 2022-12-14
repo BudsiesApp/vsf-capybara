@@ -1,5 +1,5 @@
 <template>
-  <div class="parallax" :style="styles" :class="cssClasses">
+  <div class="aatoryblok-parallax layout-regular-component" :style="styles" :class="cssClasses">
     <m-parallax-section
       :direction="direction"
       :image-src="itemData.image.filename"
@@ -8,7 +8,7 @@
     >
       <template #content>
         <div class="_content">
-          <sb-render v-for="child in itemData.content" :item="child" :key="child.uuid" />
+          <sb-render v-for="child in (itemData.content || [])" :item="child" :key="child._uid" />
         </div>
       </template>
     </m-parallax-section>
@@ -36,3 +36,12 @@ export default Blok.extend({
   }
 })
 </script>
+
+<style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+
+.aatoryblok-parallax {
+  @include display-property-handling;
+}
+</style>

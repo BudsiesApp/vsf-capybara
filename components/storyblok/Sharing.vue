@@ -1,6 +1,6 @@
 <template>
   <div
-    class="storyblok-sharing"
+    class="storyblok-sharing layout-regular-component"
     :class="cssClasses"
     :style="styles"
   >

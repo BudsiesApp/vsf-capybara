@@ -1,6 +1,6 @@
 <template>
   <div
-    class="storyblok-slider"
+    class="storyblok-slider layout-regular-component"
     :class="cssClasses"
   >
     <editor-block-icons :item="itemData" />
