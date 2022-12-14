@@ -264,11 +264,11 @@ export default Vue.extend({
 
       ._image-container {
         position: relative;
-        max-width: 250px;
+        max-width: 75%;
 
         &.-wide-image {
-          margin-left: var(--spacer-base);
-          max-width: 459px;
+          margin-left: var(--spacer-xl);
+          max-width: 100%;
         }
       }
 
