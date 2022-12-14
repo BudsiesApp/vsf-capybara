@@ -1,7 +1,7 @@
 <template>
   <div
     class="storyblok-homepage-intro-section"
-    :class="[...cssClasses, skinClass]"
+    :class="cssClasses"
     :style="styles"
   >
     <editor-block-icons :item="itemData" />
@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { VueConstructor } from 'vue';
+import { VueConstructor } from 'vue';
 import { mapGetters } from 'vuex';
 import { nl2br, BaseImage, ImageSourceItem } from 'src/modules/budsies';
 
@@ -72,19 +72,15 @@ import {
 import HomepageIntroSectionData from './interfaces/homepage-intro-section-data.interface';
 import generateBreakpointsSpecs from './generate-breakpoints-specs';
 import generateImageSourcesList from './generate-image-sources-list';
-import ThemeSkin from 'theme/mixins/theme-skin';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 interface InjectedServices {
   componentWidthCalculator: ComponentWidthCalculator,
   window: Window
 }
 
-export default (Vue as VueConstructor<InstanceType<typeof Blok> & InstanceType<typeof ThemeSkin> & InjectedServices>).extend({
+export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServices>).extend({
   name: 'StoryblokHomepageIntroSection',
-  mixins: [
-    Blok,
-    ThemeSkin
-  ],
   components: {
     BaseImage,
     SfHeading
@@ -99,6 +95,9 @@ export default (Vue as VueConstructor<InstanceType<typeof Blok> & InstanceType<t
     }),
     itemData (): HomepageIntroSectionData {
       return this.item as HomepageIntroSectionData;
+    },
+    extraCssClasses (): string[] {
+      return [getCurrentThemeClass()];
     },
     extraStyles (): Record<string, string> {
       const styles: Record<string, string> = {};
