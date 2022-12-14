@@ -38,7 +38,12 @@
             </div>
 
             <div class="_image-column">
-              <div class="_image-container" v-if="!shouldShowVideo(addon.id)" @click="switchToVideo($event, addon)">
+              <div
+                v-if="!shouldShowVideo(addon.id)"
+                class="_image-container"
+                :class="{'-wide-image': wideImage}"
+                @click="switchToVideo($event, addon)"
+              >
                 <img v-if="getItemImage(addon)" :src="getItemImage(addon)" class="_image">
 
                 <img v-if="getItemHoverImage(addon)" :src="getItemHoverImage(addon)" class="_image-hover">
@@ -89,6 +94,10 @@ export default Vue.extend({
     value: {
       type: Array as PropType<number[]>,
       default: () => []
+    },
+    wideImage: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -256,7 +265,11 @@ export default Vue.extend({
 
       ._image-container {
         position: relative;
-        max-width: 459px;
+        max-width: 250px;
+
+        &.-wide-image {
+          max-width: 459px;
+        }
       }
 
       ._image {
