@@ -45,7 +45,7 @@ export default Blok.extend({
   flex-wrap: wrap;
   flex-direction: row;
   justify-content: center;
-  gap: 1em;
+  gap: $storyblok-layout-standard-top-margin;
   width: 100%;
 
   ._button-item {
