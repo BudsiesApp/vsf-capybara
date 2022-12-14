@@ -31,4 +31,8 @@
             }
         }
     }
+
+    @media (max-width: $mobile-max) {
+        padding: var(--button-padding, var(--spacer-sm) calc(var(--spacer-sm) * 1.5));
+    }
 }

@@ -2,7 +2,7 @@
   <div
     :class="cssClasses"
     :style="styles"
-    class="storyblok-image"
+    class="storyblok-image layout-regular-component"
   >
     <editor-block-icons :item="itemData" />
 
@@ -146,7 +146,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 
 .storyblok-image {
   text-align: center;
-  font-size: 0;
 
   &.-editor-preview-mode {
     ._image {

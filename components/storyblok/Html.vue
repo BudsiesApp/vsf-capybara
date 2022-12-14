@@ -1,6 +1,6 @@
 <template>
   <div
-    class="storyblok-html-renderer"
+    class="storyblok-html-renderer layout-regular-component"
     :class="cssClasses"
     :style="styles"
   >
