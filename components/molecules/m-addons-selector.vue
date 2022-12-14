@@ -259,8 +259,7 @@ export default Vue.extend({
     }
 
     ._image-column {
-      margin-left: var(--spacer-xl);
-      justify-content: center;
+      justify-content: flex-end;
       align-items: flex-start;
 
       ._image-container {
@@ -268,6 +267,7 @@ export default Vue.extend({
         max-width: 250px;
 
         &.-wide-image {
+          margin-left: var(--spacer-base);
           max-width: 459px;
         }
       }
