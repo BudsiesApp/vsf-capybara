@@ -17,7 +17,6 @@ import { StorefrontModule, registerModule } from '@vue-storefront/core/lib/modul
 import { BudsiesModule } from 'src/modules/budsies'
 import { Braintree } from 'src/modules/payment-braintree'
 import { PromotionPlatformModule } from 'src/modules/promotion-platform'
-import { GiftCardModule } from 'src/modules/gift-card'
 import { AmazonPay } from 'src/modules/vsf-amazon-pay'
 import { PaymentBackendMethodsModule } from 'src/modules/payment-backend-methods'
 import { PaymentAffirm } from 'src/modules/payment-affirm';
