@@ -517,12 +517,17 @@ $promt-color: #8eba4c;
     margin-right: var(--spacer-xl);
   }
 
+  ._production-time {
+    margin-top: var(--spacer-xl);
+  }
+
   ._quotes-selector {
     margin-top: var(--spacer-xl);
     width: 100%;
 
     ._quotes-list {
       list-style: none;
+      margin-top: var(--spacer-base);
       padding-left: 0;
     }
 
