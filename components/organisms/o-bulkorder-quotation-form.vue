@@ -98,6 +98,7 @@
 
       <m-addons-selector
         v-model="selectedAddons"
+        :wide-image="true"
         :addons="addons"
         :disabled="isDisabled"
       />
