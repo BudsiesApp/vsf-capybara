@@ -1,6 +1,6 @@
 <template>
   <div
-    class="storyblok-homepage-intro-section"
+    class="storyblok-homepage-intro-section layout-regular-component"
     :class="cssClasses"
     :style="styles"
   >
@@ -19,12 +19,12 @@
     <div class="_intro-column _content">
       <div class="_title-block">
         <SfHeading
-          :level="2"
+          :level="1"
           :subtitle="itemData.subtitle"
         >
           <template #title>
-            <h2
-              class="sf-heading__title sf-heading__title--h2"
+            <h1
+              class="sf-heading__title sf-heading__title--h1"
               v-html="nl2br(itemData.title)"
             />
           </template>
@@ -72,6 +72,7 @@ import {
 import HomepageIntroSectionData from './interfaces/homepage-intro-section-data.interface';
 import generateBreakpointsSpecs from './generate-breakpoints-specs';
 import generateImageSourcesList from './generate-image-sources-list';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 interface InjectedServices {
   componentWidthCalculator: ComponentWidthCalculator,
@@ -94,6 +95,9 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     }),
     itemData (): HomepageIntroSectionData {
       return this.item as HomepageIntroSectionData;
+    },
+    extraCssClasses (): string[] {
+      return [getCurrentThemeClass()];
     },
     extraStyles (): Record<string, string> {
       const styles: Record<string, string> = {};
@@ -191,13 +195,13 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     }
   }
 
+  &.-skin-bulkorders {
+    display: flex;
+    flex-direction: column;
+  }
+
   @media (min-width: $tablet-min) {
     ._content {
-      padding: 0 5% 0 55%;
-      position: absolute;
-      top: 0;
-      left: 0;
-
       ._title-block {
         .sf-heading__title {
           text-align: left;
@@ -206,6 +210,25 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
         ._button-row {
           text-align: left;
         }
+      }
+    }
+
+    &.-skin-bulkorders {
+      justify-content: space-between;
+      align-items: center;
+      flex-direction: row;
+
+      ._intro-column {
+        flex: 1;
+      }
+    }
+
+    &.-skin-petsies {
+      ._content {
+        padding: 0 5% 0 55%;
+        position: absolute;
+        top: 0;
+        left: 0;
       }
     }
   }

@@ -17,27 +17,28 @@
               @click.native="onLinkClick(link)"
               exact
             >
-              <SfMenuItem class="sf-footer__menu-item" :label="link.name" />
+              <SfMenuItem class="sf-footer__menu-item" :label="link.name" icon="" />
             </router-link>
           </SfListItem>
         </SfList>
       </SfFooterColumn>
+
       <SfFooterColumn :title="$t('Contact')" class="contact-column">
         <SfList>
           <SfListItem>
             <a href="mailto:info@stuffedanimalpros.com">
-              <SfMenuItem class="sf-footer__menu-item" :label="$t('info@stuffedanimalpros.com')" />
+              <SfMenuItem class="sf-footer__menu-item" :label="$t('info@stuffedanimalpros.com')" icon="" />
             </a>
           </SfListItem>
 
           <SfListItem>
             <a href="tel:855-758-7443">
-              <SfMenuItem class="sf-footer__menu-item" label="855-758-7443" />
+              <SfMenuItem class="sf-footer__menu-item" label="855-758-7443" icon="" />
             </a>
           </SfListItem>
 
           <SfListItem>
-            <SfMenuItem class="sf-footer__menu-item" label="M-F, 9-4 EST" />
+            <SfMenuItem class="sf-footer__menu-item" label="M-F, 9-4 EST" icon="" />
           </SfListItem>
         </SfList>
       </SfFooterColumn>
