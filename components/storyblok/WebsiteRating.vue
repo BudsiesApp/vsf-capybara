@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="ratingEnabled"
-    class="website-rating-container"
+    class="storyblok-website-rating layout-regular-component"
     :class="cssClasses"
     :style="styles"
   >
@@ -11,7 +11,7 @@
       {{ ratingDataString }}
     </script>
 
-    <div class="website-rating" :data-average-rating="averageValue">
+    <div class="_website-rating" :data-average-rating="averageValue">
       <div class="_rating">
         Rating: {{ averageValue }} / 5
       </div>
@@ -108,24 +108,26 @@ export default Blok.extend({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
-.website-rating {
-  text-align: center;
+.storyblok-website-rating  {
+  ._website-rating {
+    text-align: center;
 
-  ._rating {
-    font-size: 1.5em;
+    ._rating {
+      font-size: 1.5em;
 
-    ._averageValue {
-      display: inline;
+      ._averageValue {
+        display: inline;
+      }
     }
-  }
 
-  ._rating-stars {
-    display: inline-block;
-  }
+    ._rating-stars {
+      display: inline-block;
+    }
 
-  ._reviewsCount {
-    font-size: 0.75em;
-    font-weight: 600;
+    ._reviewsCount {
+      font-size: 0.75em;
+      font-weight: 600;
+    }
   }
 
   &.-editor-preview-mode {

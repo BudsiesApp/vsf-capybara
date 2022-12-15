@@ -113,11 +113,16 @@
         :disabled="isFormFieldsDisabled"
         @change="onChangeCountry"
       />
+
       <SfInput
         v-model.trim="shipping.phoneNumber"
         :required="isPhoneNumberRequired"
         :valid="!$v.shipping.phoneNumber.$error"
-        :error-message="$t('Field is required')"
+        :error-message="
+          !$v.shipping.phoneNumber || !$v.shipping.phoneNumber.required
+            ? $t('Field is required')
+            : $t('Please, enter valid phone number')
+        "
         class="form__element"
         name="phone"
         :label="$t('Phone number')"
@@ -176,7 +181,7 @@
   </div>
 </template>
 <script>
-import { required, requiredIf, minLength } from 'vuelidate/lib/validators';
+import { required, requiredIf, minLength, helpers } from 'vuelidate/lib/validators';
 import { unicodeAlpha, unicodeAlphaNum } from '@vue-storefront/core/helpers/validators';
 import { Shipping } from '@vue-storefront/core/modules/checkout/components/Shipping';
 import {
@@ -192,7 +197,10 @@ import {
   KEY as AMAZON_PAY_MODULE_KEY,
   METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
 } from 'src/modules/vsf-amazon-pay/index';
+
 const States = require('@vue-storefront/i18n/resource/states.json');
+
+const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/);
 
 export default {
   name: 'OShipping',
@@ -236,7 +244,8 @@ export default {
         unicodeAlpha
       },
       phoneNumber: {
-        required: requiredIf(function () { return this.isPhoneNumberRequired })
+        required: requiredIf(function () { return this.isPhoneNumberRequired }),
+        phoneValidator
       }
     }
   },

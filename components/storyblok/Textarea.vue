@@ -1,6 +1,6 @@
 <template>
   <div
-    class="storyblok-textarea"
+    class="storyblok-textarea layout-transparent-container"
     :class="cssClasses"
     :style="styles"
   >
@@ -29,11 +29,6 @@ export default Blok.extend({
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 .storyblok-textarea {
-  ::v-deep ul, ol, dl {
-    display: inline-block;
-    text-align: left;
-  }
-
   ::v-deep .storyblok-rich-text {
     .-accent-color {
       color: var(--c-warning);
@@ -62,6 +57,7 @@ export default Blok.extend({
     }
   }
 
+  @include storyblok-transparent-container-layout;
   @include display-property-handling;
 }
 </style>

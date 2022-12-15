@@ -51,7 +51,17 @@
             </div>
 
             <div class="_image-column">
-              <div class="_image" v-if="!shouldShowVideo(addon.id)" @click="switchToVideo($event, addon)" />
+              <div
+                v-if="!shouldShowVideo(addon.id)"
+                class="_image-container"
+                :class="{'-wide-image': wideImage}"
+                @click="switchToVideo($event, addon)"
+              >
+                <img v-if="getItemImage(addon)" :src="getItemImage(addon)" class="_image">
+
+                <img v-if="getItemHoverImage(addon)" :src="getItemHoverImage(addon)" class="_image-hover">
+              </div>
+
               <StreamingVideo
                 :video-id="getVideoId(addon)"
                 :provider="getVideoProvider(addon)"
@@ -100,6 +110,10 @@ export default Vue.extend({
     value: {
       type: Array as PropType<SelectedAddon[]>,
       default: () => []
+    },
+    wideImage: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -123,6 +137,12 @@ export default Vue.extend({
     },
     getInputId (addon: AddonOption): string {
       return `design-product-${this.instanceId}-${addon.id}`;
+    },
+    getItemImage (item: AddonOption): string | undefined {
+      return item.images[0];
+    },
+    getItemHoverImage (item: AddonOption): string | undefined {
+      return item.images[1];
     },
     getItemStyles (item: AddonOption): Record<string, string> {
       const result: Record<string, string> = {};
@@ -309,22 +329,35 @@ export default Vue.extend({
     }
 
     ._image-column {
-      ._image {
-        background: var(--addon-image-regular) no-repeat center center;
-        background-size: contain;
-        padding-top: calc(min(100%, 250px));
-        max-width: 250px;
-        margin-left: auto;
+      justify-content: flex-end;
+      align-items: flex-start;
 
-        &::after {
-          position: absolute; width:0; height:0; overflow:hidden; z-index:-1;
-          content: var(--addon-image-hover);
+      ._image-container {
+        position: relative;
+        max-width: 75%;
+
+        &.-wide-image {
+          margin-left: var(--spacer-xl);
+          max-width: 100%;
         }
       }
 
+      ._image {
+        width: 100%;
+      }
+
+      ._image-hover {
+        display: none;
+        position: absolute;
+        width: 100%;
+        z-index: 2;
+        top: 0;
+        left: 0;
+      }
+
       &:hover {
-        ._image {
-          background-image: var(--addon-image-hover, var(--addon-image-regular));
+        ._image-hover {
+          display: block;
         }
       }
     }
@@ -359,8 +392,15 @@ export default Vue.extend({
     ._item {
       ._info-column,
       ._image-column {
-        display: block;
         width: 50%;
+      }
+
+      ._info-column {
+        display: block;
+      }
+
+      ._image-column {
+        display: flex;
       }
     }
   }

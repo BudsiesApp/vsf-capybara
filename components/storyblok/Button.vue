@@ -1,7 +1,7 @@
 <template>
   <div
     :style="styles"
-    class="storyblok-button"
+    class="storyblok-button layout-regular-component"
     :class="cssClasses"
   >
     <editor-block-icons :item="itemData" />

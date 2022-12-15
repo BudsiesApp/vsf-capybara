@@ -6,7 +6,6 @@
         name="email"
         type="email"
         :label="$t('Your email')"
-        :required="true"
         :valid="!$v.email.$error"
         :error-message="
           !$v.email.required
@@ -19,7 +18,6 @@
         v-model="password"
         name="password"
         :label="$t('Password')"
-        :required="true"
         :valid="!$v.password.$error"
         :error-message="$t('Field is required.')"
         type="password"

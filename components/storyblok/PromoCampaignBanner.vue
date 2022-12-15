@@ -1,5 +1,5 @@
 <template>
-  <div class="promotion-platform-image-banner-wrapper"
+  <div class="promotion-platform-image-banner-wrapper layout-regular-component"
        :class="cssClasses"
        :style="styles"
   >

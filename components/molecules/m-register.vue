@@ -6,7 +6,6 @@
         name="email"
         type="email"
         :label="$t('Your email')"
-        :required="true"
         :valid="!$v.email.$error"
         :error-message="
           !$v.email.required
@@ -15,38 +14,32 @@
         "
         class="form__element"
       />
+
       <SfInput
         v-model="firstName"
         name="first-name"
         :label="$t('First name')"
-        :required="true"
         :valid="!$v.firstName.$error"
         :error-message="$t('Field is required.')"
         class="form__element"
       />
+
       <SfInput
         v-model="lastName"
         name="last-name"
         :label="$t('Last name')"
-        :required="true"
         :valid="!$v.lastName.$error"
         :error-message="$t('Field is required.')"
         class="form__element"
       />
-      <SfInput
-        v-model="password"
-        name="password"
-        :label="$t('Password')"
-        :required="true"
-        :valid="!$v.password.$error"
-        :error-message="$t('Field is required.')"
-        type="password"
-        class="form__element"
-      />
+
+      <m-password ref="password" v-model="passwordData" />
+
       <SfButton class="sf-button--full-width form__submit">
         {{ $t('Create an account') }}
       </SfButton>
     </form>
+
     <SfButton class="sf-button--text action-button" @click.native="switchElem('login')">
       {{ `${$t('or')} ${$t('login in to your account')}` }}
     </SfButton>
@@ -61,13 +54,22 @@ import { SfInput, SfButton } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
 import { mapActions } from 'vuex';
 
+import MPassword from 'theme/components/molecules/m-password.vue';
+
 export default {
   name: 'MRegister',
-  components: { SfInput, SfButton },
+  components: {
+    SfInput,
+    SfButton,
+    MPassword
+  },
   data () {
     return {
       email: '',
-      password: '',
+      passwordData: {
+        password: '',
+        repeatPassword: ''
+      },
       firstName: '',
       lastName: ''
     };
@@ -83,7 +85,9 @@ export default {
     },
     register () {
       this.$v.$touch();
-      if (this.$v.$invalid) {
+      const isPasswordValid = this.$refs.password.getIsPasswordValid();
+
+      if (this.$v.$invalid || !isPasswordValid) {
         this.$store.dispatch('notification/spawnNotification', {
           type: 'danger',
           message: this.$t('Please fix the validation errors'),
@@ -98,7 +102,7 @@ export default {
       this.$store
         .dispatch('user/register', {
           email: this.email,
-          password: this.password,
+          password: this.passwordData.password,
           firstname: this.firstName,
           lastname: this.lastName
         })
@@ -109,7 +113,7 @@ export default {
           } else {
             this.$store.dispatch('user/login', {
               username: this.email,
-              password: this.password
+              password: this.passwordData.password
             });
             this.onSuccess(i18n.t('You are logged in!'));
             this.closeModal({ name: ModalList.Auth });
@@ -143,9 +147,6 @@ export default {
     email: {
       required,
       email
-    },
-    password: {
-      required
     },
     firstName: {
       required

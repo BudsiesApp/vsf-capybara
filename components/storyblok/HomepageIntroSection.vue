@@ -1,6 +1,6 @@
 <template>
   <div
-    class="storyblok-homepage-intro-section"
+    class="storyblok-homepage-intro-section layout-regular-component"
     :class="cssClasses"
     :style="styles"
   >
