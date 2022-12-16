@@ -199,7 +199,7 @@ export default {
 
     &__navigation {
       --header-navigation-margin: 0 var(--spacer-base);
-      justify-content: flex-end;
+      justify-content: space-evenly;
       align-items: center;
       flex-grow: 2;
     }
