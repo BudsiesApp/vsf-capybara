@@ -44,10 +44,10 @@ export default {
 </script>
 <style lang="scss" scoped>
 .a-logo {
-  display: inline-flex;
+  --image-height: var(--header-logo-height, 2.125rem);
 
-  .sf-header__logo {
-    width: calc(var(--image-height) * var(--aspect-ratio, 2.22));
-  }
+  display: inline-flex;
+  flex: 1;
+  max-width: calc(var(--image-height) * var(--aspect-ratio, 2.22));
 }
 </style>

@@ -8,18 +8,15 @@
         :label="item.label"
         :is-floating="item.isFloating"
         :is-active="isActive(item.icon)"
+        class="_item"
         @click.native="item.onClick"
       />
 
-      <ALogo :is-small="true" />
+      <ALogo class="_item" />
 
-      <ADetailedCartIcon class="sf-header__action" />
+      <MCtaButton size="small" class="_item" />
 
-      <SfButton class="_bulk-quote-button">
-        <router-link :to="{name: 'bulk-quote'}">
-          {{ $t('Get Quote') }}
-        </router-link>
-      </SfButton>
+      <ADetailedCartIcon class="sf-header__action _item" />
     </SfBottomNavigation>
   </div>
 </template>
@@ -127,19 +124,23 @@ export default {
     position: relative;
   }
 
-  .a-logo {
-    display: none;
+  .m-cta-button {
+    --button-padding: var(--spacer-sm);
   }
 
-  ._bulk-quote-button {
-    --c-link: var(--c-white);
-    --c-link-hover: var(--c-white);
+  ._item {
+    margin-left: var(--spacer-sm);
+
+    &:first-child {
+      margin-left: 0;
+    }
   }
 
   .a-microcart-icon {
-    margin: 0;
-    padding: var(--spacer-sm) var(--spacer-xs);
+    margin: 0 0 0 var(--spacer-sm);
+    padding: var(--spacer-sm) 0;
   }
+
   ::v-deep .sf-header {
     &__logo {
       --header-logo-height: 1.8rem;
@@ -152,15 +153,10 @@ export default {
     --bottom-navigation-z-index: 11;
     align-items: center;
     justify-content: space-between;
+
     .sf-bottom-navigation-item {
       cursor: pointer;
       --icon-color: var(--c-white);
-    }
-  }
-
-  @media (min-width: 450px) {
-    .a-logo {
-      display: block;
     }
   }
 

@@ -216,6 +216,7 @@ export default {
 
     &__actions {
       justify-content: space-between;
+      flex: 1;
     }
   }
 
