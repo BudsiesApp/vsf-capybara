@@ -101,6 +101,7 @@ import foreversCreationWizardPersistedStateService from 'theme/helpers/forevers-
 import getForeversSizeSkuBySizeAndType from 'theme/helpers/get-forevers-size-sku-by-size-and-type.function';
 import getForeversSkuByType from 'theme/helpers/get-forevers-sku-by-type.function';
 import getForeversTypeByBundleSku from 'theme/helpers/get-forevers-type-by-bundle-sku.function';
+import { getAddonOptionsFromBundleOption } from 'theme/helpers/get-addon-options-from-bundle-option.function';
 
 import MProductTypeChooseStep from './OForeversCreationWizard/m-product-type-choose-step.vue';
 import MImageUploadStep from './OForeversCreationWizard/m-image-upload-step.vue';
@@ -115,6 +116,7 @@ import ForeversWizardCustomizeStepData from '../interfaces/forevers-wizard-custo
 import ForeversCreationWizardPersistedState from '../interfaces/forevers-creation-wizard-persisted-state.interface';
 import SizeOption from '../interfaces/size-option';
 import SelectedAddon from '../interfaces/selected-addon.interface';
+import AddonOption from '../interfaces/addon-option.interface';
 
 export default Vue.extend({
   name: 'OForeversCreationWizard',
@@ -180,6 +182,13 @@ export default Vue.extend({
     }
   },
   computed: {
+    addons (): AddonOption[] {
+      if (!this.addonsBundleOption) {
+        return []
+      }
+
+      return getAddonOptionsFromBundleOption(this.addonsBundleOption);
+    },
     canGoBack (): boolean {
       return !this.isSubmitting && (this.currentStep !== 1 || !this.existingCartItem);
     },
@@ -368,10 +377,22 @@ export default Vue.extend({
         return;
       }
       const optionSelections = productOption.extension_attributes.bundle_options[this.addonsBundleOption.option_id].option_selections;
+
       this.customizeStepData.addons = optionSelections.map((selection: number) => {
+        const addon = this.addons.find((addon) => addon.optionValueId === selection);
+        let optionsValues = {};
+
+        if (addon) {
+          const upgradeOptionValues = cartItem.upgrade_option_values?.find(
+            ({ upgradeSku }) => upgradeSku === addon.sku
+          );
+
+          optionsValues = upgradeOptionValues?.optionsValues || {};
+        }
+
         return {
           addonOptionValueId: selection,
-          optionsValues: {}
+          optionsValues
         }
       });
     },
