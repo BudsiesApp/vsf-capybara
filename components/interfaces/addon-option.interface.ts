@@ -1,3 +1,5 @@
+import { AddonCustomOption } from 'src/modules/budsies';
+
 export default interface AddonOption {
   id: number,
   sku: string,
@@ -8,5 +10,5 @@ export default interface AddonOption {
   optionId: number,
   optionValueId: number,
   videoUrl?: string,
-  customOptions?: any[]
+  customOptions?: AddonCustomOption[]
 }
