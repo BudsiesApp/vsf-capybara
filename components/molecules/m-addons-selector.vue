@@ -39,13 +39,22 @@
 
               <div class="_addon-options" v-if="showCustomOptionsForAddon(addon)">
                 <div class="_addon-option-item" v-for="option in getCustomOptionsForAddon(addon)" :key="option.option_id">
-                  <SfInput
-                    class="_custom-option-field"
-                    :value="getValueForCustomOption(option.product_sku, addon.optionValueId)"
-                    :label="option.title"
-                    :name="option.title"
-                    @input="onCustomOptionInput($event, option.product_sku, addon.optionValueId)"
-                  />
+                  <validation-provider
+                    v-slot="{errors}"
+                    tag="div"
+                    :name="`'${option.title}'`"
+                    :rules="getValidationRuleForCustomOption(option)"
+                  >
+                    <SfInput
+                      class="_custom-option-field"
+                      :value="getValueForCustomOption(option.product_sku, addon.optionValueId)"
+                      :label="option.title"
+                      :name="option.title"
+                      :error-message="errors[0]"
+                      :valid="!errors.length"
+                      @input="onCustomOptionInput($event, option.product_sku, addon.optionValueId)"
+                    />
+                  </validation-provider>
                 </div>
               </div>
             </div>
@@ -81,13 +90,26 @@
 import Vue, { PropType } from 'vue';
 import { SfInput } from '@storefront-ui/vue';
 import urlParser from 'js-video-url-parser';
+import { ValidationProvider, extend } from 'vee-validate';
+import { required, max } from 'vee-validate/dist/rules';
 
+import { AddonCustomOption } from 'src/modules/budsies';
 import { StreamingVideo } from 'src/modules/shared';
 
 import AddonOption from '../interfaces/addon-option.interface';
 import SelectedAddon from '../interfaces/selected-addon.interface';
 
 import MCheckbox from './m-checkbox.vue';
+
+extend('required', {
+  ...required,
+  message: 'The {_field_} field is required'
+});
+
+extend('max', {
+  ...max,
+  message: 'The {_field_} length should be less than {length}'
+});
 
 let instanceId = 0;
 
@@ -96,7 +118,8 @@ export default Vue.extend({
   components: {
     MCheckbox,
     SfInput,
-    StreamingVideo
+    StreamingVideo,
+    ValidationProvider
   },
   props: {
     addons: {
@@ -132,7 +155,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    getCustomOptionsForAddon (addon: AddonOption): any[] {
+    getCustomOptionsForAddon (addon: AddonOption): AddonCustomOption[] {
       return addon.customOptions || [];
     },
     getInputId (addon: AddonOption): string {
@@ -160,6 +183,20 @@ export default Vue.extend({
       result['--addon-image-hover'] = `url(${item.images[1]})`;
 
       return result;
+    },
+    getValidationRuleForCustomOption (option: AddonCustomOption): string {
+      let rules = '';
+
+      if (option.is_require) {
+        rules = 'required';
+      }
+
+      if (option.max_characters) {
+        const maxLengthRule = `max:${option.max_characters}`;
+        rules += rules.length ? `|${maxLengthRule}` : maxLengthRule;
+      }
+
+      return rules;
     },
     getValueForCustomOption (optionSku: string, addonOptionValueId: number): string {
       const selectedAddon = this.value.find(
