@@ -311,7 +311,8 @@ export default Vue.extend({
               plushieDescription: this.customizeStepData.description?.trim(),
               bodyparts: this.getBodypartsData(),
               uploadMethod: this.imageUploadStepData.uploadMethod,
-              customerImages: this.customerImages
+              customerImages: this.customerImages,
+              upgrade_option_values: this.getUpgradeOptionValues()
             })
           });
         } catch (error) {
@@ -561,6 +562,20 @@ export default Vue.extend({
       this.customizeStepData.description = cartItem.plushieDescription;
       this.customizeStepData.quantity = cartItem.qty;
     },
+    getUpgradeOptionValues () {
+      return this.customizeStepData.addons.map((selectedAddon) => {
+        const addonItem = this.addons.find(({ optionValueId }) => optionValueId === selectedAddon.addonOptionValueId);
+
+        if (!addonItem) {
+          throw new Error('Unable to find addon by optionValueId');
+        }
+
+        return {
+          upgradeSku: addonItem.sku,
+          optionsValues: selectedAddon.optionsValues
+        }
+      })
+    },
     async nextStep (): Promise<void> {
       if (this.currentStep === 3) {
         return;
@@ -707,7 +722,8 @@ export default Vue.extend({
               bodyparts: this.getBodypartsData(),
               uploadMethod: this.imageUploadStepData.uploadMethod,
               product_option: setBundleProductOptionsAsync(null, { product: this.existingCartItem, bundleOptions: this.$store.state.product.current_bundle_options }),
-              customerImages: this.customerImages
+              customerImages: this.customerImages,
+              upgrade_option_values: this.getUpgradeOptionValues()
             }),
             forceUpdateServerItem: true
           });
