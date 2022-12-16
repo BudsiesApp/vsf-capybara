@@ -4,7 +4,7 @@
     :class="{ '-small': size === 'small' }"
     v-show="showCtaButtonContainer"
   >
-    <MMakeYourOwnDropdown v-show="showMakeYourOwnDropdown" :size="size" />
+    <MMakeYourOwnDropdown v-show="showDefaultButton" :size="size" />
 
     <SfButton v-show="showGoToCheckoutButton" @click="goToCheckout">
       Go to Checkout
@@ -63,7 +63,7 @@ export default Vue.extend({
     showGoToCheckoutButton (): boolean {
       return this.ctaButtonType === HeaderCtaButtonType.GO_TO_CHECKOUT;
     },
-    showMakeYourOwnDropdown (): boolean {
+    showDefaultButton (): boolean {
       return this.ctaButtonType === HeaderCtaButtonType.DEFAULT;
     }
   },
@@ -86,7 +86,7 @@ export default Vue.extend({
     .sf-button {
       --button-font-size: var(--font-2xs);
       --button-font-line-height: 1;
-      --button-padding: calc(var(--spacer-2xs) * 3) var(--spacer-sm);
+      --button-padding: calc(var(--spacer-2xs) * 3);
     }
   }
 }
