@@ -255,9 +255,14 @@ export default Vue.extend({
     },
     onCustomOptionInput (value: string, optionSku: string, addonOptionValueId: number) {
       const selectedAddonIndex = this.value.findIndex((selectedAddon) => selectedAddon.addonOptionValueId === addonOptionValueId);
-      const selectedAddon = selectedAddonIndex > -1 ? this.value[selectedAddonIndex] : undefined;
 
-      const optionValues = selectedAddon?.optionsValues || {};
+      if (selectedAddonIndex === -1) {
+        throw new Error(`Not found selected addon with optionValueId: ${addonOptionValueId}`);
+      }
+
+      const selectedAddon = this.value[selectedAddonIndex];
+
+      const optionValues = selectedAddon.optionsValues;
 
       const updatedSelectedAddon: SelectedAddon = {
         addonOptionValueId,
@@ -265,11 +270,6 @@ export default Vue.extend({
           ...optionValues,
           [optionSku]: value
         }
-      }
-
-      if (!selectedAddon) {
-        this.$emit('input', [...this.value, updatedSelectedAddon]);
-        return;
       }
 
       const valueForUpdate = [...this.value];
