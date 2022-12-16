@@ -22,8 +22,6 @@ import { SfButton } from '@storefront-ui/vue';
 
 import Product from 'core/modules/catalog/types/Product';
 
-import MMakeYourOwnDropdown from 'theme/components/molecules/m-make-your-own-dropdown.vue';
-
 enum HeaderCtaButtonType {
   DEFAULT = 'default',
   GO_TO_CHECKOUT = 'go-to-checkout',
@@ -38,7 +36,6 @@ export default Vue.extend({
     }
   },
   components: {
-    MMakeYourOwnDropdown,
     SfButton
   },
   computed: {

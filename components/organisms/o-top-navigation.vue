@@ -12,7 +12,7 @@
         @click.native="item.onClick"
       />
 
-      <ALogo class="_item" />
+      <ALogo class="_item" :is-small="true" />
 
       <MCtaButton size="small" class="_item" />
 
@@ -23,11 +23,12 @@
 
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
-import { SfBottomNavigation, SfButton } from '@storefront-ui/vue'
+import { SfBottomNavigation } from '@storefront-ui/vue'
 
 import { ModalList } from 'theme/store/ui/modals'
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
 import ALogo from 'theme/components/atoms/a-logo.vue';
+import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
 export default {
   name: 'OTopNavigation',
@@ -35,7 +36,7 @@ export default {
     SfBottomNavigation,
     ALogo,
     ADetailedCartIcon,
-    SfButton
+    MCtaButton
   },
   data () {
     return {
