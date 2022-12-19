@@ -93,7 +93,7 @@ import urlParser from 'js-video-url-parser';
 import { ValidationProvider, extend } from 'vee-validate';
 import { required, max } from 'vee-validate/dist/rules';
 
-import { AddonCustomOption } from 'src/modules/budsies';
+import { CustomOption } from 'core/modules/catalog/types/CustomOption';
 import { StreamingVideo } from 'src/modules/shared';
 
 import AddonOption from '../interfaces/addon-option.interface';
@@ -155,7 +155,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    getCustomOptionsForAddon (addon: AddonOption): AddonCustomOption[] {
+    getCustomOptionsForAddon (addon: AddonOption): CustomOption[] {
       return addon.customOptions || [];
     },
     getInputId (addon: AddonOption): string {
@@ -184,7 +184,7 @@ export default Vue.extend({
 
       return result;
     },
-    getValidationRuleForCustomOption (option: AddonCustomOption): string {
+    getValidationRuleForCustomOption (option: CustomOption): string {
       let rules = '';
 
       if (option.is_require) {
