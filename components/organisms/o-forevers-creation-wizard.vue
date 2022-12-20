@@ -101,6 +101,7 @@ import foreversCreationWizardPersistedStateService from 'theme/helpers/forevers-
 import getForeversSizeSkuBySizeAndType from 'theme/helpers/get-forevers-size-sku-by-size-and-type.function';
 import getForeversSkuByType from 'theme/helpers/get-forevers-sku-by-type.function';
 import getForeversTypeByBundleSku from 'theme/helpers/get-forevers-type-by-bundle-sku.function';
+import { getAddonOptionsFromBundleOption } from 'theme/helpers/get-addon-options-from-bundle-option.function';
 
 import MProductTypeChooseStep from './OForeversCreationWizard/m-product-type-choose-step.vue';
 import MImageUploadStep from './OForeversCreationWizard/m-image-upload-step.vue';
@@ -114,6 +115,8 @@ import ForeversWizardPetInfoStepData from '../interfaces/forevers-wizard-pet-inf
 import ForeversWizardCustomizeStepData from '../interfaces/forevers-wizard-customize-step-data.interface';
 import ForeversCreationWizardPersistedState from '../interfaces/forevers-creation-wizard-persisted-state.interface';
 import SizeOption from '../interfaces/size-option';
+import SelectedAddon from '../interfaces/selected-addon.interface';
+import AddonOption from '../interfaces/addon-option.interface';
 
 export default Vue.extend({
   name: 'OForeversCreationWizard',
@@ -179,6 +182,13 @@ export default Vue.extend({
     }
   },
   computed: {
+    addons (): AddonOption[] {
+      if (!this.addonsBundleOption) {
+        return []
+      }
+
+      return getAddonOptionsFromBundleOption(this.addonsBundleOption);
+    },
     canGoBack (): boolean {
       return !this.isSubmitting && (this.currentStep !== 1 || !this.existingCartItem);
     },
@@ -301,7 +311,8 @@ export default Vue.extend({
               plushieDescription: this.customizeStepData.description?.trim(),
               bodyparts: this.getBodypartsData(),
               uploadMethod: this.imageUploadStepData.uploadMethod,
-              customerImages: this.customerImages
+              customerImages: this.customerImages,
+              upgrade_option_values: this.getUpgradeOptionValues()
             })
           });
         } catch (error) {
@@ -366,8 +377,25 @@ export default Vue.extend({
       if (!productOption.extension_attributes.bundle_options[this.addonsBundleOption.option_id]) {
         return;
       }
+      const optionSelections = productOption.extension_attributes.bundle_options[this.addonsBundleOption.option_id].option_selections;
 
-      this.customizeStepData.addons = productOption.extension_attributes.bundle_options[this.addonsBundleOption.option_id].option_selections.map((selection: number) => selection);
+      this.customizeStepData.addons = optionSelections.map((selection: number) => {
+        const addon = this.addons.find((addon) => addon.optionValueId === selection);
+        let optionsValues = {};
+
+        if (addon) {
+          const upgradeOptionValues = cartItem.upgrade_option_values?.find(
+            ({ upgradeSku }) => upgradeSku === addon.sku
+          );
+
+          optionsValues = upgradeOptionValues?.optionsValues || {};
+        }
+
+        return {
+          addonOptionValueId: selection,
+          optionsValues
+        }
+      });
     },
     fillBodypartsValues (cartItem: CartItem): void {
       this.customizeStepData.bodypartsValues = {};
@@ -534,6 +562,20 @@ export default Vue.extend({
       this.customizeStepData.description = cartItem.plushieDescription;
       this.customizeStepData.quantity = cartItem.qty;
     },
+    getUpgradeOptionValues () {
+      return this.customizeStepData.addons.map((selectedAddon) => {
+        const addonItem = this.addons.find(({ optionValueId }) => optionValueId === selectedAddon.addonOptionValueId);
+
+        if (!addonItem) {
+          throw new Error('Unable to find addon by optionValueId');
+        }
+
+        return {
+          upgradeSku: addonItem.sku,
+          optionsValues: selectedAddon.optionsValues
+        }
+      })
+    },
     async nextStep (): Promise<void> {
       if (this.currentStep === 3) {
         return;
@@ -680,7 +722,8 @@ export default Vue.extend({
               bodyparts: this.getBodypartsData(),
               uploadMethod: this.imageUploadStepData.uploadMethod,
               product_option: setBundleProductOptionsAsync(null, { product: this.existingCartItem, bundleOptions: this.$store.state.product.current_bundle_options }),
-              customerImages: this.customerImages
+              customerImages: this.customerImages,
+              upgrade_option_values: this.getUpgradeOptionValues()
             }),
             forceUpdateServerItem: true
           });
@@ -741,7 +784,7 @@ export default Vue.extend({
 
     },
     'customizeStepData.addons': {
-      handler (newValue: number[]) {
+      handler (newValue: SelectedAddon[]) {
         if (!this.addonsBundleOption) {
           return
         }
@@ -749,7 +792,7 @@ export default Vue.extend({
         this.setBundleOptionValue(
           this.addonsBundleOption.option_id,
           1,
-          newValue
+          newValue.map(({ addonOptionValueId }) => addonOptionValueId)
         );
       },
       immediate: false
