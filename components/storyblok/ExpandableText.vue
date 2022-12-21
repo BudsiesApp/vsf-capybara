@@ -1,7 +1,7 @@
 <template>
-  <p
+  <div
     ref="expandableTextBlock"
-    class="expandable-text-block"
+    class="expandable-text-block layout-regular-component"
     :class="cssClasses"
   >
     <editor-block-icons :item="itemData" />
@@ -19,7 +19,7 @@
       @click.stop="toggleState"
       v-if="isShrinkable"
     >show less</a>
-  </p>
+  </div>
 </template>
 
 <script lang="ts">

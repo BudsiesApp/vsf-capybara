@@ -863,14 +863,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     margin-top: var(--spacer-xs);
   }
 
-  ._description-story {
-    ::v-deep {
-      .a-custom-heading {
-        margin-bottom: calc(-1 * var(--spacer-xl));
-      }
-    }
-  }
-
   @media (min-width: $tablet-min) {
     ._info {
       flex-direction: row;

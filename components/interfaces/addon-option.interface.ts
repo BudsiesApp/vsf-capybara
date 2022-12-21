@@ -1,3 +1,5 @@
+import { CustomOption } from 'core/modules/catalog/types/CustomOption';
+
 export default interface AddonOption {
   id: number,
   sku: string,
@@ -7,5 +9,6 @@ export default interface AddonOption {
   images: string[],
   optionId: number,
   optionValueId: number,
-  videoUrl?: string
+  videoUrl?: string,
+  customOptions?: CustomOption[]
 }

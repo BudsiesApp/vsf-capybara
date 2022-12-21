@@ -1,10 +1,10 @@
 <template>
   <div
-    class="storyblok-newsletter-subscribe-form"
+    class="storyblok-newsletter-subscribe-form layout-regular-component"
     :style="styles"
     :class="cssClasses"
   >
-    <editor-block-icons :item="itemData" />
+    <editor-block-icons :item="item" />
 
     <MNewsletterSubscription
       name="storyblock-newsletter-subscription-form"

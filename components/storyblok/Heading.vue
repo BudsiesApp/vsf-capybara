@@ -1,6 +1,6 @@
 <template>
   <div
-    class="storyblok-heading"
+    class="storyblok-heading layout-heading-component"
     :class="cssClasses"
     :style="styles"
   >
@@ -45,6 +45,10 @@ export default Blok.extend({
         result.push('-custom-styled');
       }
 
+      if (this.itemData.intro_text) {
+        result.push('-with-intro');
+      }
+
       if (this.itemData.alignment) {
         result.push('-aligned-' + this.itemData.alignment);
       }
@@ -72,6 +76,8 @@ export default Blok.extend({
 $intro-left-margin: 1em;
 
 .storyblok-heading {
+  --heading-title-margin: 0;
+  --heading-padding: 0;
   text-align: center;
 
   ._heading {
@@ -82,13 +88,11 @@ $intro-left-margin: 1em;
     overflow: hidden;
     margin-left: 1em;
     margin-right: 1em;
-    padding: var(--heading-padding, var(--spacer-xs) 0 var(--spacer-xs) 0);
     text-align: center;
 
     ._container {
       display: inline-block;
       position: relative;
-      padding-top: 0.75em;
       padding-left: 0.5 * $intro-left-margin;
       padding-right: 0.5 * $intro-left-margin;
     }
@@ -118,6 +122,12 @@ $intro-left-margin: 1em;
         ._container {
           font-size: calc(var(--h#{$i}-font-size) * 1.15);
         }
+      }
+    }
+
+    &.-with-intro {
+      ._container {
+        padding-top: 0.75em;
       }
     }
 
