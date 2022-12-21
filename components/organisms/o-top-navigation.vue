@@ -114,6 +114,9 @@ export default {
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .o-top-navigation {
+  --header-logo-height: 1.8rem;
+  --header-logo-margin: 0;
+
   --bottom-navigation-background: var(--c-blue);
   --header-action-margin: 0 0 0 var(--spacer-sm);
 
@@ -142,12 +145,6 @@ export default {
     padding: var(--spacer-sm) 0;
   }
 
-  ::v-deep .sf-header {
-    &__logo {
-      --header-logo-height: 1.8rem;
-      --header-logo-margin: 0;
-    }
-  }
   ::v-deep .sf-bottom-navigation {
     top: auto;
     bottom: auto;
