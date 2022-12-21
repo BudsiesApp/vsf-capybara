@@ -8,29 +8,27 @@
         :label="item.label"
         :is-floating="item.isFloating"
         :is-active="isActive(item.icon)"
+        class="_item"
         @click.native="item.onClick"
       />
 
-      <ALogo :is-small="true" />
+      <ALogo class="_item" :is-small="true" />
 
-      <ADetailedCartIcon class="sf-header__action" />
+      <MCtaButton size="small" class="_item" />
 
-      <SfButton class="_bulk-quote-button">
-        <router-link :to="{name: 'bulk-quote'}">
-          {{ $t('Get Quote') }}
-        </router-link>
-      </SfButton>
+      <ADetailedCartIcon class="sf-header__action _item" />
     </SfBottomNavigation>
   </div>
 </template>
 
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
-import { SfBottomNavigation, SfButton } from '@storefront-ui/vue'
+import { SfBottomNavigation } from '@storefront-ui/vue'
 
 import { ModalList } from 'theme/store/ui/modals'
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
 import ALogo from 'theme/components/atoms/a-logo.vue';
+import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
 export default {
   name: 'OTopNavigation',
@@ -38,7 +36,7 @@ export default {
     SfBottomNavigation,
     ALogo,
     ADetailedCartIcon,
-    SfButton
+    MCtaButton
   },
   data () {
     return {
@@ -116,6 +114,9 @@ export default {
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .o-top-navigation {
+  --header-logo-height: 1.8rem;
+  --header-logo-margin: 0;
+
   --bottom-navigation-background: var(--c-blue);
   --header-action-margin: 0 0 0 var(--spacer-sm);
 
@@ -127,40 +128,33 @@ export default {
     position: relative;
   }
 
-  .a-logo {
-    display: none;
+  .m-cta-button {
+    --button-padding: var(--spacer-sm);
   }
 
-  ._bulk-quote-button {
-    --c-link: var(--c-white);
-    --c-link-hover: var(--c-white);
+  ._item {
+    margin-left: var(--spacer-sm);
+
+    &:first-child {
+      margin-left: 0;
+    }
   }
 
   .a-microcart-icon {
-    margin: 0;
-    padding: var(--spacer-sm) var(--spacer-xs);
+    margin: 0 0 0 var(--spacer-sm);
+    padding: var(--spacer-sm) 0;
   }
-  ::v-deep .sf-header {
-    &__logo {
-      --header-logo-height: 1.8rem;
-      --header-logo-margin: 0;
-    }
-  }
+
   ::v-deep .sf-bottom-navigation {
     top: auto;
     bottom: auto;
     --bottom-navigation-z-index: 11;
     align-items: center;
     justify-content: space-between;
+
     .sf-bottom-navigation-item {
       cursor: pointer;
       --icon-color: var(--c-white);
-    }
-  }
-
-  @media (min-width: 450px) {
-    .a-logo {
-      display: block;
     }
   }
 

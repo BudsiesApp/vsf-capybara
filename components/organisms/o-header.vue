@@ -57,11 +57,7 @@
           </router-link>
         </SfHeaderNavigationItem>
 
-        <SfButton class="_instant-quote">
-          <router-link :to="{name: 'bulk-quote'}">
-            {{ $t('Instant Quote') }}
-          </router-link>
-        </SfButton>
+        <MCtaButton />
       </template>
       <template #search>
         <div />
@@ -94,6 +90,7 @@ import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import AMicrocartIcon from 'theme/components/atoms/a-microcart-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
 import OSearch from 'theme/components/organisms/o-search';
+import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 import MMenu from 'theme/components/molecules/m-menu';
 
 export default {
@@ -107,7 +104,8 @@ export default {
     OSearch,
     SfOverlay,
     SfButton,
-    MMenu
+    MMenu,
+    MCtaButton
   },
   data () {
     return {
@@ -168,14 +166,6 @@ export default {
     }
   }
 
-  ._instant-quote {
-    --c-link: var(--c-white);
-    --c-link-hover: var(--c-white);
-
-    font-size: var(--header-navigation-item-font-size);
-    margin-left: var(--spacer-sm);
-  }
-
   .sf-header-navigation-item {
     flex: unset;
 
@@ -209,13 +199,14 @@ export default {
 
     &__navigation {
       --header-navigation-margin: 0 var(--spacer-base);
-      justify-content: flex-end;
+      justify-content: space-evenly;
       align-items: center;
       flex-grow: 2;
     }
 
     &__actions {
       justify-content: space-between;
+      flex: 1;
     }
   }
 
