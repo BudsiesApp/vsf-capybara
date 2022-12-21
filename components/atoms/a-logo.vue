@@ -3,10 +3,11 @@
     :to="localizedRoute('/')"
     :title="$t('Home Page')"
     class="a-logo"
+    :style="{'--aspect-ratio': aspectRatio}"
   >
     <BaseImage
-      src="/assets/logo.png"
-      :aspect-ratio="3.85"
+      :src="logoSrc"
+      :aspect-ratio="aspectRatio"
       :alt="$t(defaultTitle)"
       class="sf-header__logo"
     />
@@ -23,18 +24,24 @@ import get from 'lodash-es/get';
 export default {
   components: { BaseImage },
   computed: {
+    aspectRatio () {
+      return 3.85;
+    },
     defaultTitle () {
       return get(currentStoreView(), 'seo.defaultTitle', config.seo.defaultTitle);
+    },
+    logoSrc () {
+      return '/assets/logo.png';
     }
   }
 };
 </script>
 <style lang="scss" scoped>
 .a-logo {
-  display: inline-flex;
+  --image-height: var(--header-logo-height, 2.125rem);
 
-  .sf-header__logo {
-    width: calc(var(--image-height) * 3.85);
-  }
+  display: inline-flex;
+  flex: 1;
+  max-width: calc(var(--image-height) * var(--aspect-ratio, 2.22));
 }
 </style>
