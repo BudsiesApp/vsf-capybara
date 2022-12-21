@@ -123,5 +123,8 @@ export default {
 };
 </script>
 <style lang="scss">
+// This component is a replacement for SfCheckbox and we are trying to use the same classes to
+// make it look similar. Storefront-UI components are responsible for importing corresponding styles.
+// So we are doing the same here.
 @import "~@storefront-ui/shared/styles/components/atoms/SfCheckbox.scss";
 </style>
