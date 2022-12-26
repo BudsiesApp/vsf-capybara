@@ -1,6 +1,6 @@
 <template>
   <div
-    class="storyblok-heading"
+    class="storyblok-heading layout-heading-component"
     :class="cssClasses"
     :style="styles"
   >
@@ -74,11 +74,9 @@ export default Blok.extend({
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 $intro-left-margin: 1em;
-$margin-top: 2em;
-$margin-bottom: 1em;
 
 .storyblok-heading {
-  --heading-title-margin: #{$margin-top} #{$margin-bottom} 0;
+  --heading-title-margin: 0;
   --heading-padding: 0;
   text-align: center;
 
@@ -86,20 +84,10 @@ $margin-bottom: 1em;
     text-align: inherit;
   }
 
-  &.-first-item {
-    --heading-title-margin: 0 0 #{$margin-bottom} 0;
-  }
-
-  &.-last-item {
-    --heading-title-margin: 0;
-  }
-
   &.-custom-styled {
     overflow: hidden;
     margin-left: 1em;
     margin-right: 1em;
-    margin-top: $margin-top;
-    margin-bottom: $margin-bottom;
     text-align: center;
 
     ._container {
@@ -141,14 +129,6 @@ $margin-bottom: 1em;
       ._container {
         padding-top: 0.75em;
       }
-    }
-
-    &.-first-item {
-      margin-top: 0;
-    }
-
-    &.-last-item {
-      margin-bottom: 0;
     }
 
     &.-aligned-left {

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="storyblok-driver"
+    class="storyblok-driver layout-regular-component"
     :class="cssClasses"
     :style="styles"
   >
@@ -197,7 +197,6 @@ $transition-zoom-in-time: 0.5s;
     }
   }
 
-  @include storyblok-default-margin;
   @include display-property-handling;
 }
 </style>

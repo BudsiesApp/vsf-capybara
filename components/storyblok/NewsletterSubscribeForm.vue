@@ -1,6 +1,6 @@
 <template>
   <div
-    class="storyblok-newsletter-subscribe-form"
+    class="storyblok-newsletter-subscribe-form layout-regular-component"
     :style="styles"
     :class="cssClasses"
   >
@@ -30,7 +30,6 @@ export default Blok.extend({
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 .storyblok-newsletter-subscribe-form {
-  @include storyblok-default-margin;
   @include display-property-handling;
 }
 </style>

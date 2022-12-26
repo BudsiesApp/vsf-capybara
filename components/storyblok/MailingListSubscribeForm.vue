@@ -1,5 +1,5 @@
 <template>
-  <div class="storyblok-mailing-list-subscribe-form" :style="styles" :class="cssClasses">
+  <div class="storyblok-mailing-list-subscribe-form layout-regular-component" :style="styles" :class="cssClasses">
     <m-mailing-list-subscription
       :button-text="buttonText"
       :list-id="listId"
@@ -52,7 +52,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 .storyblok-mailing-list-subscribe-form {
-  @include storyblok-default-margin;
   @include display-property-handling;
 }
 </style>

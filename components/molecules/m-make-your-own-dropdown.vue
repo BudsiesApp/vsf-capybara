@@ -166,7 +166,7 @@ export default Vue.extend({
     .sf-button {
       --button-font-size: var(--font-2xs);
       --button-font-line-height: 1;
-      --button-padding: calc(var(--spacer-2xs) * 3) var(--spacer-sm);
+      --button-padding: calc(var(--spacer-2xs) * 3);
     }
 
     .sf-dropdown {

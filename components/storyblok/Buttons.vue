@@ -1,5 +1,5 @@
 <template>
-  <div class="storyblok-buttons" :style="styles" :class="cssClasses">
+  <div class="storyblok-buttons layout-regular-component" :style="styles" :class="cssClasses">
     <editor-block-icons :item="itemData" />
 
     <Button
@@ -41,18 +41,29 @@ export default Blok.extend({
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 .storyblok-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: center;
+  gap: $storyblok-layout-standard-top-margin;
   width: 100%;
 
   ._button-item {
     display: inline-block;
-    margin-left: 1em;
-
-    &:first-child {
-      margin-left: 0;
-    }
   }
 
-  @include storyblok-default-margin;
+  &.-align-left {
+    justify-content: start;
+  }
+
+  &.-align-center {
+    justify-content: center;
+  }
+
+  &.-align-right {
+    justify-content: end;
+  }
+
   @include display-property-handling;
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="storyblok-sharing"
+    class="storyblok-sharing layout-regular-component"
     :class="cssClasses"
     :style="styles"
   >
@@ -40,7 +40,6 @@ export default Blok.extend({
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 .storyblok-sharing {
-  @include storyblok-default-margin;
   @include display-property-handling;
 }
 </style>

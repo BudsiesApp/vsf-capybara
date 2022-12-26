@@ -18,8 +18,9 @@
         name="upgrades[]"
         class="_addon-input"
         :value="addon.optionValueId"
-        v-model="selectedValues"
+        :selected="selectedValues"
         :disabled="disabled"
+        @change="onSelectedValuesChange"
       >
         <template #label>
           <div class="_addon-wrapper">
@@ -35,10 +36,41 @@
                   + {{ addon.price | price() }}
                 </strong>
               </div>
+
+              <div class="_addon-options" v-if="showCustomOptionsForAddon(addon)">
+                <div class="_addon-option-item" v-for="option in getCustomOptionsForAddon(addon)" :key="option.option_id">
+                  <validation-provider
+                    v-slot="{errors}"
+                    tag="div"
+                    :name="`'${option.title}'`"
+                    :rules="getValidationRuleForCustomOption(option)"
+                  >
+                    <SfInput
+                      class="_custom-option-field"
+                      :value="getValueForCustomOption(option.product_sku, addon.optionValueId)"
+                      :label="option.title"
+                      :name="option.title"
+                      :error-message="errors[0]"
+                      :valid="!errors.length"
+                      @input="onCustomOptionInput($event, option.product_sku, addon.optionValueId)"
+                    />
+                  </validation-provider>
+                </div>
+              </div>
             </div>
 
             <div class="_image-column">
-              <div class="_image" v-if="!shouldShowVideo(addon.id)" @click="switchToVideo($event, addon)" />
+              <div
+                v-if="!shouldShowVideo(addon.id)"
+                class="_image-container"
+                :class="{'-wide-image': wideImage}"
+                @click="switchToVideo($event, addon)"
+              >
+                <img v-if="getItemImage(addon)" :src="getItemImage(addon)" class="_image">
+
+                <img v-if="getItemHoverImage(addon)" :src="getItemHoverImage(addon)" class="_image-hover">
+              </div>
+
               <StreamingVideo
                 :video-id="getVideoId(addon)"
                 :provider="getVideoProvider(addon)"
@@ -56,13 +88,28 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue';
+import { SfInput } from '@storefront-ui/vue';
 import urlParser from 'js-video-url-parser';
+import { ValidationProvider, extend } from 'vee-validate';
+import { required, max } from 'vee-validate/dist/rules';
 
+import { CustomOption } from 'core/modules/catalog/types/CustomOption';
 import { StreamingVideo } from 'src/modules/shared';
+
+import AddonOption from '../interfaces/addon-option.interface';
+import SelectedAddon from '../interfaces/selected-addon.interface';
 
 import MCheckbox from './m-checkbox.vue';
 
-import AddonOption from '../interfaces/addon-option.interface';
+extend('required', {
+  ...required,
+  message: 'The {_field_} field is required'
+});
+
+extend('max', {
+  ...max,
+  message: 'The {_field_} length should be less than {length}'
+});
 
 let instanceId = 0;
 
@@ -70,7 +117,9 @@ export default Vue.extend({
   name: 'MAddonsSelector',
   components: {
     MCheckbox,
-    StreamingVideo
+    SfInput,
+    StreamingVideo,
+    ValidationProvider
   },
   props: {
     addons: {
@@ -82,8 +131,12 @@ export default Vue.extend({
       default: false
     },
     value: {
-      type: Array as PropType<number[]>,
+      type: Array as PropType<SelectedAddon[]>,
       default: () => []
+    },
+    wideImage: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -97,18 +150,22 @@ export default Vue.extend({
     skinClass (): string {
       return `-skin-petsies`;
     },
-    selectedValues: {
-      get: function (): number[] {
-        return this.value;
-      },
-      set: function (value: number[]) {
-        this.$emit('input', value);
-      }
+    selectedValues (): number[] {
+      return this.value.map(({ addonOptionValueId }) => addonOptionValueId);
     }
   },
   methods: {
+    getCustomOptionsForAddon (addon: AddonOption): CustomOption[] {
+      return addon.customOptions || [];
+    },
     getInputId (addon: AddonOption): string {
       return `design-product-${this.instanceId}-${addon.id}`;
+    },
+    getItemImage (item: AddonOption): string | undefined {
+      return item.images[0];
+    },
+    getItemHoverImage (item: AddonOption): string | undefined {
+      return item.images[1];
     },
     getItemStyles (item: AddonOption): Record<string, string> {
       const result: Record<string, string> = {};
@@ -126,6 +183,31 @@ export default Vue.extend({
       result['--addon-image-hover'] = `url(${item.images[1]})`;
 
       return result;
+    },
+    getValidationRuleForCustomOption (option: CustomOption): string {
+      let rules = '';
+
+      if (option.is_require) {
+        rules = 'required';
+      }
+
+      if (option.max_characters) {
+        const maxLengthRule = `max:${option.max_characters}`;
+        rules += rules.length ? `|${maxLengthRule}` : maxLengthRule;
+      }
+
+      return rules;
+    },
+    getValueForCustomOption (optionSku: string, addonOptionValueId: number): string {
+      const selectedAddon = this.value.find(
+        (selectedAddon) => selectedAddon.addonOptionValueId === addonOptionValueId
+      );
+
+      if (!selectedAddon) {
+        return '';
+      }
+
+      return selectedAddon.optionsValues[optionSku] ? selectedAddon.optionsValues[optionSku] : '';
     },
     getVideoId (addon: AddonOption): string | undefined {
       if (!addon.videoUrl) {
@@ -153,8 +235,53 @@ export default Vue.extend({
 
       return info.provider;
     },
+    onSelectedValuesChange (selectedValues: number[]): void {
+      const updatedValue: SelectedAddon[] = [];
+
+      selectedValues.forEach((value) => {
+        const selectedAddonIndex = this.value.findIndex(({ addonOptionValueId }) => addonOptionValueId === value);
+
+        if (selectedAddonIndex === -1) {
+          updatedValue.push({
+            addonOptionValueId: value,
+            optionsValues: {}
+          })
+        } else {
+          updatedValue.push(this.value[selectedAddonIndex]);
+        }
+      });
+
+      this.$emit('input', updatedValue);
+    },
+    onCustomOptionInput (value: string, optionSku: string, addonOptionValueId: number) {
+      const selectedAddonIndex = this.value.findIndex((selectedAddon) => selectedAddon.addonOptionValueId === addonOptionValueId);
+
+      if (selectedAddonIndex === -1) {
+        throw new Error(`Not found selected addon with optionValueId: ${addonOptionValueId}`);
+      }
+
+      const selectedAddon = this.value[selectedAddonIndex];
+
+      const optionValues = selectedAddon.optionsValues;
+
+      const updatedSelectedAddon: SelectedAddon = {
+        addonOptionValueId,
+        optionsValues: {
+          ...optionValues,
+          [optionSku]: value
+        }
+      }
+
+      const valueForUpdate = [...this.value];
+      valueForUpdate.splice(selectedAddonIndex, 1, updatedSelectedAddon);
+
+      this.$emit('input', valueForUpdate);
+    },
     shouldShowVideo (addonId: number): boolean {
       return !!this.showVideoFlags[addonId];
+    },
+    showCustomOptionsForAddon (addon: AddonOption): boolean {
+      return this.getCustomOptionsForAddon(addon).length > 0 && this.selectedValues.includes(addon.optionValueId);
     },
     switchToVideo (event: Event, addon: AddonOption): void {
       if (!addon.videoUrl) {
@@ -239,23 +366,52 @@ export default Vue.extend({
     }
 
     ._image-column {
-      ._image {
-        background: var(--addon-image-regular) no-repeat center center;
-        background-size: contain;
-        padding-top: calc(min(100%, 250px));
-        max-width: 250px;
-        margin-left: auto;
+      justify-content: flex-end;
+      align-items: flex-start;
 
-        &::after {
-          position: absolute; width:0; height:0; overflow:hidden; z-index:-1;
-          content: var(--addon-image-hover);
+      ._image-container {
+        position: relative;
+        max-width: 75%;
+
+        &.-wide-image {
+          margin-left: var(--spacer-xl);
+          max-width: 100%;
         }
       }
 
+      ._image {
+        width: 100%;
+      }
+
+      ._image-hover {
+        display: none;
+        position: absolute;
+        width: 100%;
+        z-index: 2;
+        top: 0;
+        left: 0;
+      }
+
       &:hover {
-        ._image {
-          background-image: var(--addon-image-hover, var(--addon-image-regular));
+        ._image-hover {
+          display: block;
         }
+      }
+    }
+  }
+
+  ._custom-option-field {
+    --input-border-color: var(--c-white);
+
+    margin-top: var(--spacer-sm);
+
+    ::v-deep {
+      input {
+        position: relative;
+        opacity: 1;
+        left: 0;
+        width: 100%;
+        height: 100%;
       }
     }
   }
@@ -273,8 +429,15 @@ export default Vue.extend({
     ._item {
       ._info-column,
       ._image-column {
-        display: block;
         width: 50%;
+      }
+
+      ._info-column {
+        display: block;
+      }
+
+      ._image-column {
+        display: flex;
       }
     }
   }

@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="ratingEnabled"
-    class="storyblok-website-rating"
+    class="storyblok-website-rating layout-regular-component"
     :class="cssClasses"
     :style="styles"
   >
@@ -136,7 +136,6 @@ export default Blok.extend({
     }
   }
 
-  @include storyblok-default-margin;
   @include display-property-handling;
 }
 </style>

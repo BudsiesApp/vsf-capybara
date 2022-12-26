@@ -2,7 +2,7 @@
   <div
     :class="cssClasses"
     :style="styles"
-    class="storyblok-image"
+    class="storyblok-image layout-regular-component"
   >
     <editor-block-icons :item="itemData" />
 
@@ -153,7 +153,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     }
   }
 
-  @include storyblok-default-margin;
   @include display-property-handling;
 }
 </style>

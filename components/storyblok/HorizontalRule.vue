@@ -1,6 +1,6 @@
 <template>
   <hr
-    class="storyblok-hr"
+    class="storyblok-hr layout-regular-component"
     :class="cssClasses"
     :style="styles"
   >

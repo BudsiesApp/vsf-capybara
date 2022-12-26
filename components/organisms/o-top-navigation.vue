@@ -8,13 +8,15 @@
         :label="item.label"
         :is-floating="item.isFloating"
         :is-active="isActive(item.icon)"
+        class="_item"
         @click.native="item.onClick"
       />
-      <ALogo />
 
-      <MCtaButton size="small" />
+      <ALogo class="_item" />
 
-      <ADetailedCartIcon class="sf-header__action" />
+      <MCtaButton size="small" class="_item" />
+
+      <ADetailedCartIcon class="sf-header__action _item" />
     </SfBottomNavigation>
   </div>
 </template>
@@ -115,6 +117,8 @@ export default {
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .o-top-navigation {
+  --header-logo-height: 1.5rem;
+
   position: relative;
   min-height: var(--bottom-navigation-height);
   z-index: 10;
@@ -123,33 +127,32 @@ export default {
     position: relative;
   }
 
-  .a-logo {
-    display: none;
+  .m-cta-button {
+    --button-padding: var(--spacer-sm);
+  }
+
+  ._item {
+    margin-left: var(--spacer-sm);
+
+    &:first-child {
+      margin-left: 0;
+    }
   }
 
   .a-microcart-icon {
-    margin: 0;
-    padding: var(--spacer-sm) var(--spacer-xs);
+    margin: 0 0 0 var(--spacer-sm);
+    padding: var(--spacer-sm) 0;
   }
-  ::v-deep .sf-header {
-      &__logo {
-        --header-logo-height: 1.5rem;
-      }
-    }
+
   ::v-deep .sf-bottom-navigation {
     top: auto;
     bottom: auto;
     --bottom-navigation-z-index: 11;
     align-items: center;
     justify-content: space-between;
+
     .sf-bottom-navigation-item {
       cursor: pointer;
-    }
-  }
-
-  @media (min-width: 375px) {
-    .a-logo {
-      display: block;
     }
   }
 
