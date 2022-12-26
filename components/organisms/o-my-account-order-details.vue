@@ -25,60 +25,7 @@
       </template>
     </SfHeading>
 
-    <div class="_products">
-      <SfCollectedProduct
-        v-for="product in products"
-        :key="product.id"
-        :image="getThumbnailForProduct(product)"
-        image-width="140"
-        image-height="140"
-        :title="product.name"
-        class="sf-collected-product--detailed collected-product"
-      >
-        <template #configuration>
-          <div class="collected-product__properties" v-if="getPlushieName(product)">
-            {{ getPlushieName(product) | htmlDecode }}
-          </div>
-
-          <div class="collected-product__properties" v-if="getPlushieDesc(product)">
-            {{ getPlushieDesc(product) | htmlDecode }}
-          </div>
-
-          <div class="collected-product__properties">
-            <div
-              v-for="option in getBundleProductOptions(product)"
-              :key="option.id"
-            >
-              <SfIcon
-                icon="check"
-                size="xxs"
-                color="blue-primary"
-                class="collected-product__properties__icon"
-              />
-              {{ option.name }}
-            </div>
-          </div>
-        </template>
-
-        <template #input>
-          {{ $t('Quantity') }}: {{ product.qty_ordered }}
-        </template>
-
-        <template #price>
-          <div />
-        </template>
-
-        <template #remove>
-          <SfPrice
-            :regular="product.row_total_incl_tax"
-          />
-        </template>
-
-        <template #more-actions>
-          <div />
-        </template>
-      </SfCollectedProduct>
-    </div>
+    <o-products-base-table :table-items="tableItems" />
 
     <div class="_summary">
       <div>
@@ -115,7 +62,7 @@
       </div>
     </div>
 
-    <div class="_informations">
+    <div class="_information">
       <div v-if="shippingAddress">
         <SfHeading
           :title="$t('Shipping address')"
@@ -170,43 +117,30 @@
 </template>
 
 <script>
-import { SearchQuery } from 'storefront-query-builder';
-import { getThumbnailPath, productThumbnailPath } from '@vue-storefront/core/helpers'
+import { getThumbnailPath } from '@vue-storefront/core/helpers'
 import {
-  SfCollectedProduct,
-  SfIcon,
-  SfHeading,
   SfArrow,
   SfBadge,
-  SfTable,
-  SfPrice,
-  SfProperty,
-  SfImage
+  SfHeading,
+  SfProperty
 } from '@storefront-ui/vue';
+
+import OProductsBaseTable from './o-products-base-table';
 
 export default {
   name: 'OMyAccountOrderDetails',
   components: {
-    SfCollectedProduct,
-    SfIcon,
-    SfHeading,
+    OProductsBaseTable,
     SfArrow,
     SfBadge,
-    SfTable,
-    SfPrice,
-    SfProperty,
-    SfImage
+    SfHeading,
+    SfProperty
   },
   props: {
     order: {
       type: Object,
       required: true,
       default: () => {}
-    }
-  },
-  data () {
-    return {
-      products: []
     }
   },
   computed: {
@@ -216,61 +150,31 @@ export default {
     billingAddress () {
       return this.order && this.order.billing_address
     },
+    products () {
+      return this.order.items;
+    },
     shippingAddress () {
       return this.order && this.order.extension_attributes.shipping_assignments[0].shipping.address
+    },
+    tableItems () {
+      return this.products.map((product) => {
+        return {
+          key: product.id,
+          thumbnail: this.getThumbnailForProduct(product),
+          name: product.name,
+          plushieName: product.plushieName,
+          plushieBreed: product.plushieBreed,
+          qty: product.qty_ordered,
+          customOptions: product.custom_options,
+          regularPrice: `$${product.row_total_incl_tax}`,
+          bundleOptions: this.getBundleProductOptions(product).map((option) => option.name)
+        }
+      });
     }
   },
   methods: {
     getBundleProductOptions (product) {
       return product.upgrades ? product.upgrades : [];
-    },
-    async getOrderedProducts () {
-      let arrayOfSKUs = []
-      this.order.items.forEach(product => {
-        if (arrayOfSKUs.indexOf(product.sku) === -1) {
-          arrayOfSKUs.push(product.sku)
-        }
-      })
-
-      let searchQuery = new SearchQuery();
-      searchQuery = searchQuery.applyFilter({ key: 'configurable_children.sku.keyword', value: { 'in': arrayOfSKUs } })
-
-      const result = await this.$store.dispatch(
-        'product/findProducts',
-        {
-          query: searchQuery,
-          start: 0,
-          size: this.order.items.length,
-          updateState: false
-        },
-        { root: true }
-      );
-
-      this.order.items.forEach(orderItem => {
-        let responseItem = result.items.find(item => { return item.sku === orderItem.sku });
-
-        this.products.push(Object.assign(responseItem || {}, orderItem))
-      })
-    },
-    getPlushieName (product) {
-      if (!product.plushieName) {
-        return '';
-      }
-
-      let name = product.plushieName;
-
-      if (product.plushieBreed) {
-        name += ', ' + product.plushieBreed;
-      }
-
-      return this.truncate(name);
-    },
-    getPlushieDesc (product) {
-      if (!product.plushieDescription) {
-        return '';
-      }
-
-      return this.truncate(product.plushieDescription, 150, 50);
     },
     getThumbnailForProduct (product) {
       if (product.thumbnail.includes('https://')) {
@@ -278,19 +182,7 @@ export default {
       }
 
       return getThumbnailPath(product.thumbnail, 100, 142)
-    },
-    truncate (text, desktopLength = 75, mobileLength = 50) {
-      const maxLength = this.isMobile ? mobileLength : desktopLength;
-
-      if (text.length <= maxLength) {
-        return text;
-      }
-
-      return text.substring(0, maxLength) + '...';
     }
-  },
-  mounted () {
-    this.getOrderedProducts()
   }
 }
 </script>
@@ -335,7 +227,11 @@ export default {
     }
   }
 
-  ._informations {
+  .o-products-base-table {
+    margin-top: var(--spacer-base);
+  }
+
+  ._information {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -354,111 +250,33 @@ export default {
       margin: var(--spacer) 0 0 0;
     }
 
-    .sf-collected-product {
-    &__remove {
-      position: static;
-    }
   }
-  }
+  .property {
+    margin: 0 0 var(--spacer-base) 0;
 
-  .collected-product {
-    --collected-product-padding: var(--spacer-sm) 0;
-    --collected-product-title-font-size: var(--font-sm);
-    --collected-product-title-font-weight: var(--font-semibold);
-    --collected-product-image-background: none;
-    --collected-product-main-margin: 0 var(--spacer-sm);
+    @include for-desktop {
+      margin: 0 0 var(--spacer-sm) 0;
 
-  border: 1px solid var(--c-light);
-  border-width: 1px 0 0 0;
-
-    .sf-price {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-
-  ::v-deep {
-    .sf-link {
-      pointer-events: none;
-      cursor: default;
-    }
-
-    .sf-collected-product__actions {
-      display: none;
-    }
-  }
-
-  &__properties {
-    font-size: var(--font-xs);
-    margin-bottom: var(--spacer-sm);
-
-    &__icon {
-      display: inline-block;
-    }
-  }
-
-  &__properties > div {
-    margin-bottom: var(--spacer-xs);
-  }
-
-  @include for-mobile {
-    --collected-product-remove-bottom: var(--spacer-sm);
-
-    &:first-of-type {
-      border: none;
-    }
-  }
-
-  @include for-desktop {
-    --collected-product-padding: var(--spacer-lg) 0;
-    --collected-product-title-font-size: var(--font-base);
-  }
-}
-
-@include for-desktop {
-    .sf-collected-product {
-      .sf-price {
-        flex-direction: row;
-      }
-
-      ::v-deep &__details {
-        flex-grow: 3;
+      &__total {
+        padding: var(--spacer-base) 0 0 0;
       }
     }
-
-    &__main {
-      flex: 1;
-    }
-
-    &__aside {
-      flex: 0 0 26.8125rem;
-      margin: 0 0 0 var(--spacer-xl);
-    }
-  }
-}
-
-.property {
-  margin: 0 0 var(--spacer-base) 0;
-  @include for-desktop {
-    margin: 0 0 var(--spacer-sm) 0;
-    &__total {
-      padding: var(--spacer-base) 0 0 0;
-    }
-  }
-}
-
-.property-total {
-  --property-name-font-weight: 500;
-  --property-value-font-weight: 500;
-}
-
-.order-details__summary {
-  .sf-property__name {
-    min-width: 100px;
   }
 
-  .sf-property__value {
-    min-width: 180px;
-    text-align: center;
+  .property-total {
+    --property-name-font-weight: 500;
+    --property-value-font-weight: 500;
+  }
+
+  ._summary {
+    .sf-property__name {
+      min-width: 100px;
+    }
+
+    .sf-property__value {
+      min-width: 180px;
+      text-align: center;
+    }
   }
 }
 </style>
