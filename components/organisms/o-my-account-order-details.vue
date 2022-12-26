@@ -6,11 +6,13 @@
       class="sf-heading--left sf-heading--no-underline title"
     >
       <template #title="{title}">
-        <h3 class="order-details__title">
-          <SfArrow class="sf-arrow--transparent order-details__back" @click.native="$emit('close')" />
+        <h3 class="_title">
+          <SfArrow class="sf-arrow--transparent _back" @click.native="$emit('close')" />
+
           {{ title }}
+
           <SfBadge
-            class="order-details__status"
+            class="_status"
             :class="{
               'color-success': order.status === 'complete',
               'color-danger': order.status === 'canceled' || order.status === 'closed',
@@ -22,67 +24,89 @@
         </h3>
       </template>
     </SfHeading>
-    <div class="order-details__products">
-      <SfTable class="sf-table--bordered table">
-        <SfTableHeading>
-          <SfTableHeader class="table__header table__image">
-            {{ $t('Thumbnail') }}
-          </SfTableHeader>
-          <SfTableHeader class="table__header">
-            {{ $t('Product Name') }}
-          </SfTableHeader>
-          <SfTableHeader class="table__header">
-            {{ $t('Quantity') }}
-          </SfTableHeader>
-          <SfTableHeader class="table__header table__price">
-            {{ $t('Subtotal') }}
-          </SfTableHeader>
-          <SfTableHeader class="table__header table__price">
-            {{ $t('Price') }}
-          </SfTableHeader>
-        </SfTableHeading>
-        <SfTableRow v-for="product in products" :key="product.id">
-          <SfTableData class="table__header table__image">
-            <SfImage :src="getThumbnailForProduct(product)" :alt="product.name | htmlDecode" />
-          </SfTableData>
-          <SfTableData class="table__header">
-            {{ product.name | htmlDecode }}
-          </SfTableData>
-          <SfTableData class="table__header">
-            {{ product.qty_ordered }}
-          </SfTableData>
-          <SfTableData class="table__header table__price">
-            {{ product.row_total_incl_tax | price }}
-          </SfTableData>
-          <SfTableData class="table__header table__price">
-            {{ product.price_incl_tax | price }}
-          </SfTableData>
-        </SfTableRow>
-      </SfTable>
+
+    <div class="_products">
+      <SfCollectedProduct
+        v-for="product in products"
+        :key="product.id"
+        :image="getThumbnailForProduct(product)"
+        image-width="140"
+        image-height="140"
+        :title="product.name"
+        class="sf-collected-product--detailed collected-product"
+      >
+        <template #configuration>
+          <div class="collected-product__properties" v-if="getPlushieName(product)">
+            {{ getPlushieName(product) | htmlDecode }}
+          </div>
+
+          <div class="collected-product__properties" v-if="getPlushieDesc(product)">
+            {{ getPlushieDesc(product) | htmlDecode }}
+          </div>
+
+          <div class="collected-product__properties">
+            <div
+              v-for="option in getBundleProductOptions(product)"
+              :key="option.id"
+            >
+              <SfIcon
+                icon="check"
+                size="xxs"
+                color="blue-primary"
+                class="collected-product__properties__icon"
+              />
+              {{ option.name }}
+            </div>
+          </div>
+        </template>
+
+        <template #input>
+          {{ $t('Quantity') }}: {{ product.qty_ordered }}
+        </template>
+
+        <template #price>
+          <div />
+        </template>
+
+        <template #remove>
+          <SfPrice
+            :regular="product.row_total_incl_tax"
+          />
+        </template>
+
+        <template #more-actions>
+          <div />
+        </template>
+      </SfCollectedProduct>
     </div>
-    <div class="order-details__summary">
+
+    <div class="_summary">
       <div>
         <SfProperty
           :name="$t('Subtotal')"
           :value="order.subtotal | price"
           class="sf-property--full-width property"
         />
+
         <SfProperty
           :name="$t('Tax')"
           :value="order.tax_amount + order.discount_tax_compensation_amount | price"
           class="sf-property--full-width property"
         />
+
         <SfProperty
           :name="$t('Shipping')"
           :value="order.shipping_amount | price"
           class="sf-property--full-width property"
         />
+
         <SfProperty
           v-if="order.discount_amount"
           :name="$t('Discount')"
           :value="order.discount_amount | price"
           class="sf-property--full-width property"
         />
+
         <SfProperty
           :name="$t('Total')"
           :value="order.grand_total | price"
@@ -90,13 +114,15 @@
         />
       </div>
     </div>
-    <div class="order-details__informations">
+
+    <div class="_informations">
       <div v-if="shippingAddress">
         <SfHeading
           :title="$t('Shipping address')"
           :level="4"
           class="sf-heading--left sf-heading--no-underline"
         />
+
         <address>
           <p>{{ shippingAddress.firstname }} {{ shippingAddress.lastname }}</p>
           <p>{{ shippingAddress.street[0] }} {{ shippingAddress.street[1] }}</p>
@@ -104,20 +130,24 @@
           <p>{{ shippingAddress.country }}</p>
         </address>
       </div>
+
       <div v-if="order.shipping_description">
         <SfHeading
           :title="$t('Shipping method')"
           :level="4"
           class="sf-heading--left sf-heading--no-underline"
         />
+
         <p>{{ order.shipping_description }}</p>
       </div>
+
       <div>
         <SfHeading
           :title="$t('Billing address')"
           :level="4"
           class="sf-heading--left sf-heading--no-underline"
         />
+
         <address>
           <p>{{ billingAddress.firstname }} {{ billingAddress.lastname }}</p>
           <p>{{ billingAddress.street[0] }} {{ billingAddress.street[1] }}</p>
@@ -125,12 +155,14 @@
           <p>{{ billingAddress.country }}</p>
         </address>
       </div>
+
       <div>
         <SfHeading
           :title="$t('Payment method')"
           :level="4"
           class="sf-heading--left sf-heading--no-underline"
         />
+
         <p>{{ paymentMethod }}</p>
       </div>
     </div>
@@ -141,10 +173,13 @@
 import { SearchQuery } from 'storefront-query-builder';
 import { getThumbnailPath, productThumbnailPath } from '@vue-storefront/core/helpers'
 import {
+  SfCollectedProduct,
+  SfIcon,
   SfHeading,
   SfArrow,
   SfBadge,
   SfTable,
+  SfPrice,
   SfProperty,
   SfImage
 } from '@storefront-ui/vue';
@@ -152,10 +187,13 @@ import {
 export default {
   name: 'OMyAccountOrderDetails',
   components: {
+    SfCollectedProduct,
+    SfIcon,
     SfHeading,
     SfArrow,
     SfBadge,
     SfTable,
+    SfPrice,
     SfProperty,
     SfImage
   },
@@ -183,6 +221,9 @@ export default {
     }
   },
   methods: {
+    getBundleProductOptions (product) {
+      return product.upgrades ? product.upgrades : [];
+    },
     async getOrderedProducts () {
       let arrayOfSKUs = []
       this.order.items.forEach(product => {
@@ -208,12 +249,44 @@ export default {
       this.order.items.forEach(orderItem => {
         let responseItem = result.items.find(item => { return item.sku === orderItem.sku });
 
-        this.products.push(Object.assign({}, orderItem, responseItem))
+        this.products.push(Object.assign(responseItem || {}, orderItem))
       })
     },
+    getPlushieName (product) {
+      if (!product.plushieName) {
+        return '';
+      }
+
+      let name = product.plushieName;
+
+      if (product.plushieBreed) {
+        name += ', ' + product.plushieBreed;
+      }
+
+      return this.truncate(name);
+    },
+    getPlushieDesc (product) {
+      if (!product.plushieDescription) {
+        return '';
+      }
+
+      return this.truncate(product.plushieDescription, 150, 50);
+    },
     getThumbnailForProduct (product) {
-      const thumbnail = productThumbnailPath(product)
-      return getThumbnailPath(thumbnail, 100, 142)
+      if (product.thumbnail.includes('https://')) {
+        return product.thumbnail;
+      }
+
+      return getThumbnailPath(product.thumbnail, 100, 142)
+    },
+    truncate (text, desktopLength = 75, mobileLength = 50) {
+      const maxLength = this.isMobile ? mobileLength : desktopLength;
+
+      if (text.length <= maxLength) {
+        return text;
+      }
+
+      return text.substring(0, maxLength) + '...';
     }
   },
   mounted () {
@@ -225,52 +298,144 @@ export default {
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-.order-details {
-  &__title {
+.o-my-account-order-details {
+  ._title {
     display: flex;
     align-items: center;
     margin: 0;
   }
-  &__back {
+
+  ._back {
     margin-right: var(--spacer-lg);
   }
-  &__status {
+
+  ._status {
     margin-left: var(--spacer-lg);
   }
-  &__products {
+
+  ._products {
     margin-top: var(--spacer-xl);
+
     img {
       display: block;
     }
+
     .sf-table__header--center {
       text-align: center;
     }
   }
-  &__summary {
+
+  ._summary {
     margin-top: var(--spacer-lg);
     display: flex;
     justify-content: flex-end;
+
     div {
       width: 10rem;
     }
   }
-  &__informations {
+
+  ._informations {
     display: flex;
     flex-direction: column;
     justify-content: center;
+
     @include for-desktop {
       margin-top: var(--spacer-xl);
       flex-direction: row;
       justify-content: space-between;
     }
+
     .sf-heading {
       margin-top: var(--spacer-xl);
     }
+
     p {
       margin: var(--spacer) 0 0 0;
     }
+
+    .sf-collected-product {
+    &__remove {
+      position: static;
+    }
+  }
+  }
+
+  .collected-product {
+    --collected-product-padding: var(--spacer-sm) 0;
+    --collected-product-title-font-size: var(--font-sm);
+    --collected-product-title-font-weight: var(--font-semibold);
+    --collected-product-image-background: none;
+    --collected-product-main-margin: 0 var(--spacer-sm);
+
+  border: 1px solid var(--c-light);
+  border-width: 1px 0 0 0;
+
+    .sf-price {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+  ::v-deep {
+    .sf-link {
+      pointer-events: none;
+      cursor: default;
+    }
+
+    .sf-collected-product__actions {
+      display: none;
+    }
+  }
+
+  &__properties {
+    font-size: var(--font-xs);
+    margin-bottom: var(--spacer-sm);
+
+    &__icon {
+      display: inline-block;
+    }
+  }
+
+  &__properties > div {
+    margin-bottom: var(--spacer-xs);
+  }
+
+  @include for-mobile {
+    --collected-product-remove-bottom: var(--spacer-sm);
+
+    &:first-of-type {
+      border: none;
+    }
+  }
+
+  @include for-desktop {
+    --collected-product-padding: var(--spacer-lg) 0;
+    --collected-product-title-font-size: var(--font-base);
   }
 }
+
+@include for-desktop {
+    .sf-collected-product {
+      .sf-price {
+        flex-direction: row;
+      }
+
+      ::v-deep &__details {
+        flex-grow: 3;
+      }
+    }
+
+    &__main {
+      flex: 1;
+    }
+
+    &__aside {
+      flex: 0 0 26.8125rem;
+      margin: 0 0 0 var(--spacer-xl);
+    }
+  }
+}
+
 .property {
   margin: 0 0 var(--spacer-base) 0;
   @include for-desktop {
@@ -280,44 +445,20 @@ export default {
     }
   }
 }
+
 .property-total {
   --property-name-font-weight: 500;
   --property-value-font-weight: 500;
 }
+
 .order-details__summary {
   .sf-property__name {
     min-width: 100px;
   }
+
   .sf-property__value {
     min-width: 180px;
     text-align: center;
-  }
-}
-.table {
-  &__header {
-    text-align: center;
-    &:last-child {
-      text-align: right;
-    }
-  }
-  &__image {
-    --image-width: 5.125rem;
-    text-align: left;
-  }
-  &__price {
-    text-align: right;
-  }
-  @include for-mobile {
-    &__header,
-    &__image,
-    &__price {
-      text-align: left;
-    }
-    &__header {
-      &:last-child {
-        text-align: left;
-      }
-    }
   }
 }
 </style>
