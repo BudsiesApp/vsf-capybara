@@ -84,6 +84,10 @@ export default Vue.extend({
           }
         },
         {
+          label: 'Bobbleheads & Figurines',
+          url: '/pet-bobblehead-figurines/'
+        },
+        {
           label: 'Pet Keychains',
           url: {
             name: 'printed-keychains-creation-page'

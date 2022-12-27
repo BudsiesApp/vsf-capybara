@@ -126,6 +126,10 @@ export default {
           }
         },
         {
+          label: this.$t('Bobbleheads & Figurines'),
+          url: '/pet-bobblehead-figurines/'
+        },
+        {
           label: this.$t('Pet Keychains'),
           url: {
             name: 'printed-keychains-creation-page'

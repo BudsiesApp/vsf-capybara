@@ -130,6 +130,10 @@ export default {
           }
         },
         {
+          label: 'Bobbleheads & Figurines',
+          url: '/pet-bobblehead-figurines/'
+        },
+        {
           label: 'Pet Keychains',
           url: {
             name: 'printed-keychains-creation-page'
