@@ -530,6 +530,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       switch (this.product.id) {
         case 532:
           return ProductValue.FIGURINES;
+        case 528:
+          return ProductValue.BOBBLEHEADS;
         default:
           throw new Error(
             `Can't resolve Backend product ID for Magento '${this.product.id}' product ID`
