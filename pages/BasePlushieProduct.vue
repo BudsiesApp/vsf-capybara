@@ -4,7 +4,14 @@
       v-if="getCurrentProduct"
       :artwork-upload-url="artworkUploadUrl"
       :product="getCurrentProduct"
-      :existing-cart-item="existingCartItem"
+      :customize-step-subtitle="customizeStepSubtitle"
+      :page-title="pageTitle"
+      :top-story-slug="topStorySlug"
+      :bottom-story-slug="bottomStorySlug"
+      :upgrades-subtitle="upgradesSubtitle"
+      :upgrades-text="upgradesText"
+      :plushie-id="computedPlushieId"
+      @make-another="onMakeAnother"
     />
   </div>
 </template>
@@ -15,11 +22,13 @@ import config from 'config';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
-import CartItem from 'core/modules/cart/types/CartItem';
 
 import Product from 'core/modules/catalog/types/Product';
 
 import OBasePlushieProductOrderForm from 'theme/components/organisms/o-base-plushie-product-order-form.vue';
+import { TranslateResult } from 'vue-i18n';
+
+const figurinesSku = 'petsiesFigurines_bundle';
 
 export default Vue.extend({
   name: 'BasePlushieProduct',
@@ -38,10 +47,16 @@ export default Vue.extend({
   },
   data () {
     return {
-      isRouterLeaving: false
+      isRouterLeaving: false,
+      plushieId: undefined as number | undefined
     };
   },
   computed: {
+    computedPlushieId (): number | undefined {
+      return this.existingPlushieId
+        ? Number.parseInt(this.existingPlushieId)
+        : this.plushieId;
+    },
     getCurrentProduct (): Product | null {
       const product = this.$store.getters['product/getCurrentProduct'];
       if (!product?.sku || product.sku !== this.sku) {
@@ -53,26 +68,64 @@ export default Vue.extend({
     artworkUploadUrl () {
       return config.images.fileuploaderUploadUrl;
     },
-    cartItems (): CartItem[] {
-      return this.$store.getters['cart/getCartItems'];
+    customizeStepSubtitle (): TranslateResult {
+      return this.$t(
+        'Customize Your Petsies {product}',
+        {
+          product: this.isFigurines ? 'Figurines' : 'Bobbleheads'
+        }
+      );
     },
-    existingCartItem (): CartItem | undefined {
-      if (!this.existingPlushieId) {
-        return;
-      }
-
-      return this.cartItems.find((item) => item.plushieId && item.plushieId === this.existingPlushieId);
+    pageTitle (): TranslateResult {
+      return this.$t(
+        'Petsies {product} Order Form',
+        {
+          product: this.isFigurines ? 'Figurines' : 'Bobbleheads'
+        }
+      );
+    },
+    upgradesSubtitle (): TranslateResult {
+      return this.$t(
+        'Upgrade Your {product} Figurines (optional)',
+        {
+          product: this.isFigurines ? 'Figurines' : 'Bobbleheads'
+        }
+      );
+    },
+    upgradesText (): TranslateResult {
+      return this.$t(
+        'Make your Petsies {product} even more special with these common add-ons',
+        {
+          product: this.isFigurines ? 'Figurines' : 'Bobbleheads'
+        }
+      );
+    },
+    topStorySlug (): string {
+      return this.isFigurines
+        ? 'petsies_figurines_creation_page_top'
+        : 'petsies_bobbleheads_creation_page_top';
+    },
+    bottomStorySlug (): string {
+      return this.isFigurines
+        ? 'petsies_figurines_creation_page_bottom'
+        : 'petsies_bobbleheads_creation_page_bottom';
+    },
+    isFigurines (): boolean {
+      return this.sku === figurinesSku;
     }
   },
   async serverPrefetch () {
     if (this.$ssrContext) this.$ssrContext.output.cacheTags.add('product')
 
     await (this as any).loadData();
+    (this as any).dataLoaded = true;
   },
-  async mounted () {
+  async beforeMount () {
     if (!this.getCurrentProduct) {
       await this.loadData();
     }
+
+    await this.loadPlushieData();
   },
   beforeRouteLeave (to, from, next) {
     this.isRouterLeaving = true
@@ -86,6 +139,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    async onMakeAnother (): Promise<void> {
+      this.plushieId = await this.createPlushie();
+    },
     async loadData (): Promise<void> {
       const product = await this.$store.dispatch('product/loadProduct', {
         parentSku: this.sku,
@@ -93,11 +149,36 @@ export default Vue.extend({
       });
 
       catalogHooksExecutors.productPageVisited(product);
+
+      await Promise.all([
+        this.$store.dispatch('budsies/loadProductBodyparts', { productId: product.id })
+      ]);
+    },
+    async createPlushie (): Promise<number> {
+      if (!this.getCurrentProduct) {
+        throw new Error('Current product is not set!');
+      }
+
+      const task = await this.$store.dispatch(
+        'budsies/createNewPlushie',
+        {
+          productId: this.getCurrentProduct.id
+        }
+      );
+      return task.result;
+    },
+    async loadPlushieData (): Promise<void> {
+      if (!this.existingPlushieId) {
+        this.plushieId = await this.createPlushie();
+      }
+
+      this.$store.dispatch('budsies/loadPlushieShortcode', { plushieId: this.computedPlushieId });
     }
   },
   watch: {
     sku: async function () {
       await this.loadData();
+      await this.loadPlushieData();
     }
   },
   metaInfo () {
