@@ -25,3 +25,13 @@ export default {
   }
 };
 </script>
+
+<style lang="scss" scoped>
+.o-my-account-profile {
+  ::v-deep {
+    .sf-tabs__title {
+      padding: var(--tabs-title-padding, var(--spacer-sm));
+    }
+  }
+}
+</style>
