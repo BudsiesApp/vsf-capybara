@@ -1,7 +1,7 @@
 <template>
   <div class="o-my-account-orders-history">
     <SfTabs :open-tab="1">
-      <SfTab :title="$t('My orders')">
+      <SfTab :title="$t('My orders')" class="_orders-tab">
         <template v-if="!activeOrder">
           <div v-if="ordersHistory.length === 0" class="no-orders">
             <p class="no-orders__title">
@@ -205,6 +205,10 @@ export default {
     .sf-table__row {
       flex-wrap: nowrap;
     }
+
+    .sf-tabs__title {
+      display: none;
+    }
   }
 
   @media screen and (min-width: 400px) {
@@ -237,6 +241,12 @@ export default {
         &--right {
           text-align: right;
         }
+      }
+    }
+
+    ::v-deep {
+      .sf-tabs__title {
+        display: flex;
       }
     }
   }
