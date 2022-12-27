@@ -7,7 +7,7 @@
       v-if="topStorySlug"
     />
 
-    <validation-observer v-slot="{passes}">
+    <validation-observer v-slot="{passes}" ref="validation-observer">
       <form @submit.prevent="() => passes(() => onSubmit())">
         <div class="_step">
           <SfDivider class="_step-divider" />
@@ -766,10 +766,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     resetForm (): void {
       this.quantity = this.product.qty || 1;
       this.customerImages = [];
-
-      for (const bodypart of this.bodyparts) {
-        this.bodypartsValues[bodypart.id] = undefined;
-      }
+      this.initialCustomerImages = [];
+      this.selectedAddons = [];
+      this.bodypartsValues = {};
+      this.description = '';
 
       const uploader = this.getUploader();
       if (uploader) {
