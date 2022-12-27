@@ -25,7 +25,7 @@
       </template>
     </SfHeading>
 
-    <o-products-base-table :table-items="tableItems" />
+    <o-order-content :table-items="tableItems" />
 
     <div class="_summary">
       <div>
@@ -125,12 +125,12 @@ import {
   SfProperty
 } from '@storefront-ui/vue';
 
-import OProductsBaseTable from './o-products-base-table';
+import OOrderContent from './o-order-content';
 
 export default {
   name: 'OMyAccountOrderDetails',
   components: {
-    OProductsBaseTable,
+    OOrderContent,
     SfArrow,
     SfBadge,
     SfHeading,
@@ -191,6 +191,8 @@ export default {
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .o-my-account-order-details {
+  --heading-padding: 0;
+
   ._title {
     display: flex;
     align-items: center;
@@ -227,7 +229,7 @@ export default {
     }
   }
 
-  .o-products-base-table {
+  .o-order-content {
     margin-top: var(--spacer-base);
   }
 

@@ -153,6 +153,10 @@ export default {
   @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
   .o-order-content {
+    --table-column-flex: 1;
+    --table-heading-padding: var(--spacer-sm) var(--spacer-sm);
+    --table-row-padding: var(--spacer-sm) var(--spacer-sm);
+
     margin: 0 0 var(--spacer-base) 0;
 
     .table__row {
@@ -163,6 +167,12 @@ export default {
     .sf-table {
       &__data {
         --table-data-color: var(--c-text);
+
+        min-width: 5rem;
+      }
+
+      &__header {
+        min-width: 5rem;
       }
 
       &__row {
@@ -194,47 +204,55 @@ export default {
 
         .table__image {
           --image-width: 8.125rem;
+
           min-width: var(--image-width);
           margin-right: 1em;
         }
     }
 
-    @include for-desktop {
-      .table__header {
-        text-align: center;
+    .table__header {
+      text-align: center;
 
-        &:last-child {
-          text-align: right;
-        }
+      &:last-child {
+        text-align: right;
+      }
+    }
+
+    .table__data {
+      text-align: center;
+    }
+
+    .table__description {
+      text-align: left;
+      flex: 1 0 5rem;
+      order: unset;
+
+      .product-title {
+        font-weight: var(--font-semibold);
       }
 
-      .table__data {
-        text-align: center;
-      }
+      .bundle-product-option,
+      .custom-plushie-name {
+        font-size: var(--font-xs);
 
-      .table__description {
-        text-align: left;
-        flex: 1 0 12rem;
-
-        .product-title {
-          font-weight: var(--font-semibold);
-        }
-
-        .bundle-product-option,
-        .custom-plushie-name {
-          font-size: var(--font-xs);
-
-          &__icon {
-            display: inline-block;
-          }
+        &__icon {
+          display: inline-block;
         }
       }
+    }
 
+    .table__image {
+      --image-width: 5.125rem;
+
+      text-align: left;
+      margin-right: var(--spacer-sm);
+      min-width: var(--image-width);
+      display: none;
+    }
+
+    @media (min-width: 480px) {
       .table__image {
-        --image-width: 5.125rem;
-        text-align: left;
-        margin-right: var(--spacer-sm);
-        min-width: var(--image-width);
+        display: table-cell;
       }
     }
   }
