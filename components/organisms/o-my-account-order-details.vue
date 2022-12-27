@@ -63,54 +63,62 @@
     </div>
 
     <div class="_information">
-      <div v-if="shippingAddress">
+      <div v-if="shippingAddress" class="_section">
         <SfHeading
           :title="$t('Shipping address')"
           :level="4"
           class="sf-heading--left sf-heading--no-underline"
         />
 
-        <address>
-          <p>{{ shippingAddress.firstname }} {{ shippingAddress.lastname }}</p>
-          <p>{{ shippingAddress.street[0] }} {{ shippingAddress.street[1] }}</p>
-          <p>{{ shippingAddress.postcode }} {{ shippingAddress.city }}</p>
-          <p>{{ shippingAddress.country }}</p>
-        </address>
+        <div class="_content">
+          <address>
+            <p>{{ shippingAddress.firstname }} {{ shippingAddress.lastname }}</p>
+            <p>{{ shippingAddress.street[0] }} {{ shippingAddress.street[1] }}</p>
+            <p>{{ shippingAddress.postcode }} {{ shippingAddress.city }}</p>
+            <p>{{ shippingAddress.country }}</p>
+          </address>
+        </div>
       </div>
 
-      <div v-if="order.shipping_description">
+      <div v-if="order.shipping_description" class="_section">
         <SfHeading
           :title="$t('Shipping method')"
           :level="4"
           class="sf-heading--left sf-heading--no-underline"
         />
 
-        <p>{{ order.shipping_description }}</p>
+        <div class="_content">
+          <p>{{ order.shipping_description }}</p>
+        </div>
       </div>
 
-      <div>
+      <div class="_section">
         <SfHeading
           :title="$t('Billing address')"
           :level="4"
           class="sf-heading--left sf-heading--no-underline"
         />
 
-        <address>
-          <p>{{ billingAddress.firstname }} {{ billingAddress.lastname }}</p>
-          <p>{{ billingAddress.street[0] }} {{ billingAddress.street[1] }}</p>
-          <p>{{ billingAddress.postcode }} {{ billingAddress.city }}</p>
-          <p>{{ billingAddress.country }}</p>
-        </address>
+        <div class="_content">
+          <address>
+            <p>{{ billingAddress.firstname }} {{ billingAddress.lastname }}</p>
+            <p>{{ billingAddress.street[0] }} {{ billingAddress.street[1] }}</p>
+            <p>{{ billingAddress.postcode }} {{ billingAddress.city }}</p>
+            <p>{{ billingAddress.country }}</p>
+          </address>
+        </div>
       </div>
 
-      <div>
+      <div class="_section">
         <SfHeading
           :title="$t('Payment method')"
           :level="4"
           class="sf-heading--left sf-heading--no-underline"
         />
 
-        <p>{{ paymentMethod }}</p>
+        <div class="_content">
+          <p>{{ paymentMethod }}</p>
+        </div>
       </div>
     </div>
   </div>
@@ -238,12 +246,6 @@ export default {
     flex-direction: column;
     justify-content: center;
 
-    @include for-desktop {
-      margin-top: var(--spacer-xl);
-      flex-direction: row;
-      justify-content: space-between;
-    }
-
     .sf-heading {
       margin-top: var(--spacer-xl);
     }
@@ -278,6 +280,29 @@ export default {
     .sf-property__value {
       min-width: 180px;
       text-align: center;
+    }
+  }
+
+  ._content {
+    margin-top: var(--spacer-sm);
+  }
+
+  @include for-desktop {
+    ._information {
+      margin-top: var(--spacer-xl);
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+    }
+
+    ._section {
+      flex: 1;
+      margin-right: var(--spacer-base);
+      min-width: 10rem;
+
+      &:last-child {
+        margin-right: 0;
+      }
     }
   }
 }
