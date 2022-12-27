@@ -1,9 +1,13 @@
 <template>
   <div class="o-base-plushie-product-order-form">
-    <SfHeading :level="1" :title="pageTitle" />
+    <SfHeading
+      :level="1"
+      :title="pageTitle"
+    />
 
     <MBlockStory
       :story-slug="topStorySlug"
+      class="_top-block"
       v-if="topStorySlug"
     />
 
@@ -674,6 +678,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     fillPlushieDataFromCartItem (existingCartItem: CartItem): void {
       this.description = existingCartItem.plushieDescription || '';
       this.quantity = existingCartItem.qty || 1;
+
       this.fillCustomerImagesData(existingCartItem);
       this.fillBodypartsValues(existingCartItem);
       this.fillAddons(existingCartItem);
@@ -957,6 +962,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
 .o-base-plushie-product-order-form {
   text-align: center;
+
+  ._top-block {
+    margin-top: var(--spacer-base);
+  }
 
   b,
   strong {
