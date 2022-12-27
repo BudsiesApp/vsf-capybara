@@ -118,7 +118,6 @@ export default Vue.extend({
     if (this.$ssrContext) this.$ssrContext.output.cacheTags.add('product')
 
     await (this as any).loadData();
-    (this as any).dataLoaded = true;
   },
   async beforeMount () {
     if (!this.getCurrentProduct) {
