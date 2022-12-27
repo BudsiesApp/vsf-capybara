@@ -1,7 +1,8 @@
 <template>
-  <o-products-base-table
+  <o-order-content
     :should-show-header="shouldShowHeader"
     :table-items="tableItems"
+    class="desktop-only"
   />
 </template>
 
@@ -16,14 +17,14 @@ import CartItemOption from 'core/modules/cart/types/CartItemOption';
 import { ProductId } from 'src/modules/budsies';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
 
-import { ProductBaseTableItem } from '../interfaces/product-base-table-item.interface';
+import { OrderContentItem } from '../interfaces/order-content-item.interface';
 
-import OProductsBaseTable from './o-products-base-table.vue';
+import OOrderContent from './o-order-content.vue';
 
 export default {
   name: 'OCartItemsTable',
   components: {
-    OProductsBaseTable
+    OOrderContent
   },
   props: {
     shouldShowHeader: {
@@ -45,7 +46,7 @@ export default {
     }
   },
   computed: {
-    tableItems (): ProductBaseTableItem[] {
+    tableItems (): OrderContentItem[] {
       return this.cartItems.map((cartItem) => {
         return {
           key: this.getCartItemKey(cartItem),

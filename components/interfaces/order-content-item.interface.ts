@@ -1,6 +1,6 @@
 import CartItemOption from 'core/modules/cart/types/CartItemOption';
 
-export interface ProductBaseTableItem {
+export interface OrderContentItem {
   key: string,
   thumbnail: string,
   name: string,

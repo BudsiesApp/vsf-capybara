@@ -1,7 +1,7 @@
 <template>
   <SfTable
-    class="sf-table--bordered o-products-base-table desktop-only"
-    :class="{'o-products-base-table--hidden-header': !shouldShowHeader}"
+    class="sf-table--bordered o-order-content"
+    :class="{'o-order-content--hidden-header': !shouldShowHeader}"
   >
     <SfTableHeading class="table__row" v-if="shouldShowHeader">
       <SfTableHeader class="table__header table__image">
@@ -87,10 +87,10 @@ import {
 } from '@storefront-ui/vue';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
-import { ProductBaseTableItem } from '../interfaces/product-base-table-item.interface';
+import { OrderContentItem } from '../interfaces/order-content-item.interface';
 
 export default {
-  name: 'OProductsBaseTable',
+  name: 'OOrderContent',
   components: {
     SfIcon,
     SfImage,
@@ -103,7 +103,7 @@ export default {
       default: true
     },
     tableItems: {
-      type: Array as PropType<ProductBaseTableItem[]>,
+      type: Array as PropType<OrderContentItem[]>,
       default: () => []
     }
   },
@@ -120,10 +120,10 @@ export default {
     ...mapMobileObserver()
   },
   methods: {
-    getItemQuantity (product: ProductBaseTableItem): number | string {
+    getItemQuantity (product: OrderContentItem): number | string {
       return this.shouldShowHeader ? product.qty : `x ${product.qty}`;
     },
-    getPlushieName (product: ProductBaseTableItem): string {
+    getPlushieName (product: OrderContentItem): string {
       if (!product.plushieName) {
         return '';
       }
@@ -152,7 +152,7 @@ export default {
   <style lang="scss" scoped>
   @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-  .o-products-base-table {
+  .o-order-content {
     margin: 0 0 var(--spacer-base) 0;
 
     .table__row {
@@ -181,7 +181,7 @@ export default {
       justify-content: flex-end;
     }
 
-    &.o-products-base-table--hidden-header {
+    &.o-order-content--hidden-header {
         .product-price {
           ::v-deep .sf-price__old {
               margin: 0;
