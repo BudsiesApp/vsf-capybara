@@ -86,7 +86,7 @@ export default Vue.extend({
     },
     upgradesSubtitle (): TranslateResult {
       return this.$t(
-        'Upgrade Your {product} Figurines (optional)',
+        'Upgrade Your Petsies {product} (optional)',
         {
           product: this.isFigurines ? 'Figurines' : 'Bobbleheads'
         }

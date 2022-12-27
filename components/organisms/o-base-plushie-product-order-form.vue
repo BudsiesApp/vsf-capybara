@@ -441,7 +441,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     MBlockStory
   },
   inject: {
-    imageHandlerService: { from: 'ImageHandlerService' }
+    imageHandlerService: { from: 'ImageHandlerService' },
+    window: { from: 'WindowObject' }
   } as unknown as InjectType<InjectedServices>,
   props: {
     artworkUploadUrl: {
