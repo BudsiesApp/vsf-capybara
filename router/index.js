@@ -26,6 +26,8 @@ const GiftCards = () =>
   import(/* webpackChunkName: "vsf-gift-cards" */ 'theme/pages/GiftCards');
 const BlanketProduct = () =>
   import(/* webpackChunkName: "vsf-blankets" */ 'theme/pages/BlanketProduct');
+const BasePlushieProduct = () =>
+  import(/* webpackChunkName: "vsf-plushie-product" */ 'theme/pages/BasePlushieProduct');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -307,6 +309,48 @@ let routes = [
         slug: 'renaissance-design-115'
       }
     }
+  },
+  {
+    name: 'figurines-alias-1',
+    path: '/plushie/index/create/id/:plushieId/type/petsies-figurine/',
+    redirect: (route) => {
+      return {
+        name: 'figurines-creation',
+        query: {
+          existingPlushieId: route.params.plushieId
+        }
+      }
+    }
+  },
+  {
+    name: 'figurines-creation',
+    path: '/petsies-figurines/create/',
+    component: BasePlushieProduct,
+    props: (route) => ({
+      sku: 'petsiesFigurines_bundle',
+      existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
+    name: 'bobbleheads-alias-1',
+    path: '/plushie/index/create/id/:plushieId/type/petsies-bobblehead/',
+    redirect: (route) => {
+      return {
+        name: 'bobbleheads-creation',
+        query: {
+          existingPlushieId: route.params.plushieId
+        }
+      }
+    }
+  },
+  {
+    name: 'bobbleheads-creation',
+    path: '/petsies-bobbleheads/create/',
+    component: BasePlushieProduct,
+    props: (route) => ({
+      sku: 'petsiesBobbleheads_bundle',
+      existingPlushieId: route.query.existingPlushieId
+    })
   }
 ];
 
