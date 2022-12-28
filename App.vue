@@ -68,28 +68,35 @@ export default {
 <style lang="scss">
 @import "~@storefront-ui/vue/styles";
 </style>
+
 <style lang="scss">
 @import "./css/main";
+
 html {
   font-size: var(--font-size-base);
 }
 
 body {
+  @import "./css/components";
+
   --overlay-z-index: 1;
   --sidebar-aside-z-index: 2;
   --sidebar-z-index: 2;
   --bottom-navigation-height: 3.75rem;
   --bar-height: 3.125rem;
   --notification-font-size: var(--font-sm);
+
   font-family: var(--font-family-secondary);
   font-weight: var(--font-normal);
   line-height: #{$line-height-base};
   margin: 0;
   padding: 0;
+
   a {
     text-decoration: none;
     color: var(--c-link);
     cursor: pointer;
+
     &:hover {
       color: var(--c-link-hover);
     }
