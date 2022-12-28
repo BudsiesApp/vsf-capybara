@@ -68,8 +68,10 @@ export default {
 <style lang="scss">
 @import "~@storefront-ui/vue/styles";
 </style>
+
 <style lang="scss">
 @import "./css/main";
+
 html {
   font-size: var(--font-size-base);
 }
@@ -86,10 +88,12 @@ body {
   line-height: #{$line-height-base};
   margin: 0;
   padding: 0;
+
   a {
     text-decoration: none;
     color: var(--c-link);
     cursor: pointer;
+
     &:hover {
       color: var(--c-link-hover);
     }
@@ -101,6 +105,10 @@ body,
 #app,
 .default-layout {
   height: 100%;
+}
+
+#app {
+  @import "./css/components";
 }
 
 #viewport {
