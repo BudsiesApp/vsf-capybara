@@ -77,12 +77,15 @@ html {
 }
 
 body {
+  @import "./css/components";
+
   --overlay-z-index: 1;
   --sidebar-aside-z-index: 2;
   --sidebar-z-index: 2;
   --bottom-navigation-height: 3.75rem;
   --bar-height: 3.125rem;
   --notification-font-size: var(--font-sm);
+
   font-family: var(--font-family-secondary);
   font-weight: var(--font-normal);
   line-height: #{$line-height-base};
@@ -105,10 +108,6 @@ body,
 #app,
 .default-layout {
   height: 100%;
-}
-
-#app {
-  @import "./css/components";
 }
 
 #viewport {
