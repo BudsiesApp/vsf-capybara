@@ -64,13 +64,17 @@ export default {
 <style lang="scss">
 @import "~@storefront-ui/vue/styles";
 </style>
+
 <style lang="scss">
 @import "./css/main";
+
 html {
   font-size: var(--font-size-base);
 }
 
 body {
+  @import "./css/components";
+
   --overlay-z-index: 1;
   --sidebar-aside-z-index: 2;
   --sidebar-z-index: 2;
@@ -89,6 +93,7 @@ body {
     text-decoration: none;
     color: var(--c-link);
     cursor: pointer;
+
     &:hover {
       color: var(--c-link-hover);
     }
