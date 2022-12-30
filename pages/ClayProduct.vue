@@ -1,6 +1,6 @@
 <template>
-  <div id="base-plushie-product" itemscope itemtype="http://schema.org/Product">
-    <o-base-plushie-product-order-form
+  <div id="clay-product" itemscope itemtype="http://schema.org/Product">
+    <o-clay-product-order-form
       v-if="getCurrentProduct"
       :artwork-upload-url="artworkUploadUrl"
       :product="getCurrentProduct"
@@ -25,15 +25,15 @@ import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/stor
 
 import Product from 'core/modules/catalog/types/Product';
 
-import OBasePlushieProductOrderForm from 'theme/components/organisms/o-base-plushie-product-order-form.vue';
+import OClayProductOrderForm from 'theme/components/organisms/o-clay-product-order-form.vue';
 import { TranslateResult } from 'vue-i18n';
 
 const figurinesSku = 'petsiesFigurines_bundle';
 
 export default Vue.extend({
-  name: 'BasePlushieProduct',
+  name: 'ClayProduct',
   components: {
-    OBasePlushieProductOrderForm
+    OClayProductOrderForm
   },
   props: {
     sku: {
@@ -204,7 +204,7 @@ export default Vue.extend({
   <style lang="scss" scoped>
   @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-  #base-plushie-product {
+  #clay-product {
     box-sizing: border-box;
     padding: 0 1rem;
 
@@ -213,7 +213,7 @@ export default Vue.extend({
       width: 100%;
       margin: 0 auto;
 
-      .o-base-plushie-product-order-form {
+      .o-clay-product-order-form {
         margin-top: var(--spacer-lg);
       }
     }
