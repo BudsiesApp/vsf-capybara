@@ -1,5 +1,5 @@
 <template>
-  <div class="o-base-plushie-product-order-form">
+  <div class="o-clay-product-order-form">
     <SfHeading
       :level="1"
       :title="pageTitle"
@@ -320,7 +320,7 @@
       @close="showQuantityNotes = false"
     >
       <div class="_popup-content">
-        <p><strong>Quantity Discounts</strong></p>
+        <p><strong>{{ $t('Quantity Discounts') }}</strong></p>
 
         <p>{{ $t('All quantity discounts applied automatically at checkout:') }}</p>
 
@@ -429,7 +429,7 @@ extend('email', {
 });
 
 export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
-  name: 'OBasePlushieProductOrderForm',
+  name: 'OClayProductOrderForm',
   components: {
     SfInput,
     MBodypartOptionConfigurator,
@@ -960,7 +960,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "~@storefront-ui/shared/styles/helpers/layout";
 
-.o-base-plushie-product-order-form {
+.o-clay-product-order-form {
   text-align: center;
 
   ._top-block {
