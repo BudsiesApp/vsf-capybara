@@ -534,9 +534,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     backendProductId (): ProductValue | undefined {
       switch (this.product.id) {
         case 532:
-          return ProductValue.FIGURINES;
+          return ProductValue.PETSIES_FIGURINES;
         case 528:
-          return ProductValue.BOBBLEHEADS;
+          return ProductValue.PETSIES_BOBBLEHEADS;
         default:
           throw new Error(
             `Can't resolve Backend product ID for Magento '${this.product.id}' product ID`
