@@ -773,6 +773,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.selectedAddons = [];
       this.bodypartsValues = {};
       this.description = '';
+      this.plushieId = undefined;
 
       const uploader = this.getUploader();
       if (uploader) {
@@ -858,7 +859,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         { root: true }
       );
 
-      this.plushieId = undefined;
       this.plushieId = await this.createPlushie();
       this.$store.dispatch('budsies/loadPlushieShortcode', { plushieId: this.plushieId });
     },
@@ -940,6 +940,20 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   watch: {
     existingPlushieId () {
       if (!this.existingCartItem) {
+        return;
+      }
+
+      this.fillPlushieDataFromCartItem(this.existingCartItem);
+    },
+    async 'product.sku' () {
+      if (!this.existingCartItem || this.existingCartItem.sku !== this.product.sku) {
+        if (this.existingCartItem) {
+          await this.$router.replace({ query: undefined });
+        }
+
+        this.resetForm();
+        this.plushieId = await this.createPlushie();
+        await this.$store.dispatch('budsies/loadPlushieShortcode', { plushieId: this.plushieId });
         return;
       }
 
