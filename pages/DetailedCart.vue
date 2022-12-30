@@ -209,10 +209,16 @@ const blanketProductsSkus = [
   'customCutOutBlankets_bundle'
 ]
 
+const basePlushieProductSkus = [
+  'petsiesFigurines_bundle',
+  'petsiesBobbleheads_bundle'
+]
+
 const editableProductsSkus = [
   ...foreversProductsSkus,
   ...printedProductSkus,
-  ...blanketProductsSkus
+  ...blanketProductsSkus,
+  ...basePlushieProductSkus
 ];
 
 export default {
@@ -276,6 +282,10 @@ export default {
           url: {
             name: 'printed-masks-creation-page'
           }
+        },
+        {
+          label: 'Bobbleheads & Figurines',
+          url: '/pet-bobblehead-figurines/'
         },
         {
           label: 'Pet Keychains',
@@ -379,7 +389,18 @@ export default {
             product_design: this.getProductDesign(product),
             existingPlushieId: product.plushieId
           }
-        })
+        });
+      } else if (basePlushieProductSkus.includes(product.sku)) {
+        const routeName = product.sku === 'petsiesBobbleheads_bundle'
+          ? 'bobbleheads-creation'
+          : 'figurines-creation';
+
+        this.$router.push({
+          name: routeName,
+          query: {
+            existingPlushieId: product.plushieId
+          }
+        });
       }
     },
     getProductOptions (product) {
