@@ -671,7 +671,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         artworkUploadComponent.initFiles();
       });
     },
-    async fillPlushieDataFromCartItem (existingCartItem: CartItem): Promise<void> {
+    fillPlushieDataFromCartItem (existingCartItem: CartItem): void {
       this.description = existingCartItem.plushieDescription || '';
       this.quantity = existingCartItem.qty || 1;
       this.plushieId = Number(existingCartItem.plushieId);
@@ -679,7 +679,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.fillCustomerImagesData(existingCartItem);
       this.fillBodypartsValues(existingCartItem);
       this.fillAddons(existingCartItem);
-      await this.$store.dispatch('budsies/loadPlushieShortcode', { plushieId: this.plushieId });
     },
     getArtworkUploadComponent (): InstanceType<typeof MArtworkUpload> | undefined {
       return this.$refs['artwork-upload'] as InstanceType<typeof MArtworkUpload> | undefined;
@@ -860,7 +859,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       );
 
       this.plushieId = await this.createPlushie();
-      this.$store.dispatch('budsies/loadPlushieShortcode', { plushieId: this.plushieId });
     },
     setBundleOptionValue (optionId: number, optionQty: number, optionSelections: number[]): void {
       this.$store.commit('product' + '/' + catalogTypes.PRODUCT_SET_BUNDLE_OPTION, { optionId, optionQty, optionSelections });
@@ -928,7 +926,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
 
     this.plushieId = await this.createPlushie();
-    this.$store.dispatch('budsies/loadPlushieShortcode', { plushieId: this.plushieId });
   },
   created (): void {
     this.resetForm();
@@ -945,6 +942,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       this.fillPlushieDataFromCartItem(this.existingCartItem);
     },
+    async plushieId (id: number | undefined): Promise<void> {
+      if (!id) {
+        return;
+      }
+
+      await this.$store.dispatch('budsies/loadPlushieShortcode', { plushieId: id });
+    },
     async 'product.sku' () {
       if (!this.existingCartItem || this.existingCartItem.sku !== this.product.sku) {
         if (this.existingCartItem) {
@@ -953,7 +957,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
         this.resetForm();
         this.plushieId = await this.createPlushie();
-        await this.$store.dispatch('budsies/loadPlushieShortcode', { plushieId: this.plushieId });
         return;
       }
 
