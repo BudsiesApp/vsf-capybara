@@ -149,9 +149,7 @@ export default Vue.extend({
 
       catalogHooksExecutors.productPageVisited(product);
 
-      await Promise.all([
-        this.$store.dispatch('budsies/loadProductBodyparts', { productId: product.id })
-      ]);
+      await this.$store.dispatch('budsies/loadProductBodyparts', { productId: product.id })
     },
     async createPlushie (): Promise<number> {
       if (!this.getCurrentProduct) {
@@ -176,6 +174,10 @@ export default Vue.extend({
   },
   watch: {
     sku: async function () {
+      if (this.existingPlushieId) {
+        await this.$router.replace({ query: undefined })
+      }
+
       await this.loadData();
       await this.loadPlushieData();
     }

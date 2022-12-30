@@ -320,25 +320,7 @@
       @close="showQuantityNotes = false"
     >
       <div class="_popup-content">
-        <p><strong>{{ $t('Quantity Discounts') }}</strong></p>
-
-        <p>{{ $t('All quantity discounts applied automatically at checkout:') }}</p>
-
-        <ul>
-          <li>{{ $t('10% discount on 10+ Petsies') }}</li>
-          <li>{{ $t('20% discount on 20+ Petsies') }}</li>
-        </ul>
-
-        <p>&nbsp;</p>
-
-        <p><strong>{{ $t('Shipping Discounts') }}</strong></p>
-
-        <ul>
-          <li>{{ $t('First custom Petsie: $13.95 domestic') }}</li>
-          <li>{{ $t('Each additional Petsie in same order:') }} &nbsp; $5.95</li>
-          <li>{{ $t('All domestic Petsies ship via USPS 2 day priority mail.') }}</li>
-          <li>{{ $t('International orders ship via USPS First Class Mail for just $24.95 worldwide, with $5.95 per each additional Petsie in the order.') }}</li>
-        </ul>
+        <MBlockStory story-slug="petsies_shipping_qty_discount_popup_content" />
       </div>
     </SfModal>
 
