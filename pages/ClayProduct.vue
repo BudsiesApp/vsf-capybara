@@ -10,8 +10,7 @@
       :bottom-story-slug="bottomStorySlug"
       :upgrades-subtitle="upgradesSubtitle"
       :upgrades-text="upgradesText"
-      :plushie-id="computedPlushieId"
-      @make-another="onMakeAnother"
+      :existing-plushie-id="existingPlushieId"
     />
   </div>
 </template>
@@ -52,11 +51,6 @@ export default Vue.extend({
     };
   },
   computed: {
-    computedPlushieId (): number | undefined {
-      return this.existingPlushieId
-        ? Number.parseInt(this.existingPlushieId)
-        : this.plushieId;
-    },
     getCurrentProduct (): Product | null {
       const product = this.$store.getters['product/getCurrentProduct'];
       if (!product?.sku || product.sku !== this.sku) {
@@ -123,8 +117,6 @@ export default Vue.extend({
     if (!this.getCurrentProduct) {
       await this.loadData();
     }
-
-    await this.loadPlushieData();
   },
   beforeRouteLeave (to, from, next) {
     this.isRouterLeaving = true
@@ -138,9 +130,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    async onMakeAnother (): Promise<void> {
-      this.plushieId = await this.createPlushie();
-    },
     async loadData (): Promise<void> {
       const product = await this.$store.dispatch('product/loadProduct', {
         parentSku: this.sku,
@@ -150,36 +139,11 @@ export default Vue.extend({
       catalogHooksExecutors.productPageVisited(product);
 
       await this.$store.dispatch('budsies/loadProductBodyparts', { productId: product.id })
-    },
-    async createPlushie (): Promise<number> {
-      if (!this.getCurrentProduct) {
-        throw new Error('Current product is not set!');
-      }
-
-      const task = await this.$store.dispatch(
-        'budsies/createNewPlushie',
-        {
-          productId: this.getCurrentProduct.id
-        }
-      );
-      return task.result;
-    },
-    async loadPlushieData (): Promise<void> {
-      if (!this.existingPlushieId) {
-        this.plushieId = await this.createPlushie();
-      }
-
-      this.$store.dispatch('budsies/loadPlushieShortcode', { plushieId: this.computedPlushieId });
     }
   },
   watch: {
     sku: async function () {
-      if (this.existingPlushieId) {
-        await this.$router.replace({ query: undefined })
-      }
-
       await this.loadData();
-      await this.loadPlushieData();
     }
   },
   metaInfo () {

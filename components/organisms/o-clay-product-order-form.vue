@@ -459,11 +459,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       type: String,
       required: true
     },
-    plushieId: {
-      type: Number as PropType<number | undefined>,
+    bottomStorySlug: {
+      type: String,
       default: undefined
     },
-    bottomStorySlug: {
+    existingPlushieId: {
       type: String,
       default: undefined
     }
@@ -483,7 +483,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       description: '',
       showEyeColorNotes: false,
       showPhotoTips: false,
-      initialCustomerImages: [] as CustomerImage[]
+      initialCustomerImages: [] as CustomerImage[],
+      plushieId: undefined as number | undefined
     }
   },
   computed: {
@@ -504,11 +505,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return this.$store.getters['cart/getCartItems'];
     },
     existingCartItem (): CartItem | undefined {
-      if (!this.plushieId) {
+      if (!this.existingPlushieId) {
         return;
       }
 
-      return this.cartItems.find((item) => item.plushieId && item.plushieId === this.plushieId?.toString(10));
+      return this.cartItems.find((item) => item.plushieId && item.plushieId === this.existingPlushieId);
     },
     isUploadNow (): boolean {
       return this.uploadMethod === ImageUploadMethod.NOW;
@@ -589,6 +590,19 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         this.onFailure('Unexpected error: ' + error);
       }
     },
+    async createPlushie (): Promise<number> {
+      if (!this.product) {
+        throw new Error('Current product is not set!');
+      }
+
+      const task = await this.$store.dispatch(
+        'budsies/createNewPlushie',
+        {
+          productId: this.product.id
+        }
+      );
+      return task.result;
+    },
     fillAddons (cartItem: CartItem): void {
       const productOption = cartItem.product_option;
       this.selectedAddons = [];
@@ -657,13 +671,15 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         artworkUploadComponent.initFiles();
       });
     },
-    fillPlushieDataFromCartItem (existingCartItem: CartItem): void {
+    async fillPlushieDataFromCartItem (existingCartItem: CartItem): Promise<void> {
       this.description = existingCartItem.plushieDescription || '';
       this.quantity = existingCartItem.qty || 1;
+      this.plushieId = Number(existingCartItem.plushieId);
 
       this.fillCustomerImagesData(existingCartItem);
       this.fillBodypartsValues(existingCartItem);
       this.fillAddons(existingCartItem);
+      await this.$store.dispatch('budsies/loadPlushieShortcode', { plushieId: this.plushieId });
     },
     getArtworkUploadComponent (): InstanceType<typeof MArtworkUpload> | undefined {
       return this.$refs['artwork-upload'] as InstanceType<typeof MArtworkUpload> | undefined;
@@ -826,7 +842,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         action1: { label: i18n.t('OK') }
       });
     },
-    onSuccessAndMakeAnother (): void {
+    async onSuccessAndMakeAnother (): Promise<void> {
       this.resetForm();
       this.window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
 
@@ -842,7 +858,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         { root: true }
       );
 
-      this.$emit('make-another');
+      this.plushieId = undefined;
+      this.plushieId = await this.createPlushie();
+      this.$store.dispatch('budsies/loadPlushieShortcode', { plushieId: this.plushieId });
     },
     setBundleOptionValue (optionId: number, optionQty: number, optionSelections: number[]): void {
       this.$store.commit('product' + '/' + catalogTypes.PRODUCT_SET_BUNDLE_OPTION, { optionId, optionQty, optionSelections });
@@ -900,13 +918,17 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       }
     }
   },
-  beforeMount () {
+  async beforeMount () {
     this.$bus.$once('budsies-store-synchronized', this.prefillEmail);
   },
-  mounted () {
+  async mounted () {
     if (this.existingCartItem) {
       this.fillPlushieDataFromCartItem(this.existingCartItem);
+      return;
     }
+
+    this.plushieId = await this.createPlushie();
+    this.$store.dispatch('budsies/loadPlushieShortcode', { plushieId: this.plushieId });
   },
   created (): void {
     this.resetForm();
@@ -916,7 +938,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     this.$bus.$off('budsies-store-synchronized', this.prefillEmail);
   },
   watch: {
-    plushieId () {
+    existingPlushieId () {
       if (!this.existingCartItem) {
         return;
       }
