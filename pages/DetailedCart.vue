@@ -209,7 +209,7 @@ const blanketProductsSkus = [
   'customCutOutBlankets_bundle'
 ]
 
-const basePlushieProductSkus = [
+const clayPlushieProductSkus = [
   'petsiesFigurines_bundle',
   'petsiesBobbleheads_bundle'
 ]
@@ -218,7 +218,7 @@ const editableProductsSkus = [
   ...foreversProductsSkus,
   ...printedProductSkus,
   ...blanketProductsSkus,
-  ...basePlushieProductSkus
+  ...clayPlushieProductSkus
 ];
 
 export default {
@@ -390,7 +390,7 @@ export default {
             existingPlushieId: product.plushieId
           }
         });
-      } else if (basePlushieProductSkus.includes(product.sku)) {
+      } else if (clayPlushieProductSkus.includes(product.sku)) {
         const routeName = product.sku === 'petsiesBobbleheads_bundle'
           ? 'bobbleheads-creation'
           : 'figurines-creation';
