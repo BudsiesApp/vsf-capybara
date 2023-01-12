@@ -82,18 +82,12 @@ export default {
     }
   },
   beforeMount () {
-    // Progress bar on top of the page
-    this.$router.beforeEach((to, from, next) => {
-      this.$Progress.start();
-      this.$Progress.increase(40);
-      next();
-    });
     this.$router.afterEach(() => {
       if (!isServer && this.quicklinkEnabled) {
         this.quicklink.listen();
       }
-      this.$Progress.finish();
     });
+
     this.$bus.$on('offline-order-confirmation', this.onOrderConfirmation);
   },
   mounted () {
