@@ -3,20 +3,22 @@
     <o-keychain-quote-order-form
       :artwork-upload-url="artworkUploadUrl"
       :product="getCurrentProduct"
-      v-if="getCurrentProduct"
+      v-if="getCurrentProduct && !isDataLoading"
     />
+
+    <a-loading-spinner v-else />
   </div>
 </template>
 
 <script lang="ts">
 import config from 'config';
 import { htmlDecode } from '@vue-storefront/core/filters';
-import { isServer } from '@vue-storefront/core/helpers';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 
 import Product from 'core/modules/catalog/types/Product';
 
+import ALoadingSpinner from 'theme/components/atoms/a-loading-spinner.vue';
 import OKeychainQuoteOrderForm from 'theme/components/organisms/OBulkorders/o-keychain-quote-order-form.vue';
 
 const keychainQuoteProductSku = 'keychainBulkSample_bundle';
@@ -24,10 +26,12 @@ const keychainQuoteProductSku = 'keychainBulkSample_bundle';
 export default {
   name: 'KeychainQuote',
   components: {
+    ALoadingSpinner,
     OKeychainQuoteOrderForm
   },
   data () {
     return {
+      isDataLoading: false,
       isRouterLeaving: false
     };
   },
@@ -48,26 +52,17 @@ export default {
       return this.$store.getters['product/getProductBySkuDictionary'];
     }
   },
-  async mounted (): Promise<void> {
-    await this.setCurrentProduct();
-  },
-  async asyncData ({ store, route, context }): Promise<void> {
-    if (context) context.output.cacheTags.add('product')
-
-    const [product, _] = await Promise.all([
-      store.dispatch('product/loadProduct',
-        {
-          parentSku: keychainQuoteProductSku,
-          setCurrent: false
-        }
-      ), store.dispatch('budsies/fetchCustomerTypes')
-    ]);
-
-    if (isServer) {
-      await store.dispatch('product/setCurrent', product);
+  beforeMount (): void {
+    if (this.getCurrentProduct) {
+      return;
     }
 
-    catalogHooksExecutors.productPageVisited(product);
+    void this.loadData();
+  },
+  serverPrefetch (): Promise<void> {
+    if (this.$ssrContext) this.$ssrContext.output.cacheTags.add('product')
+
+    return (this as any).loadData();
   },
   beforeRouteLeave (to, from, next) {
     this.isRouterLeaving = true
@@ -81,13 +76,27 @@ export default {
     }
   },
   methods: {
-    async setCurrentProduct (): Promise<void> {
-      if (this.getCurrentProduct) {
-        return;
+    async loadData (): Promise<void> {
+      this.isDataLoading = true;
+
+      const dataLoadingPromises = [this.$store.dispatch('product/loadProduct',
+        {
+          parentSku: keychainQuoteProductSku,
+          setCurrent: true
+        }
+      )];
+
+      if (!this.$isServer) {
+        void this.$store.dispatch('budsies/fetchCustomerTypes');
+      } else {
+        dataLoadingPromises.push(this.$store.dispatch('budsies/fetchCustomerTypes'));
       }
 
-      const product = this.getProductBySkuDictionary[keychainQuoteProductSku];
-      await this.$store.dispatch('product/setCurrent', product);
+      const [product] = await Promise.all(dataLoadingPromises);
+
+      this.isDataLoading = false;
+
+      catalogHooksExecutors.productPageVisited(product);
     }
   },
   metaInfo () {

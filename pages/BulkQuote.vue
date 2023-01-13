@@ -4,20 +4,22 @@
     <o-bulk-quote-order-form
       :artwork-upload-url="artworkUploadUrl"
       :product="getCurrentProduct"
-      v-if="getCurrentProduct"
+      v-if="getCurrentProduct && !isDataLoading"
     />
+
+    <a-loading-spinner v-else />
   </div>
 </template>
 
 <script lang="ts">
 import config from 'config';
 import { htmlDecode } from '@vue-storefront/core/filters';
-import { isServer } from '@vue-storefront/core/helpers';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 
 import Product from 'core/modules/catalog/types/Product';
 
+import ALoadingSpinner from 'theme/components/atoms/a-loading-spinner.vue';
 import OBulkQuoteOrderForm from 'theme/components/organisms/OBulkorders/o-bulk-quote-order-form.vue';
 
 const bulkQuoteProductSku = 'CustomBulkSample_bundle';
@@ -25,11 +27,13 @@ const bulkQuoteProductSku = 'CustomBulkSample_bundle';
 export default {
   name: 'KeychainQuote',
   components: {
+    ALoadingSpinner,
     OBulkQuoteOrderForm
   },
   data () {
     return {
-      isRouterLeaving: false
+      isRouterLeaving: false,
+      isDataLoading: false
     };
   },
   computed: {
@@ -49,29 +53,17 @@ export default {
       return this.$store.getters['product/getProductBySkuDictionary'];
     }
   },
-  async mounted (): Promise<void> {
-    await this.setCurrentProduct();
-  },
-  async asyncData ({ store, route, context }): Promise<void> {
-    if (context) context.output.cacheTags.add('product')
-
-    const product = await store.dispatch('product/loadProduct',
-      {
-        parentSku: bulkQuoteProductSku,
-        setCurrent: false
-      }
-    );
-
-    await Promise.all([
-      store.dispatch('budsies/loadProductBodyparts', { productId: product.id }),
-      store.dispatch('budsies/fetchCustomerTypes')
-    ]);
-
-    if (isServer) {
-      await store.dispatch('product/setCurrent', product);
+  beforeMount (): void {
+    if (this.getCurrentProduct) {
+      return;
     }
 
-    catalogHooksExecutors.productPageVisited(product);
+    void this.loadData();
+  },
+  serverPrefetch (): Promise<void> {
+    if (this.$ssrContext) this.$ssrContext.output.cacheTags.add('product')
+
+    return (this as any).loadData();
   },
   beforeRouteLeave (to, from, next) {
     this.isRouterLeaving = true
@@ -85,13 +77,27 @@ export default {
     }
   },
   methods: {
-    async setCurrentProduct (): Promise<void> {
-      if (this.getCurrentProduct) {
-        return;
+    async loadData (): Promise<void> {
+      this.isDataLoading = true;
+      const product = await this.$store.dispatch('product/loadProduct',
+        {
+          parentSku: bulkQuoteProductSku,
+          setCurrent: true
+        }
+      );
+
+      const productRelatedDataLoadingPromises = [this.$store.dispatch('budsies/loadProductBodyparts', { productId: product.id })];
+
+      if (!this.$isServer) {
+        void this.$store.dispatch('budsies/fetchCustomerTypes');
+      } else {
+        productRelatedDataLoadingPromises.push(this.$store.dispatch('budsies/fetchCustomerTypes'));
       }
 
-      const product = this.getProductBySkuDictionary[bulkQuoteProductSku];
-      await this.$store.dispatch('product/setCurrent', product);
+      await Promise.all(productRelatedDataLoadingPromises);
+
+      this.isDataLoading = false;
+      catalogHooksExecutors.productPageVisited(product);
     }
   },
   metaInfo () {
@@ -123,6 +129,10 @@ export default {
       .o-bulk-quote-order-form {
         max-width: 760px;
         margin: 0 auto;
+      }
+
+      .a-loading-spinner {
+        height: 50vh;
       }
 
       @media (min-width: $tablet-min) {
