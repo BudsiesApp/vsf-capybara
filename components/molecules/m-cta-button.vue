@@ -5,13 +5,13 @@
     v-show="showCtaButtonContainer"
   >
     <SfButton class="_bulk-quote-button" v-show="showDefaultButton">
-      <router-link :to="{name: 'bulk-quote'}">
+      <router-link class="_inner" :to="{name: 'bulk-quote'}">
         {{ $t('Get Quote') }}
       </router-link>
     </SfButton>
 
     <SfButton v-show="showGoToCheckoutButton" @click="goToCheckout">
-      Go to Checkout
+      {{ $t('Go to Checkout') }}
     </SfButton>
   </div>
 </template>
@@ -77,6 +77,8 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+$small-button-padding: calc(var(--spacer-2xs) * 3);
+
 .m-cta-button {
   .sf-button {
     --button-font-size: var(--font-sm);
@@ -86,13 +88,24 @@ export default Vue.extend({
   ._bulk-quote-button {
     --c-link: var(--c-white);
     --c-link-hover: var(--c-white);
+    --button-padding: 0;
+
+    ._inner {
+      padding: var(--spacer-sm) calc(var(--spacer-sm) * 2);
+    }
   }
 
   &.-small {
     .sf-button {
       --button-font-size: var(--font-2xs);
       --button-font-line-height: 1;
-      --button-padding: calc(var(--spacer-2xs) * 3);
+      --button-padding: $small-button-padding;
+    }
+
+    ._bulk-quote-button {
+      ._inner {
+        padding: $small-button-padding;
+      }
     }
   }
 }
