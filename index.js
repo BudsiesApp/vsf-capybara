@@ -3,7 +3,6 @@ import App from './App';
 import routes from './router';
 import Vue from 'vue';
 import Vue2Filters from 'vue2-filters';
-import VueProgressBar from 'vue-progressbar';
 import VueLazyload from 'vue-lazyload';
 import VueObserveVisibility from 'vue-observe-visibility';
 import '@vue-storefront/core/lib/passive-listeners';
@@ -15,7 +14,6 @@ import { StorageManager } from '@vue-storefront/core/lib/storage-manager';
 
 once('__VUE_EXTEND_DROPPOINT_VPB__', () => {
   Vue.use(Vue2Filters);
-  Vue.use(VueProgressBar);
   Vue.use(VueLazyload, { attempt: 2, preLoad: 1.5 });
   Vue.use(VueObserveVisibility);
 });

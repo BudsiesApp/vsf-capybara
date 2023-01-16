@@ -21,8 +21,9 @@ import { AmazonPay } from 'src/modules/vsf-amazon-pay'
 import { PaymentBackendMethodsModule } from 'src/modules/payment-backend-methods'
 import { UrlRewriteModule } from 'src/modules/url-rewrite';
 import { mappingFallbackForUrlRewrite } from 'src/modules/url-rewrite/mappingFallback';
-import { BackendSettings } from 'src/modules/backend-settings'
-import { ErrorLoggingModule } from 'src/modules/error-logging'
+import { BackendSettings } from 'src/modules/backend-settings';
+import { ErrorLoggingModule } from 'src/modules/error-logging';
+import { PageLoadingIndicatorModule } from 'src/modules/page-loading-indicator';
 
 import registerStoryblokComponents from 'theme/components/storyblok'
 
@@ -51,6 +52,7 @@ const extendUrlModule: StorefrontModule = function ({ store }) {
 export function registerClientModules () {
   registerStoryblokComponents()
 
+  registerModule(PageLoadingIndicatorModule)
   registerModule(UrlModule)
   registerModule(CatalogModule)
   registerModule(CheckoutModule) // To Checkout
