@@ -86,11 +86,10 @@ export default {
           setCurrent: true
         }
       )];
+      const customerTypesLoadingPromise = this.$store.dispatch('budsies/fetchCustomerTypes');
 
-      if (!this.$isServer) {
-        void this.$store.dispatch('budsies/fetchCustomerTypes');
-      } else {
-        dataLoadingPromises.push(this.$store.dispatch('budsies/fetchCustomerTypes'));
+      if (this.$isServer) {
+        dataLoadingPromises.push(customerTypesLoadingPromise);
       }
 
       const [product] = await Promise.all(dataLoadingPromises);

@@ -87,11 +87,10 @@ export default {
       );
 
       const productRelatedDataLoadingPromises = [this.$store.dispatch('budsies/loadProductBodyparts', { productId: product.id })];
+      const customerTypesLoadingPromise = this.$store.dispatch('budsies/fetchCustomerTypes');
 
-      if (!this.$isServer) {
-        void this.$store.dispatch('budsies/fetchCustomerTypes');
-      } else {
-        productRelatedDataLoadingPromises.push(this.$store.dispatch('budsies/fetchCustomerTypes'));
+      if (this.$isServer) {
+        productRelatedDataLoadingPromises.push(customerTypesLoadingPromise);
       }
 
       await Promise.all(productRelatedDataLoadingPromises);
