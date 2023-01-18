@@ -28,10 +28,12 @@
             <label
               :for="getInputId(option)"
             >
-              <div
-                class="_icon"
-                :style="getIconStyle(option)"
-              />
+              <div class="_icon-wrapper">
+                <div
+                  class="_icon"
+                  :style="getIconStyle(option)"
+                />
+              </div>
 
               <div class="_name">
                 {{ option.label }}
@@ -171,9 +173,9 @@ export default Vue.extend({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 $bodypart-item-width: 145px;
+$color-selector-selected-border-color: #51a7f9;
 
 .m-bodypart-option-configurator {
-
   ._group-item {
     margin-bottom: var(--spacer-sm);
 
@@ -223,8 +225,35 @@ $bodypart-item-width: 145px;
     &.-color-value {
       width: 25.1%;
 
+      ._icon-wrapper {
+        border-radius: 50%;
+        border: 4px solid transparent;
+        width: 100%;
+        height: 0;
+        position: relative;
+        padding-top: 100%;
+      }
+
       ._icon {
         border: 1px solid #ccc;
+        height: 100%;
+        position: absolute;
+        box-sizing: border-box;
+        padding-top: 0;
+        top: 0;
+      }
+
+      input:checked {
+        & + label {
+          ._icon-wrapper {
+            border-color: $color-selector-selected-border-color;
+          }
+
+          ._icon::before,
+          ._icon::after {
+            content: none;
+          }
+        }
       }
     }
   }
@@ -259,6 +288,7 @@ $bodypart-item-width: 145px;
     width: 100%;
     z-index: 1;
   }
+
   ._visual-selector-value > input:checked + label ._icon::after {
     background: url('/assets/images/sprite/ico-tick-green.png') no-repeat center #fff;
     border: 2px solid #38b677;
