@@ -9,7 +9,7 @@
     <sb-router-link
       class="_button sf-button"
       :class="cssClasses"
-      :link="itemData.link_url"
+      :link="linkField"
       :is-new-window="shouldOpenInNewWindow"
     >
       {{ itemData.link_text }}
@@ -21,9 +21,7 @@
 import { VueConstructor } from 'vue';
 import { InjectType } from 'src/modules/shared';
 
-import {
-  Blok
-} from 'src/modules/vsf-storyblok-module'
+import { Blok, LinkField } from 'src/modules/vsf-storyblok-module'
 
 import ButtonItemData from './interfaces/button-item-data.interface';
 
@@ -51,6 +49,16 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
       }
 
       return result;
+    },
+    linkField (): LinkField {
+      const linkUrl = this.itemData.link_url;
+      const url = linkUrl.url ? linkUrl.url : linkUrl.email;
+
+      if (!url) {
+        throw new Error('Url is not set');
+      }
+
+      return { ...this.itemData.link_url, url: url };
     }
   }
 })
