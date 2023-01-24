@@ -77,11 +77,11 @@
       <template #quantity-helper>
         <span class="_helper">
           {{ $t('Need less than 50? Order directly from our sister brand, Budsies. Budsies specializes in one-off or low quantity production at a simple, flat price. You\'ll automatically get discounts of 10-20% when you add qty 10 or 20 to your cart.') }}
-        </span>
 
-        <a :href="budsiesStoreDomain" target="_blank">
-          {{ $t('Visit Budsies!') }}
-        </a>
+          <a :href="budsiesStoreDomain" target="_blank">
+            {{ $t('Visit Budsies!') }}
+          </a>
+        </span>
       </template>
     </m-base-form>
 
