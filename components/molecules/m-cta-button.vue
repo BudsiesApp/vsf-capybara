@@ -6,7 +6,7 @@
   >
     <SfButton class="_bulk-quote-button" v-show="showDefaultButton">
       <router-link class="_inner" :to="{name: 'bulk-quote'}">
-        {{ $t('Get Quote') }}
+        {{ $t('Instant Quote') }}
       </router-link>
     </SfButton>
 
