@@ -154,7 +154,7 @@
           <SfHeading
             :level="3"
             :title="descriptionTitleText"
-            class="_step-title -required -subsection"
+            class="_step-title -required"
           />
 
           <textarea
@@ -185,7 +185,7 @@
           <SfHeading
             :level="3"
             :title="$t('Color Palette')"
-            class="_step-title -required -subsection"
+            class="_step-title -required"
           />
 
           <span class="_subtitle">
@@ -234,7 +234,7 @@
 
         <m-addons-selector
           v-model="selectedAddons"
-          :addons="addons"
+          :addons="availableAddonsForSelect"
           :disabled="isDisabled"
         />
       </div>
@@ -281,7 +281,7 @@
         <validation-provider
           v-slot="{ errors }"
           :name="$t('\'E-mail\'')"
-          rules="required"
+          :rules="showEmailStep ? 'required' : ''"
           slim
         >
           <SfInput
@@ -299,7 +299,7 @@
         </span>
 
         <validation-provider
-          :rules="{ required: { allowFalse: false } }"
+          :rules="showEmailStep ? { required: { allowFalse: false } } : ''"
           :name="$t('Agreement')"
           v-slot="{errors}"
           slim
@@ -365,6 +365,7 @@ import CustomerType from '../interfaces/customer-type.interface';
 import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
 import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
 import MBodypartOptionConfigurator from 'theme/components/molecules/m-bodypart-option-configurator.vue';
+import SelectedAddon from '../interfaces/selected-addon.interface';
 
 extend('required', {
   ...required,
@@ -387,6 +388,13 @@ interface PillowSizeOption {
 }
 
 const sizeFromDescriptionRegex = /Size: (\d{1,2})/;
+
+const sneakPeakAddonOptionValueId = 82;
+const defaultSelectedAddon: SelectedAddon = {
+  addonOptionValueId: sneakPeakAddonOptionValueId,
+  optionsValues: {}
+};
+const hiddenAddonOptionValueIds = [sneakPeakAddonOptionValueId];
 
 export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   props: {
@@ -424,6 +432,15 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     SfCheckbox
   },
   computed: {
+    availableAddonsForSelect (): AddonOption[] {
+      if (!this.addons) {
+        return [];
+      }
+
+      return this.addons.filter(
+        (option) => !hiddenAddonOptionValueIds.includes(option.optionValueId)
+      );
+    },
     addons (): AddonOption[] {
       if (!this.addonsBundleOption) {
         return []
@@ -656,7 +673,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       description: '',
       customerType: undefined as string | undefined,
       color: undefined as BodypartOption[] | undefined,
-      selectedAddons: [] as number [],
+      selectedAddons: [] as SelectedAddon [],
       customerImages: [] as CustomerImage[],
       email: '',
       showEmailStep: true,
@@ -696,7 +713,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
             customerImages: this.customerImages,
             customerType: this.customerType,
             plushieId: this.plushieId.toString(),
-            uploadMethod: ImageUploadMethod.NOW
+            uploadMethod: ImageUploadMethod.NOW,
+            upgrade_option_values: this.getUpgradeOptionValues()
           }
 
           if (this.type === BulksampleProduct.PLUSH) {
@@ -747,8 +765,25 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       const selectedAddonsProductOption =
        productOption.extension_attributes.bundle_options[this.addonsBundleOption.option_id];
+      const optionSelections = selectedAddonsProductOption.option_selections;
 
-      this.selectedAddons = selectedAddonsProductOption.option_selections;
+      this.selectedAddons = optionSelections.map((selection: number) => {
+        const addon = this.addons.find((addon) => addon.optionValueId === selection);
+        let optionsValues = {};
+
+        if (addon) {
+          const upgradeOptionValues = existingCartItem.upgrade_option_values?.find(
+            ({ upgradeSku }) => upgradeSku === addon.sku
+          );
+
+          optionsValues = upgradeOptionValues?.optionsValues || {};
+        }
+
+        return {
+          addonOptionValueId: selection,
+          optionsValues
+        }
+      });
     },
     fillBodypartsFromCartItem (existingCartItem: CartItem): void {
       this.color = undefined;
@@ -773,6 +808,17 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.customerImages = existingCartItem.customerImages || [];
       this.artworkUploadInitialItems = [ ...this.customerImages ];
     },
+    fillDefaultSelectedAddon (): void {
+      const hasDefaultSelectedAddon = this.selectedAddons.find(
+        (selectedAddon) => selectedAddon.addonOptionValueId === defaultSelectedAddon.addonOptionValueId
+      );
+
+      if (hasDefaultSelectedAddon) {
+        return;
+      }
+
+      this.selectedAddons.push(defaultSelectedAddon);
+    },
     fillDescriptionFromCartItem (existingCartItem: CartItem): void {
       if (this.type === BulksampleProduct.PLUSH) {
         this.description = this.getDescriptionFromExistingCartItem(existingCartItem);
@@ -790,6 +836,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.fillCustomerImagesFromCartItem(existingCartItem);
       this.fillAddonsDataFromCartItem(existingCartItem);
       this.fillBodypartsFromCartItem(existingCartItem);
+
+      this.fillDefaultSelectedAddon();
     },
     fillSizeFromCartItem (existingCartItem: CartItem): void {
       this.size = '';
@@ -864,6 +912,20 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     getDescriptionFromExistingCartItem (existingCartItem: CartItem): string {
       return existingCartItem.plushieDescription?.replace(sizeFromDescriptionRegex, '').trim() || '';
     },
+    getUpgradeOptionValues () {
+      return this.selectedAddons.map((selectedAddon) => {
+        const addonItem = this.addons.find(({ optionValueId }) => optionValueId === selectedAddon.addonOptionValueId);
+
+        if (!addonItem) {
+          throw new Error('Unable to find addon by optionValueId');
+        }
+
+        return {
+          upgradeSku: addonItem.sku,
+          optionsValues: selectedAddon.optionsValues
+        }
+      })
+    },
     onArtworkAdd (value: Item): void {
       this.customerImages.push({
         id: value.id,
@@ -935,7 +997,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
                 product: this.existingCartItem,
                 bundleOptions: this.$store.state.product.current_bundle_options
               }
-            )
+            ),
+            upgrade_option_values: this.getUpgradeOptionValues()
           }
 
           if (this.type === BulksampleProduct.PLUSH) {
@@ -969,6 +1032,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   },
   created (): void {
     this.prefillEmail();
+    this.fillDefaultSelectedAddon();
 
     if (this.existingCartItem) {
       this.fillPlushieDataFromCartItem(this.existingCartItem)
@@ -982,7 +1046,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   },
   watch: {
     selectedAddons: {
-      handler (newValue: number[]) {
+      handler (newValue: SelectedAddon[]) {
         if (!this.addonsBundleOption) {
           return;
         }
@@ -990,7 +1054,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         this.setBundleOptionValue(
           this.addonsBundleOption.option_id,
           1,
-          newValue
+          newValue.map(({ addonOptionValueId }) => addonOptionValueId)
         );
       }
     },
@@ -1014,8 +1078,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
+$subsection-margin: 0 0 4rem;
+
 .o-bulksample-creation-form {
-    --divider-margin: 0 0 var(--spacer-xl);
+    --divider-margin: 0 0 var(--spacer-2xl);
     --divider-border-color: rgba(0, 0, 0, 0.1);
     --divider-display: none;
 
@@ -1023,10 +1089,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
     ._main-heading {
         margin-bottom: var(--spacer-xl);
-    }
-
-    ._order-hint {
-        margin-top: var(--spacer-sm);
     }
 
     ._step-container {
@@ -1045,15 +1107,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
         display: inline-block;
         border-bottom: 4px solid var(--c-primary);
-        margin-bottom: var(--spacer-sm);
+        margin-bottom: var(--spacer-lg);
     }
 
     ._step-title {
         margin-bottom: var(--spacer-sm);
-
-        &.-subsection {
-            margin-top: var(--spacer-xl);
-        }
 
         &.-required {
             ::v-deep .sf-heading__title {
@@ -1080,6 +1138,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         flex-direction: column;
         align-items: center;
         width: 100%;
+        margin: $subsection-margin;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
     }
 
     ._error-text {
@@ -1091,7 +1154,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
 
     .m-artwork-upload {
-        margin: var(--spacer-sm) 0 var(--spacer-xl);
+        margin: var(--spacer-sm);
         width: 100%;
     }
 
@@ -1154,7 +1217,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       --divider-display: block;
 
       ._step-container {
-        margin-bottom: var(--spacer-xl);
+        // margin-bottom: var(--spacer-xl);
       }
 
       .sf-input {
@@ -1170,7 +1233,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         min-width: 15rem;
       }
       ._step-number {
-        margin-bottom: var(--spacer-base);
+        margin-bottom: var(--spacer-lg);
       }
     }
 }
