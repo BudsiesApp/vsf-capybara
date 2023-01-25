@@ -177,6 +177,8 @@ import { ItemData } from 'src/modules/vsf-storyblok-module';
 import { BulkorderQuote, BulkOrderInfo, BulkOrderStatus, BulkorderQuoteProductId } from 'src/modules/budsies';
 import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
 import AddonOption from '../interfaces/addon-option.interface';
+import SelectedAddon from '../interfaces/selected-addon.interface';
+import { TranslateResult } from 'vue-i18n';
 
 export default (Vue as VueConstructor<Vue>).extend({
   props: {
@@ -191,9 +193,9 @@ export default (Vue as VueConstructor<Vue>).extend({
   },
   data () {
     return {
-      quoteId: undefined as number,
-      selectedAddons: [] as number[],
-      question: undefined as string,
+      quoteId: undefined as number | undefined,
+      selectedAddons: [] as SelectedAddon[],
+      question: undefined as string | undefined,
       isDataLoaded: false,
       isSubmitting: false,
       isShowSendMessageToManagerForm: false,
@@ -265,7 +267,7 @@ export default (Vue as VueConstructor<Vue>).extend({
     orderNoticesStoryContent (): ItemData | undefined {
       return this.getStoryContent(this.orderNoticesStorySlug);
     },
-    formTitle (): string {
+    formTitle (): TranslateResult {
       if (this.bulkorderInfo.bulkorderProductId === BulkorderQuoteProductId.PLUSHIE) {
         return this.$t('Bulk Quote');
       }
@@ -295,7 +297,7 @@ export default (Vue as VueConstructor<Vue>).extend({
     orderBulkSampleTitle (): string {
       return this.$t('Next Step: Get your sample - just') + ` ${this.sampleProductPrice}`;
     },
-    orderBulkSampleButtonTitle (): string {
+    orderBulkSampleButtonTitle (): TranslateResult {
       return this.$t(`Get Your Custom ${this.sampleProductName} Sample`);
     },
     sampleProductName (): string {
@@ -380,7 +382,7 @@ export default (Vue as VueConstructor<Vue>).extend({
     }
 
     if (this.quotes && this.quotes.length && !this.isBulkOrderInProgress) {
-      this.quoteId = this.quotes[0].id + '';
+      this.quoteId = this.quotes[0].id;
     }
   },
   methods: {
@@ -388,6 +390,10 @@ export default (Vue as VueConstructor<Vue>).extend({
       return '$' + price.toFixed(2);
     },
     getSavingsForQuote (quote: BulkorderQuote): string {
+      if (!this.quotes) {
+        return '';
+      }
+
       const quoteIndex = this.quotes.indexOf(quote);
 
       if (quoteIndex < 1 || !this.quotes.hasOwnProperty(quoteIndex - 1)) {
@@ -412,7 +418,8 @@ export default (Vue as VueConstructor<Vue>).extend({
       return story.story.content;
     },
     get3dRenderingAddonOptionValueId (): number | undefined {
-      const renderingAddon: AddonOption = this.addons.find((addon: AddonOption) => addon.sku.indexOf('3d_rendering') > -1);
+      const renderingAddon: AddonOption | undefined =
+       this.addons.find((addon: AddonOption) => addon.sku.indexOf('3d_rendering') > -1);
 
       return renderingAddon ? renderingAddon.optionValueId : undefined;
     },
@@ -440,7 +447,9 @@ export default (Vue as VueConstructor<Vue>).extend({
         await this.$store.dispatch('cart/connect', { guestCart: true });
       }
 
-      const include3dRendering = this.selectedAddons.includes(this.get3dRenderingAddonOptionValueId());
+      const include3dRendering = !!this.selectedAddons.find(
+        (selectedAddon) => selectedAddon.addonOptionValueId === this.get3dRenderingAddonOptionValueId()
+      );
 
       try {
         await this.$store.dispatch(
