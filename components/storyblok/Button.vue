@@ -52,9 +52,11 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     },
     linkField (): LinkField {
       const linkUrl = this.itemData.link_url;
-      const url = linkUrl.url ? linkUrl.url : linkUrl.email;
+      const url = linkUrl.email !== undefined
+        ? linkUrl.email
+        : linkUrl.url;
 
-      if (!url) {
+      if (url === undefined) {
         throw new Error('Url is not set');
       }
 
