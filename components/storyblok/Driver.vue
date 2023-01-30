@@ -16,6 +16,7 @@
         :srcsets="imageSources"
         :alt="itemData.alt_tag"
         :title="itemData.title_tag"
+        :width="itemData.width"
       />
 
       <span class="_driver-text" v-if="itemData.link_text">
@@ -101,7 +102,7 @@ $transition-zoom-in-time: 0.5s;
 
 .storyblok-driver {
   ._link {
-    display: block;
+    display: inline-block;
     text-decoration: none;
     position: relative;
   }

@@ -8,5 +8,6 @@ export default interface DriverData extends ItemData {
   title_tag: string,
   link_text: string,
   link_url: LinkField,
-  target_blank?: boolean
+  target_blank?: boolean,
+  width: string
 }
