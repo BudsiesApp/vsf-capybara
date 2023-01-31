@@ -118,7 +118,7 @@
               <SfButton
                 class="color-secondary _button"
               >
-                <router-link :to="{name: 'plushie-creation'}">
+                <router-link :to="{name: 'plush-sample'}">
                   Order Another Sample
                 </router-link>
               </SfButton>
