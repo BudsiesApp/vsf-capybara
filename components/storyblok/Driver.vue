@@ -102,7 +102,7 @@ $transition-zoom-in-time: 0.5s;
 
 .storyblok-driver {
   ._link {
-    display: inline-block;
+    display: block;
     text-decoration: none;
     position: relative;
   }
@@ -122,7 +122,7 @@ $transition-zoom-in-time: 0.5s;
   }
 
   ._image {
-    display: block;
+    vertical-align: bottom;
   }
 
   &.-zoom-effect {
