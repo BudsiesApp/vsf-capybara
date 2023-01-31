@@ -147,6 +147,10 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 .storyblok-image {
   text-align: center;
 
+  ._image {
+    vertical-align: bottom;
+  }
+
   &.-editor-preview-mode {
     ._image {
       pointer-events: none
