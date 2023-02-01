@@ -194,6 +194,11 @@ export default {
     await this.$nextTick();
     this.$refs.menu.active = this.$refs.menu.items;
     this.$refs.menu._computedWatchers.isMobile = undefined;
+  },
+  methods: {
+    getScrollingElement () {
+      return this.$refs['menu'].$el;
+    }
   }
 }
 </script>

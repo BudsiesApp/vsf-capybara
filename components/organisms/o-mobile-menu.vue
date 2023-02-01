@@ -3,10 +3,10 @@
     class="o-mobile-menu"
     v-show="show"
     @click.self="onMenuCloseHandler"
-    ref="mobile-menu"
   >
     <transition name="slide" @after-leave="show = false">
       <MMenu
+        ref="mobile-menu"
         v-show="isMobileMenu"
         class="_mobile-menu mobile-only"
         @close="onMenuCloseHandler"
@@ -38,6 +38,9 @@ export default Vue.extend({
   methods: {
     onMenuCloseHandler (): void {
       this.$store.commit('ui/closeMenu')
+    },
+    getMenuComponent (): InstanceType<typeof MMenu> {
+      return (this.$refs['mobile-menu'] as InstanceType<typeof MMenu>);
     }
   },
   watch: {
@@ -45,15 +48,12 @@ export default Vue.extend({
       if (this.isMobileMenu) {
         this.show = true;
 
-        // we can't add this style to body because sfui also add/remove overflow to body and there may be conflict
-        document.documentElement.style.overflow = 'hidden';
+        const scrollingElement = this.getMenuComponent().getScrollingElement();
 
         this.$nextTick(() => {
-          disableBodyScroll(this.$refs['mobile-menu']);
+          disableBodyScroll(scrollingElement);
         })
       } else {
-        document.documentElement.style.overflow = '';
-
         clearAllBodyScrollLocks();
       }
     }
