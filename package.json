@@ -14,7 +14,7 @@
   "dependencies": {
     "@cabbiepete/cloud-zoom": "https://github.com/GorbunovStudio/cloud-zoom.git#gorbunov-studio",
     "@storefront-ui/shared": "0.7.11",
-    "@storefront-ui/vue": "https://gitpkg.now.sh/BudsiesApp/storefront-ui/packages/vue?9b1c6c97cc532e70a8d30dfdfaf99fed99080968",
+    "@storefront-ui/vue": "https://gitpkg.now.sh/BudsiesApp/storefront-ui/packages/vue?06cccfdb5c320b8c5adbeac4b51e3082f380a45b",
     "@types/croppie": "^2.5.4",
     "@types/lodash.throttle": "^4.1.6",
     "@types/lodash.debounce": "^4.0.7",
