@@ -219,7 +219,7 @@
         </validation-provider>
       </div>
 
-      <SfDivider />
+      <SfDivider v-if="showAddonsStep" />
 
       <div class="_step-container" v-if="showAddonsStep">
         <SfHeading
@@ -392,12 +392,7 @@ interface PillowSizeOption {
 
 const sizeFromDescriptionRegex = /Size: (\d{1,2})/;
 
-const sneakPeakAddonOptionValueId = 82;
-const defaultSelectedAddon: SelectedAddon = {
-  addonOptionValueId: sneakPeakAddonOptionValueId,
-  optionsValues: {}
-};
-const hiddenAddonOptionValueIds = [sneakPeakAddonOptionValueId];
+const sneakPeakAddonSku = 'bulk_sample_sneak_peek';
 
 export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   props: {
@@ -441,7 +436,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       }
 
       return this.addons.filter(
-        (option) => !hiddenAddonOptionValueIds.includes(option.optionValueId)
+        (option) => !this.hiddenAddonOptionValueId ||
+         this.hiddenAddonOptionValueId !== option.optionValueId
       );
     },
     addons (): AddonOption[] {
@@ -565,6 +561,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     getBodypartOptions (): (id: string) => BodypartOption[] {
       return this.$store.getters['budsies/getBodypartOptions']
     },
+    hiddenAddonOptionValueId (): number | undefined {
+      if (!this.defaultSelectedAddon) {
+        return;
+      }
+
+      return this.defaultSelectedAddon.addonOptionValueId;
+    },
     isDisabled (): boolean {
       return this.isSubmitting;
     },
@@ -586,6 +589,18 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     customerTypeStepNumber (): number {
       return this.showAddonsStep ? this.addonsStepNumber + 1 : this.nameStepNumber + 1;
+    },
+    defaultSelectedAddon (): SelectedAddon | undefined {
+      const defaultAddonOption = this.addons.find((addon) => addon.sku === sneakPeakAddonSku);
+
+      if (!defaultAddonOption) {
+        return;
+      }
+
+      return {
+        addonOptionValueId: defaultAddonOption.optionValueId,
+        optionsValues: {}
+      }
     },
     existingCartItem (): CartItem | undefined {
       if (!this.existingPlushieId) {
@@ -657,7 +672,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         : 'required|between:6,16';
     },
     showAddonsStep (): boolean {
-      return this.addons.length > 0;
+      return this.availableAddonsForSelect.length > 0;
     },
     showColorPalette (): boolean {
       return this.type === BulksampleProduct.PLUSH && !!this.colorPaletteBodypart;
@@ -813,14 +828,15 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     fillDefaultSelectedAddon (): void {
       const hasDefaultSelectedAddon = this.selectedAddons.find(
-        (selectedAddon) => selectedAddon.addonOptionValueId === defaultSelectedAddon.addonOptionValueId
+        (selectedAddon) => this.defaultSelectedAddon &&
+          selectedAddon.addonOptionValueId === this.defaultSelectedAddon.addonOptionValueId
       );
 
-      if (hasDefaultSelectedAddon) {
+      if (hasDefaultSelectedAddon || !this.defaultSelectedAddon) {
         return;
       }
 
-      this.selectedAddons.push(defaultSelectedAddon);
+      this.selectedAddons.push(this.defaultSelectedAddon);
     },
     fillDescriptionFromCartItem (existingCartItem: CartItem): void {
       if (this.type === BulksampleProduct.PLUSH) {
