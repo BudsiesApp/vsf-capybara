@@ -110,7 +110,7 @@
               <SfButton
                 class="color-secondary _button"
               >
-                <router-link :to="{name: 'bulk-quote'}">
+                <router-link class="_inner" :to="{name: 'bulk-quote'}">
                   Add Another Design
                 </router-link>
               </SfButton>
@@ -118,7 +118,7 @@
               <SfButton
                 class="color-secondary _button"
               >
-                <router-link :to="{name: 'plush-sample'}">
+                <router-link class="_inner" :to="{name: 'plush-sample'}">
                   Order Another Sample
                 </router-link>
               </SfButton>
@@ -450,7 +450,13 @@ export default {
   ._button {
     --c-link: var(--c-primary);
     --c-link-hover: var(--c-primary);
+    --button-padding: 0;
+
     margin-top: var(--spacer-base);
+
+    ._inner {
+      padding: var(--spacer-sm) calc(var(--spacer-sm) * 1.5);
+    }
   }
 }
 
@@ -521,6 +527,10 @@ export default {
       flex: 0 0 26.8125rem;
       margin: 0 0 0 var(--spacer-xl);
     }
+  }
+
+  ._buttons-container ._button ._inner {
+    padding: var(--spacer-sm) calc(var(--spacer-sm) * 2);
   }
 }
 .collected-product-list {
