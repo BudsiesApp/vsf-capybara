@@ -470,16 +470,16 @@ export default Vue.extend({
       ::v-deep .multiselect {
 
         .multiselect__content-wrapper {
-          background-color: var(--c-dark-variant);
+          background-color: var(--c-black-lighten);
         }
 
         .multiselect__option {
-          background-color: var(--c-dark-variant);
+          background-color: var(--c-black-lighten);
           border-color: var(--c-gray-lighten);
+          color: var(--c-white-darken);
 
           &.multiselect__option--highlight {
             background-color: var(--c-dark-lighten);
-            color: var(--c-white-darken);
           }
         }
       }
