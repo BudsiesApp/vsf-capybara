@@ -68,6 +68,7 @@
             :label="$t('Size')"
             :valid="!$v.bulkSize || !$v.bulkSize.$error"
             :error-message="$t('This field is required')"
+            name="size"
             class="sf-input--required"
             v-model="bulkSize"
           />

@@ -33,14 +33,13 @@
         // Hack for detect iOS Safari
         @supports (-webkit-touch-callout: none) {
             --select-option-border-color: var(--c-gray-lighten);
-            --select-dropdown-background: var(--c-dark-variant);
+            --select-dropdown-background: var(--c-black-lighten);
 
             .sf-select-option {
-                color: var(--c-dark-darken);
+                color: var(--c-white-darken);
 
                 &.sf-select-option--is-active {
                     --select-option-background: var(--c-dark-lighten);
-                    color: var(--c-white-darken);
                 }
             }
 
