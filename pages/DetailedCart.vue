@@ -493,6 +493,7 @@ export default {
 
   &__aside {
     box-sizing: border-box;
+    margin: var(--spacer-base) 0 0;
   }
 
   @include for-desktop {
