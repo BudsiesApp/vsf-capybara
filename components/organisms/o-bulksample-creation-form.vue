@@ -106,6 +106,7 @@
             v-else-if="showSimpleSizeInput"
             v-model="size"
             class="-required"
+            name="simple-size"
             :label="$t('Size in inches')"
             :disabled="isDisabled"
             :error-message="errors[0]"
@@ -133,6 +134,7 @@
           <SfInput
             v-model="plushieName"
             class="-required"
+            name="plushie-name"
             :label="$t('Name')"
             :disabled="isDisabled"
             :error-message="errors[0]"
@@ -288,6 +290,7 @@
             :label="$t('Enter your email address')"
             v-model="email"
             class="-required"
+            name="email"
             :disabled="isDisabled"
             :error-message="errors[0]"
             :valid="!errors.length"

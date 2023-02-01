@@ -36,6 +36,7 @@
 
       <SfInput
         :label="$t('Project Name')"
+        name="project-name"
         v-model="name"
         :disabled="isDisabled"
         class="sf-input--required"
@@ -91,6 +92,7 @@
       <SfInput
         :label="$t('Quantity')"
         :disabled="isDisabled"
+        name="quantity"
         class="sf-input--required -quantity"
         v-model="quantity"
         :valid="!$v.value.quantity || !$v.value.quantity.$error"
@@ -121,6 +123,7 @@
         <SfInput
           :label="$t('Also quote this quantity:')"
           :disabled="isDisabled"
+          name="additional-quantity"
           v-model="additionalQuantity"
         />
       </div>
@@ -218,6 +221,7 @@
       <div class="_content --half">
         <SfInput
           :label="$t('First Name')"
+          name="first-name"
           v-model="customerFirstName"
           class="sf-input--required"
           :valid="!$v.value.customerFirstName || !$v.value.customerFirstName.$error"
@@ -226,11 +230,13 @@
 
         <SfInput
           :label="$t('Last Name')"
+          name="last-name"
           v-model="customerLastName"
         />
 
         <SfInput
           :label="$t('Your e-mail address')"
+          name="email"
           v-model="customerEmail"
           class="sf-input--required"
           :valid="!$v.value.customerEmail || !$v.value.customerEmail.$error"
@@ -243,6 +249,7 @@
 
         <SfInput
           :label="$t('Phone number')"
+          name="phone-number"
           v-model="customerPhone"
           class="sf-input--required"
           :valid="!$v.value.customerPhone || !$v.value.customerPhone.$error"
