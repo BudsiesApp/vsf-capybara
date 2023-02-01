@@ -66,10 +66,11 @@
     </SfMegaMenu>
   </div>
 </template>
-<script>
+<script lang="ts">
+import Vue from 'vue';
 import { SfMegaMenu, SfList, SfMenuItem } from '@storefront-ui/vue';
 
-export default {
+export default Vue.extend({
   components: { SfMegaMenu, SfList, SfMenuItem },
   props: {
     visible: {
@@ -192,15 +193,17 @@ export default {
   },
   async mounted () {
     await this.$nextTick();
-    this.$refs.menu.active = this.$refs.menu.items;
-    this.$refs.menu._computedWatchers.isMobile = undefined;
+
+    const menu: any = this.$refs.menu;
+    menu.active = menu.items;
+    menu._computedWatchers.isMobile = undefined;
   },
   methods: {
     getScrollingElement () {
-      return this.$refs['menu'].$el;
+      return (this.$refs['menu'] as Vue).$el;
     }
   }
-}
+})
 </script>
 <style lang="scss">
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";

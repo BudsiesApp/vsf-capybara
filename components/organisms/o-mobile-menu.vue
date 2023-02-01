@@ -39,8 +39,8 @@ export default Vue.extend({
     onMenuCloseHandler (): void {
       this.$store.commit('ui/closeMenu')
     },
-    getMenuComponent (): InstanceType<typeof MMenu> {
-      return (this.$refs['mobile-menu'] as InstanceType<typeof MMenu>);
+    getMenuComponent (): InstanceType<typeof MMenu> | undefined {
+      return (this.$refs['mobile-menu'] as InstanceType<typeof MMenu> | undefined);
     }
   },
   watch: {
@@ -48,7 +48,11 @@ export default Vue.extend({
       if (this.isMobileMenu) {
         this.show = true;
 
-        const scrollingElement = this.getMenuComponent().getScrollingElement();
+        const scrollingElement = this.getMenuComponent()?.getScrollingElement();
+
+        if (!scrollingElement) {
+          return;
+        }
 
         this.$nextTick(() => {
           disableBodyScroll(scrollingElement);
