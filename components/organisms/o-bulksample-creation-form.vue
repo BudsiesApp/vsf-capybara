@@ -591,7 +591,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     customerTypeStepNumber (): number {
       return this.showAddonsStep ? this.addonsStepNumber + 1 : this.nameStepNumber + 1;
     },
-    defaultPillowSize (): string | undefined {
+    defaultPillowSizeValue (): string | undefined {
       return this.pillowSizeOptions[0]?.value.toString();
     },
     defaultSelectedAddon (): SelectedAddon | undefined {
@@ -864,7 +864,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     fillSizeFromCartItem (existingCartItem: CartItem): void {
       this.size = '';
-      this.pillowSize = this.defaultPillowSize;
+      this.pillowSize = this.defaultPillowSizeValue;
 
       if (this.type === BulksampleProduct.KEYCHAIN) {
         return;
@@ -1061,7 +1061,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   created (): void {
     this.prefillEmail();
     this.fillDefaultSelectedAddon();
-    this.pillowSize = this.defaultPillowSize;
+    this.pillowSize = this.defaultPillowSizeValue;
   },
   beforeMount (): void {
     EventBus.$once('cart-after-loaded', this.onCartAfterLoadedEventHandler);
