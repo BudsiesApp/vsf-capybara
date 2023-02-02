@@ -348,6 +348,7 @@ import { required, between } from 'vee-validate/dist/rules';
 import Vue, { PropType, VueConstructor } from 'vue'
 import { TranslateResult } from 'vue-i18n';
 import { SfButton, SfCheckbox, SfHeading, SfSelect, SfDivider, SfInput } from '@storefront-ui/vue'
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { getProductGallery as getGalleryByProduct, setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 import * as catalogTypes from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
@@ -1059,12 +1060,12 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     this.fillDefaultSelectedAddon();
   },
   beforeMount (): void {
-    this.$bus.$once('cart-after-loaded', this.onCartAfterLoadedEventHandler);
-    this.$bus.$once('budsies-store-synchronized', this.prefillEmail);
+    EventBus.$once('cart-after-loaded', this.onCartAfterLoadedEventHandler);
+    EventBus.$once('budsies-store-synchronized', this.prefillEmail);
   },
   beforeDestroy (): void {
-    this.$bus.$off('cart-after-loaded', this.onCartAfterLoadedEventHandler)
-    this.$bus.$off('budsies-store-synchronized', this.prefillEmail);
+    EventBus.$off('cart-after-loaded', this.onCartAfterLoadedEventHandler)
+    EventBus.$off('budsies-store-synchronized', this.prefillEmail);
   },
   watch: {
     selectedAddons: {
