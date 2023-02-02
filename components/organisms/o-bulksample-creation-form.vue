@@ -1064,6 +1064,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     this.$bus.$off('budsies-store-synchronized', this.prefillEmail);
   },
   watch: {
+    existingCartItem (cartItem: CartItem | undefined) {
+      if (cartItem) {
+        this.fillPlushieDataFromCartItem(cartItem);
+      }
+    },
     selectedAddons: {
       handler (newValue: SelectedAddon[]) {
         if (!this.addonsBundleOption) {
