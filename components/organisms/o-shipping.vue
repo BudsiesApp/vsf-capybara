@@ -401,7 +401,6 @@ export default {
   &__element {
       margin: 0 0 var(--spacer-sm) 0;
   }
-
   @include for-desktop {
     display: flex;
     flex-wrap: wrap;
