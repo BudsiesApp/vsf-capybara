@@ -2,33 +2,33 @@
   <div class="o-order-success">
     <SfHeading
       class="_main-title"
-      :title="$t('Order Complete')"
+      :title="$t('Let the plushification begin!')"
       :level="1"
     />
+
     <SfHeading
       class="_main-subtitle"
-      :title="$t('Thank you for placing your Petsies order.')"
+      :title="$t('Thank you for your order.')"
       :level="3"
     />
+
     <SfHeading
       :level="4"
     >
       <template #title>
         <h4 class="sf-heading__title sf-heading__title--h4">
           {{ $t('Please feel free to email') }}
-          <a href="mailto:support@mypetsies.com">support@mypetsies.com</a>
+          <a href="mailto:info@stuffedanimalpros.com">info@stuffedanimalpros.com</a>
           {{ $t('if you have any questions.') }}
         </h4>
       </template>
     </SfHeading>
 
-    <p class="_confirmation">
-      {{ $t('You\'ll receive a confirmation email with your order number shortly!') }}
-    </p>
-
     <div class="_content">
       <div class="_left">
-        <img class="_success-icon" src="/assets/images/success-icon.jpg" alt="">
+        <video autoplay loop muted playsinline class="_success-icon">
+          <source src="/assets/success/video/success-icon.mp4" type="video/mp4">
+        </video>
       </div>
 
       <div class="_right">
@@ -39,42 +39,12 @@
             </div>
 
             <SfHeading
-              :title="$t('Get special birthday savings for your pet(s) (optional)')"
-              :level="3"
-            />
-          </div>
-
-          <MPetsBirthdayForm class="_section_content" />
-        </div>
-
-        <div class="_section">
-          <div class="_title">
-            <div class="_number">
-              2
-            </div>
-
-            <SfHeading
-              :title="$t('Does your pet have a special story?')"
-              :level="3"
-            />
-          </div>
-
-          <m-pet-special-story-form class="m-pet-special-story-form _section_content" />
-        </div>
-
-        <div class="_section">
-          <div class="_title">
-            <div class="_number">
-              3
-            </div>
-
-            <SfHeading
               :title="$t('Are you a trendsetter?')"
               :level="3"
             />
           </div>
 
-          <div class="_sharing-content _section_content">
+          <div class="_sharing-content _section-content">
             <p class="_text">
               {{ $t('Let your friends know about Petsies so they can make their own amazing custom plushies.') }}
             </p>
@@ -92,20 +62,66 @@
             </p>
           </div>
         </div>
+
+        <div class="_section">
+          <div class="_title">
+            <div class="_number">
+              2
+            </div>
+
+            <SfHeading
+              :title="$t('Check out our sister brands!')"
+              :level="3"
+            />
+          </div>
+
+          <div class="_section-content _brands-section">
+            <div class="_brands-container">
+              <div class="_brand-item" v-for="item in brandItems" :key="item.storeName">
+                <span>
+                  <a :href="item.link" target="_blank">
+                    {{ item.storeName }}
+                  </a>
+
+                  {{ item.text }}
+                </span>
+
+                <div class="_brand-content">
+                  <a :href="item.link" target="_blank">
+                    <img class="_image" :src="item.imageSrc">
+                  </a>
+
+                  <SfButton class="_button-link">
+                    <a class="_inner" :href="item.link" target="_blank">
+                      {{ item.buttonText }}
+                    </a>
+                  </SfButton>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import config from 'config';
 import Vue, { VueConstructor } from 'vue'
-import { SfHeading } from '@storefront-ui/vue';
+import { SfButton, SfHeading } from '@storefront-ui/vue';
 
 import MSocialSharing from 'theme/components/molecules/m-social-sharing.vue';
 
-import MPetSpecialStoryForm from './OOrderSuccess/m-pet-special-story-form.vue';
-import MPetsBirthdayForm from './OOrderSuccess/m-pets-birthday-form.vue';
 import { InjectType } from 'src/modules/shared';
+
+interface BrandItem {
+  link: string,
+  storeName: string,
+  text: string,
+  imageSrc: string,
+  buttonText: string
+}
 
 interface NonReactiveState {
   sharingData: {
@@ -114,7 +130,8 @@ interface NonReactiveState {
     eMailSubject: string,
     twitterDescription: string,
     image: string
-  }
+  },
+  brandItems: BrandItem[]
 }
 
 interface InjectedServices {
@@ -127,20 +144,42 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
     window: { from: 'WindowObject' }
   } as unknown as InjectType<InjectedServices>,
   components: {
-    MPetSpecialStoryForm,
-    MPetsBirthdayForm,
     MSocialSharing,
+    SfButton,
     SfHeading
   },
   created () {
     const baseUrl = this.window.location ? `${this.window.location.protocol}//${this.window.location.host}` : ''
-    this.sharingData = {
+    this.sharingData = { // TODO update
       sharingUrl: baseUrl,
       sharingDescription: `${this.$t('Woah! @Petsies makes a custom plush lookalike of your pet (just send them a photo!). Check out')} ${baseUrl}`,
       eMailSubject: this.$t('Check out Petsies - they make a custom plush lookalike of your pet!') as string,
       twitterDescription: this.$t('Now you can get a custom plush lookalike of your pet from @PetsiesOfficial. Check it out! https://t.co/YxtXW7CYJQ') as string,
       image: 'http://pbs.twimg.com/media/CqFVJ8bVYAI2fK0.jpg'
     };
+    this.brandItems = [
+      {
+        link: `https://${config.budsies.budsiesStoreDomain}/budsies-services/`,
+        storeName: 'Budsies',
+        text: this.$t('turns anyone\'s drawings into real custom stuffed animals. Bring your (or your child\'s) artwork to life!').toString(),
+        buttonText: this.$t('Visit {storeName}', { storeName: 'Budsies' }).toString(),
+        imageSrc: '/assets/success/images/budsies-advertising-image.jpg'
+      },
+      {
+        link: `https://${config.budsies.budsiesStoreDomain}/selfies-services/`,
+        storeName: 'Selfies',
+        text: this.$t(': Get a plush doll of anyone special in your life').toString(),
+        buttonText: this.$t('Visit {storeName}', { storeName: 'Selfies' }).toString(),
+        imageSrc: '/assets/success/images/selfies-advertising-image.jpg'
+      },
+      {
+        link: `https://${config.budsies.petsiesStoreDomain}`,
+        storeName: 'Petsies',
+        text: this.$t(': Handmade plush lookalikes of your real pets!').toString(),
+        buttonText: this.$t('Visit {storeName}', { storeName: 'Petsies' }).toString(),
+        imageSrc: '/assets/success/images/petsies-advertising-image.jpg'
+      }
+    ]
   },
   destroyed () {
     this.$store.dispatch('checkout/setThankYouPage', false);
@@ -185,6 +224,38 @@ $number-margin-right-desktop: var(--spacer-sm);
     max-width: 100%;
   }
 
+  ._brands-container {
+    display: grid;
+    grid-template-columns: auto;
+
+    ._brand-item {
+      box-sizing: border-box;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: var(--spacer-lg);
+      padding: 0 var(--spacer-sm);
+    }
+
+    ._brand-content,
+    .sf-button {
+      margin-top: var(--spacer-sm);
+    }
+
+    ._brand-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    ._image {
+      height: auto;
+      width: 100%;
+    }
+  }
+
   ._section {
     padding: 0 var(--spacer-sm);
     margin-bottom: var(--spacer-xl);
@@ -221,6 +292,15 @@ $number-margin-right-desktop: var(--spacer-sm);
     align-items: center;
   }
 
+  ._button-link {
+    --button-padding: 0;
+
+    ._inner {
+      padding: var(--spacer-sm) calc(var(--spacer-sm) * 2);
+      color: var(--color-white);
+    }
+  }
+
   ._text {
     text-align: center;
 
@@ -237,11 +317,16 @@ $number-margin-right-desktop: var(--spacer-sm);
         align-items: start;
         flex: 2;
         margin-bottom: 0;
+        margin-top: 3rem;
       }
 
       ._right {
         flex: 3;
       }
+    }
+
+    ._brands-container {
+      grid-template-columns: auto auto;
     }
 
     ._section {
@@ -258,8 +343,12 @@ $number-margin-right-desktop: var(--spacer-sm);
         margin-right: $number-margin-right-desktop;
       }
 
-      ._section_content {
+      ._section-content {
         padding-left: calc(#{$number-size} + #{$number-margin-right-desktop});
+
+        &._brands-section {
+          padding-left: $number-size;
+        }
       }
 
       &:first-child {

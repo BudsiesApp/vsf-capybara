@@ -60,42 +60,32 @@ export default Vue.extend({
 .sharing-buttons {
 
   .sharing-button {
-    background: url('/assets/sharing.png') no-repeat;
+    background-repeat: no-repeat;
     background-position: 0;
+    background-size: 100%;
     display: inline-block;
     height: 30px;
     width: 30px;
+    opacity: 0.8;
+
+    &:hover {
+      opacity: 1;
+    }
 
     &.-pinterest {
-      background-position: -30px 0;
-
-      &:hover {
-        background-position: -30px -30px;
-      }
+      background-image: url('/assets/sharing/pinterest.png');
     }
 
     &.-twitter {
-      background-position: -60px 0;
-
-      &:hover {
-        background-position: -60px -30px;
-      }
+      background-image: url('/assets/sharing/twitter.png');
     }
 
     &.-facebook {
-      background-position: -90px 0;
-
-      &:hover {
-        background-position: -90px -30px;
-      }
+      background-image: url('/assets/sharing/facebook.png');
     }
 
     &.-email {
-      background-position: 0 0;
-
-      &:hover {
-        background-position: 0 -30px;
-      }
+      background-image: url('/assets/sharing/email.png');
     }
   }
 }
