@@ -712,11 +712,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         return;
       }
 
+      this.isSubmitting = true;
+
       if (!this.plushieId) {
         this.plushieId = await this.createPlushie();
       }
-
-      this.isSubmitting = true;
 
       await this.$store.dispatch(
         'product/setBundleOptions',
