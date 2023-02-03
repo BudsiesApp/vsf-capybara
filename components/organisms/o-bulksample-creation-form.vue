@@ -43,6 +43,7 @@
         >
 
         <m-artwork-upload
+          ref="artworkUpload"
           :allow-multiple="true"
           :disabled="isDisabled"
           :product-id="backendProductId"
@@ -829,6 +830,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     fillCustomerImagesFromCartItem (existingCartItem: CartItem): void {
       this.customerImages = existingCartItem.customerImages || [];
       this.artworkUploadInitialItems = [ ...this.customerImages ];
+      this.updateArtworkUploader();
     },
     fillDefaultSelectedAddon (): void {
       const hasDefaultSelectedAddon = this.selectedAddons.find(
@@ -876,6 +878,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       }
 
       this.size = this.getSizeFromExistingCartItem(existingCartItem);
+    },
+    getArtworkUpload (): InstanceType<typeof MArtworkUpload> | undefined {
+      return this.$refs.artworkUpload as InstanceType<typeof MArtworkUpload> | undefined;
     },
     getBodypartsData (): Record<string, string[]> {
       let data: Record<string, string[]> = {};
@@ -993,6 +998,17 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     setBundleOptionValue (optionId: number, optionQty: number, optionSelections: number[]): void {
       this.$store.commit('product' + '/' + catalogTypes.PRODUCT_SET_BUNDLE_OPTION, { optionId, optionQty, optionSelections });
     },
+    async updateArtworkUploader (): Promise<void> {
+      await this.$nextTick();
+
+      const artworkUpload = this.getArtworkUpload();
+
+      if (!artworkUpload) {
+        return;
+      }
+
+      artworkUpload.initFiles();
+    },
     async updateClientAndServerItem (payload: {
       product: CartItem,
       forceUpdateServerItem?: boolean,
@@ -1062,6 +1078,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     this.prefillEmail();
     this.fillDefaultSelectedAddon();
     this.pillowSize = this.defaultPillowSizeValue;
+
+    if (this.existingCartItem) {
+      this.fillPlushieDataFromCartItem(this.existingCartItem);
+    }
   },
   beforeMount (): void {
     EventBus.$once('cart-after-loaded', this.onCartAfterLoadedEventHandler);
