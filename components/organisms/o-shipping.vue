@@ -5,11 +5,11 @@
       :level="3"
       class="sf-heading--left sf-heading--no-underline title"
     />
-    <div class="form" :disabled="isAddressFormDisabled">
+    <div class="form">
       <SfCheckbox
         v-if="currentUser && hasShippingDetails()"
         v-model="shipToMyAddress"
-        class="form__element form__checkbox -always-enabled"
+        class="form__element form__checkbox"
         name="shipToMyAddress"
         :label="$t('Ship to my default address')"
         :disabled="isFormFieldsDisabled"
@@ -257,9 +257,6 @@ export default {
     };
   },
   computed: {
-    isAddressFormDisabled () {
-      return this.shipToMyAddress;
-    },
     isPhoneNumberRequired () {
       return this.shipping.country && this.shipping.country !== 'US';
     },
@@ -403,15 +400,6 @@ export default {
   }
   &__element {
       margin: 0 0 var(--spacer-sm) 0;
-  }
-
-  &[disabled] {
-    .form__element {
-      &:not(.-always-enabled) {
-        pointer-events: none;
-        opacity: 0.75;
-      }
-    }
   }
 
   @include for-desktop {
