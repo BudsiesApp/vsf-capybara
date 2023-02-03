@@ -149,13 +149,15 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
     SfHeading
   },
   created () {
-    const baseUrl = this.window.location ? `${this.window.location.protocol}//${this.window.location.host}` : ''
-    this.sharingData = { // TODO update
+    const baseUrl = this.window.location ? `${this.window.location.protocol}//${this.window.location.host}` : '';
+    const description = `${baseUrl} ${this.$t('lets any person or brand turn their character into a real, custom, handmade stuffed animal. Check it out!')} ${baseUrl}`;
+
+    this.sharingData = {
       sharingUrl: baseUrl,
-      sharingDescription: `${this.$t('Woah! @Petsies makes a custom plush lookalike of your pet (just send them a photo!). Check out')} ${baseUrl}`,
-      eMailSubject: this.$t('Check out Petsies - they make a custom plush lookalike of your pet!') as string,
-      twitterDescription: this.$t('Now you can get a custom plush lookalike of your pet from @PetsiesOfficial. Check it out! https://t.co/YxtXW7CYJQ') as string,
-      image: 'http://pbs.twimg.com/media/CqFVJ8bVYAI2fK0.jpg'
+      sharingDescription: description,
+      eMailSubject: this.$t('Check out {websiteUrl} - super cool', { websiteUrl: baseUrl }) as string,
+      twitterDescription: description,
+      image: `${baseUrl}/assets/images/sharing/sharing-image.jpg`
     };
     this.brandItems = [
       {
@@ -200,13 +202,6 @@ $number-margin-right-desktop: var(--spacer-sm);
 
   ._main-subtitle {
     margin-bottom: var(--spacer-base);
-  }
-
-  ._confirmation {
-    color: var(--c-danger-variant);
-    text-align: center;
-    font-size: var(--font-base);
-    margin-top: var(--spacer-base);
   }
 
   ._content {
