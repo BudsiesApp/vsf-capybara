@@ -396,8 +396,6 @@ const sizeFromDescriptionRegex = /Size: (\d{1,2})/;
 
 const sneakPeakAddonSku = 'bulk_sample_sneak_peek';
 
-const pillowSizeProductSkuPrefix = 'simplePillowBulkSample';
-
 export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   props: {
     artworkUploadUrl: {
@@ -633,13 +631,16 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     pillowSizeOptions (): PillowSizeOption[] {
       const options: PillowSizeOption[] = [];
+      if (this.type !== BulksampleProduct.PILLOW) {
+        return options;
+      }
 
       if (!this.productBundleOption) {
         return options;
       }
 
       this.productBundleOption.product_links.forEach((productLink) => {
-        if (!productLink.product || !productLink.sku.startsWith(pillowSizeProductSkuPrefix)) {
+        if (!productLink.product) {
           return;
         }
 
