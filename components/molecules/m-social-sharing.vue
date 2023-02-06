@@ -58,6 +58,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .sharing-buttons {
+
   .sharing-button {
     background: url('/assets/images/sharing.png') no-repeat;
     background-position: 0;
