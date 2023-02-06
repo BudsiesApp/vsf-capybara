@@ -58,34 +58,43 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .sharing-buttons {
-
   .sharing-button {
-    background-repeat: no-repeat;
+    background: url('/assets/images/sharing.png') no-repeat;
     background-position: 0;
-    background-size: 100%;
     display: inline-block;
     height: 30px;
     width: 30px;
-    opacity: 0.8;
-
-    &:hover {
-      opacity: 1;
-    }
 
     &.-pinterest {
-      background-image: url('/assets/sharing/pinterest.png');
+      background-position: -30px 0;
+
+      &:hover {
+        background-position: -30px -30px;
+      }
     }
 
     &.-twitter {
-      background-image: url('/assets/sharing/twitter.png');
+      background-position: -60px 0;
+
+      &:hover {
+        background-position: -60px -30px;
+      }
     }
 
     &.-facebook {
-      background-image: url('/assets/sharing/facebook.png');
+      background-position: -90px 0;
+
+      &:hover {
+        background-position: -90px -30px;
+      }
     }
 
     &.-email {
-      background-image: url('/assets/sharing/email.png');
+      background-position: 0 0;
+
+      &:hover {
+        background-position: 0 -30px;
+      }
     }
   }
 }

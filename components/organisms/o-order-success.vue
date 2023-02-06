@@ -159,7 +159,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
       sharingDescription: description,
       eMailSubject: this.$t('Check out {websiteUrl} - super cool', { websiteUrl: baseUrl }) as string,
       twitterDescription: description,
-      image: `${baseUrl}/assets/images/sharing/sharing-image.jpg`
+      image: `${baseUrl}/assets/images/sharing-image.jpg`
     };
     this.brandItems = [
       {
