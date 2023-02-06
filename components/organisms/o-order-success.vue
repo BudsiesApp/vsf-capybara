@@ -1,28 +1,30 @@
 <template>
   <div class="o-order-success">
-    <SfHeading
-      class="_main-title"
-      :title="$t('Let the plushification begin!')"
-      :level="1"
-    />
+    <div class="_headings">
+      <SfHeading
+        class="_main-title"
+        :title="$t('Let the plushification begin!')"
+        :level="1"
+      />
 
-    <SfHeading
-      class="_main-subtitle"
-      :title="$t('Thank you for your order.')"
-      :level="3"
-    />
+      <SfHeading
+        class="_main-subtitle"
+        :title="$t('Thank you for your order.')"
+        :level="3"
+      />
 
-    <SfHeading
-      :level="4"
-    >
-      <template #title>
-        <h4 class="sf-heading__title sf-heading__title--h4">
-          {{ $t('Please feel free to email') }}
-          <a href="mailto:info@stuffedanimalpros.com">info@stuffedanimalpros.com</a>
-          {{ $t('if you have any questions.') }}
-        </h4>
-      </template>
-    </SfHeading>
+      <SfHeading
+        :level="4"
+      >
+        <template #title>
+          <h4 class="sf-heading__title sf-heading__title--h4">
+            {{ $t('Please feel free to email') }}
+            <a href="mailto:info@stuffedanimalpros.com">info@stuffedanimalpros.com</a>
+            {{ $t('if you have any questions.') }}
+          </h4>
+        </template>
+      </SfHeading>
+    </div>
 
     <div class="_content">
       <div class="_left">
@@ -196,6 +198,10 @@ $number-size: 50px;
 $number-margin-right-desktop: var(--spacer-sm);
 
 .o-order-success {
+  ._headings {
+    padding: 0 var(--spacer-sm);
+  }
+
   ._main-title {
     margin-bottom: var(--spacer-lg);
   }
@@ -231,7 +237,7 @@ $number-margin-right-desktop: var(--spacer-sm);
       justify-content: space-between;
       align-items: center;
       margin-top: var(--spacer-lg);
-      padding: 0 var(--spacer-sm);
+      padding: 0;
     }
 
     ._brand-content,
@@ -321,7 +327,11 @@ $number-margin-right-desktop: var(--spacer-sm);
     }
 
     ._brands-container {
-      grid-template-columns: auto auto;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+
+      ._brand-item {
+        padding: 0 var(--spacer-sm);
+      }
     }
 
     ._section {
