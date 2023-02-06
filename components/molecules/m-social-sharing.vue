@@ -60,7 +60,7 @@ export default Vue.extend({
 .sharing-buttons {
 
   .sharing-button {
-    background: url('/assets/sharing.png') no-repeat;
+    background: url('/assets/images/sharing.png') no-repeat;
     background-position: 0;
     display: inline-block;
     height: 30px;
