@@ -63,7 +63,7 @@ import { SfButton, SfSelect, SfHeading } from '@storefront-ui/vue';
 
 import Product from 'core/modules/catalog/types/Product';
 import { BundleOption, BundleOptionsProductLink } from 'core/modules/catalog/types/BundleOption';
-import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo } from 'src/modules/budsies';
+import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo, vuexTypes as budsiesTypes } from 'src/modules/budsies';
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
 
@@ -234,6 +234,11 @@ export default BulkorderBaseFormPersistanceState.extend({
     },
     async submitBulkorder (): Promise<void> {
       this.isSubmitting = true;
+
+      this.$store.commit(
+        budsiesTypes.SN_BUDSIES + '/' + budsiesTypes.CUSTOMER_EMAIL_SET,
+        { email: this.bulkordersBaseFormData.customerEmail }
+      );
 
       try {
         const bulkOrderId = await this.$store.dispatch(

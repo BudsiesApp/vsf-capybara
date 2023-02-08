@@ -27,7 +27,7 @@ import i18n from '@vue-storefront/i18n';
 
 import Product from 'core/modules/catalog/types/Product';
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
-import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo } from 'src/modules/budsies';
+import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo, vuexTypes as budsiesTypes } from 'src/modules/budsies';
 
 import MBaseForm from './m-base-form.vue';
 import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
@@ -132,6 +132,11 @@ export default BulkorderBaseFormPersistanceState.extend({
     },
     async submitBulkorder (): Promise<void> {
       this.isSubmitting = true;
+
+      this.$store.commit(
+        budsiesTypes.SN_BUDSIES + '/' + budsiesTypes.CUSTOMER_EMAIL_SET,
+        { email: this.bulkordersBaseFormData.customerEmail }
+      );
 
       try {
         const bulkOrderId = await this.$store.dispatch(
