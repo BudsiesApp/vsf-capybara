@@ -2,4 +2,8 @@
     --header-background: var(--c-blue);
     --header-navigation-item-font-family: var(--font-family-primary);
     --header-navigation-item-color: var(--c-white);
+
+    .sf-header-navigation-item > *:not(.sf-mega-menu):focus {
+        --header-navigation-item-color: var(--c-white);
+    }
 }

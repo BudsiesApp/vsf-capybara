@@ -116,7 +116,7 @@ export default BulkorderBaseFormPersistanceState.extend({
     return {
       bulkordersBaseFormData,
       isSubmitting: false,
-      pillowSize: undefined,
+      pillowSize: undefined as string | undefined,
       showCalculationAnimation: false,
       onCalculationAnimationFinished: () => {}
     }
@@ -124,6 +124,9 @@ export default BulkorderBaseFormPersistanceState.extend({
   computed: {
     bulkOrderInfo (): BulkOrderInfo | undefined {
       return this.$store.getters['budsies/getBulkorderInfo'];
+    },
+    defaultPillowSizeValue (): string | undefined {
+      return this.pillowSizeOptions[0]?.value.toString();
     },
     isDisabled (): boolean {
       return this.isSubmitting;
@@ -161,6 +164,7 @@ export default BulkorderBaseFormPersistanceState.extend({
   },
   async beforeMount (): Promise<void> {
     const state = await this.getPersistedState();
+    this.pillowSize = this.defaultPillowSizeValue;
 
     if (!state) {
       return;

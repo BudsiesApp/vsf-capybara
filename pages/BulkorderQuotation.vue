@@ -31,7 +31,6 @@ export default Vue.extend({
   },
   data () {
     return {
-      isRouterLeaving: false,
       isDataLoaded: false
     };
   },
@@ -84,15 +83,8 @@ export default Vue.extend({
       this.isDataLoaded = true;
     }
   },
-  beforeDestroy () {
-    // Hot-reload workaround (old component instance is destroyed after new one has been created)
-    // https://github.com/vuejs/vue/issues/6518
-    if (this.isRouterLeaving) {
-      this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
-    }
-  },
   beforeRouteLeave (to, from, next) {
-    this.isRouterLeaving = true
+    this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
     next();
   },
   methods: {

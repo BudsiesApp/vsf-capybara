@@ -43,6 +43,7 @@
         >
 
         <m-artwork-upload
+          ref="artworkUpload"
           :allow-multiple="true"
           :disabled="isDisabled"
           :product-id="backendProductId"
@@ -316,7 +317,7 @@
               <span>
                 {{ $t('I agree to ') }}
 
-                <a href="" target="_blank">{{ $t('Bulk Order Customer Agreement') }}</a>,
+                <a href="/media/bulkOrder/agreement/Standard_Bulk_Order_Customer_Agreement.pdf" target="_blank">{{ $t('Bulk Order Customer Agreement') }}</a>,
 
                 <a href="/terms-of-service/">{{ $t('Terms of Service') }}</a>, and
 
@@ -348,6 +349,7 @@ import { required, between } from 'vee-validate/dist/rules';
 import Vue, { PropType, VueConstructor } from 'vue'
 import { TranslateResult } from 'vue-i18n';
 import { SfButton, SfCheckbox, SfHeading, SfSelect, SfDivider, SfInput } from '@storefront-ui/vue'
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { getProductGallery as getGalleryByProduct, setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 import * as catalogTypes from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
@@ -590,6 +592,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     customerTypeStepNumber (): number {
       return this.showAddonsStep ? this.addonsStepNumber + 1 : this.nameStepNumber + 1;
     },
+    defaultPillowSizeValue (): string | undefined {
+      return this.pillowSizeOptions[0]?.value.toString();
+    },
     defaultSelectedAddon (): SelectedAddon | undefined {
       const defaultAddonOption = this.addons.find((addon) => addon.sku === sneakPeakAddonSku);
 
@@ -626,6 +631,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     pillowSizeOptions (): PillowSizeOption[] {
       const options: PillowSizeOption[] = [];
+      if (this.type !== BulksampleProduct.PILLOW) {
+        return options;
+      }
 
       if (!this.productBundleOption) {
         return options;
@@ -708,11 +716,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         return;
       }
 
+      this.isSubmitting = true;
+
       if (!this.plushieId) {
         this.plushieId = await this.createPlushie();
       }
-
-      this.isSubmitting = true;
 
       await this.$store.dispatch(
         'product/setBundleOptions',
@@ -825,6 +833,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     fillCustomerImagesFromCartItem (existingCartItem: CartItem): void {
       this.customerImages = existingCartItem.customerImages || [];
       this.artworkUploadInitialItems = [ ...this.customerImages ];
+      this.updateArtworkUploader();
     },
     fillDefaultSelectedAddon (): void {
       const hasDefaultSelectedAddon = this.selectedAddons.find(
@@ -860,7 +869,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     fillSizeFromCartItem (existingCartItem: CartItem): void {
       this.size = '';
-      this.pillowSize = undefined;
+      this.pillowSize = this.defaultPillowSizeValue;
 
       if (this.type === BulksampleProduct.KEYCHAIN) {
         return;
@@ -872,6 +881,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       }
 
       this.size = this.getSizeFromExistingCartItem(existingCartItem);
+    },
+    getArtworkUpload (): InstanceType<typeof MArtworkUpload> | undefined {
+      return this.$refs.artworkUpload as InstanceType<typeof MArtworkUpload> | undefined;
     },
     getBodypartsData (): Record<string, string[]> {
       let data: Record<string, string[]> = {};
@@ -960,6 +972,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       this.customerImages.splice(index, 1);
     },
+    onCartAfterLoadedEventHandler (): void {
+      if (this.existingCartItem) {
+        this.fillPlushieDataFromCartItem(this.existingCartItem)
+      }
+    },
     onFailure (message: any): void {
       this.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
@@ -983,6 +1000,17 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     setBundleOptionValue (optionId: number, optionQty: number, optionSelections: number[]): void {
       this.$store.commit('product' + '/' + catalogTypes.PRODUCT_SET_BUNDLE_OPTION, { optionId, optionQty, optionSelections });
+    },
+    async updateArtworkUploader (): Promise<void> {
+      await this.$nextTick();
+
+      const artworkUpload = this.getArtworkUpload();
+
+      if (!artworkUpload) {
+        return;
+      }
+
+      artworkUpload.initFiles();
     },
     async updateClientAndServerItem (payload: {
       product: CartItem,
@@ -1052,16 +1080,19 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   created (): void {
     this.prefillEmail();
     this.fillDefaultSelectedAddon();
+    this.pillowSize = this.defaultPillowSizeValue;
 
     if (this.existingCartItem) {
-      this.fillPlushieDataFromCartItem(this.existingCartItem)
+      this.fillPlushieDataFromCartItem(this.existingCartItem);
     }
   },
   beforeMount (): void {
-    this.$bus.$once('budsies-store-synchronized', this.prefillEmail);
+    EventBus.$once('cart-after-loaded', this.onCartAfterLoadedEventHandler);
+    EventBus.$once('budsies-store-synchronized', this.prefillEmail);
   },
   beforeDestroy (): void {
-    this.$bus.$off('budsies-store-synchronized', this.prefillEmail);
+    EventBus.$off('cart-after-loaded', this.onCartAfterLoadedEventHandler)
+    EventBus.$off('budsies-store-synchronized', this.prefillEmail);
   },
   watch: {
     selectedAddons: {
