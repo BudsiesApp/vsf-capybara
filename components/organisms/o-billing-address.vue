@@ -79,7 +79,7 @@
         :disabled="isFormFieldsDisabled"
       />
       <MMultiselect
-        v-if="isSelectedCountryHasStates && canShowStateSelector"
+        v-if="isSelectedCountryHasStates"
         v-model.trim="payment.state"
         class="
           form__element
@@ -195,8 +195,6 @@ import {
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
-const addressKeys = ['firstName', 'lastName', 'phoneNumber', 'country', 'city', 'state', 'streetAddress', 'zipCode'];
-
 const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/);
 
 export default {
@@ -258,8 +256,7 @@ export default {
   },
   data: () => {
     return {
-      states: States,
-      fCanShowStateSelector: false
+      states: States
     };
   },
   computed: {
@@ -285,9 +282,6 @@ export default {
       }
 
       return this.states[this.payment.country];
-    },
-    canShowStateSelector () {
-      return this.fCanShowStateSelector;
     },
     getPaymentCountry () {
       return this.payment.country;
@@ -318,29 +312,9 @@ export default {
       }
 
       return false;
-    },
-    isShippingAndBillingAddressesEquals () {
-      const paymentDetails = this.$store.getters['checkout/getPaymentDetails'];
-      const shippingDetails = this.$store.getters['checkout/getShippingDetails'];
-
-      return addressKeys.every(
-        (key) => paymentDetails[key] === shippingDetails[key]
-      );
-    },
-    isBillingAddressEmpty () {
-      const paymentDetails = this.$store.getters['checkout/getPaymentDetails'];
-      return addressKeys.every((key) => !paymentDetails[key] || key === 'country');
-    }
-  },
-  created () {
-    if (this.isShippingAndBillingAddressesEquals || this.isBillingAddressEmpty) {
-      this.sendToShippingAddress = true;
     }
   },
   mounted () {
-    this.$nextTick(() => {
-      this.fCanShowStateSelector = true;
-    })
     createSmoothscroll(
       document.documentElement.scrollTop || document.body.scrollTop,
       0
@@ -349,6 +323,7 @@ export default {
   methods: {
     async changeCountry () {
       await this.$nextTick();
+      this.payment.state = '';
       this.validateCountryRelatedFields();
 
       await Promise.all([
@@ -373,24 +348,9 @@ export default {
   },
   watch: {
     getPaymentCountry (after, before) {
-      this.fCanShowStateSelector = false;
-
-      if (
-        after &&
-        before &&
-        !this.sendToBillingAddress &&
-        !this.sendToShippingAddress
-      ) {
-        this.payment.state = '';
-      }
-
       if (after && before !== after) {
         this.changeCountry();
       }
-
-      this.$nextTick(() => {
-        this.fCanShowStateSelector = true;
-      });
     }
   }
 };
