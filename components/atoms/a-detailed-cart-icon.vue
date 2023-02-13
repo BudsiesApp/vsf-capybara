@@ -1,6 +1,6 @@
 <template>
   <SfButton
-    class="sf-button--pure a-microcart-icon"
+    class="sf-button--pure a-microcart-icon a-detailed-cart-icon"
     :class="extraCssClasses"
     @click="openDetailedCart"
   >
