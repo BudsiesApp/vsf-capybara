@@ -19,7 +19,7 @@
         v-model="sendToBillingAddress"
         class="form__element form__checkbox -always-enabled"
         name="sendToBillingAddress"
-        :label="$t('Use my billing data')"
+        :label="$t('Use my default billing data')"
         :disabled="isFormFieldsDisabled"
       />
       <SfInput
