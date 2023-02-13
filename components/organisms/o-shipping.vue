@@ -7,7 +7,7 @@
     />
     <div class="form" :disabled="isAddressFormDisabled">
       <SfCheckbox
-        v-if="currentUser && hasShippingDetails()"
+        v-if="currentUser && hasDefaultShippingAddress"
         v-model="shipToMyAddress"
         class="form__element form__checkbox -always-enabled"
         name="shipToMyAddress"
@@ -71,7 +71,7 @@
         :disabled="isFormFieldsDisabled"
       />
       <MMultiselect
-        v-if="isSelectedCountryHasStates && canShowStateSelector"
+        v-if="isSelectedCountryHasStates"
         v-model.trim="shipping.state"
         class="form__element form__element--half form__element--half-even form__select"
         name="state"
@@ -252,7 +252,6 @@ export default {
   data: () => {
     return {
       states: States,
-      fCanShowStateSelector: true,
       fZipCodeChanged: false
     };
   },
@@ -276,9 +275,6 @@ export default {
       }
 
       return this.states[this.shipping.country];
-    },
-    canShowStateSelector () {
-      return this.fCanShowStateSelector
     },
     getShippingCountry () {
       return this.shipping.country;
@@ -304,6 +300,7 @@ export default {
     async onChangeCountry () {
       this.changeCountry();
       await this.$nextTick();
+      this.shipping.state = '';
       this.validateCountryRelatedFields();
     },
     onZipCodeBlur () {
@@ -344,20 +341,6 @@ export default {
     createSmoothscroll(document.documentElement.scrollTop || document.body.scrollTop, 0);
   },
   watch: {
-    getShippingCountry: {
-      handler (after, before) {
-        this.fCanShowStateSelector = false;
-
-        if (after && before) {
-          this.shipping.state = '';
-        }
-
-        this.$nextTick(() => {
-          this.fCanShowStateSelector = true;
-        })
-      },
-      immediate: true
-    },
     getZipCode: {
       handler () {
         this.fZipCodeChanged = true;
