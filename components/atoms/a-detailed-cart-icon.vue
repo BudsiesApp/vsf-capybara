@@ -52,14 +52,18 @@ export default {
 .a-detailed-cart-icon {
   position: relative;
 
+  .sf-header__icon {
+    cursor: pointer;
+  }
+
   &.-skin-bulkorders {
     .sf-icon__badge {
       --badge-background: var(--c-primary);
     }
-  }
 
-  .sf-header__icon {
-    cursor: pointer;
+    .sf-header__icon:hover {
+      --icon-color: var(--c-secondary);
+    }
   }
 }
 </style>
