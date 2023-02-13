@@ -48,7 +48,7 @@
 
           <div class="_sharing-content _section-content">
             <p class="_text">
-              {{ $t('Let your friends know about Petsies so they can make their own amazing custom plushies.') }}
+              {{ $t('Let your colleagues know about Stuffed Animal Pros so they can make their own amazing custom plushies.') }}
             </p>
 
             <m-social-sharing

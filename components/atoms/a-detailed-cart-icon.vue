@@ -56,10 +56,6 @@ export default {
 
   .sf-header__icon {
     cursor: pointer;
-
-    &:hover {
-      --icon-color: var(--c-secondary);
-    }
   }
 
   &.-skin-bulkorders {

@@ -18,7 +18,7 @@
           <AOrderedHeading
             :order="4"
             :level="3"
-            :title="$t('Color Pallette')"
+            :title="$t('Color Palette')"
             class="_title -required"
           />
 
@@ -34,7 +34,7 @@
             :disabled="isDisabled"
             compact-mode
             type="bodypart"
-            class="_color-pallette"
+            class="_color-palette"
           />
 
           <div class="_error-text -center" v-if="$v.color.$error">
@@ -406,7 +406,7 @@ export default BulkorderBaseFormPersistanceState.extend({
         text-align: center;
     }
 
-    ._color-pallette {
+    ._color-palette {
       text-align: center;
       margin: var(--spacer-base) 0;
     }
