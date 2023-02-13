@@ -92,9 +92,9 @@
         {{ $t('Compare to') }} $750!
       </p>
 
-      <p class="_order-notices">
+      <div class="_order-notices">
         <Blok :item="orderNoticesStoryContent" v-if="orderNoticesStoryContent" />
-      </p>
+      </div>
 
       <m-addons-selector
         v-model="selectedAddons"
@@ -142,7 +142,7 @@
           :disabled="isDisabled"
           @click="submitQuestion"
         >
-          Submit
+          {{ $t('Submit') }}
         </SfButton>
       </div>
       <p v-if="isQuestionSubmitted">
@@ -157,9 +157,9 @@
       :level="2"
     />
 
-    <p class="_more-info" v-if="moreInfoStoryContent">
+    <div class="_more-info" v-if="moreInfoStoryContent">
       <Blok :item="moreInfoStoryContent" />
-    </p>
+    </div>
   </div>
 </template>
 
@@ -193,7 +193,7 @@ export default (Vue as VueConstructor<Vue>).extend({
   },
   data () {
     return {
-      quoteId: undefined as number | undefined,
+      quoteId: undefined as string | undefined,
       selectedAddons: [] as SelectedAddon[],
       question: undefined as string | undefined,
       isDataLoaded: false,
@@ -382,7 +382,7 @@ export default (Vue as VueConstructor<Vue>).extend({
     }
 
     if (this.quotes && this.quotes.length && !this.isBulkOrderInProgress) {
-      this.quoteId = this.quotes[0].id;
+      this.quoteId = this.quotes[0].id.toString();
     }
   },
   methods: {
@@ -455,7 +455,7 @@ export default (Vue as VueConstructor<Vue>).extend({
         await this.$store.dispatch(
           'budsies/chooseBulkOrderQuote',
           {
-            quoteId: this.quoteId,
+            quoteId: Number.parseInt(this.quoteId, 10),
             include3dRendering
           }
         );
