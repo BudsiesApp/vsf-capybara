@@ -48,12 +48,8 @@ export default {
 .a-detailed-cart-icon {
   position: relative;
 
-  ::v-deep .sf-header__icon {
+  .sf-header__icon {
     cursor: pointer;
-
-    &:hover {
-      --icon-color: var(--c-secondary);
-    }
   }
 }
 </style>
