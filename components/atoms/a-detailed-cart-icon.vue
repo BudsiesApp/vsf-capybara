@@ -22,6 +22,8 @@
 import { mapGetters } from 'vuex';
 import { SfIcon, SfButton, SfBadge } from '@storefront-ui/vue';
 
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
+
 export default {
   components: { SfIcon, SfButton, SfBadge },
   props: {
@@ -33,7 +35,10 @@ export default {
   computed: {
     ...mapGetters({
       totalQuantity: 'cart/getItemsTotalQuantity'
-    })
+    }),
+    extraCssClasses () {
+      return [getCurrentThemeClass()];
+    }
   },
   methods: {
     openDetailedCart () {
@@ -46,6 +51,13 @@ export default {
 <style lang="scss" scoped>
 .a-detailed-cart-icon {
   position: relative;
+
+  &.-skin-bulkorders {
+    .sf-icon__badge {
+      --badge-background: var(--c-primary);
+    }
+  }
+
   .sf-header__icon {
     cursor: pointer;
   }
