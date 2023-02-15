@@ -19,6 +19,7 @@ import { Braintree } from 'src/modules/payment-braintree'
 import { PromotionPlatformModule } from 'src/modules/promotion-platform'
 import { AmazonPay } from 'src/modules/vsf-amazon-pay'
 import { PaymentBackendMethodsModule } from 'src/modules/payment-backend-methods'
+import { PaymentAffirm } from 'src/modules/payment-affirm';
 import { UrlRewriteModule } from 'src/modules/url-rewrite';
 import { mappingFallbackForUrlRewrite } from 'src/modules/url-rewrite/mappingFallback';
 import { BackendSettings } from 'src/modules/backend-settings';
@@ -69,6 +70,7 @@ export function registerClientModules () {
   registerModule(Braintree)
   registerModule(PromotionPlatformModule)
   registerModule(PaymentBackendMethodsModule)
+  registerModule(PaymentAffirm)
   registerModule(UrlRewriteModule)
   registerModule(BackendSettings)
   registerModule(ErrorLoggingModule)
