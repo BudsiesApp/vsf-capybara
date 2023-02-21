@@ -87,11 +87,6 @@ export default Vue.extend({
     SfButton,
     OProductCard
   },
-  data: function () {
-    return {
-      isRouterLeaving: false
-    }
-  },
   computed: {
     crossSellsProducts (): any[] {
       if (!this.getCurrentProduct) {
@@ -145,15 +140,8 @@ export default Vue.extend({
     await this.setCurrentProduct();
   },
   beforeRouteLeave (to, from, next) {
-    this.isRouterLeaving = true
+    this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
     next();
-  },
-  beforeDestroy () {
-    // Hot-reload workaround (old component instance is destroyed after new one has been created)
-    // https://github.com/vuejs/vue/issues/6518
-    if (this.isRouterLeaving) {
-      this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
-    }
   },
   methods: {
     getProductLinkSkusByType (type: string): string[] {
