@@ -47,48 +47,45 @@
       :key="bodypart.id"
       tag="div"
     >
-      <SfHeading
-        class="-required "
-        :level="3"
-        :title="bodypart.name"
-        :ref="getFieldAnchorName(bodypart.name)"
-      />
-
-      <div
-        class="_helper-text"
-        v-if="bodypart.code === 'forevers_color_palette'"
-      >
-        {{ $t('You may select up to 3 most prominent color(s) of your animal to assist our team.') }}
-      </div>
-
-      <div
-        v-if="bodypart.code === 'eye_color'"
-      >
-        (<a
-          class="_popup-link"
-          href="javascript:void(0)"
-          @click="areEyeColorNotesVisible = true"
-        ><b>?</b></a>)
-      </div>
-
       <m-bodypart-option-configurator
         class="_options-list"
         :name="bodypart.code"
-        v-model="bodypartsValues[bodypart.id]"
+        :value="bodypartsValues[bodypart.id]"
         :max-values="bodypart.maxValues"
-        :options="getBodypartOptions(bodypart.id)"
+        :body-part="bodypart"
         type="bodypart"
         :disabled="disabled"
-      />
-
-      <div
-        class="_helper-text"
-        v-if="bodypart.code === 'forevers_color_palette'"
+        @input="onInput"
       >
-        {{ $t('Click a selected color to deselect it') }}. <br>
+        <template #heading>
+          <SfHeading
+            class="-required "
+            :level="3"
+            :title="bodypart.name"
+            :ref="getFieldAnchorName(bodypart.name)"
+          />
+        </template>
 
-        {{ $t('Your color input is especially helpful when photos are blurry or poorly lit. If left blank, our designers will use their professional judgement.') }}
-      </div>
+        <template #top-helper-text>
+          <div
+            class="_helper-text"
+            v-if="bodypart.code === 'forevers_color_palette'"
+          >
+            {{ $t('You may select up to 3 most prominent color(s) of your animal to assist our team.') }}
+          </div>
+        </template>
+
+        <template #bottom-helper-text>
+          <div
+            class="_helper-text"
+            v-if="bodypart.code === 'forevers_color_palette'"
+          >
+            {{ $t('Click a selected color to deselect it') }}. <br>
+
+            {{ $t('Your color input is especially helpful when photos are blurry or poorly lit. If left blank, our designers will use their professional judgement.') }}
+          </div>
+        </template>
+      </m-bodypart-option-configurator>
 
       <div class="_error-text">
         {{ errors[0] }}
@@ -241,16 +238,6 @@
         />
       </div>
     </SfModal>
-
-    <SfModal
-      :visible="areEyeColorNotesVisible"
-      @close="areEyeColorNotesVisible = false"
-    >
-      <div class="_popup-content">
-        If your pet has different color eyes, <br>
-        please indicate in Special Instructions
-      </div>
-    </SfModal>
   </validation-observer>
 </template>
 
@@ -261,11 +248,10 @@ import { required } from 'vee-validate/dist/rules';
 
 import { SfHeading, SfButton, SfModal, SfSelect } from '@storefront-ui/vue';
 import Product from 'core/modules/catalog/types/Product';
-import { getProductGallery as getGalleryByProduct } from '@vue-storefront/core/modules/catalog/helpers';
 import { BundleOption } from 'core/modules/catalog/types/BundleOption';
 import { Logger } from '@vue-storefront/core/lib/logger';
 
-import { isVue, getProductDefaultPrice } from 'src/modules/shared';
+import { isVue } from 'src/modules/shared';
 import { Bodypart, BodypartOption } from 'src/modules/budsies';
 
 import MAddonsSelector from '../../molecules/m-addons-selector.vue';
@@ -351,8 +337,7 @@ export default Vue.extend({
   },
   data () {
     return {
-      areQuantityNotesVisible: false,
-      areEyeColorNotesVisible: false
+      areQuantityNotesVisible: false
     }
   },
   computed: {
@@ -379,6 +364,7 @@ export default Vue.extend({
         return this.value.bodypartsValues;
       },
       set (value: Record<string, BodypartOption | BodypartOption[] | undefined>): void {
+        debugger;
         const newValue: ForeversWizardCustomizeStepData = { ...this.value, bodypartsValues: value };
         this.$emit('input', newValue);
       }
@@ -433,9 +419,6 @@ export default Vue.extend({
 
       return bodyparts;
     },
-    getBodypartOptions (): (id: string) => BodypartOption[] {
-      return this.$store.getters['budsies/getBodypartOptions']
-    },
     productionTimeOptions (): ProductionTimeOption[] {
       if (!this.productionTimeBundleOption) {
         return []
@@ -445,6 +428,10 @@ export default Vue.extend({
     }
   },
   methods: {
+    onInput (event: Record<string, BodypartOption | BodypartOption[]>): void {
+      debugger;
+      this.bodypartsValues = event;
+    },
     getFieldAnchorName (field: string): string {
       field = field.toLowerCase().replace(/ /g, '-');
 
