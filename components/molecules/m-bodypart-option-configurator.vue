@@ -3,61 +3,75 @@
     class="m-bodypart-option-configurator"
     :class="{ '-disabled': disabled }"
   >
-    <div class="_options-groups-container">
-      <div class="_group-item" v-for="group in optionsGroups" :key="group">
-        <div class="_group-title" v-if="group !== 'default'">
-          {{ group }}
-        </div>
+    <m-checkbox
+      v-if="canBeDetailed"
+      class="_detailing-checkbox"
+      v-model="showDetailedBodyParts"
+      :label="detailingFlagText"
+      :disabled="disabled"
+    />
 
-        <ul class="_visual-selector">
-          <li
-            class="_visual-selector-value"
-            :class="{'-color-value': isColorValue(option)}"
-            v-for="option in optionsByGroup[group]"
-            :key="option.value"
-          >
-            <input
-              :id="getInputId(option)"
-              :name="name"
-              :type="inputType"
-              :value="option"
-              v-model="selectedOption"
-              :disabled="disabled"
-              @click="(event) => onChange(event, option)"
-            >
-            <label
-              :for="getInputId(option)"
-            >
-              <div class="_icon-wrapper">
-                <div
-                  class="_icon"
-                  :style="getIconStyle(option)"
-                />
-              </div>
+    <slot name="heading" />
 
-              <div class="_name">
-                {{ option.label }}
-              </div>
-            </label>
-          </li>
-        </ul>
-      </div>
+    <slot name="top-helper-text" />
+
+    <div v-if="showDetailedBodyParts" class="_detailed-body-parts-container">
+      <m-bodypart-option-configurator
+        v-for="childBodyPart in childrenBodyParts"
+        class="_detailed-body-part"
+        :key="childBodyPart.id"
+        :name="childBodyPart.code"
+        v-model="selectedOption"
+        :max-values="childBodyPart.maxValues"
+        :body-part="childBodyPart"
+        :type="type"
+        :disabled="disabled"
+      >
+        <template #heading>
+          <SfHeading
+            class="-required "
+            :level="3"
+            :title="childBodyPart.name"
+          />
+        </template>
+      </m-bodypart-option-configurator>
     </div>
+
+    <div class="_options-groups-container" v-else>
+      <m-options-groups
+        :options="options"
+        :input-type="inputType"
+        :option-configurator-instance-id="instanceId"
+        :name="name"
+        v-model="selectedOption"
+        :disabled="disabled"
+        :type="type"
+        @change="onChange"
+      />
+    </div>
+
+    <slot name="bottom-helper-text" />
   </div>
 </template>
 
 <script lang="ts">
 import Vue, { PropType } from 'vue';
-import { getThumbnailPath } from '@vue-storefront/core/helpers/index';
+import { SfHeading } from '@storefront-ui/vue';
 
-import { BodypartOption, BodyPartValueContentType, Dictionary } from 'src/modules/budsies';
+import { Bodypart, BodypartOption } from 'src/modules/budsies';
 
-const BODYPART_ITEM_WIDTH = 145;
+import MOptionsGroups from './m-options-groups.vue';
+import MCheckbox from './m-checkbox.vue';
 
 let instanceId = 0;
 
 export default Vue.extend({
   name: 'MBodypartOptionConfigurator',
+  components: {
+    MCheckbox,
+    MOptionsGroups,
+    SfHeading
+  },
   props: {
     name: {
       type: String,
@@ -75,21 +89,42 @@ export default Vue.extend({
       type: String,
       default: 'product'
     },
-    options: {
-      type: Array as PropType<BodypartOption[]>,
-      default: () => []
-    },
     disabled: {
       type: Boolean,
       default: false
+    },
+    bodyPart: {
+      type: Object as PropType<Bodypart>,
+      required: true
     }
   },
   data (): Record<string, any> {
     return {
-      instanceId: ''
+      instanceId: '',
+      fShowDetailedBodyParts: false
     };
   },
   computed: {
+    options (): BodypartOption[] {
+      return this.$store.getters['budsies/getBodypartOptions'](this.bodyPart.id);
+    },
+    detailingFlagText (): string | undefined {
+      return this.bodyPart.detailingFlagText;
+    },
+    canBeDetailed (): boolean {
+      return !!this.bodyPart.childrenBodyparts && this.bodyPart.childrenBodyparts.length > 0;
+    },
+    childrenBodyParts (): Bodypart[] {
+      return this.bodyPart.childrenBodyparts || [];
+    },
+    showDetailedBodyParts: {
+      get (): boolean {
+        return this.canBeDetailed && this.fShowDetailedBodyParts;
+      },
+      set (value: boolean) {
+        this.fShowDetailedBodyParts = value;
+      }
+    },
     selectedOption: {
       get (): BodypartOption | BodypartOption[] {
         if (this.inputType === 'checkbox' && this.value === undefined) {
@@ -108,18 +143,6 @@ export default Vue.extend({
     },
     inputType (): 'checkbox' | 'radio' {
       return this.maxValues > 1 ? 'checkbox' : 'radio';
-    },
-    optionsByGroup (): Dictionary<BodypartOption[]> {
-      const optionsByGroup: Dictionary<BodypartOption[]> = Object.assign({}, ...Array.from(this.optionsGroups, (k) => ({ [`${k}`]: [] })));
-
-      this.options.forEach((option) => {
-        optionsByGroup[option.group].push(option);
-      });
-
-      return optionsByGroup;
-    },
-    optionsGroups (): string[] {
-      return Array.from(new Set(this.options.map((option) => option.group)));
     }
   },
   created: function (): void {
@@ -127,28 +150,6 @@ export default Vue.extend({
     instanceId += 1;
   },
   methods: {
-    isColorValue (option: BodypartOption): boolean {
-      return option.contentTypeId === BodyPartValueContentType.COLOR;
-    },
-    getInputId (option: BodypartOption): string {
-      return `body_part_value_${this.instanceId}_${option.id}`;
-    },
-    getIconStyle (option: BodypartOption): string | Record<string, string | number> {
-      if (option.contentTypeId === BodyPartValueContentType.IMAGE && option.image) {
-        const thumb = getThumbnailPath(option.image, BODYPART_ITEM_WIDTH * 2, BODYPART_ITEM_WIDTH * 2, this.type);
-        return {
-          'background-image': `url(${thumb})`
-        }
-      }
-
-      if (option.contentTypeId === BodyPartValueContentType.COLOR && option.color) {
-        return {
-          'background-color': option.color
-        }
-      }
-
-      return '';
-    },
     onChange (event: Event, option: BodypartOption): void {
       if (!Array.isArray(this.selectedOption)) {
         return;
@@ -172,138 +173,25 @@ export default Vue.extend({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-$bodypart-item-width: 145px;
-$color-selector-selected-border-color: #51a7f9;
-
 .m-bodypart-option-configurator {
-  ._group-item {
-    margin-bottom: var(--spacer-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-    &:last-child {
-      margin-bottom: 0;
-    }
+  ._detailing-checkbox {
+    display: inline-block;
+    margin-bottom: var(--spacer-lg);
   }
 
-  ._group-title {
-    text-align: center;
-    font-size: var(--font-sm);
-    margin-bottom: var(--spacer-sm);
-  }
-
-  ._visual-selector {
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 0;
-    row-gap: 2vw;
-  }
-
-  ._visual-selector-value {
-    box-sizing: border-box;
-    width: 33.33%;
-    padding: 0 2%;
-    max-width: $bodypart-item-width;
-
-    ._icon {
-      background-position: center center;
-      background-repeat: no-repeat;
-      background-size: contain;
-      border-radius: 50%;
-      padding-top: 100%;
-      width: 100%;
-      position: relative;
-      z-index: 0;
-    }
-
-    ._name {
-      font-size: var(--font-xs);
-      font-weight: var(--font-medium);
-      margin-top: var(--spacer-sm);
-    }
-
-    &.-color-value {
-      width: 25.1%;
-
-      ._icon-wrapper {
-        border-radius: 50%;
-        border: 4px solid transparent;
-        width: 100%;
-        height: 0;
-        position: relative;
-        padding-top: 100%;
-      }
-
-      ._icon {
-        border: 1px solid #ccc;
-        height: 100%;
-        position: absolute;
-        box-sizing: border-box;
-        padding-top: 0;
-        top: 0;
-      }
-
-      input:checked {
-        & + label {
-          ._icon-wrapper {
-            border-color: $color-selector-selected-border-color;
-          }
-
-          ._icon::before,
-          ._icon::after {
-            content: none;
-          }
-        }
-      }
-    }
-  }
-
-  ._visual-selector-value > input {
-      display: block;
-      height: 0;
-      opacity: 0;
-      width: 0;
-      margin: 0;
-      padding: 0;
-      border: 0;
-  }
-
-  ._visual-selector-value > label {
-      height: auto;
-      margin: 0;
-      min-height: 0;
-      padding: 0;
-      width: 100%;
-      cursor: pointer;
-  }
-
-  ._visual-selector-value > input:checked + label ._icon::before {
-    background: rgba(52, 184, 147, 0.7);
-    border-radius: 100%;
-    content: "";
-    height: 100%;
-    left: 0;
-    position: absolute;
-    top: 0;
-    width: 100%;
-    z-index: 1;
-  }
-
-  ._visual-selector-value > input:checked + label ._icon::after {
-    background: url('/assets/images/sprite/ico-tick-green.png') no-repeat center #fff;
-    border: 2px solid #38b677;
-    border-radius: 100%;
-    content: "";
-    height: 24px;
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 24px;
-    z-index: 2;
+  ._detailed-body-parts-container {
+    margin-top: var(--spacer-lg);
+    display: grid;
+    gap: var(--spacer-sm);
+    grid-template-columns: auto;
   }
 
   &.-disabled {
-    ._visual-selector-value {
+    ::v-deep .a-body-part-vale {
       opacity: 0.7;
 
       > label {
@@ -312,13 +200,9 @@ $color-selector-selected-border-color: #51a7f9;
     }
   }
 
-  @media (min-width: $tablet-min) {
-    ._visual-selector-value {
-      width: $bodypart-item-width;
-
-      &.-color-value {
-        width: 90px;
-      }
+  @include for-desktop {
+    ._detailed-body-parts-container {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 }
