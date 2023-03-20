@@ -176,8 +176,8 @@
                 class="_options-list"
                 :name="bodypart.code"
                 v-model="bodypartsValues[bodypart.id]"
-                :options="getBodypartOptions(bodypart.id)"
                 :max-values="bodypart.maxValues"
+                :options="getBodypartOptions(bodypart.id)"
                 type="bodypart"
                 :disabled="isSubmitting"
               />
