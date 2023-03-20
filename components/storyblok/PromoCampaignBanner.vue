@@ -65,6 +65,20 @@ export default Blok.extend({
   async mounted () {
     await this.$nextTick()
     this.isMounted = true;
+    this.onComponentContentUpdate();
+  },
+  methods: {
+    onComponentContentUpdate () {
+      this.$emit(
+        'content-change',
+        { itemId: (this as any)._uid, isEmpty: !this.shouldShowImageBanner }
+      );
+    }
+  },
+  watch: {
+    shouldShowImageBanner () {
+      this.onComponentContentUpdate();
+    }
   }
 })
 </script>
