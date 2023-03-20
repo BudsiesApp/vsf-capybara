@@ -43,7 +43,11 @@
       v-for="bodypart in bodyparts"
       :key="bodypart.id"
     >
-      <m-detailed-body-parts :disabled="disabled" :body-part="bodypart">
+      <m-detailed-body-parts
+        :disabled="disabled"
+        :body-part="bodypart"
+        :body-parts-values="bodypartsValues"
+      >
         <template #main-body-part-heading>
           <SfHeading
             class="-required"

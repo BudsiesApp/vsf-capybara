@@ -54,12 +54,21 @@ export default Vue.extend({
     bodyPart: {
       type: Object as PropType<Bodypart>,
       required: true
+    },
+    bodyPartsValues: {
+      type: Object as PropType<Record<string, BodypartOption | BodypartOption[] | undefined>>,
+      default: () => ({})
     }
   },
   data (): Record<string, any> {
     return {
       fShowDetailedBodyParts: false
     };
+  },
+  mounted (): void {
+    const isChildBodyPartSelected = !!this.childrenBodyParts.find((bodyPart) => this.bodyPartsValues[bodyPart.id]);
+
+    this.fShowDetailedBodyParts = isChildBodyPartSelected;
   },
   computed: {
     detailingFlagText (): string | undefined {
