@@ -19,7 +19,7 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 
-import { Bodypart, BodypartOption } from 'src/modules/budsies';
+import { BodypartOption } from 'src/modules/budsies';
 
 import MOptionsGroups from './m-options-groups.vue';
 
@@ -88,7 +88,7 @@ export default Vue.extend({
     instanceId += 1;
   },
   methods: {
-    onChange (event: Event, option: BodypartOption): void {
+    onChange ({ event, option }: {event: Event, option: BodypartOption}): void {
       if (!Array.isArray(this.selectedOption)) {
         return;
       }

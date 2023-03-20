@@ -11,7 +11,7 @@
       :value="option"
       v-model="fSelectedOption"
       :disabled="disabled"
-      @click="$emit('change', option)"
+      @click="$emit('change', { event: $event, option })"
     >
     <label
       :for="inputId"
