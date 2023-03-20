@@ -46,7 +46,7 @@
       <m-detailed-body-parts :disabled="disabled" :body-part="bodypart">
         <template #main-body-part-heading>
           <SfHeading
-            class="-required "
+            class="-required"
             :level="3"
             :title="bodypart.name"
             :ref="getFieldAnchorName(bodypart.name)"
@@ -74,6 +74,7 @@
               class="_options-list"
               :name="bodypart.code"
               v-model="bodypartsValues[bodypart.id]"
+              :options="getBodypartOptions(bodypart.id)"
               :max-values="bodypart.maxValues"
               :body-part="bodypart"
               type="bodypart"
@@ -105,6 +106,7 @@
               class="_options-list"
               :name="childBodyPart.code"
               v-model="bodypartsValues[childBodyPart.id]"
+              :options="getBodypartOptions(childBodyPart.id)"
               :max-values="childBodyPart.maxValues"
               :body-part="childBodyPart"
               type="bodypart"
@@ -194,7 +196,7 @@
       >
         <div class="_quantity-field" :class="classes">
           <SfHeading
-            class="-required "
+            class="-required"
             :level="3"
             :title="$t('How many Petsies of this exact same design?')"
           />
@@ -457,6 +459,9 @@ export default Vue.extend({
       }
 
       return bodyparts;
+    },
+    getBodypartOptions (): (id: string) => BodypartOption[] {
+      return this.$store.getters['budsies/getBodypartOptions']
     },
     productionTimeOptions (): ProductionTimeOption[] {
       if (!this.productionTimeBundleOption) {

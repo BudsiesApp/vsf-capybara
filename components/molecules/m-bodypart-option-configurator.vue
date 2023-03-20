@@ -47,13 +47,13 @@ export default Vue.extend({
       type: String,
       default: 'product'
     },
+    options: {
+      type: Array as PropType<BodypartOption[]>,
+      default: () => []
+    },
     disabled: {
       type: Boolean,
       default: false
-    },
-    bodyPart: {
-      type: Object as PropType<Bodypart>,
-      required: true
     }
   },
   data (): Record<string, any> {
@@ -63,9 +63,6 @@ export default Vue.extend({
     };
   },
   computed: {
-    options (): BodypartOption[] {
-      return this.$store.getters['budsies/getBodypartOptions'](this.bodyPart.id);
-    },
     selectedOption: {
       get (): BodypartOption | BodypartOption[] {
         if (this.inputType === 'checkbox' && this.value === undefined) {
