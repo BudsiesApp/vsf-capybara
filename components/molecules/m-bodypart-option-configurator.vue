@@ -6,7 +6,7 @@
     <m-options-groups
       :options="options"
       :input-type="inputType"
-      :option-configurator-instance-id="instanceId"
+      :configurator-instance-id="instanceId"
       :name="name"
       v-model="selectedOption"
       :disabled="disabled"

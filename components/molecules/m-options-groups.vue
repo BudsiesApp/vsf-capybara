@@ -10,7 +10,7 @@
           v-for="option in optionsByGroup[group]"
           :option="option"
           :input-type="inputType"
-          :option-configurator-instance-id="optionConfiguratorInstanceId"
+          :configurator-instance-id="configuratorInstanceId"
           :name="name"
           v-model="fSelectedOption"
           :disabled="disabled"
@@ -44,7 +44,7 @@ export default Vue.extend({
       type: String as PropType<'checkbox' | 'radio'>,
       required: true
     },
-    optionConfiguratorInstanceId: {
+    configuratorInstanceId: {
       type: String,
       required: true
     },

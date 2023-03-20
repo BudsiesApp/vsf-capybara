@@ -49,7 +49,7 @@ export default Vue.extend({
       type: Object as PropType<BodypartOption>,
       required: true
     },
-    optionConfiguratorInstanceId: {
+    configuratorInstanceId: {
       type: String,
       required: true
     },
@@ -108,7 +108,7 @@ export default Vue.extend({
       return this.option.contentTypeId === BodyPartValueContentType.COLOR;
     },
     inputId (): string {
-      return `body_part_value_${this.optionConfiguratorInstanceId}_${this.option.id}`;
+      return `body_part_value_${this.configuratorInstanceId}_${this.option.id}`;
     }
   }
 })
