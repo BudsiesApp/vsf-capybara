@@ -38,26 +38,13 @@
       </div>
     </validation-provider>
 
-    <validation-provider
-      v-slot="{ errors }"
+    <div
       class="_bodypart _section"
-      :rules="bodypart.isRequired ? 'required' : ''"
-      :name="`'${bodypart.name}'`"
       v-for="bodypart in bodyparts"
       :key="bodypart.id"
-      tag="div"
     >
-      <m-bodypart-option-configurator
-        class="_options-list"
-        :name="bodypart.code"
-        :value="bodypartsValues[bodypart.id]"
-        :max-values="bodypart.maxValues"
-        :body-part="bodypart"
-        type="bodypart"
-        :disabled="disabled"
-        @input="onInput"
-      >
-        <template #heading>
+      <m-detailed-body-parts :disabled="disabled" :body-part="bodypart">
+        <template #main-body-part-heading>
           <SfHeading
             class="-required "
             :level="3"
@@ -75,6 +62,62 @@
           </div>
         </template>
 
+        <template #default="{removeConflictingBodyPartsValues}">
+          <validation-provider
+            v-slot="{ errors }"
+            :rules="bodypart.isRequired ? 'required' : ''"
+            :name="`'${bodypart.name}'`"
+            :key="bodypart.id"
+            tag="div"
+          >
+            <m-bodypart-option-configurator
+              class="_options-list"
+              :name="bodypart.code"
+              v-model="bodypartsValues[bodypart.id]"
+              :max-values="bodypart.maxValues"
+              :body-part="bodypart"
+              type="bodypart"
+              :disabled="disabled"
+              @input="() => removeConflictingBodyPartsValues(bodypartsValues, bodypart)"
+            />
+
+            <div class="_error-text">
+              {{ errors[0] }}
+            </div>
+          </validation-provider>
+        </template>
+
+        <template #detailed-body-part="{childBodyPart, removeConflictingBodyPartsValues}">
+          <validation-provider
+            v-slot="{ errors }"
+            :rules="childBodyPart.isRequired ? 'required' : ''"
+            :name="`'${childBodyPart.name}'`"
+            :key="childBodyPart.id"
+            tag="div"
+          >
+            <SfHeading
+              :level="3"
+              :title="childBodyPart.name"
+              :ref="getFieldAnchorName(childBodyPart.name)"
+            />
+
+            <m-bodypart-option-configurator
+              class="_options-list"
+              :name="childBodyPart.code"
+              v-model="bodypartsValues[childBodyPart.id]"
+              :max-values="childBodyPart.maxValues"
+              :body-part="childBodyPart"
+              type="bodypart"
+              :disabled="disabled"
+              @input="() => removeConflictingBodyPartsValues(bodypartsValues, childBodyPart)"
+            />
+
+            <div class="_error-text">
+              {{ errors[0] }}
+            </div>
+          </validation-provider>
+        </template>
+
         <template #bottom-helper-text>
           <div
             class="_helper-text"
@@ -85,12 +128,8 @@
             {{ $t('Your color input is especially helpful when photos are blurry or poorly lit. If left blank, our designers will use their professional judgement.') }}
           </div>
         </template>
-      </m-bodypart-option-configurator>
-
-      <div class="_error-text">
-        {{ errors[0] }}
-      </div>
-    </validation-provider>
+      </m-detailed-body-parts>
+    </div>
 
     <validation-provider
       v-slot="{ errors, classes }"
@@ -246,7 +285,7 @@ import Vue, { PropType } from 'vue';
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
 import { required } from 'vee-validate/dist/rules';
 
-import { SfHeading, SfButton, SfModal, SfSelect } from '@storefront-ui/vue';
+import { SfHeading, SfButton, SfModal } from '@storefront-ui/vue';
 import Product from 'core/modules/catalog/types/Product';
 import { BundleOption } from 'core/modules/catalog/types/BundleOption';
 import { Logger } from '@vue-storefront/core/lib/logger';
@@ -258,6 +297,7 @@ import MAddonsSelector from '../../molecules/m-addons-selector.vue';
 import ACustomProductQuantity from '../../atoms/a-custom-product-quantity.vue';
 import MBodypartOptionConfigurator from '../../molecules/m-bodypart-option-configurator.vue';
 import MBlockStory from '../../molecules/m-block-story.vue';
+import MDetailedBodyParts from '../../molecules/m-detailed-body-parts.vue';
 import MProductionTimeSelector from '../../molecules/m-production-time-selector.vue';
 import MPlushieSizeSelector from '../../molecules/m-plushie-size-selector.vue';
 
@@ -280,13 +320,13 @@ export default Vue.extend({
     SfHeading,
     SfButton,
     SfModal,
-    SfSelect,
     ValidationProvider,
     ValidationObserver,
     MAddonsSelector,
     ACustomProductQuantity,
     MBodypartOptionConfigurator,
     MBlockStory,
+    MDetailedBodyParts,
     MProductionTimeSelector,
     MPlushieSizeSelector
   },
@@ -364,7 +404,6 @@ export default Vue.extend({
         return this.value.bodypartsValues;
       },
       set (value: Record<string, BodypartOption | BodypartOption[] | undefined>): void {
-        debugger;
         const newValue: ForeversWizardCustomizeStepData = { ...this.value, bodypartsValues: value };
         this.$emit('input', newValue);
       }
@@ -428,10 +467,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    onInput (event: Record<string, BodypartOption | BodypartOption[]>): void {
-      debugger;
-      this.bodypartsValues = event;
-    },
     getFieldAnchorName (field: string): string {
       field = field.toLowerCase().replace(/ /g, '-');
 
