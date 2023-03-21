@@ -171,7 +171,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    fillShowBodyPartsInitialValues (): void {
+    fillShowDetailedBodyPartsInitialValues (): void {
       this.bodyParts.forEach((bodyPart) => {
         const isChildBodyPartSelected = !!this.childrenBodyParts[bodyPart.id].find((bodyPart) => this.value[bodyPart.id]);
 
@@ -233,7 +233,7 @@ export default Vue.extend({
           return;
         }
 
-        this.fillShowBodyPartsInitialValues();
+        this.fillShowDetailedBodyPartsInitialValues();
       }
     }
   }
