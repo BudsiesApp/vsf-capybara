@@ -9,7 +9,7 @@
       :name="name"
       :type="inputType"
       :value="option"
-      v-model="fSelectedOption"
+      v-model="selectedOption"
       :disabled="disabled"
       @click="$emit('change', { event: $event, option })"
     >
@@ -49,7 +49,7 @@ export default Vue.extend({
       type: Object as PropType<BodypartOption>,
       required: true
     },
-    configuratorInstanceId: {
+    parentComponentInstanceId: {
       type: String,
       required: true
     },
@@ -71,7 +71,7 @@ export default Vue.extend({
     }
   },
   computed: {
-    fSelectedOption: {
+    selectedOption: {
       get (): BodypartOption | BodypartOption[] {
         return this.value;
       },
@@ -108,7 +108,7 @@ export default Vue.extend({
       return this.option.contentTypeId === BodyPartValueContentType.COLOR;
     },
     inputId (): string {
-      return `body_part_value_${this.configuratorInstanceId}_${this.option.id}`;
+      return `body_part_value_${this.parentComponentInstanceId}_${this.option.id}`;
     }
   }
 })
