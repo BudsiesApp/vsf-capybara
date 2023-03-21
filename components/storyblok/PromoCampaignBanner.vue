@@ -71,7 +71,7 @@ export default Blok.extend({
     onComponentContentUpdate () {
       this.$emit(
         'content-change',
-        { itemId: (this as any)._uid, isEmpty: !this.shouldShowImageBanner }
+        { itemId: this.itemData._uid, isEmpty: !this.shouldShowImageBanner }
       );
     }
   },
