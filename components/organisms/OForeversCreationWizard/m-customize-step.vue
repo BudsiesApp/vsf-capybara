@@ -12,7 +12,7 @@
 
     <validation-provider
       v-slot="{ errors }"
-      class="_bodypart _section"
+      class="_size _section"
       rules="required"
       tag="div"
       :name="$t('\'Size\'')"
@@ -38,62 +38,49 @@
       </div>
     </validation-provider>
 
-    <validation-provider
-      v-slot="{ errors }"
-      class="_bodypart _section"
-      :rules="bodypart.isRequired ? 'required' : ''"
-      :name="`'${bodypart.name}'`"
-      v-for="bodypart in bodyparts"
-      :key="bodypart.id"
-      tag="div"
+    <m-body-parts-section
+      v-if="product"
+      :disabled="disabled"
+      :product-id="product.id"
+      v-model="bodypartsValues"
     >
-      <SfHeading
-        class="-required "
-        :level="3"
-        :title="bodypart.name"
-        :ref="getFieldAnchorName(bodypart.name)"
-      />
+      <template #main-body-part-heading="{ bodyPart }">
+        <SfHeading
+          class="-required"
+          :level="3"
+          :title="bodyPart.name"
+          :ref="getFieldAnchorName(bodyPart.name)"
+        />
+      </template>
 
-      <div
-        class="_helper-text"
-        v-if="bodypart.code === 'forevers_color_palette'"
-      >
-        {{ $t('You may select up to 3 most prominent color(s) of your animal to assist our team.') }}
-      </div>
+      <template #top-helper-text="{ bodyPart }">
+        <div
+          class="_helper-text"
+          v-if="bodyPart.code === 'forevers_color_palette'"
+        >
+          {{ $t('You may select up to 3 most prominent color(s) of your animal to assist our team.') }}
+        </div>
+      </template>
 
-      <div
-        v-if="bodypart.code === 'eye_color'"
-      >
-        (<a
-          class="_popup-link"
-          href="javascript:void(0)"
-          @click="areEyeColorNotesVisible = true"
-        ><b>?</b></a>)
-      </div>
+      <template #child-body-part-heading="{ childBodyPart }">
+        <SfHeading
+          :level="3"
+          :title="childBodyPart.name"
+          :ref="getFieldAnchorName(childBodyPart.name)"
+        />
+      </template>
 
-      <m-bodypart-option-configurator
-        class="_options-list"
-        :name="bodypart.code"
-        v-model="bodypartsValues[bodypart.id]"
-        :max-values="bodypart.maxValues"
-        :options="getBodypartOptions(bodypart.id)"
-        type="bodypart"
-        :disabled="disabled"
-      />
+      <template #bottom-helper-text="{ bodyPart }">
+        <div
+          class="_helper-text"
+          v-if="bodyPart.code === 'forevers_color_palette'"
+        >
+          {{ $t('Click a selected color to deselect it') }}. <br>
 
-      <div
-        class="_helper-text"
-        v-if="bodypart.code === 'forevers_color_palette'"
-      >
-        {{ $t('Click a selected color to deselect it') }}. <br>
-
-        {{ $t('Your color input is especially helpful when photos are blurry or poorly lit. If left blank, our designers will use their professional judgement.') }}
-      </div>
-
-      <div class="_error-text">
-        {{ errors[0] }}
-      </div>
-    </validation-provider>
+          {{ $t('Your color input is especially helpful when photos are blurry or poorly lit. If left blank, our designers will use their professional judgement.') }}
+        </div>
+      </template>
+    </m-body-parts-section>
 
     <validation-provider
       v-slot="{ errors, classes }"
@@ -158,7 +145,7 @@
       >
         <div class="_quantity-field" :class="classes">
           <SfHeading
-            class="-required "
+            class="-required"
             :level="3"
             :title="$t('How many Petsies of this exact same design?')"
           />
@@ -241,16 +228,6 @@
         />
       </div>
     </SfModal>
-
-    <SfModal
-      :visible="areEyeColorNotesVisible"
-      @close="areEyeColorNotesVisible = false"
-    >
-      <div class="_popup-content">
-        If your pet has different color eyes, <br>
-        please indicate in Special Instructions
-      </div>
-    </SfModal>
   </validation-observer>
 </template>
 
@@ -259,19 +236,18 @@ import Vue, { PropType } from 'vue';
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
 import { required } from 'vee-validate/dist/rules';
 
-import { SfHeading, SfButton, SfModal, SfSelect } from '@storefront-ui/vue';
+import { SfHeading, SfButton, SfModal } from '@storefront-ui/vue';
 import Product from 'core/modules/catalog/types/Product';
-import { getProductGallery as getGalleryByProduct } from '@vue-storefront/core/modules/catalog/helpers';
 import { BundleOption } from 'core/modules/catalog/types/BundleOption';
 import { Logger } from '@vue-storefront/core/lib/logger';
 
-import { isVue, getProductDefaultPrice } from 'src/modules/shared';
-import { Bodypart, BodypartOption } from 'src/modules/budsies';
+import { isVue } from 'src/modules/shared';
+import { BodypartOption } from 'src/modules/budsies';
 
 import MAddonsSelector from '../../molecules/m-addons-selector.vue';
 import ACustomProductQuantity from '../../atoms/a-custom-product-quantity.vue';
-import MBodypartOptionConfigurator from '../../molecules/m-bodypart-option-configurator.vue';
 import MBlockStory from '../../molecules/m-block-story.vue';
+import MBodyPartsSection from '../../molecules/m-body-parts-section.vue';
 import MProductionTimeSelector from '../../molecules/m-production-time-selector.vue';
 import MPlushieSizeSelector from '../../molecules/m-plushie-size-selector.vue';
 
@@ -294,13 +270,12 @@ export default Vue.extend({
     SfHeading,
     SfButton,
     SfModal,
-    SfSelect,
     ValidationProvider,
     ValidationObserver,
     MAddonsSelector,
     ACustomProductQuantity,
-    MBodypartOptionConfigurator,
     MBlockStory,
+    MBodyPartsSection,
     MProductionTimeSelector,
     MPlushieSizeSelector
   },
@@ -351,8 +326,7 @@ export default Vue.extend({
   },
   data () {
     return {
-      areQuantityNotesVisible: false,
-      areEyeColorNotesVisible: false
+      areQuantityNotesVisible: false
     }
   },
   computed: {
@@ -419,22 +393,6 @@ export default Vue.extend({
       }
 
       return getAddonOptionsFromBundleOption(this.addonsBundleOption);
-    },
-    bodyparts (): Bodypart[] {
-      if (!this.product) {
-        return [];
-      }
-
-      const bodyparts = this.$store.getters['budsies/getProductBodyparts'](this.product.id);
-
-      if (!bodyparts.length) {
-        return [];
-      }
-
-      return bodyparts;
-    },
-    getBodypartOptions (): (id: string) => BodypartOption[] {
-      return this.$store.getters['budsies/getBodypartOptions']
     },
     productionTimeOptions (): ProductionTimeOption[] {
       if (!this.productionTimeBundleOption) {
@@ -508,7 +466,8 @@ export default Vue.extend({
     font-size: var(--font-xs);
   }
 
-  ._bodypart {
+  ._size,
+  .m-body-parts-section {
     ._helper-text,
     ._options-list {
       margin-top: var(--spacer-sm);
