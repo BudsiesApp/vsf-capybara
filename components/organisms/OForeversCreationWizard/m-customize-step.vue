@@ -12,7 +12,7 @@
 
     <validation-provider
       v-slot="{ errors }"
-      class="_bodypart _section"
+      class="_size _section"
       rules="required"
       tag="div"
       :name="$t('\'Size\'')"
@@ -38,104 +38,49 @@
       </div>
     </validation-provider>
 
-    <div
-      class="_bodypart _section"
-      v-for="bodypart in bodyparts"
-      :key="bodypart.id"
+    <m-body-parts-section
+      v-if="product"
+      :disabled="disabled"
+      :product-id="product.id"
+      v-model="bodypartsValues"
     >
-      <m-detailed-body-parts
-        :disabled="disabled"
-        :body-part="bodypart"
-        :body-parts-values="bodypartsValues"
-      >
-        <template #main-body-part-heading>
-          <SfHeading
-            class="-required"
-            :level="3"
-            :title="bodypart.name"
-            :ref="getFieldAnchorName(bodypart.name)"
-          />
-        </template>
+      <template #main-body-part-heading="{ bodyPart }">
+        <SfHeading
+          class="-required"
+          :level="3"
+          :title="bodyPart.name"
+          :ref="getFieldAnchorName(bodyPart.name)"
+        />
+      </template>
 
-        <template #top-helper-text>
-          <div
-            class="_helper-text"
-            v-if="bodypart.code === 'forevers_color_palette'"
-          >
-            {{ $t('You may select up to 3 most prominent color(s) of your animal to assist our team.') }}
-          </div>
-        </template>
+      <template #top-helper-text="{ bodyPart }">
+        <div
+          class="_helper-text"
+          v-if="bodyPart.code === 'forevers_color_palette'"
+        >
+          {{ $t('You may select up to 3 most prominent color(s) of your animal to assist our team.') }}
+        </div>
+      </template>
 
-        <template #default="{removeConflictingBodyPartsValues}">
-          <validation-provider
-            v-slot="{ errors }"
-            :rules="bodypart.isRequired ? 'required' : ''"
-            :name="`'${bodypart.name}'`"
-            :key="bodypart.id"
-            tag="div"
-          >
-            <m-bodypart-option-configurator
-              class="_options-list"
-              :name="bodypart.code"
-              v-model="bodypartsValues[bodypart.id]"
-              :options="getBodypartOptions(bodypart.id)"
-              :max-values="bodypart.maxValues"
-              :body-part="bodypart"
-              type="bodypart"
-              :disabled="disabled"
-              @input="() => removeConflictingBodyPartsValues(bodypartsValues, bodypart)"
-            />
+      <template #child-body-part-heading="{ childBodyPart }">
+        <SfHeading
+          :level="3"
+          :title="childBodyPart.name"
+          :ref="getFieldAnchorName(childBodyPart.name)"
+        />
+      </template>
 
-            <div class="_error-text">
-              {{ errors[0] }}
-            </div>
-          </validation-provider>
-        </template>
+      <template #bottom-helper-text="{ bodyPart }">
+        <div
+          class="_helper-text"
+          v-if="bodyPart.code === 'forevers_color_palette'"
+        >
+          {{ $t('Click a selected color to deselect it') }}. <br>
 
-        <template #detailed-body-part="{childBodyPart, removeConflictingBodyPartsValues}">
-          <validation-provider
-            v-slot="{ errors }"
-            :rules="childBodyPart.isRequired ? 'required' : ''"
-            :name="`'${childBodyPart.name}'`"
-            :key="childBodyPart.id"
-            tag="div"
-          >
-            <SfHeading
-              :level="3"
-              :title="childBodyPart.name"
-              :ref="getFieldAnchorName(childBodyPart.name)"
-            />
-
-            <m-bodypart-option-configurator
-              class="_options-list"
-              :name="childBodyPart.code"
-              v-model="bodypartsValues[childBodyPart.id]"
-              :options="getBodypartOptions(childBodyPart.id)"
-              :max-values="childBodyPart.maxValues"
-              :body-part="childBodyPart"
-              type="bodypart"
-              :disabled="disabled"
-              @input="() => removeConflictingBodyPartsValues(bodypartsValues, childBodyPart)"
-            />
-
-            <div class="_error-text">
-              {{ errors[0] }}
-            </div>
-          </validation-provider>
-        </template>
-
-        <template #bottom-helper-text>
-          <div
-            class="_helper-text"
-            v-if="bodypart.code === 'forevers_color_palette'"
-          >
-            {{ $t('Click a selected color to deselect it') }}. <br>
-
-            {{ $t('Your color input is especially helpful when photos are blurry or poorly lit. If left blank, our designers will use their professional judgement.') }}
-          </div>
-        </template>
-      </m-detailed-body-parts>
-    </div>
+          {{ $t('Your color input is especially helpful when photos are blurry or poorly lit. If left blank, our designers will use their professional judgement.') }}
+        </div>
+      </template>
+    </m-body-parts-section>
 
     <validation-provider
       v-slot="{ errors, classes }"
@@ -297,13 +242,12 @@ import { BundleOption } from 'core/modules/catalog/types/BundleOption';
 import { Logger } from '@vue-storefront/core/lib/logger';
 
 import { isVue } from 'src/modules/shared';
-import { Bodypart, BodypartOption } from 'src/modules/budsies';
+import { BodypartOption } from 'src/modules/budsies';
 
 import MAddonsSelector from '../../molecules/m-addons-selector.vue';
 import ACustomProductQuantity from '../../atoms/a-custom-product-quantity.vue';
-import MBodypartOptionConfigurator from '../../molecules/m-bodypart-option-configurator.vue';
 import MBlockStory from '../../molecules/m-block-story.vue';
-import MDetailedBodyParts from '../../molecules/m-detailed-body-parts.vue';
+import MBodyPartsSection from '../../molecules/m-body-parts-section.vue';
 import MProductionTimeSelector from '../../molecules/m-production-time-selector.vue';
 import MPlushieSizeSelector from '../../molecules/m-plushie-size-selector.vue';
 
@@ -330,9 +274,8 @@ export default Vue.extend({
     ValidationObserver,
     MAddonsSelector,
     ACustomProductQuantity,
-    MBodypartOptionConfigurator,
     MBlockStory,
-    MDetailedBodyParts,
+    MBodyPartsSection,
     MProductionTimeSelector,
     MPlushieSizeSelector
   },
@@ -451,22 +394,6 @@ export default Vue.extend({
 
       return getAddonOptionsFromBundleOption(this.addonsBundleOption);
     },
-    bodyparts (): Bodypart[] {
-      if (!this.product) {
-        return [];
-      }
-
-      const bodyparts = this.$store.getters['budsies/getProductBodyparts'](this.product.id);
-
-      if (!bodyparts.length) {
-        return [];
-      }
-
-      return bodyparts;
-    },
-    getBodypartOptions (): (id: string) => BodypartOption[] {
-      return this.$store.getters['budsies/getBodypartOptions']
-    },
     productionTimeOptions (): ProductionTimeOption[] {
       if (!this.productionTimeBundleOption) {
         return []
@@ -539,7 +466,8 @@ export default Vue.extend({
     font-size: var(--font-xs);
   }
 
-  ._bodypart {
+  ._size,
+  .m-body-parts-section {
     ._helper-text,
     ._options-list {
       margin-top: var(--spacer-sm);
