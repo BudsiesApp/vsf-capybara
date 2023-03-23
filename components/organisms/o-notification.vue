@@ -4,6 +4,7 @@
       v-for="notification in notifications"
       :key="notification.id"
       class="notification"
+      :class="`-color-${getType(notification)}`"
       :visible="true"
       :type="getType(notification)"
       :message="notification.message | htmlDecode"
@@ -85,6 +86,11 @@ export default {
     cursor: pointer;
     margin: 0.3rem 1rem 0 0;
   }
+
+  &.-color-success {
+    --notification-background: var(--c-info);
+  }
+
   @include for-desktop {
     max-width: 32rem;
     align-self: end;
