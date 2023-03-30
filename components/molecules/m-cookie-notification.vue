@@ -79,6 +79,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+
 .m-cookie-notification {
   z-index: 100;
   position: fixed;
@@ -88,20 +90,35 @@ export default {
   color: var(--c-light-darken);
   .cookie {
     box-sizing: border-box;
-    padding: 0 1.5rem;
+    padding: 0 5.5rem 0 1rem;
     margin: auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 1272px;
     max-width: 100%;
-    height: 3rem;
+    height: 4.5rem;
+
     &__icon {
+      margin-left: var(--spacer-sm);
       cursor: pointer;
       --icon-color: var(--c-link);
       &:hover {
         --icon-color: var(--c-link-hover);
       }
+    }
+  }
+
+  @media (min-width: 375px) {
+    .cookie {
+      height: 3rem;
+      padding: 0 5.5rem 0 1.5rem;
+    }
+  }
+
+  @media (min-width: $desktop-xl-min) {
+    .cookie {
+      padding: 0 1.5rem;
     }
   }
 }
