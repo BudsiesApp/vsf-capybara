@@ -51,7 +51,7 @@
         <div class="_legal-information">
           ©{{ new Date().getFullYear() }} Budsies Co LLC. All Rights Reserved.
           |
-          <router-link to="/terms-of-service" exact>
+          <router-link to="/terms-of-service/" exact>
             {{ $t('Terms of Service') }}
           </router-link>
           |

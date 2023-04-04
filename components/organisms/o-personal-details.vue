@@ -70,12 +70,27 @@
               @blur="$v.acceptConditions.$touch()"
             >
               <template #label>
-                <span class="sf-checkbox__label no-flex">
-                  {{ $t('I accept ') }}
+                <span class="sf-checkbox__label">
+                  {{ $t('I accept') }}
+
+                  <router-link
+                    target="_blank"
+                    to="/terms-of-service/"
+                  >
+                    {{ $t('Terms of Service') }}
+                  </router-link>
+
+                  <span>
+                    {{ $t('And') }}
+                  </span>
+
+                  <router-link
+                    target="_blank"
+                    to="/privacy-policy/"
+                  >
+                    {{ $t('Privacy Policy') }}
+                  </router-link>
                 </span>
-                <SfButton class="sf-button sf-button--text terms" @click.prevent="openTermsAndConditionsModal">
-                  {{ $t('Terms and conditions') }}
-                </SfButton>
               </template>
             </SfCheckbox>
           </div>
@@ -162,9 +177,6 @@ export default {
     }),
     login () {
       this.openModal({ name: ModalList.Auth, payload: 'login' })
-    },
-    openTermsAndConditionsModal () {
-      this.openModal({ name: ModalList.TermsAndConditions })
     },
     onContinueButtonClick () {
       let isInvalid = false;
@@ -256,11 +268,5 @@ export default {
       }
     }
   }
-  .terms {
-    margin: 0 0 0 0.4em;
-  }
-}
-.no-flex {
-  flex: unset;
 }
 </style>
