@@ -315,7 +315,7 @@
           >
             <template #label>
               <span>
-                {{ $t('I agree to ') }}
+                {{ $t('I agree to') }}
 
                 <a href="/media/bulkOrder/agreement/Standard_Bulk_Order_Customer_Agreement.pdf" target="_blank">{{ $t('Bulk Order Customer Agreement') }}</a>,
 
