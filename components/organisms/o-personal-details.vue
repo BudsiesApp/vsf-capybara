@@ -81,7 +81,7 @@
                   </router-link>
 
                   <span>
-                    {{ $t('And') }}
+                    {{ $t('and') }}
                   </span>
 
                   <router-link
