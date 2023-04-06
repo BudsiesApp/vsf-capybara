@@ -124,13 +124,27 @@
           :label="$t('Also quote this quantity:')"
           :disabled="isDisabled"
           name="additional-quantity"
+          class="-quantity"
           v-model="additionalQuantity"
         />
+
+        <div
+          class="_error-text"
+          v-if="$v.value.additionalQuantity && $v.value.additionalQuantity.$error"
+        >
+          <template>
+            {{ $t('For orders less than 50, please upload your character to our sister company') }}
+
+            <a :href="budsiesStoreDomain" target="_blank">
+              Budsies.com
+            </a>
+          </template>
+        </div>
       </div>
 
       <SfButton
         class="sf-button--text _quantity-button"
-        @click="showAdditionalQuantity = !showAdditionalQuantity"
+        @click="onAdditionalQuantityButtonClick"
       >
         {{ quantityButtonText }}
       </SfButton>
@@ -349,6 +363,7 @@ interface InjectedServices {
 }
 
 const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/);
+const quantityMinimumValue = 50;
 
 export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   name: 'MBaseForm',
@@ -573,6 +588,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.$v.$touch();
       return !this.$v.$invalid;
     },
+    onAdditionalQuantityButtonClick (): void {
+      this.showAdditionalQuantity = !this.showAdditionalQuantity;
+      this.additionalQuantity = undefined;
+    },
     onArtworkAdd (value: Item): void {
       const customerImages = [...this.value.customerImages];
 
@@ -608,6 +627,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   },
   validations (): any {
     const isDeadlineDateRequired = requiredIf(() => this.deadline === '1');
+    const additionalQuantityValidation = () => {
+      return this.showAdditionalQuantity
+        ? {
+          minValue: minValue(quantityMinimumValue)
+        }
+        : {}
+    };
 
     return {
       value: {
@@ -622,8 +648,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         },
         quantity: {
           required,
-          minValue: minValue(50)
+          minValue: minValue(quantityMinimumValue)
         },
+        additionalQuantity: additionalQuantityValidation(),
         deadline: {
           required
         },
