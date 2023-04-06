@@ -363,6 +363,7 @@ interface InjectedServices {
 }
 
 const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/);
+const quantityMinimumValue = 50;
 
 export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   name: 'MBaseForm',
@@ -629,7 +630,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     const additionalQuantityValidation = () => {
       return this.showAdditionalQuantity
         ? {
-          minValue: minValue(50)
+          minValue: minValue(quantityMinimumValue)
         }
         : {}
     };
@@ -647,7 +648,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         },
         quantity: {
           required,
-          minValue: minValue(50)
+          minValue: minValue(quantityMinimumValue)
         },
         additionalQuantity: additionalQuantityValidation(),
         deadline: {
