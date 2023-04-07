@@ -111,7 +111,6 @@ export default Vue.extend({
   max-width: 47em;
   margin-left: auto;
   margin-right: auto;
-  margin-top: var(--spacer-xl);
   text-align: center;
 
   ::v-deep .sf-select__selected {

@@ -991,6 +991,7 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     position: relative;
+    margin-top: var(--spacer-base);
   }
 
   ._steps-container {
