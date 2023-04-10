@@ -354,8 +354,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     margin-top: var(--spacer-base);
   }
 
-  ._upload-now {
-    margin-bottom: var(--spacer-xl);
+  ._upload-now,
+  ._upload-email {
+    margin-top: var(--spacer-xl);
   }
 
   ._error-text {
