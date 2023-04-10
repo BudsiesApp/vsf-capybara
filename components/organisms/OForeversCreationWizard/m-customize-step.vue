@@ -476,7 +476,7 @@ export default Vue.extend({
 
   ._description-field,
   ._addons {
-    margin-top: 3rem;
+    margin-top: calc(2 * var(--spacer-base));
   }
 
   textarea,
