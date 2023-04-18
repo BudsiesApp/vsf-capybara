@@ -1,11 +1,11 @@
 import { PlushieType } from 'theme/interfaces/plushie.type';
-import ForeversProductType from 'theme/interfaces/forevers-product-type';
+import PlushieProductType from 'theme/interfaces/plushie-product-type';
 
 import getForeversSkuByType from './get-forevers-sku-by-type.function';
 import getGolfCoverSkuByType from './get-golf-covers-sku-by-type.function';
 
 export default function getPlushieSkuByTypes (
-  productType: ForeversProductType,
+  productType: PlushieProductType,
   plushieType: PlushieType
 ): string {
   switch (plushieType) {
