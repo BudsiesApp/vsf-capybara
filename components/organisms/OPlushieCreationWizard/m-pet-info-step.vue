@@ -1,7 +1,7 @@
 <template>
   <validation-observer
     v-slot="{ passes }"
-    class="forevers-wizard-pet-info-step"
+    class="plushie-wizard-pet-info-step"
     tag="div"
     ref="validation-observer"
   >
@@ -103,7 +103,7 @@ import { ForeversWizardEvents, ProductId } from 'src/modules/budsies';
 
 import MMultiselect from '../../molecules/m-multiselect.vue';
 
-import ForeversWizardPetInfoStepData from '../../interfaces/forevers-wizard-pet-info-step-data.interface';
+import ForeversWizardPetInfoStepData from '../../interfaces/plushie-wizard-pet-info-step-data.interface';
 import Product from 'core/modules/catalog/types/Product';
 
 extend('required', {
@@ -228,7 +228,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-.forevers-wizard-pet-info-step {
+.plushie-wizard-pet-info-step {
   display: inline-flex;
   flex-direction: column;
   justify-content: space-between;

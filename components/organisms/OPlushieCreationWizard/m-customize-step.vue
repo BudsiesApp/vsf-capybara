@@ -1,7 +1,7 @@
 <template>
   <validation-observer
     v-slot="{ passes, errors: formErrors }"
-    class="forevers-wizard-customization-step"
+    class="plushie-wizard-customization-step"
     tag="div"
     ref="validation-observer"
   >
@@ -259,7 +259,7 @@ import MPlushieSizeSelector from '../../molecules/m-plushie-size-selector.vue';
 
 import AddonOption from '../../interfaces/addon-option.interface';
 import ProductionTimeOption from '../../interfaces/production-time-option.interface';
-import ForeversWizardCustomizeStepData from '../../interfaces/forevers-wizard-customize-step-data.interface';
+import ForeversWizardCustomizeStepData from '../../interfaces/plushie-wizard-customize-step-data.interface';
 import getProductionTimeOptions from '../../../helpers/get-production-time-options';
 import SizeOption from 'theme/components/interfaces/size-option';
 import SelectedAddon from 'theme/components/interfaces/selected-addon.interface';
@@ -460,7 +460,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.forevers-wizard-customization-step {
+.plushie-wizard-customization-step {
   ._section {
     margin-top: var(--spacer-base);
 

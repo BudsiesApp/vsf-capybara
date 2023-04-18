@@ -1,6 +1,6 @@
 <template>
-  <div id="forevers-product" itemscope itemtype="http://schema.org/Product">
-    <o-forevers-creation-wizard
+  <div id="plushie-product" itemscope itemtype="http://schema.org/Product">
+    <o-plushie-creation-wizard
       :artwork-upload-url="artworkUploadUrl"
       :existing-plushie-id="existingPlushieId"
       :preselected-product-type="preselectedProductType"
@@ -17,12 +17,12 @@ import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/stor
 
 import Product from 'core/modules/catalog/types/Product';
 
-import OForeversCreationWizard from 'theme/components/organisms/o-forevers-creation-wizard.vue';
+import OPlushieCreationWizard from 'theme/components/organisms/o-plushie-creation-wizard.vue.js';
 
 export default Vue.extend({
-  name: 'ForeversProduct',
+  name: 'PlushieProduct',
   components: {
-    OForeversCreationWizard
+    OPlushieCreationWizard
   },
   computed: {
     getCurrentProduct (): Product | null {
@@ -67,7 +67,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-#forevers-product {
+#plushie-product {
   padding: var(--spacer-lg) 0 0;
   box-sizing: border-box;
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="forevers-wizard-product-type-step">
+  <div class="plushie-wizard-product-type-step">
     <SfHeading
       :level="2"
       :title="$t('Select Your Type of Pet')"
@@ -62,7 +62,7 @@ import {
   BaseImage
 } from 'src/modules/budsies';
 
-import ForeversWizardProductTypeStepData from '../../interfaces/forevers-wizard-product-type-step-data.interface';
+import ForeversWizardProductTypeStepData from '../../interfaces/plushie-wizard-product-type-step-data.interface';
 
 export default Vue.extend({
   name: 'MProductTypeChooseStep',
@@ -121,7 +121,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-.forevers-wizard-product-type-step {
+.plushie-wizard-product-type-step {
   ._buttons-wrapper {
     display: inline-grid;
     grid-template-columns: 1fr;

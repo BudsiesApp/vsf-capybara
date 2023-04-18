@@ -1,7 +1,7 @@
 <template>
   <validation-observer
     v-slot="{ passes }"
-    class="forevers-wizard-image-upload-step"
+    class="plushie-wizard-image-upload-step"
     tag="div"
     ref="validation-observer"
   >
@@ -162,7 +162,7 @@ import { CustomerImage } from 'src/modules/shared';
 import MArtworkUpload from '../../molecules/m-artwork-upload.vue';
 import MBlockStory from '../../molecules/m-block-story.vue';
 
-import ForeversWizardImageUploadStepData from '../../interfaces/forevers-wizard-image-upload-step-data.interface';
+import ForeversWizardImageUploadStepData from '../../interfaces/plushie-wizard-image-upload-step-data.interface';
 
 extend('required', {
   ...required,
@@ -349,7 +349,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 </script>
 
 <style lang="scss" scoped>
-.forevers-wizard-image-upload-step {
+.plushie-wizard-image-upload-step {
   ._file-uploader {
     margin-top: var(--spacer-base);
   }

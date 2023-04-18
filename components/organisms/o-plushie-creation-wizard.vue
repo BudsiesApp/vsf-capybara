@@ -1,5 +1,5 @@
 <template>
-  <div class="o-forevers-creation-wizard product" :class="skinClass">
+  <div class="o-plushie-creation-wizard product" :class="skinClass">
     <SfHeading
       :level="1"
       :title="$t('Create Your Custom Forevers Plush')"
@@ -97,29 +97,29 @@ import {
 import ServerError from 'src/modules/shared/types/server-error';
 import { CustomerImage, getProductDefaultPrice } from 'src/modules/shared';
 
-import foreversCreationWizardPersistedStateService from 'theme/helpers/forevers-creation-wizard-persisted-state.service';
+import foreversCreationWizardPersistedStateService from 'theme/helpers/plushie-creation-wizard-persisted-state.service';
 import getForeversSizeSkuBySizeAndType from 'theme/helpers/get-forevers-size-sku-by-size-and-type.function';
 import getForeversSkuByType from 'theme/helpers/get-forevers-sku-by-type.function';
 import getForeversTypeByBundleSku from 'theme/helpers/get-forevers-type-by-bundle-sku.function';
 import { getAddonOptionsFromBundleOption } from 'theme/helpers/get-addon-options-from-bundle-option.function';
 
-import MProductTypeChooseStep from './OForeversCreationWizard/m-product-type-choose-step.vue';
-import MImageUploadStep from './OForeversCreationWizard/m-image-upload-step.vue';
-import MPetInfoStep from './OForeversCreationWizard/m-pet-info-step.vue';
-import MCustomizeStep from './OForeversCreationWizard/m-customize-step.vue';
-import MFloatingPhoto from './OForeversCreationWizard/m-floating-photo.vue';
+import MProductTypeChooseStep from './OPlushieCreationWizard/m-product-type-choose-step.vue';
+import MImageUploadStep from './OPlushieCreationWizard/m-image-upload-step.vue';
+import MPetInfoStep from './OPlushieCreationWizard/m-pet-info-step.vue';
+import MCustomizeStep from './OPlushieCreationWizard/m-customize-step.vue';
+import MFloatingPhoto from './OPlushieCreationWizard/m-floating-photo.vue';
 
-import ForeversWizardProductTypeStepData from '../interfaces/forevers-wizard-product-type-step-data.interface';
-import ForeversWizardImageUploadStepData from '../interfaces/forevers-wizard-image-upload-step-data.interface';
-import ForeversWizardPetInfoStepData from '../interfaces/forevers-wizard-pet-info-step-data.interface';
-import ForeversWizardCustomizeStepData from '../interfaces/forevers-wizard-customize-step-data.interface';
-import ForeversCreationWizardPersistedState from '../interfaces/forevers-creation-wizard-persisted-state.interface';
+import PlushieWizardProductTypeStepData from '../interfaces/plushie-wizard-product-type-step-data.interface';
+import PlushieWizardImageUploadStepData from '../interfaces/plushie-wizard-image-upload-step-data.interface';
+import PlushieWizardPetInfoStepData from '../interfaces/plushie-wizard-pet-info-step-data.interface';
+import PlushieWizardCustomizeStepData from '../interfaces/plushie-wizard-customize-step-data.interface';
+import PlushieCreationWizardPersistedState from '../interfaces/plushie-creation-wizard-persisted-state.interface';
 import SizeOption from '../interfaces/size-option';
 import SelectedAddon from '../interfaces/selected-addon.interface';
 import AddonOption from '../interfaces/addon-option.interface';
 
 export default Vue.extend({
-  name: 'OForeversCreationWizard',
+  name: 'OPlushieCreationWizard',
   components: {
     SfSteps,
     SfHeading,
@@ -155,18 +155,18 @@ export default Vue.extend({
       productTypeStepData: {
         product: undefined,
         plushieId: undefined
-      } as ForeversWizardProductTypeStepData,
+      } as PlushieWizardProductTypeStepData,
       // eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
       imageUploadStepData: {
         uploadMethod: ImageUploadMethod.NOW,
         customerImages: []
-      } as ForeversWizardImageUploadStepData,
+      } as PlushieWizardImageUploadStepData,
       // eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
       petInfoStepData: {
         name: undefined,
         breed: undefined,
         email: undefined
-      } as ForeversWizardPetInfoStepData,
+      } as PlushieWizardPetInfoStepData,
       // eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
       customizeStepData: {
         bodypartsValues: {},
@@ -175,7 +175,7 @@ export default Vue.extend({
         productionTime: undefined,
         size: undefined,
         quantity: 1
-      } as ForeversWizardCustomizeStepData,
+      } as PlushieWizardCustomizeStepData,
 
       isSubmitting: false,
       isWizardInitializing: false
@@ -445,7 +445,7 @@ export default Vue.extend({
       this.productTypeStepData.product = cartItem;
       this.productTypeStepData.plushieId = cartItem.plushieId ? Number.parseInt(cartItem.plushieId, 10) : undefined;
     },
-    async fillProductTypeStepDataFromPersistedState (persistedState?: ForeversCreationWizardPersistedState): Promise<void> {
+    async fillProductTypeStepDataFromPersistedState (persistedState?: PlushieCreationWizardPersistedState): Promise<void> {
       if (!persistedState?.productTypeData) {
         this.productTypeStepData = {
           product: undefined,
@@ -464,7 +464,7 @@ export default Vue.extend({
         plushieId: persistedState.productTypeData.plushieId
       }
     },
-    fillImageUploadStepDataFromPersistedState (persistedState?: ForeversCreationWizardPersistedState): void {
+    fillImageUploadStepDataFromPersistedState (persistedState?: PlushieCreationWizardPersistedState): void {
       if (!persistedState?.imageUploadStepData) {
         this.imageUploadStepData = {
           uploadMethod: ImageUploadMethod.NOW,
@@ -475,7 +475,7 @@ export default Vue.extend({
 
       this.imageUploadStepData = persistedState.imageUploadStepData;
     },
-    fillPetInfoStepDataFromPersistedState (persistedState?: ForeversCreationWizardPersistedState): void {
+    fillPetInfoStepDataFromPersistedState (persistedState?: PlushieCreationWizardPersistedState): void {
       if (!persistedState?.petInfoStepData) {
         this.petInfoStepData = {
           name: undefined,
@@ -650,14 +650,14 @@ export default Vue.extend({
         action1: { label: i18n.t('OK') }
       });
     },
-    async onImageUploadStepDataInput (value: ForeversWizardImageUploadStepData): Promise<void> {
+    async onImageUploadStepDataInput (value: PlushieWizardImageUploadStepData): Promise<void> {
       this.imageUploadStepData = value;
 
       if (!this.existingCartItem) {
         await this.persistImageUploadStepData(value);
       }
     },
-    async onPetInfoStepDataInput (value: ForeversWizardPetInfoStepData): Promise<void> {
+    async onPetInfoStepDataInput (value: PlushieWizardPetInfoStepData): Promise<void> {
       this.petInfoStepData = value;
 
       if (!this.existingCartItem) {
@@ -671,21 +671,21 @@ export default Vue.extend({
 
       await foreversCreationWizardPersistedStateService.saveCurrentStepIndex(this.plushieId, value);
     },
-    async persistImageUploadStepData (value: ForeversWizardImageUploadStepData): Promise<void> {
+    async persistImageUploadStepData (value: PlushieWizardImageUploadStepData): Promise<void> {
       if (!this.plushieId) {
         throw new Error('Plushie id is undefined');
       }
 
       await foreversCreationWizardPersistedStateService.saveImageUploadStepData(this.plushieId, value);
     },
-    async persistPetInfoStepData (value: ForeversWizardPetInfoStepData): Promise<void> {
+    async persistPetInfoStepData (value: PlushieWizardPetInfoStepData): Promise<void> {
       if (!this.plushieId) {
         throw new Error('Plushie id is undefined');
       }
 
       await foreversCreationWizardPersistedStateService.savePetInfoStepData(this.plushieId, value);
     },
-    async persistProductTypeStepData (value: ForeversWizardProductTypeStepData): Promise<void> {
+    async persistProductTypeStepData (value: PlushieWizardProductTypeStepData): Promise<void> {
       if (!value.plushieId || !value.product) {
         throw new Error('Plushie Id or Product Sku is undefined');
       }
@@ -848,7 +848,7 @@ export default Vue.extend({
 @import "~@storefront-ui/shared/styles/helpers/layout";
 @import "~@storefront-ui/shared/styles/components/atoms/SfHeading";
 
-.o-forevers-creation-wizard {
+.o-plushie-creation-wizard {
   --steps-content-padding: var(--spacer-base) var(--spacer-sm) 0;
   $floating-photo-width: 14%;
 
