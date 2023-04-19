@@ -6,7 +6,7 @@
     ref="validation-observer"
   >
     <MBlockStory
-      story-slug="petsies_creation_page_top"
+      :story-slug="topBlockStorySlug"
     />
 
     <div class="_upload-now" v-show="isUploadNow">
@@ -136,7 +136,7 @@
     </div>
 
     <MBlockStory
-      story-slug="petsies_creation_page_bottom"
+      :story-slug="bottomBlockStorySlug"
     />
   </validation-observer>
 </template>
@@ -163,6 +163,7 @@ import MArtworkUpload from '../../molecules/m-artwork-upload.vue';
 import MBlockStory from '../../molecules/m-block-story.vue';
 
 import ForeversWizardImageUploadStepData from '../../interfaces/plushie-wizard-image-upload-step-data.interface';
+import { PlushieType } from 'theme/interfaces/plushie.type';
 
 extend('required', {
   ...required,
@@ -206,6 +207,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       type: Number,
       required: true
     },
+    plushieType: {
+      type: String as PropType<PlushieType>,
+      required: true
+    },
     disabled: {
       type: Boolean,
       default: false
@@ -232,11 +237,22 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           return ProductValue.FOREVERS_CAT;
         case ProductId.FOREVERS_OTHER:
           return ProductValue.FOREVERS_OTHER;
+        case ProductId.GOLF_COVERS_DOG:
+          return ProductValue.GOLF_COVERS_DOG;
+        case ProductId.GOLF_COVERS_CAT:
+          return ProductValue.GOLF_COVERS_CAT;
+        case ProductId.GOLF_COVERS_OTHER:
+          return ProductValue.GOLF_COVERS_OTHER;
         default:
           throw new Error(
             `Can't resolve Backend product ID for Magento '${this.product.id}' product ID`
           );
       }
+    },
+    bottomBlockStorySlug (): string {
+      return this.plushieType === PlushieType.FOREVERS
+        ? 'petsies_creation_page_bottom'
+        : 'golf_cover_creation_page_bottom';
     },
     isDisabled (): boolean {
       return this.disabled || this.isUploadProcessingInProgress;
@@ -250,6 +266,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     shortcode (): string | undefined {
       return this.$store.getters['budsies/getPlushieShortcode'](this.plushieId);
+    },
+    topBlockStorySlug (): string {
+      return this.plushieType === PlushieType.FOREVERS
+        ? 'petsies_creation_page_top'
+        : 'golf_cover_creation_page_top';
     }
   },
   methods: {
