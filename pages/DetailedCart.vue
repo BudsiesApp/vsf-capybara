@@ -197,6 +197,12 @@ const foreversProductsSkus = [
   'ForeversOther_bundle'
 ]
 
+const golfHeadCoversProductsSkus = [
+  'golfHeadCoversDog_bundle',
+  'golfHeadCoversCat_bundle',
+  'golfHeadCoversOther_bundle'
+]
+
 const printedProductSkus = [
   'customPrintedSocks_bundle',
   'customPrintedMasks_bundle',
@@ -218,7 +224,8 @@ const editableProductsSkus = [
   ...foreversProductsSkus,
   ...printedProductSkus,
   ...blanketProductsSkus,
-  ...clayPlushieProductSkus
+  ...clayPlushieProductSkus,
+  ...golfHeadCoversProductsSkus
 ];
 
 export default {
@@ -367,7 +374,9 @@ export default {
       return this.truncate(product.plushieDescription, 150, 50);
     },
     editHandler (product) {
-      if (foreversProductsSkus.includes(product.sku)) {
+      if (golfHeadCoversProductsSkus.includes(product.sku)) {
+        this.$router.push({ name: 'golf-covers-create', query: { id: product.plushieId } });
+      } else if (foreversProductsSkus.includes(product.sku)) {
         this.$router.push({ name: 'forevers-create', query: { id: product.plushieId } });
       } else if (printedProductSkus.includes(product.sku)) {
         this.$router.push({
