@@ -2,7 +2,7 @@
   <div class="o-plushie-creation-wizard product" :class="skinClass">
     <SfHeading
       :level="1"
-      :title="$t('Create Your Custom Forevers Plush')"
+      :title="mainTitleText"
     />
 
     <div class="_content">
@@ -19,6 +19,7 @@
               :value="productTypeStepData"
               :disabled="isBusy"
               :set-product-type-action="setProductType"
+              :plushie-type="plushieType"
               @next-step="nextStep"
             />
           </SfStep>
@@ -30,6 +31,7 @@
               :product="activeProduct"
               :plushie-id="plushieId"
               :disabled="isBusy"
+              :plushie-type="plushieType"
               @input="onImageUploadStepDataInput"
               @next-step="nextStep"
               v-if="plushieId"
@@ -42,6 +44,7 @@
               :plushie-id="plushieId"
               :product="activeProduct"
               :disabled="isBusy"
+              :plushie-type="plushieType"
               @next-step="nextStep"
               @input="onPetInfoStepDataInput"
             />
@@ -58,6 +61,7 @@
               :sizes="sizes"
               :add-to-cart="onAddToCartHandler"
               :disabled="isBusy"
+              :plushie-type="plushieType"
               @next-step="nextStep"
             />
           </SfStep>
@@ -74,7 +78,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import Vue, { PropType } from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import i18n from '@vue-storefront/i18n';
@@ -92,7 +96,7 @@ import {
   vuexTypes as budsiesTypes,
   BodypartOption,
   BodyPartValueContentType,
-  ForeversWizardEvents
+  PlushieWizardEvents
 } from 'src/modules/budsies';
 import ServerError from 'src/modules/shared/types/server-error';
 import { CustomerImage, getProductDefaultPrice } from 'src/modules/shared';
@@ -117,6 +121,8 @@ import PlushieCreationWizardPersistedState from '../interfaces/plushie-creation-
 import SizeOption from '../interfaces/size-option';
 import SelectedAddon from '../interfaces/selected-addon.interface';
 import AddonOption from '../interfaces/addon-option.interface';
+import { PlushieType } from 'theme/interfaces/plushie.type';
+import getPlushieSkuByTypes from 'theme/helpers/get-plushie-sku-by-types.function';
 
 export default Vue.extend({
   name: 'OPlushieCreationWizard',
@@ -145,6 +151,10 @@ export default Vue.extend({
     preselectedSize: {
       type: String,
       default: undefined
+    },
+    plushieType: {
+      type: String as PropType<PlushieType>,
+      required: true
     }
   },
   data () {
@@ -279,6 +289,13 @@ export default Vue.extend({
     },
     floatingPhotoImageUrl (): string | undefined {
       return this.customerImages[0] ? this.customerImages[0].url : undefined;
+    },
+    mainTitleText (): string {
+      const title = this.plushieType === PlushieType.FOREVERS
+        ? this.$t('Create Your Custom Forevers Plush')
+        : this.$t('Create Your Custom Golf Head Covers');
+
+      return title.toString();
     }
   },
   methods: {
@@ -339,7 +356,7 @@ export default Vue.extend({
       }
     },
     async setProductType (type: string): Promise<void> {
-      const productSku: string = getForeversSkuByType(type);
+      const productSku: string = getPlushieSkuByTypes(type, this.plushieType);
 
       if (this.productTypeStepData.product?.sku === productSku) {
         return;
@@ -362,7 +379,11 @@ export default Vue.extend({
 
       this.fillSizeByPreselectedParamAndCurrentProduct();
 
-      EventBus.$emit(ForeversWizardEvents.TYPE_CHANGE, type);
+      const eventName = this.plushieType === PlushieType.FOREVERS
+        ? PlushieWizardEvents.FOREVERS_TYPE_CHANGE
+        : PlushieWizardEvents.GOLF_COVERS_TYPE_CHANGE;
+
+      EventBus.$emit(eventName, type);
 
       this.$router.push({ query: { ...this.$route.query, id: plushieId.toString(10) } });
     },

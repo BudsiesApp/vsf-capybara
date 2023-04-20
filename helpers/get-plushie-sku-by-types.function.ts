@@ -5,7 +5,7 @@ import getForeversSkuByType from './get-forevers-sku-by-type.function';
 import getGolfCoverSkuByType from './get-golf-covers-sku-by-type.function';
 
 export default function getPlushieSkuByTypes (
-  productType: PlushieProductType,
+  productType: string,
   plushieType: PlushieType
 ): string {
   switch (plushieType) {

@@ -99,12 +99,13 @@ import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
 import { SfHeading, SfButton, SfInput } from '@storefront-ui/vue';
 
-import { ForeversWizardEvents, ProductId } from 'src/modules/budsies';
+import { PlushieWizardEvents, ProductId } from 'src/modules/budsies';
 
 import MMultiselect from '../../molecules/m-multiselect.vue';
 
 import ForeversWizardPetInfoStepData from '../../interfaces/plushie-wizard-pet-info-step-data.interface';
 import Product from 'core/modules/catalog/types/Product';
+import { PlushieType } from 'theme/interfaces/plushie.type';
 
 extend('required', {
   ...required,
@@ -146,6 +147,10 @@ export default Vue.extend({
     disabled: {
       type: Boolean,
       default: false
+    },
+    plushieType: {
+      type: String as PropType<PlushieType>,
+      required: true
     }
   },
   data () {
@@ -205,7 +210,11 @@ export default Vue.extend({
       this.breed = undefined;
     },
     submitStep (): void {
-      EventBus.$emit(ForeversWizardEvents.INFO_FILL);
+      const eventName = this.plushieType === PlushieType.FOREVERS
+        ? PlushieWizardEvents.FOREVERS_INFO_FILL
+        : PlushieWizardEvents.GOLF_COVERS_INFO_FILL;
+
+      EventBus.$emit(eventName);
       this.$emit('next-step');
     }
   },

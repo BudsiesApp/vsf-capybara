@@ -150,7 +150,7 @@ import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { SfHeading, SfButton } from '@storefront-ui/vue';
 import Product from 'core/modules/catalog/types/Product';
 
-import { ForeversWizardEvents,
+import { PlushieWizardEvents,
   ImageUploadMethod,
   ProductId,
   ProductValue
@@ -329,8 +329,12 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.isUploadProcessingInProgress = value;
     },
     submitStep (): void {
+      const eventName = this.plushieType === PlushieType.FOREVERS
+        ? PlushieWizardEvents.FOREVERS_PHOTOS_PROVIDE
+        : PlushieWizardEvents.GOLF_COVERS_PHOTOS_PROVIDE;
+
       EventBus.$emit(
-        ForeversWizardEvents.PHOTOS_PROVIDE,
+        eventName,
         this.uploadMethod === ImageUploadMethod.EMAIL ? 'email' : 'now'
       );
 

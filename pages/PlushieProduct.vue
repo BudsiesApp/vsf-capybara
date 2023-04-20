@@ -1,6 +1,7 @@
 <template>
   <div id="plushie-product" itemscope itemtype="http://schema.org/Product">
     <o-plushie-creation-wizard
+      :plushie-type="plushieType"
       :artwork-upload-url="artworkUploadUrl"
       :existing-plushie-id="existingPlushieId"
       :preselected-product-type="preselectedProductType"
@@ -10,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import Vue, { PropType } from 'vue';
 import config from 'config';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
@@ -18,11 +19,18 @@ import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/stor
 import Product from 'core/modules/catalog/types/Product';
 
 import OPlushieCreationWizard from 'theme/components/organisms/o-plushie-creation-wizard.vue.js';
+import { PlushieType } from 'theme/interfaces/plushie.type';
 
 export default Vue.extend({
   name: 'PlushieProduct',
   components: {
     OPlushieCreationWizard
+  },
+  props: {
+    plushieType: {
+      type: String as PropType<PlushieType>,
+      required: true
+    }
   },
   computed: {
     getCurrentProduct (): Product | null {
@@ -35,10 +43,10 @@ export default Vue.extend({
       return String(this.$route.query?.id);
     },
     preselectedProductType (): string | undefined {
-      return this.$route.query?.product;
+      return this.$route.query?.product as string | undefined;
     },
     preselectedSize (): string | undefined {
-      return this.$route.query?.size;
+      return this.$route.query?.size as string | undefined;
     }
   },
   beforeRouteLeave (to, from, next) {

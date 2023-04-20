@@ -7,48 +7,20 @@
 
     <div class="_buttons-wrapper">
       <SfButton
+        v-for="item in productTypeButtonsList"
+        :key="item.title"
         class="_button"
         :disabled="isDisabled"
-        @click="setProductType('dog')"
+        @click="setProductType(item.type)"
       >
         <BaseImage
           class="_image"
-          src="/assets/forevers/dog-icon1_1.png"
-          :alt="$t('Forevers Dog')"
+          :src="item.imageSrc"
+          :alt="item.title"
           width="76px"
           :aspect-ratio="1"
         />
-        {{ $t('Forevers Dog') }}
-      </SfButton>
-
-      <SfButton
-        class="_button"
-        :disabled="isDisabled"
-        @click="setProductType('cat')"
-      >
-        <BaseImage
-          class="_image"
-          src="/assets/forevers/cat-icon1_1.png"
-          :alt="$t('Forevers Cat')"
-          width="76px"
-          :aspect-ratio="1"
-        />
-        {{ $t('Forevers Cat') }}
-      </SfButton>
-
-      <SfButton
-        class="_button"
-        :disabled="isDisabled"
-        @click="setProductType('other')"
-      >
-        <BaseImage
-          class="_image"
-          src="/assets/forevers/other-icon1_1.png"
-          :alt="$t('Forevers Other')"
-          width="76px"
-          :aspect-ratio="1"
-        />
-        {{ $t('Forevers Other') }}
+        {{ item.title }}
       </SfButton>
     </div>
   </div>
@@ -63,6 +35,14 @@ import {
 } from 'src/modules/budsies';
 
 import ForeversWizardProductTypeStepData from '../../interfaces/plushie-wizard-product-type-step-data.interface';
+import PlushieProductType from 'theme/interfaces/plushie-product-type';
+import { PlushieType } from 'theme/interfaces/plushie.type';
+
+interface ProductTypeButton {
+  title: string,
+  type: PlushieProductType,
+  imageSrc: string
+}
 
 export default Vue.extend({
   name: 'MProductTypeChooseStep',
@@ -86,6 +66,10 @@ export default Vue.extend({
     setProductTypeAction: {
       type: Function as PropType<(type: string) => Promise<void>>,
       required: true
+    },
+    plushieType: {
+      type: String as PropType<PlushieType>,
+      required: true
     }
   },
   data () {
@@ -96,10 +80,53 @@ export default Vue.extend({
   computed: {
     isDisabled (): boolean {
       return this.disabled || this.isSubmitting;
+    },
+    foreversProductTypeButtons (): ProductTypeButton[] {
+      return [
+        {
+          title: this.$t('Forevers Dog').toString(),
+          type: PlushieProductType.DOG,
+          imageSrc: '/assets/forevers/dog-icon1_1.png'
+        },
+        {
+          title: this.$t('Forevers Cat').toString(),
+          type: PlushieProductType.CAT,
+          imageSrc: '/assets/forevers/cat-icon1_1.png'
+        },
+        {
+          title: this.$t('Forevers Other').toString(),
+          type: PlushieProductType.OTHER,
+          imageSrc: '/assets/forevers/other-icon1_1.png'
+        }
+      ]
+    },
+    golfCoversProductTypeButtons (): ProductTypeButton[] {
+      return [
+        {
+          title: this.$t('Dog Golf Head Covers').toString(),
+          type: PlushieProductType.DOG,
+          imageSrc: ''
+        },
+        {
+          title: this.$t('Cat Golf Head Covers').toString(),
+          type: PlushieProductType.CAT,
+          imageSrc: ''
+        },
+        {
+          title: this.$t('Other Golf Head Covers').toString(),
+          type: PlushieProductType.OTHER,
+          imageSrc: ''
+        }
+      ]
+    },
+    productTypeButtonsList (): ProductTypeButton[] {
+      return this.plushieType === PlushieType.FOREVERS
+        ? this.foreversProductTypeButtons
+        : this.golfCoversProductTypeButtons;
     }
   },
   methods: {
-    async setProductType (type: 'dog' | 'cat' | 'other'): Promise<void> {
+    async setProductType (type: PlushieProductType): Promise<void> {
       if (this.disabled) {
         return;
       }
