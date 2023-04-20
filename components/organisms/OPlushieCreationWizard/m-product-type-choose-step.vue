@@ -15,6 +15,7 @@
       >
         <BaseImage
           class="_image"
+          :class="{ '-hidden': !item.imageSrc }"
           :src="item.imageSrc"
           :alt="item.title"
           width="76px"
@@ -105,12 +106,12 @@ export default Vue.extend({
         {
           title: this.$t('Dog Golf Head Covers').toString(),
           type: PlushieProductType.DOG,
-          imageSrc: ''
+          imageSrc: '/assets/golf-covers/dog-icon.png'
         },
         {
           title: this.$t('Cat Golf Head Covers').toString(),
           type: PlushieProductType.CAT,
-          imageSrc: ''
+          imageSrc: '/assets/golf-covers/cat-icon.png'
         },
         {
           title: this.$t('Other Golf Head Covers').toString(),
@@ -162,6 +163,11 @@ export default Vue.extend({
 
     ._image {
       margin-right: 1em;
+      border-radius: 50%;
+
+      &.-hidden {
+        visibility: hidden;
+      }
     }
   }
 
