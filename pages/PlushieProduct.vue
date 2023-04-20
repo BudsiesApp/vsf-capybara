@@ -18,7 +18,7 @@ import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/stor
 
 import Product from 'core/modules/catalog/types/Product';
 
-import OPlushieCreationWizard from 'theme/components/organisms/o-plushie-creation-wizard.vue.js';
+import OPlushieCreationWizard from 'theme/components/organisms/o-plushie-creation-wizard.vue';
 import { PlushieType } from 'theme/interfaces/plushie.type';
 
 export default Vue.extend({

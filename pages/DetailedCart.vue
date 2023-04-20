@@ -254,6 +254,10 @@ export default {
           url: '/forevers-pet-plush/'
         },
         {
+          label: this.$t('Golf Club Headcovers'),
+          url: '/golf-headcovers/'
+        },
+        {
           label: 'Pet Pillow',
           url: '/pet-pillow/'
         },

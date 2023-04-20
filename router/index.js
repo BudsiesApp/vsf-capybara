@@ -4,8 +4,8 @@ const ErrorPage = () =>
   import(/* webpackChunkName: "vsf-error" */ 'theme/pages/Error');
 const Product = () =>
   import(/* webpackChunkName: "vsf-product" */ 'theme/pages/Product');
-const ForeversProduct = () =>
-  import(/* webpackChunkName: "vsf-forevers-product" */ 'theme/pages/ForeversProduct');
+const PlushieProduct = () =>
+  import(/* webpackChunkName: "vsf-forevers-product" */ 'theme/pages/PlushieProduct');
 const PrintedProduct = () =>
   import(/* webpackChunkName: "vsf-printed-product" */ 'theme/pages/PrintedProduct');
 const PillowProduct = () =>
@@ -83,7 +83,7 @@ let routes = [
   {
     name: 'forevers-create',
     path: '/forevers/create/',
-    component: ForeversProduct,
+    component: PlushieProduct,
     props: {
       plushieType: PlushieType.FOREVERS
     }
@@ -115,7 +115,7 @@ let routes = [
   {
     name: 'golf-covers-create',
     path: '/golf-head-covers/create/',
-    component: ForeversProduct,
+    component: PlushieProduct,
     props: {
       plushieType: PlushieType.GOLF_COVERS
     }

@@ -90,6 +90,10 @@ export default Vue.extend({
           url: '/forevers-pet-plush/'
         },
         {
+          label: this.$t('Golf Club Headcovers'),
+          url: '/golf-headcovers/'
+        },
+        {
           label: this.$t('Pet Shaped Pillows'),
           url: '/pet-pillow/'
         },
