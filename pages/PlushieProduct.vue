@@ -54,7 +54,10 @@ export default Vue.extend({
     next();
   },
   metaInfo () {
-    const productName = this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name || 'Forevers';
+    const defaultProductName = this.plushieType === PlushieType.FOREVERS
+      ? 'Forevers'
+      : 'Golf Head Covers';
+    const productName = this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name || defaultProductName;
 
     return {
       title: htmlDecode(productName),
