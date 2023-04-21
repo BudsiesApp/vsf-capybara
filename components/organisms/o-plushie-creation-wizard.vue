@@ -438,11 +438,13 @@ export default Vue.extend({
 
       this.fillSizeByPreselectedParamAndCurrentProduct();
 
-      const eventName = this.plushieType === PlushieType.FOREVERS
-        ? PlushieWizardEvents.FOREVERS_TYPE_CHANGE
-        : PlushieWizardEvents.GOLF_COVERS_TYPE_CHANGE;
-
-      EventBus.$emit(eventName, type);
+      EventBus.$emit(
+        PlushieWizardEvents.PLUSHIE_WIZARD_TYPE_CHANGE,
+        {
+          productType: type,
+          plushieType: this.plushieType
+        }
+      );
 
       this.$router.push({ query: { ...this.$route.query, id: plushieId.toString(10) } });
     },

@@ -210,11 +210,10 @@ export default Vue.extend({
       this.breed = undefined;
     },
     submitStep (): void {
-      const eventName = this.plushieType === PlushieType.FOREVERS
-        ? PlushieWizardEvents.FOREVERS_INFO_FILL
-        : PlushieWizardEvents.GOLF_COVERS_INFO_FILL;
-
-      EventBus.$emit(eventName);
+      EventBus.$emit(
+        PlushieWizardEvents.PLUSHIE_WIZARD_INFO_FILL,
+        this.plushieType
+      );
       this.$emit('next-step');
     }
   },

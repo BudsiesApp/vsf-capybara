@@ -327,13 +327,12 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.isUploadProcessingInProgress = value;
     },
     submitStep (): void {
-      const eventName = this.plushieType === PlushieType.FOREVERS
-        ? PlushieWizardEvents.FOREVERS_PHOTOS_PROVIDE
-        : PlushieWizardEvents.GOLF_COVERS_PHOTOS_PROVIDE;
-
       EventBus.$emit(
-        eventName,
-        this.uploadMethod === ImageUploadMethod.EMAIL ? 'email' : 'now'
+        PlushieWizardEvents.PLUSHIE_WIZARD_PHOTOS_PROVIDE,
+        {
+          plushieType: this.plushieType,
+          uploadMethod: this.uploadMethod === ImageUploadMethod.EMAIL ? 'email' : 'now'
+        }
       );
 
       this.$emit('next-step');
