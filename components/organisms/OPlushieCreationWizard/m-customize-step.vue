@@ -265,7 +265,6 @@ import getProductionTimeOptions from '../../../helpers/get-production-time-optio
 import SizeOption from 'theme/components/interfaces/size-option';
 import SelectedAddon from 'theme/components/interfaces/selected-addon.interface';
 import { getAddonOptionsFromBundleOption } from 'theme/helpers/get-addon-options-from-bundle-option.function';
-import { PlushieType } from 'theme/interfaces/plushie.type';
 
 extend('required', {
   ...required,
@@ -331,9 +330,9 @@ export default Vue.extend({
       type: Array as PropType<SizeOption[]>,
       default: () => []
     },
-    plushieType: {
-      type: String as PropType<PlushieType>,
-      required: true
+    showSizeSelector: {
+      type: Boolean,
+      default: true
     }
   },
   data () {
@@ -415,9 +414,6 @@ export default Vue.extend({
     },
     showProductionTimeOptions (): boolean {
       return this.productionTimeOptions.length > 0;
-    },
-    showSizeSelector (): boolean {
-      return this.plushieType === PlushieType.FOREVERS;
     }
   },
   methods: {

@@ -6,7 +6,7 @@
     ref="validation-observer"
   >
     <MBlockStory
-      :story-slug="topBlockStorySlug"
+      :story-slug="topStorySlug"
     />
 
     <div class="_upload-now" v-show="isUploadNow">
@@ -136,7 +136,7 @@
     </div>
 
     <MBlockStory
-      :story-slug="bottomBlockStorySlug"
+      :story-slug="bottomStorySlug"
     />
   </validation-observer>
 </template>
@@ -214,6 +214,14 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     disabled: {
       type: Boolean,
       default: false
+    },
+    bottomStorySlug: {
+      type: String,
+      required: true
+    },
+    topStorySlug: {
+      type: String,
+      required: true
     }
   },
   data () {
@@ -249,11 +257,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           );
       }
     },
-    bottomBlockStorySlug (): string {
-      return this.plushieType === PlushieType.FOREVERS
-        ? 'petsies_creation_page_bottom'
-        : 'golf_cover_creation_page_bottom';
-    },
     isDisabled (): boolean {
       return this.disabled || this.isUploadProcessingInProgress;
     },
@@ -266,11 +269,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     shortcode (): string | undefined {
       return this.$store.getters['budsies/getPlushieShortcode'](this.plushieId);
-    },
-    topBlockStorySlug (): string {
-      return this.plushieType === PlushieType.FOREVERS
-        ? 'petsies_creation_page_top'
-        : 'golf_cover_creation_page_top';
     }
   },
   methods: {

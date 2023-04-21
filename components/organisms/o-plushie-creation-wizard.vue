@@ -19,7 +19,7 @@
               :value="productTypeStepData"
               :disabled="isBusy"
               :set-product-type-action="setProductType"
-              :plushie-type="plushieType"
+              :product-type-buttons-list="productTypeButtonsList"
               @next-step="nextStep"
             />
           </SfStep>
@@ -32,6 +32,8 @@
               :plushie-id="plushieId"
               :disabled="isBusy"
               :plushie-type="plushieType"
+              :top-story-slug="imageUploadStepTopStorySlug"
+              :bottom-story-slug="imageUploadStepBottomStorySlug"
               @input="onImageUploadStepDataInput"
               @next-step="nextStep"
               v-if="plushieId"
@@ -61,7 +63,7 @@
               :sizes="sizes"
               :add-to-cart="onAddToCartHandler"
               :disabled="isBusy"
-              :plushie-type="plushieType"
+              :show-size-selector="showSizeSelector"
               @next-step="nextStep"
             />
           </SfStep>
@@ -103,9 +105,11 @@ import { CustomerImage, getProductDefaultPrice } from 'src/modules/shared';
 
 import foreversCreationWizardPersistedStateService from 'theme/helpers/plushie-creation-wizard-persisted-state.service';
 import getForeversSizeSkuBySizeAndType from 'theme/helpers/get-forevers-size-sku-by-size-and-type.function';
-import getForeversSkuByType from 'theme/helpers/get-forevers-sku-by-type.function';
 import getForeversTypeByBundleSku from 'theme/helpers/get-forevers-type-by-bundle-sku.function';
 import { getAddonOptionsFromBundleOption } from 'theme/helpers/get-addon-options-from-bundle-option.function';
+import { PlushieType } from 'theme/interfaces/plushie.type';
+import getPlushieSkuByTypes from 'theme/helpers/get-plushie-sku-by-types.function';
+import PlushieProductType from 'theme/interfaces/plushie-product-type';
 
 import MProductTypeChooseStep from './OPlushieCreationWizard/m-product-type-choose-step.vue';
 import MImageUploadStep from './OPlushieCreationWizard/m-image-upload-step.vue';
@@ -121,8 +125,7 @@ import PlushieCreationWizardPersistedState from '../interfaces/plushie-creation-
 import SizeOption from '../interfaces/size-option';
 import SelectedAddon from '../interfaces/selected-addon.interface';
 import AddonOption from '../interfaces/addon-option.interface';
-import { PlushieType } from 'theme/interfaces/plushie.type';
-import getPlushieSkuByTypes from 'theme/helpers/get-plushie-sku-by-types.function';
+import ProductTypeButton from '../interfaces/product-type-button.interface';
 
 export default Vue.extend({
   name: 'OPlushieCreationWizard',
@@ -290,12 +293,68 @@ export default Vue.extend({
     floatingPhotoImageUrl (): string | undefined {
       return this.customerImages[0] ? this.customerImages[0].url : undefined;
     },
+    imageUploadStepBottomStorySlug (): string {
+      return this.plushieType === PlushieType.FOREVERS
+        ? 'petsies_creation_page_bottom'
+        : 'golf_cover_creation_page_bottom';
+    },
+    imageUploadStepTopStorySlug (): string {
+      return this.plushieType === PlushieType.FOREVERS
+        ? 'petsies_creation_page_top'
+        : 'golf_cover_creation_page_top';
+    },
     mainTitleText (): string {
       const title = this.plushieType === PlushieType.FOREVERS
         ? this.$t('Create Your Custom Forevers Plush')
         : this.$t('Create Your Custom Golf Head Covers');
 
       return title.toString();
+    },
+    showSizeSelector (): boolean {
+      return this.plushieType === PlushieType.FOREVERS;
+    },
+    foreversProductTypeButtons (): ProductTypeButton[] {
+      return [
+        {
+          title: this.$t('Forevers Dog').toString(),
+          type: PlushieProductType.DOG,
+          imageSrc: '/assets/forevers/dog-icon1_1.png'
+        },
+        {
+          title: this.$t('Forevers Cat').toString(),
+          type: PlushieProductType.CAT,
+          imageSrc: '/assets/forevers/cat-icon1_1.png'
+        },
+        {
+          title: this.$t('Forevers Other').toString(),
+          type: PlushieProductType.OTHER,
+          imageSrc: '/assets/forevers/other-icon1_1.png'
+        }
+      ]
+    },
+    golfCoversProductTypeButtons (): ProductTypeButton[] {
+      return [
+        {
+          title: this.$t('Dog Golf Head Covers').toString(),
+          type: PlushieProductType.DOG,
+          imageSrc: '/assets/golf-covers/dog-icon.png'
+        },
+        {
+          title: this.$t('Cat Golf Head Covers').toString(),
+          type: PlushieProductType.CAT,
+          imageSrc: '/assets/golf-covers/cat-icon.png'
+        },
+        {
+          title: this.$t('Other Golf Head Covers').toString(),
+          type: PlushieProductType.OTHER,
+          imageSrc: ''
+        }
+      ]
+    },
+    productTypeButtonsList (): ProductTypeButton[] {
+      return this.plushieType === PlushieType.FOREVERS
+        ? this.foreversProductTypeButtons
+        : this.golfCoversProductTypeButtons;
     }
   },
   methods: {
