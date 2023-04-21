@@ -1,9 +1,11 @@
+import { PlushieType } from 'theme/interfaces/plushie.type';
+
 const ErrorPage = () =>
   import(/* webpackChunkName: "vsf-error" */ 'theme/pages/Error');
 const Product = () =>
   import(/* webpackChunkName: "vsf-product" */ 'theme/pages/Product');
-const ForeversProduct = () =>
-  import(/* webpackChunkName: "vsf-forevers-product" */ 'theme/pages/ForeversProduct');
+const PlushieProduct = () =>
+  import(/* webpackChunkName: "vsf-forevers-product" */ 'theme/pages/PlushieProduct');
 const PrintedProduct = () =>
   import(/* webpackChunkName: "vsf-printed-product" */ 'theme/pages/PrintedProduct');
 const PillowProduct = () =>
@@ -81,7 +83,10 @@ let routes = [
   {
     name: 'forevers-create',
     path: '/forevers/create/',
-    component: ForeversProduct
+    component: PlushieProduct,
+    props: {
+      plushieType: PlushieType.FOREVERS
+    }
   },
   {
     name: 'forevers-create-alias-1',
@@ -102,6 +107,38 @@ let routes = [
     path: '/plushie/index/precreate/type/forevers/product/:productType/',
     redirect: (route) => ({
       name: 'forevers-create',
+      query: {
+        product: route.params.productType
+      }
+    })
+  },
+  {
+    name: 'golf-covers-create',
+    path: '/golf-head-covers/create/',
+    component: PlushieProduct,
+    props: {
+      plushieType: PlushieType.GOLF_COVERS
+    }
+  },
+  {
+    name: 'golf-covers-create-alias-1',
+    path: '/plushie/index/creationwizard/category_id/124/',
+    redirect: {
+      name: 'golf-covers-create'
+    }
+  },
+  {
+    name: 'golf-covers-create-alias-2',
+    path: '/plushie/index/creationwizard/category_id/124/attributeId/:plushieId/',
+    redirect: {
+      name: 'golf-covers-create'
+    }
+  },
+  {
+    name: 'golf-covers-create-alias-3',
+    path: '/plushie/index/precreate/type/golf-head-covers/product/:productType/',
+    redirect: (route) => ({
+      name: 'golf-covers-create',
       query: {
         product: route.params.productType
       }

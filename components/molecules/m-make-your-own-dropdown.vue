@@ -64,6 +64,10 @@ export default Vue.extend({
           url: '/forevers-pet-plush/'
         },
         {
+          label: 'Golf Headcovers',
+          url: '/golf-headcovers/'
+        },
+        {
           label: 'Custom Pillows',
           url: '/custom-pillows/'
         },
