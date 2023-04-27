@@ -419,10 +419,7 @@ extend('required', {
   message: 'This field is required'
 });
 
-extend('min_value', {
-  ...min_value,
-  message: 'This field must be greater than {min_value}'
-});
+extend('min_value', min_value);
 
 extend('email', email);
 
