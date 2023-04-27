@@ -162,7 +162,7 @@ export default BulkorderBaseFormPersistanceState.extend({
 
         options.push({
           id: productLink.id,
-          value: this.getPillowSizeValue(productLink),
+          value: this.getPillowSizeValue(productLink).toString(),
           title: this.getPillowSizeTitle(productLink).toString()
         });
       })

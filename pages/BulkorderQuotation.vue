@@ -3,7 +3,7 @@
     <o-bulkorder-quotation-form
       :bulkorder-info="bulkorderInfo"
       :sample-product="sampleProduct"
-      v-if="isDataLoaded"
+      v-if="isDataLoaded && sampleProduct"
     />
   </div>
 </template>

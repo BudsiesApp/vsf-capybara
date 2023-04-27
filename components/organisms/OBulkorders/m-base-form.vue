@@ -112,7 +112,7 @@
           name="quantity"
           class="sf-input--required -quantity"
           v-model="quantity"
-          :valid="!$v.value.quantity || !$v.value.quantity.$error"
+          :valid="!errors.length"
         />
 
         <div
@@ -276,7 +276,7 @@
         <validation-provider
           v-slot="{ errors }"
           rules="required"
-          tag="div"
+          slim
         >
           <SfInput
             :label="$t('First Name')"
@@ -297,7 +297,7 @@
         <validation-provider
           v-slot="{ errors }"
           rules="required|email"
-          tag="div"
+          slim
         >
           <SfInput
             :label="$t('Your e-mail address')"
@@ -311,8 +311,8 @@
 
         <validation-provider
           v-slot="{ errors }"
-          :rules="`required|regex:${phoneValidationRegex}`"
-          tag="div"
+          :rules="phoneValidationRules"
+          slim
         >
           <SfInput
             :label="$t('Phone number')"
@@ -416,12 +416,12 @@ const Countries = require('@vue-storefront/i18n/resource/countries.json');
 
 extend('required', {
   ...required,
-  message: 'The {_field_} field is required'
+  message: 'This field is required'
 });
 
 extend('min_value', {
   ...min_value,
-  message: 'The {_field_} field must be greater than {min_value}'
+  message: 'This field must be greater than {min_value}'
 });
 
 extend('email', email);
@@ -493,6 +493,12 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   },
   computed: {
     ...mapMobileObserver(),
+    phoneValidationRules (): any {
+      return {
+        required: true,
+        regex: phoneValidationRegex
+      }
+    },
     agreement: {
       get (): boolean {
         return this.value.agreement;
