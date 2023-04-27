@@ -2,25 +2,31 @@
   <div class="o-keychain-quote-order-form">
     <SfHeading :level="1" :title="$t('Keychain Bulk Order Quote')" class="_title" />
 
-    <m-base-form
-      ref="baseForm"
-      :product="product"
-      :is-disabled="isDisabled"
-      :artwork-upload-url="artworkUploadUrl"
-      v-model="bulkordersBaseFormData"
-      :show-calculation-animation="showCalculationAnimation"
-      @calculation-animation-finished="onCalculationAnimationFinished"
-    />
+    <validation-observer v-slot="{passes}" slim>
+      <m-base-form
+        ref="baseForm"
+        :product="product"
+        :is-disabled="isDisabled"
+        :artwork-upload-url="artworkUploadUrl"
+        v-model="bulkordersBaseFormData"
+        :show-calculation-animation="showCalculationAnimation"
+        @calculation-animation-finished="onCalculationAnimationFinished"
+      />
 
-    <div class="_button-container">
-      <SfButton @click="onSubmit" :disabled="isDisabled">
-        {{ $t('Get My Quote') }}
-      </SfButton>
-    </div>
+      <div class="_button-container">
+        <SfButton
+          @click="() => passes(() => onSubmit())"
+          :disabled="isDisabled"
+        >
+          {{ $t('Get My Quote') }}
+        </SfButton>
+      </div>
+    </validation-observer>
   </div>
 </template>
 
 <script lang="ts">
+import { ValidationObserver } from 'vee-validate';
 import { PropType } from 'vue';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
@@ -47,7 +53,8 @@ export default BulkorderBaseFormPersistanceState.extend({
   components: {
     MBaseForm,
     SfButton,
-    SfHeading
+    SfHeading,
+    ValidationObserver
   },
   data () {
     const bulkordersBaseFormData: BulkordersBaseFormData = {
@@ -92,9 +99,6 @@ export default BulkorderBaseFormPersistanceState.extend({
     this.bulkordersBaseFormData = { ...this.bulkordersBaseFormData, ...state };
   },
   methods: {
-    getBaseFormComponent (): InstanceType<typeof MBaseForm> | undefined {
-      return this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
-    },
     getDataToPersist () {
       return {
         country: this.bulkordersBaseFormData.country,
@@ -105,9 +109,7 @@ export default BulkorderBaseFormPersistanceState.extend({
       }
     },
     async onSubmit (): Promise<void> {
-      const form = this.getBaseFormComponent();
-
-      if (this.isDisabled || !form || !form.getValidationState()) {
+      if (this.isDisabled) {
         return;
       }
 
