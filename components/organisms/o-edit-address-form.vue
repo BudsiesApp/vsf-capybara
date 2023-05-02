@@ -1,24 +1,29 @@
 <template>
   <div class="o-edit-address-form">
-    <o-base-address-form
-      v-model="existingAddress"
-      :is-form-fields-disabled="isSubmitting"
-      @validation-state-change="onValidationStateChange"
-    />
+    <validation-observer slim v-slot="{passes}">
+      <o-base-address-form
+        v-model="existingAddress"
+        :is-form-fields-disabled="isSubmitting"
+      />
 
-    <div class="_buttons-row">
-      <SfButton class="color-secondary" @click="onCancelButtonClick" :disabled="isSubmitting">
-        {{ $t('Cancel') }}
-      </SfButton>
+      <div class="_buttons-row">
+        <SfButton class="color-secondary" @click="onCancelButtonClick" :disabled="isSubmitting">
+          {{ $t('Cancel') }}
+        </SfButton>
 
-      <SfButton @click="onFormSubmit" :disabled="isSubmitButtonDisabled">
-        {{ $t('Update Address') }}
-      </SfButton>
-    </div>
+        <SfButton
+          @click="() => passes(() => onFormSubmit())"
+          :disabled="isSubmitButtonDisabled"
+        >
+          {{ $t('Update Address') }}
+        </SfButton>
+      </div>
+    </validation-observer>
   </div>
 </template>
 
 <script lang="ts">
+import { ValidationObserver } from 'vee-validate';
 import Vue from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { SfButton } from '@storefront-ui/vue';
@@ -30,7 +35,8 @@ export default Vue.extend({
   name: 'OEditAddressForm',
   components: {
     OBaseAddressForm,
-    SfButton
+    SfButton,
+    ValidationObserver
   },
   props: {
     value: {
@@ -40,8 +46,7 @@ export default Vue.extend({
   },
   data () {
     return {
-      isSubmitting: false,
-      isFormValid: false
+      isSubmitting: false
     }
   },
   computed: {
@@ -54,12 +59,12 @@ export default Vue.extend({
       }
     },
     isSubmitButtonDisabled (): boolean {
-      return this.isSubmitting || !this.isFormValid;
+      return this.isSubmitting;
     }
   },
   methods: {
     async onFormSubmit (): Promise<void> {
-      if (this.isSubmitting || !this.isFormValid) {
+      if (this.isSubmitting) {
         return;
       }
 
@@ -74,9 +79,6 @@ export default Vue.extend({
       } finally {
         this.isSubmitting = false;
       }
-    },
-    onValidationStateChange (isValid: boolean) {
-      this.isFormValid = isValid;
     },
     async updateAddress () {
       const addressToUpdate = {

@@ -1,24 +1,29 @@
 <template>
   <div class="o-add-address-form">
-    <o-base-address-form
-      v-model="address"
-      :is-form-fields-disabled="isSubmitting"
-      @validation-state-change="onValidationStateChange"
-    />
+    <validation-observer slim v-slot="{passes}">
+      <o-base-address-form
+        v-model="address"
+        :is-form-fields-disabled="isSubmitting"
+      />
 
-    <div class="_buttons-row">
-      <SfButton class="color-secondary" @click="onCancelButtonClick" :disabled="isSubmitting">
-        {{ $t('Cancel') }}
-      </SfButton>
+      <div class="_buttons-row">
+        <SfButton class="color-secondary" @click="onCancelButtonClick" :disabled="isSubmitting">
+          {{ $t('Cancel') }}
+        </SfButton>
 
-      <SfButton @click="onFormSubmit" :disabled="isSubmitButtonDisabled">
-        {{ $t('Add Address') }}
-      </SfButton>
-    </div>
+        <SfButton
+          @click="() => passes(() => onFormSubmit())"
+          :disabled="isSubmitButtonDisabled"
+        >
+          {{ $t('Add Address') }}
+        </SfButton>
+      </div>
+    </validation-observer>
   </div>
 </template>
 
 <script lang="ts">
+import { ValidationObserver } from 'vee-validate';
 import Vue from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { SfButton } from '@storefront-ui/vue';
@@ -30,7 +35,8 @@ export default Vue.extend({
   name: 'OAddAddressForm',
   components: {
     SfButton,
-    OBaseAddressForm
+    OBaseAddressForm,
+    ValidationObserver
   },
   data () {
     return {
@@ -44,18 +50,17 @@ export default Vue.extend({
         streetAddress: '',
         zipCode: ''
       },
-      isFormValid: false,
       isSubmitting: false
     }
   },
   computed: {
     isSubmitButtonDisabled (): boolean {
-      return this.isSubmitting || !this.isFormValid;
+      return this.isSubmitting;
     }
   },
   methods: {
-    async onFormSubmit (address: any): Promise<void> {
-      if (this.isSubmitting || !this.isFormValid) {
+    async onFormSubmit (): Promise<void> {
+      if (this.isSubmitting) {
         return;
       }
 
@@ -88,9 +93,6 @@ export default Vue.extend({
         message,
         action1: { label: i18n.t('OK') }
       });
-    },
-    onValidationStateChange (isValid: boolean): void {
-      this.isFormValid = isValid;
     },
     onCancelButtonClick (): void {
       this.$emit('cancel');
