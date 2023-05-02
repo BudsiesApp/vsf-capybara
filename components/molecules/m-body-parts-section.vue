@@ -271,6 +271,7 @@ export default Vue.extend({
 
   ._body-part {
     margin: var(--body-part-margin, var(--spacer-base) 0 0);
+    width: 100%;
   }
 
   ._error-text {
