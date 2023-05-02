@@ -178,11 +178,11 @@ export default {
     login () {
       this.openModal({ name: ModalList.Auth, payload: 'login' })
     },
-    onContinueButtonClick () {
+    async onContinueButtonClick () {
       let isInvalid = false;
 
       if (this.createAccount) {
-        const isPasswordValid = this.$refs.password.getIsPasswordValid();
+        const isPasswordValid = await this.$refs.password.getIsPasswordValid();
         this.$v.$touch();
         isInvalid = this.$v.$invalid || !isPasswordValid;
       } else {

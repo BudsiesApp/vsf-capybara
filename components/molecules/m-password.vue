@@ -1,47 +1,69 @@
 <template>
   <div class="m-password">
-    <SfInput
-      v-model="password"
-      type="password"
-      class="_input sf-input--required"
-      name="password"
-      :has-show-password="true"
-      :label="$t('Password')"
-      :valid="!$v.value.password || !$v.value.password.$error"
-      :error-message="
-        !$v.value.password || !$v.value.password.required
-          ? $t('Field is required')
-          : $t('Password must have at least 6 symbols.')
-      "
-      @blur="() => $v.value.password && $v.value.password.$touch()"
-    />
+    <validation-provider
+      ref="passwordValidationProvider"
+      v-slot="{ errors }"
+      rules="required|min:7"
+      vid="password"
+      slim
+    >
+      <SfInput
+        v-model="password"
+        type="password"
+        class="_input sf-input--required"
+        name="password"
+        :has-show-password="true"
+        :label="$t('Password')"
+        :valid="!errors.length"
+        :error-message="errors[0]"
+      />
+    </validation-provider>
 
-    <SfInput
-      v-model="repeatPassword"
-      type="password"
-      class="_input sf-input--required"
-      name="password-confirm"
-      :has-show-password="true"
-      :label="$t('Repeat password')"
-      :valid="!$v.value.repeatPassword || !$v.value.repeatPassword.$error"
-      :error-message="
-        !$v.value.repeatPassword || !$v.value.repeatPassword.required
-          ? $t('Field is required')
-          : $t('Passwords must be identical.')
-      "
-      @blur="() => $v.value.repeatPassword && $v.value.repeatPassword.$touch()"
-    />
+    <validation-provider
+      v-slot="{ errors }"
+      ref="repeatPasswordValidationProvider"
+      rules="required|confirmed:password"
+      slim
+    >
+      <SfInput
+        v-model="repeatPassword"
+        type="password"
+        class="_input sf-input--required"
+        name="password-confirm"
+        :has-show-password="true"
+        :label="$t('Repeat password')"
+        :valid="!errors.length"
+        :error-message="errors[0]"
+      />
+    </validation-provider>
   </div>
 </template>
 
 <script lang="ts">
+import { ValidationProvider, extend } from 'vee-validate';
+import { required, min, confirmed } from 'vee-validate/dist/rules';
 import Vue, { PropType } from 'vue';
-import { required, minLength, sameAs } from 'vuelidate/lib/validators';
 import { SfInput } from '@storefront-ui/vue';
+
+extend('required', {
+  ...required,
+  message: 'Field is required'
+});
+
+extend('min', {
+  ...min,
+  message: 'Password must have at least {length} symbols.'
+});
+
+extend('confirmed', {
+  ...confirmed,
+  message: 'Passwords must be identical'
+})
 
 export default Vue.extend({
   components: {
-    SfInput
+    SfInput,
+    ValidationProvider
   },
   props: {
     value: {
@@ -76,23 +98,17 @@ export default Vue.extend({
       }
     }
   },
-  validations: {
-    value: {
-      password: {
-        required,
-        minLength: minLength(6)
-      },
-      repeatPassword: {
-        required,
-        sameAsPassword: sameAs('password')
-      }
-    }
-  },
   methods: {
-    getIsPasswordValid (): boolean {
-      this.$v.$touch();
+    async getIsPasswordValid (): Promise<boolean> {
+      const passwordValidator = this.$refs.passwordValidationProvider as InstanceType<typeof ValidationProvider>;
+      const repeatPasswordValidator = this.$refs.repeatPasswordValidationProvider as InstanceType<typeof ValidationProvider>;
 
-      return !this.$v.$invalid;
+      const [passwordValidationResult, repeatPasswordValidationResult] = await Promise.all([
+        passwordValidator.validate(),
+        repeatPasswordValidator.validate()
+      ]);
+
+      return passwordValidationResult.valid && repeatPasswordValidationResult.valid;
     }
   }
 });
