@@ -83,9 +83,9 @@ export default {
       this.$v.$reset();
       this.openModal({ name: ModalList.Auth, payload: to })
     },
-    register () {
+    async register () {
       this.$v.$touch();
-      const isPasswordValid = this.$refs.password.getIsPasswordValid();
+      const isPasswordValid = await this.$refs.password.getIsPasswordValid();
 
       if (this.$v.$invalid || !isPasswordValid) {
         this.$store.dispatch('notification/spawnNotification', {

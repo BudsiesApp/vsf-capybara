@@ -1,56 +1,72 @@
 <template>
   <div class="o-base-address-form form">
-    <SfInput
-      v-model="firstName"
-      class="form__element form__element--half"
-      name="first-name"
-      :label="$t('First name')"
-      :required="true"
-      :disabled="isFormFieldsDisabled"
-      :valid="!$v.firstName || !$v.firstName.$error"
-      :error-message="
-        !$v.firstName || !$v.firstName.required
-          ? $t('Field is required')
-          : $t('Name must have at least 2 letters.')
-      "
-      @blur="() => $v.firstName && $v.firstName.$touch()"
-    />
+    <validation-provider
+      slim
+      rules="required|min:2"
+      v-slot="{errors}"
+    >
+      <SfInput
+        v-model="firstName"
+        class="form__element form__element--half"
+        name="first-name"
+        :label="$t('First name')"
+        :required="true"
+        :disabled="isFormFieldsDisabled"
+        :valid="!errors.length"
+        :error-message="errors[0]"
+      />
+    </validation-provider>
 
-    <SfInput
-      v-model="lastName"
-      class="form__element form__element--half form__element--half-even"
-      name="last-name"
-      :label="$t('Last name')"
-      :required="true"
-      :disabled="isFormFieldsDisabled"
-      :valid="!$v.lastName || !$v.lastName.$error"
-      :error-message="$t('Field is required')"
-      @blur="() => $v.lastName && $v.lastName.$touch()"
-    />
+    <validation-provider
+      slim
+      rules="required"
+      v-slot="{errors}"
+    >
+      <SfInput
+        v-model="lastName"
+        class="form__element form__element--half form__element--half-even"
+        name="last-name"
+        :label="$t('Last name')"
+        :required="true"
+        :disabled="isFormFieldsDisabled"
+        :valid="!errors.length"
+        :error-message="errors[0]"
+      />
+    </validation-provider>
 
-    <SfInput
-      v-model="streetAddress"
-      class="form__element"
-      name="street-address"
-      :label="$t('Address')"
-      :required="true"
-      :disabled="isFormFieldsDisabled"
-      :valid="!$v.streetAddress || !$v.streetAddress.$error"
-      :error-message="$t('Field is required')"
-      @blur="() => $v.streetAddress && $v.streetAddress.$touch()"
-    />
+    <validation-provider
+      slim
+      rules="required"
+      v-slot="{errors}"
+    >
+      <SfInput
+        v-model="streetAddress"
+        class="form__element"
+        name="street-address"
+        :label="$t('Address')"
+        :required="true"
+        :disabled="isFormFieldsDisabled"
+        :valid="!errors.length"
+        :error-message="errors[0]"
+      />
+    </validation-provider>
 
-    <SfInput
-      v-model="city"
-      class="form__element form__element--half"
-      name="city"
-      :label="$t('City')"
-      :required="true"
-      :disabled="isFormFieldsDisabled"
-      :valid="!$v.city || !$v.city.$error"
-      :error-message="$t('Field is required')"
-      @blur="() => $v.city && $v.city.$touch()"
-    />
+    <validation-provider
+      slim
+      rules="required"
+      v-slot="{errors}"
+    >
+      <SfInput
+        v-model="city"
+        class="form__element form__element--half"
+        name="city"
+        :label="$t('City')"
+        :required="true"
+        :disabled="isFormFieldsDisabled"
+        :valid="!errors.length"
+        :error-message="errors[0]"
+      />
+    </validation-provider>
 
     <SfInput
       v-if="!isSelectedCountryHasStates"
@@ -61,82 +77,109 @@
       :disabled="isFormFieldsDisabled"
     />
 
-    <MMultiselect
+    <validation-provider
+      slim
+      rules="required"
+      ref="stateValidator"
+      v-slot="{errors}"
       v-if="isSelectedCountryHasStates && canShowStateSelector"
-      v-model="state"
-      class="form__element form__element--half form__element--half-even form__select"
-      name="state"
-      :label="$t('State / Province')"
-      :required="true"
-      id-field="code"
-      label-field="name"
-      :options="statesForSelectedCountry"
-      :valid="!$v.state || !$v.state.$error"
-      :error-message="$t('Field is required')"
-      :disabled="isFormFieldsDisabled"
-    />
+    >
+      <MMultiselect
+        v-model="state"
+        class="form__element form__element--half form__element--half-even form__select"
+        name="state"
+        :label="$t('State / Province')"
+        :required="true"
+        id-field="code"
+        label-field="name"
+        :options="statesForSelectedCountry"
+        :valid="!errors.length"
+        :error-message="errors[0]"
+        :disabled="isFormFieldsDisabled"
+      />
+    </validation-provider>
 
-    <SfInput
-      v-model="zipCode"
-      class="form__element form__element--half"
-      name="zipCode"
-      :label="$t('Zip-code')"
-      :required="true"
-      :disabled="isFormFieldsDisabled"
-      :valid="!$v.zipCode || !$v.zipCode.$error"
-      :error-message="
-        !$v.zipCode || !$v.zipCode.required
-          ? $t('Field is required')
-          : $t('Zip code must have at least 3 letters.')
-      "
-      @blur="onZipCodeBlur"
-    />
+    <validation-provider
+      slim
+      rules="required|min:3"
+      v-slot="{errors}"
+    >
+      <SfInput
+        v-model="zipCode"
+        class="form__element form__element--half"
+        name="zipCode"
+        :label="$t('Zip-code')"
+        :required="true"
+        :disabled="isFormFieldsDisabled"
+        :valid="!errors.length"
+        :error-message="errors[0]"
+        @blur="onZipCodeBlur"
+      />
+    </validation-provider>
 
-    <MMultiselect
-      v-model="country"
-      class="form__element form__element--half form__element--half-even form__select"
-      name="countries"
-      :label="$t('Country')"
-      :required="true"
-      id-field="code"
-      label-field="name"
-      :options="countries"
-      :valid="!$v.country || !$v.country.$error"
-      :error-message="$t('Field is required')"
-      :disabled="isFormFieldsDisabled"
-      @change="onChangeCountry"
-    />
+    <validation-provider
+      slim
+      rules="required"
+      v-slot="{errors}"
+    >
+      <MMultiselect
+        v-model="country"
+        class="form__element form__element--half form__element--half-even form__select"
+        name="countries"
+        :label="$t('Country')"
+        :required="true"
+        id-field="code"
+        label-field="name"
+        :options="countries"
+        :valid="!errors.length"
+        :error-message="errors[0]"
+        :disabled="isFormFieldsDisabled"
+        @change="onChangeCountry"
+      />
+    </validation-provider>
 
-    <SfInput
-      v-model="phoneNumber"
-      :required="isPhoneNumberRequired"
-      :valid="!$v.phoneNumber || !$v.phoneNumber.$error"
-      :error-message="
-        !$v.phoneNumber || !$v.phoneNumber.required
-          ? $t('Field is required')
-          : $t('Please, enter valid phone number')
-      "
-      class="form__element"
-      name="phone"
-      :label="$t('Phone number')"
-      :disabled="isFormFieldsDisabled"
-      @blur="() => $v.phoneNumber && $v.phoneNumber.$touch()"
-    />
+    <validation-provider
+      v-slot="{ errors }"
+      :rules="phoneValidationRules"
+      ref="phoneValidator"
+      slim
+    >
+      <SfInput
+        v-model="phoneNumber"
+        :required="isPhoneNumberRequired"
+        :valid="!errors.length"
+        :error-message="errors[0]"
+        class="form__element"
+        name="phone"
+        :label="$t('Phone number')"
+        :disabled="isFormFieldsDisabled"
+      />
+    </validation-provider>
   </div>
 </template>
 
 <script lang="ts">
+import { extend, ValidationProvider } from 'vee-validate';
+import { min, regex, required } from 'vee-validate/dist/rules';
 import Vue from 'vue';
-import { required, requiredIf, minLength, helpers } from 'vuelidate/lib/validators';
 import { SfInput } from '@storefront-ui/vue';
-import { unicodeAlpha, unicodeAlphaNum } from '@vue-storefront/core/helpers/validators';
 
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
 
 const Countries = require('@vue-storefront/i18n/resource/countries.json');
 const States = require('@vue-storefront/i18n/resource/states.json');
 
-const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/);
+const phoneValidationRegex = /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/;
+
+extend('required', {
+  ...required,
+  message: 'Field is required'
+});
+extend('min', min);
+extend('regex', {
+  ...regex,
+  message: 'Please, enter valid phone number'
+});
 
 export default Vue.extend({
   name: 'OBaseAddressForm',
@@ -152,7 +195,8 @@ export default Vue.extend({
   },
   components: {
     SfInput,
-    MMultiselect
+    MMultiselect,
+    ValidationProvider
   },
   data () {
     return {
@@ -175,6 +219,12 @@ export default Vue.extend({
       }
 
       return this.states.hasOwnProperty(this.value.country);
+    },
+    phoneValidationRules (): any {
+      return {
+        required: this.isPhoneNumberRequired,
+        regex: phoneValidationRegex
+      }
     },
     city: {
       get (): string {
@@ -255,21 +305,7 @@ export default Vue.extend({
       this.$emit('country-changed');
     },
     onZipCodeBlur (): void {
-      if (!this.$v.zipCode || !this.$v.country) {
-        return;
-      }
-
-      this.$v.zipCode.$touch();
-
       if (!this.fZipCodeChanged) {
-        return;
-      }
-
-      if (this.$v.country.$invalid) {
-        return;
-      }
-
-      if (this.$v.zipCode.$invalid) {
         return;
       }
 
@@ -278,12 +314,17 @@ export default Vue.extend({
       this.$emit('zip-code-blur');
     },
     validateCountryRelatedFields (): void {
-      if (this.$v.state) {
-        this.$v.state.$touch();
+      type validatorType = InstanceType<typeof ValidationProvider> | undefined;
+
+      const stateValidator = this.$refs.stateValidator as validatorType;
+      const phoneValidator = this.$refs.phoneValidator as validatorType;
+
+      if (stateValidator) {
+        stateValidator.validate();
       }
 
-      if (this.$v.phoneNumber) {
-        this.$v.phoneNumber.$touch();
+      if (phoneValidator) {
+        phoneValidator.validate();
       }
     },
     updateValueField (field: Record<string, string>): void {
@@ -310,51 +351,6 @@ export default Vue.extend({
         this.fZipCodeChanged = true;
       },
       immediate: true
-    },
-    '$v.$invalid': {
-      handler (value: boolean) {
-        this.$emit('validation-state-change', !value);
-      },
-      immediate: true
-    }
-  },
-  validations () {
-    const isSelectedCountryHasStates = () => this.isSelectedCountryHasStates;
-    const isPhoneNumberRequired = () => this.isPhoneNumberRequired;
-
-    return {
-      firstName: {
-        required,
-        minLength: minLength(2),
-        unicodeAlpha
-      },
-      lastName: {
-        required,
-        unicodeAlpha
-      },
-      country: {
-        required
-      },
-      state: {
-        required: requiredIf(isSelectedCountryHasStates)
-      },
-      streetAddress: {
-        required,
-        unicodeAlphaNum
-      },
-      zipCode: {
-        required,
-        minLength: minLength(3),
-        unicodeAlphaNum
-      },
-      city: {
-        required,
-        unicodeAlpha
-      },
-      phoneNumber: {
-        required: requiredIf(isPhoneNumberRequired),
-        phoneValidator
-      }
     }
   }
 })
