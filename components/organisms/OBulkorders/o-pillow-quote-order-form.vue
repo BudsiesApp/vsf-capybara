@@ -2,63 +2,73 @@
   <div class="o-pillow-quote-order-form">
     <SfHeading :level="1" :title="$t('Pillow Bulk Order Quote')" class="_title" />
 
-    <m-base-form
-      ref="baseForm"
-      :product="product"
-      :is-disabled="isDisabled"
-      :artwork-upload-url="artworkUploadUrl"
-      :has-size="true"
-      v-model="bulkordersBaseFormData"
-      :show-calculation-animation="showCalculationAnimation"
-      @calculation-animation-finished="onCalculationAnimationFinished"
-    >
-      <template #size>
-        <div class="_section">
-          <AOrderedHeading
-            :order="6"
-            :level="3"
-            :title="$t('What\'s your preferred size?')"
-            class="_title -required"
-          />
-
-          <div class="_hint">
-            {{ $t('It\'s OK if you\'re not sure.') }}
-          </div>
-
-          <SfSelect
-            v-model="pillowSize"
-            :disabled="isDisabled"
-            class="sf-select--underlined"
+    <validation-observer v-slot="{passes}" slim>
+      <m-base-form
+        ref="baseForm"
+        :product="product"
+        :is-disabled="isDisabled"
+        :artwork-upload-url="artworkUploadUrl"
+        :has-size="true"
+        v-model="bulkordersBaseFormData"
+        :show-calculation-animation="showCalculationAnimation"
+        @calculation-animation-finished="onCalculationAnimationFinished"
+      >
+        <template #size>
+          <validation-provider
+            tag="div"
+            class="_section"
+            v-slot="{errors}"
           >
-            <SfSelectOption
-              v-for="sizeOption in pillowSizeOptions"
-              :key="sizeOption.id"
-              :value="sizeOption.value"
+            <AOrderedHeading
+              :order="6"
+              :level="3"
+              :title="$t('What\'s your preferred size?')"
+              class="_title -required"
+            />
+
+            <div class="_hint">
+              {{ $t('It\'s OK if you\'re not sure.') }}
+            </div>
+
+            <SfSelect
+              v-model="pillowSize"
+              :disabled="isDisabled"
+              class="sf-select--underlined"
             >
-              {{ sizeOption.title }}
-            </SfSelectOption>
-          </SfSelect>
+              <SfSelectOption
+                v-for="sizeOption in pillowSizeOptions"
+                :key="sizeOption.id"
+                :value="sizeOption.value"
+              >
+                {{ sizeOption.title }}
+              </SfSelectOption>
+            </SfSelect>
 
-          <div class="_error-text" v-if="$v.pillowSize.$error">
-            {{ $t('This field is required') }}
-          </div>
-        </div>
-      </template>
-    </m-base-form>
+            <div class="_error-text" v-if="errors.length">
+              {{ errors[0] }}
+            </div>
+          </validation-provider>
+        </template>
+      </m-base-form>
 
-    <div class="_button-container">
-      <SfButton @click="onSubmit" :disabled="isDisabled">
-        {{ $t('Get My Quote') }}
-      </SfButton>
-    </div>
+      <div class="_button-container">
+        <SfButton
+          @click="() => passes(() => onSubmit())"
+          :disabled="isDisabled"
+        >
+          {{ $t('Get My Quote') }}
+        </SfButton>
+      </div>
+    </validation-observer>
   </div>
 </template>
 
 <script lang="ts">
 import i18n from '@vue-storefront/i18n';
+import { ValidationObserver, ValidationProvider, extend } from 'vee-validate';
+import { required } from 'vee-validate/dist/rules';
 import { PropType } from 'vue';
 import { TranslateResult } from 'vue-i18n';
-import { required } from 'vuelidate/lib/validators';
 import { SfButton, SfSelect, SfHeading } from '@storefront-ui/vue';
 
 import Product from 'core/modules/catalog/types/Product';
@@ -75,6 +85,11 @@ interface PillowSizeOption {
   value: number | string,
   title: string
 }
+
+extend('required', {
+  ...required,
+  message: 'This field is required'
+})
 
 export default BulkorderBaseFormPersistanceState.extend({
   name: 'OPillowQuoteOrderForm',
@@ -93,7 +108,9 @@ export default BulkorderBaseFormPersistanceState.extend({
     SfButton,
     AOrderedHeading,
     SfSelect,
-    SfHeading
+    SfHeading,
+    ValidationObserver,
+    ValidationProvider
   },
   data () {
     const bulkordersBaseFormData: BulkordersBaseFormData = {
@@ -145,7 +162,7 @@ export default BulkorderBaseFormPersistanceState.extend({
 
         options.push({
           id: productLink.id,
-          value: this.getPillowSizeValue(productLink),
+          value: this.getPillowSizeValue(productLink).toString(),
           title: this.getPillowSizeTitle(productLink).toString()
         });
       })
@@ -173,9 +190,6 @@ export default BulkorderBaseFormPersistanceState.extend({
     this.bulkordersBaseFormData = { ...this.bulkordersBaseFormData, ...state };
   },
   methods: {
-    getBaseFormComponent (): InstanceType<typeof MBaseForm> | undefined {
-      return this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
-    },
     getDataToPersist () {
       return {
         country: this.bulkordersBaseFormData.country,
@@ -210,10 +224,7 @@ export default BulkorderBaseFormPersistanceState.extend({
       }
     },
     async onSubmit (): Promise<void> {
-      const form = this.getBaseFormComponent();
-      this.$v.$touch();
-
-      if (this.isDisabled || !form || !form.getValidationState() || this.$v.$invalid) {
+      if (this.isDisabled) {
         return;
       }
 
@@ -318,11 +329,6 @@ export default BulkorderBaseFormPersistanceState.extend({
       handler (): void {
         this.savePersistedState();
       }
-    }
-  },
-  validations: {
-    pillowSize: {
-      required
     }
   }
 })

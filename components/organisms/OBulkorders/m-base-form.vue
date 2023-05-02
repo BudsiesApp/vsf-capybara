@@ -1,12 +1,19 @@
 <template>
   <div class="m-base-form">
-    <div class="_section">
+    <validation-provider
+      tag="div"
+      class="_section"
+      v-slot="{ errors }"
+      rules="required"
+    >
       <AOrderedHeading
         :order="1"
         :level="3"
         :title="$t('Please upload your awesome design')"
         class="_title -required"
       />
+
+      <input type="hidden" v-model="value.customerImages">
 
       <MArtworkUpload
         :allow-multiple="true"
@@ -20,13 +27,18 @@
 
       <div
         class="_error-text"
-        v-if="$v.value.customerImages && $v.value.customerImages.$error"
+        v-if="errors[0]"
       >
         {{ $t('Please provide your artwork to continue.') }}
       </div>
-    </div>
+    </validation-provider>
 
-    <div class="_section">
+    <validation-provider
+      tag="div"
+      class="_section"
+      v-slot="{ errors }"
+      rules="required"
+    >
       <AOrderedHeading
         :order="2"
         :level="3"
@@ -40,16 +52,16 @@
         v-model="name"
         :disabled="isDisabled"
         class="sf-input--required"
-        :valid="!$v.value.name || !$v.value.name.$error"
-        :error-message="$t('This field should not be blank.')"
+        :valid="!errors.length"
+        :error-message="errors[0]"
       />
 
       <span class="_hint">
         {{ $t('This could be the name of your character or name of your project (e.g., \'Danny the Dolphin\')') }}
       </span>
-    </div>
+    </validation-provider>
 
-    <div class="_section">
+    <validation-provider tag="div" class="_section" v-slot="{ errors }" rules="required">
       <AOrderedHeading
         :order="3"
         :level="3"
@@ -67,11 +79,11 @@
 
       <div
         class="_error-text"
-        v-if="$v.value.description && $v.value.description.$error"
+        v-if="errors.length"
       >
-        {{ $t('This field should not be blank.') }}
+        {{ errors[0] }}
       </div>
-    </div>
+    </validation-provider>
 
     <slot name="bodyparts" />
 
@@ -89,33 +101,44 @@
 
       <slot name="quantity-helper" />
 
-      <SfInput
-        :label="$t('Quantity')"
-        :disabled="isDisabled"
-        name="quantity"
-        class="sf-input--required -quantity"
-        v-model="quantity"
-        :valid="!$v.value.quantity || !$v.value.quantity.$error"
-      />
-
-      <div
-        class="_error-text"
-        v-if="$v.value.quantity && $v.value.quantity.$error"
+      <validation-provider
+        tag="div"
+        v-slot="{ errors, failedRules }"
+        rules="required|min_value:50"
       >
-        <template v-if="!$v.value.quantity || !$v.value.quantity.required">
-          {{ $t('This field is required') }}
-        </template>
+        <SfInput
+          :label="$t('Quantity')"
+          :disabled="isDisabled"
+          name="quantity"
+          class="sf-input--required -quantity"
+          v-model="quantity"
+          :valid="!errors.length"
+        />
 
-        <template v-else>
-          {{ $t('For orders less than 50, please upload your character to our sister company') }}
+        <div
+          class="_error-text"
+          v-if="errors.length"
+        >
+          <template v-if="failedRules.required">
+            {{ $t('This field is required') }}
+          </template>
 
-          <a :href="budsiesStoreDomain" target="_blank">
-            Budsies.com
-          </a>
-        </template>
-      </div>
+          <template v-else-if="failedRules.min_value">
+            {{ $t('For orders less than 50, please upload your character to our sister company') }}
 
-      <div class="_additional-quantity" v-show="showAdditionalQuantity">
+            <a :href="budsiesStoreDomain" target="_blank">
+              Budsies.com
+            </a>
+          </template>
+        </div>
+      </validation-provider>
+
+      <validation-provider
+        tag="div" v-slot="{ errors }"
+        rules="min_value:50"
+        class="_additional-quantity"
+        v-show="showAdditionalQuantity"
+      >
         <span class="_helper">
           {{ $t('Don\'t worry, we will quote you the quantity you enter and the quantity with the next price break. However, you can also enter another quantity below and we\'ll quote you both!') }}
         </span>
@@ -130,7 +153,7 @@
 
         <div
           class="_error-text"
-          v-if="$v.value.additionalQuantity && $v.value.additionalQuantity.$error"
+          v-if="errors.length"
         >
           <template>
             {{ $t('For orders less than 50, please upload your character to our sister company') }}
@@ -140,7 +163,7 @@
             </a>
           </template>
         </div>
-      </div>
+      </validation-provider>
 
       <SfButton
         class="sf-button--text _quantity-button"
@@ -158,47 +181,64 @@
         class="_title -required"
       />
 
-      <SfRadio
-        value="0"
-        :label="$t('No firm deadline - the sooner the better!')"
-        v-model="deadline"
-      />
-
-      <SfRadio
-        value="1"
-        :label="$t('I need them for a specific date')"
-        v-model="deadline"
-      />
-
-      <div
-        class="_error-text"
-        v-if="$v.value.deadline && $v.value.deadline.$error"
+      <validation-provider
+        tag="div"
+        v-slot="{ errors }"
+        rules="required"
       >
-        {{ $t('This field is required') }}
-      </div>
+        <SfRadio
+          value="0"
+          :label="$t('No firm deadline - the sooner the better!')"
+          v-model="deadline"
+        />
 
-      <div
-        class="sf-input _deadline-input"
-        :class="{'--required': deadline && deadline !== '0'}"
-      >
-        <input
-          v-model="deadlineDate"
-          type="date"
-          :disabled="!deadline || deadline === '0'"
-        >
+        <SfRadio
+          value="1"
+          :label="$t('I need them for a specific date')"
+          v-model="deadline"
+        />
 
         <div
           class="_error-text"
-          v-if="$v.value.deadlineDate && $v.value.deadlineDate.$error"
+          v-if="errors.length"
         >
-          {{ $t('This field is required') }}
+          {{ errors[0] }}
         </div>
-      </div>
+      </validation-provider>
+
+      <validation-provider
+        tag="div"
+        v-slot="{ errors }"
+        :rules="deadline === '1' ? 'required' : ''"
+      >
+        <div
+          class="sf-input _deadline-input"
+          :class="{'--required': deadline && deadline !== '0'}"
+        >
+          <input
+            v-model="deadlineDate"
+            type="date"
+            :disabled="!deadline || deadline === '0'"
+          >
+
+          <div
+            class="_error-text"
+            v-if="errors.length"
+          >
+            {{ errors[0] }}
+          </div>
+        </div>
+      </validation-provider>
     </div>
 
     <slot name="size" />
 
-    <div class="_section">
+    <validation-provider
+      tag="div"
+      class="_section"
+      v-slot="{ errors }"
+      rules="required"
+    >
       <AOrderedHeading
         :order="countryStepOrder"
         :level="3"
@@ -218,11 +258,11 @@
         id-field="code"
         label-field="name"
         :options="countries"
-        :valid="!$v.value.country || !$v.value.country.$error"
-        :error-message="$t('Field is required')"
+        :valid="!errors.length"
+        :error-message="errors[0]"
         :disabled="isDisabled"
       />
-    </div>
+    </validation-provider>
 
     <div class="_section --half">
       <AOrderedHeading
@@ -233,14 +273,20 @@
       />
 
       <div class="_content --half">
-        <SfInput
-          :label="$t('First Name')"
-          name="first-name"
-          v-model="customerFirstName"
-          class="sf-input--required"
-          :valid="!$v.value.customerFirstName || !$v.value.customerFirstName.$error"
-          :error-message="$t('Field is required')"
-        />
+        <validation-provider
+          v-slot="{ errors }"
+          rules="required"
+          slim
+        >
+          <SfInput
+            :label="$t('First Name')"
+            name="first-name"
+            v-model="customerFirstName"
+            class="sf-input--required"
+            :valid="!errors.length"
+            :error-message="errors[0]"
+          />
+        </validation-provider>
 
         <SfInput
           :label="$t('Last Name')"
@@ -248,32 +294,35 @@
           v-model="customerLastName"
         />
 
-        <SfInput
-          :label="$t('Your e-mail address')"
-          name="email"
-          v-model="customerEmail"
-          class="sf-input--required"
-          :valid="!$v.value.customerEmail || !$v.value.customerEmail.$error"
-          :error-message="
-            $v.value.customerEmail && $v.value.customerEmail.required
-              ? $t('Please, enter correct Email')
-              : $t('Field is required')
-          "
-        />
+        <validation-provider
+          v-slot="{ errors }"
+          rules="required|email"
+          slim
+        >
+          <SfInput
+            :label="$t('Your e-mail address')"
+            name="email"
+            v-model="customerEmail"
+            class="sf-input--required"
+            :valid="!errors.length"
+            :error-message="errors[0]"
+          />
+        </validation-provider>
 
-        <SfInput
-          :label="$t('Phone number')"
-          name="phone-number"
-          v-model="customerPhone"
-          class="sf-input--required"
-          :valid="!$v.value.customerPhone || !$v.value.customerPhone.$error"
-          :error-message="
-            $v.value.customerPhone && $v.value.customerPhone.required
-              ? $t('Please, enter valid phone number')
-              : $t('Field is required')
-          "
-          @blur="() => $v.value.customerPhone && $v.value.customerPhone.$touch()"
-        />
+        <validation-provider
+          v-slot="{ errors }"
+          :rules="phoneValidationRules"
+          slim
+        >
+          <SfInput
+            :label="$t('Phone number')"
+            name="phone-number"
+            v-model="customerPhone"
+            class="sf-input--required"
+            :valid="!errors.length"
+            :error-message="errors[0]"
+          />
+        </validation-provider>
       </div>
     </div>
 
@@ -304,27 +353,33 @@
       </SfSelect>
     </div>
 
-    <MCheckbox
-      v-model="agreement"
-      :disabled="isDisabled"
+    <validation-provider
+      v-slot="{ errors }"
+      :rules="{ required: { allowFalse: false } }"
+      slim
     >
-      <template #label>
-        <div class="sf-checkbox__label">
-          {{ $t('I have read and agree to the') }}
+      <MCheckbox
+        v-model="agreement"
+        :disabled="isDisabled"
+      >
+        <template #label>
+          <div class="sf-checkbox__label">
+            {{ $t('I have read and agree to the') }}
 
-          <a href="/media/bulkOrder/agreement/Standard_Bulk_Order_Customer_Agreement.pdf" target="_blank">
-            {{ $t('Bulk Order Customer Agreement') }}
-          </a>
-        </div>
-      </template>
-    </MCheckbox>
+            <a href="/media/bulkOrder/agreement/Standard_Bulk_Order_Customer_Agreement.pdf" target="_blank">
+              {{ $t('Bulk Order Customer Agreement') }}
+            </a>
+          </div>
+        </template>
+      </MCheckbox>
 
-    <div
-      class="_error-text"
-      v-if="$v.value.agreement && $v.value.agreement.$error"
-    >
-      {{ $t('This field is required') }}
-    </div>
+      <div
+        class="_error-text"
+        v-if="errors.length"
+      >
+        {{ errors[0] }}
+      </div>
+    </validation-provider>
 
     <MBulkordersCalculationAnimation
       :show-calculation-animation="showCalculationAnimation"
@@ -335,8 +390,9 @@
 
 <script lang="ts">
 import config from 'config';
+import { ValidationProvider, extend } from 'vee-validate';
+import { email, required, min_value, regex } from 'vee-validate/dist/rules';
 import Vue, { PropType, VueConstructor } from 'vue';
-import { required, requiredIf, minValue, email, sameAs, helpers } from 'vuelidate/lib/validators';
 import { TranslateResult } from 'vue-i18n';
 import { SfButton, SfInput, SfRadio, SfSelect } from '@storefront-ui/vue';
 import {
@@ -358,12 +414,25 @@ import MBulkordersCalculationAnimation from './m-calculation-animation.vue';
 
 const Countries = require('@vue-storefront/i18n/resource/countries.json');
 
+extend('required', {
+  ...required,
+  message: 'This field is required'
+});
+
+extend('min_value', min_value);
+
+extend('email', email);
+
+extend('regex', {
+  ...regex,
+  message: 'Please, enter valid phone number'
+})
+
 interface InjectedServices {
   imageHandlerService: ImageHandlerService
 }
 
-const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/);
-const quantityMinimumValue = 50;
+const phoneValidationRegex = /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/;
 
 export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   name: 'MBaseForm',
@@ -376,7 +445,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     SfInput,
     SfRadio,
     SfSelect,
-    MBulkordersCalculationAnimation
+    MBulkordersCalculationAnimation,
+    ValidationProvider
   },
   props: {
     product: {
@@ -414,11 +484,18 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   data () {
     return {
       countries: Countries,
-      showAdditionalQuantity: false
+      showAdditionalQuantity: false,
+      phoneValidationRegex
     }
   },
   computed: {
     ...mapMobileObserver(),
+    phoneValidationRules (): any {
+      return {
+        required: true,
+        regex: phoneValidationRegex
+      }
+    },
     agreement: {
       get (): boolean {
         return this.value.agreement;
@@ -584,10 +661,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
   },
   methods: {
-    getValidationState (): boolean {
-      this.$v.$touch();
-      return !this.$v.$invalid;
-    },
     onAdditionalQuantityButtonClick (): void {
       this.showAdditionalQuantity = !this.showAdditionalQuantity;
       this.additionalQuantity = undefined;
@@ -624,58 +697,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   },
   beforeDestroy () {
     unMapMobileObserver();
-  },
-  validations (): any {
-    const isDeadlineDateRequired = requiredIf(() => this.deadline === '1');
-    const additionalQuantityValidation = () => {
-      return this.showAdditionalQuantity
-        ? {
-          minValue: minValue(quantityMinimumValue)
-        }
-        : {}
-    };
-
-    return {
-      value: {
-        customerImages: {
-          required
-        },
-        name: {
-          required
-        },
-        description: {
-          required
-        },
-        quantity: {
-          required,
-          minValue: minValue(quantityMinimumValue)
-        },
-        additionalQuantity: additionalQuantityValidation(),
-        deadline: {
-          required
-        },
-        deadlineDate: {
-          required: isDeadlineDateRequired
-        },
-        country: {
-          required
-        },
-        customerFirstName: {
-          required
-        },
-        customerEmail: {
-          required,
-          email
-        },
-        customerPhone: {
-          required,
-          phoneValidator
-        },
-        agreement: {
-          sameAs: sameAs(() => true)
-        }
-      }
-    }
   }
 })
 </script>

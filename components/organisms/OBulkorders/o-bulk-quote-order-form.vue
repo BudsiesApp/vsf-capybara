@@ -2,102 +2,120 @@
   <div class="o-bulk-quote-order-form">
     <SfHeading :level="1" :title="$t('Bulk Order Quote')" class="_title" />
 
-    <m-base-form
-      ref="baseForm"
-      :product="product"
-      :is-disabled="isDisabled"
-      :artwork-upload-url="artworkUploadUrl"
-      :has-size="true"
-      :has-bodyparts="true"
-      :show-calculation-animation="showCalculationAnimation"
-      v-model="bulkordersBaseFormData"
-      @calculation-animation-finished="onCalculationAnimationFinished"
-    >
-      <template #bodyparts v-if="colorPaletteBodypart">
-        <div class="_section">
-          <AOrderedHeading
-            :order="4"
-            :level="3"
-            :title="$t('Color Palette')"
-            class="_title -required"
-          />
+    <validation-observer v-slot="{passes}" slim>
+      <m-base-form
+        ref="baseForm"
+        :product="product"
+        :is-disabled="isDisabled"
+        :artwork-upload-url="artworkUploadUrl"
+        :has-size="true"
+        :has-bodyparts="true"
+        :show-calculation-animation="showCalculationAnimation"
+        v-model="bulkordersBaseFormData"
+        @calculation-animation-finished="onCalculationAnimationFinished"
+      >
+        <template #bodyparts v-if="colorPaletteBodypart">
+          <div class="_section">
+            <AOrderedHeading
+              :order="4"
+              :level="3"
+              :title="$t('Color Palette')"
+              class="_title -required"
+            />
 
-          <span class="_subtitle">
-            {{ $t('Please select the colors of your design to help us accurately bring your character to life.') }}
-          </span>
+            <span class="_subtitle">
+              {{ $t('Please select the colors of your design to help us accurately bring your character to life.') }}
+            </span>
 
-          <m-bodypart-option-configurator
-            v-model="color"
-            :name="colorPaletteBodypart.code"
-            :max-values="colorPaletteBodypart.maxValues"
-            :options="colorPaletteOptions"
-            :disabled="isDisabled"
-            compact-mode
-            type="bodypart"
-            class="_color-palette"
-          />
+            <validation-provider
+              v-slot="{ errors }"
+              rules="required"
+              slim
+            >
+              <m-bodypart-option-configurator
+                v-model="color"
+                :name="colorPaletteBodypart.code"
+                :max-values="colorPaletteBodypart.maxValues"
+                :options="colorPaletteOptions"
+                :disabled="isDisabled"
+                compact-mode
+                type="bodypart"
+                class="_color-palette"
+              />
 
-          <div class="_error-text -center" v-if="$v.color.$error">
-            {{ $t('This field is required') }}
+              <div class="_error-text -center" v-if="errors.length">
+                {{ errors[0] }}
+              </div>
+            </validation-provider>
+
+            <span class="_input-hint">
+              {{ $t('Click an existing color to deselect it.') }}
+            </span>
+
+            <span class="_input-hint">
+              {{ $t('Please note any special requests in the description above') }}
+            </span>
           </div>
+        </template>
 
-          <span class="_input-hint">
-            {{ $t('Click an existing color to deselect it.') }}
-          </span>
+        <template #size>
+          <div class="_section">
+            <AOrderedHeading
+              :order="7"
+              :level="3"
+              :title="$t('What’s your preferred size?')"
+              class="_title"
+            />
 
-          <span class="_input-hint">
-            {{ $t('Please note any special requests in the description above') }}
-          </span>
-        </div>
-      </template>
+            <div class="_helper">
+              {{ $t('Typical sizes are 6" (small), 8" (regular), 12" (large), and 16" (maximum). It\'s OK if you’re not sure.') }}
+            </div>
 
-      <template #size>
-        <div class="_section">
-          <AOrderedHeading
-            :order="7"
-            :level="3"
-            :title="$t('What’s your preferred size?')"
-            class="_title"
-          />
-
-          <div class="_helper">
-            {{ $t('Typical sizes are 6" (small), 8" (regular), 12" (large), and 16" (maximum). It\'s OK if you’re not sure.') }}
+            <validation-provider
+              v-slot="{ errors }"
+              rules="required"
+              slim
+            >
+              <SfInput
+                :label="$t('Size')"
+                :valid="!errors.length"
+                :error-message="errors[0]"
+                name="size"
+                class="sf-input--required"
+                v-model="bulkSize"
+              />
+            </validation-provider>
           </div>
+        </template>
 
-          <SfInput
-            :label="$t('Size')"
-            :valid="!$v.bulkSize || !$v.bulkSize.$error"
-            :error-message="$t('This field is required')"
-            name="size"
-            class="sf-input--required"
-            v-model="bulkSize"
-          />
-        </div>
-      </template>
+        <template #quantity-helper>
+          <span class="_helper">
+            {{ $t('Need less than 50? Order directly from our sister brand, Budsies. Budsies specializes in one-off or low quantity production at a simple, flat price. You\'ll automatically get discounts of 10-20% when you add qty 10 or 20 to your cart.') }}
 
-      <template #quantity-helper>
-        <span class="_helper">
-          {{ $t('Need less than 50? Order directly from our sister brand, Budsies. Budsies specializes in one-off or low quantity production at a simple, flat price. You\'ll automatically get discounts of 10-20% when you add qty 10 or 20 to your cart.') }}
+            <a :href="budsiesStoreDomain" target="_blank">
+              {{ $t('Visit Budsies!') }}
+            </a>
+          </span>
+        </template>
+      </m-base-form>
 
-          <a :href="budsiesStoreDomain" target="_blank">
-            {{ $t('Visit Budsies!') }}
-          </a>
-        </span>
-      </template>
-    </m-base-form>
-
-    <div class="_button-container">
-      <SfButton @click="onSubmit" :disabled="isDisabled">
-        {{ $t('Get My Quote') }}
-      </SfButton>
-    </div>
+      <div class="_button-container">
+        <SfButton
+          @click="() => passes(() => onSubmit())"
+          :disabled="isDisabled"
+        >
+          {{ $t('Get My Quote') }}
+        </SfButton>
+      </div>
+    </validation-observer>
   </div>
 </template>
 
 <script lang="ts">
 import config from 'config';
+import { ValidationObserver, ValidationProvider, extend } from 'vee-validate';
+import { required } from 'vee-validate/dist/rules';
 import { PropType } from 'vue';
-import { required } from 'vuelidate/lib/validators';
 import { SfButton, SfHeading, SfInput } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
 
@@ -109,6 +127,11 @@ import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-
 import MBaseForm from './m-base-form.vue';
 import MBodypartOptionConfigurator from '../../molecules/m-bodypart-option-configurator.vue';
 import AOrderedHeading from '../../atoms/a-ordered-heading.vue';
+
+extend('required', {
+  ...required,
+  message: 'Field is required'
+})
 
 export default BulkorderBaseFormPersistanceState.extend({
   name: 'OBulkQuoteOrderForm',
@@ -128,7 +151,9 @@ export default BulkorderBaseFormPersistanceState.extend({
     MBodypartOptionConfigurator,
     SfButton,
     SfHeading,
-    SfInput
+    SfInput,
+    ValidationObserver,
+    ValidationProvider
   },
   data () {
     const bulkordersBaseFormData: BulkordersBaseFormData = {
@@ -215,9 +240,6 @@ export default BulkorderBaseFormPersistanceState.extend({
     this.bulkordersBaseFormData = { ...this.bulkordersBaseFormData, ...state };
   },
   methods: {
-    getBaseFormComponent (): InstanceType<typeof MBaseForm> | undefined {
-      return this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
-    },
     getBodypartsData (): Dictionary<string[]> {
       if (!this.color || !this.colorPaletteBodypart) {
         return {};
@@ -235,10 +257,7 @@ export default BulkorderBaseFormPersistanceState.extend({
       }
     },
     async onSubmit (): Promise<void> {
-      const form = this.getBaseFormComponent();
-      this.$v.$touch();
-
-      if (this.isDisabled || !form || !form.getValidationState() || this.$v.$invalid) {
+      if (this.isDisabled) {
         return;
       }
 
@@ -344,14 +363,6 @@ export default BulkorderBaseFormPersistanceState.extend({
       handler (): void {
         this.savePersistedState();
       }
-    }
-  },
-  validations: {
-    bulkSize: {
-      required
-    },
-    color: {
-      required
     }
   }
 })
