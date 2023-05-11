@@ -191,6 +191,10 @@ export default Vue.extend({
           label: this.$t('Blog'),
           url: '/blog/',
           target: '_blank'
+        },
+        {
+          label: this.$t('Reviews'),
+          url: '/reviews/'
         }
       ]
     }
