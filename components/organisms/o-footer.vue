@@ -150,6 +150,10 @@ export default {
             {
               name: this.$t('How it Works'),
               link: '/how-it-works/'
+            },
+            {
+              name: this.$t('Reviews'),
+              link: '/reviews/'
             }
           ]
         },
