@@ -1,5 +1,8 @@
 <template>
-  <div class="o-order-review">
+  <div
+    class="o-order-review"
+    :class="skinClass"
+  >
     <SfHeading
       :title="$t('Details')"
       :level="3"
@@ -90,6 +93,9 @@
 <script>
 import { mapGetters } from 'vuex';
 import { SfHeading, SfButton } from '@storefront-ui/vue';
+
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
+
 export default {
   name: 'OOrderReview',
   components: {
@@ -109,6 +115,9 @@ export default {
         method => this.shippingDetails.shippingMethod === method.method_code
       );
       return shippingMethod ? shippingMethod.method_title : '';
+    },
+    skinClass () {
+      return getCurrentThemeClass();
     }
   }
 };
@@ -154,6 +163,14 @@ export default {
     color: var(--c-text);
     font-weight: var(--font-normal);
     margin-bottom: var(--spacer-2xs);
+  }
+}
+
+.o-order-review {
+  &.-skin-petsies {
+    .content {
+      color: var(--c-text);
+    }
   }
 }
 </style>
