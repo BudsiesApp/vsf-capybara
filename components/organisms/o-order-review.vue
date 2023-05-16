@@ -55,7 +55,7 @@
         {{ shippingDetails.city }}, {{ shippingDetails.country }}
       </p>
 
-      <p class="content">
+      <p class="content" v-if="shippingDetails.phoneNumber">
         {{ shippingDetails.phoneNumber }}
       </p>
     </div>
@@ -81,7 +81,8 @@
         <br>
         {{ paymentDetails.city }}, {{ paymentDetails.country }}
       </p>
-      <p class="content">
+
+      <p class="content" v-if="shippingDetails.phoneNumber">
         {{ paymentDetails.phoneNumber }}
       </p>
     </div>
