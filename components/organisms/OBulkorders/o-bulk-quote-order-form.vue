@@ -73,7 +73,8 @@
 
             <validation-provider
               v-slot="{ errors }"
-              rules="required"
+              :name="$t('\'Size\'')"
+              rules="required|between:6,16"
               slim
             >
               <SfInput
@@ -114,7 +115,7 @@
 <script lang="ts">
 import config from 'config';
 import { ValidationObserver, ValidationProvider, extend } from 'vee-validate';
-import { required } from 'vee-validate/dist/rules';
+import { between, required } from 'vee-validate/dist/rules';
 import { PropType } from 'vue';
 import { SfButton, SfHeading, SfInput } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
@@ -132,6 +133,11 @@ extend('required', {
   ...required,
   message: 'Field is required'
 })
+
+extend('between', {
+  ...between,
+  message: 'The {_field_} field must be between {min} and {max}'
+});
 
 export default BulkorderBaseFormPersistanceState.extend({
   name: 'OBulkQuoteOrderForm',
