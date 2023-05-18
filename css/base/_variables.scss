@@ -110,6 +110,8 @@ $forms-color-placeholder: #a09999;
     --c-link-hover: var(--_c-blue-primary);
     --c-footer: var(--c-blue);
     --property-name-color: var(--property-color, var(--c-text));
+    --c-blockquote: var(--c-text);
+    --c-blockquote-border: var(--_c-gray-accent);
     @include assign-color-variants(--c-primary, --_c-blue-primary);
     --c-primary-variant: var(--_c-blue-primary-darken);
     @include assign-color-variants(--c-secondary, --_c-blue-secondary);
