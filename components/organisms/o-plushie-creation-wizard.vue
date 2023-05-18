@@ -337,17 +337,17 @@ export default Vue.extend({
         {
           title: this.$t('Dog Golf Head Covers').toString(),
           type: PlushieProductType.DOG,
-          imageSrc: '/assets/golf-covers/dog-icon.png'
+          imageSrc: '/assets/forevers/dog-icon1_1.png'
         },
         {
           title: this.$t('Cat Golf Head Covers').toString(),
           type: PlushieProductType.CAT,
-          imageSrc: '/assets/golf-covers/cat-icon.png'
+          imageSrc: '/assets/forevers/cat-icon1_1.png'
         },
         {
           title: this.$t('Other Golf Head Covers').toString(),
           type: PlushieProductType.OTHER,
-          imageSrc: ''
+          imageSrc: '/assets/forevers/other-icon1_1.png'
         }
       ]
     },
