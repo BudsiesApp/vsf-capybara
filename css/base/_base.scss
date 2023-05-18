@@ -12,3 +12,9 @@ dl {
         }
     }
 }
+
+blockquote {
+    border-left: 1px solid var(--c-blockquote-border);
+    color: var(--c-blockquote);
+    padding: var(--spacer-xs) var(--spacer-base) 0 var(--spacer-lg);
+}
