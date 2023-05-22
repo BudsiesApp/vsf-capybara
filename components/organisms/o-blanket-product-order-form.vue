@@ -511,10 +511,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       );
 
       try {
-        let diffLog;
-
         try {
-          diffLog = await this.$store.dispatch('cart/addItem', {
+          await this.$store.dispatch('cart/addItem', {
             productToAdd: Object.assign({}, this.product, {
               qty: this.quantity,
               customerImages: [this.customerImage],
@@ -661,7 +659,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     onSuccessExistingCartItemUpdate (): void {
       this.resetData();
 
-      this.$router.push({ name: 'detailed-cart' });
+      this.$router.push(localizedRoute({
+        name: 'detailed-cart'
+      }));
     },
     onSubmit (): void {
       if (!this.existingCartItem) {
