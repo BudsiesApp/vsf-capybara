@@ -54,14 +54,10 @@
               class="_select sf-select--underlined"
               :class="classes"
             >
-              <SfSelectOption value="">
-                {{ $t('MM') }}
-              </SfSelectOption>
-
               <SfSelectOption
                 v-for="monthItem in monthsOptions"
                 :key="monthItem.title"
-                :value="monthItem.value"
+                :value="monthItem.value !== undefined ? monthItem.value : ''"
               >
                 {{ monthItem.title }}
               </SfSelectOption>
@@ -86,14 +82,10 @@
               class="_select sf-select--underlined"
               :class="classes"
             >
-              <SfSelectOption value="">
-                {{ $t('DD') }}
-              </SfSelectOption>
-
               <SfSelectOption
                 v-for="dayItem in daysOptions"
                 :key="dayItem.title"
-                :value="dayItem.value"
+                :value="dayItem.value !== undefined ? dayItem.value : ''"
               >
                 {{ dayItem.title }}
               </SfSelectOption>
@@ -138,22 +130,26 @@ extend('required-short', {
   message: 'Field is required'
 });
 
-function getOptionsList (length: number): OptionItem[] {
-  return Array.from({ length }, (_, i) => {
+function getOptionsList (length: number, placeholder: string): OptionItem[] {
+  const options: OptionItem[] = Array.from({ length }, (_, i) => {
     const item = i + 1;
 
     return {
       value: item,
       title: item >= 10 ? item.toString(10) : `0${item}`
     }
-  })
+  });
+
+  options.unshift({
+    value: undefined,
+    title: placeholder
+  });
+
+  return options;
 }
 
-const monthsOptions = getOptionsList(12);
-const daysOptions = getOptionsList(31);
-
 interface OptionItem {
-  value: number,
+  value?: number,
   title: string
 }
 
@@ -186,8 +182,8 @@ export default (Vue as VueConstructor<Vue & NonReactiveData>).extend({
     })
   },
   created () {
-    this.monthsOptions = monthsOptions;
-    this.daysOptions = daysOptions;
+    this.monthsOptions = getOptionsList(12, this.$t('MM').toString());
+    this.daysOptions = getOptionsList(31, this.$t('DD').toString());
   },
   methods: {
     clearForm () {
