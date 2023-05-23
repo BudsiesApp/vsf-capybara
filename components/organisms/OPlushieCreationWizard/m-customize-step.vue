@@ -7,7 +7,7 @@
   >
     <SfHeading
       :level="2"
-      :title="$t('Customize your Petsies plush')"
+      :title="$t('Customize your {productType}', {productType})"
     />
 
     <div class="_content">
@@ -152,7 +152,10 @@
               <SfHeading
                 class="-required"
                 :level="3"
-                :title="$t('How many Petsies of this exact same design?')"
+                :title="$t(
+                  'How many {productType} of this exact same design?',
+                  {productType}
+                )"
               />
 
               <ACustomProductQuantity
@@ -177,7 +180,10 @@
           <div class="_addons _section">
             <SfHeading
               :level="3"
-              :title="$t('Upgrade Your Petsies (optional)')"
+              :title="$t(
+                'Upgrade Your {productType} (optional)',
+                {productType}
+              )"
             />
 
             <MAddonsSelector
@@ -397,6 +403,21 @@ export default Vue.extend({
     },
     productionTimeOption (): ProductionTimeOption | undefined {
       return this.productionTimeOptions.find(option => option.optionValueId === this.productionTime)
+    },
+    productType (): string {
+      const defaultProductType = 'Plush';
+
+      if (!this.product.category) {
+        return defaultProductType;
+      }
+
+      const firstCategory = this.product.category[0];
+
+      if (!firstCategory) {
+        return defaultProductType;
+      }
+
+      return firstCategory.name;
     },
     addons (): AddonOption[] {
       if (!this.addonsBundleOption) {
