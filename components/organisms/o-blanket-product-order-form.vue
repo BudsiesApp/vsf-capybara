@@ -181,6 +181,7 @@ import { SfButton, SfHeading, SfSelect } from '@storefront-ui/vue';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
+import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { getSelectedBundleOptions } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions';
 import { PRODUCT_SET_BUNDLE_OPTION } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { BundleOption, BundleOptionsProductLink } from '@vue-storefront/core/modules/catalog/types/BundleOption';
@@ -510,10 +511,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       );
 
       try {
-        let diffLog;
-
         try {
-          diffLog = await this.$store.dispatch('cart/addItem', {
+          await this.$store.dispatch('cart/addItem', {
             productToAdd: Object.assign({}, this.product, {
               qty: this.quantity,
               customerImages: [this.customerImage],
@@ -528,7 +527,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           Logger.error(err, 'budsies')();
         }
 
-        this.onSuccessAddToCart(diffLog);
+        this.onSuccessAddToCart();
       } catch (err) {
         Logger.error(err, 'budsies')();
 
@@ -627,6 +626,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       return products;
     },
+    goToCrossSells (): void {
+      this.$router.push(localizedRoute({
+        name: 'cross-sells',
+        params: { parentSku: this.product.sku }
+      }
+      ));
+    },
     onArtworkAdd (value: Item): void {
       this.customerImage = {
         id: value.id,
@@ -646,29 +652,16 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         action1: { label: this.$t('OK') }
       });
     },
-    onSuccessAddToCart (diffLog: any): void {
+    onSuccessAddToCart (): void {
       this.resetData();
-      this.scrollToTop();
-
-      if (!diffLog || !diffLog.clientNotifications) {
-        return;
-      }
-
-      diffLog.clientNotifications.forEach((notificationData: any) => {
-        notificationData.type = 'info'
-        notificationData.timeToLive = 10 * 1000
-
-        this.$store.dispatch(
-          'notification/spawnNotification',
-          notificationData,
-          { root: true }
-        );
-      });
+      this.goToCrossSells();
     },
     onSuccessExistingCartItemUpdate (): void {
       this.resetData();
 
-      this.$router.push({ name: 'detailed-cart' });
+      this.$router.push(localizedRoute({
+        name: 'detailed-cart'
+      }));
     },
     onSubmit (): void {
       if (!this.existingCartItem) {
@@ -681,13 +674,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.fillDefaultSelectedSizeOption();
       this.fillEmptyCustomerImage();
       this.onDesignSelect(undefined);
-    },
-    scrollToTop (): void {
-      if (!document.scrollingElement) {
-        return;
-      }
-
-      document.scrollingElement.scrollTop = 0;
     },
     setDesignProcessingLevel (): void {
       if (!this.designProcessingLevelBundleOption) {
