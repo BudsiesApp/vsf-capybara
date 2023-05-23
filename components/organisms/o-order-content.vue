@@ -192,12 +192,6 @@ export default {
     }
 
     &.o-order-content--hidden-header {
-        .product-price {
-          ::v-deep .sf-price__old {
-              margin: 0;
-          }
-        }
-
         .table__description {
           flex-basis: 6rem;
         }
