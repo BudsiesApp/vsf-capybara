@@ -545,6 +545,10 @@ $send-friend-block-max-height: 500px;
     --checkbox-cursor: default;
   }
 
+  label {
+    font-weight: bold;
+  }
+
   @include for-desktop {
     ._giftcard-preview {
       display: block;
