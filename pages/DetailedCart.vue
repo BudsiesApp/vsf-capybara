@@ -220,12 +220,15 @@ const clayPlushieProductSkus = [
   'petsiesBobbleheads_bundle'
 ]
 
+const pajamaProductSku = 'customPajamas_bundle';
+
 const editableProductsSkus = [
   ...foreversProductsSkus,
   ...printedProductSkus,
   ...blanketProductsSkus,
   ...clayPlushieProductSkus,
-  ...golfHeadCoversProductsSkus
+  ...golfHeadCoversProductsSkus,
+  pajamaProductSku
 ];
 
 export default {
@@ -378,7 +381,15 @@ export default {
       return this.truncate(product.plushieDescription, 150, 50);
     },
     editHandler (product) {
-      if (golfHeadCoversProductsSkus.includes(product.sku)) {
+      if (product.sku === pajamaProductSku) {
+        this.$router.push({
+          name: 'pajamas-creation',
+          query: {
+            existingPlushieId: product.plushieId,
+            product_design: this.getProductDesign(product)
+          }
+        });
+      } else if (golfHeadCoversProductsSkus.includes(product.sku)) {
         this.$router.push({ name: 'golf-covers-create', query: { id: product.plushieId } });
       } else if (foreversProductsSkus.includes(product.sku)) {
         this.$router.push({ name: 'forevers-create', query: { id: product.plushieId } });
