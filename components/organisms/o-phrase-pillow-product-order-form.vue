@@ -1859,6 +1859,10 @@ export default (
     text-align: center;
   }
 
+  ._qty-container {
+    margin-top: var(--spacer-xs);
+  }
+
   .m-live-preview {
     width: 100%;
   }
