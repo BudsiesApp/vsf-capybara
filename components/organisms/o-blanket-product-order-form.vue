@@ -145,17 +145,13 @@
               </validation-provider>
 
               <div class="_actions">
-                <div class="row">
-                  <div class="medium-8 large-6 columns">
-                    <SfButton
-                      class="_add-to-cart color-primary"
-                      type="submit"
-                      :disabled="isDisabled"
-                    >
-                      Add to Cart
-                    </SfButton>
-                  </div>
-                </div>
+                <SfButton
+                  class="_add-to-cart color-primary"
+                  type="submit"
+                  :disabled="isDisabled"
+                >
+                  Add to Cart
+                </SfButton>
               </div>
             </div>
           </form>
@@ -838,6 +834,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     margin-top: var(--spacer-base);
   }
 
+  ._add-to-cart {
+    width: 100%;
+  }
+
   ._error-text {
     font-size: 0.8em;
     margin-top: var(--spacer-xs);
@@ -866,6 +866,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
     ._product-name-mobile {
         display: none;
+    }
+
+    ._add-to-cart {
+      width: auto;
     }
   }
 }
