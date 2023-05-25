@@ -323,11 +323,6 @@ export default Vue.extend({
       align-items: flex-start;
     }
 
-    ::v-deep .sf-checkbox__checkmark {
-      align-items: flex-start;
-      flex-shrink: 0;
-    }
-
     ._addon-wrapper {
       display: flex;
       flex-direction: row;
