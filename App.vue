@@ -88,6 +88,7 @@ body {
   padding: 0;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  color: var(--c-text);
 
   a {
     text-decoration: none;
