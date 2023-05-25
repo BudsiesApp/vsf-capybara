@@ -22,7 +22,7 @@
           :special-price="specialPrice"
         />
 
-        <validation-observer v-slot="{ passes }" slim ref="validation-observer">
+        <validation-observer v-slot="{ passes, errors }" slim ref="validation-observer">
           <form @submit.prevent="() => passes(() => onSubmit())">
             <div class="_step">
               <div class="_step-title">
@@ -215,6 +215,11 @@
                 </div>
               </validation-provider>
 
+              <m-form-errors
+                v-if="getErrorsList(errors).length"
+                :form-errors="getErrorsList(errors)"
+              />
+
               <div class="_actions">
                 <div class="row">
                   <div class="medium-8 large-6 columns">
@@ -279,6 +284,7 @@ import MProductDescriptionStory from '../molecules/m-product-description-story.v
 import MZoomGallery from '../molecules/m-zoom-gallery.vue';
 import MPajamaStyleSelector from './OPajamaProductOrderForm/m-pajama-style-selector.vue';
 import MExtraFaces from '../molecules/m-extra-faces.vue';
+import MFormErrors from '../molecules/m-form-errors.vue';
 
 extend('required', {
   ...required,
@@ -314,7 +320,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     ACustomProductQuantity,
     MProductDescriptionStory,
     MPajamaStyleSelector,
-    MExtraFaces
+    MExtraFaces,
+    MFormErrors
   },
   inject: {
     imageHandlerService: { from: 'ImageHandlerService' }
@@ -733,6 +740,19 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     ...mapMutations('product', {
       setBundleOptionValue: PRODUCT_SET_BUNDLE_OPTION
     }),
+    getErrorsList (errors: Record<string, string[]>): string[] {
+      const errorsList: string[] = [];
+
+      Object.values(errors).forEach((error) => {
+        if (!error.length) {
+          return;
+        }
+
+        errorsList.push(error[0]);
+      })
+
+      return errorsList;
+    },
     async addToCart (): Promise<void> {
       if (this.isSubmitting) {
         return;
@@ -1239,6 +1259,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           margin-top: var(--spacer-sm);
         }
       }
+    }
+
+    .m-form-errors {
+      margin-top: var(--spacer-base);
     }
 
     .m-artwork-upload {
