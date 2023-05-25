@@ -54,14 +54,10 @@
       :disabled="disabled"
       :should-lock-scroll-on-open="isMobile"
     >
-      <SfSelectOption value="">
-        No extra pets
-      </SfSelectOption>
-
       <SfSelectOption
-        v-for="option in availableOptions"
+        v-for="option in selectOptions"
         :key="option.id"
-        :value="option"
+        :value="option.value ? option.value : ''"
       >
         {{ option.label }}
       </SfSelectOption>
@@ -92,6 +88,14 @@ extend('required', {
   ...required,
   message: 'The {_field_} field is required'
 });
+
+interface SelectOptionItem {
+  id: string,
+  value?: ExtraPhotoAddonOption,
+  label: string
+}
+
+const defaultOptionId = 'no-extra-pets';
 
 export default Vue.extend({
   name: 'MExtraFaces',
@@ -135,6 +139,24 @@ export default Vue.extend({
   },
   computed: {
     ...mapMobileObserver(),
+    selectOptions (): SelectOptionItem[] {
+      const defaultOption = {
+        id: defaultOptionId,
+        label: this.$t('No Extra Pets').toString(),
+        value: undefined
+      }
+      const options: SelectOptionItem[] = [defaultOption];
+
+      this.availableOptions.forEach((item) => {
+        options.push({
+          id: item.id,
+          label: item.label,
+          value: item
+        })
+      });
+
+      return options;
+    },
     selectedVariant: {
       get: function (): ExtraPhotoAddonOption | undefined {
         return this.fSelectedVariant;
@@ -248,16 +270,6 @@ export default Vue.extend({
     }
   },
   watch: {
-    availableOptions: {
-      handler (): void {
-        // SfSelect doesn't support options updating in the current package version
-        this.shouldShowAddonSelector = false;
-
-        this.$nextTick(() => {
-          this.shouldShowAddonSelector = true;
-        });
-      }
-    },
     backendProductId: {
       handler (newValue: string, oldValue: string) {
         if (newValue === oldValue) {

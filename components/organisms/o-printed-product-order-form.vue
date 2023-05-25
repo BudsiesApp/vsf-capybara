@@ -55,12 +55,8 @@
                     :disabled="isSubmitting"
                     :should-lock-scroll-on-open="isMobile"
                   >
-                    <SfSelectOption disabled value="">
-                      Select Design Variant
-                    </SfSelectOption>
-
                     <SfSelectOption
-                      v-for="option in availableStyles"
+                      v-for="option in designSelectorOptions"
                       :key="option.value"
                       :value="option.value"
                     >
@@ -395,7 +391,17 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       return this.product.bundle_options.find(item => item.title.toLowerCase() === 'product');
     },
-    availableStyles () {
+    designSelectorOptions (): {
+      value: string,
+      label: string
+    }[] {
+      const placeholder = {
+        value: '',
+        label: this.$t('Select Design Variant').toString()
+      }
+      return [placeholder, ...this.availableStyles];
+    },
+    availableStyles (): SelectOption[] {
       if (!this.styleBundleOption) {
         return []
       }
