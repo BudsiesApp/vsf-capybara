@@ -30,6 +30,8 @@ const BlanketProduct = () =>
   import(/* webpackChunkName: "vsf-blankets" */ 'theme/pages/BlanketProduct');
 const ClayProduct = () =>
   import(/* webpackChunkName: "vsf-plushie-product" */ 'theme/pages/ClayProduct');
+const PajamaProduct = () =>
+  import(/* webpackChunkName: "vsf-pajama-product" */ 'theme/pages/PajamaProduct');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -386,6 +388,15 @@ let routes = [
     component: ClayProduct,
     props: (route) => ({
       sku: 'petsiesBobbleheads_bundle',
+      existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
+    name: 'pajamas-creation',
+    path: '/pajamas/index/create/',
+    component: PajamaProduct,
+    props: (route) => ({
+      productDesign: route.query.product_design,
       existingPlushieId: route.query.existingPlushieId
     })
   }
