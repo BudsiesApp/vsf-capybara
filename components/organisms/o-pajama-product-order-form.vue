@@ -257,6 +257,7 @@ import { SfButton, SfHeading, SfSelect } from '@storefront-ui/vue';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
+import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { getSelectedBundleOptions } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions';
 import { PRODUCT_SET_BUNDLE_OPTION } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { BundleOption, BundleOptionsProductLink } from '@vue-storefront/core/modules/catalog/types/BundleOption';
@@ -291,7 +292,7 @@ extend('required', {
   message: 'The {_field_} field is required'
 });
 
-interface SizeOption {
+interface SelectOptionItem {
   value: string,
   label: string
 }
@@ -615,8 +616,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         (bundleOption) => bundleOption.title.toLowerCase() === SIZE_BUNDLE_OPTION_TITLE
       );
     },
-    sizeOptions (): SizeOption[] {
-      const sizeOptions: SizeOption[] = [];
+    sizeOptions (): SelectOptionItem[] {
+      const sizeOptions: SelectOptionItem[] = [];
 
       if (!this.sizeBundleOption) {
         return [];
@@ -695,8 +696,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       return this.variantsBundleOption.product_links
     },
-    variantOptions (): SizeOption[] {
-      const options: SizeOption[] = [];
+    variantOptions (): SelectOptionItem[] {
+      const options: SelectOptionItem[] = [];
 
       if (!this.selectedStyle) {
         return options;
@@ -971,6 +972,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       return products;
     },
+    goToCrossSells (): void {
+      this.$router.push(localizedRoute({
+        name: 'cross-sells',
+        params: { parentSku: this.product.sku }
+      }
+      ));
+    },
     onArtworkAdd (value: Item): void {
       this.customerImage = {
         id: value.id,
@@ -1003,22 +1011,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     onSuccessAddToCart (diffLog: any): void {
       this.resetData();
-      this.scrollToTop();
-
-      if (!diffLog || !diffLog.clientNotifications) {
-        return;
-      }
-
-      diffLog.clientNotifications.forEach((notificationData: any) => {
-        notificationData.type = 'info'
-        notificationData.timeToLive = 10 * 1000
-
-        this.$store.dispatch(
-          'notification/spawnNotification',
-          notificationData,
-          { root: true }
-        );
-      });
+      this.goToCrossSells();
     },
     onSuccessExistingCartItemUpdate (): void {
       this.resetData();
@@ -1039,13 +1032,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.fillEmptyExtraFacesDataAddon();
       this.fillDefaultStyle();
       this.onDesignSelect(undefined);
-    },
-    scrollToTop (): void {
-      if (!document.scrollingElement) {
-        return;
-      }
-
-      document.scrollingElement.scrollTop = 0;
     },
     setDefaultVariant (): void {
       if (!this.variantOptions.length) {
