@@ -772,10 +772,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       }));
 
       try {
-        let diffLog;
-
         try {
-          diffLog = await this.$store.dispatch('cart/addItem', {
+          await this.$store.dispatch('cart/addItem', {
             productToAdd: Object.assign({}, this.product, {
               qty: this.quantity,
               customerImages: [this.customerImage, ...additionalArtworks],
@@ -790,7 +788,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           Logger.error(err, 'budsies')();
         }
 
-        this.onSuccessAddToCart(diffLog);
+        this.onSuccessAddToCart();
       } catch (err) {
         Logger.error(err, 'budsies')();
 
@@ -1009,7 +1007,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           this.showVariantSelectorComponent = true;
         })
     },
-    onSuccessAddToCart (diffLog: any): void {
+    onSuccessAddToCart (): void {
       this.resetData();
       this.goToCrossSells();
     },
