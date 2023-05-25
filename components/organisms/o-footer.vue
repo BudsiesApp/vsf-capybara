@@ -166,6 +166,12 @@ export default {
             { name: this.$t('Custom Socks'), link: { name: 'printed-socks-creation-page' } },
             { name: this.$t('Custom Face Masks'), link: { name: 'printed-masks-creation-page' } },
             { name: this.$t('Bobbleheads & Figurines'), link: '/pet-bobblehead-figurines/' },
+            {
+              name: this.$t('Pajamas'),
+              link: {
+                name: 'pajamas-creation'
+              }
+            },
             { name: this.$t('Custom Golf Headcovers'), link: '/golf-headcovers/' },
             { name: this.$t('Custom Keychains'), link: { name: 'printed-keychains-creation-page' } },
             { name: this.$t('Custom Magnets'), link: { name: 'felted-magnets-creation-page' } },

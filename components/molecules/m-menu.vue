@@ -135,6 +135,12 @@ export default Vue.extend({
           url: '/pet-bobblehead-figurines/'
         },
         {
+          label: this.$t('Pajamas'),
+          url: {
+            name: 'pajamas-creation'
+          }
+        },
+        {
           label: this.$t('Pet Keychains'),
           url: {
             name: 'printed-keychains-creation-page'

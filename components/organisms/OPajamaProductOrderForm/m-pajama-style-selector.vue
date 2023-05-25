@@ -19,7 +19,7 @@
         <div class="_icon-wrapper">
           <div
             class="_icon"
-            :style="getIconStyle"
+            :style="getIconStyle(option)"
           />
         </div>
 
@@ -74,7 +74,8 @@ export default Vue.extend({
       const thumb = getThumbnailPath(
         option.image,
         OPTION_ITEM_WIDTH * 2,
-        OPTION_ITEM_WIDTH * 2
+        OPTION_ITEM_WIDTH * 2,
+        'product'
       );
 
       return {

@@ -302,6 +302,12 @@ export default {
           url: '/pet-bobblehead-figurines/'
         },
         {
+          label: this.$t('Pajamas'),
+          url: {
+            name: 'pajamas-creation'
+          }
+        },
+        {
           label: 'Pet Keychains',
           url: {
             name: 'printed-keychains-creation-page'
