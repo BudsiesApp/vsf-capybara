@@ -8,7 +8,11 @@
           </h1>
         </header>
 
-        <m-zoom-gallery ref="gallery" :images="galleryImages" />
+        <m-zoom-gallery
+          ref="gallery"
+          class="_gallery"
+          :images="galleryImages"
+        />
       </div>
 
       <div>
@@ -1114,6 +1118,14 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       margin-top: var(--spacer-base);
     }
 
+    ._product-name-mobile {
+      margin-top: var(--spacer-lg);
+    }
+
+    ._gallery {
+      margin-top: var(--spacer-xs);
+    }
+
     ._description {
         margin-top: calc(var(--spacer-lg) * 2);
 
@@ -1184,6 +1196,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
     ._product-name-mobile {
         display: none;
+    }
+
+    ._gallery {
+      margin-top: 0;
     }
   }
 }
