@@ -258,8 +258,10 @@
         </validation-provider>
 
         <div v-show="showEmailStep">
+          <SfDivider class="_step-divider" />
+
           <div
-            class="_step-number _email-step"
+            class="_step-number"
             ref="email-field-anchor"
           >
             Step 5
@@ -847,10 +849,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     font-size: var(--font-xl);
     font-weight: var(--font-semibold);
     @include border(--step-border, 0 0 4px 0, solid, var(--_c-light-primary));
-
-    &._email-step {
-      margin-top: var(--spacer-2xl);
-    }
   }
 
   ._step-title {
@@ -884,7 +882,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     margin-top: var(--spacer-xl);
   }
 
-  .m-bodypart-option-configurator {
+  .m-bodypart-option-configurator,
+  .m-plushie-size-selector {
     margin-top: var(--spacer-base);
   }
 
