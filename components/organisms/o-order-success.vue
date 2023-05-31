@@ -1,30 +1,32 @@
 <template>
   <div class="o-order-success">
-    <SfHeading
-      class="_main-title"
-      :title="$t('Order Complete')"
-      :level="1"
-    />
-    <SfHeading
-      class="_main-subtitle"
-      :title="$t('Thank you for placing your Petsies order.')"
-      :level="3"
-    />
-    <SfHeading
-      :level="4"
-    >
-      <template #title>
-        <h4 class="sf-heading__title sf-heading__title--h4">
-          {{ $t('Please feel free to email') }}
-          <a href="mailto:support@mypetsies.com">support@mypetsies.com</a>
-          {{ $t('if you have any questions.') }}
-        </h4>
-      </template>
-    </SfHeading>
+    <div class="_heading">
+      <SfHeading
+        class="_main-title"
+        :title="$t('Order Complete')"
+        :level="1"
+      />
+      <SfHeading
+        class="_main-subtitle"
+        :title="$t('Thank you for placing your Petsies order.')"
+        :level="3"
+      />
+      <SfHeading
+        :level="4"
+      >
+        <template #title>
+          <h4 class="sf-heading__title sf-heading__title--h4">
+            {{ $t('Please feel free to email') }}
+            <a href="mailto:support@mypetsies.com">support@mypetsies.com</a>
+            {{ $t('if you have any questions.') }}
+          </h4>
+        </template>
+      </SfHeading>
 
-    <p class="_confirmation">
-      {{ $t('You\'ll receive a confirmation email with your order number shortly!') }}
-    </p>
+      <p class="_confirmation">
+        {{ $t('You\'ll receive a confirmation email with your order number shortly!') }}
+      </p>
+    </div>
 
     <div class="_content">
       <div class="_left">
@@ -155,6 +157,10 @@ $number-size: 50px;
 $number-margin-right-desktop: var(--spacer-sm);
 
 .o-order-success {
+  ._heading {
+    padding: 0 var(--spacer-sm);
+  }
+
   ._main-title {
     margin-bottom: var(--spacer-lg);
   }
