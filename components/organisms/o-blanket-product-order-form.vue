@@ -8,7 +8,7 @@
           class="_product-name-mobile sf-heading--left"
         />
 
-        <m-zoom-gallery :images="galleryImages" />
+        <m-zoom-gallery class="_gallery" :images="galleryImages" />
       </div>
 
       <div class="_form-container">
@@ -812,7 +812,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   }
 
   ._product-name-mobile {
-    display: block;
+    margin-top: var(--spacer-lg);
+  }
+
+  ._gallery {
+    margin-top: var(--spacer-xs);
   }
 
   ._step {
@@ -866,6 +870,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
     ._product-name-mobile {
         display: none;
+    }
+
+    ._gallery {
+      margin-top: 0;
     }
 
     ._add-to-cart {

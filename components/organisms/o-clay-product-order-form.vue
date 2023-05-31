@@ -3,6 +3,7 @@
     <SfHeading
       :level="1"
       :title="pageTitle"
+      class="_title"
     />
 
     <MBlockStory
@@ -991,6 +992,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
 .o-clay-product-order-form {
   text-align: center;
+
+  ._title {
+    margin-top: var(--spacer-lg);
+  }
 
   ._top-block {
     margin-top: var(--spacer-base);
