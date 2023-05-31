@@ -115,6 +115,16 @@
               />
             </transition-group>
           </lazy-hydrate>
+
+          <div
+            class="_product-loading-indicator"
+            v-if="isLazyLoadingEnabled"
+          >
+            <SfLoader
+              :loading="loadingProducts"
+            />
+          </div>
+
           <SfPagination
             v-if="totalPages > 1"
             class="products__pagination desktop-only"
@@ -205,6 +215,20 @@ import { getSearchOptionsFromRouteParams } from '@vue-storefront/core/modules/ca
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { getTopLevelCategories, prepareCategoryMenuItem, prepareCategoryProduct } from 'theme/helpers';
 import { formatProductLink } from '@vue-storefront/core/modules/url/helpers';
+import {
+  SfLoader,
+  SfIcon,
+  SfList,
+  SfColor,
+  SfButton,
+  SfSelect,
+  SfFilter,
+  SfSidebar,
+  SfHeading,
+  SfMenuItem,
+  SfAccordion,
+  SfPagination
+} from '@storefront-ui/vue';
 
 import {
   localizedRoute,
@@ -219,19 +243,6 @@ import {
 import isObjectEmpty from 'theme/helpers/is-object-empty.function';
 
 import ASortIcon from 'theme/components/atoms/a-sort-icon';
-import {
-  SfIcon,
-  SfList,
-  SfColor,
-  SfButton,
-  SfSelect,
-  SfFilter,
-  SfSidebar,
-  SfHeading,
-  SfMenuItem,
-  SfAccordion,
-  SfPagination
-} from '@storefront-ui/vue';
 
 import MCategoryDescriptionStory from 'theme/components/molecules/m-category-description-story.vue';
 import OProductCard from 'theme/components/organisms/o-product-card';
@@ -283,7 +294,8 @@ export default {
     SfMenuItem,
     SfAccordion,
     SfPagination,
-    MCategoryDescriptionStory
+    MCategoryDescriptionStory,
+    SfLoader
   },
   mixins: [onBottomScroll],
   data () {
@@ -596,6 +608,17 @@ export default {
     max-width: 1272px;
     width: 100%;
     margin: 0 auto;
+  }
+
+  ._product-loading-indicator {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--spacer-base);
+
+    .sf-loader {
+      width: 2rem;
+      height: 2rem;
+    }
   }
 
   .category__short-description {
