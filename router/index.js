@@ -55,7 +55,7 @@ let routes = [
     name: 'url-rewrite',
     path: '/stub',
     beforeEnter: (to, from, next) => {
-      next(to.path);
+      next(to.params.targetPath);
     }
   },
   {
