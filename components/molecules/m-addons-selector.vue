@@ -57,7 +57,7 @@
 
                     <div
                       class="_characters-count"
-                      :class="{'-full-filled': isValueForCustomOptionFullFilled(option, addon.optionValueId)}"
+                      :class="{'-limit-reached': isLengthLimitReachedForCustomOption(option, addon.optionValueId)}"
                     >
                       {{ getCharactersCountForCustomOption(option, addon.optionValueId) }}
                     </div>
@@ -254,7 +254,7 @@ export default Vue.extend({
 
       return info.provider;
     },
-    isValueForCustomOptionFullFilled (
+    isLengthLimitReachedForCustomOption (
       option: CustomOption,
       addonOptionValueId: number
     ): boolean {
@@ -264,7 +264,7 @@ export default Vue.extend({
       );
       const valueLength = optionValue.length;
 
-      return valueLength === option.max_characters;
+      return valueLength >= option.max_characters;
     },
     onSelectedValuesChange (selectedValues: number[]): void {
       const updatedValue: SelectedAddon[] = [];
@@ -437,7 +437,7 @@ export default Vue.extend({
   ._characters-count {
     font-size: var(--font-sm);
 
-    &.-full-filled {
+    &.-limit-reached {
       font-weight: 400;
     }
   }
