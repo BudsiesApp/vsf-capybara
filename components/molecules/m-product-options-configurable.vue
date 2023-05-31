@@ -119,14 +119,8 @@ export default {
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .m-product-options-configurable {
-  border-bottom: 1px solid #f1f2f3;
-  padding-bottom: 10px;
   display: flex;
   flex-wrap: wrap;
-  @include for-desktop {
-    border: 0;
-    padding-bottom: 0;
-  }
 }
 .attribute {
   margin-bottom: var(--spacer-xl);

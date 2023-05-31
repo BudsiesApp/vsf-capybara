@@ -21,6 +21,7 @@
           width="76px"
           :aspect-ratio="1"
         />
+
         {{ item.title }}
       </SfButton>
     </div>
@@ -113,6 +114,7 @@ export default Vue.extend({
   ._button {
     justify-content: flex-start;
     flex-direction: row;
+    white-space: normal;
 
     ._image {
       margin-right: 1em;

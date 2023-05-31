@@ -303,10 +303,10 @@ export default {
     justify-content: flex-start;
     padding: var(--spacer-sm) 0;
     &__link {
-      background-image: url(../../assets/footer-socials.png);
+      background-image: url(../../assets/footer-socials-mobile.png);
       display: block;
-      height: 42px;
-      width: 42px;
+      height: 30px;
+      width: 30px;
       margin-right: var(--spacer-base);
 
       &.-facebook {
@@ -314,19 +314,19 @@ export default {
       }
 
       &.-instagram {
-        background-position: -45px -1px;
+        background-position: -30px -1px;
       }
 
       &.-twitter {
-        background-position: -89px -1px;
+        background-position: -60px -1px;
       }
 
       &.-pinterest {
-        background-position: -133px -1px;
+        background-position: -90px -1px;
       }
 
       &.-tiktok {
-        background-position: -177px -1px;
+        background-position: -120px -1px;
       }
 
       &:last-child {
@@ -365,6 +365,30 @@ export default {
 
     ._additional-information {
       padding: 0;
+    }
+
+    .social-icon {
+      &__link {
+        background-image: url(../../assets/footer-socials.png);
+        height: 42px;
+        width: 42px;
+
+        &.-instagram {
+          background-position: -45px -1px;
+        }
+
+        &.-twitter {
+          background-position: -89px -1px;
+        }
+
+        &.-pinterest {
+          background-position: -133px -1px;
+        }
+
+        &.-tiktok {
+          background-position: -177px -1px;
+        }
+      }
     }
   }
 }
