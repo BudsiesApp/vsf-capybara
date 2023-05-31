@@ -638,6 +638,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     resetForm (): void {
       this.quantity = this.product.qty || 1;
       this.customerImage = undefined;
+      this.uploadMethod = ImageUploadMethod.NOW;
       this.size = undefined;
       this.name = undefined;
 

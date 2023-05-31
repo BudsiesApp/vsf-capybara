@@ -778,6 +778,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.quantity = this.product.qty || 1;
       this.customerImages = [];
       this.initialCustomerImages = [];
+      this.uploadMethod = ImageUploadMethod.NOW;
       this.selectedAddons = [];
       this.bodypartsValues = {};
       this.description = '';
