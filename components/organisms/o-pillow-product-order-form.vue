@@ -875,9 +875,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   }
 
   .sf-input {
+    --input-width: 20em;
+
+    max-width: 100%;
     text-align: center;
     display: inline-block;
-    --input-width: 20em;
   }
 
   .sf-divider {

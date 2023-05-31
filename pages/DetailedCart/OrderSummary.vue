@@ -70,6 +70,8 @@ export default {
   background: var(--c-light);
   padding: var(--spacer-xl);
 
+  --heading-title-margin: 0 0 var(--spacer-base) 0;
+
   .title {
     @include for-desktop {
       --heading-title-margin: 0 0 var(--spacer-2xl) 0;

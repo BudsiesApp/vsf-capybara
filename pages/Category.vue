@@ -178,10 +178,12 @@
       </template>
     </SfSidebar>
 
-    <MCategoryDescriptionStory
-      :category="getCurrentCategory"
-      v-if="showCategoryDescription"
-    />
+    <div class="_description-story">
+      <MCategoryDescriptionStory
+        :category="getCurrentCategory"
+        v-if="showCategoryDescription"
+      />
+    </div>
   </div>
 </template>
 
@@ -805,6 +807,13 @@ export default {
     }
   }
 }
+
+._description-story {
+  padding: 0 var(--spacer-xs);
+  max-width: 60em;
+  margin: auto;
+}
+
 .products {
   box-sizing: border-box;
   flex: 1;
