@@ -730,6 +730,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           Logger.error(error, 'budsies')();
         }
 
+        this.showEmailStep = false;
+
         if (!shouldMakeAnother) {
           this.goToCrossSells();
           return;
