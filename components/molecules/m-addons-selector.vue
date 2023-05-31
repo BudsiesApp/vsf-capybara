@@ -52,8 +52,15 @@
                       :name="option.title"
                       :error-message="errors[0]"
                       :valid="!errors.length"
-                      @input="onCustomOptionInput($event, option.product_sku, addon.optionValueId)"
+                      @input="onCustomOptionInput($event, option, addon.optionValueId)"
                     />
+
+                    <div
+                      class="_characters-count"
+                      :class="{'-limit-reached': isLengthLimitReachedForCustomOption(option, addon.optionValueId)}"
+                    >
+                      {{ getCharactersCountForCustomOption(option, addon.optionValueId) }}
+                    </div>
                   </validation-provider>
                 </div>
               </div>
@@ -155,6 +162,18 @@ export default Vue.extend({
     }
   },
   methods: {
+    getCharactersCountForCustomOption (
+      option: CustomOption,
+      addonOptionValueId: number
+    ): string {
+      const optionValue = this.getValueForCustomOption(
+        option.product_sku,
+        addonOptionValueId
+      );
+      const valueLength = optionValue.length;
+
+      return `${valueLength}/${option.max_characters}`;
+    },
     getCustomOptionsForAddon (addon: AddonOption): CustomOption[] {
       return addon.customOptions || [];
     },
@@ -235,6 +254,18 @@ export default Vue.extend({
 
       return info.provider;
     },
+    isLengthLimitReachedForCustomOption (
+      option: CustomOption,
+      addonOptionValueId: number
+    ): boolean {
+      const optionValue = this.getValueForCustomOption(
+        option.product_sku,
+        addonOptionValueId
+      );
+      const valueLength = optionValue.length;
+
+      return valueLength >= option.max_characters;
+    },
     onSelectedValuesChange (selectedValues: number[]): void {
       const updatedValue: SelectedAddon[] = [];
 
@@ -253,7 +284,15 @@ export default Vue.extend({
 
       this.$emit('input', updatedValue);
     },
-    onCustomOptionInput (value: string, optionSku: string, addonOptionValueId: number) {
+    onCustomOptionInput (
+      value: string,
+      option: CustomOption,
+      addonOptionValueId: number
+    ) {
+      if (value.length > option.max_characters) {
+        return;
+      }
+
       const selectedAddonIndex = this.value.findIndex((selectedAddon) => selectedAddon.addonOptionValueId === addonOptionValueId);
 
       if (selectedAddonIndex === -1) {
@@ -268,7 +307,7 @@ export default Vue.extend({
         addonOptionValueId,
         optionsValues: {
           ...optionValues,
-          [optionSku]: value
+          [option.product_sku]: value
         }
       }
 
@@ -392,6 +431,14 @@ export default Vue.extend({
           display: block;
         }
       }
+    }
+  }
+
+  ._characters-count {
+    font-size: var(--font-sm);
+
+    &.-limit-reached {
+      font-weight: 400;
     }
   }
 
