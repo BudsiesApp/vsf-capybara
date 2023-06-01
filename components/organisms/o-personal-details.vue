@@ -132,6 +132,8 @@ import { SfInput, SfButton, SfHeading, SfCheckbox } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
 import { mapActions } from 'vuex';
 
+import { createSmoothscroll } from 'theme/helpers';
+
 import APromoCode from 'theme/components/atoms/a-promo-code'
 import MPassword from 'theme/components/molecules/m-password'
 
@@ -170,6 +172,12 @@ export default {
     if (customerEmail) {
       this.personalDetails.emailAddress = customerEmail;
     }
+  },
+  mounted () {
+    createSmoothscroll(
+      document.documentElement.scrollTop || document.body.scrollTop,
+      0
+    );
   },
   methods: {
     ...mapActions('ui', {

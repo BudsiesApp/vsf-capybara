@@ -7,15 +7,20 @@
     />
     <MPriceSummary :is-large="true" />
     <div class="_total-notes">
-      All pricing in USD
+      {{ $t('All pricing in USD') }}
     </div>
     <div class="actions">
       <APromoCode :allow-promo-code-removal="false" />
+
+      <p class="_helper-text">
+        {{ $t('Please apply gift certificates during checkout (next step)') }}
+      </p>
+
       <SfButton
         class="sf-button--full-width actions__button"
         @click="goToCheckout"
       >
-        Go to checkout
+        {{ $t('Go to checkout') }}
       </SfButton>
     </div>
     <SfLoader v-if="isUpdatingQuantity" :loading="isUpdatingQuantity" />
@@ -100,6 +105,13 @@ export default {
   .promo-code {
     padding: 0;
   }
+
+  ._helper-text {
+    margin: var(--spacer-xs) 0 0;
+    font-size: var(--font-2xs);
+    font-weight: var(--font-medium);
+  }
+
   .sf-loader {
     position: absolute;
     top: 0;
