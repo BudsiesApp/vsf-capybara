@@ -88,6 +88,7 @@
                 :is-required="true"
                 @file-added="onArtworkAdd"
                 @file-removed="onArtworkRemove"
+                @is-busy-changed="onArtworkUploadBusyStatusChanged('main', $event)"
               />
             </div>
 
@@ -103,6 +104,7 @@
                 :uploaded-artwork="additionalArtworks[0]"
                 @file-added="(value) => onAdditionalArtworkAdd(0, value)"
                 @file-removed="onAdditionalArtworkRemove"
+                @is-busy-changed="onArtworkUploadBusyStatusChanged('side', $event)"
               />
 
               <MTitledArtworkUpload
@@ -116,6 +118,7 @@
                 :uploaded-artwork="additionalArtworks[1]"
                 @file-added="(value) => onAdditionalArtworkAdd(1, value)"
                 @file-removed="onAdditionalArtworkRemove"
+                @is-busy-changed="onArtworkUploadBusyStatusChanged('back', $event)"
               />
 
               <div class="_bodypart-selector-container" v-for="bodypart in bodyparts" :key="bodypart.code">
@@ -156,6 +159,7 @@
               :initial-artworks="initialAdditionalArtworks"
               v-if="hasExtraFaceAddons"
               @input="extraFacesData = $event"
+              @is-busy-changed="onArtworkUploadBusyStatusChanged('extra-faces', $event)"
             />
 
             <validation-provider
@@ -180,7 +184,11 @@
             <div class="_actions">
               <div class="row">
                 <div class="medium-8 large-6 columns">
-                  <SfButton class="_add-to-cart color-primary" type="submit" :disabled="isSubmitting">
+                  <SfButton
+                    class="_add-to-cart color-primary"
+                    type="submit"
+                    :disabled="isSubmitButtonDisabled"
+                  >
                     Add to Cart
                   </SfButton>
                 </div>
@@ -222,7 +230,7 @@ import { getProductGallery as getGalleryByProduct, setBundleProductOptionsAsync 
 import CartItem from 'core/modules/cart/types/CartItem';
 
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
-import { Bodypart, BodypartOption, ExtraPhotoAddon, ProductValue } from 'src/modules/budsies';
+import { Bodypart, BodypartOption, Dictionary, ExtraPhotoAddon, ProductValue } from 'src/modules/budsies';
 import ServerError from 'src/modules/shared/types/server-error';
 import { CustomerImage, getProductDefaultPrice, InjectType } from 'src/modules/shared';
 
@@ -301,6 +309,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
   },
   data () {
+    const artworkUploaderBusyState: Dictionary<boolean> = {};
     const bodypartValues: Record<string, BodypartOption | BodypartOption[] | undefined> = {};
 
     return {
@@ -314,7 +323,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       initialAddonItemId: undefined as string | undefined,
       additionalArtworks: [] as CustomerImage[],
       initialAdditionalArtworks: [] as CustomerImage[],
-      bodypartValues
+      bodypartValues,
+      artworkUploaderBusyState
     }
   },
   computed: {
@@ -540,6 +550,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         this.addons.length > 0
       );
     },
+    isSomeUploaderBusy (): boolean {
+      return !!Object.values(this.artworkUploaderBusyState)
+        .find((isBusy) => isBusy);
+    },
+    isSubmitButtonDisabled (): boolean {
+      return this.isSubmitting || this.isSomeUploaderBusy;
+    },
     description (): string | undefined {
       const style = this.availableStyles.find(
         (item) => item.value === this.selectedStyle
@@ -653,6 +670,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     onArtworkRemove (storageItemId: string): void {
       this.customerImage = undefined;
+    },
+    onArtworkUploadBusyStatusChanged (key: string, isBusy: boolean): void {
+      Vue.set(this.artworkUploaderBusyState, key, isBusy);
     },
     onAdditionalArtworkAdd (index: number, value: CustomerImage): void {
       this.additionalArtworks.splice(index, 0, value);

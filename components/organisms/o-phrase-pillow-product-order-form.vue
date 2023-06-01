@@ -12,6 +12,7 @@
       <SfHeading
         :level="3"
         title="Your customizations will appear on the left side of the page"
+        class="_subtitle"
       />
     </div>
 
@@ -1569,6 +1570,10 @@ export default (
 
   ._main-header {
     line-height: 100%;
+  }
+
+  ._subtitle {
+    margin-top: var(--spacer-base);
   }
 
   ._notes {

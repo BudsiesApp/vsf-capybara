@@ -934,6 +934,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     ._error-link {
       color: inherit;
     }
+
+    &:empty {
+      display: none;
+    }
   }
 
   ._order-agreement {

@@ -3,7 +3,8 @@
     class="m-multiselect"
     :class="{
       '--invalid': !valid,
-      '--focused': isOpen
+      '--focused': isOpen,
+      '--disabled': disabled
     }"
     @keydown.enter.capture="onEnterPressed"
   >
@@ -443,6 +444,18 @@ export default Vue.extend({
 
     &.--focused {
       --input-label-color: var(--c-danger);
+    }
+  }
+
+  &.--disabled {
+    --input-border-color: var(--c-text-disabled);
+    --input-label-color: var(--c-text-disabled);
+    --chevron-color: var(--c-text-disabled);
+
+    ::v-deep .multiselect {
+      color: var(--c-text-disabled);
+      background-color: transparent;
+      opacity: 1;
     }
   }
 

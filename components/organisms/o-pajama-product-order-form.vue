@@ -173,6 +173,7 @@
                   :initial-items="artworkUploadInitialItems"
                   @file-added="onArtworkAdd"
                   @file-removed="onArtworkRemove"
+                  @is-busy-changed="onArtworkUploadBusyStatusChanged('main', $event)"
                 />
 
                 <div class="_error-text">
@@ -192,6 +193,7 @@
                 :initial-artworks="initialAdditionalArtworks"
                 v-if="hasExtraFaceAddons"
                 @input="extraFacesData = $event"
+                @is-busy-changed="onArtworkUploadBusyStatusChanged('extra-faces', $event)"
               />
             </div>
 
@@ -224,7 +226,7 @@
                 <SfButton
                   class="_add-to-cart color-primary"
                   type="submit"
-                  :disabled="isDisabled"
+                  :disabled="isSubmitButtonDisabled"
                 >
                   Add to Cart
                 </SfButton>
@@ -342,6 +344,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
   },
   data () {
+    const artworkUploaderBusyState: Dictionary<boolean> = {};
+
     return {
       quantity: 1,
       customerImage: undefined as CustomerImage | undefined,
@@ -355,7 +359,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       additionalArtworks: [] as CustomerImage[],
       initialAdditionalArtworks: [] as CustomerImage[],
       // eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
-      extraFacesDataAddon: undefined as ExtraPhotoAddonOption | undefined
+      extraFacesDataAddon: undefined as ExtraPhotoAddonOption | undefined,
+      artworkUploaderBusyState
     }
   },
   computed: {
@@ -510,6 +515,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     isDisabled (): boolean {
       return this.isSubmitting;
+    },
+    isSubmitButtonDisabled (): boolean {
+      return this.isDisabled || this.isSomeUploaderBusy;
+    },
+    isSomeUploaderBusy (): boolean {
+      return !!Object.values(this.artworkUploaderBusyState)
+        .find((isBusy) => isBusy);
     },
     productImages (): GalleryProductImages[] {
       const images = this.getProductGallery.map((imageObject: any) => ({
@@ -981,6 +993,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     onArtworkRemove (): void {
       this.customerImage = undefined;
+    },
+    onArtworkUploadBusyStatusChanged (key: string, isBusy: boolean): void {
+      Vue.set(this.artworkUploaderBusyState, key, isBusy);
     },
     onDesignSelect (value?: string): void {
       this.$emit('design-selected', value);
