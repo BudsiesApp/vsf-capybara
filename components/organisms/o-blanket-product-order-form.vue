@@ -82,6 +82,7 @@
                   :initial-items="artworkUploadInitialItems"
                   @file-added="onArtworkAdd"
                   @file-removed="onArtworkRemove"
+                  @is-busy-changed="onArtworkUploadBusyStatusChanged"
                 />
 
                 <div class="_error-text">
@@ -148,7 +149,7 @@
                 <SfButton
                   class="_add-to-cart color-primary"
                   type="submit"
-                  :disabled="isDisabled"
+                  :disabled="isSubmitButtonDisabled"
                 >
                   Add to Cart
                 </SfButton>
@@ -261,7 +262,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       customerImage: undefined as CustomerImage | undefined,
       isSubmitting: false,
       artworkUploadInitialItems: [] as CustomerImage[],
-      selectedSizeOption: undefined as string | undefined
+      selectedSizeOption: undefined as string | undefined,
+      isArtworkUploaderBusy: false
     }
   },
   computed: {
@@ -361,6 +363,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     isDisabled (): boolean {
       return this.isSubmitting;
+    },
+    isSubmitButtonDisabled (): boolean {
+      return this.isDisabled || this.isArtworkUploaderBusy;
     },
     productImages (): GalleryProductImages[] {
       const images = this.getProductGallery.map((imageObject: any) => ({
@@ -637,6 +642,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     onArtworkRemove (): void {
       this.customerImage = undefined;
+    },
+    onArtworkUploadBusyStatusChanged (isBusy: boolean): void {
+      this.isArtworkUploaderBusy = isBusy;
     },
     onDesignSelect (value?: string): void {
       this.$emit('design-selected', value);
