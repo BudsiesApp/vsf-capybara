@@ -80,7 +80,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue';
+import Vue, { PropType, VueConstructor } from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import i18n from '@vue-storefront/i18n';
@@ -101,7 +101,7 @@ import {
   PlushieWizardEvents
 } from 'src/modules/budsies';
 import ServerError from 'src/modules/shared/types/server-error';
-import { CustomerImage, getProductDefaultPrice } from 'src/modules/shared';
+import { CustomerImage, InjectType, getProductDefaultPrice } from 'src/modules/shared';
 
 import foreversCreationWizardPersistedStateService from 'theme/helpers/plushie-creation-wizard-persisted-state.service';
 import getForeversSizeSkuBySizeAndType from 'theme/helpers/get-forevers-size-sku-by-size-and-type.function';
@@ -127,7 +127,11 @@ import SelectedAddon from '../interfaces/selected-addon.interface';
 import AddonOption from '../interfaces/addon-option.interface';
 import ProductTypeButton from '../interfaces/product-type-button.interface';
 
-export default Vue.extend({
+interface InjectedServices {
+  window: Window
+}
+
+export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   name: 'OPlushieCreationWizard',
   components: {
     SfSteps,
@@ -138,6 +142,9 @@ export default Vue.extend({
     MCustomizeStep,
     MFloatingPhoto
   },
+  inject: {
+    window: { from: 'WindowObject' }
+  } as unknown as InjectType<InjectedServices>,
   props: {
     artworkUploadUrl: {
       type: String,
@@ -665,6 +672,8 @@ export default Vue.extend({
 
       this.currentStep += 1;
 
+      this.scrollToTop();
+
       if (!this.existingCartItem) {
         await this.persistCurrentStep(this.currentStep);
       }
@@ -722,6 +731,8 @@ export default Vue.extend({
       if (nextStep < this.currentStep) {
         this.currentStep = nextStep;
 
+        this.scrollToTop();
+
         await this.persistCurrentStep(nextStep);
       }
     },
@@ -773,6 +784,9 @@ export default Vue.extend({
       }
 
       await foreversCreationWizardPersistedStateService.saveProductTypeStepData(value.plushieId, value.product.sku);
+    },
+    scrollToTop (): void {
+      this.window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     },
     setBundleOptionValue (optionId: number, optionQty: number, optionSelections: number[]): void {
       this.$store.commit('product' + '/' + catalogTypes.PRODUCT_SET_BUNDLE_OPTION, { optionId, optionQty, optionSelections });

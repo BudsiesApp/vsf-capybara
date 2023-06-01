@@ -15,7 +15,7 @@
       <validation-provider
         v-slot="{ errors }"
         class="_field"
-        rules="required"
+        rules="required|max:128"
         :name="$t('Pet Name')"
         tag="div"
       >
@@ -94,7 +94,7 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
-import { required, email } from 'vee-validate/dist/rules';
+import { required, email, max } from 'vee-validate/dist/rules';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
 import { SfHeading, SfButton, SfInput } from '@storefront-ui/vue';
@@ -116,6 +116,8 @@ extend('email', {
   ...email,
   message: 'Please, provide the correct email address'
 });
+
+extend('max', max);
 
 export default Vue.extend({
   name: 'MPetInfoStep',
