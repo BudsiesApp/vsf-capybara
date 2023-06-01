@@ -16,6 +16,7 @@
           v-slot="{errors}"
           rules="required|email"
           slim
+          name="E-mail"
         >
           <SfInput
             v-model="email"
