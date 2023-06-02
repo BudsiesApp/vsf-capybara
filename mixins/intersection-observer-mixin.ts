@@ -2,21 +2,35 @@ import Vue from 'vue';
 
 export default Vue.extend({
   data () {
+    const intersectionObserverOptions: IntersectionObserverInit = {
+      threshold: 1
+    }
     return {
       intersectionObserver: undefined as IntersectionObserver | undefined,
-      intersectionObserverOptions: undefined as IntersectionObserverInit | undefined
+      intersectionObserverOptions
     }
   },
   mounted (): void {
+    const observableElement = this.getObservableElement();
+
+    if (!observableElement) {
+      return;
+    }
+
     this.intersectionObserver = new IntersectionObserver(
       this.onIntersectHandler,
       this.intersectionObserverOptions
     );
+
     this.intersectionObserver.observe(this.getObservableElement());
   },
   beforeDestroy (): void {
-    this.intersectionObserver?.unobserve(this.getObservableElement());
-    this.intersectionObserver?.disconnect();
+    if (!this.intersectionObserver) {
+      return;
+    }
+
+    this.intersectionObserver.unobserve(this.getObservableElement());
+    this.intersectionObserver.disconnect();
   },
   methods: {
     onIntersectHandler (

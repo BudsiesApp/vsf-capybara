@@ -116,9 +116,11 @@
             </transition-group>
           </lazy-hydrate>
 
+          <div class="_observable" ref="observable" />
+
           <div
             class="_product-loading-indicator"
-            v-if="isLazyLoadingEnabled"
+            v-show="isLazyLoadingEnabled"
           >
             <SfLoader
               :loading="loadingProducts"
@@ -208,7 +210,6 @@ import {
   isServer
 } from '@vue-storefront/core/helpers';
 import i18n from '@vue-storefront/i18n';
-import onBottomScroll from '@vue-storefront/core/mixins/onBottomScroll';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { quickSearchByQuery } from '@vue-storefront/core/lib/search';
 import { getSearchOptionsFromRouteParams } from '@vue-storefront/core/modules/catalog-next/helpers/categoryHelpers';
@@ -241,9 +242,9 @@ import {
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
 import isObjectEmpty from 'theme/helpers/is-object-empty.function';
+import intersectionObserverMixin from 'theme/mixins/intersection-observer-mixin';
 
 import ASortIcon from 'theme/components/atoms/a-sort-icon';
-
 import MCategoryDescriptionStory from 'theme/components/molecules/m-category-description-story.vue';
 import OProductCard from 'theme/components/organisms/o-product-card';
 
@@ -297,7 +298,7 @@ export default {
     MCategoryDescriptionStory,
     SfLoader
   },
-  mixins: [onBottomScroll],
+  mixins: [intersectionObserverMixin],
   data () {
     return {
       loading: true,
@@ -499,7 +500,19 @@ export default {
     getBrowserWidth () {
       return (this.browserWidth = window.innerWidth);
     },
-    async onBottomScroll () {
+    getObservableElement () {
+      return this.$refs.observable;
+    },
+    async onIntersectHandler (
+      entries
+    ) {
+      const target = this.getObservableElement();
+      const entry = entries.find((entry) => entry.target === target);
+
+      if (!entry || !entry.isIntersecting) {
+        return;
+      }
+
       if (!this.isLazyLoadingEnabled || this.loadingProducts) {
         return;
       }
