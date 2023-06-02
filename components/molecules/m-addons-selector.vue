@@ -29,62 +29,66 @@
                 {{ addon.name }}
               </div>
 
-              <div class="_description" v-html="addon.description" />
-
               <div class="_price" v-if="addon.price">
                 <strong>
                   + {{ addon.price | price() }}
                 </strong>
               </div>
 
-              <div class="_addon-options" v-if="showCustomOptionsForAddon(addon)">
-                <div class="_addon-option-item" v-for="option in getCustomOptionsForAddon(addon)" :key="option.option_id">
-                  <validation-provider
-                    v-slot="{errors}"
-                    tag="div"
-                    :name="`'${option.title}'`"
-                    :rules="getValidationRuleForCustomOption(option)"
-                  >
-                    <SfInput
-                      class="_custom-option-field"
-                      :value="getValueForCustomOption(option.product_sku, addon.optionValueId)"
-                      :label="option.title"
-                      :name="option.title"
-                      :error-message="errors[0]"
-                      :valid="!errors.length"
-                      @input="onCustomOptionInput($event, option, addon.optionValueId)"
-                    />
-
+              <div class="_content">
+                <div class="_description-container">
+                  <div class="_image-column">
                     <div
-                      class="_characters-count"
-                      :class="{'-limit-reached': isLengthLimitReachedForCustomOption(option, addon.optionValueId)}"
+                      v-if="!shouldShowVideo(addon.id)"
+                      class="_image-container"
+                      :class="{'-wide-image': wideImage}"
+                      @click="switchToVideo($event, addon)"
                     >
-                      {{ getCharactersCountForCustomOption(option, addon.optionValueId) }}
+                      <img v-if="getItemImage(addon)" :src="getItemImage(addon)" class="_image">
+
+                      <img v-if="getItemHoverImage(addon)" :src="getItemHoverImage(addon)" class="_image-hover">
                     </div>
-                  </validation-provider>
+
+                    <StreamingVideo
+                      :video-id="getVideoId(addon)"
+                      :provider="getVideoProvider(addon)"
+                      :auto-play="true"
+                      :display-controls="false"
+                      v-if="shouldShowVideo(addon.id) && getVideoId(addon) && getVideoProvider(addon)"
+                    />
+                  </div>
+
+                  <div class="_description" v-html="addon.description" />
+                </div>
+
+                <div class="_addon-options" v-if="showCustomOptionsForAddon(addon)">
+                  <div class="_addon-option-item" v-for="option in getCustomOptionsForAddon(addon)" :key="option.option_id">
+                    <validation-provider
+                      v-slot="{errors}"
+                      tag="div"
+                      :name="`'${option.title}'`"
+                      :rules="getValidationRuleForCustomOption(option)"
+                    >
+                      <SfInput
+                        class="_custom-option-field"
+                        :value="getValueForCustomOption(option.product_sku, addon.optionValueId)"
+                        :label="option.title"
+                        :name="option.title"
+                        :error-message="errors[0]"
+                        :valid="!errors.length"
+                        @input="onCustomOptionInput($event, option, addon.optionValueId)"
+                      />
+
+                      <div
+                        class="_characters-count"
+                        :class="{'-limit-reached': isLengthLimitReachedForCustomOption(option, addon.optionValueId)}"
+                      >
+                        {{ getCharactersCountForCustomOption(option, addon.optionValueId) }}
+                      </div>
+                    </validation-provider>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div class="_image-column">
-              <div
-                v-if="!shouldShowVideo(addon.id)"
-                class="_image-container"
-                :class="{'-wide-image': wideImage}"
-                @click="switchToVideo($event, addon)"
-              >
-                <img v-if="getItemImage(addon)" :src="getItemImage(addon)" class="_image">
-
-                <img v-if="getItemHoverImage(addon)" :src="getItemHoverImage(addon)" class="_image-hover">
-              </div>
-
-              <StreamingVideo
-                :video-id="getVideoId(addon)"
-                :provider="getVideoProvider(addon)"
-                :auto-play="true"
-                :display-controls="false"
-                v-if="shouldShowVideo(addon.id) && getVideoId(addon) && getVideoProvider(addon)"
-              />
             </div>
           </div>
         </template>
@@ -371,12 +375,10 @@ export default Vue.extend({
       margin-left: 1em;
     }
 
-    ._info-column {
-      width: 100%;
-    }
-
-    ._image-column {
-      display: none;
+    ._content {
+      display: flex;
+      flex-direction: column;
+      margin-left: calc(var(--spacer-xl) * -1);
     }
 
     ._info-column {
@@ -391,21 +393,21 @@ export default Vue.extend({
         font-size: var(--font-sm);
         margin-top: 1em;
       }
+    }
 
-      ._price {
-        color: var(--_c-light-primary);
-        font-size: var(--font-base);
-        margin-top: 1em;
-      }
+    ._price {
+      color: var(--_c-light-primary);
+      font-size: var(--font-base);
+      margin-top: 1em;
     }
 
     ._image-column {
-      justify-content: flex-end;
-      align-items: flex-start;
+      float: right;
+      width: 40%;
+      padding: 0 0 var(--spacer-sm) var(--spacer-sm);
 
       ._image-container {
         position: relative;
-        max-width: 75%;
 
         &.-wide-image {
           margin-left: var(--spacer-xl);
@@ -469,17 +471,8 @@ export default Vue.extend({
 
   @media (min-width: $tablet-min) {
     ._item {
-      ._info-column,
-      ._image-column {
-        width: 50%;
-      }
-
-      ._info-column {
-        display: block;
-      }
-
-      ._image-column {
-        display: flex;
+      ._content {
+        margin: 0;
       }
     }
   }
