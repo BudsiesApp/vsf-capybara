@@ -22,14 +22,19 @@ export default Vue.extend({
       this.intersectionObserverOptions
     );
 
-    this.intersectionObserver.observe(this.getObservableElement());
+    this.intersectionObserver.observe(observableElement);
   },
   beforeDestroy (): void {
     if (!this.intersectionObserver) {
       return;
     }
 
-    this.intersectionObserver.unobserve(this.getObservableElement());
+    const observableElement = this.getObservableElement();
+
+    if (observableElement) {
+      this.intersectionObserver.unobserve(observableElement);
+    }
+
     this.intersectionObserver.disconnect();
   },
   methods: {
@@ -39,7 +44,7 @@ export default Vue.extend({
     ): void {
       throw new Error(`'onIntersectHandler' is not implemented`);
     },
-    getObservableElement (): Element {
+    getObservableElement (): Element | undefined {
       throw new Error(`'getObservableElement' is not implemented`);
     }
   }
