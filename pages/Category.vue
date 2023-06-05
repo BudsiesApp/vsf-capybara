@@ -116,7 +116,7 @@
             </transition-group>
           </lazy-hydrate>
 
-          <div class="_observable" ref="observable" />
+          <div class="nextPageLoadingThreshold" ref="nextPageLoadingThreshold" />
 
           <div
             class="_product-loading-indicator"
@@ -202,6 +202,7 @@
 <script>
 import LazyHydrate from 'vue-lazy-hydration';
 import { mapGetters } from 'vuex';
+import { ref } from '@vue/composition-api';
 import castArray from 'lodash-es/castArray';
 import config from 'config';
 import {
@@ -242,14 +243,14 @@ import {
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
 import isObjectEmpty from 'theme/helpers/is-object-empty.function';
-import intersectionObserverMixin from 'theme/mixins/intersection-observer-mixin';
+import { useIntersectionObservable } from 'theme/helpers/use-intersection-observable';
+import { useItemsLazyLoading } from 'theme/helpers/use-items-lazy-loading';
 
 import ASortIcon from 'theme/components/atoms/a-sort-icon';
 import MCategoryDescriptionStory from 'theme/components/molecules/m-category-description-story.vue';
 import OProductCard from 'theme/components/organisms/o-product-card';
 
 const THEME_PAGE_SIZE = 12;
-const LAZY_LOADING_ACTIVATION_BREAKPOINT = 1024;
 
 const composeInitialPageState = async (store, route, forceLoad = false) => {
   try {
@@ -298,13 +299,49 @@ export default {
     MCategoryDescriptionStory,
     SfLoader
   },
-  mixins: [intersectionObserverMixin],
+  setup () {
+    async function loadProducts () {
+      await store.dispatch('category-next/loadMoreCategoryProducts');
+    }
+    const nextPageLoadingThreshold = ref(null);
+
+    const {
+      isLazyLoadingEnabled,
+      isLoadingItems,
+      browserWidth,
+      loadItems
+    } = useItemsLazyLoading(loadProducts);
+
+    async function onIntersectHandler (
+      entries
+    ) {
+      const entry = entries.find(
+        (entry) => entry.target === nextPageLoadingThreshold.value
+      );
+
+      if (!entry || !entry.isIntersecting) {
+        return;
+      }
+
+      await loadItems();
+    }
+
+    useIntersectionObservable(
+      nextPageLoadingThreshold,
+      onIntersectHandler
+    );
+
+    return {
+      nextPageLoadingThreshold,
+      isLazyLoadingEnabled,
+      browserWidth,
+      loadingProducts: isLoadingItems
+    }
+  },
   data () {
     return {
       loading: true,
-      loadingProducts: false,
       currentPage: 1,
-      browserWidth: 0,
       isFilterSidebarOpen: false,
       unsubscribeFromStoreAction: null,
       aggregations: null
@@ -328,9 +365,6 @@ export default {
     },
     isCategoryEmpty () {
       return this.getCategoryProductsTotal === 0;
-    },
-    isLazyLoadingEnabled () {
-      return !isServer && this.browserWidth < LAZY_LOADING_ACTIVATION_BREAKPOINT;
     },
     categories () {
       return getTopLevelCategories(this.getCategories)
@@ -486,41 +520,14 @@ export default {
       }
     });
     this.$bus.$on('product-after-list', this.initPagination);
-    window.addEventListener('resize', this.getBrowserWidth);
-    this.getBrowserWidth();
   },
   beforeDestroy () {
     unMapMobileObserver();
     this.$store.dispatch('category-next/resetCurrentCategoryData');
     this.unsubscribeFromStoreAction();
     this.$bus.$off('product-after-list', this.initPagination);
-    window.removeEventListener('resize', this.getBrowserWidth);
   },
   methods: {
-    getBrowserWidth () {
-      return (this.browserWidth = window.innerWidth);
-    },
-    getObservableElement () {
-      return this.$refs.observable;
-    },
-    async onIntersectHandler (
-      entries
-    ) {
-      const target = this.getObservableElement();
-      const entry = entries.find((entry) => entry.target === target);
-
-      if (!entry || !entry.isIntersecting) {
-        return;
-      }
-
-      if (!this.isLazyLoadingEnabled || this.loadingProducts) {
-        return;
-      }
-
-      this.loadingProducts = true;
-      await this.$store.dispatch('category-next/loadMoreCategoryProducts');
-      this.loadingProducts = false;
-    },
     async changePage (page = this.currentPage) {
       await this.$store.dispatch('category-next/fetchPageProducts', { page, pageSize: THEME_PAGE_SIZE, route: this.$route });
       this.currentPage = page;
