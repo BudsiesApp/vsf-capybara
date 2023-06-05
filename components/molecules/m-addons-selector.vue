@@ -368,6 +368,7 @@ export default Vue.extend({
     ._addon-wrapper {
       display: flex;
       flex-direction: column;
+      flex-grow: 1;
       margin-left: var(--spacer-sm);
       text-align: left;
 
