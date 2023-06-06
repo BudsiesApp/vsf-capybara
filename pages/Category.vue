@@ -120,10 +120,10 @@
 
           <div
             class="_product-loading-indicator"
-            v-show="isLazyLoadingEnabled"
+            v-show="isInfinityScrollingEnabled"
           >
             <SfLoader
-              :loading="loadingProducts"
+              :loading="isLoadingItems"
             />
           </div>
 
@@ -243,8 +243,7 @@ import {
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
 import isObjectEmpty from 'theme/helpers/is-object-empty.function';
-import { useIntersectionObservable } from 'theme/helpers/use-intersection-observable';
-import { useItemsLazyLoading } from 'theme/helpers/use-items-lazy-loading';
+import { useInfinityScroll } from 'theme/helpers/use-infinity-scroll';
 
 import ASortIcon from 'theme/components/atoms/a-sort-icon';
 import MCategoryDescriptionStory from 'theme/components/molecules/m-category-description-story.vue';
@@ -279,6 +278,10 @@ const getPageFromRoute = (route) => {
   return route.query.page ? Number.parseInt(route.query.page, 10) : 1;
 };
 
+async function loadProducts () {
+  await store.dispatch('category-next/loadMoreCategoryProducts');
+}
+
 export default {
   name: 'CategoryPage',
   components: {
@@ -300,42 +303,20 @@ export default {
     SfLoader
   },
   setup () {
-    async function loadProducts () {
-      await store.dispatch('category-next/loadMoreCategoryProducts');
-    }
     const nextPageLoadingThreshold = ref(null);
 
     const {
-      isLazyLoadingEnabled,
-      isLoadingItems,
-      browserWidth,
-      loadItems
-    } = useItemsLazyLoading(loadProducts);
-
-    async function onIntersectHandler (
-      entries
-    ) {
-      const entry = entries.find(
-        (entry) => entry.target === nextPageLoadingThreshold.value
-      );
-
-      if (!entry || !entry.isIntersecting) {
-        return;
-      }
-
-      await loadItems();
-    }
-
-    useIntersectionObservable(
-      nextPageLoadingThreshold,
-      onIntersectHandler
+      isInfinityScrollingEnabled,
+      isLoadingItems
+    } = useInfinityScroll(
+      loadProducts,
+      nextPageLoadingThreshold
     );
 
     return {
       nextPageLoadingThreshold,
-      isLazyLoadingEnabled,
-      browserWidth,
-      loadingProducts: isLoadingItems
+      isInfinityScrollingEnabled,
+      isLoadingItems
     }
   },
   data () {
@@ -397,10 +378,10 @@ export default {
       // so products from store have to be filtered out because there could
       // be more than THEME_PAGE_SIZE of them - they could be fetched earlier
       // when lazy loading was enabled
-      return this.isLazyLoadingEnabled || this.currentPage === 1
+      return this.isInfinityScrollingEnabled || this.currentPage === 1
         ? this.getCategoryProducts
           .filter((product, i) => {
-            return this.isLazyLoadingEnabled || i < THEME_PAGE_SIZE;
+            return this.isInfinityScrollingEnabled || i < THEME_PAGE_SIZE;
           })
           .map(prepareCategoryProduct)
         : this.getCurrentPageProducts.map(prepareCategoryProduct);
