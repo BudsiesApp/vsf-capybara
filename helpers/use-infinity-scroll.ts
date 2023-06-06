@@ -34,21 +34,9 @@ export function useInfinityScroll (
     isLoadingItems.value = false;
   }
 
-  function onIntersectHandler (
-    entries: IntersectionObserverEntry[]
-  ): void {
-    const entry = entries[0];
-
-    if (!entry || !entry.isIntersecting) {
-      return;
-    }
-
-    void loadItems();
-  }
-
   useIntersectionObservable(
     nextPageLoadingThreshold,
-    onIntersectHandler
+    loadItems
   )
 
   onMounted(() => {
