@@ -123,7 +123,7 @@
             v-show="isInfinityScrollingEnabled"
           >
             <SfLoader
-              :loading="isLoadingItems"
+              :loading="isProductsLoading"
             />
           </div>
 
@@ -278,8 +278,14 @@ const getPageFromRoute = (route) => {
   return route.query.page ? Number.parseInt(route.query.page, 10) : 1;
 };
 
-async function loadProducts () {
+async function loadProducts (isProductsLoading) {
+  if (isProductsLoading.value) {
+    return;
+  }
+
+  isProductsLoading.value = true;
   await store.dispatch('category-next/loadMoreCategoryProducts');
+  isProductsLoading.value = false;
 }
 
 export default {
@@ -304,19 +310,19 @@ export default {
   },
   setup () {
     const nextPageLoadingThreshold = ref(null);
+    const isProductsLoading = ref(false);
 
     const {
-      isInfinityScrollingEnabled,
-      isLoadingItems
+      isInfinityScrollingEnabled
     } = useInfinityScroll(
-      loadProducts,
+      () => loadProducts(isProductsLoading),
       nextPageLoadingThreshold
     );
 
     return {
       nextPageLoadingThreshold,
       isInfinityScrollingEnabled,
-      isLoadingItems
+      isProductsLoading
     }
   },
   data () {

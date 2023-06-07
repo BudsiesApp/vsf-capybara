@@ -10,11 +10,9 @@ export function useInfinityScroll (
   itemsLoadAction: () => Promise<void>,
   nextPageLoadingThreshold: Ref<Element | null>
 ): {
-    isInfinityScrollingEnabled: ComputedRef<boolean>,
-    isLoadingItems: Ref<boolean>
+    isInfinityScrollingEnabled: ComputedRef<boolean>
   } {
   const browserWidth = ref(0);
-  const isLoadingItems = ref(false);
 
   const isInfinityScrollingEnabled = computed(() => {
     return !isServer && browserWidth.value < INFINITY_SCROLLING_ACTIVATION_BREAKPOINT;
@@ -25,13 +23,11 @@ export function useInfinityScroll (
   }
 
   async function loadItems (): Promise<void> {
-    if (!isInfinityScrollingEnabled.value || isLoadingItems.value) {
+    if (!isInfinityScrollingEnabled.value) {
       return;
     }
 
-    isLoadingItems.value = true;
     await itemsLoadAction();
-    isLoadingItems.value = false;
   }
 
   useIntersectionObservable(
@@ -49,7 +45,6 @@ export function useInfinityScroll (
   });
 
   return {
-    isInfinityScrollingEnabled,
-    isLoadingItems
+    isInfinityScrollingEnabled
   }
 }
