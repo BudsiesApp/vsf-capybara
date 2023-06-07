@@ -2,7 +2,7 @@
   <div class="o-pillow-quote-order-form">
     <SfHeading :level="1" :title="$t('Pillow Bulk Order Quote')" class="_title" />
 
-    <validation-observer v-slot="{passes}" slim>
+    <validation-observer v-slot="{passes, errors: formErrors}" slim>
       <m-base-form
         ref="baseForm"
         :product="product"
@@ -17,6 +17,7 @@
           <validation-provider
             tag="div"
             class="_section"
+            name="'Size'"
             v-slot="{errors}"
           >
             <AOrderedHeading
@@ -24,6 +25,7 @@
               :level="3"
               :title="$t('What\'s your preferred size?')"
               class="_title -required"
+              :ref="getFieldAnchorName('Size')"
             />
 
             <div class="_hint">
@@ -51,6 +53,12 @@
         </template>
       </m-base-form>
 
+      <m-form-errors
+        class="_form-errors"
+        :form-errors="formErrors"
+        @go-to-field="onGoToField"
+      />
+
       <div class="_button-container">
         <SfButton
           @click="() => passes(() => onSubmit())"
@@ -76,9 +84,12 @@ import { BundleOption, BundleOptionsProductLink } from 'core/modules/catalog/typ
 import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo, vuexTypes as budsiesTypes } from 'src/modules/budsies';
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
+import { getFieldAnchorName } from 'theme/helpers/get-field-anchor-name.function';
+import { goToFieldByName } from 'theme/helpers/go-to-field-by-name.function';
 
 import MBaseForm from './m-base-form.vue';
 import AOrderedHeading from '../../atoms/a-ordered-heading.vue';
+import MFormErrors from '../../molecules/m-form-errors.vue';
 
 interface PillowSizeOption {
   id: number | string,
@@ -88,7 +99,7 @@ interface PillowSizeOption {
 
 extend('required', {
   ...required,
-  message: 'This field is required'
+  message: '{_field_} field is required'
 })
 
 export default BulkorderBaseFormPersistanceState.extend({
@@ -105,6 +116,7 @@ export default BulkorderBaseFormPersistanceState.extend({
   },
   components: {
     MBaseForm,
+    MFormErrors,
     SfButton,
     AOrderedHeading,
     SfSelect,
@@ -190,6 +202,9 @@ export default BulkorderBaseFormPersistanceState.extend({
     this.bulkordersBaseFormData = { ...this.bulkordersBaseFormData, ...state };
   },
   methods: {
+    getBaseForm (): InstanceType<typeof MBaseForm> | undefined {
+      return this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
+    },
     getDataToPersist () {
       return {
         country: this.bulkordersBaseFormData.country,
@@ -198,6 +213,18 @@ export default BulkorderBaseFormPersistanceState.extend({
         customerPhone: this.bulkordersBaseFormData.customerPhone,
         customerLastName: this.bulkordersBaseFormData.customerLastName
       }
+    },
+    getFieldAnchorName (fieldName: string): string {
+      return getFieldAnchorName(fieldName);
+    },
+    getFormAllRefs (): Record<string, Vue | Element | Vue[] | Element[]> {
+      const baseForm = this.getBaseForm();
+
+      if (!baseForm) {
+        return this.$refs;
+      }
+
+      return { ...this.$refs, ...baseForm.$refs };
     },
     getPillowSizeTitle (sizeProductLink: BundleOptionsProductLink): TranslateResult {
       switch (sizeProductLink.sku) {
@@ -222,6 +249,11 @@ export default BulkorderBaseFormPersistanceState.extend({
         default:
           throw new Error('Wrong pillow size sku!');
       }
+    },
+    onGoToField (fieldName: string): void {
+      const refs = this.getFormAllRefs();
+
+      goToFieldByName(fieldName, refs);
     },
     async onSubmit (): Promise<void> {
       if (this.isDisabled) {
@@ -342,13 +374,14 @@ export default BulkorderBaseFormPersistanceState.extend({
       margin-bottom: var(--spacer-2xl);
     }
 
-    .m-base-form {
-      margin-bottom: var(--spacer-lg);
+    ._form-errors {
+      margin-top: var(--spacer-lg);
     }
 
     ._button-container {
       display: flex;
       justify-content: center;
+      margin-top: var(--spacer-lg);
     }
 
     ._section {

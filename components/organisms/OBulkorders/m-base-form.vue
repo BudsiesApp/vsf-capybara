@@ -4,13 +4,15 @@
       tag="div"
       class="_section"
       v-slot="{ errors }"
-      rules="required"
+      name="'Artwork'"
+      rules="requiredArtwork"
     >
       <AOrderedHeading
         :order="1"
         :level="3"
         :title="$t('Please upload your awesome design')"
         class="_title -required"
+        :ref="getFieldAnchorName('Artwork')"
       />
 
       <input type="hidden" v-model="value.customerImages">
@@ -29,7 +31,7 @@
         class="_error-text"
         v-if="errors[0]"
       >
-        {{ $t('Please provide your artwork to continue.') }}
+        {{ errors[0] }}
       </div>
     </validation-provider>
 
@@ -37,6 +39,7 @@
       tag="div"
       class="_section"
       v-slot="{ errors }"
+      name="'Project Name'"
       rules="required"
     >
       <AOrderedHeading
@@ -44,6 +47,7 @@
         :level="3"
         :title="$t('Project Name')"
         class="_title"
+        :ref="getFieldAnchorName('Project Name')"
       />
 
       <SfInput
@@ -61,12 +65,19 @@
       </span>
     </validation-provider>
 
-    <validation-provider tag="div" class="_section" v-slot="{ errors }" rules="required">
+    <validation-provider
+      tag="div"
+      class="_section"
+      v-slot="{ errors }"
+      rules="required"
+      name="'Design'"
+    >
       <AOrderedHeading
         :order="3"
         :level="3"
         :title="$t('Describe your design')"
         class="_title -required"
+        :ref="getFieldAnchorName('Design')"
       />
 
       <textarea
@@ -93,6 +104,7 @@
         :level="3"
         :title="$t('What quantity are you interested in?')"
         class="_title"
+        :ref="getFieldAnchorName('Quantity')"
       />
 
       <span class="_helper">
@@ -105,6 +117,7 @@
         tag="div"
         v-slot="{ errors, failedRules }"
         rules="required|min_value:50"
+        name="'Quantity'"
       >
         <SfInput
           :label="$t('Quantity')"
@@ -137,6 +150,7 @@
         tag="div" v-slot="{ errors }"
         rules="min_value:50"
         class="_additional-quantity"
+        name="'Additional Quantity'"
         v-show="showAdditionalQuantity"
       >
         <span class="_helper">
@@ -148,6 +162,7 @@
           :disabled="isDisabled"
           name="additional-quantity"
           class="-quantity"
+          :ref="getFieldAnchorName('Additional Quantity')"
           v-model="additionalQuantity"
         />
 
@@ -178,6 +193,7 @@
         :order="deadlineStepOrder"
         :level="3"
         :title="$t('Do you have a deadline for delivery?')"
+        :ref="getFieldAnchorName('Deadline')"
         class="_title -required"
       />
 
@@ -185,6 +201,7 @@
         tag="div"
         v-slot="{ errors }"
         rules="required"
+        name="'Deadline'"
       >
         <SfRadio
           value="0"
@@ -209,6 +226,8 @@
       <validation-provider
         tag="div"
         v-slot="{ errors }"
+        name="'Deadline Date'"
+        :ref="getFieldAnchorName('Deadline Date')"
         :rules="deadline === '1' ? 'required' : ''"
       >
         <div
@@ -238,12 +257,14 @@
       class="_section"
       v-slot="{ errors }"
       rules="required"
+      name="'Country'"
     >
       <AOrderedHeading
         :order="countryStepOrder"
         :level="3"
         :title="$t('Which country is the plush being delivered to?')"
         class="_title"
+        :ref="getFieldAnchorName('Country')"
       />
 
       <div class="_helper">
@@ -276,10 +297,12 @@
         <validation-provider
           v-slot="{ errors }"
           rules="required"
+          name="'First Name'"
           slim
         >
           <SfInput
             :label="$t('First Name')"
+            :ref="getFieldAnchorName('First Name')"
             name="first-name"
             v-model="customerFirstName"
             class="sf-input--required"
@@ -297,10 +320,12 @@
         <validation-provider
           v-slot="{ errors }"
           rules="required|email"
+          name="'Email'"
           slim
         >
           <SfInput
             :label="$t('Your e-mail address')"
+            :ref="getFieldAnchorName('Email')"
             name="email"
             v-model="customerEmail"
             class="sf-input--required"
@@ -312,10 +337,12 @@
         <validation-provider
           v-slot="{ errors }"
           :rules="phoneValidationRules"
+          name="'Phone Number'"
           slim
         >
           <SfInput
-            :label="$t('Phone number')"
+            :label="$t('Phone Number')"
+            :ref="getFieldAnchorName('Phone Number')"
             name="phone-number"
             v-model="customerPhone"
             class="sf-input--required"
@@ -356,11 +383,13 @@
     <validation-provider
       v-slot="{ errors }"
       :rules="{ required: { allowFalse: false } }"
+      name="'Agreement'"
       slim
     >
       <MCheckbox
         v-model="agreement"
         :disabled="isDisabled"
+        :ref="getFieldAnchorName('Agreement')"
       >
         <template #label>
           <div class="sf-checkbox__label">
@@ -411,15 +440,24 @@ import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
 import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
 import MBulkordersCalculationAnimation from './m-calculation-animation.vue';
+import { getFieldAnchorName } from 'theme/helpers/get-field-anchor-name.function';
 
 const Countries = require('@vue-storefront/i18n/resource/countries.json');
 
 extend('required', {
   ...required,
-  message: 'This field is required'
+  message: '{_field_} field is required'
 });
 
-extend('min_value', min_value);
+extend('requiredArtwork', {
+  ...required,
+  message: 'Please provide your artwork to continue'
+});
+
+extend('min_value', {
+  ...min_value,
+  message: '{_field_} field should be greater than {min}'
+});
 
 extend('email', email);
 
@@ -661,6 +699,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
   },
   methods: {
+    getFieldAnchorName (fieldName: string): string {
+      return getFieldAnchorName(fieldName);
+    },
     onAdditionalQuantityButtonClick (): void {
       this.showAdditionalQuantity = !this.showAdditionalQuantity;
       this.additionalQuantity = undefined;

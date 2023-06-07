@@ -1,22 +1,50 @@
 <template>
-  <div class="m-form-errors" v-if="formErrors.length">
-    <ul>
-      <li v-for="error in formErrors" :key="error">
-        {{ error }}
+  <div class="m-form-errors" v-if="hasErrors">
+    <ul class="_list">
+      <li class="_item"
+          v-for="(errors, key) in filteredErrors"
+          :key="key"
+          @click="$emit('go-to-field', key)"
+      >
+        {{ errors[0] }}
       </li>
     </ul>
   </div>
 </template>
 
 <script lang="ts">
+import { Dictionary } from 'src/modules/budsies';
 import Vue, { PropType } from 'vue';
 
 export default Vue.extend({
   name: 'MFormErrors',
   props: {
     formErrors: {
-      type: Array as PropType<string[]>,
-      default: () => []
+      type: Object as PropType<Dictionary<string[]>>,
+      default: () => {
+        const defaultFormErrors: Dictionary<string[]> = {};
+        return defaultFormErrors;
+      }
+    }
+  },
+  computed: {
+    filteredErrors (): Dictionary<string[]> {
+      const errors: Dictionary<string[]> = {};
+
+      for (const key in this.formErrors) {
+        const element = this.formErrors[key];
+
+        if (!element || !element.length) {
+          continue;
+        }
+
+        errors[key] = element;
+      }
+
+      return errors;
+    },
+    hasErrors (): boolean {
+      return !!Object.keys(this.filteredErrors).length;
     }
   }
 })
@@ -24,9 +52,20 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .m-form-errors {
-    color: var(--c-danger-variant);
-    margin-top: 1em;
-    margin-bottom: 0;
-    text-align: left;
+  color: var(--c-danger-variant);
+  text-align: center;
+
+  ._list {
+    list-style: none;
+
+    ._item {
+      margin-top: var(--spacer-xs);
+      cursor: pointer;
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+  }
 }
 </style>

@@ -2,7 +2,7 @@
   <div class="o-bulk-quote-order-form">
     <SfHeading :level="1" :title="$t('Bulk Order Quote')" class="_title" />
 
-    <validation-observer v-slot="{passes}" slim>
+    <validation-observer v-slot="{passes, errors: formErrors}" slim>
       <m-base-form
         ref="baseForm"
         :product="product"
@@ -21,6 +21,7 @@
               :level="3"
               :title="$t('Color Palette')"
               class="_title -required"
+              :ref="getFieldAnchorName('Color Palette')"
             />
 
             <span class="_subtitle">
@@ -30,6 +31,7 @@
             <validation-provider
               v-slot="{ errors }"
               rules="required"
+              name="'Color Palette'"
               slim
             >
               <m-bodypart-option-configurator
@@ -65,6 +67,7 @@
               :level="3"
               :title="$t('What’s your preferred size?')"
               class="_title"
+              :ref="getFieldAnchorName('Size')"
             />
 
             <div class="_helper">
@@ -100,6 +103,12 @@
         </template>
       </m-base-form>
 
+      <m-form-errors
+        class="_form-errors"
+        :form-errors="formErrors"
+        @go-to-field="onGoToField"
+      />
+
       <div class="_button-container">
         <SfButton
           @click="() => passes(() => onSubmit())"
@@ -124,14 +133,17 @@ import Product from 'core/modules/catalog/types/Product';
 import { Bodypart, BodypartOption, BodypartValue, BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo, Dictionary, vuexTypes as budsiesTypes } from 'src/modules/budsies';
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
+import { getFieldAnchorName } from 'theme/helpers/get-field-anchor-name.function';
+import { goToFieldByName } from 'theme/helpers/go-to-field-by-name.function';
 
 import MBaseForm from './m-base-form.vue';
 import MBodypartOptionConfigurator from '../../molecules/m-bodypart-option-configurator.vue';
 import AOrderedHeading from '../../atoms/a-ordered-heading.vue';
+import MFormErrors from '../../molecules/m-form-errors.vue';
 
 extend('required', {
   ...required,
-  message: 'Field is required'
+  message: '{_field_} field is required'
 })
 
 extend('between', {
@@ -155,6 +167,7 @@ export default BulkorderBaseFormPersistanceState.extend({
     AOrderedHeading,
     MBaseForm,
     MBodypartOptionConfigurator,
+    MFormErrors,
     SfButton,
     SfHeading,
     SfInput,
@@ -246,6 +259,9 @@ export default BulkorderBaseFormPersistanceState.extend({
     this.bulkordersBaseFormData = { ...this.bulkordersBaseFormData, ...state };
   },
   methods: {
+    getBaseForm (): InstanceType<typeof MBaseForm> | undefined {
+      return this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
+    },
     getBodypartsData (): Dictionary<string[]> {
       if (!this.color || !this.colorPaletteBodypart) {
         return {};
@@ -261,6 +277,23 @@ export default BulkorderBaseFormPersistanceState.extend({
         customerPhone: this.bulkordersBaseFormData.customerPhone,
         customerLastName: this.bulkordersBaseFormData.customerLastName
       }
+    },
+    getFormAllRefs (): Record<string, Vue | Element | Vue[] | Element[]> {
+      const baseForm = this.getBaseForm();
+
+      if (!baseForm) {
+        return this.$refs;
+      }
+
+      return { ...this.$refs, ...baseForm.$refs };
+    },
+    getFieldAnchorName (fieldName: string): string {
+      return getFieldAnchorName(fieldName);
+    },
+    onGoToField (fieldName: string): void {
+      const refs = this.getFormAllRefs();
+
+      goToFieldByName(fieldName, refs);
     },
     async onSubmit (): Promise<void> {
       if (this.isDisabled) {
@@ -376,19 +409,20 @@ export default BulkorderBaseFormPersistanceState.extend({
 
 <style lang="scss" scoped>
 .o-bulk-quote-order-form {
-      padding: var(--spacer-lg);
+  padding: var(--spacer-lg);
 
       ._title {
         margin-bottom: var(--spacer-2xl);
       }
 
-      .m-base-form {
-        margin-bottom: var(--spacer-lg);
+      ._form-errors {
+        margin-top: var(--spacer-lg);
       }
 
       ._button-container {
         display: flex;
         justify-content: center;
+        margin-top: var(--spacer-lg);
       }
 
     ._input-hint {

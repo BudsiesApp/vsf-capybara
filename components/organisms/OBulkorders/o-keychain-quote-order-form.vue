@@ -2,7 +2,7 @@
   <div class="o-keychain-quote-order-form">
     <SfHeading :level="1" :title="$t('Keychain Bulk Order Quote')" class="_title" />
 
-    <validation-observer v-slot="{passes}" slim>
+    <validation-observer v-slot="{passes, errors}" slim>
       <m-base-form
         ref="baseForm"
         :product="product"
@@ -11,6 +11,12 @@
         v-model="bulkordersBaseFormData"
         :show-calculation-animation="showCalculationAnimation"
         @calculation-animation-finished="onCalculationAnimationFinished"
+      />
+
+      <m-form-errors
+        class="_form-errors"
+        :form-errors="errors"
+        @go-to-field="onGoToField"
       />
 
       <div class="_button-container">
@@ -34,9 +40,12 @@ import i18n from '@vue-storefront/i18n';
 import Product from 'core/modules/catalog/types/Product';
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo, vuexTypes as budsiesTypes } from 'src/modules/budsies';
+import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
+
+import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 
 import MBaseForm from './m-base-form.vue';
-import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
+import { goToFieldByName } from 'theme/helpers/go-to-field-by-name.function';
 
 export default BulkorderBaseFormPersistanceState.extend({
   name: 'OKeychainQuoteOrderForm',
@@ -52,6 +61,7 @@ export default BulkorderBaseFormPersistanceState.extend({
   },
   components: {
     MBaseForm,
+    MFormErrors,
     SfButton,
     SfHeading,
     ValidationObserver
@@ -99,6 +109,9 @@ export default BulkorderBaseFormPersistanceState.extend({
     this.bulkordersBaseFormData = { ...this.bulkordersBaseFormData, ...state };
   },
   methods: {
+    getBaseForm (): InstanceType<typeof MBaseForm> | undefined {
+      return this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
+    },
     getDataToPersist () {
       return {
         country: this.bulkordersBaseFormData.country,
@@ -107,6 +120,15 @@ export default BulkorderBaseFormPersistanceState.extend({
         customerPhone: this.bulkordersBaseFormData.customerPhone,
         customerLastName: this.bulkordersBaseFormData.customerLastName
       }
+    },
+    onGoToField (fieldName: string): void {
+      const baseForm = this.getBaseForm();
+
+      if (!baseForm) {
+        return;
+      }
+
+      goToFieldByName(fieldName, baseForm.$refs);
     },
     async onSubmit (): Promise<void> {
       if (this.isDisabled) {
@@ -226,13 +248,14 @@ export default BulkorderBaseFormPersistanceState.extend({
     margin-bottom: var(--spacer-2xl);
   }
 
-  .m-base-form {
-    margin-bottom: var(--spacer-lg);
+  ._form-errors {
+    margin-top: var(--spacer-lg);
   }
 
   ._button-container {
     display: flex;
     justify-content: center;
+    margin-top: var(--spacer-lg);
   }
 }
 </style>
