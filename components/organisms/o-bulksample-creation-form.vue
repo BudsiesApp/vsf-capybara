@@ -1,6 +1,6 @@
 <template>
   <validation-observer
-    v-slot="{ passes }"
+    v-slot="{ passes, errors: formErrors }"
     slim
   >
     <form
@@ -24,6 +24,7 @@
           :level="3"
           :title="$t('STEP {number}', {number: 1})"
           class="_step-number"
+          :ref="getFieldAnchorName('Artwork')"
         />
 
         <SfHeading
@@ -77,6 +78,7 @@
             :level="3"
             :title="$t('STEP {number}', {number: 2})"
             class="_step-number"
+            :ref="getFieldAnchorName('Size')"
           />
 
           <template v-if="showPillowSizeSelector">
@@ -130,6 +132,7 @@
             :level="3"
             :title="$t('STEP {number}', {number: nameStepNumber})"
             class="_step-number"
+            :ref="getFieldAnchorName('Name')"
           />
 
           <SfInput
@@ -158,6 +161,7 @@
             :level="3"
             :title="descriptionTitleText"
             class="_step-title -required"
+            :ref="getFieldAnchorName('Description')"
           />
 
           <textarea
@@ -189,6 +193,7 @@
             :level="3"
             :title="$t('Color Palette')"
             class="_step-title -required"
+            :ref="getFieldAnchorName('Colors')"
           />
 
           <span class="_subtitle">
@@ -279,6 +284,7 @@
           :level="3"
           :title="$t('STEP {number}', {number: emailStepNumber})"
           class="_step-number"
+          :ref="getFieldAnchorName('E-mail')"
         />
 
         <validation-provider
@@ -304,13 +310,14 @@
 
         <validation-provider
           :rules="showEmailStep ? { required: { allowFalse: false } } : ''"
-          :name="$t('Agreement')"
+          :name="$t('\'Agreement\'')"
           v-slot="{errors}"
           slim
         >
           <SfCheckbox
             class="_agreement"
             :disabled="isDisabled"
+            :ref="getFieldAnchorName('Agreement')"
             v-model="agreement"
           >
             <template #label>
@@ -333,6 +340,12 @@
           </div>
         </validation-provider>
       </div>
+
+      <m-form-errors
+        class="_form-errors"
+        :form-errors="formErrors"
+        @go-to-field="goToFieldByName"
+      />
 
       <div class="_buttons-container">
         <SfButton type="submit" :disabled="isDisabled">
@@ -363,14 +376,17 @@ import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage, getProductDefaultPrice, ServerError } from 'src/modules/shared';
 
 import BulksampleProduct from 'theme/interfaces/bulksample-product.type';
+import { getFieldAnchorName } from 'theme/helpers/get-field-anchor-name.function';
+import { goToFieldByName } from 'theme/helpers/go-to-field-by-name.function';
 
 import AddonOption from '../interfaces/addon-option.interface';
 import CustomerType from '../interfaces/customer-type.interface';
+import SelectedAddon from '../interfaces/selected-addon.interface';
 
 import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
 import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
 import MBodypartOptionConfigurator from 'theme/components/molecules/m-bodypart-option-configurator.vue';
-import SelectedAddon from '../interfaces/selected-addon.interface';
+import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 
 extend('required', {
   ...required,
@@ -427,6 +443,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     MAddonsSelector,
     MArtworkUpload,
     MBodypartOptionConfigurator,
+    MFormErrors,
     ValidationProvider,
     ValidationObserver,
     SfCheckbox
@@ -777,6 +794,12 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       const task = await this.$store.dispatch('budsies/createNewPlushie', { productId: this.product.id });
       return task.result;
+    },
+    getFieldAnchorName (fieldName: string): string {
+      return getFieldAnchorName(fieldName);
+    },
+    goToFieldByName (fieldName: string): void {
+      goToFieldByName(fieldName, this.$refs);
     },
     fillAddonsDataFromCartItem (existingCartItem: CartItem): void {
       const productOption = existingCartItem.product_option;
@@ -1131,7 +1154,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 $subsection-margin: 0 0 4rem;
 
 .o-bulksample-creation-form {
-    --divider-margin: 0 0 var(--spacer-2xl);
+    --divider-margin: var(--spacer-2xl) 0 0;
     --divider-border-color: rgba(0, 0, 0, 0.1);
     --divider-display: none;
 
@@ -1146,8 +1169,16 @@ $subsection-margin: 0 0 4rem;
         flex-direction: column;
         align-items: center;
         max-width: 760px;
-        margin: 0 auto var(--spacer-2xl);
+        margin: var(--spacer-2xl) auto 0;
         text-align: center;
+
+        &:first-child {
+          margin-top: 0;
+        }
+    }
+
+    ._form-errors {
+      margin-top: var(--spacer-2xl);
     }
 
     ._step-number {
@@ -1261,14 +1292,11 @@ $subsection-margin: 0 0 4rem;
         display: flex;
         align-items: center;
         justify-content: center;
+        margin-top: var(--spacer-2xl);
     }
 
     @media screen and (min-width: $mobile-max) {
       --divider-display: block;
-
-      ._step-container {
-        // margin-bottom: var(--spacer-xl);
-      }
 
       .sf-input {
         --input-width: 70%;
