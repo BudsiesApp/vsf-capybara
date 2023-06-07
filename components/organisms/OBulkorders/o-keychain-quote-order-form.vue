@@ -46,11 +46,11 @@ import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-
 import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo, vuexTypes as budsiesTypes } from 'src/modules/budsies';
 import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
 import { validateForm } from 'theme/helpers/validate-form.function';
+import { goToFieldByName } from 'theme/helpers/go-to-field-by-name.function';
 
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 
 import MBaseForm from './m-base-form.vue';
-import { goToFieldByName } from 'theme/helpers/go-to-field-by-name.function';
 
 export default BulkorderBaseFormPersistanceState.extend({
   name: 'OKeychainQuoteOrderForm',
