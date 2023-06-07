@@ -283,9 +283,12 @@ async function loadProducts (isProductsLoading) {
     return;
   }
 
-  isProductsLoading.value = true;
-  await store.dispatch('category-next/loadMoreCategoryProducts');
-  isProductsLoading.value = false;
+  try {
+    isProductsLoading.value = true;
+    await store.dispatch('category-next/loadMoreCategoryProducts');
+  } finally {
+    isProductsLoading.value = false;
+  }
 }
 
 export default {
