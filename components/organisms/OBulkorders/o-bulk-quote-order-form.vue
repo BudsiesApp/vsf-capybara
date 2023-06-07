@@ -2,7 +2,11 @@
   <div class="o-bulk-quote-order-form">
     <SfHeading :level="1" :title="$t('Bulk Order Quote')" class="_title" />
 
-    <validation-observer v-slot="{passes, errors: formErrors}" slim>
+    <validation-observer
+      ref="validationObserver"
+      v-slot="{errors: formErrors}"
+      slim
+    >
       <m-base-form
         ref="baseForm"
         :product="product"
@@ -111,7 +115,7 @@
 
       <div class="_button-container">
         <SfButton
-          @click="() => passes(() => onSubmit())"
+          @click="onSubmit"
           :disabled="isDisabled"
         >
           {{ $t('Get My Quote') }}
@@ -135,6 +139,7 @@ import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-
 import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
 import { getFieldAnchorName } from 'theme/helpers/get-field-anchor-name.function';
 import { goToFieldByName } from 'theme/helpers/go-to-field-by-name.function';
+import { validateForm } from 'theme/helpers/validate-form.function';
 
 import MBaseForm from './m-base-form.vue';
 import MBodypartOptionConfigurator from '../../molecules/m-bodypart-option-configurator.vue';
@@ -259,8 +264,14 @@ export default BulkorderBaseFormPersistanceState.extend({
     this.bulkordersBaseFormData = { ...this.bulkordersBaseFormData, ...state };
   },
   methods: {
-    getBaseForm (): InstanceType<typeof MBaseForm> | undefined {
-      return this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
+    getBaseForm (): InstanceType<typeof MBaseForm> {
+      const baseForm = this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
+
+      if (!baseForm) {
+        throw new Error('Base Form is not defined');
+      }
+
+      return baseForm;
     },
     getBodypartsData (): Dictionary<string[]> {
       if (!this.color || !this.colorPaletteBodypart) {
@@ -281,14 +292,19 @@ export default BulkorderBaseFormPersistanceState.extend({
     getFormAllRefs (): Record<string, Vue | Element | Vue[] | Element[]> {
       const baseForm = this.getBaseForm();
 
-      if (!baseForm) {
-        return this.$refs;
-      }
-
       return { ...this.$refs, ...baseForm.$refs };
     },
     getFieldAnchorName (fieldName: string): string {
       return getFieldAnchorName(fieldName);
+    },
+    getValidationObserver (): InstanceType<typeof ValidationObserver> {
+      const validationObserver = this.$refs.validationObserver as InstanceType<typeof ValidationObserver> | undefined;
+
+      if (!validationObserver) {
+        throw new Error('Validation Observer is not defined');
+      }
+
+      return validationObserver;
     },
     onGoToField (fieldName: string): void {
       const refs = this.getFormAllRefs();
@@ -296,7 +312,12 @@ export default BulkorderBaseFormPersistanceState.extend({
       goToFieldByName(fieldName, refs);
     },
     async onSubmit (): Promise<void> {
-      if (this.isDisabled) {
+      const isValid = await validateForm(
+        this.getValidationObserver(),
+        this.getFormAllRefs()
+      );
+
+      if (this.isDisabled || !isValid) {
         return;
       }
 

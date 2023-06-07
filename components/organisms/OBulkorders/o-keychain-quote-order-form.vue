@@ -2,7 +2,11 @@
   <div class="o-keychain-quote-order-form">
     <SfHeading :level="1" :title="$t('Keychain Bulk Order Quote')" class="_title" />
 
-    <validation-observer v-slot="{passes, errors}" slim>
+    <validation-observer
+      ref="validationObserver"
+      v-slot="{errors}"
+      slim
+    >
       <m-base-form
         ref="baseForm"
         :product="product"
@@ -21,7 +25,7 @@
 
       <div class="_button-container">
         <SfButton
-          @click="() => passes(() => onSubmit())"
+          @click="onSubmit"
           :disabled="isDisabled"
         >
           {{ $t('Get My Quote') }}
@@ -41,6 +45,7 @@ import Product from 'core/modules/catalog/types/Product';
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo, vuexTypes as budsiesTypes } from 'src/modules/budsies';
 import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
+import { validateForm } from 'theme/helpers/validate-form.function';
 
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 
@@ -109,8 +114,14 @@ export default BulkorderBaseFormPersistanceState.extend({
     this.bulkordersBaseFormData = { ...this.bulkordersBaseFormData, ...state };
   },
   methods: {
-    getBaseForm (): InstanceType<typeof MBaseForm> | undefined {
-      return this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
+    getBaseForm (): InstanceType<typeof MBaseForm> {
+      const form = this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
+
+      if (!form) {
+        throw new Error('Base Form is not defined');
+      }
+
+      return form;
     },
     getDataToPersist () {
       return {
@@ -121,17 +132,25 @@ export default BulkorderBaseFormPersistanceState.extend({
         customerLastName: this.bulkordersBaseFormData.customerLastName
       }
     },
-    onGoToField (fieldName: string): void {
-      const baseForm = this.getBaseForm();
+    getValidationObserver (): InstanceType<typeof ValidationObserver> {
+      const validationObserver = this.$refs.validationObserver as InstanceType<typeof ValidationObserver> | undefined;
 
-      if (!baseForm) {
-        return;
+      if (!validationObserver) {
+        throw new Error('Validation Observer is not defined');
       }
 
-      goToFieldByName(fieldName, baseForm.$refs);
+      return validationObserver;
+    },
+    onGoToField (fieldName: string): void {
+      goToFieldByName(fieldName, this.getBaseForm().$refs);
     },
     async onSubmit (): Promise<void> {
-      if (this.isDisabled) {
+      const isValid = await validateForm(
+        this.getValidationObserver(),
+        this.getBaseForm().$refs
+      );
+
+      if (this.isDisabled || !isValid) {
         return;
       }
 

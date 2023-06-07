@@ -1,11 +1,12 @@
 <template>
   <validation-observer
-    v-slot="{ passes, errors: formErrors }"
+    ref="validationObserver"
+    v-slot="{ errors: formErrors }"
     slim
   >
     <form
       class="o-bulksample-creation-form"
-      @submit.prevent="() => passes(() => onFormSubmit())"
+      @submit.prevent="onFormSubmit"
     >
       <SfHeading
         :level="1"
@@ -39,7 +40,6 @@
 
         <input
           type="hidden"
-          name="uploaded_artwork_ids[]"
           v-model="customerImages"
         >
 
@@ -378,6 +378,7 @@ import { CustomerImage, getProductDefaultPrice, ServerError } from 'src/modules/
 import BulksampleProduct from 'theme/interfaces/bulksample-product.type';
 import { getFieldAnchorName } from 'theme/helpers/get-field-anchor-name.function';
 import { goToFieldByName } from 'theme/helpers/go-to-field-by-name.function';
+import { validateForm } from 'theme/helpers/validate-form.function';
 
 import AddonOption from '../interfaces/addon-option.interface';
 import CustomerType from '../interfaces/customer-type.interface';
@@ -980,6 +981,15 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         }
       })
     },
+    getValidationObserver (): InstanceType<typeof ValidationObserver> {
+      const validationObserver = this.$refs.validationObserver as InstanceType<typeof ValidationObserver> | undefined;
+
+      if (!validationObserver) {
+        throw new Error('Validation Observer is not defined');
+      }
+
+      return validationObserver;
+    },
     onArtworkAdd (value: Item): void {
       this.customerImages.push({
         id: value.id,
@@ -1007,7 +1017,16 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         action1: { label: i18n.t('OK') }
       });
     },
-    onFormSubmit (): void {
+    async onFormSubmit (): Promise<void> {
+      const isValid = await validateForm(
+        this.getValidationObserver(),
+        this.$refs
+      );
+
+      if (!isValid) {
+        return;
+      }
+
       if (!this.existingCartItem) {
         void this.addToCart();
       } else {
