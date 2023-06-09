@@ -3,13 +3,13 @@ import LocalForageCacheDriver from '@vue-storefront/core/lib/store/storage';
 import { Mutex, MutexInterface } from 'async-mutex';
 
 import { SN_BUDSIES } from 'src/modules/budsies/store/mutation-types';
-import ForeversCreationWizardPersistedState from 'theme/components/interfaces/forevers-creation-wizard-persisted-state.interface';
-import ForeversWizardImageUploadStepData from 'theme/components/interfaces/forevers-wizard-image-upload-step-data.interface';
-import ForeversWizardPetInfoStepData from 'theme/components/interfaces/forevers-wizard-pet-info-step-data.interface';
+import PlushieCreationWizardPersistedState from 'theme/components/interfaces/plushie-creation-wizard-persisted-state.interface';
+import PlushieWizardImageUploadStepData from 'theme/components/interfaces/plushie-wizard-image-upload-step-data.interface';
+import PlushieWizardPetInfoStepData from 'theme/components/interfaces/plushie-wizard-pet-info-step-data.interface';
 
 const STORAGE_KEY = 'forevers-creation-wizard-state';
 
-class ForeversCreationWizardPersistedStateService {
+class PlushieCreationWizardPersistedStateService {
   private fBudsiesStorage: LocalForageCacheDriver;
   private fMutex: MutexInterface;
 
@@ -57,7 +57,7 @@ class ForeversCreationWizardPersistedStateService {
     }
   };
 
-  public async saveImageUploadStepData (plushieId: number, imageUploadStepData: ForeversWizardImageUploadStepData): Promise<void> {
+  public async saveImageUploadStepData (plushieId: number, imageUploadStepData: PlushieWizardImageUploadStepData): Promise<void> {
     const mutexRelease = await this.fMutex.acquire();
 
     try {
@@ -75,7 +75,7 @@ class ForeversCreationWizardPersistedStateService {
     }
   };
 
-  public async savePetInfoStepData (plushieId: number, petInfoStepData: ForeversWizardPetInfoStepData): Promise<void> {
+  public async savePetInfoStepData (plushieId: number, petInfoStepData: PlushieWizardPetInfoStepData): Promise<void> {
     const mutexRelease = await this.fMutex.acquire();
 
     try {
@@ -93,7 +93,7 @@ class ForeversCreationWizardPersistedStateService {
     }
   };
 
-  public async getStateByPlushieId (plushieId: number): Promise<ForeversCreationWizardPersistedState | undefined> {
+  public async getStateByPlushieId (plushieId: number): Promise<PlushieCreationWizardPersistedState | undefined> {
     let wizardStateDictionary = await this.fBudsiesStorage.getItem(STORAGE_KEY);
 
     if (!wizardStateDictionary) {
@@ -123,7 +123,7 @@ class ForeversCreationWizardPersistedStateService {
     }
   }
 
-  private async updateStateForPlushie (plushieId: number, state: ForeversCreationWizardPersistedState): Promise<void> {
+  private async updateStateForPlushie (plushieId: number, state: PlushieCreationWizardPersistedState): Promise<void> {
     let stateDictionary = await this.fBudsiesStorage.getItem(STORAGE_KEY);
 
     if (!stateDictionary) {
@@ -139,6 +139,6 @@ class ForeversCreationWizardPersistedStateService {
   }
 }
 
-const foreversCreationWizardPersistedStateService = new ForeversCreationWizardPersistedStateService();
+const foreversCreationWizardPersistedStateService = new PlushieCreationWizardPersistedStateService();
 
 export default foreversCreationWizardPersistedStateService;

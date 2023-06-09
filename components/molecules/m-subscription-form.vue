@@ -2,45 +2,70 @@
   <div class="m-subscription-form">
     <slot />
 
-    <form @submit.prevent="onSubmitForm" class="_form" v-if="displayForm">
-      <SfInput
-        v-model="email"
-        class="_input"
-        :name="emailInputName"
-        :label="$t('E-mail address')"
-        :disabled="isSubmitting"
-        :valid="!$v.email.$error"
-        :error-message="validationError"
-        @input="onEmailInput"
-      />
+    <validation-observer
+      ref="validationObserver"
+      v-slot="{passes}"
+      slim
+    >
+      <form
+        @submit.prevent="() => passes(() => onSubmitForm())"
+        class="_form"
+        v-if="displayForm"
+      >
+        <validation-provider
+          v-slot="{errors}"
+          rules="required|email"
+          slim
+          name="E-mail"
+        >
+          <SfInput
+            v-model="email"
+            class="_input"
+            :name="emailInputName"
+            :label="$t('E-mail address')"
+            :disabled="isSubmitting"
+            :valid="!errors.length"
+            :error-message="errors[0]"
+          />
+        </validation-provider>
 
-      <MSpinnerButton :show-spinner="isSubmitting">
-        {{ buttonText }}
-      </MSpinnerButton>
-    </form>
+        <MSpinnerButton :show-spinner="isSubmitting">
+          {{ buttonText }}
+        </MSpinnerButton>
+      </form>
 
-    <div class="_success-message" v-else>
-      {{ successMessage }}
-    </div>
+      <div class="_success-message" v-else>
+        {{ successMessage }}
+      </div>
+    </validation-observer>
   </div>
 </template>
 
 <script lang="ts">
+import { extend, ValidationProvider, ValidationObserver } from 'vee-validate';
+import { email, required } from 'vee-validate/dist/rules';
 import Vue, { PropType } from 'vue';
-import { required, email } from 'vuelidate/lib/validators';
 
 import { SfInput } from '@storefront-ui/vue';
 import Task from '@vue-storefront/core/lib/sync/types/Task';
 
 import MSpinnerButton from 'theme/components/molecules/m-spinner-button.vue';
 
-function serverErrorValidator (value: string, vm: any): boolean {
-  return !vm.errorMessage;
-}
+extend('required', {
+  ...required,
+  message: 'Field is required'
+});
+
+extend('email', email);
 
 export default Vue.extend({
   name: 'MSubscriptionForm',
-  components: { SfInput, MSpinnerButton },
+  components: {
+    SfInput,
+    MSpinnerButton,
+    ValidationProvider,
+    ValidationObserver
+  },
   props: {
     name: {
       type: String,
@@ -66,7 +91,6 @@ export default Vue.extend({
   data () {
     return {
       email: '',
-      errorMessage: '',
       isSuccessSubscribed: false,
       isSubmitting: false
     };
@@ -77,29 +101,10 @@ export default Vue.extend({
     },
     displayForm (): boolean {
       return !this.isSuccessSubscribed;
-    },
-    validationError (): string {
-      if (this.errorMessage) {
-        return this.errorMessage;
-      }
-
-      return !this.$v.email.required
-        ? this.$t('Field is required.').toString()
-        : this.$t('Please provide valid e-mail address.').toString()
     }
   },
   methods: {
-    onEmailInput (): void {
-      this.errorMessage = '';
-    },
     async onSubmitForm (): Promise<void> {
-      this.$v.$touch();
-      this.errorMessage = '';
-
-      if (this.$v.$invalid) {
-        return;
-      }
-
       if (this.isSubmitting) {
         return;
       }
@@ -110,7 +115,11 @@ export default Vue.extend({
         const response = await this.subscribeAction(this.email);
 
         if (response.result.errorMessage) {
-          this.errorMessage = response.result.errorMessage;
+          const validationObserver = this.$refs.validationObserver as InstanceType<typeof ValidationObserver>;
+
+          validationObserver.setErrors({
+            [this.emailInputName]: response.result.errorMessage
+          })
           return;
         }
 
@@ -122,13 +131,6 @@ export default Vue.extend({
       } finally {
         this.isSubmitting = false;
       }
-    }
-  },
-  validations: {
-    email: {
-      required,
-      email,
-      serverErrorValidator
     }
   }
 });

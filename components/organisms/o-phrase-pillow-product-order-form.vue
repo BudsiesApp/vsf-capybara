@@ -12,6 +12,7 @@
       <SfHeading
         :level="3"
         title="Your customizations will appear on the left side of the page"
+        class="_subtitle"
       />
     </div>
 
@@ -1571,6 +1572,10 @@ export default (
     line-height: 100%;
   }
 
+  ._subtitle {
+    margin-top: var(--spacer-base);
+  }
+
   ._notes {
     text-align: center;
   }
@@ -1857,6 +1862,10 @@ export default (
 
   ._quantity-field {
     text-align: center;
+  }
+
+  ._qty-container {
+    margin-top: var(--spacer-xs);
   }
 
   .m-live-preview {

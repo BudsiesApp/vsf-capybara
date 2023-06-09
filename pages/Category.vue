@@ -115,6 +115,18 @@
               />
             </transition-group>
           </lazy-hydrate>
+
+          <div class="nextPageLoadingThreshold" ref="nextPageLoadingThreshold" />
+
+          <div
+            class="_product-loading-indicator"
+            v-show="isInfinityScrollingEnabled"
+          >
+            <SfLoader
+              :loading="isProductsLoading"
+            />
+          </div>
+
           <SfPagination
             v-if="totalPages > 1"
             class="products__pagination desktop-only"
@@ -178,16 +190,19 @@
       </template>
     </SfSidebar>
 
-    <MCategoryDescriptionStory
-      :category="getCurrentCategory"
-      v-if="showCategoryDescription"
-    />
+    <div class="_description-story">
+      <MCategoryDescriptionStory
+        :category="getCurrentCategory"
+        v-if="showCategoryDescription"
+      />
+    </div>
   </div>
 </template>
 
 <script>
 import LazyHydrate from 'vue-lazy-hydration';
 import { mapGetters } from 'vuex';
+import { ref } from '@vue/composition-api';
 import castArray from 'lodash-es/castArray';
 import config from 'config';
 import {
@@ -196,28 +211,14 @@ import {
   isServer
 } from '@vue-storefront/core/helpers';
 import i18n from '@vue-storefront/i18n';
-import onBottomScroll from '@vue-storefront/core/mixins/onBottomScroll';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { quickSearchByQuery } from '@vue-storefront/core/lib/search';
 import { getSearchOptionsFromRouteParams } from '@vue-storefront/core/modules/catalog-next/helpers/categoryHelpers';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { getTopLevelCategories, prepareCategoryMenuItem, prepareCategoryProduct } from 'theme/helpers';
 import { formatProductLink } from '@vue-storefront/core/modules/url/helpers';
-
 import {
-  localizedRoute,
-  currentStoreView
-} from '@vue-storefront/core/lib/multistore';
-import store from '@vue-storefront/core/store'
-import {
-  mapMobileObserver,
-  unMapMobileObserver
-} from '@storefront-ui/vue/src/utilities/mobile-observer';
-
-import isObjectEmpty from 'theme/helpers/is-object-empty.function';
-
-import ASortIcon from 'theme/components/atoms/a-sort-icon';
-import {
+  SfLoader,
   SfIcon,
   SfList,
   SfColor,
@@ -231,11 +232,24 @@ import {
   SfPagination
 } from '@storefront-ui/vue';
 
+import {
+  localizedRoute,
+  currentStoreView
+} from '@vue-storefront/core/lib/multistore';
+import store from '@vue-storefront/core/store'
+import {
+  mapMobileObserver,
+  unMapMobileObserver
+} from '@storefront-ui/vue/src/utilities/mobile-observer';
+
+import isObjectEmpty from 'theme/helpers/is-object-empty.function';
+import { useInfinityScroll } from 'theme/helpers/use-infinity-scroll';
+
+import ASortIcon from 'theme/components/atoms/a-sort-icon';
 import MCategoryDescriptionStory from 'theme/components/molecules/m-category-description-story.vue';
 import OProductCard from 'theme/components/organisms/o-product-card';
 
 const THEME_PAGE_SIZE = 12;
-const LAZY_LOADING_ACTIVATION_BREAKPOINT = 1024;
 
 const composeInitialPageState = async (store, route, forceLoad = false) => {
   try {
@@ -264,6 +278,19 @@ const getPageFromRoute = (route) => {
   return route.query.page ? Number.parseInt(route.query.page, 10) : 1;
 };
 
+async function loadProducts (isProductsLoading) {
+  if (isProductsLoading.value) {
+    return;
+  }
+
+  try {
+    isProductsLoading.value = true;
+    await store.dispatch('category-next/loadMoreCategoryProducts');
+  } finally {
+    isProductsLoading.value = false;
+  }
+}
+
 export default {
   name: 'CategoryPage',
   components: {
@@ -281,15 +308,30 @@ export default {
     SfMenuItem,
     SfAccordion,
     SfPagination,
-    MCategoryDescriptionStory
+    MCategoryDescriptionStory,
+    SfLoader
   },
-  mixins: [onBottomScroll],
+  setup () {
+    const nextPageLoadingThreshold = ref(null);
+    const isProductsLoading = ref(false);
+
+    const {
+      isInfinityScrollingEnabled
+    } = useInfinityScroll(
+      () => loadProducts(isProductsLoading),
+      nextPageLoadingThreshold
+    );
+
+    return {
+      nextPageLoadingThreshold,
+      isInfinityScrollingEnabled,
+      isProductsLoading
+    }
+  },
   data () {
     return {
       loading: true,
-      loadingProducts: false,
       currentPage: 1,
-      browserWidth: 0,
       isFilterSidebarOpen: false,
       unsubscribeFromStoreAction: null,
       aggregations: null
@@ -313,9 +355,6 @@ export default {
     },
     isCategoryEmpty () {
       return this.getCategoryProductsTotal === 0;
-    },
-    isLazyLoadingEnabled () {
-      return !isServer && this.browserWidth < LAZY_LOADING_ACTIVATION_BREAKPOINT;
     },
     categories () {
       return getTopLevelCategories(this.getCategories)
@@ -348,10 +387,10 @@ export default {
       // so products from store have to be filtered out because there could
       // be more than THEME_PAGE_SIZE of them - they could be fetched earlier
       // when lazy loading was enabled
-      return this.isLazyLoadingEnabled || this.currentPage === 1
+      return this.isInfinityScrollingEnabled || this.currentPage === 1
         ? this.getCategoryProducts
           .filter((product, i) => {
-            return this.isLazyLoadingEnabled || i < THEME_PAGE_SIZE;
+            return this.isInfinityScrollingEnabled || i < THEME_PAGE_SIZE;
           })
           .map(prepareCategoryProduct)
         : this.getCurrentPageProducts.map(prepareCategoryProduct);
@@ -471,29 +510,14 @@ export default {
       }
     });
     this.$bus.$on('product-after-list', this.initPagination);
-    window.addEventListener('resize', this.getBrowserWidth);
-    this.getBrowserWidth();
   },
   beforeDestroy () {
     unMapMobileObserver();
     this.$store.dispatch('category-next/resetCurrentCategoryData');
     this.unsubscribeFromStoreAction();
     this.$bus.$off('product-after-list', this.initPagination);
-    window.removeEventListener('resize', this.getBrowserWidth);
   },
   methods: {
-    getBrowserWidth () {
-      return (this.browserWidth = window.innerWidth);
-    },
-    async onBottomScroll () {
-      if (!this.isLazyLoadingEnabled || this.loadingProducts) {
-        return;
-      }
-
-      this.loadingProducts = true;
-      await this.$store.dispatch('category-next/loadMoreCategoryProducts');
-      this.loadingProducts = false;
-    },
     async changePage (page = this.currentPage) {
       await this.$store.dispatch('category-next/fetchPageProducts', { page, pageSize: THEME_PAGE_SIZE, route: this.$route });
       this.currentPage = page;
@@ -594,6 +618,17 @@ export default {
     max-width: 1272px;
     width: 100%;
     margin: 0 auto;
+  }
+
+  ._product-loading-indicator {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--spacer-base);
+
+    .sf-loader {
+      width: 2rem;
+      height: 2rem;
+    }
   }
 
   .category__short-description {
@@ -805,6 +840,13 @@ export default {
     }
   }
 }
+
+._description-story {
+  padding: 0 var(--spacer-xs);
+  max-width: 60em;
+  margin: auto;
+}
+
 .products {
   box-sizing: border-box;
   flex: 1;

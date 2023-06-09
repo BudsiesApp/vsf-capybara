@@ -1,135 +1,38 @@
 <template>
   <validation-observer
     v-slot="{ passes, errors: formErrors }"
-    class="forevers-wizard-customization-step"
+    class="plushie-wizard-customization-step"
     tag="div"
     ref="validation-observer"
   >
     <SfHeading
       :level="2"
-      :title="$t('Customize your Petsies plush')"
+      :title="$t('Customize your {productType}', {productType})"
     />
 
-    <validation-provider
-      v-slot="{ errors }"
-      class="_size _section"
-      rules="required"
-      tag="div"
-      :name="$t('\'Size\'')"
-    >
-      <SfHeading
-        class="-required"
-        :level="3"
-        :title="$t('Size')"
-      />
-
-      <m-plushie-size-selector
-        name="pillow_size"
-        class="_options-list"
-        v-model="size"
-        :show-full-price="false"
-        :show-most-popular-icon="true"
-        :options="sizes"
-        :disabled="disabled"
-      />
-
-      <div class="_error-text">
-        {{ errors[0] }}
-      </div>
-    </validation-provider>
-
-    <m-body-parts-section
-      v-if="product"
-      :disabled="disabled"
-      :product-id="product.id"
-      v-model="bodypartsValues"
-    >
-      <template #main-body-part-heading="{ bodyPart }">
+    <div class="_content">
+      <validation-provider
+        v-slot="{ errors }"
+        class="_size _section"
+        rules="required"
+        tag="div"
+        :name="$t('\'Size\'')"
+        v-if="showSizeSelector"
+      >
         <SfHeading
           class="-required"
           :level="3"
-          :title="bodyPart.name"
-          :ref="getFieldAnchorName(bodyPart.name)"
-        />
-      </template>
-
-      <template #top-helper-text="{ bodyPart }">
-        <div
-          class="_helper-text"
-          v-if="bodyPart.code === 'forevers_color_palette'"
-        >
-          {{ $t('You may select up to 3 most prominent color(s) of your animal to assist our team.') }}
-        </div>
-      </template>
-
-      <template #child-body-part-heading="{ childBodyPart }">
-        <SfHeading
-          :level="3"
-          :title="childBodyPart.name"
-          :ref="getFieldAnchorName(childBodyPart.name)"
-        />
-      </template>
-
-      <template #bottom-helper-text="{ bodyPart }">
-        <div
-          class="_helper-text"
-          v-if="bodyPart.code === 'forevers_color_palette'"
-        >
-          {{ $t('Click a selected color to deselect it') }}. <br>
-
-          {{ $t('Your color input is especially helpful when photos are blurry or poorly lit. If left blank, our designers will use their professional judgement.') }}
-        </div>
-      </template>
-    </m-body-parts-section>
-
-    <validation-provider
-      v-slot="{ errors, classes }"
-      rules="required"
-      :name="$t('Description')"
-      slim
-    >
-      <div class="_description-field _section" :class="classes">
-        <SfHeading
-          class="-required "
-          :level="3"
-          :title="$t('Describe Your Pet\'s Physical Features')"
-          ref="description-field-anchor"
+          :title="$t('Size')"
         />
 
-        <textarea
-          name="description"
-          rows="4"
-          v-model="description"
-          :placeholder="$t('Tell us about your pet\'s coloration and defining feature(s).')"
+        <m-plushie-size-selector
+          name="pillow_size"
+          class="_options-list"
+          v-model="size"
+          :show-full-price="false"
+          :show-most-popular-icon="true"
+          :options="sizes"
           :disabled="disabled"
-          :required="true"
-          :valid="!errors.length"
-          :error-message="errors[0]"
-        />
-
-        <div class="_error-text">
-          {{ errors[0] }}
-        </div>
-      </div>
-    </validation-provider>
-
-    <div class="_section">
-      <SfHeading
-        :level="2"
-        :title="$t('Final Options')"
-      />
-
-      <validation-provider
-        v-slot="{ errors }"
-        name="Production time"
-        tag="div"
-      >
-        <MProductionTimeSelector
-          :value="productionTimeOption"
-          :production-time-options="productionTimeOptions"
-          :product-id="product.id"
-          :disabled="disabled"
-          @input="updateProductionTime"
         />
 
         <div class="_error-text">
@@ -137,85 +40,195 @@
         </div>
       </validation-provider>
 
-      <validation-provider
-        v-slot="{ errors, classes }"
-        rules="required"
-        :name="$t('Quantity')"
-        slim
+      <m-body-parts-section
+        v-if="product"
+        :disabled="disabled"
+        :product-id="product.id"
+        v-model="bodypartsValues"
       >
-        <div class="_quantity-field" :class="classes">
+        <template #main-body-part-heading="{ bodyPart }">
           <SfHeading
             class="-required"
             :level="3"
-            :title="$t('How many Petsies of this exact same design?')"
+            :title="bodyPart.name"
+            :ref="getFieldAnchorName(bodyPart.name)"
+          />
+        </template>
+
+        <template #top-helper-text="{ bodyPart }">
+          <div
+            class="_helper-text"
+            v-if="bodyPart.code === 'forevers_color_palette'"
+          >
+            {{ $t('You may select up to 3 most prominent color(s) of your animal to assist our team.') }}
+          </div>
+        </template>
+
+        <template #child-body-part-heading="{ childBodyPart }">
+          <SfHeading
+            :level="3"
+            :title="childBodyPart.name"
+            :ref="getFieldAnchorName(childBodyPart.name)"
+          />
+        </template>
+
+        <template #bottom-helper-text="{ bodyPart }">
+          <div
+            class="_helper-text"
+            v-if="bodyPart.code === 'forevers_color_palette'"
+          >
+            {{ $t('Click a selected color to deselect it') }}. <br>
+
+            {{ $t('Your color input is especially helpful when photos are blurry or poorly lit. If left blank, our designers will use their professional judgement.') }}
+          </div>
+        </template>
+      </m-body-parts-section>
+
+      <validation-provider
+        v-slot="{ errors, classes }"
+        rules="required"
+        :name="$t('Description')"
+        slim
+      >
+        <div class="_description-field _section" :class="classes">
+          <SfHeading
+            class="-required "
+            :level="3"
+            :title="$t('Describe Your Pet\'s Physical Features')"
+            ref="description-field-anchor"
           />
 
-          <ACustomProductQuantity
-            v-model="quantity"
+          <textarea
+            name="description"
+            rows="4"
+            v-model="description"
+            :placeholder="$t('Tell us about your pet\'s coloration and defining feature(s).')"
             :disabled="disabled"
-            class="_qty-container"
-            ref="quantity-field-anchor"
+            :required="true"
+            :valid="!errors.length"
+            :error-message="errors[0]"
           />
 
           <div class="_error-text">
             {{ errors[0] }}
           </div>
-
-          <a
-            class="_popup-link"
-            href="javascript:void(0)"
-            @click="areQuantityNotesVisible = true"
-          >{{ $t('Quantity & Shipping Discounts') }}</a>
         </div>
       </validation-provider>
 
-      <div class="_addons">
+      <div class="_section">
         <SfHeading
-          :level="3"
-          :title="$t('Upgrade Your Petsies (optional)')"
+          :level="2"
+          :title="$t('Final Options')"
         />
 
-        <MAddonsSelector
-          v-model="selectedAddons"
-          :addons="addons"
+        <div class="_final-options-content">
+          <validation-provider
+            v-slot="{ errors }"
+            name="Production time"
+            class="_section"
+            tag="div"
+            v-if="showProductionTimeOptions"
+          >
+            <MProductionTimeSelector
+              :value="productionTimeOption"
+              :production-time-options="productionTimeOptions"
+              :product-id="product.id"
+              :disabled="disabled"
+              @input="updateProductionTime"
+            />
+
+            <div class="_error-text">
+              {{ errors[0] }}
+            </div>
+          </validation-provider>
+
+          <validation-provider
+            v-slot="{ errors, classes }"
+            rules="required"
+            :name="$t('Quantity')"
+            slim
+          >
+            <div class="_section" :class="classes">
+              <SfHeading
+                class="-required"
+                :level="3"
+                :title="$t(
+                  'How many {productType} of this exact same design?',
+                  {productType}
+                )"
+              />
+
+              <ACustomProductQuantity
+                v-model="quantity"
+                :disabled="disabled"
+                class="_qty-container"
+                ref="quantity-field-anchor"
+              />
+
+              <div class="_error-text">
+                {{ errors[0] }}
+              </div>
+
+              <a
+                class="_popup-link"
+                href="javascript:void(0)"
+                @click="areQuantityNotesVisible = true"
+              >{{ $t('Quantity & Shipping Discounts') }}</a>
+            </div>
+          </validation-provider>
+
+          <div class="_addons _section">
+            <SfHeading
+              :level="3"
+              :title="$t(
+                'Upgrade Your {productType} (optional)',
+                {productType}
+              )"
+            />
+
+            <MAddonsSelector
+              v-model="selectedAddons"
+              :addons="addons"
+              :disabled="disabled"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="_form-errors">
+        <template
+          v-for="(fieldErrors, field) in formErrors"
+        >
+          <div
+            class="_error-text"
+            :key="field"
+            v-if="fieldErrors.length > 0"
+          >
+            <a
+              class="_error-link"
+              href="javascript:void(0)"
+              @click.prevent="goToFieldByName(field.toString())"
+            >
+              {{ fieldErrors.join('. ') }}
+            </a>
+          </div>
+        </template>
+      </div>
+
+      <div class="_actions _section">
+        <SfButton
+          class="_add-to-cart color-primary"
+          type="submit"
           :disabled="disabled"
+          @click="(event) => passes(() => submitStep())"
+        >
+          {{ $t('Add to Cart') }}
+        </SfButton>
+
+        <MBlockStory
+          story-slug="order_submit_agreement_petsies"
         />
       </div>
-    </div>
-
-    <div class="_form-errors">
-      <template
-        v-for="(fieldErrors, field) in formErrors"
-      >
-        <div
-          class="_error-text"
-          :key="field"
-          v-if="fieldErrors.length > 0"
-        >
-          <a
-            class="_error-link"
-            href="javascript:void(0)"
-            @click.prevent="goToFieldByName(field.toString())"
-          >
-            {{ fieldErrors.join('. ') }}
-          </a>
-        </div>
-      </template>
-    </div>
-
-    <div class="_actions _section">
-      <SfButton
-        class="_add-to-cart color-primary"
-        type="submit"
-        :disabled="disabled"
-        @click="(event) => passes(() => submitStep())"
-      >
-        {{ $t('Add to Cart') }}
-      </SfButton>
-
-      <MBlockStory
-        story-slug="order_submit_agreement_petsies"
-      />
     </div>
 
     <SfModal
@@ -253,7 +266,7 @@ import MPlushieSizeSelector from '../../molecules/m-plushie-size-selector.vue';
 
 import AddonOption from '../../interfaces/addon-option.interface';
 import ProductionTimeOption from '../../interfaces/production-time-option.interface';
-import ForeversWizardCustomizeStepData from '../../interfaces/forevers-wizard-customize-step-data.interface';
+import ForeversWizardCustomizeStepData from '../../interfaces/plushie-wizard-customize-step-data.interface';
 import getProductionTimeOptions from '../../../helpers/get-production-time-options';
 import SizeOption from 'theme/components/interfaces/size-option';
 import SelectedAddon from 'theme/components/interfaces/selected-addon.interface';
@@ -322,6 +335,10 @@ export default Vue.extend({
     sizes: {
       type: Array as PropType<SizeOption[]>,
       default: () => []
+    },
+    showSizeSelector: {
+      type: Boolean,
+      default: true
     }
   },
   data () {
@@ -387,6 +404,21 @@ export default Vue.extend({
     productionTimeOption (): ProductionTimeOption | undefined {
       return this.productionTimeOptions.find(option => option.optionValueId === this.productionTime)
     },
+    productType (): string {
+      const defaultProductType = 'Plush';
+
+      if (!this.product.category) {
+        return defaultProductType;
+      }
+
+      const firstCategory = this.product.category[0];
+
+      if (!firstCategory) {
+        return defaultProductType;
+      }
+
+      return firstCategory.name;
+    },
     addons (): AddonOption[] {
       if (!this.addonsBundleOption) {
         return []
@@ -400,6 +432,9 @@ export default Vue.extend({
       }
 
       return getProductionTimeOptions(this.productionTimeBundleOption, this.product, this.$store);
+    },
+    showProductionTimeOptions (): boolean {
+      return this.productionTimeOptions.length > 0;
     }
   },
   methods: {
@@ -451,15 +486,29 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.forevers-wizard-customization-step {
+.plushie-wizard-customization-step {
   ._section {
     margin-top: var(--spacer-base);
+
+    &:first-child {
+      margin-top: 0;
+    }
   }
 
-  ._production-time-field,
-  ._quantity-field,
+  ._content,
+  ._final-options-content {
+    margin-top: var(--spacer-xl);
+  }
+
+  ._description-field,
   ._addons {
-    margin-top: var(--spacer-base);
+    margin-top: calc(2 * var(--spacer-base));
+  }
+
+  textarea,
+  .a-custom-product-quantity,
+  .m-addons-selector {
+    margin-top: var(--spacer-sm);
   }
 
   ._helper-text {

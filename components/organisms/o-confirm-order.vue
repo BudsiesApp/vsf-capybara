@@ -39,7 +39,7 @@
               <br>
               {{ shippingDetails.city }}, {{ shippingDetails.country }}
             </p>
-            <p class="content">
+            <p class="content" v-if="shippingDetails.phoneNumber">
               {{ shippingDetails.phoneNumber }}
             </p>
           </div>
@@ -62,7 +62,7 @@
               <br>
               {{ paymentDetails.city }}, {{ paymentDetails.country }}
             </p>
-            <p class="content">
+            <p class="content" v-if="paymentDetails.phoneNumber">
               {{ paymentDetails.phoneNumber }}
             </p>
           </div>
@@ -626,6 +626,10 @@ export default {
   color: var(--c-text);
   &__label {
     font-weight: 400;
+  }
+
+  &:last-child {
+    margin: 0;
   }
 }
 .actions {

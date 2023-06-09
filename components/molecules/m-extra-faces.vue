@@ -27,6 +27,7 @@
             :initial-items="artworkUploadInitialItems(index - 1)"
             @file-added="(value) => onArtworkAdd(index - 1, value)"
             @file-removed="(storageItemId) => onArtworkRemove(index - 1, storageItemId)"
+            @is-busy-changed="onArtworkUploadBusyStatusChanged('uploader_wrapper_' + index.toString(), $event)"
           />
 
           <div class="_error-text">
@@ -54,14 +55,10 @@
       :disabled="disabled"
       :should-lock-scroll-on-open="isMobile"
     >
-      <SfSelectOption value="">
-        No extra pets
-      </SfSelectOption>
-
       <SfSelectOption
-        v-for="option in availableOptions"
+        v-for="option in selectOptions"
         :key="option.id"
-        :value="option"
+        :value="option.value ? option.value : ''"
       >
         {{ option.label }}
       </SfSelectOption>
@@ -83,6 +80,7 @@ import {
 
 import { Item } from 'src/modules/file-storage';
 import { CustomerImage } from 'src/modules/shared';
+import { Dictionary } from 'src/modules/budsies';
 
 import MArtworkUpload from './m-artwork-upload.vue';
 import ExtraPhotoAddonOption from '../interfaces/extra-photo-addon-option.interface';
@@ -92,6 +90,14 @@ extend('required', {
   ...required,
   message: 'The {_field_} field is required'
 });
+
+interface SelectOptionItem {
+  id: string,
+  value?: ExtraPhotoAddonOption,
+  label: string
+}
+
+const defaultOptionId = 'no-extra-pets';
 
 export default Vue.extend({
   name: 'MExtraFaces',
@@ -127,14 +133,35 @@ export default Vue.extend({
     }
   },
   data () {
+    const artworkUploaderBusyState: Dictionary<boolean> = {};
+
     return {
       fSelectedVariant: undefined as undefined | ExtraPhotoAddonOption,
       uploaderValues: [] as CustomerImage[],
-      shouldShowAddonSelector: true
+      shouldShowAddonSelector: true,
+      artworkUploaderBusyState
     }
   },
   computed: {
     ...mapMobileObserver(),
+    selectOptions (): SelectOptionItem[] {
+      const defaultOption = {
+        id: defaultOptionId,
+        label: this.$t('No Extra Pets').toString(),
+        value: undefined
+      }
+      const options: SelectOptionItem[] = [defaultOption];
+
+      this.availableOptions.forEach((item) => {
+        options.push({
+          id: item.id,
+          label: item.label,
+          value: item
+        })
+      });
+
+      return options;
+    },
     selectedVariant: {
       get: function (): ExtraPhotoAddonOption | undefined {
         return this.fSelectedVariant;
@@ -245,19 +272,16 @@ export default Vue.extend({
       };
 
       this.$emit('input', eventData)
+    },
+    onArtworkUploadBusyStatusChanged (key: string, isBusy: boolean): void {
+      Vue.set(this.artworkUploaderBusyState, key, isBusy);
+
+      const isSomeUploaderBusy = !!Object.values(this.artworkUploaderBusyState).find((isBusy) => isBusy);
+
+      this.$emit('is-busy-changed', isSomeUploaderBusy);
     }
   },
   watch: {
-    availableOptions: {
-      handler (): void {
-        // SfSelect doesn't support options updating in the current package version
-        this.shouldShowAddonSelector = false;
-
-        this.$nextTick(() => {
-          this.shouldShowAddonSelector = true;
-        });
-      }
-    },
     backendProductId: {
       handler (newValue: string, oldValue: string) {
         if (newValue === oldValue) {

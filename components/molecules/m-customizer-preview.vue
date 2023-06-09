@@ -102,19 +102,23 @@ export default Vue.extend({
         position: relative;
 
         &.-left {
-            flex: 2;
-            margin-right: 0.9em;
+          --heading-title-margin: var(--spacer-xs) 0 0;
 
-            ._slot-wrapper {
-                flex-direction: column-reverse;
-            }
+          flex: 2;
+          margin-right: 0.9em;
+
+          ._slot-wrapper {
+            flex-direction: column-reverse;
+          }
         }
 
         &.-right {
-            flex: 3;
-            justify-content: flex-start;
-            margin-left: 0.9em;
-            padding-top: 4%;
+          --heading-title-margin: 0 0 var(--spacer-xs);
+
+          flex: 3;
+          justify-content: flex-start;
+          margin-left: 0.9em;
+          padding-top: 4%;
         }
     }
 

@@ -24,17 +24,40 @@
       >
         <template #label>
           <div class="_addon-wrapper">
-            <div class="_info-column">
-              <div class="_title">
-                {{ addon.name }}
-              </div>
+            <div class="_title">
+              {{ addon.name }}
+            </div>
 
-              <div class="_description" v-html="addon.description" />
+            <div class="_price" v-if="addon.price">
+              <strong>
+                + {{ addon.price | price() }}
+              </strong>
+            </div>
 
-              <div class="_price" v-if="addon.price">
-                <strong>
-                  + {{ addon.price | price() }}
-                </strong>
+            <div class="_content">
+              <div class="_description-container">
+                <div class="_media">
+                  <div
+                    v-if="!shouldShowVideo(addon.id)"
+                    class="_image-container"
+                    :class="{'-wide-image': wideImage}"
+                    @click="switchToVideo($event, addon)"
+                  >
+                    <img v-if="getItemImage(addon)" :src="getItemImage(addon)" class="_image">
+
+                    <img v-if="getItemHoverImage(addon)" :src="getItemHoverImage(addon)" class="_image-hover">
+                  </div>
+
+                  <StreamingVideo
+                    :video-id="getVideoId(addon)"
+                    :provider="getVideoProvider(addon)"
+                    :auto-play="true"
+                    :display-controls="false"
+                    v-if="shouldShowVideo(addon.id) && getVideoId(addon) && getVideoProvider(addon)"
+                  />
+                </div>
+
+                <div class="_description" v-html="addon.description" />
               </div>
 
               <div class="_addon-options" v-if="showCustomOptionsForAddon(addon)">
@@ -52,32 +75,18 @@
                       :name="option.title"
                       :error-message="errors[0]"
                       :valid="!errors.length"
-                      @input="onCustomOptionInput($event, option.product_sku, addon.optionValueId)"
+                      @input="onCustomOptionInput($event, option, addon.optionValueId)"
                     />
+
+                    <div
+                      class="_characters-count"
+                      :class="{'-limit-reached': isLengthLimitReachedForCustomOption(option, addon.optionValueId)}"
+                    >
+                      {{ getCharactersCountForCustomOption(option, addon.optionValueId) }}
+                    </div>
                   </validation-provider>
                 </div>
               </div>
-            </div>
-
-            <div class="_image-column">
-              <div
-                v-if="!shouldShowVideo(addon.id)"
-                class="_image-container"
-                :class="{'-wide-image': wideImage}"
-                @click="switchToVideo($event, addon)"
-              >
-                <img v-if="getItemImage(addon)" :src="getItemImage(addon)" class="_image">
-
-                <img v-if="getItemHoverImage(addon)" :src="getItemHoverImage(addon)" class="_image-hover">
-              </div>
-
-              <StreamingVideo
-                :video-id="getVideoId(addon)"
-                :provider="getVideoProvider(addon)"
-                :auto-play="true"
-                :display-controls="false"
-                v-if="shouldShowVideo(addon.id) && getVideoId(addon) && getVideoProvider(addon)"
-              />
             </div>
           </div>
         </template>
@@ -155,6 +164,18 @@ export default Vue.extend({
     }
   },
   methods: {
+    getCharactersCountForCustomOption (
+      option: CustomOption,
+      addonOptionValueId: number
+    ): string {
+      const optionValue = this.getValueForCustomOption(
+        option.product_sku,
+        addonOptionValueId
+      );
+      const valueLength = optionValue.length;
+
+      return `${valueLength}/${option.max_characters}`;
+    },
     getCustomOptionsForAddon (addon: AddonOption): CustomOption[] {
       return addon.customOptions || [];
     },
@@ -235,6 +256,18 @@ export default Vue.extend({
 
       return info.provider;
     },
+    isLengthLimitReachedForCustomOption (
+      option: CustomOption,
+      addonOptionValueId: number
+    ): boolean {
+      const optionValue = this.getValueForCustomOption(
+        option.product_sku,
+        addonOptionValueId
+      );
+      const valueLength = optionValue.length;
+
+      return valueLength >= option.max_characters;
+    },
     onSelectedValuesChange (selectedValues: number[]): void {
       const updatedValue: SelectedAddon[] = [];
 
@@ -253,7 +286,15 @@ export default Vue.extend({
 
       this.$emit('input', updatedValue);
     },
-    onCustomOptionInput (value: string, optionSku: string, addonOptionValueId: number) {
+    onCustomOptionInput (
+      value: string,
+      option: CustomOption,
+      addonOptionValueId: number
+    ) {
+      if (value.length > option.max_characters) {
+        return;
+      }
+
       const selectedAddonIndex = this.value.findIndex((selectedAddon) => selectedAddon.addonOptionValueId === addonOptionValueId);
 
       if (selectedAddonIndex === -1) {
@@ -268,7 +309,7 @@ export default Vue.extend({
         addonOptionValueId,
         optionsValues: {
           ...optionValues,
-          [optionSku]: value
+          [option.product_sku]: value
         }
       }
 
@@ -309,9 +350,10 @@ export default Vue.extend({
 
   ._item {
     cursor: pointer;
+    margin: 0 calc(var(--spacer-sm) * -1);
 
     ._addon-input {
-      padding: 1em 1.5em;
+      padding: var(--spacer-sm);
       transition: background-color .15s cubic-bezier(0.65, 0.05, 0.35, 1);
 
       &.sf-checkbox--is-active {
@@ -323,29 +365,11 @@ export default Vue.extend({
       align-items: flex-start;
     }
 
-    ::v-deep .sf-checkbox__checkmark {
-      align-items: flex-start;
-      flex-shrink: 0;
-    }
-
     ._addon-wrapper {
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       flex-grow: 1;
-      justify-content: stretch;
-      align-items: stretch;
-      margin-left: 1em;
-    }
-
-    ._info-column {
-      width: 100%;
-    }
-
-    ._image-column {
-      display: none;
-    }
-
-    ._info-column {
+      margin-left: var(--spacer-sm);
       text-align: left;
 
       ._title {
@@ -355,23 +379,32 @@ export default Vue.extend({
 
       ._description {
         font-size: var(--font-sm);
-        margin-top: 1em;
-      }
 
-      ._price {
-        color: var(--_c-light-primary);
-        font-size: var(--font-base);
-        margin-top: 1em;
+        > :first-child {
+          margin-top: 0;
+        }
       }
     }
 
-    ._image-column {
-      justify-content: flex-end;
-      align-items: flex-start;
+    ._content {
+      display: flex;
+      flex-direction: column;
+      margin-top: var(--spacer-sm);
+    }
+
+    ._price {
+      color: var(--_c-light-primary);
+      font-size: var(--font-base);
+      margin-top: 1em;
+    }
+
+    ._media {
+      float: right;
+      width: 40%;
+      padding: 0 0 var(--spacer-sm) var(--spacer-sm);
 
       ._image-container {
         position: relative;
-        max-width: 75%;
 
         &.-wide-image {
           margin-left: var(--spacer-xl);
@@ -397,6 +430,14 @@ export default Vue.extend({
           display: block;
         }
       }
+    }
+  }
+
+  ._characters-count {
+    font-size: var(--font-sm);
+
+    &.-limit-reached {
+      font-weight: 400;
     }
   }
 
@@ -427,17 +468,10 @@ export default Vue.extend({
 
   @media (min-width: $tablet-min) {
     ._item {
-      ._info-column,
-      ._image-column {
-        width: 50%;
-      }
+      margin: 0;
 
-      ._info-column {
-        display: block;
-      }
-
-      ._image-column {
-        display: flex;
+      ._addon-input {
+        padding: var(--spacer-sm) var(--spacer-base);
       }
     }
   }

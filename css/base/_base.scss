@@ -16,3 +16,18 @@ dl {
 ul {
     list-style-image: url("/assets/paw-marker.svg");
 }
+
+blockquote {
+    border-left: 2px solid var(--c-blockquote-border);
+    color: var(--c-blockquote);
+    padding: var(--spacer-xs) var(--spacer-base);
+    text-align: left;
+
+    > p {
+        margin-bottom: 0;
+
+        &:first-child {
+            margin-top: 0;
+        }
+    }
+}

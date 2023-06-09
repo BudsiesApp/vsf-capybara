@@ -70,12 +70,27 @@
               @blur="$v.acceptConditions.$touch()"
             >
               <template #label>
-                <span class="sf-checkbox__label no-flex">
-                  {{ $t('I accept ') }}
+                <span class="sf-checkbox__label">
+                  {{ $t('I accept') }}
+
+                  <router-link
+                    target="_blank"
+                    to="/terms-of-service/"
+                  >
+                    {{ $t('Terms of Service') }}
+                  </router-link>
+
+                  <span>
+                    {{ $t('and') }}
+                  </span>
+
+                  <router-link
+                    target="_blank"
+                    to="/privacy-policy/"
+                  >
+                    {{ $t('Privacy Policy') }}
+                  </router-link>
                 </span>
-                <SfButton class="sf-button sf-button--text terms" @click.prevent="openTermsAndConditionsModal">
-                  {{ $t('Terms and conditions') }}
-                </SfButton>
               </template>
             </SfCheckbox>
           </div>
@@ -111,11 +126,13 @@
   </div>
 </template>
 <script>
-import { required, minLength, email, sameAs } from 'vuelidate/lib/validators';
+import { required, minLength, email } from 'vuelidate/lib/validators';
 import { PersonalDetails } from '@vue-storefront/core/modules/checkout/components/PersonalDetails';
 import { SfInput, SfButton, SfHeading, SfCheckbox } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
 import { mapActions } from 'vuex';
+
+import { createSmoothscroll } from 'theme/helpers';
 
 import APromoCode from 'theme/components/atoms/a-promo-code'
 import MPassword from 'theme/components/molecules/m-password'
@@ -156,6 +173,12 @@ export default {
       this.personalDetails.emailAddress = customerEmail;
     }
   },
+  mounted () {
+    createSmoothscroll(
+      document.documentElement.scrollTop || document.body.scrollTop,
+      0
+    );
+  },
   methods: {
     ...mapActions('ui', {
       openModal: 'openModal'
@@ -163,14 +186,11 @@ export default {
     login () {
       this.openModal({ name: ModalList.Auth, payload: 'login' })
     },
-    openTermsAndConditionsModal () {
-      this.openModal({ name: ModalList.TermsAndConditions })
-    },
-    onContinueButtonClick () {
+    async onContinueButtonClick () {
       let isInvalid = false;
 
       if (this.createAccount) {
-        const isPasswordValid = this.$refs.password.getIsPasswordValid();
+        const isPasswordValid = await this.$refs.password.getIsPasswordValid();
         this.$v.$touch();
         isInvalid = this.$v.$invalid || !isPasswordValid;
       } else {
@@ -256,11 +276,5 @@ export default {
       }
     }
   }
-  .terms {
-    margin: 0 0 0 0.4em;
-  }
-}
-.no-flex {
-  flex: unset;
 }
 </style>

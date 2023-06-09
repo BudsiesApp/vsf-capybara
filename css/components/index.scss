@@ -1,12 +1,15 @@
 @import "./atoms/SfButton.scss";
+@import "./atoms/SfDivider.scss";
 @import "./atoms/SfQuantitySelector.scss";
 @import "./atoms/SfPrice.scss";
 @import "./atoms/SfInput.scss";
 @import "./atoms/SfImage.scss";
 
 @import "./molecules/SfSelect.scss";
+@import "./molecules/SfSteps.scss";
 @import "./molecules/SfModal.scss";
 
+@import "./organisms/SfAccordion.scss";
 @import "./organisms/SfFooter.scss";
 @import "./organisms/SfList.scss";
 @import "./organisms/SfCarousel.scss";

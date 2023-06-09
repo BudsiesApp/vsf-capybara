@@ -1,7 +1,7 @@
 <template>
   <validation-observer
     v-slot="{ passes }"
-    class="forevers-wizard-pet-info-step"
+    class="plushie-wizard-pet-info-step"
     tag="div"
     ref="validation-observer"
   >
@@ -15,7 +15,7 @@
       <validation-provider
         v-slot="{ errors }"
         class="_field"
-        rules="required"
+        rules="required|max:128"
         :name="$t('Pet Name')"
         tag="div"
       >
@@ -94,17 +94,18 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
-import { required, email } from 'vee-validate/dist/rules';
+import { required, email, max } from 'vee-validate/dist/rules';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
 import { SfHeading, SfButton, SfInput } from '@storefront-ui/vue';
 
-import { ForeversWizardEvents, ProductId } from 'src/modules/budsies';
+import { PlushieWizardEvents, ProductId } from 'src/modules/budsies';
 
 import MMultiselect from '../../molecules/m-multiselect.vue';
 
-import ForeversWizardPetInfoStepData from '../../interfaces/forevers-wizard-pet-info-step-data.interface';
+import ForeversWizardPetInfoStepData from '../../interfaces/plushie-wizard-pet-info-step-data.interface';
 import Product from 'core/modules/catalog/types/Product';
+import { PlushieType } from 'theme/interfaces/plushie.type';
 
 extend('required', {
   ...required,
@@ -115,6 +116,8 @@ extend('email', {
   ...email,
   message: 'Please, provide the correct email address'
 });
+
+extend('max', max);
 
 export default Vue.extend({
   name: 'MPetInfoStep',
@@ -146,6 +149,10 @@ export default Vue.extend({
     disabled: {
       type: Boolean,
       default: false
+    },
+    plushieType: {
+      type: String as PropType<PlushieType>,
+      required: true
     }
   },
   data () {
@@ -205,7 +212,10 @@ export default Vue.extend({
       this.breed = undefined;
     },
     submitStep (): void {
-      EventBus.$emit(ForeversWizardEvents.INFO_FILL);
+      EventBus.$emit(
+        PlushieWizardEvents.PLUSHIE_WIZARD_INFO_FILL,
+        this.plushieType
+      );
       this.$emit('next-step');
     }
   },
@@ -228,7 +238,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-.forevers-wizard-pet-info-step {
+.plushie-wizard-pet-info-step {
   display: inline-flex;
   flex-direction: column;
   justify-content: space-between;

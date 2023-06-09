@@ -53,6 +53,7 @@ export default {
   justify-content: center;
   align-items: center;
   flex: 1;
+  padding: 0 var(--spacer-sm);
 
   &__action {
     margin-top: var(--spacer-2xl);

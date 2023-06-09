@@ -1,6 +1,7 @@
 <template>
-  <div id="forevers-product" itemscope itemtype="http://schema.org/Product">
-    <o-forevers-creation-wizard
+  <div id="plushie-product" itemscope itemtype="http://schema.org/Product">
+    <o-plushie-creation-wizard
+      :plushie-type="plushieType"
       :artwork-upload-url="artworkUploadUrl"
       :existing-plushie-id="existingPlushieId"
       :preselected-product-type="preselectedProductType"
@@ -10,19 +11,26 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import Vue, { PropType } from 'vue';
 import config from 'config';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 
 import Product from 'core/modules/catalog/types/Product';
 
-import OForeversCreationWizard from 'theme/components/organisms/o-forevers-creation-wizard.vue';
+import OPlushieCreationWizard from 'theme/components/organisms/o-plushie-creation-wizard.vue';
+import { PlushieType } from 'theme/interfaces/plushie.type';
 
 export default Vue.extend({
-  name: 'ForeversProduct',
+  name: 'PlushieProduct',
   components: {
-    OForeversCreationWizard
+    OPlushieCreationWizard
+  },
+  props: {
+    plushieType: {
+      type: String as PropType<PlushieType>,
+      required: true
+    }
   },
   computed: {
     getCurrentProduct (): Product | null {
@@ -35,10 +43,10 @@ export default Vue.extend({
       return String(this.$route.query?.id);
     },
     preselectedProductType (): string | undefined {
-      return this.$route.query?.product;
+      return this.$route.query?.product as string | undefined;
     },
     preselectedSize (): string | undefined {
-      return this.$route.query?.size;
+      return this.$route.query?.size as string | undefined;
     }
   },
   beforeRouteLeave (to, from, next) {
@@ -46,7 +54,10 @@ export default Vue.extend({
     next();
   },
   metaInfo () {
-    const productName = this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name || 'Forevers';
+    const defaultProductName = this.plushieType === PlushieType.FOREVERS
+      ? 'Forevers'
+      : 'Golf Head Covers';
+    const productName = this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name || defaultProductName;
 
     return {
       title: htmlDecode(productName),
@@ -67,7 +78,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-#forevers-product {
+#plushie-product {
   padding: var(--spacer-lg) 0 0;
   box-sizing: border-box;
 

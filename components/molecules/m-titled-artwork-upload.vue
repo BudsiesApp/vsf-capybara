@@ -25,6 +25,7 @@
         :initial-items="initialArtworks"
         @file-added="$emit('file-added', $event)"
         @file-removed="$emit('file-removed', $event)"
+        @is-busy-changed="$emit('is-busy-changed', $event)"
       />
 
       <div class="_error-text">

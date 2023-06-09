@@ -1,4 +1,4 @@
-import ForeversProductType from 'theme/interfaces/forevers-product-type';
+import PlushieProductType from 'theme/interfaces/plushie-product-type';
 
 const availableSizes = ['small', 'medium', 'large'];
 
@@ -10,13 +10,13 @@ export default function getForeversSizeSkuBySizeAndType (size: string, type: str
   let skuPrefix;
 
   switch (type) {
-    case ForeversProductType.DOG:
+    case PlushieProductType.DOG:
       skuPrefix = 'simpleForeversDog'
       break;
-    case ForeversProductType.CAT:
+    case PlushieProductType.CAT:
       skuPrefix = 'simpleForeversCat'
       break;
-    case ForeversProductType.OTHER:
+    case PlushieProductType.OTHER:
       skuPrefix = 'simpleForeversOther'
       break;
     default:

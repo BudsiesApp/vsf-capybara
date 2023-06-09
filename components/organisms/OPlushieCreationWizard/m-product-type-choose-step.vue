@@ -1,5 +1,5 @@
 <template>
-  <div class="forevers-wizard-product-type-step">
+  <div class="plushie-wizard-product-type-step">
     <SfHeading
       :level="2"
       :title="$t('Select Your Type of Pet')"
@@ -7,48 +7,22 @@
 
     <div class="_buttons-wrapper">
       <SfButton
+        v-for="item in productTypeButtonsList"
+        :key="item.title"
         class="_button"
         :disabled="isDisabled"
-        @click="setProductType('dog')"
+        @click="setProductType(item.type)"
       >
         <BaseImage
           class="_image"
-          src="/assets/forevers/dog-icon1_1.png"
-          :alt="$t('Forevers Dog')"
+          :class="{ '-hidden': !item.imageSrc }"
+          :src="item.imageSrc"
+          :alt="item.title"
           width="76px"
           :aspect-ratio="1"
         />
-        {{ $t('Forevers Dog') }}
-      </SfButton>
 
-      <SfButton
-        class="_button"
-        :disabled="isDisabled"
-        @click="setProductType('cat')"
-      >
-        <BaseImage
-          class="_image"
-          src="/assets/forevers/cat-icon1_1.png"
-          :alt="$t('Forevers Cat')"
-          width="76px"
-          :aspect-ratio="1"
-        />
-        {{ $t('Forevers Cat') }}
-      </SfButton>
-
-      <SfButton
-        class="_button"
-        :disabled="isDisabled"
-        @click="setProductType('other')"
-      >
-        <BaseImage
-          class="_image"
-          src="/assets/forevers/other-icon1_1.png"
-          :alt="$t('Forevers Other')"
-          width="76px"
-          :aspect-ratio="1"
-        />
-        {{ $t('Forevers Other') }}
+        {{ item.title }}
       </SfButton>
     </div>
   </div>
@@ -62,7 +36,10 @@ import {
   BaseImage
 } from 'src/modules/budsies';
 
-import ForeversWizardProductTypeStepData from '../../interfaces/forevers-wizard-product-type-step-data.interface';
+import PlushieProductType from 'theme/interfaces/plushie-product-type';
+import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
+
+import ForeversWizardProductTypeStepData from '../../interfaces/plushie-wizard-product-type-step-data.interface';
 
 export default Vue.extend({
   name: 'MProductTypeChooseStep',
@@ -86,6 +63,10 @@ export default Vue.extend({
     setProductTypeAction: {
       type: Function as PropType<(type: string) => Promise<void>>,
       required: true
+    },
+    productTypeButtonsList: {
+      type: Array as PropType<ProductTypeButton[]>,
+      required: true
     }
   },
   data () {
@@ -97,9 +78,10 @@ export default Vue.extend({
     isDisabled (): boolean {
       return this.disabled || this.isSubmitting;
     }
+
   },
   methods: {
-    async setProductType (type: 'dog' | 'cat' | 'other'): Promise<void> {
+    async setProductType (type: PlushieProductType): Promise<void> {
       if (this.disabled) {
         return;
       }
@@ -121,7 +103,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-.forevers-wizard-product-type-step {
+.plushie-wizard-product-type-step {
   ._buttons-wrapper {
     display: inline-grid;
     grid-template-columns: 1fr;
@@ -132,9 +114,15 @@ export default Vue.extend({
   ._button {
     justify-content: flex-start;
     flex-direction: row;
+    white-space: normal;
 
     ._image {
       margin-right: 1em;
+      border-radius: 50%;
+
+      &.-hidden {
+        visibility: hidden;
+      }
     }
   }
 

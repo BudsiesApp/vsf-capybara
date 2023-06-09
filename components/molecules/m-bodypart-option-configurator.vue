@@ -13,7 +13,7 @@
           v-for="option in optionsByGroup[group]"
           :option="option"
           :input-type="inputType"
-          :parent-component-instance-id="configuratorInstanceId"
+          :parent-component-instance-id="instanceId"
           :name="name"
           v-model="selectedOption"
           :disabled="disabled"

@@ -19,7 +19,7 @@
       </template>
       <template #navigation>
         <SfHeaderNavigationItem
-          @mouseover="isHoveredMenu = true"
+          @mouseover="onMainMenuMouseOver"
           @mouseleave="isHoveredMenu = false"
         >
           <div class="o-header__submenu">
@@ -27,7 +27,8 @@
           </div>
           <MMenu
             :visible="isHoveredMenu && !isSearchPanelVisible"
-            @close="isHoveredMenu = false"
+            @transitionend.native="onMainMenuTransitionEnd"
+            @close="onMainMenuClose"
           />
         </SfHeaderNavigationItem>
         <SfHeaderNavigationItem>
@@ -104,6 +105,7 @@ export default {
     return {
       isHoveredMenu: false,
       isDropdownOpen: false,
+      isMouseOverLocked: false,
       dropdownActions: [
         {
           label: 'Custom Petsies',
@@ -132,6 +134,12 @@ export default {
         {
           label: 'Bobbleheads & Figurines',
           url: '/pet-bobblehead-figurines/'
+        },
+        {
+          label: this.$t('Pajamas'),
+          url: {
+            name: 'pajamas-creation'
+          }
         },
         {
           label: 'Pet Keychains',
@@ -165,6 +173,23 @@ export default {
     ...mapGetters('user', ['isLoggedIn']),
     activeIcon () {
       return this.isLoggedIn ? 'account' : '';
+    }
+  },
+  methods: {
+    onMainMenuClose () {
+      this.isHoveredMenu = false;
+      this.isMouseOverLocked = true;
+    },
+    onMainMenuMouseOver () {
+      if (this.isMouseOverLocked) {
+        return;
+      }
+
+      this.isHoveredMenu = true;
+    },
+    async onMainMenuTransitionEnd () {
+      await this.$nextTick();
+      this.isMouseOverLocked = false;
     }
   }
 };

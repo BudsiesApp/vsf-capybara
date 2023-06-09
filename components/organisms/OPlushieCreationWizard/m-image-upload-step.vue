@@ -1,12 +1,12 @@
 <template>
   <validation-observer
     v-slot="{ passes }"
-    class="forevers-wizard-image-upload-step"
+    class="plushie-wizard-image-upload-step"
     tag="div"
     ref="validation-observer"
   >
     <MBlockStory
-      story-slug="petsies_creation_page_top"
+      :story-slug="topStorySlug"
     />
 
     <div class="_upload-now" v-show="isUploadNow">
@@ -136,7 +136,7 @@
     </div>
 
     <MBlockStory
-      story-slug="petsies_creation_page_bottom"
+      :story-slug="bottomStorySlug"
     />
   </validation-observer>
 </template>
@@ -150,7 +150,7 @@ import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { SfHeading, SfButton } from '@storefront-ui/vue';
 import Product from 'core/modules/catalog/types/Product';
 
-import { ForeversWizardEvents,
+import { PlushieWizardEvents,
   ImageUploadMethod,
   ProductId,
   ProductValue
@@ -162,7 +162,8 @@ import { CustomerImage } from 'src/modules/shared';
 import MArtworkUpload from '../../molecules/m-artwork-upload.vue';
 import MBlockStory from '../../molecules/m-block-story.vue';
 
-import ForeversWizardImageUploadStepData from '../../interfaces/forevers-wizard-image-upload-step-data.interface';
+import ForeversWizardImageUploadStepData from '../../interfaces/plushie-wizard-image-upload-step-data.interface';
+import { PlushieType } from 'theme/interfaces/plushie.type';
 
 extend('required', {
   ...required,
@@ -206,9 +207,21 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       type: Number,
       required: true
     },
+    plushieType: {
+      type: String as PropType<PlushieType>,
+      required: true
+    },
     disabled: {
       type: Boolean,
       default: false
+    },
+    bottomStorySlug: {
+      type: String,
+      required: true
+    },
+    topStorySlug: {
+      type: String,
+      required: true
     }
   },
   data () {
@@ -232,6 +245,12 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           return ProductValue.FOREVERS_CAT;
         case ProductId.FOREVERS_OTHER:
           return ProductValue.FOREVERS_OTHER;
+        case ProductId.GOLF_COVERS_DOG:
+          return ProductValue.GOLF_COVERS_DOG;
+        case ProductId.GOLF_COVERS_CAT:
+          return ProductValue.GOLF_COVERS_CAT;
+        case ProductId.GOLF_COVERS_OTHER:
+          return ProductValue.GOLF_COVERS_OTHER;
         default:
           throw new Error(
             `Can't resolve Backend product ID for Magento '${this.product.id}' product ID`
@@ -309,8 +328,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     submitStep (): void {
       EventBus.$emit(
-        ForeversWizardEvents.PHOTOS_PROVIDE,
-        this.uploadMethod === ImageUploadMethod.EMAIL ? 'email' : 'now'
+        PlushieWizardEvents.PLUSHIE_WIZARD_PHOTOS_PROVIDE,
+        {
+          plushieType: this.plushieType,
+          uploadMethod: this.uploadMethod === ImageUploadMethod.EMAIL ? 'email' : 'now'
+        }
       );
 
       this.$emit('next-step');
@@ -349,13 +371,14 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 </script>
 
 <style lang="scss" scoped>
-.forevers-wizard-image-upload-step {
+.plushie-wizard-image-upload-step {
   ._file-uploader {
     margin-top: var(--spacer-base);
   }
 
-  ._upload-now {
-    margin-bottom: var(--spacer-xl);
+  ._upload-now,
+  ._upload-email {
+    margin-top: var(--spacer-xl);
   }
 
   ._error-text {

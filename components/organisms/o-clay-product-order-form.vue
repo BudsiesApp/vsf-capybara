@@ -3,6 +3,7 @@
     <SfHeading
       :level="1"
       :title="pageTitle"
+      class="_title"
     />
 
     <MBlockStory
@@ -367,6 +368,7 @@ import { TranslateResult } from 'vue-i18n';
 import { SfButton, SfDivider, SfHeading, SfInput, SfModal } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/core/i18n';
 import { Logger } from '@vue-storefront/core/lib/logger';
+import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import { setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
@@ -578,8 +580,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           Logger.error(error, 'budsies')();
         }
 
+        this.showEmailStep = false;
+
         if (!shouldMakeAnother) {
-          this.goToCart();
+          this.goToCrossSells();
           return;
         }
 
@@ -756,7 +760,14 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return this.$refs['validation-observer'] as InstanceType<typeof ValidationObserver> | undefined;
     },
     goToCart (): void {
-      this.$router.push({ name: 'detailed-cart' });
+      this.$router.push(localizedRoute({ name: 'detailed-cart' }));
+    },
+    goToCrossSells (): void {
+      this.$router.push(localizedRoute({
+        name: 'cross-sells',
+        params: { parentSku: this.product.sku }
+      }
+      ));
     },
     prefillEmail (): void {
       const customerEmail = this.$store.getters['budsies/getPrefilledCustomerEmail'];
@@ -769,6 +780,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.quantity = this.product.qty || 1;
       this.customerImages = [];
       this.initialCustomerImages = [];
+      this.uploadMethod = ImageUploadMethod.NOW;
       this.selectedAddons = [];
       this.bodypartsValues = {};
       this.description = '';
@@ -983,6 +995,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
 .o-clay-product-order-form {
   text-align: center;
+
+  ._title {
+    margin-top: var(--spacer-lg);
+  }
 
   ._top-block {
     margin-top: var(--spacer-base);

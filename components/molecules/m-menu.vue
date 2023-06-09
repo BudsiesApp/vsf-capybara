@@ -90,6 +90,10 @@ export default Vue.extend({
           url: '/forevers-pet-plush/'
         },
         {
+          label: this.$t('Golf Club Headcovers'),
+          url: '/golf-headcovers/'
+        },
+        {
           label: this.$t('Pet Shaped Pillows'),
           url: '/pet-pillow/'
         },
@@ -129,6 +133,12 @@ export default Vue.extend({
         {
           label: this.$t('Bobbleheads & Figurines'),
           url: '/pet-bobblehead-figurines/'
+        },
+        {
+          label: this.$t('Pajamas'),
+          url: {
+            name: 'pajamas-creation'
+          }
         },
         {
           label: this.$t('Pet Keychains'),
@@ -187,6 +197,10 @@ export default Vue.extend({
           label: this.$t('Blog'),
           url: '/blog/',
           target: '_blank'
+        },
+        {
+          label: this.$t('Reviews'),
+          url: '/reviews/'
         }
       ]
     }

@@ -170,7 +170,9 @@ export default Vue.extend({
 
       for (const sku of skus) {
         for (const key in this.getProductBySkuDictionary) {
-          if (this.getProductBySkuDictionary[key].parentSku === sku) {
+          const product = this.getProductBySkuDictionary[key];
+
+          if (product.parentSku === sku && !!product.landing_page_url) {
             products.push(this.getProductBySkuDictionary[key]);
 
             break;
@@ -324,6 +326,7 @@ export default Vue.extend({
       justify-content: space-between;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(50%, 1fr));
+      row-gap: var(--spacer-sm);
     }
     &__product-card {
       --product-card-max-width: none;

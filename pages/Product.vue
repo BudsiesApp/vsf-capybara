@@ -257,6 +257,7 @@ export default {
 
   ._product-full-description {
     margin-top: var(--spacer-xl);
+    padding: 0 var(--spacer-sm);
 
     ::v-deep {
       .a-custom-heading {

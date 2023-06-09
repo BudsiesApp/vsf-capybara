@@ -91,6 +91,7 @@ body {
   line-height: #{$line-height-base};
   margin: 0;
   padding: 0;
+  color: var(--c-text);
 
   a {
     text-decoration: none;
