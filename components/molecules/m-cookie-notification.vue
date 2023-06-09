@@ -2,6 +2,14 @@
   <transition name="fade" appear>
     <div v-show="isOpen" class="m-cookie-notification">
       <div class="cookie">
+        <div class="cookie__icon">
+          <SfIcon
+            icon="cross"
+            size="xxs"
+            @click="accept"
+          />
+        </div>
+
         <div class="cookie__message">
           {{ message }}
           <router-link
@@ -11,13 +19,6 @@
           >
             {{ detailsLinkText }}
           </router-link>
-        </div>
-        <div class="cookie__icon">
-          <SfIcon
-            icon="cross"
-            size="xxs"
-            @click="accept"
-          />
         </div>
       </div>
     </div>
@@ -90,35 +91,38 @@ export default {
   color: var(--c-light-darken);
   .cookie {
     box-sizing: border-box;
-    padding: 0 5.5rem 0 1rem;
+    padding: 0 calc(var(--spacer-2xl) + var(--spacer-2xs)) 0 var(--spacer-sm);
     margin: auto;
     display: flex;
-    justify-content: space-between;
     align-items: center;
     width: 1272px;
     max-width: 100%;
     height: 4.5rem;
 
     &__icon {
-      margin-left: var(--spacer-sm);
       cursor: pointer;
       --icon-color: var(--c-link);
       &:hover {
         --icon-color: var(--c-link-hover);
       }
     }
+
+    &__message {
+      margin-left: var(--spacer-sm);
+      margin-top: var(--spacer-2xs);
+    }
   }
 
-  @media (min-width: 375px) {
+  @media (min-width: 390px) {
     .cookie {
       height: 3rem;
-      padding: 0 5.5rem 0 1.5rem;
+      padding-left: var(--spacer-base);
     }
   }
 
   @media (min-width: $desktop-xl-min) {
     .cookie {
-      padding: 0 1.5rem;
+      padding: 0 var(--spacer-base);
     }
   }
 }
