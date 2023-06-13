@@ -28,6 +28,7 @@ import { mapState, mapGetters, mapActions } from 'vuex';
 import { SfBottomNavigation } from '@storefront-ui/vue'
 
 import { ModalList } from 'theme/store/ui/modals'
+import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
 import ALogo from 'theme/components/atoms/a-logo.vue';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
