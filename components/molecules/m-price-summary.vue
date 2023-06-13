@@ -127,6 +127,12 @@ export default {
     --property-name-color: var(--_c-light-primary);
     --property-value-color: var(--_c-light-primary);
   }
+
+  .divider {
+    --divider-border-color: var(--c-white);
+    --divider-width: 100%;
+    --divider-margin: 0 0 var(--spacer-base) 0;
+  }
 }
 
 .property {
@@ -144,11 +150,7 @@ export default {
     }
   }
 }
-.divider {
-  --divider-border-color: var(--c-white);
-  --divider-width: 100%;
-  --divider-margin: 0 0 var(--spacer-base) 0;
-}
+
 .promo-code {
   &__button {
     --button-height: 2rem;

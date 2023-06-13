@@ -70,6 +70,7 @@ $font-family-secondary: "Gotham-Rounded-Medium";
     --property-name-color: var(--property-color, var(--c-text));
     --c-blockquote: var(--c-text);
     --c-blockquote-border: var(--_c-gray-primary);
+    --c-divider: var(--_c-gray-accent);
     @include assign-color-variants(--c-primary, --_c-yellow-primary);
     --c-primary-variant: var(--_c-yellow-secondary);
     @include assign-color-variants(--c-secondary, --_c-yellow-secondary);

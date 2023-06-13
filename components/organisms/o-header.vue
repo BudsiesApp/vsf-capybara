@@ -26,7 +26,7 @@
         </SfHeaderNavigationItem>
 
         <SfHeaderNavigationItem
-          @mouseover="isHoveredMenu = true"
+          @mouseover="onMainMenuMouseOver"
           @mouseleave="isHoveredMenu = false"
         >
           <div class="o-header__submenu">
@@ -35,7 +35,8 @@
 
           <MMenu
             :visible="isHoveredMenu && !isSearchPanelVisible"
-            @close="isHoveredMenu = false"
+            @transitionend.native="onMainMenuTransitionEnd"
+            @close="onMainMenuClose"
           />
         </SfHeaderNavigationItem>
 
@@ -109,7 +110,8 @@ export default {
   },
   data () {
     return {
-      isHoveredMenu: false
+      isHoveredMenu: false,
+      isMouseOverLocked: false
     }
   },
   computed: {
@@ -119,6 +121,23 @@ export default {
     ...mapGetters('user', ['isLoggedIn']),
     activeIcon () {
       return this.isLoggedIn ? 'account' : '';
+    }
+  },
+  methods: {
+    onMainMenuClose () {
+      this.isHoveredMenu = false;
+      this.isMouseOverLocked = true;
+    },
+    onMainMenuMouseOver () {
+      if (this.isMouseOverLocked) {
+        return;
+      }
+
+      this.isHoveredMenu = true;
+    },
+    async onMainMenuTransitionEnd () {
+      await this.$nextTick();
+      this.isMouseOverLocked = false;
     }
   }
 };

@@ -12,6 +12,8 @@
         @click.native="item.onClick"
       />
 
+      <AAccountIcon class="sf-header__action _item" />
+
       <ALogo class="_item" :is-small="true" />
 
       <MCtaButton size="small" class="_item" />
@@ -36,13 +38,14 @@ export default {
     SfBottomNavigation,
     ALogo,
     ADetailedCartIcon,
-    MCtaButton
+    MCtaButton,
+    AAccountIcon
   },
   data () {
     return {
       navigationItems: [
-        { icon: 'list', label: '', onClick: this.goToMenu },
-        { icon: 'account', label: '', onClick: this.goToAccount }
+        { icon: 'list', label: '', onClick: this.goToMenu }
+        // { icon: 'account', label: '', onClick: this.goToAccount }
       ]
     }
   },
