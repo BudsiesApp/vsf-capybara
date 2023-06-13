@@ -7,5 +7,9 @@
         &:focus {
             outline: none;
         }
+
+        &:disabled {
+            --input-border-color: var(--c-text-disabled);
+        }
     }
 }

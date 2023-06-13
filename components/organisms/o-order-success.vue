@@ -1,6 +1,6 @@
 <template>
   <div class="o-order-success">
-    <div class="_headings">
+    <div class="_heading">
       <SfHeading
         class="_main-title"
         :title="$t('Let the plushification begin!')"
@@ -198,7 +198,7 @@ $number-size: 50px;
 $number-margin-right-desktop: var(--spacer-sm);
 
 .o-order-success {
-  ._headings {
+  ._heading {
     padding: 0 var(--spacer-sm);
   }
 

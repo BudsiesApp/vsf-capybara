@@ -23,17 +23,23 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.title {
-  --heading-title-margin: 0 0 var(--spacer-2xl) 0;
-}
-.property {
-  margin: var(--spacer-base) 0;
-}
-.actions {
-  &__button {
-    margin: var(--spacer-sm) 0;
-    &--secondary {
-      text-align: left;
+
+.o-order-summary {
+  .title {
+    --heading-title-margin: 0 0 var(--spacer-2xl) 0;
+  }
+
+  .property {
+    margin: var(--spacer-base) 0;
+  }
+
+  .actions {
+    &__button {
+      margin: var(--spacer-sm) 0;
+
+      &--secondary {
+        text-align: left;
+      }
     }
   }
 }

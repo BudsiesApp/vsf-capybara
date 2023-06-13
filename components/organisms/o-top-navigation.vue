@@ -12,6 +12,8 @@
         @click.native="item.onClick"
       />
 
+      <AAccountIcon class="sf-header__action _item" />
+
       <ALogo class="_item" :is-small="true" />
 
       <MCtaButton size="small" class="_item" />
@@ -26,6 +28,7 @@ import { mapState, mapGetters, mapActions } from 'vuex';
 import { SfBottomNavigation } from '@storefront-ui/vue'
 
 import { ModalList } from 'theme/store/ui/modals'
+import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
 import ALogo from 'theme/components/atoms/a-logo.vue';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
@@ -36,13 +39,14 @@ export default {
     SfBottomNavigation,
     ALogo,
     ADetailedCartIcon,
-    MCtaButton
+    MCtaButton,
+    AAccountIcon
   },
   data () {
     return {
       navigationItems: [
-        { icon: 'list', label: '', onClick: this.goToMenu },
-        { icon: 'account', label: '', onClick: this.goToAccount }
+        { icon: 'list', label: '', onClick: this.goToMenu }
+        // { icon: 'account', label: '', onClick: this.goToAccount }
       ]
     }
   },
