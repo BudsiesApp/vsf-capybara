@@ -109,7 +109,6 @@ export default {
 
     &__message {
       margin-left: var(--spacer-sm);
-      margin-top: var(--spacer-2xs);
     }
   }
 
