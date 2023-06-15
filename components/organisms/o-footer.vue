@@ -27,7 +27,7 @@
 
       <SfFooterColumn title="Get more @Petsies cuteness" class="social-column">
         <MNewsletterSubscription />
-        <div class="social-icon">
+        <div class="social-icon desktop-only">
           <a
             :href="item.url"
             v-for="item in social"
@@ -38,6 +38,17 @@
           />
         </div>
       </SfFooterColumn>
+
+      <div class="social-icon mobile-only">
+        <a
+          :href="item.url"
+          v-for="item in social"
+          :key="item.name + ';' + item.url"
+          class="social-icon__link"
+          :class="'-' + item.name"
+          target="_blank"
+        />
+      </div>
 
       <div class="_additional-information">
         <router-link to="//support.mypetsies.com/support/home" target="_blank" exact>
@@ -302,6 +313,12 @@ export default {
     display: flex;
     justify-content: flex-start;
     padding: var(--spacer-sm) 0;
+
+    &.mobile-only {
+      justify-content: center;
+      padding-bottom: 0;
+    }
+
     &__link {
       background-image: url(../../assets/footer-socials-mobile.png);
       display: block;
