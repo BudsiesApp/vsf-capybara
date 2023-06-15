@@ -67,7 +67,12 @@
                     :qty="product.qty"
                     :disabled="isUpdatingQuantity"
                     @input="changeProductQuantity(product, $event)"
+                    v-if="showQuantitySelectorForProduct(product)"
                   />
+
+                  <div class="_quantity" v-else>
+                    {{ product.qty }}
+                  </div>
                 </template>
                 <template #price>
                   <div />
@@ -188,6 +193,7 @@ import { CART_UPD_ITEM } from '@vue-storefront/core/modules/cart/store/mutation-
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 import { htmlDecode } from '@vue-storefront/core/filters';
+import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
 
 const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
 
@@ -505,6 +511,9 @@ export default {
         this.syncQuantityDebounced();
       }
     },
+    showQuantitySelectorForProduct (product) {
+      return getProductMaxSaleQuantity(product) > 1;
+    },
     syncQuantity () {
       this.isUpdatingQuantity = true;
 
@@ -654,6 +663,14 @@ export default {
       line-height: 1.6;
     }
   }
+
+  ._quantity {
+    line-height: initial;
+    text-align: center;
+    margin-top: var(--spacer-sm);
+    font-size: var(--font-lg);
+  }
+
   @include for-desktop {
     display: flex;
     .sf-collected-product {
