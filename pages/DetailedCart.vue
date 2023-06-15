@@ -668,6 +668,7 @@ export default {
     line-height: initial;
     text-align: center;
     margin-top: var(--spacer-sm);
+    font-size: var(--font-lg);
   }
 
   @include for-desktop {
