@@ -22,6 +22,7 @@ export function useBulkOrdersBaseForm () {
     agreement: false
   });
 
+  // TODO fix for TS v3.9
   useBulkorderBaseFormPersistanceState(bulkordersBaseFormData as unknown as BulkordersBaseFormData);
 
   return {
