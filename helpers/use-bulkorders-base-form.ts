@@ -22,7 +22,7 @@ export function useBulkOrdersBaseForm () {
     agreement: false
   });
 
-  useBulkorderBaseFormPersistanceState(bulkordersBaseFormData);
+  useBulkorderBaseFormPersistanceState(bulkordersBaseFormData as unknown as BulkordersBaseFormData);
 
   return {
     bulkordersBaseFormData
