@@ -376,9 +376,6 @@ import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage, getProductDefaultPrice, ServerError } from 'src/modules/shared';
 
 import BulksampleProduct from 'theme/interfaces/bulksample-product.type';
-import { getFieldAnchorName } from 'theme/helpers/get-field-anchor-name.function';
-import { goToFieldByName } from 'theme/helpers/go-to-field-by-name.function';
-import { validateAndGoToFirstError } from 'theme/helpers/validate-form.function';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 
 import AddonOption from '../interfaces/addon-option.interface';
@@ -399,10 +396,6 @@ extend('between', {
   ...between,
   message: 'The {_field_} field must be between {min} and {max}'
 });
-
-interface InjectedServices {
-  imageHandlerService: ImageHandlerService
-}
 
 interface PillowSizeOption {
   id: number | string,
@@ -803,12 +796,6 @@ export default defineComponent({
       const task = await this.$store.dispatch('budsies/createNewPlushie', { productId: this.product.id });
       return task.result;
     },
-    getFieldAnchorName (fieldName: string): string {
-      return getFieldAnchorName(fieldName);
-    },
-    goToFieldByName (fieldName: string): void {
-      goToFieldByName(fieldName, this.$refs);
-    },
     fillAddonsDataFromCartItem (existingCartItem: CartItem): void {
       const productOption = existingCartItem.product_option;
 
@@ -988,15 +975,6 @@ export default defineComponent({
         }
       })
     },
-    getValidationObserver (): InstanceType<typeof ValidationObserver> {
-      const validationObserver = this.$refs.validationObserver as InstanceType<typeof ValidationObserver> | undefined;
-
-      if (!validationObserver) {
-        throw new Error('Validation Observer is not defined');
-      }
-
-      return validationObserver;
-    },
     onArtworkAdd (value: Item): void {
       if (!this.imageHandlerService) {
         throw new Error('Image Handler Service is not defined');
@@ -1029,10 +1007,7 @@ export default defineComponent({
       });
     },
     async onFormSubmit (): Promise<void> {
-      const isValid = await validateAndGoToFirstError(
-        this.getValidationObserver(),
-        this.$refs
-      );
+      const isValid = await this.validateAndGoToFirstError();
 
       if (!isValid) {
         return;

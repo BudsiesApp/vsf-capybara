@@ -136,7 +136,6 @@ import { defineComponent, PropType } from '@vue/composition-api';
 
 import Product from 'core/modules/catalog/types/Product';
 import { Bodypart, BodypartOption, BodypartValue, BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo, Dictionary, vuexTypes as budsiesTypes } from 'src/modules/budsies';
-import { goToFieldByName } from 'theme/helpers/go-to-field-by-name.function';
 import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 
@@ -268,24 +267,6 @@ export default defineComponent({
       }
 
       return { [this.colorPaletteBodypart.id]: this.color.map(item => item.id) };
-    },
-    getDataToPersist () {
-      return {
-        country: this.bulkordersBaseFormData.country,
-        customerFirstName: this.bulkordersBaseFormData.customerFirstName,
-        customerEmail: this.bulkordersBaseFormData.customerEmail,
-        customerPhone: this.bulkordersBaseFormData.customerPhone,
-        customerLastName: this.bulkordersBaseFormData.customerLastName
-      }
-    },
-    getValidationObserver (): InstanceType<typeof ValidationObserver> {
-      const validationObserver = this.$refs.validationObserver as InstanceType<typeof ValidationObserver> | undefined;
-
-      if (!validationObserver) {
-        throw new Error('Validation Observer is not defined');
-      }
-
-      return validationObserver;
     },
     async onSubmit (): Promise<void> {
       if (this.isDisabled) {
