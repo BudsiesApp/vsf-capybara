@@ -14,13 +14,14 @@
         :artwork-upload-url="artworkUploadUrl"
         v-model="bulkordersBaseFormData"
         :show-calculation-animation="showCalculationAnimation"
+        :get-field-anchor-name="getFieldAnchorName"
         @calculation-animation-finished="onCalculationAnimationFinished"
       />
 
       <m-form-errors
         class="_form-errors"
         :form-errors="errors"
-        @go-to-field="onGoToField"
+        @item-click="goToFieldByName"
       />
 
       <div class="_button-container">
@@ -37,23 +38,39 @@
 
 <script lang="ts">
 import { ValidationObserver } from 'vee-validate';
-import { PropType } from 'vue';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
+import { defineComponent, PropType } from '@vue/composition-api';
 
 import Product from 'core/modules/catalog/types/Product';
-import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo, vuexTypes as budsiesTypes } from 'src/modules/budsies';
-import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
-import { validateForm } from 'theme/helpers/validate-form.function';
-import { goToFieldByName } from 'theme/helpers/go-to-field-by-name.function';
+import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
 
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 
 import MBaseForm from './m-base-form.vue';
 
-export default BulkorderBaseFormPersistanceState.extend({
+function getBaseFormRefs (
+  refs: Record<string, Vue | Element | Vue[] | Element[]>
+): Record<string, Vue | Element | Vue[] | Element[]> {
+  const baseForm = refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
+
+  if (!baseForm) {
+    throw new Error('Base Form is not defined');
+  }
+
+  return baseForm.$refs;
+}
+
+export default defineComponent({
   name: 'OKeychainQuoteOrderForm',
+  setup (_, setupContext) {
+    return {
+      ...useBulkOrdersBaseForm(),
+      ...useFormValidation(() => getBaseFormRefs(setupContext.refs))
+    };
+  },
   props: {
     product: {
       type: Object as PropType<Product>,
@@ -72,25 +89,7 @@ export default BulkorderBaseFormPersistanceState.extend({
     ValidationObserver
   },
   data () {
-    const bulkordersBaseFormData: BulkordersBaseFormData = {
-      name: '',
-      description: '',
-      quantity: undefined,
-      additionalQuantity: undefined,
-      deadline: undefined,
-      deadlineDate: undefined,
-      country: '',
-      customerFirstName: '',
-      customerLastName: undefined,
-      customerEmail: '',
-      customerPhone: '',
-      customerImages: [],
-      customerType: undefined,
-      agreement: false
-    }
-
     return {
-      bulkordersBaseFormData,
       isSubmitting: false,
       showCalculationAnimation: false,
       onCalculationAnimationFinished: () => {}
@@ -104,53 +103,15 @@ export default BulkorderBaseFormPersistanceState.extend({
       return this.isSubmitting;
     }
   },
-  async beforeMount (): Promise<void> {
-    const state = await this.getPersistedState();
-
-    if (!state) {
-      return;
-    }
-
-    this.bulkordersBaseFormData = { ...this.bulkordersBaseFormData, ...state };
-  },
   methods: {
-    getBaseForm (): InstanceType<typeof MBaseForm> {
-      const form = this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
-
-      if (!form) {
-        throw new Error('Base Form is not defined');
-      }
-
-      return form;
-    },
-    getDataToPersist () {
-      return {
-        country: this.bulkordersBaseFormData.country,
-        customerFirstName: this.bulkordersBaseFormData.customerFirstName,
-        customerEmail: this.bulkordersBaseFormData.customerEmail,
-        customerPhone: this.bulkordersBaseFormData.customerPhone,
-        customerLastName: this.bulkordersBaseFormData.customerLastName
-      }
-    },
-    getValidationObserver (): InstanceType<typeof ValidationObserver> {
-      const validationObserver = this.$refs.validationObserver as InstanceType<typeof ValidationObserver> | undefined;
-
-      if (!validationObserver) {
-        throw new Error('Validation Observer is not defined');
-      }
-
-      return validationObserver;
-    },
-    onGoToField (fieldName: string): void {
-      goToFieldByName(fieldName, this.getBaseForm().$refs);
-    },
     async onSubmit (): Promise<void> {
-      const isValid = await validateForm(
-        this.getValidationObserver(),
-        this.getBaseForm().$refs
-      );
+      if (this.isDisabled) {
+        return;
+      }
 
-      if (this.isDisabled || !isValid) {
+      const isValid = await this.validateAndGoToFirstError();
+
+      if (!isValid) {
         return;
       }
 
@@ -232,28 +193,6 @@ export default BulkorderBaseFormPersistanceState.extend({
         message: message,
         action1: { label: i18n.t('OK') }
       });
-    }
-  },
-  watch: {
-    'bulkordersBaseFormData.customerFirstName': {
-      handler (): void {
-        this.savePersistedState()
-      }
-    },
-    'bulkordersBaseFormData.customerEmail': {
-      handler (): void {
-        this.savePersistedState();
-      }
-    },
-    'bulkordersBaseFormData.country': {
-      handler (): void {
-        this.savePersistedState();
-      }
-    },
-    'bulkordersBaseFormData.customerPhone': {
-      handler (): void {
-        this.savePersistedState();
-      }
     }
   }
 })

@@ -4,7 +4,7 @@
       <li class="_item"
           v-for="(errors, key) in filteredErrors"
           :key="key"
-          @click="$emit('go-to-field', key)"
+          @click="$emit('item-click', key)"
       >
         {{ errors[0] }}
       </li>

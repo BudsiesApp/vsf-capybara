@@ -344,7 +344,7 @@
       <m-form-errors
         class="_form-errors"
         :form-errors="formErrors"
-        @go-to-field="goToFieldByName"
+        @item-click="goToFieldByName"
       />
 
       <div class="_buttons-container">
@@ -359,7 +359,6 @@
 <script lang="ts">
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
 import { required, between } from 'vee-validate/dist/rules';
-import Vue, { PropType, VueConstructor } from 'vue'
 import { TranslateResult } from 'vue-i18n';
 import { SfButton, SfCheckbox, SfHeading, SfSelect, SfDivider, SfInput } from '@storefront-ui/vue'
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
@@ -370,6 +369,7 @@ import { BundleOption, BundleOptionsProductLink } from '@vue-storefront/core/mod
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import i18n from '@vue-storefront/i18n';
+import { defineComponent, inject, PropType } from '@vue/composition-api';
 
 import { Bodypart, BodypartOption, BodypartValue, ProductId, ProductValue, vuexTypes as budsiesTypes, ImageUploadMethod, Dictionary } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
@@ -378,7 +378,8 @@ import { CustomerImage, getProductDefaultPrice, ServerError } from 'src/modules/
 import BulksampleProduct from 'theme/interfaces/bulksample-product.type';
 import { getFieldAnchorName } from 'theme/helpers/get-field-anchor-name.function';
 import { goToFieldByName } from 'theme/helpers/go-to-field-by-name.function';
-import { validateForm } from 'theme/helpers/validate-form.function';
+import { validateAndGoToFirstError } from 'theme/helpers/validate-form.function';
+import { useFormValidation } from 'theme/helpers/use-form-validation';
 
 import AddonOption from '../interfaces/addon-option.interface';
 import CustomerType from '../interfaces/customer-type.interface';
@@ -413,7 +414,7 @@ const sizeFromDescriptionRegex = /Size: (\d{1,2})/;
 
 const sneakPeakAddonSku = 'bulk_sample_sneak_peek';
 
-export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
+export default defineComponent({
   props: {
     artworkUploadUrl: {
       type: String,
@@ -432,8 +433,14 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       default: false
     }
   },
-  inject: {
-    imageHandlerService: { from: 'ImageHandlerService' }
+  setup (_, setupContext) {
+    const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService')
+    const getRefs: () => Record<string, Vue | Element | Vue[] | Element[]> = () => setupContext.refs;
+
+    return {
+      imageHandlerService,
+      ...useFormValidation(getRefs)
+    }
   },
   components: {
     SfButton,
@@ -991,6 +998,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return validationObserver;
     },
     onArtworkAdd (value: Item): void {
+      if (!this.imageHandlerService) {
+        throw new Error('Image Handler Service is not defined');
+      }
+
       this.customerImages.push({
         id: value.id,
         url: this.imageHandlerService.getOriginalImageUrl(value.url)
@@ -1018,7 +1029,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       });
     },
     async onFormSubmit (): Promise<void> {
-      const isValid = await validateForm(
+      const isValid = await validateAndGoToFirstError(
         this.getValidationObserver(),
         this.$refs
       );

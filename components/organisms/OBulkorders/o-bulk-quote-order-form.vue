@@ -16,6 +16,7 @@
         :has-bodyparts="true"
         :show-calculation-animation="showCalculationAnimation"
         v-model="bulkordersBaseFormData"
+        :get-field-anchor-name="getFieldAnchorName"
         @calculation-animation-finished="onCalculationAnimationFinished"
       >
         <template #bodyparts v-if="colorPaletteBodypart">
@@ -110,7 +111,7 @@
       <m-form-errors
         class="_form-errors"
         :form-errors="formErrors"
-        @go-to-field="onGoToField"
+        @item-click="goToFieldByName"
       />
 
       <div class="_button-container">
@@ -129,17 +130,15 @@
 import config from 'config';
 import { ValidationObserver, ValidationProvider, extend } from 'vee-validate';
 import { between, required } from 'vee-validate/dist/rules';
-import { PropType } from 'vue';
 import { SfButton, SfHeading, SfInput } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
+import { defineComponent, PropType } from '@vue/composition-api';
 
 import Product from 'core/modules/catalog/types/Product';
 import { Bodypart, BodypartOption, BodypartValue, BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo, Dictionary, vuexTypes as budsiesTypes } from 'src/modules/budsies';
-import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
-import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
-import { getFieldAnchorName } from 'theme/helpers/get-field-anchor-name.function';
 import { goToFieldByName } from 'theme/helpers/go-to-field-by-name.function';
-import { validateForm } from 'theme/helpers/validate-form.function';
+import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
+import { useFormValidation } from 'theme/helpers/use-form-validation';
 
 import MBaseForm from './m-base-form.vue';
 import MBodypartOptionConfigurator from '../../molecules/m-bodypart-option-configurator.vue';
@@ -156,8 +155,34 @@ extend('between', {
   message: 'The {_field_} field must be between {min} and {max}'
 });
 
-export default BulkorderBaseFormPersistanceState.extend({
+function getBaseForm (
+  refs: Record<string, Vue | Element | Vue[] | Element[]>
+): InstanceType<typeof MBaseForm> {
+  const baseForm = refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
+
+  if (!baseForm) {
+    throw new Error('Base Form is not defined');
+  }
+
+  return baseForm;
+}
+
+function getFormAllRefs (
+  refs: Record<string, Vue | Element | Vue[] | Element[]>
+): Record<string, Vue | Element | Vue[] | Element[]> {
+  const baseForm = getBaseForm(refs);
+
+  return { ...refs, ...baseForm.$refs }
+}
+
+export default defineComponent({
   name: 'OBulkQuoteOrderForm',
+  setup (_, setupContext) {
+    return {
+      ...useBulkOrdersBaseForm(),
+      ...useFormValidation(() => getFormAllRefs(setupContext.refs))
+    };
+  },
   props: {
     product: {
       type: Object as PropType<Product>,
@@ -180,25 +205,7 @@ export default BulkorderBaseFormPersistanceState.extend({
     ValidationProvider
   },
   data () {
-    const bulkordersBaseFormData: BulkordersBaseFormData = {
-      name: '',
-      description: '',
-      quantity: undefined,
-      additionalQuantity: undefined,
-      deadline: undefined,
-      deadlineDate: undefined,
-      country: '',
-      customerFirstName: '',
-      customerLastName: undefined,
-      customerEmail: '',
-      customerPhone: '',
-      customerImages: [],
-      customerType: undefined,
-      agreement: false
-    }
-
     return {
-      bulkordersBaseFormData,
       isSubmitting: false,
       bulkSize: undefined as string | undefined,
       color: undefined as BodypartOption[] | undefined,
@@ -254,25 +261,7 @@ export default BulkorderBaseFormPersistanceState.extend({
       return `https://${config.budsies.budsiesStoreDomain}`;
     }
   },
-  async beforeMount (): Promise<void> {
-    const state = await this.getPersistedState();
-
-    if (!state) {
-      return;
-    }
-
-    this.bulkordersBaseFormData = { ...this.bulkordersBaseFormData, ...state };
-  },
   methods: {
-    getBaseForm (): InstanceType<typeof MBaseForm> {
-      const baseForm = this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
-
-      if (!baseForm) {
-        throw new Error('Base Form is not defined');
-      }
-
-      return baseForm;
-    },
     getBodypartsData (): Dictionary<string[]> {
       if (!this.color || !this.colorPaletteBodypart) {
         return {};
@@ -289,14 +278,6 @@ export default BulkorderBaseFormPersistanceState.extend({
         customerLastName: this.bulkordersBaseFormData.customerLastName
       }
     },
-    getFormAllRefs (): Record<string, Vue | Element | Vue[] | Element[]> {
-      const baseForm = this.getBaseForm();
-
-      return { ...this.$refs, ...baseForm.$refs };
-    },
-    getFieldAnchorName (fieldName: string): string {
-      return getFieldAnchorName(fieldName);
-    },
     getValidationObserver (): InstanceType<typeof ValidationObserver> {
       const validationObserver = this.$refs.validationObserver as InstanceType<typeof ValidationObserver> | undefined;
 
@@ -306,18 +287,14 @@ export default BulkorderBaseFormPersistanceState.extend({
 
       return validationObserver;
     },
-    onGoToField (fieldName: string): void {
-      const refs = this.getFormAllRefs();
-
-      goToFieldByName(fieldName, refs);
-    },
     async onSubmit (): Promise<void> {
-      const isValid = await validateForm(
-        this.getValidationObserver(),
-        this.getFormAllRefs()
-      );
+      if (this.isDisabled) {
+        return;
+      }
 
-      if (this.isDisabled || !isValid) {
+      const isValid = await this.validateAndGoToFirstError();
+
+      if (!isValid) {
         return;
       }
 
@@ -401,28 +378,6 @@ export default BulkorderBaseFormPersistanceState.extend({
         message: message,
         action1: { label: i18n.t('OK') }
       });
-    }
-  },
-  watch: {
-    'bulkordersBaseFormData.customerFirstName': {
-      handler (): void {
-        this.savePersistedState()
-      }
-    },
-    'bulkordersBaseFormData.customerEmail': {
-      handler (): void {
-        this.savePersistedState();
-      }
-    },
-    'bulkordersBaseFormData.country': {
-      handler (): void {
-        this.savePersistedState();
-      }
-    },
-    'bulkordersBaseFormData.customerPhone': {
-      handler (): void {
-        this.savePersistedState();
-      }
     }
   }
 })

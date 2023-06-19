@@ -15,7 +15,7 @@
         :ref="getFieldAnchorName('Artwork')"
       />
 
-      <input type="hidden" v-model="value.customerImages">
+      <input type="hidden" v-model="formData.customerImages">
 
       <MArtworkUpload
         :allow-multiple="true"
@@ -53,7 +53,7 @@
       <SfInput
         :label="$t('Project Name')"
         name="project-name"
-        v-model="name"
+        v-model="formData.name"
         :disabled="isDisabled"
         class="sf-input--required"
         :valid="!errors.length"
@@ -83,7 +83,7 @@
       <textarea
         name="description"
         rows="5"
-        v-model="description"
+        v-model="formData.description"
         :placeholder="$t('Give us any additional direction as we create your plush prototype')"
         :disabled="isDisabled"
       />
@@ -124,7 +124,7 @@
           :disabled="isDisabled"
           name="quantity"
           class="sf-input--required -quantity"
-          v-model="quantity"
+          v-model="formData.quantity"
           :valid="!errors.length"
         />
 
@@ -163,7 +163,7 @@
           name="additional-quantity"
           class="-quantity"
           :ref="getFieldAnchorName('Additional Quantity')"
-          v-model="additionalQuantity"
+          v-model="formData.additionalQuantity"
         />
 
         <div
@@ -206,13 +206,13 @@
         <SfRadio
           value="0"
           :label="$t('No firm deadline - the sooner the better!')"
-          v-model="deadline"
+          v-model="formData.deadline"
         />
 
         <SfRadio
           value="1"
           :label="$t('I need them for a specific date')"
-          v-model="deadline"
+          v-model="formData.deadline"
         />
 
         <div
@@ -228,16 +228,16 @@
         v-slot="{ errors }"
         name="'Deadline Date'"
         :ref="getFieldAnchorName('Deadline Date')"
-        :rules="deadline === '1' ? 'required' : ''"
+        :rules="formData.deadline === '1' ? 'required' : ''"
       >
         <div
           class="sf-input _deadline-input"
-          :class="{'--required': deadline && deadline !== '0'}"
+          :class="{'--required': formData.deadline && formData.deadline !== '0'}"
         >
           <input
-            v-model="deadlineDate"
+            v-model="formData.deadlineDate"
             type="date"
-            :disabled="!deadline || deadline === '0'"
+            :disabled="!formData.deadline || formData.deadline === '0'"
           >
 
           <div
@@ -272,7 +272,7 @@
       </div>
 
       <MMultiselect
-        v-model="country"
+        v-model="formData.country"
         name="countries"
         :label="$t('Country')"
         :required="true"
@@ -304,7 +304,7 @@
             :label="$t('First Name')"
             :ref="getFieldAnchorName('First Name')"
             name="first-name"
-            v-model="customerFirstName"
+            v-model="formData.customerFirstName"
             class="sf-input--required"
             :valid="!errors.length"
             :error-message="errors[0]"
@@ -314,7 +314,7 @@
         <SfInput
           :label="$t('Last Name')"
           name="last-name"
-          v-model="customerLastName"
+          v-model="formData.customerLastName"
         />
 
         <validation-provider
@@ -327,7 +327,7 @@
             :label="$t('Your e-mail address')"
             :ref="getFieldAnchorName('Email')"
             name="email"
-            v-model="customerEmail"
+            v-model="formData.customerEmail"
             class="sf-input--required"
             :valid="!errors.length"
             :error-message="errors[0]"
@@ -344,7 +344,7 @@
             :label="$t('Phone Number')"
             :ref="getFieldAnchorName('Phone Number')"
             name="phone-number"
-            v-model="customerPhone"
+            v-model="formData.customerPhone"
             class="sf-input--required"
             :valid="!errors.length"
             :error-message="errors[0]"
@@ -366,7 +366,7 @@
       </div>
 
       <SfSelect
-        v-model="customerType"
+        v-model="formData.customerType"
         :should-lock-scroll-on-open="isMobile"
         class="sf-select--underlined"
       >
@@ -387,7 +387,7 @@
       slim
     >
       <MCheckbox
-        v-model="agreement"
+        v-model="formData.agreement"
         :disabled="isDisabled"
         :ref="getFieldAnchorName('Agreement')"
       >
@@ -440,7 +440,6 @@ import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
 import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
 import MBulkordersCalculationAnimation from './m-calculation-animation.vue';
-import { getFieldAnchorName } from 'theme/helpers/get-field-anchor-name.function';
 
 const Countries = require('@vue-storefront/i18n/resource/countries.json');
 
@@ -514,6 +513,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     showCalculationAnimation: {
       type: Boolean,
       default: false
+    },
+    getFieldAnchorName: {
+      type: Function as PropType<(fieldName: string) => string>,
+      required: true
     }
   },
   inject: {
@@ -532,14 +535,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return {
         required: true,
         regex: phoneValidationRegex
-      }
-    },
-    agreement: {
-      get (): boolean {
-        return this.value.agreement;
-      },
-      set (value: boolean) {
-        this.updateValue({ agreement: value })
       }
     },
     backendProductId (): string | undefined {
@@ -596,100 +591,12 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     customerTypeStepOrder (): number {
       return this.customerInfoStepOrder + 1;
     },
-    customerType: {
-      get (): string | undefined {
-        return this.value.customerType
+    formData: {
+      get (): BulkordersBaseFormData {
+        return this.value;
       },
-      set (value: string) {
-        this.updateValue({ customerType: value });
-      }
-    },
-    name: {
-      get (): string {
-        return this.value.name;
-      },
-      set (value: string) {
-        this.updateValue({ name: value });
-      }
-    },
-    description: {
-      get (): string {
-        return this.value.description;
-      },
-      set (value: string) {
-        this.updateValue({ description: value });
-      }
-    },
-    quantity: {
-      get (): number | undefined {
-        return this.value.quantity;
-      },
-      set (value: number) {
-        this.updateValue({ quantity: value });
-      }
-    },
-    additionalQuantity: {
-      get (): number | undefined {
-        return this.value.additionalQuantity;
-      },
-      set (value: number) {
-        this.updateValue({ additionalQuantity: value });
-      }
-    },
-    deadline: {
-      get (): '0' | '1' | undefined {
-        return this.value.deadline;
-      },
-      set (value: '0' | '1' | undefined) {
-        this.updateValue({ deadline: value });
-      }
-    },
-    deadlineDate: {
-      get (): string | undefined {
-        return this.value.deadlineDate;
-      },
-      set (value: any) {
-        this.updateValue({ deadlineDate: value })
-      }
-    },
-    country: {
-      get (): string {
-        return this.value.country;
-      },
-      set (value: string) {
-        this.updateValue({ country: value });
-      }
-    },
-    customerFirstName: {
-      get (): string {
-        return this.value.customerFirstName;
-      },
-      set (value: string) {
-        this.updateValue({ customerFirstName: value });
-      }
-    },
-    customerLastName: {
-      get (): string | undefined {
-        return this.value.customerLastName;
-      },
-      set (value: string | undefined) {
-        this.updateValue({ customerLastName: value });
-      }
-    },
-    customerEmail: {
-      get (): string {
-        return this.value.customerEmail;
-      },
-      set (value: string) {
-        this.updateValue({ customerEmail: value });
-      }
-    },
-    customerPhone: {
-      get (): string {
-        return this.value.customerPhone;
-      },
-      set (value: string) {
-        this.updateValue({ customerPhone: value });
+      set (value: BulkordersBaseFormData) {
+        this.$emit('input', value);
       }
     },
     quantityButtonText (): TranslateResult {
@@ -699,12 +606,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
   },
   methods: {
-    getFieldAnchorName (fieldName: string): string {
-      return getFieldAnchorName(fieldName);
-    },
     onAdditionalQuantityButtonClick (): void {
       this.showAdditionalQuantity = !this.showAdditionalQuantity;
-      this.additionalQuantity = undefined;
+      this.formData.additionalQuantity = undefined;
     },
     onArtworkAdd (value: Item): void {
       const customerImages = [...this.value.customerImages];
@@ -714,7 +618,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         url: this.imageHandlerService.getOriginalImageUrl(value.url)
       });
 
-      this.updateValue({ customerImages })
+      this.formData.customerImages = customerImages;
     },
     onArtworkRemove (storageItemId: string): void {
       const customerImages = [...this.value.customerImages];
@@ -727,10 +631,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       customerImages.splice(index, 1);
 
-      this.updateValue({ customerImages });
-    },
-    updateValue (value: Partial<BulkordersBaseFormData>): void {
-      this.$emit('input', { ...this.value, ...value })
+      this.formData.customerImages = customerImages;
     },
     onCalculationAnimationFinished (): void {
       this.$emit('calculation-animation-finished');
