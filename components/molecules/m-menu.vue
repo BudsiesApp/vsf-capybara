@@ -310,6 +310,7 @@ export default Vue.extend({
   }
 
   ._close-icon {
+    cursor: pointer;
     position: absolute;
     right: var(--spacer-sm);
     top: var(--spacer-base);
