@@ -57,19 +57,10 @@
       </template>
       <template #search>
         <div />
-        <!-- <OSearch :class="{'desktop-only': !isSearchPanelVisible}" />
-        <SfButton
-          v-if="isSearchPanelVisible"
-          class="sf-button--text form__action-button form__action-button--secondary mobile-only"
-          @click="$store.commit('ui/setSearchpanel', false)"
-        >
-          {{ $t('Cancel') }}
-        </SfButton> -->
       </template>
       <template #header-icons>
         <div class="sf-header__icons">
           <AAccountIcon class="sf-header__action" />
-          <!-- <AMicrocartIcon class="sf-header__action" /> -->
           <ADetailedCartIcon class="sf-header__action" />
         </div>
       </template>
@@ -81,9 +72,7 @@
 import { SfHeader, SfOverlay } from '@storefront-ui/vue';
 import ALogo from 'theme/components/atoms/a-logo';
 import AAccountIcon from 'theme/components/atoms/a-account-icon';
-import AMicrocartIcon from 'theme/components/atoms/a-microcart-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
-import OSearch from 'theme/components/organisms/o-search';
 import { mapState, mapGetters } from 'vuex';
 import MMenu from 'theme/components/molecules/m-menu';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
@@ -94,9 +83,7 @@ export default {
     SfHeader,
     ALogo,
     AAccountIcon,
-    AMicrocartIcon,
     ADetailedCartIcon,
-    OSearch,
     MMenu,
     SfOverlay,
     MCtaButton
@@ -104,66 +91,7 @@ export default {
   data () {
     return {
       isHoveredMenu: false,
-      isDropdownOpen: false,
-      isMouseOverLocked: false,
-      dropdownActions: [
-        {
-          label: 'Custom Petsies',
-          url: '/forevers-pet-plush/'
-        },
-        {
-          label: 'Custom Pillows',
-          url: '/custom-pillows/'
-        },
-        {
-          label: 'Custom Blankets',
-          url: '/custom-blankets/'
-        },
-        {
-          label: 'Custom Socks',
-          url: {
-            name: 'printed-socks-creation-page'
-          }
-        },
-        {
-          label: 'Face Masks',
-          url: {
-            name: 'printed-masks-creation-page'
-          }
-        },
-        {
-          label: 'Bobbleheads & Figurines',
-          url: '/pet-bobblehead-figurines/'
-        },
-        {
-          label: this.$t('Pajamas'),
-          url: {
-            name: 'pajamas-creation'
-          }
-        },
-        {
-          label: 'Pet Keychains',
-          url: {
-            name: 'printed-keychains-creation-page'
-          }
-        },
-        {
-          label: 'Pet Magnets',
-          url: {
-            name: 'felted-magnets-creation-page'
-          }
-        },
-        {
-          label: 'Pet Ornaments',
-          url: {
-            name: 'felted-ornaments-creation-page'
-          }
-        },
-        {
-          label: 'Gift Box',
-          url: { name: 'giftbox' }
-        }
-      ]
+      isMouseOverLocked: false
     }
   },
   computed: {
