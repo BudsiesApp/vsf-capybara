@@ -1,11 +1,12 @@
 <template>
   <validation-observer
-    v-slot="{ passes }"
+    ref="validationObserver"
+    v-slot="{ errors: formErrors }"
     slim
   >
     <form
       class="o-bulksample-creation-form"
-      @submit.prevent="() => passes(() => onFormSubmit())"
+      @submit.prevent="onFormSubmit"
     >
       <SfHeading
         :level="1"
@@ -24,6 +25,7 @@
           :level="3"
           :title="$t('STEP {number}', {number: 1})"
           class="_step-number"
+          :ref="getFieldAnchorName('Artwork')"
         />
 
         <SfHeading
@@ -38,7 +40,6 @@
 
         <input
           type="hidden"
-          name="uploaded_artwork_ids[]"
           v-model="customerImages"
         >
 
@@ -77,6 +78,7 @@
             :level="3"
             :title="$t('STEP {number}', {number: 2})"
             class="_step-number"
+            :ref="getFieldAnchorName('Size')"
           />
 
           <template v-if="showPillowSizeSelector">
@@ -130,6 +132,7 @@
             :level="3"
             :title="$t('STEP {number}', {number: nameStepNumber})"
             class="_step-number"
+            :ref="getFieldAnchorName('Name')"
           />
 
           <SfInput
@@ -158,6 +161,7 @@
             :level="3"
             :title="descriptionTitleText"
             class="_step-title -required"
+            :ref="getFieldAnchorName('Description')"
           />
 
           <textarea
@@ -189,6 +193,7 @@
             :level="3"
             :title="$t('Color Palette')"
             class="_step-title -required"
+            :ref="getFieldAnchorName('Colors')"
           />
 
           <span class="_subtitle">
@@ -279,6 +284,7 @@
           :level="3"
           :title="$t('STEP {number}', {number: emailStepNumber})"
           class="_step-number"
+          :ref="getFieldAnchorName('E-mail')"
         />
 
         <validation-provider
@@ -304,13 +310,14 @@
 
         <validation-provider
           :rules="showEmailStep ? { required: { allowFalse: false } } : ''"
-          :name="$t('Agreement')"
+          :name="$t('\'Agreement\'')"
           v-slot="{errors}"
           slim
         >
           <SfCheckbox
             class="_agreement"
             :disabled="isDisabled"
+            :ref="getFieldAnchorName('Agreement')"
             v-model="agreement"
           >
             <template #label>
@@ -334,6 +341,12 @@
         </validation-provider>
       </div>
 
+      <m-form-errors
+        class="_form-errors"
+        :form-errors="formErrors"
+        @item-click="goToFieldByName"
+      />
+
       <div class="_buttons-container">
         <SfButton type="submit" :disabled="isDisabled">
           {{ $t('SAVE') }}
@@ -346,7 +359,6 @@
 <script lang="ts">
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
 import { required, between } from 'vee-validate/dist/rules';
-import Vue, { PropType, VueConstructor } from 'vue'
 import { TranslateResult } from 'vue-i18n';
 import { SfButton, SfCheckbox, SfHeading, SfSelect, SfDivider, SfInput } from '@storefront-ui/vue'
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
@@ -357,20 +369,23 @@ import { BundleOption, BundleOptionsProductLink } from '@vue-storefront/core/mod
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import i18n from '@vue-storefront/i18n';
+import { defineComponent, inject, PropType, Ref, ref } from '@vue/composition-api';
 
 import { Bodypart, BodypartOption, BodypartValue, ProductId, ProductValue, vuexTypes as budsiesTypes, ImageUploadMethod, Dictionary } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage, getProductDefaultPrice, ServerError } from 'src/modules/shared';
 
 import BulksampleProduct from 'theme/interfaces/bulksample-product.type';
+import { useFormValidation } from 'theme/helpers/use-form-validation';
 
 import AddonOption from '../interfaces/addon-option.interface';
 import CustomerType from '../interfaces/customer-type.interface';
+import SelectedAddon from '../interfaces/selected-addon.interface';
 
 import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
 import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
 import MBodypartOptionConfigurator from 'theme/components/molecules/m-bodypart-option-configurator.vue';
-import SelectedAddon from '../interfaces/selected-addon.interface';
+import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 
 extend('required', {
   ...required,
@@ -382,10 +397,6 @@ extend('between', {
   message: 'The {_field_} field must be between {min} and {max}'
 });
 
-interface InjectedServices {
-  imageHandlerService: ImageHandlerService
-}
-
 interface PillowSizeOption {
   id: number | string,
   value: number | string,
@@ -396,7 +407,7 @@ const sizeFromDescriptionRegex = /Size: (\d{1,2})/;
 
 const sneakPeakAddonSku = 'bulk_sample_sneak_peek';
 
-export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
+export default defineComponent({
   props: {
     artworkUploadUrl: {
       type: String,
@@ -415,8 +426,19 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       default: false
     }
   },
-  inject: {
-    imageHandlerService: { from: 'ImageHandlerService' }
+  setup (_, setupContext) {
+    const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService')
+    const getRefs: () => Record<string, Vue | Element | Vue[] | Element[]> = () => setupContext.refs;
+    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+
+    return {
+      imageHandlerService,
+      validationObserver,
+      ...useFormValidation(
+        validationObserver,
+        getRefs
+      )
+    }
   },
   components: {
     SfButton,
@@ -427,6 +449,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     MAddonsSelector,
     MArtworkUpload,
     MBodypartOptionConfigurator,
+    MFormErrors,
     ValidationProvider,
     ValidationObserver,
     SfCheckbox
@@ -958,6 +981,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       })
     },
     onArtworkAdd (value: Item): void {
+      if (!this.imageHandlerService) {
+        throw new Error('Image Handler Service is not defined');
+      }
+
       this.customerImages.push({
         id: value.id,
         url: this.imageHandlerService.getOriginalImageUrl(value.url)
@@ -984,7 +1011,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         action1: { label: i18n.t('OK') }
       });
     },
-    onFormSubmit (): void {
+    async onFormSubmit (): Promise<void> {
+      const isValid = await this.validateAndGoToFirstError();
+
+      if (!isValid) {
+        return;
+      }
+
       if (!this.existingCartItem) {
         void this.addToCart();
       } else {
@@ -1131,7 +1164,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 $subsection-margin: 0 0 4rem;
 
 .o-bulksample-creation-form {
-    --divider-margin: 0 0 var(--spacer-2xl);
+    --divider-margin: var(--spacer-2xl) 0 0;
     --divider-border-color: rgba(0, 0, 0, 0.1);
     --divider-display: none;
 
@@ -1146,8 +1179,16 @@ $subsection-margin: 0 0 4rem;
         flex-direction: column;
         align-items: center;
         max-width: 760px;
-        margin: 0 auto var(--spacer-2xl);
+        margin: var(--spacer-2xl) auto 0;
         text-align: center;
+
+        &:first-child {
+          margin-top: 0;
+        }
+    }
+
+    ._form-errors {
+      margin-top: var(--spacer-2xl);
     }
 
     ._step-number {
@@ -1261,14 +1302,11 @@ $subsection-margin: 0 0 4rem;
         display: flex;
         align-items: center;
         justify-content: center;
+        margin-top: var(--spacer-2xl);
     }
 
     @media screen and (min-width: $mobile-max) {
       --divider-display: block;
-
-      ._step-container {
-        // margin-bottom: var(--spacer-xl);
-      }
 
       .sf-input {
         --input-width: 70%;

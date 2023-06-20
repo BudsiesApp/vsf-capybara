@@ -2,7 +2,11 @@
   <div class="o-bulk-quote-order-form">
     <SfHeading :level="1" :title="$t('Bulk Order Quote')" class="_title" />
 
-    <validation-observer v-slot="{passes}" slim>
+    <validation-observer
+      ref="validationObserver"
+      v-slot="{errors: formErrors}"
+      slim
+    >
       <m-base-form
         ref="baseForm"
         :product="product"
@@ -12,6 +16,7 @@
         :has-bodyparts="true"
         :show-calculation-animation="showCalculationAnimation"
         v-model="bulkordersBaseFormData"
+        :get-field-anchor-name="getFieldAnchorName"
         @calculation-animation-finished="onCalculationAnimationFinished"
       >
         <template #bodyparts v-if="colorPaletteBodypart">
@@ -21,6 +26,7 @@
               :level="3"
               :title="$t('Color Palette')"
               class="_title -required"
+              :ref="getFieldAnchorName('Color Palette')"
             />
 
             <span class="_subtitle">
@@ -30,6 +36,7 @@
             <validation-provider
               v-slot="{ errors }"
               rules="required"
+              name="'Color Palette'"
               slim
             >
               <m-bodypart-option-configurator
@@ -65,6 +72,7 @@
               :level="3"
               :title="$t('What’s your preferred size?')"
               class="_title"
+              :ref="getFieldAnchorName('Size')"
             />
 
             <div class="_helper">
@@ -100,9 +108,15 @@
         </template>
       </m-base-form>
 
+      <m-form-errors
+        class="_form-errors"
+        :form-errors="formErrors"
+        @item-click="goToFieldByName"
+      />
+
       <div class="_button-container">
         <SfButton
-          @click="() => passes(() => onSubmit())"
+          @click="onSubmit"
           :disabled="isDisabled"
         >
           {{ $t('Get My Quote') }}
@@ -116,22 +130,23 @@
 import config from 'config';
 import { ValidationObserver, ValidationProvider, extend } from 'vee-validate';
 import { between, required } from 'vee-validate/dist/rules';
-import { PropType } from 'vue';
 import { SfButton, SfHeading, SfInput } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
+import { defineComponent, PropType, Ref, ref } from '@vue/composition-api';
 
 import Product from 'core/modules/catalog/types/Product';
 import { Bodypart, BodypartOption, BodypartValue, BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo, Dictionary, vuexTypes as budsiesTypes } from 'src/modules/budsies';
-import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
-import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
+import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
+import { useFormValidation } from 'theme/helpers/use-form-validation';
 
 import MBaseForm from './m-base-form.vue';
 import MBodypartOptionConfigurator from '../../molecules/m-bodypart-option-configurator.vue';
 import AOrderedHeading from '../../atoms/a-ordered-heading.vue';
+import MFormErrors from '../../molecules/m-form-errors.vue';
 
 extend('required', {
   ...required,
-  message: 'Field is required'
+  message: '{_field_} field is required'
 })
 
 extend('between', {
@@ -139,8 +154,40 @@ extend('between', {
   message: 'The {_field_} field must be between {min} and {max}'
 });
 
-export default BulkorderBaseFormPersistanceState.extend({
+function getBaseForm (
+  refs: Record<string, Vue | Element | Vue[] | Element[]>
+): InstanceType<typeof MBaseForm> {
+  const baseForm = refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
+
+  if (!baseForm) {
+    throw new Error('Base Form is not defined');
+  }
+
+  return baseForm;
+}
+
+function getFormAllRefs (
+  refs: Record<string, Vue | Element | Vue[] | Element[]>
+): Record<string, Vue | Element | Vue[] | Element[]> {
+  const baseForm = getBaseForm(refs);
+
+  return { ...refs, ...baseForm.$refs }
+}
+
+export default defineComponent({
   name: 'OBulkQuoteOrderForm',
+  setup (_, setupContext) {
+    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+
+    return {
+      validationObserver,
+      ...useBulkOrdersBaseForm(),
+      ...useFormValidation(
+        validationObserver,
+        () => getFormAllRefs(setupContext.refs)
+      )
+    };
+  },
   props: {
     product: {
       type: Object as PropType<Product>,
@@ -155,6 +202,7 @@ export default BulkorderBaseFormPersistanceState.extend({
     AOrderedHeading,
     MBaseForm,
     MBodypartOptionConfigurator,
+    MFormErrors,
     SfButton,
     SfHeading,
     SfInput,
@@ -162,25 +210,7 @@ export default BulkorderBaseFormPersistanceState.extend({
     ValidationProvider
   },
   data () {
-    const bulkordersBaseFormData: BulkordersBaseFormData = {
-      name: '',
-      description: '',
-      quantity: undefined,
-      additionalQuantity: undefined,
-      deadline: undefined,
-      deadlineDate: undefined,
-      country: '',
-      customerFirstName: '',
-      customerLastName: undefined,
-      customerEmail: '',
-      customerPhone: '',
-      customerImages: [],
-      customerType: undefined,
-      agreement: false
-    }
-
     return {
-      bulkordersBaseFormData,
       isSubmitting: false,
       bulkSize: undefined as string | undefined,
       color: undefined as BodypartOption[] | undefined,
@@ -236,15 +266,6 @@ export default BulkorderBaseFormPersistanceState.extend({
       return `https://${config.budsies.budsiesStoreDomain}`;
     }
   },
-  async beforeMount (): Promise<void> {
-    const state = await this.getPersistedState();
-
-    if (!state) {
-      return;
-    }
-
-    this.bulkordersBaseFormData = { ...this.bulkordersBaseFormData, ...state };
-  },
   methods: {
     getBodypartsData (): Dictionary<string[]> {
       if (!this.color || !this.colorPaletteBodypart) {
@@ -253,17 +274,14 @@ export default BulkorderBaseFormPersistanceState.extend({
 
       return { [this.colorPaletteBodypart.id]: this.color.map(item => item.id) };
     },
-    getDataToPersist () {
-      return {
-        country: this.bulkordersBaseFormData.country,
-        customerFirstName: this.bulkordersBaseFormData.customerFirstName,
-        customerEmail: this.bulkordersBaseFormData.customerEmail,
-        customerPhone: this.bulkordersBaseFormData.customerPhone,
-        customerLastName: this.bulkordersBaseFormData.customerLastName
-      }
-    },
     async onSubmit (): Promise<void> {
       if (this.isDisabled) {
+        return;
+      }
+
+      const isValid = await this.validateAndGoToFirstError();
+
+      if (!isValid) {
         return;
       }
 
@@ -348,47 +366,26 @@ export default BulkorderBaseFormPersistanceState.extend({
         action1: { label: i18n.t('OK') }
       });
     }
-  },
-  watch: {
-    'bulkordersBaseFormData.customerFirstName': {
-      handler (): void {
-        this.savePersistedState()
-      }
-    },
-    'bulkordersBaseFormData.customerEmail': {
-      handler (): void {
-        this.savePersistedState();
-      }
-    },
-    'bulkordersBaseFormData.country': {
-      handler (): void {
-        this.savePersistedState();
-      }
-    },
-    'bulkordersBaseFormData.customerPhone': {
-      handler (): void {
-        this.savePersistedState();
-      }
-    }
   }
 })
 </script>
 
 <style lang="scss" scoped>
 .o-bulk-quote-order-form {
-      padding: var(--spacer-lg);
+  padding: var(--spacer-lg);
 
       ._title {
         margin-bottom: var(--spacer-2xl);
       }
 
-      .m-base-form {
-        margin-bottom: var(--spacer-lg);
+      ._form-errors {
+        margin-top: var(--spacer-lg);
       }
 
       ._button-container {
         display: flex;
         justify-content: center;
+        margin-top: var(--spacer-lg);
       }
 
     ._input-hint {

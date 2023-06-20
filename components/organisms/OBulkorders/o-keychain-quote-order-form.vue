@@ -2,7 +2,11 @@
   <div class="o-keychain-quote-order-form">
     <SfHeading :level="1" :title="$t('Keychain Bulk Order Quote')" class="_title" />
 
-    <validation-observer v-slot="{passes}" slim>
+    <validation-observer
+      ref="validationObserver"
+      v-slot="{errors}"
+      slim
+    >
       <m-base-form
         ref="baseForm"
         :product="product"
@@ -10,12 +14,19 @@
         :artwork-upload-url="artworkUploadUrl"
         v-model="bulkordersBaseFormData"
         :show-calculation-animation="showCalculationAnimation"
+        :get-field-anchor-name="getFieldAnchorName"
         @calculation-animation-finished="onCalculationAnimationFinished"
+      />
+
+      <m-form-errors
+        class="_form-errors"
+        :form-errors="errors"
+        @item-click="goToFieldByName"
       />
 
       <div class="_button-container">
         <SfButton
-          @click="() => passes(() => onSubmit())"
+          @click="onSubmit"
           :disabled="isDisabled"
         >
           {{ $t('Get My Quote') }}
@@ -27,19 +38,45 @@
 
 <script lang="ts">
 import { ValidationObserver } from 'vee-validate';
-import { PropType } from 'vue';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
+import { defineComponent, PropType, Ref, ref } from '@vue/composition-api';
 
 import Product from 'core/modules/catalog/types/Product';
-import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo, vuexTypes as budsiesTypes } from 'src/modules/budsies';
+import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
+
+import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 
 import MBaseForm from './m-base-form.vue';
-import BulkorderBaseFormPersistanceState from 'theme/mixins/bulkorder-base-form-persistance-state';
 
-export default BulkorderBaseFormPersistanceState.extend({
+function getBaseFormRefs (
+  refs: Record<string, Vue | Element | Vue[] | Element[]>
+): Record<string, Vue | Element | Vue[] | Element[]> {
+  const baseForm = refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
+
+  if (!baseForm) {
+    throw new Error('Base Form is not defined');
+  }
+
+  return baseForm.$refs;
+}
+
+export default defineComponent({
   name: 'OKeychainQuoteOrderForm',
+  setup (_, setupContext) {
+    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+
+    return {
+      validationObserver,
+      ...useBulkOrdersBaseForm(),
+      ...useFormValidation(
+        validationObserver,
+        () => getBaseFormRefs(setupContext.refs)
+      )
+    };
+  },
   props: {
     product: {
       type: Object as PropType<Product>,
@@ -52,30 +89,13 @@ export default BulkorderBaseFormPersistanceState.extend({
   },
   components: {
     MBaseForm,
+    MFormErrors,
     SfButton,
     SfHeading,
     ValidationObserver
   },
   data () {
-    const bulkordersBaseFormData: BulkordersBaseFormData = {
-      name: '',
-      description: '',
-      quantity: undefined,
-      additionalQuantity: undefined,
-      deadline: undefined,
-      deadlineDate: undefined,
-      country: '',
-      customerFirstName: '',
-      customerLastName: undefined,
-      customerEmail: '',
-      customerPhone: '',
-      customerImages: [],
-      customerType: undefined,
-      agreement: false
-    }
-
     return {
-      bulkordersBaseFormData,
       isSubmitting: false,
       showCalculationAnimation: false,
       onCalculationAnimationFinished: () => {}
@@ -89,27 +109,15 @@ export default BulkorderBaseFormPersistanceState.extend({
       return this.isSubmitting;
     }
   },
-  async beforeMount (): Promise<void> {
-    const state = await this.getPersistedState();
-
-    if (!state) {
-      return;
-    }
-
-    this.bulkordersBaseFormData = { ...this.bulkordersBaseFormData, ...state };
-  },
   methods: {
-    getDataToPersist () {
-      return {
-        country: this.bulkordersBaseFormData.country,
-        customerFirstName: this.bulkordersBaseFormData.customerFirstName,
-        customerEmail: this.bulkordersBaseFormData.customerEmail,
-        customerPhone: this.bulkordersBaseFormData.customerPhone,
-        customerLastName: this.bulkordersBaseFormData.customerLastName
-      }
-    },
     async onSubmit (): Promise<void> {
       if (this.isDisabled) {
+        return;
+      }
+
+      const isValid = await this.validateAndGoToFirstError();
+
+      if (!isValid) {
         return;
       }
 
@@ -192,28 +200,6 @@ export default BulkorderBaseFormPersistanceState.extend({
         action1: { label: i18n.t('OK') }
       });
     }
-  },
-  watch: {
-    'bulkordersBaseFormData.customerFirstName': {
-      handler (): void {
-        this.savePersistedState()
-      }
-    },
-    'bulkordersBaseFormData.customerEmail': {
-      handler (): void {
-        this.savePersistedState();
-      }
-    },
-    'bulkordersBaseFormData.country': {
-      handler (): void {
-        this.savePersistedState();
-      }
-    },
-    'bulkordersBaseFormData.customerPhone': {
-      handler (): void {
-        this.savePersistedState();
-      }
-    }
   }
 })
 </script>
@@ -226,13 +212,14 @@ export default BulkorderBaseFormPersistanceState.extend({
     margin-bottom: var(--spacer-2xl);
   }
 
-  .m-base-form {
-    margin-bottom: var(--spacer-lg);
+  ._form-errors {
+    margin-top: var(--spacer-lg);
   }
 
   ._button-container {
     display: flex;
     justify-content: center;
+    margin-top: var(--spacer-lg);
   }
 }
 </style>
