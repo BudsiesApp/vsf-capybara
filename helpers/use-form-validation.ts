@@ -1,14 +1,13 @@
 import { ValidationObserver } from 'vee-validate';
-import { Ref, ref } from '@vue/composition-api';
+import { Ref } from '@vue/composition-api';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { isVue } from 'src/modules/shared';
 
 export function useFormValidation (
+  validationObserver: Ref<InstanceType<typeof ValidationObserver> | null>,
   getFormFieldsRefs: () => Record<string, Vue | Element | Vue[] | Element[]>
 ) {
-  const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
-
   function getFieldAnchorName (field: string): string {
     // Strip quotes
     let fieldName = field.replace(/^['"]+|['"]+$/g, '');
@@ -75,7 +74,6 @@ export function useFormValidation (
   return {
     getFieldAnchorName,
     goToFieldByName,
-    validateAndGoToFirstError,
-    validationObserver
+    validateAndGoToFirstError
   }
 }

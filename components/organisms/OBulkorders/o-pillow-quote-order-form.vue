@@ -82,7 +82,7 @@ import { ValidationObserver, ValidationProvider, extend } from 'vee-validate';
 import { required } from 'vee-validate/dist/rules';
 import { TranslateResult } from 'vue-i18n';
 import { SfButton, SfSelect, SfHeading } from '@storefront-ui/vue';
-import { defineComponent, PropType } from '@vue/composition-api';
+import { defineComponent, PropType, Ref, ref } from '@vue/composition-api';
 
 import Product from 'core/modules/catalog/types/Product';
 import { BundleOption, BundleOptionsProductLink } from 'core/modules/catalog/types/BundleOption';
@@ -128,9 +128,14 @@ function getFormAllRefs (
 export default defineComponent({
   name: 'OPillowQuoteOrderForm',
   setup (_, setupContext) {
+    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+
     return {
       ...useBulkOrdersBaseForm(),
-      ...useFormValidation(() => getFormAllRefs(setupContext.refs))
+      ...useFormValidation(
+        validationObserver,
+        () => getFormAllRefs(setupContext.refs)
+      )
     };
   },
   props: {

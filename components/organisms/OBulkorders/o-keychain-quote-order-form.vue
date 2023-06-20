@@ -40,7 +40,7 @@
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
-import { defineComponent, PropType } from '@vue/composition-api';
+import { defineComponent, PropType, Ref, ref } from '@vue/composition-api';
 
 import Product from 'core/modules/catalog/types/Product';
 import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo, vuexTypes as budsiesTypes } from 'src/modules/budsies';
@@ -66,9 +66,14 @@ function getBaseFormRefs (
 export default defineComponent({
   name: 'OKeychainQuoteOrderForm',
   setup (_, setupContext) {
+    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+
     return {
       ...useBulkOrdersBaseForm(),
-      ...useFormValidation(() => getBaseFormRefs(setupContext.refs))
+      ...useFormValidation(
+        validationObserver,
+        () => getBaseFormRefs(setupContext.refs)
+      )
     };
   },
   props: {

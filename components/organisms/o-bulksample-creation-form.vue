@@ -369,7 +369,7 @@ import { BundleOption, BundleOptionsProductLink } from '@vue-storefront/core/mod
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import i18n from '@vue-storefront/i18n';
-import { defineComponent, inject, PropType } from '@vue/composition-api';
+import { defineComponent, inject, PropType, Ref, ref } from '@vue/composition-api';
 
 import { Bodypart, BodypartOption, BodypartValue, ProductId, ProductValue, vuexTypes as budsiesTypes, ImageUploadMethod, Dictionary } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
@@ -429,10 +429,14 @@ export default defineComponent({
   setup (_, setupContext) {
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService')
     const getRefs: () => Record<string, Vue | Element | Vue[] | Element[]> = () => setupContext.refs;
+    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
 
     return {
       imageHandlerService,
-      ...useFormValidation(getRefs)
+      ...useFormValidation(
+        validationObserver,
+        getRefs
+      )
     }
   },
   components: {

@@ -132,7 +132,7 @@ import { ValidationObserver, ValidationProvider, extend } from 'vee-validate';
 import { between, required } from 'vee-validate/dist/rules';
 import { SfButton, SfHeading, SfInput } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
-import { defineComponent, PropType } from '@vue/composition-api';
+import { defineComponent, PropType, Ref, ref } from '@vue/composition-api';
 
 import Product from 'core/modules/catalog/types/Product';
 import { Bodypart, BodypartOption, BodypartValue, BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo, Dictionary, vuexTypes as budsiesTypes } from 'src/modules/budsies';
@@ -177,9 +177,14 @@ function getFormAllRefs (
 export default defineComponent({
   name: 'OBulkQuoteOrderForm',
   setup (_, setupContext) {
+    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+
     return {
       ...useBulkOrdersBaseForm(),
-      ...useFormValidation(() => getFormAllRefs(setupContext.refs))
+      ...useFormValidation(
+        validationObserver,
+        () => getFormAllRefs(setupContext.refs)
+      )
     };
   },
   props: {
