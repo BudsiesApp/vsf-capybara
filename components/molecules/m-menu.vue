@@ -54,7 +54,7 @@
       >
         <SfList>
           <SfListItem
-            v-for="item in customProductsItems"
+            v-for="item in accessoriesItems"
             :key="item.label"
           >
             <router-link
@@ -147,13 +147,13 @@ export default Vue.extend({
           url: '/pet-bobblehead-figurines/'
         },
         {
-          label: this.$t('Pet Magnets'),
+          label: this.$t('Magnets'),
           url: {
             name: 'felted-magnets-creation-page'
           }
         },
         {
-          label: this.$t('Pet Ornaments'),
+          label: this.$t('Ornaments'),
           url: {
             name: 'felted-ornaments-creation-page'
           }
@@ -188,7 +188,7 @@ export default Vue.extend({
       ],
       accessoriesItems: [
         {
-          label: this.$t('Pet Socks'),
+          label: this.$t('Socks'),
           url: {
             name: 'printed-socks-creation-page'
           }
@@ -224,7 +224,7 @@ export default Vue.extend({
           }
         },
         {
-          label: this.$t('Accessories'),
+          label: this.$t('Gift Add-ons'),
           url: {
             name: 'category',
             params: {
