@@ -1,4 +1,4 @@
-import { onBeforeMount, watch } from '@vue/composition-api';
+import { Ref, onBeforeMount, watch } from '@vue/composition-api';
 
 import { StorageManager } from '@vue-storefront/core/lib/storage-manager';
 import { SN_BUDSIES } from 'src/modules/budsies/store/mutation-types';
@@ -15,17 +15,19 @@ interface PersistedStateData {
 const key = 'bulkorder-base-form-data';
 
 export function useBulkorderBaseFormPersistanceState (
-  bulkordersBaseFormData: BulkordersBaseFormData
+  bulkordersBaseFormData: Ref<BulkordersBaseFormData>
 ) {
   const storage = StorageManager.get(SN_BUDSIES);
 
   async function savePersistedState (): Promise<void> {
+    const value = bulkordersBaseFormData.value;
+
     const persistedStateData = {
-      country: bulkordersBaseFormData.country,
-      customerFirstName: bulkordersBaseFormData.customerFirstName,
-      customerEmail: bulkordersBaseFormData.customerEmail,
-      customerPhone: bulkordersBaseFormData.customerPhone,
-      customerLastName: bulkordersBaseFormData.customerLastName
+      country: value.country,
+      customerFirstName: value.customerFirstName,
+      customerEmail: value.customerEmail,
+      customerPhone: value.customerPhone,
+      customerLastName: value.customerLastName
     };
 
     await storage.setItem(key, persistedStateData);
@@ -42,11 +44,10 @@ export function useBulkorderBaseFormPersistanceState (
       return;
     }
 
-    bulkordersBaseFormData.country = state.country;
-    bulkordersBaseFormData.customerFirstName = state.customerFirstName;
-    bulkordersBaseFormData.customerEmail = state.customerEmail;
-    bulkordersBaseFormData.customerPhone = state.customerPhone;
-    bulkordersBaseFormData.customerLastName = state.customerLastName;
+    bulkordersBaseFormData.value = {
+      ...bulkordersBaseFormData.value,
+      ...state
+    };
   });
 
   watch(bulkordersBaseFormData, () => {
