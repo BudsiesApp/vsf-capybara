@@ -69,6 +69,7 @@ export default defineComponent({
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
 
     return {
+      validationObserver,
       ...useBulkOrdersBaseForm(),
       ...useFormValidation(
         validationObserver,

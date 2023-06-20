@@ -433,6 +433,7 @@ export default defineComponent({
 
     return {
       imageHandlerService,
+      validationObserver,
       ...useFormValidation(
         validationObserver,
         getRefs
