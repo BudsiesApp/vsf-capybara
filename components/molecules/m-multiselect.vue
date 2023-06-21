@@ -68,6 +68,8 @@ type Option = Record<string, any> | string;
 
 let instanceId = 0;
 
+const onePasswordInputIgnoreAttribute = 'data-1p-ignore';
+
 export default Vue.extend({
   name: 'MMultiselect',
   inheritAttrs: false,
@@ -85,6 +87,9 @@ export default Vue.extend({
 
     const option = this.getCustomOptionForValue(this.value);
     this.customOptions.push(option);
+  },
+  mounted (): void {
+    this.disableOnePasswordForMultiselect();
   },
   props: {
     placeholder: {
@@ -199,6 +204,15 @@ export default Vue.extend({
     this.enableBodyScroll();
   },
   methods: {
+    disableOnePasswordForMultiselect (): void {
+      const input = this.getMultiselectInput();
+
+      if (!input) {
+        return;
+      }
+
+      input.setAttribute(onePasswordInputIgnoreAttribute, '');
+    },
     enableBodyScroll (): void {
       const scrollableContainer = this.getMultiselectScrollableContainer();
 
@@ -221,6 +235,15 @@ export default Vue.extend({
     },
     getMultiselect (): Multiselect | undefined {
       return this.$refs['multiselect'] as Multiselect | undefined;
+    },
+    getMultiselectInput (): Element | undefined {
+      const multiselect = this.getMultiselect();
+
+      if (!multiselect) {
+        return;
+      }
+
+      return multiselect.$refs.search as Element | undefined;
     },
     getMultiselectScrollableContainer (): Element | null {
       const multiselect = this.getMultiselect();
