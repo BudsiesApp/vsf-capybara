@@ -24,7 +24,7 @@
     >
       <SfInput
         v-model="lastName"
-        class="form__element form__element--half form__element--half-even"
+        class="form__element form__element--half"
         name="last-name"
         :label="$t('Last name')"
         :required="true"
@@ -56,22 +56,26 @@
       rules="required"
       v-slot="{errors}"
     >
-      <SfInput
-        v-model="city"
-        class="form__element form__element--half"
-        name="city"
-        :label="$t('City')"
+      <MMultiselect
+        v-model="country"
+        class="form__element form__element--half form__select"
+        name="countries"
+        :label="$t('Country')"
         :required="true"
-        :disabled="isFormFieldsDisabled"
+        id-field="code"
+        label-field="name"
+        :options="countries"
         :valid="!errors.length"
         :error-message="errors[0]"
+        :disabled="isFormFieldsDisabled"
+        @change="onChangeCountry"
       />
     </validation-provider>
 
     <SfInput
       v-if="!isSelectedCountryHasStates"
       v-model="state"
-      class="form__element form__element--half form__element--half-even"
+      class="form__element form__element--half"
       name="state"
       :label="$t('State / Province')"
       :disabled="isFormFieldsDisabled"
@@ -86,7 +90,7 @@
     >
       <MMultiselect
         v-model="state"
-        class="form__element form__element--half form__element--half-even form__select"
+        class="form__element form__element--half form__select"
         name="state"
         :label="$t('State / Province')"
         :required="true"
@@ -96,6 +100,23 @@
         :valid="!errors.length"
         :error-message="errors[0]"
         :disabled="isFormFieldsDisabled"
+      />
+    </validation-provider>
+
+    <validation-provider
+      slim
+      rules="required"
+      v-slot="{errors}"
+    >
+      <SfInput
+        v-model="city"
+        class="form__element form__element--half"
+        name="city"
+        :label="$t('City')"
+        :required="true"
+        :disabled="isFormFieldsDisabled"
+        :valid="!errors.length"
+        :error-message="errors[0]"
       />
     </validation-provider>
 
@@ -114,27 +135,6 @@
         :valid="!errors.length"
         :error-message="errors[0]"
         @blur="onZipCodeBlur"
-      />
-    </validation-provider>
-
-    <validation-provider
-      slim
-      rules="required"
-      v-slot="{errors}"
-    >
-      <MMultiselect
-        v-model="country"
-        class="form__element form__element--half form__element--half-even form__select"
-        name="countries"
-        :label="$t('Country')"
-        :required="true"
-        id-field="code"
-        label-field="name"
-        :options="countries"
-        :valid="!errors.length"
-        :error-message="errors[0]"
-        :disabled="isFormFieldsDisabled"
-        @change="onChangeCountry"
       />
     </validation-provider>
 
@@ -368,16 +368,13 @@ export default Vue.extend({
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    column-gap: var(--spacer-xl);
 
     &__element {
       flex: 0 0 100%;
 
       &--half {
-        flex: 1 1 50%;
-
-        &-even {
-          padding: 0 0 0 var(--spacer-xl);
-        }
+        flex: 1 1 40%;
       }
     }
   }

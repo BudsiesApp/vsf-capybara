@@ -39,7 +39,7 @@
       />
       <SfInput
         v-model.trim="payment.lastName"
-        class="form__element form__element--half form__element--half-even"
+        class="form__element form__element--half"
         name="last-name"
         :label="$t('Last name')"
         :required="true"
@@ -59,6 +59,54 @@
         :error-message="$t('Field is required')"
         @blur="$v.payment.streetAddress.$touch()"
       />
+
+      <MMultiselect
+        v-model="payment.country"
+        class="
+          form__element
+          form__element--half
+          form__select
+        "
+        name="countries"
+        :label="$t('Country')"
+        :required="true"
+        id-field="code"
+        label-field="name"
+        :options="countries"
+        :valid="!$v.payment.country.$error"
+        :error-message="$t('Field is required')"
+        :disabled="isFormFieldsDisabled"
+        @change="changeCountry"
+      />
+
+      <SfInput
+        v-if="!isSelectedCountryHasStates"
+        v-model.trim="payment.state"
+        class="form__element form__element--half"
+        name="state"
+        :label="$t('State / Province')"
+        :disabled="isFormFieldsDisabled"
+      />
+
+      <MMultiselect
+        v-else
+        v-model.trim="payment.state"
+        name="state"
+        class="
+          form__element
+          form__element--half
+          form__select
+        "
+        :label="$t('State / Province')"
+        :required="true"
+        id-field="code"
+        label-field="name"
+        :options="getStatesForSelectedCountry"
+        :valid="!$v.payment.state.$error"
+        :error-message="$t('Field is required')"
+        :disabled="isFormFieldsDisabled"
+      />
+
       <SfInput
         v-model.trim="payment.city"
         class="form__element form__element--half"
@@ -69,33 +117,6 @@
         :valid="!$v.payment.city.$error"
         :error-message="$t('Field is required')"
         @blur="$v.payment.city.$touch()"
-      />
-      <SfInput
-        v-if="!isSelectedCountryHasStates"
-        v-model.trim="payment.state"
-        class="form__element form__element--half form__element--half-even"
-        name="state"
-        :label="$t('State / Province')"
-        :disabled="isFormFieldsDisabled"
-      />
-      <MMultiselect
-        v-if="isSelectedCountryHasStates"
-        v-model.trim="payment.state"
-        class="
-          form__element
-          form__element--half
-          form__element--half-even
-          form__select
-        "
-        name="state"
-        :label="$t('State / Province')"
-        :required="true"
-        id-field="code"
-        label-field="name"
-        :options="getStatesForSelectedCountry"
-        :valid="!$v.payment.state.$error"
-        :error-message="$t('Field is required')"
-        :disabled="isFormFieldsDisabled"
       />
       <SfInput
         v-model.trim="payment.zipCode"
@@ -111,25 +132,6 @@
             : $t('Name must have at least 3 letters.')
         "
         @blur="$v.payment.zipCode.$touch()"
-      />
-      <MMultiselect
-        v-model="payment.country"
-        class="
-          form__element
-          form__element--half
-          form__element--half-even
-          form__select
-        "
-        name="countries"
-        :label="$t('Country')"
-        :required="true"
-        id-field="code"
-        label-field="name"
-        :options="countries"
-        :valid="!$v.payment.country.$error"
-        :error-message="$t('Field is required')"
-        :disabled="isFormFieldsDisabled"
-        @change="changeCountry"
       />
       <SfInput
         v-model.trim="payment.phoneNumber"
@@ -407,15 +409,13 @@ export default {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    column-gap: var(--spacer-xl);
     margin-right: var(--spacer-2xl);
 
     &__element {
       flex: 0 0 100%;
       &--half {
-        flex: 1 1 50%;
-        &-even {
-          padding: 0 0 0 var(--spacer-xl);
-        }
+        flex: 1 1 40%;
       }
     }
     &__action {

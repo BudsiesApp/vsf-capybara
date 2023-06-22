@@ -484,10 +484,6 @@ export default Vue.extend({
 
   @include for-desktop {
     margin: 0 0 var(--spacer-sm) 0;
-
-    &__label {
-      left: calc(var(--spacer-xl));
-    }
   }
 
   @media (prefers-color-scheme: dark) {
