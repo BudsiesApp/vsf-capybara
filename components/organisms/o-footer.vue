@@ -214,7 +214,7 @@ export default {
               }
             },
             { name: this.$t('My Cart'), link: { name: 'detailed-cart' } },
-            { name: this.$t('Rising Starts'), link: '/rising-stars/' }
+            { name: this.$t('Rising Stars'), link: '/rising-stars/' }
           ]
         },
         quickLInks: {
