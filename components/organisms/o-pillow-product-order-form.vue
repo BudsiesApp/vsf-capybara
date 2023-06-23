@@ -907,7 +907,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
   ._form-errors {
     margin-top: var(--spacer-xl);
-    min-height: calc(var(--font-xs) * 1.2 * 4);
   }
 
   ._order-agreement {

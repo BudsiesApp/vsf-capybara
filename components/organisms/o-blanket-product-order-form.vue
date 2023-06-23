@@ -22,7 +22,7 @@
           :special-price="specialPrice"
         />
 
-        <validation-observer v-slot="{ passes }" slim ref="validation-observer">
+        <validation-observer v-slot="{ passes, errors: formErrors }" slim ref="validation-observer">
           <form @submit.prevent="() => passes(() => onSubmit())">
             <div class="_step">
               <div class="_step-title">
@@ -144,6 +144,8 @@
                   </div>
                 </div>
               </validation-provider>
+
+              <m-form-errors class="_form-errors" :form-errors="formErrors" />
 
               <div class="_actions">
                 <SfButton
@@ -859,6 +861,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   ._upload-photo-hint {
     font-size: var(--font-xs);
     margin-top: var(--spacer-xs);
+  }
+
+  ._form-errors {
+    margin-top: var(--spacer-xl);
   }
 
   @media (min-width: $tablet-min) {

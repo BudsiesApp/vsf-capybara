@@ -518,7 +518,6 @@ export default Vue.extend({
 
   ._form-errors {
     margin-top: var(--spacer-xl);
-    min-height: calc(var(--font-xs) * 1.2 * 4);
   }
 
   ._actions {
