@@ -49,9 +49,8 @@
       >
         <template #main-body-part-heading="{ bodyPart }">
           <SfHeading
-            class="-required"
             :level="3"
-            :title="bodyPart.name"
+            :title="getBodyPartTitle(bodyPart)"
             :ref="getFieldAnchorName(bodyPart.name)"
           />
         </template>
@@ -68,7 +67,7 @@
         <template #child-body-part-heading="{ childBodyPart }">
           <SfHeading
             :level="3"
-            :title="childBodyPart.name"
+            :title="getBodyPartTitle(childBodyPart)"
             :ref="getFieldAnchorName(childBodyPart.name)"
           />
         </template>
@@ -241,7 +240,7 @@ import { SfHeading, SfButton, SfModal } from '@storefront-ui/vue';
 import Product from 'core/modules/catalog/types/Product';
 import { BundleOption } from 'core/modules/catalog/types/BundleOption';
 
-import { BodypartOption } from 'src/modules/budsies';
+import { Bodypart, BodypartOption } from 'src/modules/budsies';
 
 import MAddonsSelector from '../../molecules/m-addons-selector.vue';
 import ACustomProductQuantity from '../../atoms/a-custom-product-quantity.vue';
@@ -438,6 +437,13 @@ export default defineComponent({
     }
   },
   methods: {
+    getBodyPartTitle (bodyPart: Bodypart): string {
+      let prefix = !bodyPart.isRequired
+        ? `${this.$t('Optional')}:`
+        : '';
+
+      return `${prefix} ${bodyPart.name}`;
+    },
     async onAddToCartClick (): Promise<void> {
       const isValid = await this.validateAndGoToFirstError();
 
