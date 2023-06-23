@@ -12,7 +12,7 @@
       v-if="topStorySlug"
     />
 
-    <validation-observer v-slot="{passes}" ref="validation-observer">
+    <validation-observer v-slot="{passes, errors: formErrors}" ref="validation-observer">
       <form @submit.prevent="() => passes(() => onSubmit())">
         <div class="_step">
           <SfDivider class="_step-divider" />
@@ -288,6 +288,8 @@
           </div>
         </div>
 
+        <m-form-errors class="_form-errors" :form-errors="formErrors" />
+
         <div class="_actions">
           <SfButton
             class="_add-to-cart color-primary"
@@ -395,6 +397,7 @@ import ACustomProductQuantity from '../atoms/a-custom-product-quantity.vue';
 import MAddonsSelector from '../molecules/m-addons-selector.vue';
 import MArtworkUpload from '../molecules/m-artwork-upload.vue';
 import MBlockStory from '../molecules/m-block-story.vue';
+import MFormErrors from '../molecules/m-form-errors.vue';
 import MBodypartOptionConfigurator from '../molecules/m-bodypart-option-configurator.vue';
 
 interface InjectedServices {
@@ -426,7 +429,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     SfDivider,
     SfModal,
     SfHeading,
-    MBlockStory
+    MBlockStory,
+    MFormErrors
   },
   inject: {
     imageHandlerService: { from: 'ImageHandlerService' },
@@ -1121,11 +1125,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
   ._form-errors {
     margin-top: var(--spacer-xl);
-    min-height: calc(var(--font-xs) * 1.2 * 4);
-
-    ._error-link {
-      color: inherit;
-    }
   }
 
   @media (min-width: $tablet-min) {
