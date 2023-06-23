@@ -30,13 +30,20 @@
           :special-price="specialPrice"
         />
 
-        <validation-observer v-slot="{ passes }" slim ref="validation-observer">
+        <validation-observer
+          v-slot="{ errors: formErrors }"
+          slim
+          ref="validationObserver"
+        >
           <form
-            @submit.prevent="() => passes(() => onSubmit())"
+            @submit.prevent="onSubmit"
           >
             <div class="_additional-options">
               <div v-show="hasStyleSelections">
-                <div class="_step-title">
+                <div
+                  class="_step-title"
+                  :ref="getFieldAnchorName('Style Option')"
+                >
                   Design
                 </div>
 
@@ -79,6 +86,7 @@
               <MTitledArtworkUpload
                 ref="artwork-upload"
                 class="_titled-artwork-upload"
+                field-name="'Pet Photo'"
                 :title="$t('Upload your pet\'s photo')"
                 :backend-product-id="backendProductId"
                 :upload-url="artworkUploadUrl"
@@ -86,6 +94,7 @@
                 :initial-artworks="artworkInitialItems"
                 :uploaded-artwork="customerImage"
                 :is-required="true"
+                :get-field-anchor-name="getFieldAnchorName"
                 @file-added="onArtworkAdd"
                 @file-removed="onArtworkRemove"
                 @is-busy-changed="onArtworkUploadBusyStatusChanged('main', $event)"
@@ -96,12 +105,14 @@
               <MTitledArtworkUpload
                 ref="side-view-upload"
                 class="_titled-artwork-upload"
+                field-name="'Side View Photo'"
                 :title="$t('Upload Side View photo')"
                 :backend-product-id="backendProductId"
                 :upload-url="artworkUploadUrl"
                 :disabled="isSubmitting"
                 :initial-artworks="sideViewInitialArtworks"
                 :uploaded-artwork="additionalArtworks[0]"
+                :get-field-anchor-name="getFieldAnchorName"
                 @file-added="(value) => onAdditionalArtworkAdd(0, value)"
                 @file-removed="onAdditionalArtworkRemove"
                 @is-busy-changed="onArtworkUploadBusyStatusChanged('side', $event)"
@@ -110,19 +121,24 @@
               <MTitledArtworkUpload
                 ref="back-view-upload"
                 class="_titled-artwork-upload"
+                field-name="'Back View Photo'"
                 :title="$t('Upload Back View photo')"
                 :backend-product-id="backendProductId"
                 :upload-url="artworkUploadUrl"
                 :disabled="isSubmitting"
                 :initial-artworks="backViewInitialArtworks"
                 :uploaded-artwork="additionalArtworks[1]"
+                :get-field-anchor-name="getFieldAnchorName"
                 @file-added="(value) => onAdditionalArtworkAdd(1, value)"
                 @file-removed="onAdditionalArtworkRemove"
                 @is-busy-changed="onArtworkUploadBusyStatusChanged('back', $event)"
               />
 
               <div class="_bodypart-selector-container" v-for="bodypart in bodyparts" :key="bodypart.code">
-                <div class="_step-title">
+                <div
+                  class="_step-title"
+                  :ref="getFieldAnchorName(bodypart.name)"
+                >
                   {{ $t(bodypart.name) }}
                 </div>
 
@@ -168,7 +184,11 @@
               :name="'Quantity'"
               slim
             >
-              <div class="_quantity-field" :class="classes">
+              <div
+                class="_quantity-field"
+                :class="classes"
+                :ref="getFieldAnchorName('Quantity')"
+              >
                 <ACustomProductQuantity
                   v-model="quantity"
                   class="_qty-container"
@@ -180,6 +200,12 @@
                 </div>
               </div>
             </validation-provider>
+
+            <m-form-errors
+              class="_form-errors"
+              :form-errors="formErrors"
+              @item-click="goToFieldByName"
+            />
 
             <div class="_actions">
               <div class="row">
@@ -208,7 +234,8 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType, VueConstructor } from 'vue';
+import Vue from 'vue';
+import { defineComponent, ref, Ref, inject, PropType } from '@vue/composition-api';
 import { mapGetters, mapMutations } from 'vuex';
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
 import { required } from 'vee-validate/dist/rules';
@@ -234,19 +261,21 @@ import { Bodypart, BodypartOption, Dictionary, ExtraPhotoAddon, ProductValue } f
 import ServerError from 'src/modules/shared/types/server-error';
 import { CustomerImage, getProductDefaultPrice, InjectType } from 'src/modules/shared';
 
+import { useFormValidation } from 'theme/helpers/use-form-validation';
+
 import GalleryProductImages from '../interfaces/gallery-product-images.interface';
 
 import ACustomPrice from '../atoms/a-custom-price.vue';
 import ACustomProductQuantity from '../atoms/a-custom-product-quantity.vue';
 import MProductDescriptionStory from '../molecules/m-product-description-story.vue';
 import MZoomGallery from '../molecules/m-zoom-gallery.vue';
-import MArtworkUpload from '../molecules/m-artwork-upload.vue';
 import MExtraFaces from '../molecules/m-extra-faces.vue';
 import MTitledArtworkUpload from '../molecules/m-titled-artwork-upload.vue';
 import ZoomGalleryImage from '../../interfaces/zoom-gallery-image.interface';
 import ExtraPhotoAddonOption from '../interfaces/extra-photo-addon-option.interface';
 import ExtraFacesConfiguratorData from '../interfaces/extra-faces-configurator-data.interface';
 import MBodypartOptionConfigurator from '../molecules/m-bodypart-option-configurator.vue';
+import MFormErrors from '../molecules/m-form-errors.vue';
 
 extend('required', {
   ...required,
@@ -271,21 +300,62 @@ export interface SelectOption {
 const feltedMagnetSku = 'customFeltedMagnets_bundle';
 const feltedOrnamentsSku = 'customFeltedOrnaments_bundle';
 
-export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
+function getAllFormRefs (
+  refs: Record<string, Vue | Element | Vue[] | Element[]>
+): Record<string, Vue | Element | Vue[] | Element[]> {
+  const artworkUpload = refs['artwork-upload'] as InstanceType<typeof MTitledArtworkUpload> | undefined;
+  const sideViewUpload = refs['side-view-upload'] as InstanceType<typeof MTitledArtworkUpload> | undefined;
+  const backViewUpload = refs['back-view-upload'] as InstanceType<typeof MTitledArtworkUpload> | undefined;
+
+  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = { ...refs };
+
+  if (artworkUpload) {
+    refsDictionary = { ...refsDictionary, ...artworkUpload.$refs };
+  }
+
+  if (sideViewUpload) {
+    refsDictionary = { ...refsDictionary, ...sideViewUpload.$refs };
+  }
+
+  if (backViewUpload) {
+    refsDictionary = { ...refsDictionary, ...backViewUpload.$refs };
+  }
+
+  return refsDictionary;
+}
+
+export default defineComponent({
   name: 'OPrintedProductOrderForm',
+  setup (_, setupContext) {
+    const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
+    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+
+    if (!imageHandlerService) {
+      throw new Error('ImageHandlerService is not defined');
+    }
+
+    return {
+      imageHandlerService,
+      validationObserver,
+      ...useFormValidation(
+        validationObserver,
+        () => getAllFormRefs(setupContext.refs)
+      )
+    }
+  },
   components: {
     ValidationObserver,
     ValidationProvider,
     ACustomPrice,
     ACustomProductQuantity,
     MZoomGallery,
-    MArtworkUpload,
     MExtraFaces,
     SfSelect,
     SfButton,
     MProductDescriptionStory,
     MTitledArtworkUpload,
-    MBodypartOptionConfigurator
+    MBodypartOptionConfigurator,
+    MFormErrors
   },
   inject: {
     imageHandlerService: { from: 'ImageHandlerService' }
@@ -686,7 +756,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       this.additionalArtworks.splice(artworkIndex, 1);
     },
-    onSubmit (): void {
+    async onSubmit (): Promise<void> {
+      const isValid = await this.validateAndGoToFirstError();
+
+      if (!isValid) {
+        return;
+      }
+
       if (!this.existingCartItem) {
         this.addToCart();
       } else {
@@ -752,9 +828,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     getGallery (): HTMLElement | undefined {
       return this.$refs['gallery'] as HTMLElement | undefined;
-    },
-    getValidationObserver (): InstanceType<typeof ValidationObserver> | undefined {
-      return this.$refs['validation-observer'] as InstanceType<typeof ValidationObserver> | undefined;
     },
     getUploader (): InstanceType<typeof MTitledArtworkUpload> | undefined {
       return this.$refs['artwork-upload'] as InstanceType<typeof MTitledArtworkUpload> | undefined;
@@ -991,8 +1064,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           extraFacesComponent.reset();
         }
 
-        const validator = this.getValidationObserver();
-        validator?.reset();
+        this.validationObserver?.reset();
       },
       immediate: true
     },
@@ -1145,6 +1217,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     ._gallery {
       margin-top: var(--spacer-xs);
     }
+
+  ._form-errors {
+    margin-top: var(--spacer-xl);
+  }
 
     ._description {
         margin-top: calc(var(--spacer-lg) * 2);

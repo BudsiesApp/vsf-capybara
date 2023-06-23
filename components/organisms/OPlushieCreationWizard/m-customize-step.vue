@@ -1,9 +1,9 @@
 <template>
   <validation-observer
-    v-slot="{ passes, errors: formErrors }"
+    v-slot="{ errors: formErrors }"
     class="plushie-wizard-customization-step"
     tag="div"
-    ref="validation-observer"
+    ref="validationObserver"
   >
     <SfHeading
       :level="2"
@@ -23,6 +23,7 @@
           class="-required"
           :level="3"
           :title="$t('Size')"
+          :ref="getFieldAnchorName('size')"
         />
 
         <m-plushie-size-selector
@@ -48,9 +49,8 @@
       >
         <template #main-body-part-heading="{ bodyPart }">
           <SfHeading
-            class="-required"
             :level="3"
-            :title="bodyPart.name"
+            :title="getBodyPartTitle(bodyPart)"
             :ref="getFieldAnchorName(bodyPart.name)"
           />
         </template>
@@ -67,7 +67,7 @@
         <template #child-body-part-heading="{ childBodyPart }">
           <SfHeading
             :level="3"
-            :title="childBodyPart.name"
+            :title="getBodyPartTitle(childBodyPart)"
             :ref="getFieldAnchorName(childBodyPart.name)"
           />
         </template>
@@ -87,7 +87,7 @@
       <validation-provider
         v-slot="{ errors, classes }"
         rules="required"
-        :name="$t('Description')"
+        :name="`'${$t('Description')}'`"
         slim
       >
         <div class="_description-field _section" :class="classes">
@@ -95,7 +95,7 @@
             class="-required "
             :level="3"
             :title="$t('Describe Your Pet\'s Physical Features')"
-            ref="description-field-anchor"
+            :ref="getFieldAnchorName('description')"
           />
 
           <textarea
@@ -156,6 +156,7 @@
                   'How many {productType} of this exact same design?',
                   {productType}
                 )"
+                :ref="getFieldAnchorName('quantity')"
               />
 
               <ACustomProductQuantity
@@ -195,32 +196,18 @@
         </div>
       </div>
 
-      <div class="_form-errors">
-        <template
-          v-for="(fieldErrors, field) in formErrors"
-        >
-          <div
-            class="_error-text"
-            :key="field"
-            v-if="fieldErrors.length > 0"
-          >
-            <a
-              class="_error-link"
-              href="javascript:void(0)"
-              @click.prevent="goToFieldByName(field.toString())"
-            >
-              {{ fieldErrors.join('. ') }}
-            </a>
-          </div>
-        </template>
-      </div>
+      <m-form-errors
+        class="_form-errors"
+        :form-errors="formErrors"
+        @item-click="goToFieldByName"
+      />
 
       <div class="_actions _section">
         <SfButton
           class="_add-to-cart color-primary"
           type="submit"
           :disabled="disabled"
-          @click="(event) => passes(() => submitStep())"
+          @click="onAddToCartClick"
         >
           {{ $t('Add to Cart') }}
         </SfButton>
@@ -245,22 +232,21 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue';
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
 import { required } from 'vee-validate/dist/rules';
+import { PropType, Ref, defineComponent, ref } from '@vue/composition-api';
 
 import { SfHeading, SfButton, SfModal } from '@storefront-ui/vue';
 import Product from 'core/modules/catalog/types/Product';
 import { BundleOption } from 'core/modules/catalog/types/BundleOption';
-import { Logger } from '@vue-storefront/core/lib/logger';
 
-import { isVue } from 'src/modules/shared';
-import { BodypartOption } from 'src/modules/budsies';
+import { Bodypart, BodypartOption } from 'src/modules/budsies';
 
 import MAddonsSelector from '../../molecules/m-addons-selector.vue';
 import ACustomProductQuantity from '../../atoms/a-custom-product-quantity.vue';
 import MBlockStory from '../../molecules/m-block-story.vue';
 import MBodyPartsSection from '../../molecules/m-body-parts-section.vue';
+import MFormErrors from '../../molecules/m-form-errors.vue';
 import MProductionTimeSelector from '../../molecules/m-production-time-selector.vue';
 import MPlushieSizeSelector from '../../molecules/m-plushie-size-selector.vue';
 
@@ -271,24 +257,37 @@ import getProductionTimeOptions from '../../../helpers/get-production-time-optio
 import SizeOption from 'theme/components/interfaces/size-option';
 import SelectedAddon from 'theme/components/interfaces/selected-addon.interface';
 import { getAddonOptionsFromBundleOption } from 'theme/helpers/get-addon-options-from-bundle-option.function';
+import { useFormValidation } from 'theme/helpers/use-form-validation';
 
 extend('required', {
   ...required,
   message: 'The {_field_} field is required'
 });
 
-export default Vue.extend({
+export default defineComponent({
   name: 'MCustomizeStep',
+  setup (_, setupContext) {
+    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+
+    return {
+      validationObserver,
+      ...useFormValidation(
+        validationObserver,
+        () => setupContext.refs
+      )
+    }
+  },
   components: {
+    ACustomProductQuantity,
     SfHeading,
     SfButton,
     SfModal,
     ValidationProvider,
     ValidationObserver,
     MAddonsSelector,
-    ACustomProductQuantity,
     MBlockStory,
     MBodyPartsSection,
+    MFormErrors,
     MProductionTimeSelector,
     MPlushieSizeSelector
   },
@@ -438,34 +437,21 @@ export default Vue.extend({
     }
   },
   methods: {
-    getFieldAnchorName (field: string): string {
-      field = field.toLowerCase().replace(/ /g, '-');
+    getBodyPartTitle (bodyPart: Bodypart): string {
+      let prefix = !bodyPart.isRequired
+        ? `${this.$t('Optional')}:`
+        : '';
 
-      return `${field}-field-anchor`
+      return `${prefix} ${bodyPart.name}`;
     },
-    goToFieldByName (field: string): void {
-      // Strip quotes
-      let refName = field.replace(/^['"]+|['"]+$/g, '');
-      // Strip spaces & convert to lower case
-      refName = refName.toLowerCase().replace(/ /g, '-');
+    async onAddToCartClick (): Promise<void> {
+      const isValid = await this.validateAndGoToFirstError();
 
-      refName += '-field-anchor';
-
-      let ref = this.$refs[refName] as (HTMLElement | Vue) | (HTMLElement|Vue)[] | undefined;
-      if (!ref) {
-        Logger.warn(`Reference for the field with error not found. Field: ${field}, ref: ${refName}`, 'budsies')();
+      if (!isValid) {
         return;
       }
 
-      if (Array.isArray(ref)) {
-        ref = ref[0];
-      }
-
-      if (isVue(ref)) {
-        ref = ref.$el as HTMLElement;
-      }
-
-      ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      await this.submitStep();
     },
     async submitStep (): Promise<void> {
       await this.addToCart();
@@ -541,17 +527,13 @@ export default Vue.extend({
 
   ._form-errors {
     margin-top: var(--spacer-xl);
-    min-height: calc(var(--font-xs) * 1.2 * 4);
-
-    ._error-link {
-      color: inherit;
-    }
   }
 
   ._actions {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-top: var(--spacer-xl);
   }
 
   ._order-agreement {

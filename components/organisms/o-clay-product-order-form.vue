@@ -12,14 +12,24 @@
       v-if="topStorySlug"
     />
 
-    <validation-observer v-slot="{passes}" ref="validation-observer">
-      <form @submit.prevent="() => passes(() => onSubmit())">
+    <validation-observer
+      v-slot="{errors: formErrors}"
+      ref="validationObserver"
+    >
+      <form @submit.prevent="onSubmit">
         <div class="_step">
           <SfDivider class="_step-divider" />
 
-          <SfHeading class="_step-title" :level="3" :title="$t('Step {number}', {number: 1})" />
+          <SfHeading
+            class="_step-title" :level="3" :title="$t('Step {number}', {number: 1})"
+          />
 
-          <SfHeading class="_step-subtitle -required" :level="3" :title="$t('Upload Your Photo')" />
+          <SfHeading
+            class="_step-subtitle -required"
+            :level="3"
+            :title="$t('Upload Your Photo')"
+            :ref="getFieldAnchorName('Artwork')"
+          />
 
           <div class="_content">
             <div class="_upload-now" v-show="isUploadNow">
@@ -120,13 +130,18 @@
 
           <SfHeading class="_step-title" :level="3" :title="$t('Step {number}', {number: 2})" />
 
-          <SfHeading class="_step-subtitle -required" :level="3" :title="customizeStepSubtitle" />
+          <SfHeading
+            class="_step-subtitle -required"
+            :level="3"
+            :title="customizeStepSubtitle"
+            :ref="getFieldAnchorName('Description')"
+          />
 
           <div class="_content">
             <validation-provider
               v-slot="{ errors }"
               rules="required"
-              :name="$t('Description')"
+              :name="`'${$t('Description')}''`"
             >
               <textarea
                 name="description"
@@ -151,9 +166,10 @@
               tag="div"
             >
               <SfHeading
-                class="-required "
+                class="-required _step-subtitle"
                 :level="3"
                 :title="bodypart.name"
+                :ref="getFieldAnchorName(bodypart.name)"
               />
 
               <div
@@ -208,6 +224,7 @@
                   class="_step-subtitle -required "
                   :level="3"
                   title="Quantity"
+                  :ref="getFieldAnchorName('Quantity')"
                 />
 
                 <ACustomProductQuantity
@@ -263,6 +280,7 @@
             class="_step-subtitle -required"
             :level="3"
             :title="$t('Enter your email address')"
+            :ref="getFieldAnchorName('Email')"
           />
 
           <div class="_content">
@@ -287,6 +305,12 @@
             </validation-provider>
           </div>
         </div>
+
+        <m-form-errors
+          class="_form-errors"
+          :form-errors="formErrors"
+          @item-click="goToFieldByName"
+        />
 
         <div class="_actions">
           <SfButton
@@ -361,9 +385,10 @@
 </template>
 
 <script lang="ts">
+import Vue from 'vue';
+import { PropType, defineComponent, ref, Ref, inject } from '@vue/composition-api';
 import { extend, ValidationObserver, ValidationProvider } from 'vee-validate';
 import { required, email } from 'vee-validate/dist/rules';
-import Vue, { PropType, VueConstructor } from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { SfButton, SfDivider, SfHeading, SfInput, SfModal } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/core/i18n';
@@ -387,6 +412,7 @@ import Product from 'core/modules/catalog/types/Product';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { InjectType, CustomerImage, ServerError } from 'src/modules/shared';
 import { getAddonOptionsFromBundleOption } from 'theme/helpers/get-addon-options-from-bundle-option.function';
+import { useFormValidation } from 'theme/helpers/use-form-validation';
 
 import AddonOption from '../interfaces/addon-option.interface';
 import SelectedAddon from '../interfaces/selected-addon.interface';
@@ -395,6 +421,7 @@ import ACustomProductQuantity from '../atoms/a-custom-product-quantity.vue';
 import MAddonsSelector from '../molecules/m-addons-selector.vue';
 import MArtworkUpload from '../molecules/m-artwork-upload.vue';
 import MBlockStory from '../molecules/m-block-story.vue';
+import MFormErrors from '../molecules/m-form-errors.vue';
 import MBodypartOptionConfigurator from '../molecules/m-bodypart-option-configurator.vue';
 
 interface InjectedServices {
@@ -412,8 +439,32 @@ extend('email', {
   message: 'Please, provide the correct email address'
 });
 
-export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
+export default defineComponent({
   name: 'OClayProductOrderForm',
+  setup (_, setupContext) {
+    const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
+    const window = inject<Window>('WindowObject');
+
+    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+
+    if (!window) {
+      throw new Error('Window is not defined');
+    }
+
+    if (!imageHandlerService) {
+      throw new Error('ImageHandlerService is not defined');
+    }
+
+    return {
+      imageHandlerService,
+      validationObserver,
+      window,
+      ...useFormValidation(
+        validationObserver,
+        () => setupContext.refs
+      )
+    }
+  },
   components: {
     SfInput,
     MBodypartOptionConfigurator,
@@ -426,7 +477,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     SfDivider,
     SfModal,
     SfHeading,
-    MBlockStory
+    MBlockStory,
+    MFormErrors
   },
   inject: {
     imageHandlerService: { from: 'ImageHandlerService' },
@@ -756,9 +808,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     getUploader (): InstanceType<typeof MArtworkUpload> | undefined {
       return this.$refs['artwork-upload'] as InstanceType<typeof MArtworkUpload> | undefined;
     },
-    getValidationObserver (): InstanceType<typeof ValidationObserver> | undefined {
-      return this.$refs['validation-observer'] as InstanceType<typeof ValidationObserver> | undefined;
-    },
     goToCart (): void {
       this.$router.push(localizedRoute({ name: 'detailed-cart' }));
     },
@@ -791,8 +840,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         uploader.clearInput();
       }
 
-      const validator = this.getValidationObserver();
-      validator?.reset();
+      this.validationObserver?.reset();
     },
     switchToUploadNow (): void {
       if (this.isSubmitting) {
@@ -832,6 +880,12 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     async onSubmit (): Promise<void> {
       if (this.isSubmitting) {
+        return;
+      }
+
+      const isValid = await this.validateAndGoToFirstError();
+
+      if (!isValid) {
         return;
       }
 
@@ -1121,11 +1175,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
   ._form-errors {
     margin-top: var(--spacer-xl);
-    min-height: calc(var(--font-xs) * 1.2 * 4);
-
-    ._error-link {
-      color: inherit;
-    }
   }
 
   @media (min-width: $tablet-min) {
