@@ -515,7 +515,15 @@
                   />
                 </div>
 
-                <m-form-errors :form-errors="submitErrors" />
+                <ul class="_form-errors" v-if="submitErrors.length">
+                  <li
+                    class="_error-item"
+                    :key="submitError"
+                    v-for="submitError in submitErrors"
+                  >
+                    {{ submitError }}
+                  </li>
+                </ul>
               </div>
             </SfStep>
           </SfSteps>
@@ -577,7 +585,6 @@ import {
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
-import MFormErrors from '../molecules/m-form-errors.vue';
 import MBackgroundUploader from '../molecules/m-background-uploader.vue';
 import MBackgroundEditor from '../molecules/m-background-editor.vue';
 import MLivePreview from '../molecules/m-live-preview.vue';
@@ -686,7 +693,6 @@ export default (
     MLivePreview,
     MDesignSelector,
     ACustomProductQuantity,
-    MFormErrors,
     MDesignImages,
     MSubmitAnimator,
     MAccentColorSelector,
@@ -2016,6 +2022,10 @@ export default (
     position: sticky;
     bottom: var(--spacer-base);
     margin-top: var(--spacer-base);
+  }
+
+  ._form-errors {
+    margin-top: var(--spacer-sm);
   }
 
   @include for-desktop {

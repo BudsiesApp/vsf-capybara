@@ -218,8 +218,7 @@
               </validation-provider>
 
               <m-form-errors
-                v-if="getErrorsList(errors).length"
-                :form-errors="getErrorsList(errors)"
+                :form-errors="errors"
               />
 
               <div class="_actions">
@@ -749,19 +748,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     ...mapMutations('product', {
       setBundleOptionValue: PRODUCT_SET_BUNDLE_OPTION
     }),
-    getErrorsList (errors: Record<string, string[]>): string[] {
-      const errorsList: string[] = [];
-
-      Object.values(errors).forEach((error) => {
-        if (!error.length) {
-          return;
-        }
-
-        errorsList.push(error[0]);
-      })
-
-      return errorsList;
-    },
     async addToCart (): Promise<void> {
       if (this.isSubmitting) {
         return;
