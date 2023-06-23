@@ -30,7 +30,7 @@
           :special-price="specialPrice"
         />
 
-        <validation-observer v-slot="{ passes }" slim ref="validation-observer">
+        <validation-observer v-slot="{ passes, errors: formErrors }" slim ref="validation-observer">
           <form
             @submit.prevent="() => passes(() => onSubmit())"
           >
@@ -181,6 +181,8 @@
               </div>
             </validation-provider>
 
+            <m-form-errors class="_form-errors" :form-errors="formErrors" />
+
             <div class="_actions">
               <div class="row">
                 <div class="medium-8 large-6 columns">
@@ -240,13 +242,13 @@ import ACustomPrice from '../atoms/a-custom-price.vue';
 import ACustomProductQuantity from '../atoms/a-custom-product-quantity.vue';
 import MProductDescriptionStory from '../molecules/m-product-description-story.vue';
 import MZoomGallery from '../molecules/m-zoom-gallery.vue';
-import MArtworkUpload from '../molecules/m-artwork-upload.vue';
 import MExtraFaces from '../molecules/m-extra-faces.vue';
 import MTitledArtworkUpload from '../molecules/m-titled-artwork-upload.vue';
 import ZoomGalleryImage from '../../interfaces/zoom-gallery-image.interface';
 import ExtraPhotoAddonOption from '../interfaces/extra-photo-addon-option.interface';
 import ExtraFacesConfiguratorData from '../interfaces/extra-faces-configurator-data.interface';
 import MBodypartOptionConfigurator from '../molecules/m-bodypart-option-configurator.vue';
+import MFormErrors from '../molecules/m-form-errors.vue';
 
 extend('required', {
   ...required,
@@ -279,13 +281,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     ACustomPrice,
     ACustomProductQuantity,
     MZoomGallery,
-    MArtworkUpload,
     MExtraFaces,
     SfSelect,
     SfButton,
     MProductDescriptionStory,
     MTitledArtworkUpload,
-    MBodypartOptionConfigurator
+    MBodypartOptionConfigurator,
+    MFormErrors
   },
   inject: {
     imageHandlerService: { from: 'ImageHandlerService' }
@@ -1145,6 +1147,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     ._gallery {
       margin-top: var(--spacer-xs);
     }
+
+  ._form-errors {
+    margin-top: var(--spacer-xl);
+  }
 
     ._description {
         margin-top: calc(var(--spacer-lg) * 2);
