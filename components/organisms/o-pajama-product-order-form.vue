@@ -40,7 +40,6 @@
                 v-slot="{errors}"
                 rules="required"
                 name="'Style Option'"
-                mode="passive"
                 class="_step-content"
                 tag="div"
               >
@@ -106,7 +105,6 @@
                 v-slot="{ errors }"
                 rules="required"
                 name="'Size Option'"
-                mode="passive"
                 tag="div"
                 class="_step-content"
               >
@@ -146,7 +144,6 @@
                 v-slot="{errors}"
                 rules="required"
                 name="'Design Option'"
-                mode="passive"
                 tag="div"
                 class="_step-content"
               >
@@ -176,7 +173,6 @@
               <validation-provider
                 v-slot="{ errors }"
                 name="'Pet's photo'"
-                mode="passive"
                 tag="div"
                 class="_step-content"
               >

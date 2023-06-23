@@ -40,7 +40,6 @@
                 v-slot="{errors}"
                 rules="required"
                 name="'Design Option'"
-                mode="passive"
                 tag="div"
               >
                 <m-design-selector
@@ -75,7 +74,6 @@
               <validation-provider
                 v-slot="{ errors }"
                 name="'Pet's photo'"
-                mode="passive"
                 tag="div"
               >
                 <input
@@ -113,7 +111,6 @@
                 v-slot="{ errors }"
                 rules="required"
                 name="'Size Option'"
-                mode="passive"
                 tag="div"
               >
                 <SfSelect

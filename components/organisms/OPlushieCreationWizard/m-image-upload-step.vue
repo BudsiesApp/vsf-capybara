@@ -43,7 +43,7 @@
           :required="isUploadNow"
         >
 
-        <MArtworkUpload
+        <m-artwork-upload
           ref="artwork-upload"
           class="_file-uploader"
           :product-id="backendProductId"
@@ -295,10 +295,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.switchUploadMethod(ImageUploadMethod.EMAIL);
     },
     onArtworkAdd (value: Item): void {
-      this.customerImages.push({
+      this.customerImages = [ ...this.customerImages, {
         id: value.id,
         url: this.imageHandlerService.getOriginalImageUrl(value.url)
-      });
+      }];
 
       const newValue: ForeversWizardImageUploadStepData = {
         uploadMethod: this.uploadMethod,
