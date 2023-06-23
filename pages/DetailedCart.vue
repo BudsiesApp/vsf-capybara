@@ -5,11 +5,6 @@
     </div>
     <div class="detailed-cart" v-else>
       <div class="detailed-cart__main">
-        <ProductionSpotCountdown
-          :can-show="canShowProductionSpotCountdown"
-          class="_production-spot-countdown"
-        />
-
         <transition name="fade" mode="out-in">
           <div
             v-if="totalItems"
@@ -176,15 +171,12 @@ import { getCartItemPrice } from 'src/modules/shared';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
 import { onlineHelper } from '@vue-storefront/core/helpers';
-import { ProductId } from 'src/modules/budsies';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
 import CartEvents from 'src/modules/shared/types/cart-events';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 import { getBundleOptionsValues, getSelectedBundleOptions } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions'
 import { CART_UPD_ITEM } from '@vue-storefront/core/modules/cart/store/mutation-types'
-import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
-import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
 
@@ -217,8 +209,7 @@ export default {
     SfProperty,
     SfIcon,
     SfQuantitySelector,
-    OrderSummary,
-    ProductionSpotCountdown
+    OrderSummary
   },
   data () {
     return {
@@ -250,9 +241,6 @@ export default {
     },
     isLoading () {
       return !this.isMounted || !this.cartIsLoaded;
-    },
-    canShowProductionSpotCountdown () {
-      return this.products.some((product) => isCustomProduct(product.id));
     }
   },
   async mounted () {
@@ -470,10 +458,6 @@ export default {
 }
 
 .detailed-cart {
-  ._production-spot-countdown {
-    margin: var(--spacer-sm) 0;
-  }
-
   .sf-collected-product {
     --collected-product-image-background: none;
     --collected-product-main-margin: 0 var(--spacer-sm);
