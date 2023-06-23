@@ -294,25 +294,7 @@
           </validation-provider>
         </div>
 
-        <div class="_form-errors">
-          <template
-            v-for="(fieldErrors, field) in formErrors"
-          >
-            <div
-              class="_error-text"
-              :key="field"
-              v-if="fieldErrors.length > 0"
-            >
-              <a
-                class="_error-link"
-                href="javascript:void(0)"
-                @click.prevent="goToFieldByName(field.toString())"
-              >
-                {{ fieldErrors.join('. ') }}
-              </a>
-            </div>
-          </template>
-        </div>
+        <m-form-errors class="_form-errors" :form-errors="formErrors" />
 
         <div class="_actions">
           <SfButton
@@ -404,6 +386,7 @@ import ACustomProductQuantity from '../atoms/a-custom-product-quantity.vue';
 import MArtworkUpload from '../molecules/m-artwork-upload.vue';
 import MBodypartOptionConfigurator from '../molecules/m-bodypart-option-configurator.vue';
 import MPlushieSizeSelector from '../molecules/m-plushie-size-selector.vue';
+import MFormErrors from '../molecules/m-form-errors.vue';
 import SizeOption from '../interfaces/size-option';
 import ProductionTimeOption from '../interfaces/production-time-option.interface';
 import getProductionTimeOptions from '../../helpers/get-production-time-options';
@@ -441,7 +424,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     SfSelect,
     MBlockStory,
     MProductionTimeSelector,
-    MPlushieSizeSelector
+    MPlushieSizeSelector,
+    MFormErrors
   },
   inject: {
     window: { from: 'WindowObject' },
@@ -921,23 +905,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       }
   }
 
-  ._error-text {
-      font-size: var(--font-xs);
-      margin-top: var(--spacer-sm);
-      height: calc(var(--font-xs) * 1.2);
-  }
-
   ._form-errors {
     margin-top: var(--spacer-xl);
     min-height: calc(var(--font-xs) * 1.2 * 4);
-
-    ._error-link {
-      color: inherit;
-    }
-
-    &:empty {
-      display: none;
-    }
   }
 
   ._order-agreement {
