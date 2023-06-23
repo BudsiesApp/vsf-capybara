@@ -195,25 +195,7 @@
         </div>
       </div>
 
-      <div class="_form-errors">
-        <template
-          v-for="(fieldErrors, field) in formErrors"
-        >
-          <div
-            class="_error-text"
-            :key="field"
-            v-if="fieldErrors.length > 0"
-          >
-            <a
-              class="_error-link"
-              href="javascript:void(0)"
-              @click.prevent="goToFieldByName(field.toString())"
-            >
-              {{ fieldErrors.join('. ') }}
-            </a>
-          </div>
-        </template>
-      </div>
+      <m-form-errors class="_form-errors" :form-errors="formErrors" />
 
       <div class="_actions _section">
         <SfButton
@@ -261,6 +243,7 @@ import MAddonsSelector from '../../molecules/m-addons-selector.vue';
 import ACustomProductQuantity from '../../atoms/a-custom-product-quantity.vue';
 import MBlockStory from '../../molecules/m-block-story.vue';
 import MBodyPartsSection from '../../molecules/m-body-parts-section.vue';
+import MFormErrors from '../../molecules/m-form-errors.vue';
 import MProductionTimeSelector from '../../molecules/m-production-time-selector.vue';
 import MPlushieSizeSelector from '../../molecules/m-plushie-size-selector.vue';
 
@@ -280,15 +263,16 @@ extend('required', {
 export default Vue.extend({
   name: 'MCustomizeStep',
   components: {
+    ACustomProductQuantity,
     SfHeading,
     SfButton,
     SfModal,
     ValidationProvider,
     ValidationObserver,
     MAddonsSelector,
-    ACustomProductQuantity,
     MBlockStory,
     MBodyPartsSection,
+    MFormErrors,
     MProductionTimeSelector,
     MPlushieSizeSelector
   },
@@ -532,20 +516,9 @@ export default Vue.extend({
     resize: vertical;
   }
 
-  ._error-text {
-    color: var(--c-danger-variant);
-    font-size: var(--font-xs);
-    margin-top: var(--spacer-xs);
-    height: calc(var(--font-xs) * 1.2);
-  }
-
   ._form-errors {
     margin-top: var(--spacer-xl);
     min-height: calc(var(--font-xs) * 1.2 * 4);
-
-    ._error-link {
-      color: inherit;
-    }
   }
 
   ._actions {
