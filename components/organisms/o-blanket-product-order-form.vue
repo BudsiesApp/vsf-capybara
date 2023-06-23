@@ -22,10 +22,17 @@
           :special-price="specialPrice"
         />
 
-        <validation-observer v-slot="{ passes, errors: formErrors }" slim ref="validation-observer">
-          <form @submit.prevent="() => passes(() => onSubmit())">
+        <validation-observer
+          v-slot="{ errors: formErrors }"
+          slim
+          ref="validationObserver"
+        >
+          <form @submit.prevent="onSubmit">
             <div class="_step">
-              <div class="_step-title">
+              <div
+                class="_step-title"
+                :ref="getFieldAnchorName('Design Option')"
+              >
                 {{ $t('Select design') }}
               </div>
 
@@ -52,7 +59,10 @@
             </div>
 
             <div class="_step">
-              <div class="_step-title">
+              <div
+                class="_step-title"
+                :ref="getFieldAnchorName('Pet\'s photo')"
+              >
                 {{ $t('Upload your pet\'s photo') }}
               </div>
 
@@ -92,7 +102,10 @@
             </div>
 
             <div class="_step">
-              <div class="_step-title">
+              <div
+                class="_step-title"
+                :ref="getFieldAnchorName('Size Option')"
+              >
                 {{ $t('Select size and material') }}
               </div>
 
@@ -132,7 +145,11 @@
                 :name="'Quantity'"
                 slim
               >
-                <div class="_quantity-field" :class="classes">
+                <div
+                  class="_quantity-field"
+                  :class="classes"
+                  :ref="getFieldAnchorName('Quantity')"
+                >
                   <a-custom-product-quantity
                     v-model="quantity"
                     class="_qty-container"
@@ -145,7 +162,11 @@
                 </div>
               </validation-provider>
 
-              <m-form-errors class="_form-errors" :form-errors="formErrors" />
+              <m-form-errors
+                class="_form-errors"
+                :form-errors="formErrors"
+                @item-click="goToFieldByName"
+              />
 
               <div class="_actions">
                 <SfButton
@@ -172,9 +193,9 @@
 </template>
 
 <script lang="ts">
+import { PropType, defineComponent, ref, Ref, inject } from '@vue/composition-api';
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
 import { required } from 'vee-validate/dist/rules';
-import Vue, { PropType, VueConstructor } from 'vue'
 import { mapGetters, mapMutations } from 'vuex';
 import { SfButton, SfHeading, SfSelect } from '@storefront-ui/vue';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
@@ -191,8 +212,9 @@ import { getProductGallery as getGalleryByProduct, setBundleProductOptionsAsync 
 
 import { ProductValue, Dictionary } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
-import { CustomerImage, getProductDefaultPrice, InjectType, ServerError } from 'src/modules/shared';
+import { CustomerImage, getProductDefaultPrice, ServerError } from 'src/modules/shared';
 import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
+import { useFormValidation } from 'theme/helpers/use-form-validation';
 
 import DesignProduct from '../interfaces/design-product.interface';
 import GalleryProductImages from '../interfaces/gallery-product-images.interface';
@@ -203,6 +225,7 @@ import MArtworkUpload from '../molecules/m-artwork-upload.vue';
 import MDesignSelector from '../molecules/m-design-selector.vue';
 import MProductDescriptionStory from '../molecules/m-product-description-story.vue';
 import MZoomGallery from '../molecules/m-zoom-gallery.vue';
+import MFormErrors from '../molecules/m-form-errors.vue';
 
 extend('required', {
   ...required,
@@ -214,16 +237,29 @@ interface SizeOption {
   label: string
 }
 
-interface InjectedServices {
-  imageHandlerService: ImageHandlerService
-}
-
 const DESIGN_BUNDLE_OPTION_TITLE = 'product';
 const SIZE_BUNDLE_OPTION_TITLE = 'size';
 const DESIGN_PROCESSING_LEVEL_BUNDLE_OPTION_TITLE = 'design processing level';
 
-export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
+export default defineComponent({
   name: 'OBlanketProductOrderForm',
+  setup (_, setupContext) {
+    const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
+    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+
+    if (!imageHandlerService) {
+      throw new Error('ImageHandlerService is not defined');
+    }
+
+    return {
+      imageHandlerService,
+      validationObserver,
+      ...useFormValidation(
+        validationObserver,
+        () => setupContext.refs
+      )
+    }
+  },
   components: {
     SfButton,
     SfHeading,
@@ -235,11 +271,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     MDesignSelector,
     MArtworkUpload,
     ACustomProductQuantity,
-    MProductDescriptionStory
+    MProductDescriptionStory,
+    MFormErrors
   },
-  inject: {
-    imageHandlerService: { from: 'ImageHandlerService' }
-  } as unknown as InjectType<InjectedServices>,
   props: {
     artworkUploadUrl: {
       type: String,
@@ -669,7 +703,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         name: 'detailed-cart'
       }));
     },
-    onSubmit (): void {
+    async onSubmit (): Promise<void> {
+      const isValid = await this.validateAndGoToFirstError();
+
+      if (!isValid) {
+        return;
+      }
+
       if (!this.existingCartItem) {
         void this.addToCart();
       } else {

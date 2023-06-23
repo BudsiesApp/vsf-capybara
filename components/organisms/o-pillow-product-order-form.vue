@@ -11,9 +11,13 @@
 
     <SfDivider class="_step-divider" />
 
-    <validation-observer v-slot="{ passes, errors: formErrors }" slim ref="validation-observer">
+    <validation-observer
+      v-slot="{ errors: formErrors }"
+      slim
+      ref="validationObserver"
+    >
       <form
-        @submit.prevent="(event) => passes(() => onSubmit(event))"
+        @submit.prevent="onSubmit"
       >
         <div
           class="_step-number"
@@ -26,6 +30,7 @@
           class="_step-title -required "
           :level="2"
           title="Upload your photo"
+          :ref="getFieldAnchorName('Artwork')"
         />
 
         <div class="_upload-now" v-show="isUploadNow">
@@ -117,6 +122,7 @@
           class="_step-title -required "
           :level="2"
           title="Size"
+          :ref="getFieldAnchorName('Size')"
         />
 
         <validation-provider
@@ -154,6 +160,7 @@
             class="_step-title -required "
             :level="2"
             :title="bodypart.name"
+            :ref="getFieldAnchorName(bodypart.name)"
           />
 
           <validation-provider
@@ -190,6 +197,7 @@
           class="_step-title -required "
           :level="2"
           title="Your Pet's Name"
+          :ref="getFieldAnchorName('Pet name')"
         />
 
         <validation-provider
@@ -220,6 +228,7 @@
               class="_step-title -required "
               :level="2"
               title="Quantity"
+              :ref="getFieldAnchorName('Quantity')"
             />
 
             <ACustomProductQuantity
@@ -271,6 +280,7 @@
             class="_step-title -required"
             :level="2"
             title="Enter your email address"
+            :ref="getFieldAnchorName('email')"
           />
 
           <validation-provider
@@ -294,7 +304,11 @@
           </validation-provider>
         </div>
 
-        <m-form-errors class="_form-errors" :form-errors="formErrors" />
+        <m-form-errors
+          class="_form-errors"
+          :form-errors="formErrors"
+          @item-click="goToFieldByName"
+        />
 
         <div class="_actions">
           <SfButton
@@ -349,7 +363,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType, VueConstructor } from 'vue';
+import { PropType, Ref, ref, defineComponent, inject } from '@vue/composition-api';
 import { mapMutations } from 'vuex';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
@@ -370,7 +384,7 @@ import { BundleOption } from 'core/modules/catalog/types/BundleOption';
 import Product from 'core/modules/catalog/types/Product';
 
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
-import { InjectType, CustomerImage, getProductDefaultPrice } from 'src/modules/shared';
+import { CustomerImage, getProductDefaultPrice } from 'src/modules/shared';
 import {
   vuexTypes as budsiesTypes,
   Bodypart,
@@ -392,6 +406,7 @@ import ProductionTimeOption from '../interfaces/production-time-option.interface
 import getProductionTimeOptions from '../../helpers/get-production-time-options';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MProductionTimeSelector from 'theme/components/molecules/m-production-time-selector.vue';
+import { useFormValidation } from 'theme/helpers/use-form-validation';
 
 extend('required', {
   ...required,
@@ -403,13 +418,32 @@ extend('email', {
   message: 'Please, provide the correct email address'
 });
 
-interface InjectedServices {
-  window: Window,
-  imageHandlerService: ImageHandlerService
-}
-
-export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
+export default defineComponent({
   name: 'OPillowProductOrderForm',
+  setup (_, setupContext) {
+    const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
+    const window = inject<Window>('WindowObject');
+
+    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+
+    if (!window) {
+      throw new Error('Window is not defined');
+    }
+
+    if (!imageHandlerService) {
+      throw new Error('ImageHandlerService is not defined');
+    }
+
+    return {
+      imageHandlerService,
+      validationObserver,
+      window,
+      ...useFormValidation(
+        validationObserver,
+        () => setupContext.refs
+      )
+    }
+  },
   components: {
     MBodypartOptionConfigurator,
     ValidationObserver,
@@ -427,10 +461,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     MPlushieSizeSelector,
     MFormErrors
   },
-  inject: {
-    window: { from: 'WindowObject' },
-    imageHandlerService: { from: 'ImageHandlerService' }
-  } as unknown as InjectType<InjectedServices>,
   props: {
     artworkUploadUrl: {
       type: String,
@@ -585,9 +615,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     getUploader (): InstanceType<typeof MArtworkUpload> | undefined {
       return this.$refs['artwork-upload'] as InstanceType<typeof MArtworkUpload> | undefined;
     },
-    getValidationObserver (): InstanceType<typeof ValidationObserver> | undefined {
-      return this.$refs['validation-observer'] as InstanceType<typeof ValidationObserver> | undefined;
-    },
     goToCrossSells (): void {
       this.$router.push(localizedRoute({
         name: 'cross-sells',
@@ -595,22 +622,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           parentSku: this.product.sku
         }
       }));
-    },
-    goToFieldByName (field: string): void {
-      // Strip quotes
-      let refName = field.replace(/^['"]+|['"]+$/g, '');
-      // Strip spaces & convert to lower case
-      refName = refName.toLowerCase().replace(/ /g, '-');
-
-      refName += '-field-anchor';
-
-      const ref = this.$refs[refName] as HTMLElement | undefined;
-      if (!ref) {
-        Logger.warn(`Reference for the field with error not found. Field: ${field}, ref: ${refName}`, 'budsies')();
-        return;
-      }
-
-      ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
     },
     prefillEmail (): void {
       const customerEmail = this.$store.getters['budsies/getPrefilledCustomerEmail'];
@@ -640,8 +651,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         this.productionTime = this.productionTimeOptions[0];
       }
 
-      const validator = this.getValidationObserver();
-      validator?.reset();
+      this.validationObserver?.reset();
     },
     switchToUploadNow (): void {
       if (this.isSubmitting) {
@@ -673,8 +683,14 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     onArtworkRemove (storageItemId: string): void {
       this.customerImage = undefined;
     },
-    async onSubmit (event: Event): Promise<void> {
+    async onSubmit (): Promise<void> {
       if (this.isSubmitting) {
+        return;
+      }
+
+      const isValid = await this.validateAndGoToFirstError();
+
+      if (!isValid) {
         return;
       }
 
@@ -903,6 +919,12 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
               font-weight: 800;
           }
       }
+  }
+
+  ._error-text {
+    font-size: var(--font-xs);
+    margin-top: var(--spacer-xs);
+    height: calc(var(--font-xs) * 1.2);
   }
 
   ._form-errors {

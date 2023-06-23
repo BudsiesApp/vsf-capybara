@@ -1,6 +1,10 @@
 <template>
   <div class="m-titled-artwork-upload">
-    <div class="_step-title" v-if="title">
+    <div
+      class="_step-title"
+      :ref="getFieldAnchorName(fieldName)"
+      v-if="title"
+    >
       {{ title }}
     </div>
 
@@ -88,6 +92,10 @@ export default Vue.extend({
     isRequired: {
       type: Boolean,
       default: false
+    },
+    getFieldAnchorName: {
+      type: Function as PropType<(fieldName: string) => string>,
+      required: true
     }
   },
   data () {

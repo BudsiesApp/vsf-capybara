@@ -22,10 +22,17 @@
           :special-price="specialPrice"
         />
 
-        <validation-observer v-slot="{ passes, errors }" slim ref="validation-observer">
-          <form @submit.prevent="() => passes(() => onSubmit())">
+        <validation-observer
+          v-slot="{ errors: formErrors }"
+          slim
+          ref="validationObserver"
+        >
+          <form @submit.prevent="onSubmit">
             <div class="_step">
-              <div class="_step-title">
+              <div
+                class="_step-title"
+                :ref="getFieldAnchorName('Style Option')"
+              >
                 {{ $t('Select style') }}
               </div>
 
@@ -52,11 +59,16 @@
             </div>
 
             <div class="_step" v-if="showVariantSelectStep">
-              <div class="_step-title">
+              <div class="_step-title" :ref="getFieldAnchorName('Set Option')">
                 {{ $t('Select set') }}
               </div>
 
-              <validation-provider v-slot="{errors}" name="'Set Option'" tag="div" class="_step-content">
+              <validation-provider
+                v-slot="{errors}"
+                name="'Set Option'"
+                tag="div"
+                class="_step-content"
+              >
                 <SfSelect
                   class="sf-select--underlined"
                   name="set_option"
@@ -83,7 +95,10 @@
             </div>
 
             <div class="_step">
-              <div class="_step-title">
+              <div
+                class="_step-title"
+                :ref="getFieldAnchorName('Size Option')"
+              >
                 {{ $t('Select size') }}
               </div>
 
@@ -120,7 +135,10 @@
             </div>
 
             <div class="_step">
-              <div class="_step-title">
+              <div
+                class="_step-title"
+                :ref="getFieldAnchorName('Design Option')"
+              >
                 {{ $t('Select design') }}
               </div>
 
@@ -148,7 +166,10 @@
             </div>
 
             <div class="_step">
-              <div class="_step-title">
+              <div
+                class="_step-title"
+                :ref="getFieldAnchorName('Pet\'s photo')"
+              >
                 {{ $t('Upload your pet\'s photo') }}
               </div>
 
@@ -197,7 +218,10 @@
               />
             </div>
 
-            <div class="_step">
+            <div
+              class="_step"
+              :ref="getFieldAnchorName('Quantity')"
+            >
               <validation-provider
                 v-slot="{ errors, classes }"
                 rules="required"
@@ -218,7 +242,8 @@
               </validation-provider>
 
               <m-form-errors
-                :form-errors="errors"
+                :form-errors="formErrors"
+                @item-click="goToFieldByName"
               />
 
               <div class="_actions">
@@ -248,7 +273,8 @@
 <script lang="ts">
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
 import { required } from 'vee-validate/dist/rules';
-import Vue, { PropType, VueConstructor } from 'vue'
+import Vue from 'vue'
+import { defineComponent, ref, Ref, inject, PropType } from '@vue/composition-api';
 import { mapGetters, mapMutations } from 'vuex';
 import { SfButton, SfHeading, SfSelect } from '@storefront-ui/vue';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
@@ -267,6 +293,7 @@ import { ProductValue, Dictionary, ExtraPhotoAddon } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage, getProductDefaultPrice, InjectType, ServerError } from 'src/modules/shared';
 import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
+import { useFormValidation } from 'theme/helpers/use-form-validation';
 
 import DesignProduct from '../interfaces/design-product.interface';
 import GalleryProductImages from '../interfaces/gallery-product-images.interface';
@@ -294,17 +321,30 @@ interface SelectOptionItem {
   label: string
 }
 
-interface InjectedServices {
-  imageHandlerService: ImageHandlerService
-}
-
 const DESIGN_BUNDLE_OPTION_TITLE = 'product';
 const SIZE_BUNDLE_OPTION_TITLE = 'size';
 const EXTRA_FACES_BUNDLE_OPTION_TITLE = 'extra faces';
 const VARIANT_BUNDLE_OPTION_TITLE = 'variant';
 
-export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
+export default defineComponent({
   name: 'OPajamaProductOrderForm',
+  setup (_, setupContext) {
+    const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
+    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+
+    if (!imageHandlerService) {
+      throw new Error('ImageHandlerService is not defined');
+    }
+
+    return {
+      imageHandlerService,
+      validationObserver,
+      ...useFormValidation(
+        validationObserver,
+        () => setupContext.refs
+      )
+    }
+  },
   components: {
     SfButton,
     SfHeading,
@@ -321,9 +361,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     MExtraFaces,
     MFormErrors
   },
-  inject: {
-    imageHandlerService: { from: 'ImageHandlerService' }
-  } as unknown as InjectType<InjectedServices>,
   props: {
     artworkUploadUrl: {
       type: String,
@@ -1013,7 +1050,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       this.$router.push({ name: 'detailed-cart' });
     },
-    onSubmit (): void {
+    async onSubmit (): Promise<void> {
+      const isValid = await this.validateAndGoToFirstError();
+
+      if (!isValid) {
+        return;
+      }
+
       if (!this.existingCartItem) {
         void this.addToCart();
       } else {

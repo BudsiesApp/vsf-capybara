@@ -57,6 +57,7 @@ export default Vue.extend({
 
   ._list {
     list-style: none;
+    padding: 0;
 
     ._item {
       margin-top: var(--spacer-xs);
