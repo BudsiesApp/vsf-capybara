@@ -8,11 +8,6 @@
           @change="changeStep"
         >
           <template>
-            <ProductionSpotCountdown
-              :can-show="canShowProductionSpotCountdown"
-              class="_production-spot-countdown"
-            />
-
             <SfStep v-for="step in availableSteps" :key="step.key" :name="step.name">
               <component :is="step.component" :is-active="true" />
             </SfStep>
@@ -36,7 +31,6 @@
 import Checkout from '@vue-storefront/core/pages/Checkout';
 import { SfSteps } from '@storefront-ui/vue';
 import { mapGetters } from 'vuex';
-import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
@@ -50,7 +44,6 @@ import OOrderSummary from 'theme/components/organisms/o-order-summary';
 import OOrderSuccess from 'theme/components/organisms/o-order-success';
 import OPersonalDetails from 'theme/components/organisms/o-personal-details';
 import OCartItemsTable from 'theme/components/organisms/o-cart-items-table';
-import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
 import { ModalList } from 'theme/store/ui/modals';
 
 const successParamValue = 'success';
@@ -73,8 +66,7 @@ export default {
     OConfirmOrder,
     OPersonalDetails,
     OCartItemsTable,
-    OOrderSuccess,
-    ProductionSpotCountdown
+    OOrderSuccess
   },
   mixins: [Checkout],
   data () {
@@ -126,9 +118,6 @@ export default {
     },
     isReviewStep () {
       return this.availableSteps[this.currentStep].key === orderReviewStepKey;
-    },
-    canShowProductionSpotCountdown () {
-      return this.productsInCart.some((product) => isCustomProduct(product.id));
     }
   },
   beforeMount () {
@@ -237,10 +226,6 @@ export default {
 }
 .checkout {
   --steps-content-padding: 0 var(--spacer-sm);
-
-  ._production-spot-countdown {
-    margin-top: var(--spacer-sm);
-  }
 
   @include for-desktop {
     --steps-content-padding: 0;
