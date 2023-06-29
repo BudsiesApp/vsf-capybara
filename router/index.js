@@ -175,6 +175,12 @@ let routes = [
         case '73':
           parentSku = 'ForeversDog_bundle';
           break;
+        case '74':
+          parentSku = 'ForeversCat_bundle';
+          break;
+        case '75':
+          parentSku = 'ForeversOther_bundle';
+          break;
         case '253':
           parentSku = 'customPillow_bundle';
           break;
@@ -189,6 +195,42 @@ let routes = [
           break;
         case '353':
           parentSku = 'customPrintedKeychains_bundle';
+          break;
+        case '446':
+          parentSku = 'customFeltedMagnets_bundle';
+          break;
+        case '448':
+          parentSku = 'customFeltedOrnaments_bundle';
+          break;
+        case '487':
+          parentSku = 'customRenaissanceBlankets_bundle';
+          break;
+        case '504':
+          parentSku = 'customCutOutBlankets_bundle';
+          break;
+        case '528':
+          parentSku = 'petsiesBobbleheads_bundle';
+          break;
+        case '532':
+          parentSku = 'petsiesFigurines_bundle';
+          break;
+        case '558':
+          parentSku = 'customPajamas_bundle';
+          break;
+        case '571':
+          parentSku = 'golfHeadCoversDog_bundle';
+          break;
+        case '573':
+          parentSku = 'golfHeadCoversCat_bundle';
+          break;
+        case '575':
+          parentSku = 'golfHeadCoversOther_bundle';
+          break;
+        case '626':
+          parentSku = 'customGolfShirts_bundle';
+          break;
+        case '645':
+          parentSku = 'customHawaiianShirts_bundle';
           break;
       }
 
