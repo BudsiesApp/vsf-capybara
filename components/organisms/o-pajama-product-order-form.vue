@@ -143,9 +143,11 @@
               <validation-provider
                 v-slot="{errors}"
                 rules="required"
+                mode="passive"
                 name="'Design Option'"
                 tag="div"
                 class="_step-content"
+                ref="design-option-validation-provider"
               >
                 <m-design-selector
                   class="_design-selector"
@@ -997,6 +999,9 @@ export default defineComponent({
 
       return products;
     },
+    getDesignOptionValidationProvider (): InstanceType<typeof ValidationProvider> | undefined {
+      return this.$refs['design-option-validation-provider'] as InstanceType<typeof ValidationProvider> | undefined;
+    },
     goToCrossSells (): void {
       this.$router.push(localizedRoute({
         name: 'cross-sells',
@@ -1184,6 +1189,16 @@ export default defineComponent({
           optionId: this.designBundleOption.option_id,
           optionQty: 1,
           optionSelections: selectedDesign ? [selectedDesign.id] : []
+        });
+
+        const designOptionValidationProvider = this.getDesignOptionValidationProvider();
+
+        if (!designOptionValidationProvider) {
+          return;
+        }
+
+        this.$nextTick().then(() => {
+          designOptionValidationProvider.validate();
         });
       }
     },

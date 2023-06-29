@@ -40,7 +40,9 @@
                 v-slot="{errors}"
                 rules="required"
                 name="'Design Option'"
+                mode="passive"
                 tag="div"
+                ref="design-option-validation-provider"
               >
                 <m-design-selector
                   class="_design-selector"
@@ -630,6 +632,9 @@ export default defineComponent({
     getArtworkUploader (): InstanceType<typeof MArtworkUpload> | undefined {
       return this.$refs['artwork-upload'] as InstanceType<typeof MArtworkUpload> | undefined;
     },
+    getDesignOptionValidationProvider (): InstanceType<typeof ValidationProvider> | undefined {
+      return this.$refs['design-option-validation-provider'] as InstanceType<typeof ValidationProvider> | undefined;
+    },
     getLabelForSizeOptionByProductLink (productLink: BundleOptionsProductLink): string {
       if (!productLink.product) {
         throw new Error('Product is undefined for product link');
@@ -829,6 +834,16 @@ export default defineComponent({
           optionQty: 1,
           optionSelections: selectedDesign ? [selectedDesign.id] : []
         })
+
+        const designOptionValidationProvider = this.getDesignOptionValidationProvider();
+
+        if (!designOptionValidationProvider) {
+          return;
+        }
+
+        this.$nextTick().then(() => {
+          designOptionValidationProvider.validate();
+        });
       }
     }
   }
