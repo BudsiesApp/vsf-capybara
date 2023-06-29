@@ -62,19 +62,10 @@
       </template>
       <template #search>
         <div />
-        <!-- <OSearch :class="{'desktop-only': !isSearchPanelVisible}" />
-        <SfButton
-          v-if="isSearchPanelVisible"
-          class="sf-button--text form__action-button form__action-button--secondary mobile-only"
-          @click="$store.commit('ui/setSearchpanel', false)"
-        >
-          {{ $t('Cancel') }}
-        </SfButton> -->
       </template>
       <template #header-icons>
         <div class="sf-header__icons">
           <AAccountIcon class="sf-header__action" />
-          <!-- <AMicrocartIcon class="sf-header__action" /> -->
           <ADetailedCartIcon class="sf-header__action" />
         </div>
       </template>
@@ -88,11 +79,9 @@ import { mapState, mapGetters } from 'vuex';
 
 import ALogo from 'theme/components/atoms/a-logo';
 import AAccountIcon from 'theme/components/atoms/a-account-icon';
-import AMicrocartIcon from 'theme/components/atoms/a-microcart-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
-import OSearch from 'theme/components/organisms/o-search';
-import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 import MMenu from 'theme/components/molecules/m-menu';
+import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
 export default {
   name: 'OHeader',
@@ -100,9 +89,7 @@ export default {
     SfHeader,
     ALogo,
     AAccountIcon,
-    AMicrocartIcon,
     ADetailedCartIcon,
-    OSearch,
     SfOverlay,
     SfButton,
     MMenu,

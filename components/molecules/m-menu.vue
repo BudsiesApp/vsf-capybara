@@ -1,5 +1,13 @@
 <template>
   <div class="m-menu sf-mega-menu bg-white">
+    <SfIcon
+      class="desktop-only _close-icon"
+      icon="cross"
+      size="var(--font-sm)"
+      color="gray-secondary"
+      @click.native="$emit('close')"
+    />
+
     <SfMegaMenu
       ref="menu"
       :title="title"
@@ -62,10 +70,15 @@
 </template>
 <script lang="ts">
 import Vue from 'vue';
-import { SfMegaMenu, SfList, SfMenuItem } from '@storefront-ui/vue';
+import { SfIcon, SfMegaMenu, SfList, SfMenuItem } from '@storefront-ui/vue';
 
 export default Vue.extend({
-  components: { SfMegaMenu, SfList, SfMenuItem },
+  components: {
+    SfIcon,
+    SfMegaMenu,
+    SfList,
+    SfMenuItem
+  },
   props: {
     visible: {
       type: Boolean,
@@ -190,21 +203,48 @@ export default Vue.extend({
     }
   }
 
-  .sf-mega-menu__menu {
-    @include for-desktop {
+  .sf-bar {
+    display: none;
+  }
+
+  ._close-icon {
+    cursor: pointer;
+    position: absolute;
+    right: var(--spacer-sm);
+    top: var(--spacer-base);
+    z-index: 3;
+  }
+
+  @include for-desktop {
+    .sf-mega-menu__content {
+      --mega-menu-content-padding: 0 var(--spacer-sm) var(--spacer-xl) var(--spacer-sm);
+    }
+
+    .sf-mega-menu__menu {
       flex-wrap: wrap;
       flex: 0 1 auto;
     }
-  }
 
-  .sf-mega-menu__content {
-    @include for-desktop {
-      --mega-menu-content-padding: var(--spacer-xl) var(--spacer-sm);
+    .sf-mega-menu-column {
+      --mega-menu-margin: var(--spacer-xl) var(--spacer-2xl) 0 0;
+      --list-item-margin: var(--spacer-base) 0 0 0;
     }
   }
 
-  .sf-bar {
-    display: none;
+  @media (min-width: $desktop-min) and (max-height: $tablet-min) {
+    --menu-item-font-size: var(--font-sm);
+    --mega-menu-column-title-font-size: var(--font-sm);
+
+    .sf-mega-menu__content {
+      --mega-menu-content-padding: 0 var(--spacer-sm) var(--spacer-base) var(--spacer-sm);
+    }
+
+    .sf-mega-menu-column {
+      --mega-menu-margin: var(--spacer-base) var(--spacer-2xl) 0 0;
+      --list-item-margin: var(--spacer-sm) 0 0 0;
+      --mega-menu-column-title-margin: 0 0 var(--spacer-sm) 0;
+
+    }
   }
 }
 </style>
