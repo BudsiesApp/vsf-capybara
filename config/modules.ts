@@ -81,5 +81,5 @@ export function registerClientModules () {
 // Deprecated API, will be removed in 2.0
 export const registerModules: VueStorefrontModule[] = [
   // Example
-  AmazonPay
+  // AmazonPay
 ]
