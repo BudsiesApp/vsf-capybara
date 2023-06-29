@@ -282,10 +282,6 @@ extend('required', {
   message: 'The {_field_} field is required'
 });
 
-interface InjectedServices {
-  imageHandlerService: ImageHandlerService
-}
-
 export interface SelectOption {
   optionId: number,
   optionValueId: number,
@@ -357,9 +353,6 @@ export default defineComponent({
     MBodypartOptionConfigurator,
     MFormErrors
   },
-  inject: {
-    imageHandlerService: { from: 'ImageHandlerService' }
-  } as unknown as InjectType<InjectedServices>,
   props: {
     artworkUploadUrl: {
       type: String,

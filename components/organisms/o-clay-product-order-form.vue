@@ -424,11 +424,6 @@ import MBlockStory from '../molecules/m-block-story.vue';
 import MFormErrors from '../molecules/m-form-errors.vue';
 import MBodypartOptionConfigurator from '../molecules/m-bodypart-option-configurator.vue';
 
-interface InjectedServices {
-  imageHandlerService: ImageHandlerService,
-  window: Window
-}
-
 extend('required', {
   ...required,
   message: 'The {_field_} field is required'
@@ -480,10 +475,6 @@ export default defineComponent({
     MBlockStory,
     MFormErrors
   },
-  inject: {
-    imageHandlerService: { from: 'ImageHandlerService' },
-    window: { from: 'WindowObject' }
-  } as unknown as InjectType<InjectedServices>,
   props: {
     artworkUploadUrl: {
       type: String,
