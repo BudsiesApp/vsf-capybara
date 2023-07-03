@@ -98,6 +98,18 @@ export default Vue.extend({
           }
         },
         {
+          label: this.$t('Hawaiian Shirts'),
+          url: {
+            name: 'hawaiian-shirts-creation'
+          }
+        },
+        {
+          label: this.$t('Golf Shirts'),
+          url: {
+            name: 'golf-shirts-creation'
+          }
+        },
+        {
           label: 'Pet Keychains',
           url: {
             name: 'printed-keychains-creation-page'

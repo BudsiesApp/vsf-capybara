@@ -434,6 +434,16 @@ let routes = [
     })
   },
   {
+    name: 'clothes-product',
+    path: '/clothes/p/:sku/',
+    component: ClothesProduct,
+    props: (route) => ({
+      sku: route.params.sku,
+      productDesign: route.query.product_design,
+      existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
     name: 'pajamas-creation',
     path: '/pajamas/index/create/',
     component: ClothesProduct,

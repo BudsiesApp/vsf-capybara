@@ -200,6 +200,18 @@ export default Vue.extend({
           }
         },
         {
+          label: this.$t('Hawaiian Shirts'),
+          url: {
+            name: 'hawaiian-shirts-creation'
+          }
+        },
+        {
+          label: this.$t('Golf Shirts'),
+          url: {
+            name: 'golf-shirts-creation'
+          }
+        },
+        {
           label: this.$t('Face Masks'),
           url: {
             name: 'printed-masks-creation-page'

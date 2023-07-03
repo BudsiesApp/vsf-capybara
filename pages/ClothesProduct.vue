@@ -101,6 +101,12 @@ export default Vue.extend({
   watch: {
     sku: async function () {
       await this.loadData();
+
+      if (!document || !document.scrollingElement) {
+        return;
+      }
+
+      document.scrollingElement.scrollTop = 0;
     }
   },
   metaInfo () {
