@@ -83,7 +83,7 @@ export default Vue.extend({
       }
     },
     getInputId (option: ClothesStyleOption): string {
-      return `pajama_style_option_${option.code}`;
+      return `clothes_style_option_${option.code}`;
     }
   }
 })
