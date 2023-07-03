@@ -23,14 +23,16 @@ import Product from 'core/modules/catalog/types/Product';
 
 import OClothesProductOrderForm from 'theme/components/organisms/o-clothes-product-order-form.vue';
 
-const pajamaProductSku = 'customPajamas_bundle';
-
 export default Vue.extend({
   name: 'ClothesProduct',
   components: {
     OClothesProductOrderForm
   },
   props: {
+    sku: {
+      type: String,
+      required: true
+    },
     productDesign: {
       type: String as PropType<string | undefined>,
       default: undefined
@@ -43,7 +45,7 @@ export default Vue.extend({
   computed: {
     getCurrentProduct (): Product | null {
       const product = this.$store.getters['product/getCurrentProduct'];
-      if (!product?.sku || product.sku !== pajamaProductSku) {
+      if (!product?.sku || product.sku !== this.sku) {
         return null;
       }
 
@@ -80,7 +82,7 @@ export default Vue.extend({
   methods: {
     async loadData (): Promise<void> {
       const product = await this.$store.dispatch('product/loadProduct', {
-        parentSku: pajamaProductSku,
+        parentSku: this.sku,
         setCurrent: true
       });
 
@@ -106,7 +108,7 @@ export default Vue.extend({
 
     return {
       title: htmlDecode(
-        this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name
+        this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name || this.$t('Clothes')
       ),
       meta: description
         ? [
