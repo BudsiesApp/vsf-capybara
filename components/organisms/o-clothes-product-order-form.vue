@@ -28,7 +28,7 @@
           ref="validationObserver"
         >
           <form @submit.prevent="onSubmit">
-            <div class="_step">
+            <div class="_step" v-if="showStyleSelectorStep">
               <div
                 class="_step-title"
                 :ref="getFieldAnchorName('Style Option')"
@@ -250,7 +250,7 @@
                   type="submit"
                   :disabled="isSubmitButtonDisabled"
                 >
-                  Add to Cart
+                  {{ $t('Add to Cart') }}
                 </SfButton>
               </div>
             </div>
@@ -319,7 +319,9 @@ interface SelectOptionItem {
   label: string
 }
 
-const DESIGN_BUNDLE_OPTION_TITLE = 'product';
+const SHIRTS_DESIGN_BUNDLE_OPTION_TITLE = 'design';
+const SHIRTS_SIMPLE_PRODUCT_BUNDLE_OPTION_TITLE = 'product';
+const PAJAMAS_DESIGN_BUNDLE_OPTION_TITLE = 'product';
 const SIZE_BUNDLE_OPTION_TITLE = 'size';
 const EXTRA_FACES_BUNDLE_OPTION_TITLE = 'extra faces';
 const VARIANT_BUNDLE_OPTION_TITLE = 'variant';
@@ -471,10 +473,14 @@ export default defineComponent({
         this.extraFacesAddons.length > 0
       );
     },
-    backendProductId (): ProductValue {
+    backendProductId (): ProductValue.PAJAMAS | ProductValue.HAWAIIAN_SHIRTS | ProductValue.GOLF_SHIRTS {
       switch (this.product.id) {
         case 558:
           return ProductValue.PAJAMAS;
+        case 645:
+          return ProductValue.HAWAIIAN_SHIRTS;
+        case 626:
+          return ProductValue.GOLF_SHIRTS;
         default:
           throw new Error(
             `Can't resolve Backend product id for Magento '${this.product.id}' product ID`
@@ -502,8 +508,17 @@ export default defineComponent({
       }
 
       return this.product.bundle_options.find(
-        (bundleOption) => bundleOption.title.toLowerCase() === DESIGN_BUNDLE_OPTION_TITLE
+        (bundleOption) => bundleOption.title.toLowerCase() === this.designBundleOptionTitle
       );
+    },
+    designBundleOptionTitle (): string {
+      switch (this.backendProductId) {
+        case ProductValue.PAJAMAS:
+          return PAJAMAS_DESIGN_BUNDLE_OPTION_TITLE;
+        case ProductValue.GOLF_SHIRTS:
+        case ProductValue.HAWAIIAN_SHIRTS:
+          return SHIRTS_DESIGN_BUNDLE_OPTION_TITLE;
+      }
     },
     designProductOptions (): DesignProduct[] {
       const designs: DesignProduct[] = [];
@@ -682,23 +697,31 @@ export default defineComponent({
       return this.totalPrice.special;
     },
     totalPrice (): {regular: number, special: number} {
-      const variantPrice = getProductDefaultPrice(this.selectedVariantProduct, {}, false);
-      const defaultVariantPrice = getProductDefaultPrice(this.defaultVariantProduct, {}, false);
       const extraFacesPrice = getProductDefaultPrice(this.selectedExtraFaceProduct, {}, false);
-
-      const finalVariantPrice = variantPrice.regular ? variantPrice : defaultVariantPrice;
 
       return {
         regular: this.selectedDesignProductPrice.regular +
-          finalVariantPrice.regular +
+          this.simpleProductPrice.regular +
           extraFacesPrice.regular,
         special: this.selectedDesignProductPrice.special +
-          finalVariantPrice.special +
+          this.simpleProductPrice.special +
           extraFacesPrice.special
       }
     },
     customerImageId (): string | undefined {
       return this.customerImage?.id;
+    },
+    simpleProductPrice (): {regular: number, special: number} {
+      switch (this.backendProductId) {
+        case ProductValue.PAJAMAS:
+          const variantPrice = getProductDefaultPrice(this.selectedVariantProduct, {}, false);
+          const defaultVariantPrice = getProductDefaultPrice(this.defaultVariantProduct, {}, false);
+
+          return variantPrice.regular ? variantPrice : defaultVariantPrice;
+        case ProductValue.GOLF_SHIRTS:
+        case ProductValue.HAWAIIAN_SHIRTS:
+          return getProductDefaultPrice(this.product, {}, false);
+      }
     },
     styleOptions (): ClothesStyleOption[] {
       const styleCodes: Record<string, ClothesStyleOption> = {};
@@ -766,6 +789,9 @@ export default defineComponent({
       })
 
       return options;
+    },
+    showStyleSelectorStep (): boolean {
+      return this.styleOptions.length > 0;
     },
     showVariantSelectStep (): boolean {
       return this.variantOptions.length > 0;
@@ -893,12 +919,12 @@ export default defineComponent({
       this.fillExistingCartItemCustomerImage(cartItem);
       this.fillExistingCartItemSize(cartItem);
       this.fillExistingCartItemVariant(cartItem);
-      this.fillExistingCartItemStyle(cartItem);
+      this.fillExistingCartItemStyle();
       this.fillAdditionalArtworksData(cartItem);
       this.fillExtraFacesDataAddon(cartItem);
       this.fillExistingQuantity(cartItem);
     },
-    fillExistingCartItemStyle (cartItem: CartItem): void {
+    fillExistingCartItemStyle (): void {
       this.selectedStyle = undefined;
 
       if (!this.selectedVariantProduct) {
