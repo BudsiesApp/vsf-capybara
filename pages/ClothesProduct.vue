@@ -1,6 +1,6 @@
 <template>
-  <div id="pajama-product" itemscope itemtype="http://schema.org/Product">
-    <o-pajama-product-order-form
+  <div id="clothes-product" itemscope itemtype="http://schema.org/Product">
+    <o-clothes-product-order-form
       v-if="getCurrentProduct"
       :artwork-upload-url="artworkUploadUrl"
       :product="getCurrentProduct"
@@ -21,14 +21,14 @@ import CartItem from 'core/modules/cart/types/CartItem';
 
 import Product from 'core/modules/catalog/types/Product';
 
-import OPajamaProductOrderForm from 'theme/components/organisms/o-pajama-product-order-form.vue';
+import OClothesProductOrderForm from 'theme/components/organisms/o-clothes-product-order-form.vue';
 
 const pajamaProductSku = 'customPajamas_bundle';
 
 export default Vue.extend({
-  name: 'PajamaProduct',
+  name: 'ClothesProduct',
   components: {
-    OPajamaProductOrderForm
+    OClothesProductOrderForm
   },
   props: {
     productDesign: {
@@ -125,7 +125,7 @@ export default Vue.extend({
   <style lang="scss" scoped>
   @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-  #pajama-product {
+  #clothes-product {
     box-sizing: border-box;
     padding: 0 1rem;
 
@@ -140,7 +140,7 @@ export default Vue.extend({
       width: 100%;
       margin: 0 auto;
 
-      .o-pajama-product-order-form {
+      .o-clothes-product-order-form {
         margin-top: var(--spacer-lg);
       }
     }

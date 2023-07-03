@@ -1,5 +1,5 @@
 <template>
-  <div class="o-pajama-product-order-form">
+  <div class="o-clothes-product-order-form">
     <div class="_info">
       <div class="_zoom-gallery-container">
         <SfHeading
@@ -43,9 +43,9 @@
                 class="_step-content"
                 tag="div"
               >
-                <m-pajama-style-selector
+                <m-clothes-style-selector
                   :options="styleOptions"
-                  name="pajama-style-selector"
+                  name="clothes-style-selector"
                   :disabled="isDisabled"
                   :value="selectedStyle"
                   @input="onStyleSelected"
@@ -295,7 +295,7 @@ import { useFormValidation } from 'theme/helpers/use-form-validation';
 
 import DesignProduct from '../interfaces/design-product.interface';
 import GalleryProductImages from '../interfaces/gallery-product-images.interface';
-import PajamaStyleOption from '../interfaces/pajama-style-option.interface';
+import ClothesStyleOption from '../interfaces/clothes-style-option.interface';
 import ExtraPhotoAddonOption from '../interfaces/extra-photo-addon-option.interface';
 import ExtraFacesConfiguratorData from '../interfaces/extra-faces-configurator-data.interface';
 
@@ -305,7 +305,7 @@ import MArtworkUpload from '../molecules/m-artwork-upload.vue';
 import MDesignSelector from '../molecules/m-design-selector.vue';
 import MProductDescriptionStory from '../molecules/m-product-description-story.vue';
 import MZoomGallery from '../molecules/m-zoom-gallery.vue';
-import MPajamaStyleSelector from './OPajamaProductOrderForm/m-pajama-style-selector.vue';
+import MClothesStyleSelector from './OClothesProductOrderForm/m-clothes-style-selector.vue';
 import MExtraFaces from '../molecules/m-extra-faces.vue';
 import MFormErrors from '../molecules/m-form-errors.vue';
 
@@ -325,7 +325,7 @@ const EXTRA_FACES_BUNDLE_OPTION_TITLE = 'extra faces';
 const VARIANT_BUNDLE_OPTION_TITLE = 'variant';
 
 export default defineComponent({
-  name: 'OPajamaProductOrderForm',
+  name: 'OClothesProductOrderForm',
   setup (_, setupContext) {
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
@@ -355,7 +355,7 @@ export default defineComponent({
     MArtworkUpload,
     ACustomProductQuantity,
     MProductDescriptionStory,
-    MPajamaStyleSelector,
+    MClothesStyleSelector,
     MExtraFaces,
     MFormErrors
   },
@@ -700,8 +700,8 @@ export default defineComponent({
     customerImageId (): string | undefined {
       return this.customerImage?.id;
     },
-    styleOptions (): PajamaStyleOption[] {
-      const styleCodes: Record<string, PajamaStyleOption> = {};
+    styleOptions (): ClothesStyleOption[] {
+      const styleCodes: Record<string, ClothesStyleOption> = {};
 
       this.variantBundleOptionProductLinks.forEach((productLink) => {
         if (!productLink.product) {
@@ -1248,7 +1248,7 @@ export default defineComponent({
   <style lang="scss" scoped>
   @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-  .o-pajama-product-order-form {
+  .o-clothes-product-order-form {
     --select-selected-padding: 0 var(--spacer-lg) var(--spacer-xs) var(--spacer-2xs);
 
     ._info {

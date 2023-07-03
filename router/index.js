@@ -30,8 +30,8 @@ const BlanketProduct = () =>
   import(/* webpackChunkName: "vsf-blankets" */ 'theme/pages/BlanketProduct');
 const ClayProduct = () =>
   import(/* webpackChunkName: "vsf-plushie-product" */ 'theme/pages/ClayProduct');
-const PajamaProduct = () =>
-  import(/* webpackChunkName: "vsf-pajama-product" */ 'theme/pages/PajamaProduct');
+const ClothesProduct = () =>
+  import(/* webpackChunkName: "vsf-clothes-product" */ 'theme/pages/ClothesProduct');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -436,8 +436,29 @@ let routes = [
   {
     name: 'pajamas-creation',
     path: '/pajamas/index/create/',
-    component: PajamaProduct,
+    component: ClothesProduct,
     props: (route) => ({
+      sku: 'customPajamas_bundle',
+      productDesign: route.query.product_design,
+      existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
+    name: 'hawaiian-shirts-creation',
+    path: '/clothes/hawaiian-shirts/create/',
+    component: ClothesProduct,
+    props: (route) => ({
+      sku: 'customHawaiianShirts_bundle',
+      productDesign: route.query.product_design,
+      existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
+    name: 'golf-shirts-creation',
+    path: '/clothes/golf-shirts/create/',
+    component: ClothesProduct,
+    props: (route) => ({
+      sku: 'customGolfShirts_bundle',
       productDesign: route.query.product_design,
       existingPlushieId: route.query.existingPlushieId
     })

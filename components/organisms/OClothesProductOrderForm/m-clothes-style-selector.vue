@@ -1,5 +1,5 @@
 <template>
-  <ul class="m-pajama-style-selector" :class="{'-disabled': disabled}">
+  <ul class="m-clothes-style-selector" :class="{'-disabled': disabled}">
     <li
       class="_value"
       :key="option.code"
@@ -35,15 +35,15 @@
 import Vue, { PropType } from 'vue';
 import { getThumbnailPath } from '@vue-storefront/core/helpers/index';
 
-import PajamaStyleOption from 'theme/components/interfaces/pajama-style-option.interface';
+import ClothesStyleOption from 'theme/components/interfaces/clothes-style-option.interface';
 
 const OPTION_ITEM_WIDTH = 115;
 
 export default Vue.extend({
-  name: 'MPajamaStyleSelector',
+  name: 'MClothesStyleSelector',
   props: {
     options: {
-      type: Array as PropType<PajamaStyleOption[]>,
+      type: Array as PropType<ClothesStyleOption[]>,
       required: true
     },
     name: {
@@ -70,7 +70,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    getIconStyle (option: PajamaStyleOption): Record<string, string> {
+    getIconStyle (option: ClothesStyleOption): Record<string, string> {
       const thumb = getThumbnailPath(
         option.image,
         OPTION_ITEM_WIDTH * 2,
@@ -82,7 +82,7 @@ export default Vue.extend({
         'background-image': `url(${thumb})`
       }
     },
-    getInputId (option: PajamaStyleOption): string {
+    getInputId (option: ClothesStyleOption): string {
       return `pajama_style_option_${option.code}`;
     }
   }
@@ -95,7 +95,7 @@ export default Vue.extend({
 $bodypart-item-width: 115px;
 $color-selector-selected-border-color: #51a7f9;
 
-.m-pajama-style-selector {
+.m-clothes-style-selector {
   list-style: none;
   display: flex;
   flex-wrap: wrap;
