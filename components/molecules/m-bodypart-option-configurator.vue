@@ -3,51 +3,43 @@
     class="m-bodypart-option-configurator"
     :class="{ '-disabled': disabled }"
   >
-    <ul class="_visual-selector">
-      <li
-        class="_visual-selector-value"
-        :class="{'-color-value': isColorValue(option)}"
-        v-for="option in options"
-        :key="option.value"
-      >
-        <input
-          :id="getInputId(option)"
+    <div class="_group-item" v-for="group in optionsGroups" :key="group">
+      <div class="_group-title" v-if="group !== 'default'">
+        {{ group }}
+      </div>
+
+      <ul class="_visual-selector">
+        <a-body-part-value
+          v-for="option in optionsByGroup[group]"
+          :option="option"
+          :input-type="inputType"
+          :parent-component-instance-id="instanceId"
           :name="name"
-          :type="inputType"
-          :value="option"
           v-model="selectedOption"
           :disabled="disabled"
-          @click="(event) => onChange(event, option)"
-        >
-        <label
-          :for="getInputId(option)"
-        >
-          <div
-            class="_icon"
-            :style="getIconStyle(option)"
-          />
-
-          <div class="_name">
-            {{ option.label }}
-          </div>
-        </label>
-      </li>
-    </ul>
+          :type="type"
+          :key="option.id"
+          @change="onChange"
+        />
+      </ul>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue, { PropType } from 'vue';
-import { getThumbnailPath } from '@vue-storefront/core/helpers/index';
 
-import { BodyPartValueContentType } from 'src/modules/budsies';
+import { BodypartOption, Dictionary } from 'src/modules/budsies';
 
-import BodypartOption from '../interfaces/bodypart-option';
+import ABodyPartValue from '../atoms/a-body-part-value.vue';
 
 let instanceId = 0;
 
 export default Vue.extend({
   name: 'MBodypartOptionConfigurator',
+  components: {
+    ABodyPartValue
+  },
   props: {
     name: {
       type: String,
@@ -98,6 +90,18 @@ export default Vue.extend({
     },
     inputType (): 'checkbox' | 'radio' {
       return this.maxValues > 1 ? 'checkbox' : 'radio';
+    },
+    optionsGroups (): string[] {
+      return Array.from(new Set(this.options.map((option) => option.group)));
+    },
+    optionsByGroup (): Dictionary<BodypartOption[]> {
+      const optionsByGroup: Dictionary<BodypartOption[]> = Object.assign({}, ...Array.from(this.optionsGroups, (k) => ({ [`${k}`]: [] })));
+
+      this.options.forEach((option) => {
+        optionsByGroup[option.group].push(option);
+      });
+
+      return optionsByGroup;
     }
   },
   created: function (): void {
@@ -105,29 +109,7 @@ export default Vue.extend({
     instanceId += 1;
   },
   methods: {
-    isColorValue (option: BodypartOption): boolean {
-      return option.contentTypeId === BodyPartValueContentType.COLOR;
-    },
-    getInputId (option: BodypartOption): string {
-      return `body_part_value_${this.instanceId}_${option.id}`;
-    },
-    getIconStyle (option: BodypartOption): string | Record<string, string | number> {
-      if (option.contentTypeId === BodyPartValueContentType.IMAGE && option.image) {
-        const thumb = getThumbnailPath(option.image, 150, 150, this.type);
-        return {
-          'background-image': `url(${thumb})`
-        }
-      }
-
-      if (option.contentTypeId === BodyPartValueContentType.COLOR && option.color) {
-        return {
-          'background-color': option.color
-        }
-      }
-
-      return '';
-    },
-    onChange (event: Event, option: BodypartOption): void {
+    onChange ({ event, option }: {event: Event, option: BodypartOption}): void {
       if (!Array.isArray(this.selectedOption)) {
         return;
       }
@@ -148,9 +130,21 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-@import "~@storefront-ui/shared/styles/helpers/breakpoints";
-
 .m-bodypart-option-configurator {
+  ._group-item {
+    margin-bottom: var(--spacer-sm);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  ._group-title {
+    text-align: center;
+    font-size: var(--font-sm);
+    margin-bottom: var(--spacer-sm);
+  }
+
   ._visual-selector {
     list-style: none;
     display: flex;
@@ -158,84 +152,15 @@ export default Vue.extend({
     justify-content: center;
     padding: 0;
     row-gap: 2vw;
-    column-gap: 4%;
-  }
-
-  ._visual-selector-value {
-    width: 114px;
-
-    ._icon {
-      background-position: center center;
-      background-repeat: no-repeat;
-      background-size: contain;
-      border-radius: 50%;
-      padding-top: 100%;
-      width: 100%;
-      position: relative;
-      z-index: 0;
-    }
-
-    ._name {
-      font-size: var(--font-xs);
-      font-weight: var(--font-medium);
-      margin-top: var(--spacer-sm);
-    }
-
-    &.-color-value {
-      width: 60px;
-
-      ._icon {
-        border: 1px solid #ccc;
-      }
-    }
-  }
-
-  ._visual-selector-value > input {
-      display: block;
-      height: 0;
-      opacity: 0;
-      width: 0;
-      margin: 0;
-      padding: 0;
-      border: 0;
-  }
-
-  ._visual-selector-value > label {
-      height: auto;
-      margin: 0;
-      min-height: 0;
-      padding: 0;
-      width: 100%;
-      cursor: pointer;
-  }
-
-  ._visual-selector-value > input:checked + label ._icon::before {
-    background: rgba(52, 184, 147, 0.7);
-    border-radius: 100%;
-    content: "";
-    height: 100%;
-    left: 0;
-    position: absolute;
-    top: 0;
-    width: 100%;
-    z-index: 1;
-  }
-  ._visual-selector-value > input:checked + label ._icon::after {
-    background: url('/assets/images/sprite/ico-tick-green.png') no-repeat center #fff;
-    border: 2px solid #38b677;
-    border-radius: 100%;
-    content: "";
-    height: 24px;
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 24px;
-    z-index: 2;
   }
 
   &.-disabled {
-    ._visual-selector-value {
+    ._visual-selector {
       opacity: 0.7;
+
+      > label {
+       cursor: default;
+      }
     }
   }
 }

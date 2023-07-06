@@ -2,8 +2,10 @@
   <div
     :class="cssClasses"
     :style="styles"
-    class="storyblok-image"
+    class="storyblok-image layout-regular-component"
   >
+    <editor-block-icons :item="itemData" />
+
     <CoolLightBox
       :items="getLightboxItems()"
       :index="lightboxIndexValue"
@@ -41,7 +43,8 @@ import generateImageSourcesList from './generate-image-sources-list';
 const SCREEN_WIDTH_BREAKPOINT = 768;
 
 interface InjectedServices {
-  componentWidthCalculator: ComponentWidthCalculator
+  componentWidthCalculator: ComponentWidthCalculator,
+  window: Window
 }
 
 export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServices>).extend({
@@ -51,7 +54,8 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     CoolLightBox
   },
   inject: {
-    componentWidthCalculator: { }
+    componentWidthCalculator: { },
+    window: { from: 'WindowObject' }
   } as unknown as InjectType<InjectedServices>,
   data () {
     return {
@@ -116,7 +120,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
         return result;
       }
 
-      if (window.innerWidth >= SCREEN_WIDTH_BREAKPOINT || !this.itemData.mobile_image.filename) {
+      if (this.window.innerWidth >= SCREEN_WIDTH_BREAKPOINT || !this.itemData.mobile_image.filename) {
         return result;
       }
 
@@ -137,14 +141,22 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 </script>
 
 <style lang="scss">
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+
 .storyblok-image {
   text-align: center;
-  font-size: 0;
+
+  ._image {
+    vertical-align: bottom;
+  }
 
   &.-editor-preview-mode {
     ._image {
       pointer-events: none
     }
   }
+
+  @include display-property-handling;
 }
 </style>

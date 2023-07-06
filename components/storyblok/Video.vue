@@ -1,5 +1,11 @@
 <template>
-  <div class="storyblok-video" :class="cssClasses" :style="styles">
+  <div
+    class="storyblok-video layout-regular-component"
+    :class="cssClasses"
+    :style="styles"
+  >
+    <editor-block-icons :item="itemData" />
+
     <StreamingVideo
       class="_embedded-video"
       :aspect-ratio="itemData.aspect_ratio"
@@ -31,11 +37,16 @@ export default Blok.extend({
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+
 .storyblok-video {
   &.-editor-preview-mode {
     ._embedded-video {
       pointer-events: none
     }
   }
+
+  @include display-property-handling;
 }
 </style>

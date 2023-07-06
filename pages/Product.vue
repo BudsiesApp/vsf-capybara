@@ -1,56 +1,72 @@
 <template>
   <div id="product" itemscope itemtype="http://schema.org/Product">
-    <SfBreadcrumbs class="breadcrumbs desktop-only" :breadcrumbs="breadcrumbs">
-      <template #link="{breadcrumb}">
-        <router-link :to="breadcrumb.route.link" class="sf-breadcrumbs__breadcrumb">
-          {{ breadcrumb.text }}
-        </router-link>
-      </template>
-    </SfBreadcrumbs>
-    <OProductDetails
-      :product="getCurrentProduct"
-      :product-gallery="getProductGallery"
-      :product-configuration="getCurrentProductConfiguration"
-      :product-custom-options="getCurrentCustomOptions"
-      :product-attributes="getCustomAttributes"
-      :product-stock="stock"
-    />
-    <div class="product__bottom">
-      <lazy-hydrate when-idle>
-        <SfSection :title-heading="$t('We found other products you might like')">
-          <MRelatedProducts type="upsell" />
-        </SfSection>
-      </lazy-hydrate>
-      <lazy-hydrate when-idle>
-        <SfSection :title-heading="$t('Similar Products')">
-          <MRelatedProducts type="related" />
-        </SfSection>
-      </lazy-hydrate>
-    </div>
+    <template v-if="getCurrentProduct">
+      <OProductDetails
+        :product="getCurrentProduct"
+        :product-gallery="getProductGallery"
+        :product-configuration="getCurrentProductConfiguration"
+        :product-custom-options="getCurrentCustomOptions"
+        :product-attributes="getCustomAttributes"
+        :product-stock="stock"
+      />
+
+      <MProductDescriptionStory
+        class="_product-full-description"
+        :product-sku="getCurrentProduct.sku"
+        :backup-product-sku="getCurrentProduct.parentSku"
+        :title="$t('Additional Details').toString()"
+      />
+
+      <div class="product__bottom">
+        <lazy-hydrate when-idle>
+          <MRelatedProducts
+            :title-heading="$t('We found other products you might like')"
+            type="upsell"
+          />
+        </lazy-hydrate>
+        <lazy-hydrate when-idle>
+          <MRelatedProducts
+            :title-heading="$t('Similar Products')"
+            type="related"
+          />
+        </lazy-hydrate>
+      </div>
+    </template>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapState } from 'vuex';
 import LazyHydrate from 'vue-lazy-hydration';
-import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { onlineHelper, isServer } from '@vue-storefront/core/helpers';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import MRelatedProducts from 'theme/components/molecules/m-related-products';
 import OProductDetails from 'theme/components/organisms/o-product-details';
-import { SfSection, SfBreadcrumbs } from '@storefront-ui/vue';
-import { filterChangedProduct } from '@vue-storefront/core/modules/catalog/events'
-import { getMediaGallery } from '@vue-storefront/core/modules/catalog/helpers'
+import { filterChangedProduct } from '@vue-storefront/core/modules/catalog/events';
+import { getMediaGallery } from '@vue-storefront/core/modules/catalog/helpers';
+import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
+
+import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
+
+const getSkusFromRoute = (route) => {
+  const childSku = route && route.params && route.params.childSku
+    ? route.params.childSku
+    : null;
+
+  return {
+    parentSku: route.params.parentSku,
+    childSku
+  };
+}
 
 export default {
   name: 'Product',
   components: {
     LazyHydrate,
     MRelatedProducts,
-    SfSection,
     OProductDetails,
-    SfBreadcrumbs
+    MProductDescriptionStory
   },
   provide () {
     return {
@@ -77,21 +93,19 @@ export default {
       getOriginalProduct: 'product/getOriginalProduct',
       attributesByCode: 'attribute/attributeListByCode',
       getCurrentCustomOptions: 'product/getCurrentCustomOptions',
-      promotedOffers: 'promoted/getPromotedOffers',
-      getBreadcrumbsRoutes: 'breadcrumbs/getBreadcrumbsRoutes',
-      getBreadcrumbsCurrent: 'breadcrumbs/getBreadcrumbsCurrent'
+      promotedOffers: 'promoted/getPromotedOffers'
     }),
-    breadcrumbs () {
-      return this.getBreadcrumbsRoutes
-        .map(route => ({
-          text: htmlDecode(route.name),
-          route: {
-            link: route.route_link
-          }
-        }))
-        .concat({
-          text: htmlDecode(this.getBreadcrumbsCurrent)
-        });
+    categoryName () {
+      if (!this.getCurrentProduct ||
+          !this.getCurrentProduct.category ||
+          !this.getCurrentProduct.category.length
+      ) {
+        return;
+      }
+
+      return this.getCurrentProduct.category[0]
+        ? this.getCurrentProduct.category[0].name
+        : undefined;
     },
     isOnline () {
       return onlineHelper.isOnline;
@@ -119,6 +133,9 @@ export default {
         .sort((a, b) => {
           return a.attribute_id > b.attribute_id;
         });
+    },
+    getProductBySkuDictionary () {
+      return this.$store.getters['product/getProductBySkuDictionary'];
     }
   },
   watch: {
@@ -128,32 +145,38 @@ export default {
           this.getQuantity();
         }
       }
+    },
+    async $route (val, oldVal) {
+      if (val.path === oldVal.path) {
+        return;
+      }
+
+      await this.setCurrentProduct();
+      this.getQuantity();
     }
   },
   async asyncData ({ store, route, context }) {
     if (context) context.output.cacheTags.add('product')
+
+    const { parentSku, childSku } = getSkusFromRoute(route);
+
     const product = await store.dispatch('product/loadProduct', {
-      parentSku: route.params.parentSku,
-      childSku:
-        route && route.params && route.params.childSku
-          ? route.params.childSku
-          : null
+      parentSku,
+      childSku,
+      setCurrent: false
     });
-    const loadBreadcrumbsPromise = store.dispatch(
-      'product/loadProductBreadcrumbs',
-      { product }
-    );
-    if (isServer) await loadBreadcrumbsPromise;
+
+    if (isServer) await store.dispatch('product/setCurrent', product)
+
     catalogHooksExecutors.productPageVisited(product);
   },
-  beforeRouteEnter (to, from, next) {
-    if (isServer) {
-      next();
-    } else {
-      next(vm => {
-        vm.getQuantity();
-      });
-    }
+  async mounted () {
+    await this.setCurrentProduct();
+    this.getQuantity();
+  },
+  beforeRouteLeave (to, from, next) {
+    this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
+    next();
   },
   methods: {
     async configurableOptionCallback (variant) {
@@ -185,25 +208,38 @@ export default {
           product: this.getCurrentProduct,
           qty: this.getCurrentProduct.qty
         });
-        this.manageQuantity = res.isManageStock;
+        this.stock.manageQuantity = res.isManageStock;
         this.stock.max = res.isManageStock ? res.qty : null;
       } finally {
         this.stock.isLoading = false;
       }
+    },
+    async setCurrentProduct () {
+      const { parentSku, childSku } = getSkusFromRoute(this.$route);
+      const sku = childSku || parentSku;
+
+      if (this.getCurrentProduct?.sku === sku) {
+        return;
+      }
+
+      const product = this.getProductBySkuDictionary[sku];
+      await this.$store.dispatch('product/setCurrent', product);
     }
   },
   metaInfo () {
-    const storeView = currentStoreView();
+    const description = this.getCurrentProduct?.meta_description || this.getCurrentProduct?.short_description;
+    const categoryName = this.categoryName ? ` - ${this.categoryName}` : '';
+
     return {
       title: htmlDecode(
-        this.getCurrentProduct.meta_title || this.getCurrentProduct.name
+        `${this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name}${categoryName}`
       ),
-      meta: this.getCurrentProduct.meta_description
+      meta: description
         ? [
           {
             vmid: 'description',
             name: 'description',
-            content: htmlDecode(this.getCurrentProduct.meta_description)
+            content: htmlDecode(description)
           }
         ]
         : []
@@ -217,8 +253,22 @@ export default {
 
 #product {
   box-sizing: border-box;
+  padding-top: var(--spacer-base);
+
+  ._product-full-description {
+    margin-top: var(--spacer-xl);
+    padding: 0 var(--spacer-sm);
+
+    ::v-deep {
+      .a-custom-heading {
+        margin-bottom: var(--spacer-sm);
+      }
+    }
+  }
+
   @include for-desktop {
     max-width: 1272px;
+    width: 100%;
     margin: 0 auto;
   }
 }
@@ -232,13 +282,9 @@ export default {
   }
 }
 
-.breadcrumbs {
-  padding: var(--spacer-base) var(--spacer-base) var(--spacer-base) var(--spacer-sm);
-}
-
 ::v-deep {
   .product__colors button {
-      border: 1px solid var(--c-light);
+    border: 1px solid var(--c-light);
   }
 }
 

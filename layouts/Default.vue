@@ -1,18 +1,27 @@
 <template>
-  <div class="default-layout" :class="{'storyblok-preview-mode': isStoryblokPreviewMode}">
+  <div
+    class="default-layout"
+    :class="{ 'storyblok-preview-mode': isStoryblokPreviewMode }"
+  >
     <MLoader />
+    <OMobileMenu />
     <div id="viewport">
-      <PromotionPlatformBanner />
-      <OTopNavigation />
-      <OHeader />
+      <div class="_floating-elements">
+        <PromotionPlatformBanner />
+        <OTopNavigation />
+        <OHeader class="_main-header" />
+      </div>
       <OMicrocart />
       <div class="content">
         <slot />
       </div>
-      <OFooter />
+      <OFooter
+        class="default-layout_footer"
+        :class="{ '-show-for-medium-up': hideFooterOnMobile }"
+      />
       <OModal />
       <ONotification />
-      <MCookieNotification />
+      <MCookieNotification details-link="/privacy-policy" />
       <MOfflineBadge />
     </div>
     <vue-progress-bar />
@@ -28,12 +37,13 @@ import OModal from 'theme/components/organisms/o-modal';
 import OTopNavigation from 'theme/components/organisms/o-top-navigation';
 import MLoader from 'theme/components/molecules/m-loader';
 import ONotification from 'theme/components/organisms/o-notification';
+import OMobileMenu from 'theme/components/organisms/o-mobile-menu';
 import MCookieNotification from 'theme/components/molecules/m-cookie-notification';
 import MOfflineBadge from 'theme/components/molecules/m-offline-badge';
 import { isServer } from '@vue-storefront/core/helpers';
 import Head from 'theme/head';
 import config from 'config';
-import { ModalList } from 'theme/store/ui/modals'
+import { ModalList } from 'theme/store/ui/modals';
 
 import PromotionPlatformBanner from 'src/modules/promotion-platform/components/Banner.vue';
 
@@ -48,7 +58,8 @@ export default {
     MCookieNotification,
     MOfflineBadge,
     OTopNavigation,
-    OModal
+    OModal,
+    OMobileMenu
   },
   data () {
     return {
@@ -57,25 +68,24 @@ export default {
   },
   computed: {
     quicklinkEnabled () {
-      return typeof config.quicklink !== 'undefined' && config.quicklink.enabled
+      return (
+        typeof config.quicklink !== 'undefined' && config.quicklink.enabled
+      );
     },
     isStoryblokPreviewMode () {
-      return this.$route.query.hasOwnProperty('_storyblok')
+      return this.$route.query.hasOwnProperty('_storyblok');
+    },
+    hideFooterOnMobile () {
+      return this.$route.name === 'phrase-pillow-customize';
     }
   },
   beforeMount () {
-    // Progress bar on top of the page
-    this.$router.beforeEach((to, from, next) => {
-      this.$Progress.start();
-      this.$Progress.increase(40);
-      next();
-    });
     this.$router.afterEach(() => {
       if (!isServer && this.quicklinkEnabled) {
         this.quicklink.listen();
       }
-      this.$Progress.finish();
     });
+
     this.$bus.$on('offline-order-confirmation', this.onOrderConfirmation);
   },
   mounted () {
@@ -94,38 +104,52 @@ export default {
     }),
     onOrderConfirmation (payload) {
       this.openModal({ name: ModalList.OrderConfirmation, payload });
-    },
-    fetchMenuData () {
-      return this.$store.dispatch('category/list', {
-        level:
-          config.entities.category.categoriesDynamicPrefetch &&
-          config.entities.category.categoriesDynamicPrefetchLevel >= 0
-            ? config.entities.category.categoriesDynamicPrefetchLevel
-            : null,
-        includeFields:
-          config.entities.optimize && isServer
-            ? config.entities.category.includeFields
-            : null,
-        skipCache: isServer
-      })
     }
-  },
-  serverPrefetch () {
-    return Promise.all([
-      this.$store.dispatch('promoted/updatePromotedOffers'),
-      this.fetchMenuData()
-    ]);
   },
   metaInfo: Head
 };
 </script>
 
 <style lang="scss">
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+
 .default-layout {
+  $medium-breakpoint: 641px;
+
   &.storyblok-preview-mode {
     a,
     button {
       pointer-events: none;
+    }
+  }
+
+  ._floating-elements {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    max-height: 100vh;
+
+    ._main-header {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+  }
+
+  @media (max-width: $medium-breakpoint - 1px) {
+    .-show-for-medium-up {
+      display: none !important;
+    }
+  }
+
+  @include for-desktop {
+    ._floating-elements {
+      ._main-header {
+        overflow: visible;
+      }
     }
   }
 }

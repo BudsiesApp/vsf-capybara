@@ -1,5 +1,11 @@
 <template>
-  <p ref="expandableTextBlock" class="expandable-text-block">
+  <div
+    ref="expandableTextBlock"
+    class="expandable-text-block layout-regular-component"
+    :class="cssClasses"
+  >
+    <editor-block-icons :item="itemData" />
+
     {{ content }}
     <a
       href="javascript:void(0);"
@@ -13,15 +19,25 @@
       @click.stop="toggleState"
       v-if="isShrinkable"
     >show less</a>
-  </p>
+  </div>
 </template>
 
 <script lang="ts">
+import { VueConstructor } from 'vue';
+import { InjectType } from 'src/modules/shared';
+
 import { Blok } from 'src/modules/vsf-storyblok-module/components'
 import ExpandableTextData from './interfaces/expandable-text-data.interface';
 
-export default Blok.extend({
+interface InjectedServices {
+  window: Window
+}
+
+export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServices>).extend({
   name: 'StoryblokExpandableText',
+  inject: {
+    window: { from: 'WindowObject' }
+  } as unknown as InjectType<InjectedServices>,
   data () {
     return {
       fIsExpanded: false,
@@ -89,7 +105,7 @@ export default Blok.extend({
             textBlock.getBoundingClientRect().top + windowScroll;
 
       if (textBlockTopPosition < windowScroll) {
-        window.scrollTo(0, textBlockTopPosition - this.fAuxiliaryOffset);
+        this.window.scrollTo(0, textBlockTopPosition - this.fAuxiliaryOffset);
       }
     }
   }
@@ -97,9 +113,14 @@ export default Blok.extend({
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+
 .expandable-text-block {
-    ._link {
-        margin-left: 0.5em;
-    }
+  ._link {
+      margin-left: 0.5em;
+  }
+
+  @include display-property-handling;
 }
 </style>

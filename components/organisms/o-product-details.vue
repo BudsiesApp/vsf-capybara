@@ -1,7 +1,7 @@
 <template>
   <div class="o-product-details product" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
     <meta itemprop="priceCurrency" :content="$store.state.storeView.i18n.currencyCode">
-    <meta itemprop="price" :content="parseFloat(product.price_incl_tax).toFixed(2)">
+    <meta itemprop="price" :content="parseFloat(productPrice).toFixed(2)">
     <meta itemprop="availability" :content="availability">
     <meta itemprop="url" :content="product.url_path">
     <div class="product-gallery">
@@ -53,9 +53,6 @@
           :stock="productStock"
         />
       </div>
-      <MProductAdditionalInfo
-        :product="product"
-      />
     </div>
   </div>
 </template>
@@ -73,6 +70,7 @@ import MProductOptionsGroup from 'theme/components/molecules/m-product-options-g
 import MSocialSharing from 'theme/components/molecules/m-social-sharing';
 import { ModalList } from 'theme/store/ui/modals';
 import { mapActions } from 'vuex';
+import { getProductDefaultPrice } from 'src/modules/shared';
 
 export default {
   inject: {
@@ -129,9 +127,13 @@ export default {
     availability () {
       return this.product.stock && this.product.stock.is_in_stock ? 'InStock' : 'OutOfStock'
     },
+    productPrice () {
+      const price = getProductDefaultPrice(this.product, {}, false);
+      return price.special ? price.special : price.regular
+    },
     sharingData () {
       // todo may contains html tags
-      const rawDescription = this.product.short_description.replace(/(<p>|<\/p>)/g, '');
+      const rawDescription = this.product.short_description ? this.product.short_description.replace(/(<p>|<\/p>)/g, '') : '';
 
       return {
         url: this.window.location ? this.window.location.href : '',

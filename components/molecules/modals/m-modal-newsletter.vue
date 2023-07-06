@@ -11,6 +11,7 @@
         <SfInput
           v-model="email"
           name="email"
+          type="email"
           :label="$t('E-mail address')"
           :required="true"
           :valid="!$v.email.$error"
@@ -22,7 +23,7 @@
           class="form__element"
         />
         <SfButton class="sf-button--full-width form__submit">
-          {{ $t("Subscribe") }}
+          {{ $t('Subscribe') }}
         </SfButton>
       </form>
     </div>

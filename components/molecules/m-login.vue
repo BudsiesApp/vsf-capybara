@@ -4,8 +4,8 @@
       <SfInput
         v-model="email"
         name="email"
+        type="email"
         :label="$t('Your email')"
-        :required="true"
         :valid="!$v.email.$error"
         :error-message="
           !$v.email.required
@@ -18,7 +18,6 @@
         v-model="password"
         name="password"
         :label="$t('Password')"
-        :required="true"
         :valid="!$v.password.$error"
         :error-message="$t('Field is required.')"
         type="password"
@@ -31,11 +30,11 @@
         class="form__element form__checkbox"
       />
       <SfButton class="sf-button--full-width form__submit">
-        {{ $t("Login") }}
+        {{ $t('Login') }}
       </SfButton>
     </form>
     <SfButton class="sf-button--text action-button" @click.native="switchElem('forgot-pass')">
-      {{ $t("Forgotten password?") }}
+      {{ $t('Forgotten password?') }}
     </SfButton>
     <div class="aside">
       <SfHeading
@@ -44,7 +43,7 @@
         class="aside__heading"
       />
       <SfButton class="sf-button--text" @click.native="switchElem('register')">
-        {{ $t("Register now") }}
+        {{ $t('Register now') }}
       </SfButton>
     </div>
   </div>

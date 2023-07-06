@@ -1,25 +1,28 @@
 <template>
   <div
-    class="storyblok-driver"
+    class="storyblok-driver layout-regular-component"
     :class="cssClasses"
     :style="styles"
   >
-    <router-link
+    <editor-block-icons :item="itemData" />
+
+    <sb-router-link
       class="_link"
-      :to="link"
-      :target="linkTarget"
+      :link="itemData.link_url"
+      :is-new-window="itemData.target_blank"
     >
       <BaseImage
         class="_image"
         :srcsets="imageSources"
         :alt="itemData.alt_tag"
         :title="itemData.title_tag"
+        :width="itemData.width"
       />
 
       <span class="_driver-text" v-if="itemData.link_text">
         {{ itemData.link_text }}
       </span>
-    </router-link>
+    </sb-router-link>
   </div>
 </template>
 
@@ -28,12 +31,13 @@ import { VueConstructor } from 'vue';
 import { mapGetters } from 'vuex';
 
 import { InjectType } from 'src/modules/shared';
-import { ComponentWidthCalculator } from 'src/modules/vsf-storyblok-module';
+import {
+  Blok,
+  ComponentWidthCalculator
+} from 'src/modules/vsf-storyblok-module';
 
 import { BaseImage, ImageSourceItem } from 'src/modules/budsies';
-import { Blok } from 'src/modules/vsf-storyblok-module/components';
 
-import getUrlFromLink from './get-url-from-link';
 import generateBreakpointsSpecs from './generate-breakpoints-specs';
 import generateImageSourcesList from './generate-image-sources-list';
 import DriverData from './interfaces/driver-data.interface';
@@ -66,13 +70,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 
       return result;
     },
-    link (): string {
-      return getUrlFromLink(this.itemData.link_url);
-    },
-    linkTarget (): string {
-      return this.itemData.target_blank ? '_blank'
-        : '_self';
-    },
     imageSources (): ImageSourceItem[] {
       if (!this.itemData.image.filename) {
         return [];
@@ -97,6 +94,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 $color-transition-overlay-bg: rgba(0, 0, 0, 0.3);
 $transition-zoom-in-scale: 1.25;
@@ -124,7 +122,7 @@ $transition-zoom-in-time: 0.5s;
   }
 
   ._image {
-    display: block;
+    vertical-align: bottom;
   }
 
   &.-zoom-effect {
@@ -199,5 +197,7 @@ $transition-zoom-in-time: 0.5s;
       }
     }
   }
+
+  @include display-property-handling;
 }
 </style>

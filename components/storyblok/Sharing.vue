@@ -1,13 +1,19 @@
 <template>
-  <m-social-sharing
+  <div
+    class="storyblok-sharing layout-regular-component"
     :class="cssClasses"
     :style="styles"
-    :sharing-url="itemData.sharing_url.url"
-    :sharing-description="itemData.sharing_description"
-    :e-mail-subject="itemData.sharing_email_subject"
-    :twitter-description="itemData.twitter_description"
-    :image="itemData.sharing_image.filename"
-  />
+  >
+    <editor-block-icons :item="itemData" />
+
+    <m-social-sharing
+      :sharing-url="itemData.sharing_url.url"
+      :sharing-description="itemData.sharing_description"
+      :e-mail-subject="itemData.sharing_email_subject"
+      :twitter-description="itemData.twitter_description"
+      :image="itemData.sharing_image.filename"
+    />
+  </div>
 </template>
 
 <script lang="ts">
@@ -28,3 +34,12 @@ export default Blok.extend({
   }
 })
 </script>
+
+<style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+
+.storyblok-sharing {
+  @include display-property-handling;
+}
+</style>

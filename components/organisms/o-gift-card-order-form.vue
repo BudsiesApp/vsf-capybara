@@ -2,6 +2,7 @@
   <validation-observer
     v-slot="{ passes }"
     class="gift-card-order-form"
+    :class="{ '-disabled': isDisabled }"
     tag="div"
   >
     <div class="_form-block -amount">
@@ -13,6 +14,7 @@
           name="giftcard_template_id"
           class="_giftcard-template sf-select--underlined"
           :disabled="isDisabled"
+          :should-lock-scroll-on-open="isMobile"
         >
           <SfSelectOption
             v-for="template in giftCardTemplatesList"
@@ -41,6 +43,7 @@
             :disabled="isDisabled"
             :valid="!errors.length"
             :error-message="errors[0]"
+            :should-lock-scroll-on-open="isMobile"
           >
             <SfSelectOption
               v-for="option in priceAmountOptionsList"
@@ -204,7 +207,7 @@
         :disabled="isDisabled"
         @click="(event) => passes(() => submitForm())"
       >
-        {{ $t("Add to Cart") }}
+        {{ $t('Add to Cart') }}
       </SfButton>
     </div>
   </validation-observer>
@@ -214,6 +217,10 @@
 import Vue, { PropType } from 'vue';
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
 import { required, email } from 'vee-validate/dist/rules';
+import {
+  mapMobileObserver,
+  unMapMobileObserver
+} from '@storefront-ui/vue/src/utilities/mobile-observer';
 
 import { SfCheckbox, SfButton, SfInput, SfSelect } from '@storefront-ui/vue';
 
@@ -260,6 +267,7 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapMobileObserver(),
     charactersRemaining (): number {
       return maxCharactersRemaining - this.customMessage.length;
     },
@@ -406,6 +414,9 @@ export default Vue.extend({
       }
     }
   },
+  beforeDestroy () {
+    unMapMobileObserver();
+  },
   methods: {
     submitForm () {
       this.$emit('submit-form');
@@ -436,7 +447,7 @@ $send-friend-block-max-height: 500px;
   }
 
   ._form-block {
-    padding: 0 var(--spacer-lg) var(--spacer-lg);
+    padding: 0 var(--spacer-sm) var(--spacer-lg);
 
     &.-amount {
       padding-bottom: var(--spacer-base);
@@ -530,9 +541,21 @@ $send-friend-block-max-height: 500px;
     overflow: hidden;
   }
 
+  &.-disabled {
+    --checkbox-cursor: default;
+  }
+
+  label {
+    font-weight: bold;
+  }
+
   @include for-desktop {
     ._giftcard-preview {
       display: block;
+    }
+
+    ._form-block {
+      padding: 0 var(--spacer-lg) var(--spacer-lg);
     }
   }
 }

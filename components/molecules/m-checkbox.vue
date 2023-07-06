@@ -25,12 +25,12 @@
           class="sf-checkbox__checkmark"
           :class="{ 'sf-checkbox__checkmark--is-active': isChecked }"
         >
-          <SfIcon v-if="isChecked" icon="check" size="12x" color="white" />
+          <SfIcon v-show="isChecked" icon="check" size="12px" color="white" />
         </div>
       </slot>
       <!-- @slot Custom label markup -->
       <slot name="label" v-bind="{ label, isChecked, disabled }">
-        <div v-if="label" class="sf-checkbox__label">{{ label }}</div>
+        <div v-show="label" class="sf-checkbox__label">{{ label }}</div>
       </slot>
     </label>
   </div>
@@ -123,5 +123,14 @@ export default {
 };
 </script>
 <style lang="scss">
+// This component is a replacement for SfCheckbox and we are trying to use the same classes to
+// make it look similar. Storefront-UI components are responsible for importing corresponding styles.
+// So we are doing the same here.
 @import "~@storefront-ui/shared/styles/components/atoms/SfCheckbox.scss";
+
+.sf-checkbox {
+  .sf-checkbox__checkmark {
+    flex-shrink: 0;
+  }
+}
 </style>

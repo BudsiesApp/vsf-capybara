@@ -24,9 +24,10 @@
             :product-id="backendProductId"
             :upload-url="uploadUrl"
             :disabled="disabled"
-            :file="getInitialArtworkUrl(index - 1)"
+            :initial-items="artworkUploadInitialItems(index - 1)"
             @file-added="(value) => onArtworkAdd(index - 1, value)"
             @file-removed="(storageItemId) => onArtworkRemove(index - 1, storageItemId)"
+            @is-busy-changed="onArtworkUploadBusyStatusChanged('uploader_wrapper_' + index.toString(), $event)"
           />
 
           <div class="_error-text">
@@ -52,15 +53,12 @@
       class="_extra-faces-selector sf-select--underlined"
       selected=""
       :disabled="disabled"
+      :should-lock-scroll-on-open="isMobile"
     >
-      <SfSelectOption value="">
-        No extra pets
-      </SfSelectOption>
-
       <SfSelectOption
-        v-for="option in availableOptions"
+        v-for="option in selectOptions"
         :key="option.id"
-        :value="option"
+        :value="option.value ? option.value : ''"
       >
         {{ option.label }}
       </SfSelectOption>
@@ -75,18 +73,31 @@ import { ValidationProvider, extend } from 'vee-validate';
 import { required } from 'vee-validate/dist/rules';
 import { SfSelect } from '@storefront-ui/vue';
 import * as types from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
+import {
+  mapMobileObserver,
+  unMapMobileObserver
+} from '@storefront-ui/vue/src/utilities/mobile-observer';
 
 import { Item } from 'src/modules/file-storage';
+import { CustomerImage } from 'src/modules/shared';
+import { Dictionary } from 'src/modules/budsies';
 
 import MArtworkUpload from './m-artwork-upload.vue';
 import ExtraPhotoAddonOption from '../interfaces/extra-photo-addon-option.interface';
-import UploadedArtwork from '../interfaces/uploaded-artwork.interface';
 import ExtraFacesConfiguratorData from '../interfaces/extra-faces-configurator-data.interface';
 
 extend('required', {
   ...required,
   message: 'The {_field_} field is required'
 });
+
+interface SelectOptionItem {
+  id: string,
+  value?: ExtraPhotoAddonOption,
+  label: string
+}
+
+const defaultOptionId = 'no-extra-pets';
 
 export default Vue.extend({
   name: 'MExtraFaces',
@@ -117,18 +128,40 @@ export default Vue.extend({
       default: ''
     },
     initialArtworks: {
-      type: Array as PropType<UploadedArtwork[]>,
+      type: Array as PropType<CustomerImage[]>,
       default: () => []
     }
   },
   data () {
+    const artworkUploaderBusyState: Dictionary<boolean> = {};
+
     return {
       fSelectedVariant: undefined as undefined | ExtraPhotoAddonOption,
-      uploaderValues: [] as UploadedArtwork[],
-      shouldShowAddonSelector: true
+      uploaderValues: [] as CustomerImage[],
+      shouldShowAddonSelector: true,
+      artworkUploaderBusyState
     }
   },
   computed: {
+    ...mapMobileObserver(),
+    selectOptions (): SelectOptionItem[] {
+      const defaultOption = {
+        id: defaultOptionId,
+        label: this.$t('No Extra Pets').toString(),
+        value: undefined
+      }
+      const options: SelectOptionItem[] = [defaultOption];
+
+      this.availableOptions.forEach((item) => {
+        options.push({
+          id: item.id,
+          label: item.label,
+          value: item
+        })
+      });
+
+      return options;
+    },
     selectedVariant: {
       get: function (): ExtraPhotoAddonOption | undefined {
         return this.fSelectedVariant;
@@ -184,10 +217,16 @@ export default Vue.extend({
       this.selectedVariant = matchingOption;
     }
   },
+  beforeDestroy (): void {
+    unMapMobileObserver();
+  },
   methods: {
     ...mapMutations('product', {
       setBundleOptionValue: types.PRODUCT_SET_BUNDLE_OPTION
     }),
+    artworkUploadInitialItems (index: number): CustomerImage[] | undefined {
+      return this.initialArtworks.length ? [this.initialArtworks[index]] : undefined;
+    },
     clearUploaders (): void {
       const uploaders = this.getUploaders();
 
@@ -208,14 +247,6 @@ export default Vue.extend({
 
       return item.id;
     },
-    getInitialArtworkUrl (index: number): string | undefined {
-      const item = this.initialArtworks[index];
-      if (!item) {
-        return;
-      }
-
-      return item.url;
-    },
     getFilesIds (): string[] {
       return this.uploaderValues.map(item => item.id);
     },
@@ -223,10 +254,7 @@ export default Vue.extend({
       this.selectedVariant = undefined;
     },
     onArtworkAdd (index: number, value: Item): void {
-      Vue.set(this.uploaderValues, index, {
-        id: value.id,
-        url: value.url
-      });
+      this.uploaderValues.splice(index, 0, value);
 
       const eventData: ExtraFacesConfiguratorData = {
         addon: this.selectedVariant,
@@ -244,19 +272,16 @@ export default Vue.extend({
       };
 
       this.$emit('input', eventData)
+    },
+    onArtworkUploadBusyStatusChanged (key: string, isBusy: boolean): void {
+      Vue.set(this.artworkUploaderBusyState, key, isBusy);
+
+      const isSomeUploaderBusy = !!Object.values(this.artworkUploaderBusyState).find((isBusy) => isBusy);
+
+      this.$emit('is-busy-changed', isSomeUploaderBusy);
     }
   },
   watch: {
-    availableOptions: {
-      handler (): void {
-        // SfSelect doesn't support options updating in the current package version
-        this.shouldShowAddonSelector = false;
-
-        this.$nextTick(() => {
-          this.shouldShowAddonSelector = true;
-        });
-      }
-    },
     backendProductId: {
       handler (newValue: string, oldValue: string) {
         if (newValue === oldValue) {
@@ -266,6 +291,11 @@ export default Vue.extend({
         this.reset();
       },
       immediate: true
+    },
+    initialVariant (newValue: string, oldValue: string) {
+      if (!newValue && oldValue) {
+        this.selectedVariant = undefined;
+      }
     }
   }
 })

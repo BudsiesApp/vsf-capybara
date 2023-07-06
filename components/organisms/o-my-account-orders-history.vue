@@ -1,67 +1,67 @@
 <template>
   <div class="o-my-account-orders-history">
     <SfTabs :open-tab="1">
-      <SfTab :title="$t('My orders')">
+      <SfTab :title="$t('My orders')" class="_orders-tab">
         <template v-if="!activeOrder">
-          <p class="message">
-            {{ $t('Check the details and status of your orders in the online store. You can also cancel your order or request a return.') }}
-          </p>
-          <div v-if="orders.length === 0" class="no-orders">
+          <div v-if="ordersHistory.length === 0" class="no-orders">
             <p class="no-orders__title">
               {{ $t('You currently have no orders') }}
             </p>
-            <SfButton class="no-orders__button">
+
+            <SfButton @click="onStartShoppingButtonClick" class="no-orders__button">
               {{ $t('Start shopping') }}
             </SfButton>
           </div>
+
           <SfTable v-else class="orders">
             <SfTableHeading>
               <SfTableHeader
                 v-for="tableHeader in tableHeaders"
-                :key="tableHeader"
+                :key="tableHeader.title"
+                :class="tableHeader.class"
               >
-                {{ $t(tableHeader) }}
+                {{ tableHeader.title }}
               </SfTableHeader>
-              <SfTableHeader class="orders__element--right">
-                <span class="mobile-only">{{ $t('Download') }}</span>
-                <SfButton @click.native="downloadAll" class="desktop-only sf-button--text orders__download-all">
-                  {{ $t('Download all') }}
-                </SfButton>
-              </SfTableHeader>
+
+              <SfTableHeader class="orders__element--right _view-button" />
             </SfTableHeading>
-            <SfTableRow v-for="order in orders" :key="order.order_id">
-              <SfTableData v-for="(data, key) in order" :key="key">
+
+            <SfTableRow
+              v-for="row in tableRows"
+              :key="row.order_id.value"
+              @click.native="setActiveOrderById(row.order_id.value)"
+            >
+              <SfTableData v-for="(data, key) in row" :key="key" :class="data.columnClass">
                 <template v-if="key === 'status'">
                   <span
                     :class="{
-                      'text-success': data === 'Complete',
-                      'text-danger': data === 'Canceled' || data === 'Closed',
-                      'text-warning': data !== 'Complete' && data !== 'Canceled' && data !== 'Closed'
+                      'text-success': data.value === 'Complete',
+                      'text-danger': data.value === 'Canceled' || data.value === 'Closed',
+                      'text-warning': data.value !== 'Complete' && data.value !== 'Canceled' && data.value !== 'Closed'
                     }"
-                  >{{ data }}</span>
+                  >{{ data.value }}</span>
                 </template>
+
                 <template v-else>
-                  {{ data }}
+                  {{ data.value }}
                 </template>
               </SfTableData>
-              <SfTableData class="orders__view orders__element--right">
-                <SfButton class="sf-button--text color-secondary" @click.native="setActiveOrder(order)">
+
+              <SfTableData class="orders__view orders__element--right _view-button">
+                <SfButton
+                  class="sf-button--text color-secondary"
+                  @click.native="setActiveOrderById(row.order_id.value)"
+                >
                   {{ $t('VIEW') }}
                 </SfButton>
               </SfTableData>
             </SfTableRow>
           </SfTable>
         </template>
+
         <template v-else>
-          <OMyAccountOrderDetails :order="activeOrder" @close="setActiveOrder(null)" />
+          <OMyAccountOrderDetails :order="activeOrder" @close="setActiveOrderById(null)" />
         </template>
-      </SfTab>
-      <SfTab :title="$t('Returns')">
-        <p class="message">
-          {{ $t('This feature is not implemented yet! Please take a look at') }}
-          <a href="https://github.com/DivanteLtd/vue-storefront"> https://github.com/DivanteLtd/vue-storefront </a>
-          {{ $t('for our Roadmap!') }}
-        </p>
       </SfTab>
     </SfTabs>
   </div>
@@ -69,9 +69,17 @@
 
 <script>
 import UserOrder from '@vue-storefront/core/modules/order/components/UserOrdersHistory';
-import OMyAccountOrderDetails from 'theme/components/organisms/o-my-account-order-details'
+import OMyAccountOrderDetails from 'theme/components/organisms/o-my-account-order-details';
 import { SfTabs, SfTable, SfButton } from '@storefront-ui/vue';
-import { ModalList } from 'theme/store/ui/modals'
+import { ModalList } from 'theme/store/ui/modals';
+
+const ColumnClass = {
+  ORDER_ID: '_order-id',
+  ORDER_DATE: '_order-date',
+  PAYMENT_METHOD: '_payment-method',
+  AMOUNT: '_amount',
+  STATUS: '_status'
+}
 
 export default {
   name: 'OMyAccountOrdersHistory',
@@ -85,36 +93,60 @@ export default {
   data () {
     return {
       tableHeaders: [
-        'Order ID',
-        'Order date',
-        'Payment method',
-        'Amount',
-        'Status'
+        { title: this.$t('Order ID'), class: ColumnClass.ORDER_ID },
+        { title: this.$t('Order date'), class: ColumnClass.ORDER_DATE },
+        { title: this.$t('Payment method'), class: ColumnClass.PAYMENT_METHOD },
+        { title: this.$t('Amount'), class: ColumnClass.AMOUNT },
+        { title: this.$t('Status'), class: ColumnClass.STATUS }
       ],
       activeOrder: null
     };
   },
   computed: {
-    orders () {
-      let orders = []
+    tableRows () {
+      let rows = [];
+
       this.ordersHistory.forEach(item => {
-        orders.push({
-          'order_id': item.increment_id,
-          'order_date': this.$options.filters.date(item.created_at),
-          'payment_method': item.payment.additional_information[0],
-          'amount': this.$options.filters.price(item.grand_total),
-          'status': this.$options.filters.capitalize(item.status)
+        rows.push({
+          'order_id': {
+            value: item.increment_id,
+            columnClass: ColumnClass.ORDER_ID
+          },
+          'order_date': {
+            value: this.$options.filters.date(item.created_at),
+            columnClass: ColumnClass.ORDER_DATE
+          },
+          'payment_method': {
+            value: item.payment.additional_information[0],
+            columnClass: ColumnClass.PAYMENT_METHOD
+          },
+          'amount': {
+            value: this.$options.filters.price(item.grand_total),
+            columnClass: ColumnClass.AMOUNT
+          },
+          'status': {
+            value: this.$options.filters.capitalize(item.status),
+            columnClass: ColumnClass.STATUS
+          }
         })
-      })
-      return orders
+      });
+
+      return rows;
     }
   },
   methods: {
     downloadAll () {
       this.$store.dispatch('ui/openModal', { name: ModalList.FeatureNotImplemented })
     },
-    setActiveOrder (order) {
-      this.activeOrder = order ? this.ordersHistory.find(item => { return order.order_id.endsWith(item.increment_id) }) : null
+    setActiveOrderById (orderId) {
+      this.activeOrder = orderId
+        ? this.ordersHistory.find(item => {
+          return orderId.toString() === item.increment_id.toString()
+        })
+        : null
+    },
+    onStartShoppingButtonClick () {
+      this.$router.push('/');
     }
   }
 }
@@ -123,37 +155,100 @@ export default {
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-.no-orders {
-  &__title {
-    margin: 0 0 var(--spacer-base) 0;
+.o-my-account-orders-history {
+  ._order-id {
+    flex-grow: 2;
+    display: none;
   }
-  &__button {
-    --button-width: 100%;
-    margin: var(--spacer-2xl) 0 0 0;
-    @include for-desktop {
-      --button-width: 17.375rem;
+
+  ._order-date {
+    flex-grow: 3;
+  }
+
+  ._payment-method {
+    flex-grow: 3;
+    display: none;
+  }
+
+  ._amount {
+    flex-grow: 2;
+  }
+
+  ._status {
+    flex-grow: 2;
+  }
+
+  ._view-button {
+    flex-grow: 1;
+    display: none;
+  }
+
+  .orders {
+    --table-column-text-align: center;
+    --table-column-padding: 0 var(--spacer-xs);
+    --table-column-flex: 1;
+  }
+
+  .no-orders {
+    &__title {
+      margin: 0 0 var(--spacer-base) 0;
+    }
+
+    &__button {
+      --button-width: 100%;
+      margin: var(--spacer-2xl) 0 0 0;
     }
   }
-}
-.orders {
+
+  ::v-deep {
+    .sf-table__heading,
+    .sf-table__row {
+      flex-wrap: nowrap;
+    }
+
+    .sf-tabs__title {
+      display: none;
+    }
+  }
+
+  @media screen and (min-width: 400px) {
+    ._order-id {
+      display: table-cell;
+    }
+  }
+
+  @media screen and (min-width: 460px) {
+    ._payment-method {
+      display: table-cell;
+    }
+  }
+
+  @media screen and (min-width: 570px) {
+    ._view-button {
+      display: table-cell;
+    }
+  }
+
   @include for-desktop {
-    &__element {
-      &--right {
-        text-align: right;
+    .no-orders {
+      &__button {
+        --button-width: 17.375rem;
       }
     }
-  }
-}
-.message {
-  margin: 0 0 var(--spacer-xl) 0;
-  color: var(--c-dark-variant);
-}
-a {
-  color: var(--c-primary);
-  font-weight: var(--font-medium);
-  text-decoration: none;
-  &:hover {
-    color: var(--c-text);
+
+    .orders {
+      &__element {
+        &--right {
+          text-align: right;
+        }
+      }
+    }
+
+    ::v-deep {
+      .sf-tabs__title {
+        display: flex;
+      }
+    }
   }
 }
 </style>

@@ -1,9 +1,11 @@
 <template>
   <div
-    class="storyblok-homepage-intro-section"
+    class="storyblok-homepage-intro-section layout-regular-component"
     :class="cssClasses"
     :style="styles"
   >
+    <editor-block-icons :item="itemData" />
+
     <div class="_intro-column _image-column">
       <BaseImage
         :srcsets="imageSources"
@@ -38,14 +40,13 @@
         </SfHeading>
 
         <div class="_button-row">
-          <SfButton
-            :link="link"
-            class="_button"
-            @click="openLink"
+          <sb-router-link
+            class="_button sf-button"
+            :link="itemData.button_link"
             v-if="itemData.button_text"
           >
             {{ itemData.button_text }}
-          </SfButton>
+          </sb-router-link>
         </div>
       </div>
     </div>
@@ -55,36 +56,37 @@
 <script lang="ts">
 import { VueConstructor } from 'vue';
 import { mapGetters } from 'vuex';
-import { localizedRoute } from '@vue-storefront/core/lib/multistore';
-import { nl2br } from 'src/modules/budsies';
+import { nl2br, BaseImage, ImageSourceItem } from 'src/modules/budsies';
 
 import { InjectType } from 'src/modules/shared';
-import { ComponentWidthCalculator } from 'src/modules/vsf-storyblok-module';
-import { BaseImage, ImageSourceItem } from 'src/modules/budsies';
-import { Blok } from 'src/modules/vsf-storyblok-module/components';
+
 import {
-  SfButton,
+  Blok,
+  ComponentWidthCalculator
+} from 'src/modules/vsf-storyblok-module';
+
+import {
   SfHeading
 } from '@storefront-ui/vue';
 
 import HomepageIntroSectionData from './interfaces/homepage-intro-section-data.interface';
-import getUrlFromLink from './get-url-from-link';
 import generateBreakpointsSpecs from './generate-breakpoints-specs';
 import generateImageSourcesList from './generate-image-sources-list';
 
 interface InjectedServices {
-  componentWidthCalculator: ComponentWidthCalculator
+  componentWidthCalculator: ComponentWidthCalculator,
+  window: Window
 }
 
 export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServices>).extend({
   name: 'StoryblokHomepageIntroSection',
   components: {
     BaseImage,
-    SfButton,
     SfHeading
   },
   inject: {
-    componentWidthCalculator: { }
+    componentWidthCalculator: { },
+    window: { from: 'WindowObject' }
   } as unknown as InjectType<InjectedServices>,
   computed: {
     ...mapGetters({
@@ -106,9 +108,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 
       return styles;
     },
-    link (): string {
-      return getUrlFromLink(this.itemData.button_link);
-    },
     imageSources (): ImageSourceItem[] {
       if (!this.itemData.image.filename) {
         return [];
@@ -129,9 +128,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
   methods: {
     nl2br (text: string): string {
       return nl2br(text);
-    },
-    openLink (): void {
-      this.$router.push(localizedRoute(this.link));
     }
   }
 })
@@ -139,9 +135,14 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 .storyblok-homepage-intro-section {
   position: relative;
+
+  ._intro-column {
+    line-height: 0;
+  }
 
   ._content {
     display: flex;
@@ -168,6 +169,10 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 
     ._button {
       display: inline-block;
+
+      &:hover {
+        --c-link-hover: var(--button-color, var(--c-light-variant));
+      }
     }
 
     &.-desktop {
@@ -203,7 +208,8 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
         }
       }
     }
-
   }
+
+  @include display-property-handling;
 }
 </style>

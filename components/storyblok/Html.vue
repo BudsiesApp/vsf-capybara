@@ -1,9 +1,11 @@
 <template>
   <div
-    class="storyblok-html-renderer"
+    class="storyblok-html-renderer layout-regular-component"
     :class="cssClasses"
     :style="styles"
   >
+    <editor-block-icons :item="itemData" />
+
     <div class="_no-script-html"
          v-html="noScriptHtml"
     />
@@ -90,6 +92,9 @@ export default Blok.extend({
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+
 .storyblok-html-renderer {
   &.-editor-preview-mode {
     ._no-script-html,
@@ -97,5 +102,7 @@ export default Blok.extend({
       pointer-events: none
     }
   }
+
+  @include display-property-handling;
 }
 </style>

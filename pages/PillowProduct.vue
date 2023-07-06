@@ -15,9 +15,13 @@ import config from 'config';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { isServer } from '@vue-storefront/core/helpers';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
+import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
+
 import Product from 'core/modules/catalog/types/Product';
 
 import OPillowProductOrderForm from '../components/organisms/o-pillow-product-order-form.vue';
+
+const pillowSku = 'customPillow_bundle';
 
 export default {
   name: 'PillowProduct',
@@ -31,37 +35,50 @@ export default {
   },
   computed: {
     getCurrentProduct (): Product | null {
-      return this.$store.getters['product/getCurrentProduct'];
+      const product = this.$store.getters['product/getCurrentProduct'];
+
+      if (product?.sku !== pillowSku) {
+        return null;
+      }
+
+      return product;
     },
     artworkUploadUrl (): string {
       return config.images.fileuploaderUploadUrl;
+    },
+    getProductBySkuDictionary (): Record<string, Product> {
+      return this.$store.getters['product/getProductBySkuDictionary'];
     }
   },
   async mounted (): Promise<void> {
     // TODO check ID in URL and load plushie instead of create a new one
-
+    await this.setCurrentProduct();
     this.plushieId = await this.createPlushie();
   },
   async asyncData ({ store, route, context }): Promise<void> {
     if (context) context.output.cacheTags.add('product')
 
-    const product = await store.dispatch('product/loadProduct', {
-      parentSku: 'customPillow_bundle',
-      childSku: null
-    });
+    const product = await store.dispatch('product/loadProduct',
+      {
+        parentSku: pillowSku,
+        setCurrent: false
+      }
+    );
 
     await Promise.all([
       store.dispatch('budsies/loadProductBodyparts', { productId: product.id }),
       store.dispatch('budsies/loadProductRushAddons', { productId: product.id })
     ]);
 
-    const loadBreadcrumbsPromise = store.dispatch(
-      'product/loadProductBreadcrumbs',
-      { product }
-    );
+    if (isServer) {
+      await store.dispatch('product/setCurrent', product);
+    }
 
-    if (isServer) await loadBreadcrumbsPromise;
     catalogHooksExecutors.productPageVisited(product);
+  },
+  beforeRouteLeave (to, from, next) {
+    this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
+    next();
   },
   methods: {
     async onMakeAnother (): Promise<void> {
@@ -74,6 +91,14 @@ export default {
 
       const task = await this.$store.dispatch('budsies/createNewPlushie', { productId: this.getCurrentProduct.id });
       return task.result;
+    },
+    async setCurrentProduct (): Promise<void> {
+      if (this.getCurrentProduct) {
+        return;
+      }
+
+      const product = this.getProductBySkuDictionary[pillowSku];
+      await this.$store.dispatch('product/setCurrent', product);
     }
   },
   metaInfo () {
@@ -104,6 +129,7 @@ export default {
 
   @media (min-width: $tablet-min) {
     max-width: 1272px;
+    width: 100%;
     margin: 0 auto;
   }
 }

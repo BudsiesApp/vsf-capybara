@@ -4,57 +4,26 @@
       <SfFooterColumn
         v-for="linkGroup in links"
         :key="linkGroup.name"
-        :title="$t(linkGroup.name)"
+        :title="linkGroup.name"
       >
         <SfList>
           <SfListItem v-for="link in linkGroup.children" :key="link.name">
-            <router-link v-if="link.link" :to="localizedRoute(link.link)" exact>
-              <SfMenuItem class="sf-footer__menu-item" :label="$t(link.name)" />
+            <router-link
+              :to="localizedRoute(link.link)"
+              :target="link.target"
+              :event="link.event ? link.event : 'click'"
+              @click.native="onLinkClick(link)"
+              exact
+            >
+              <SfMenuItem class="sf-footer__menu-item" :label="link.name" icon="" />
             </router-link>
-            <SfMenuItem
-              v-else-if="link.clickHandler"
-              class="sf-footer__menu-item"
-              :label="$t(link.name)"
-              @click="link.clickHandler"
-            />
           </SfListItem>
         </SfList>
       </SfFooterColumn>
-      <SfFooterColumn :title="$t('Others')">
-        <SfList>
-          <SfListItem>
-            <router-link to="/legal" exact>
-              <SfMenuItem
-                class="sf-footer__menu-item"
-                :label="$t('Terms of Service')"
-              />
-            </router-link>
-          </SfListItem>
-          <SfListItem>
-            <router-link to="/privacy" exact>
-              <SfMenuItem
-                class="sf-footer__menu-item"
-                :label="$t('Privacy policy')"
-              />
-            </router-link>
-          </SfListItem>
-          <SfListItem v-if="multistoreEnabled">
-            <SfMenuItem
-              @click.native="showLanguageSwitcher"
-              class="sf-footer__menu-item"
-              :label="currentLanguage"
-            />
-          </SfListItem>
-        </SfList>
-      </SfFooterColumn>
+
       <SfFooterColumn title="Get more @Petsies cuteness" class="social-column">
-        <form class="o-footer__subscribe">
-          <SfInput v-model="subscribeEmail" name="subscribeEmail" label="Email address" :required="true" />
-          <SfButton class="color-primary">
-            Join
-          </SfButton>
-        </form>
-        <div class="social-icon">
+        <MNewsletterSubscription />
+        <div class="social-icon desktop-only">
           <a
             :href="item.url"
             v-for="item in social"
@@ -65,17 +34,48 @@
           />
         </div>
       </SfFooterColumn>
+
+      <div class="social-icon mobile-only">
+        <a
+          :href="item.url"
+          v-for="item in social"
+          :key="item.name + ';' + item.url"
+          class="social-icon__link"
+          :class="'-' + item.name"
+          target="_blank"
+        />
+      </div>
+
+      <div class="_additional-information">
+        <router-link to="//support.mypetsies.com/support/home" target="_blank" exact>
+          <SfMenuItem
+            class="sf-footer__menu-item"
+            :label="$t('Contact Us')"
+            icon=""
+          />
+        </router-link>
+
+        <div class="_legal-information">
+          ©{{ new Date().getFullYear() }} Budsies Co LLC. All Rights Reserved.
+          |
+          <router-link to="/terms-of-service/" exact>
+            {{ $t('Terms of Service') }}
+          </router-link>
+          |
+          <router-link to="/privacy-policy" exact>
+            {{ $t('Privacy Policy') }}
+          </router-link>
+        </div>
+      </div>
     </SfFooter>
-    <ABackToTop bottom="20px" right="20px" visibleoffset="200" class="desktop-only" />
   </footer>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import ABackToTop from 'theme/components/atoms/a-back-to-top';
+import MNewsletterSubscription from 'theme/components/molecules/m-newsletter-subscription.vue';
 import { SfFooter, SfList, SfMenuItem, SfInput, SfButton } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
-import { getPathForStaticPage } from 'theme/helpers';
 import config from 'config';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import get from 'lodash-es/get';
@@ -83,7 +83,7 @@ import get from 'lodash-es/get';
 export default {
   name: 'OFooter',
   components: {
-    ABackToTop,
+    MNewsletterSubscription,
     SfFooter,
     SfList,
     SfMenuItem,
@@ -114,6 +114,10 @@ export default {
         {
           name: 'pinterest',
           url: 'https://www.pinterest.com/petsies/'
+        },
+        {
+          name: 'tiktok',
+          url: 'https://www.tiktok.com/@mypetsies'
         }
       ]
     };
@@ -129,40 +133,96 @@ export default {
     },
     links () {
       return {
-        orders: {
-          name: 'Orders',
-          children: [
-            {
-              name: 'My account',
-              ...this.isLoggedIn
-                ? { link: '/my-account' }
-                : { clickHandler: () => this.openModal({ name: ModalList.Auth, payload: 'login' }) }
-            },
-            { name: 'Delivery', link: '/delivery' },
-            { name: 'Return policy', link: '/returns' }
-          ]
-        },
-        help: {
-          name: 'Help',
-          children: [
-            { name: 'Customer service', link: '/customer-service' },
-            { name: 'Size guide', link: '/size-guide' },
-            { name: 'Contact us', link: '/contact' },
-            { name: 'Typography', link: '/typography-text' }
-          ]
-        },
         about: {
-          name: 'About us',
+          name: 'Company',
           children: [
             {
-              name: 'About us',
-              link: getPathForStaticPage('/about-us')
+              name: this.$t('About'),
+              link: '/about-petsies/'
             },
             {
-              name: 'Customer service',
-              link: getPathForStaticPage('/customer-service')
+              name: this.$t('Blog'),
+              link: '/blog/',
+              target: '_blank'
             },
-            { name: 'Store locator', link: '/store-locator' }
+            {
+              name: this.$t('Refund & Return Policy'),
+              link: '/craftsmanship-promise/'
+            },
+            {
+              name: this.$t('Media'),
+              link: '//support.mypetsies.com/support/solutions/folders/13000003990',
+              target: '_blank'
+            },
+            {
+              name: this.$t('How it Works'),
+              link: '/how-it-works/'
+            },
+            {
+              name: this.$t('Reviews'),
+              link: '/reviews/'
+            }
+          ]
+        },
+        services: {
+          name: this.$t('Services'),
+          children: [
+            { name: this.$t('Custom Forevers'), link: '/forevers-pet-plush/' },
+            { name: this.$t('Custom Pillows'), link: '/custom-pillows/' },
+            { name: this.$t('Custom Blankets'), link: '/custom-blankets/' },
+            { name: this.$t('Custom Socks'), link: { name: 'printed-socks-creation-page' } },
+            { name: this.$t('Custom Face Masks'), link: { name: 'printed-masks-creation-page' } },
+            { name: this.$t('Bobbleheads & Figurines'), link: '/pet-bobblehead-figurines/' },
+            {
+              name: this.$t('Pajamas'),
+              link: {
+                name: 'pajamas-creation'
+              }
+            },
+            { name: this.$t('Custom Golf Headcovers'), link: '/golf-headcovers/' },
+            { name: this.$t('Custom Keychains'), link: { name: 'printed-keychains-creation-page' } },
+            { name: this.$t('Custom Magnets'), link: { name: 'felted-magnets-creation-page' } },
+            { name: this.$t('Custom Ornaments'), link: { name: 'felted-ornaments-creation-page' } },
+            { name: this.$t('Custom Bulk'), link: '/bulk-custom-stuffed-animal-manufacture/' },
+            { name: this.$t('Gift Cards'), link: { name: 'gift-cards' } },
+            { name: this.$t('Gift Box'), link: { name: 'giftbox' } },
+            { name: this.$t('Accessories'),
+              link: {
+                name: 'category',
+                params: {
+                  slug: 'petsies-accessories-11'
+                }
+              }
+            }
+          ]
+        },
+        account: {
+          name: this.$t('Account'),
+          children: [
+            {
+              name: this.$t('My account'),
+              link: { name: 'my-account' },
+              event: this.isLoggedIn ? 'click' : 'false',
+              clickHandler: () => {
+                if (!this.isLoggedIn) {
+                  this.openModal({ name: ModalList.Auth, payload: 'login' })
+                }
+              }
+            },
+            { name: this.$t('My Cart'), link: { name: 'detailed-cart' } },
+            { name: this.$t('Rising Stars'), link: '/rising-stars/' }
+          ]
+        },
+        quickLInks: {
+          name: this.$t('Quick Links'),
+          children: [
+            { name: this.$t('Veterinarians'), link: '/partners/' },
+            { name: this.$t('Become a Partner'), link: '/partners/' },
+            { name: this.$t('Resellers'), link: '/partners/' },
+            { name: this.$t('Affiliates'), link: '/affiliate-home/' },
+            { name: this.$t('Corporate Buying'), link: '/partners/' },
+            { name: this.$t('FAQ'), link: '//support.mypetsies.com/support/home', target: '_blank' },
+            { name: this.$t('Referral Rewards'), link: '//referrals.mypetsies.com/', target: '_blank' }
           ]
         }
       };
@@ -174,6 +234,13 @@ export default {
     }),
     showLanguageSwitcher () {
       this.openModal({ name: ModalList.LanguageSwitcher })
+    },
+    onLinkClick (link) {
+      if (!link.clickHandler) {
+        return;
+      }
+
+      link.clickHandler();
     }
   }
 };
@@ -199,37 +266,8 @@ export default {
     font-size: var(--font-2xl);
     margin: var(--spacer-base) 0;
   }
-  &__subscribe {
-    --input-background: var(--c-light-variant);
-    display: flex;
-    align-items: flex-start;
-    ::v-deep .sf-input {
-      &__wrapper {
-        margin-top: 3px;
-      }
-      &__label {
-        --input-label-font-size: var(--font-sm);
-      }
-      input {
-        --input-border: none;
-        --input-font-size: var(--font-sm);
-        &:focus {
-          & ~ * {
-            --input-label-font-size: var(--font-2xs);
-          }
-        }
-      }
-      &--has-text,
-      &--filled {
-        .sf-input__label {
-          --input-label-font-size: var(--font-2xs);
-        }
-      }
-    }
-    .sf-button {
-      margin-left: var(--spacer-base);
-      --button-font-size: var(--font-xs);
-    }
+  .m-newsletter-subscription {
+    margin-top: var(--spacer-xs);
   }
   ::v-deep .sf-menu-item {
     --menu-item-font-size: var(--font-sm);
@@ -246,6 +284,8 @@ export default {
     --footer-padding: 0 var(--spacer-sm);
     --footer-column-title-color: var(--c-light-variant);
     --footer-column-title-background: var(--c-footer);
+
+    --footer-column-title-font-size: --h4-font-size;
   }
   ::v-deep .sf-footer-column__content {
     padding: 0 var(--spacer-xl);
@@ -269,23 +309,41 @@ export default {
     display: flex;
     justify-content: flex-start;
     padding: var(--spacer-sm) 0;
+
+    &.mobile-only {
+      justify-content: center;
+      padding-bottom: 0;
+    }
+
     &__link {
-      background-image: url(../../assets/footer-socials.png);
+      background-image: url(../../assets/footer-socials-mobile.png);
       display: block;
-      height: 42px;
-      width: 42px;
+      height: 30px;
+      width: 30px;
       margin-right: var(--spacer-base);
+
       &.-facebook {
         background-position: -1px -1px;
       }
+
       &.-instagram {
-        background-position: -45px -1px;
+        background-position: -30px -1px;
       }
+
       &.-twitter {
-        background-position: -89px -1px;
+        background-position: -60px -1px;
       }
+
       &.-pinterest {
-        background-position: -133px -1px;
+        background-position: -90px -1px;
+      }
+
+      &.-tiktok {
+        background-position: -120px -1px;
+      }
+
+      &:last-child {
+        margin-right: 0;
       }
     }
   }
@@ -325,6 +383,34 @@ export default {
     max-width: 100%;
     ::v-deep .sf-footer-column__content {
       padding: 0;
+    }
+
+    ._additional-information {
+      padding: 0;
+    }
+
+    .social-icon {
+      &__link {
+        background-image: url(../../assets/footer-socials.png);
+        height: 42px;
+        width: 42px;
+
+        &.-instagram {
+          background-position: -45px -1px;
+        }
+
+        &.-twitter {
+          background-position: -89px -1px;
+        }
+
+        &.-pinterest {
+          background-position: -133px -1px;
+        }
+
+        &.-tiktok {
+          background-position: -177px -1px;
+        }
+      }
     }
   }
 }

@@ -1,5 +1,11 @@
 <template>
-  <div class="storyblok-product" v-if="product">
+  <div
+    class="storyblok-product layout-regular-component"
+    :class="cssClasses"
+    v-if="product"
+  >
+    <editor-block-icons :item="itemData" />
+
     <router-link
       class=""
       :to="link"
@@ -24,7 +30,6 @@
 </template>
 
 <script lang="ts">
-import { ProductService } from '@vue-storefront/core/data-resolver/ProductService';
 import { productThumbnailPath } from '@vue-storefront/core/helpers';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import { formatProductLink } from '@vue-storefront/core/modules/url/helpers';
@@ -33,6 +38,7 @@ import { LocalizedRoute, StoreView } from 'core/lib/types';
 import config from 'config';
 import Product from 'core/modules/catalog/types/Product';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
+import { getProductDefaultPrice } from 'src/modules/shared';
 
 import ProductData from './interfaces/product-data.interface';
 
@@ -55,10 +61,13 @@ export default Blok.extend({
       return currentStoreView;
     },
     price (): number | string {
-      if (!this.product || !this.product.price_incl_tax) {
+      if (!this.product) {
         return ''
       }
-      return this.product.price_incl_tax
+
+      const price = getProductDefaultPrice(this.product, {}, false);
+
+      return price.special ? price.special : price.regular;
     },
     name (): string {
       if (!this.product) {
@@ -103,13 +112,16 @@ export default Blok.extend({
   },
   methods: {
     async loadData () {
-      this.product = await ProductService.getProductByKey({
-        options: {
-          id: this.itemData.product_id
-        },
-        key: 'id',
-        skipCache: true
-      })
+      this.product = await this.$store.dispatch(
+        'product/single',
+        {
+          options: {
+            id: this.itemData.product_id
+          },
+          key: 'id',
+          skipCache: true
+        }
+      )
     }
   },
   watch: {
@@ -121,6 +133,9 @@ export default Blok.extend({
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+
 .storyblok-product {
   display: flex;
   justify-content: center;
@@ -140,5 +155,7 @@ export default Blok.extend({
       height: auto;
     }
   }
+
+  @include display-property-handling;
 }
 </style>

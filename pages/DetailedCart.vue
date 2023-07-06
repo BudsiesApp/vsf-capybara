@@ -5,10 +5,11 @@
     </div>
     <div class="detailed-cart" v-else>
       <div class="detailed-cart__main">
-        <SfBreadcrumbs
-          class="breadcrumbs desktop-only"
-          :breadcrumbs="breadcrumbs"
+        <ProductionSpotCountdown
+          :can-show="canShowProductionSpotCountdown"
+          class="_production-spot-countdown"
         />
+
         <transition name="fade" mode="out-in">
           <div
             v-if="totalItems"
@@ -18,17 +19,20 @@
             <transition-group name="fade" tag="div">
               <SfCollectedProduct
                 v-for="product in products"
-                :key="product.id + product.checksum"
-                :qty="product.qty"
+                :key="getCartItemKey(product)"
                 :image="getThumbnailForProductExtend(product)"
                 image-width="140"
                 image-height="140"
                 :title="product.name"
-                :link="getProductLink(product)"
                 class="sf-collected-product--detailed collected-product"
-                @input="changeQuantity(product, $event)"
               >
                 <template #configuration>
+                  <div class="collected-product__properties" v-if="getPlushieName(product)">
+                    {{ getPlushieName(product) | htmlDecode }}
+                  </div>
+                  <div class="collected-product__properties" v-if="getPlushieDesc(product)">
+                    {{ getPlushieDesc(product) | htmlDecode }}
+                  </div>
                   <div class="collected-product__properties">
                     <div
                       v-for="option in getBundleProductOptions(product)"
@@ -58,11 +62,23 @@
                     </template>
                   </div>
                 </template>
+                <template #input>
+                  <SfQuantitySelector
+                    :qty="product.qty"
+                    :disabled="isUpdatingQuantity"
+                    @input="changeProductQuantity(product, $event)"
+                    v-if="showQuantitySelectorForProduct(product)"
+                  />
+
+                  <div class="_quantity" v-else>
+                    {{ product.qty }}
+                  </div>
+                </template>
                 <template #price>
                   <div />
                 </template>
                 <template #actions>
-                  <SfButton class="sf-button--text actions__button" @click="editHandler(product)">
+                  <SfButton v-if="showEditButton(product.sku)" class="sf-button--text actions__button" @click="editHandler(product)">
                     Edit
                   </SfButton>
                   <SfButton
@@ -102,6 +118,7 @@
                   >
                     <router-link
                       :to="action.url"
+                      @click.native="onDropdownActionClick(action)"
                     >
                       {{ action.label }}
                     </router-link>
@@ -111,11 +128,6 @@
             </div>
           </div>
           <div v-else key="empty-cart" class="empty-cart">
-            <SfImage
-              :src="require('@storefront-ui/shared/icons/empty_cart.svg')"
-              alt="Empty cart"
-              class="empty-cart__image"
-            />
             <SfHeading
               title="Your cart is empty"
               :level="2"
@@ -124,6 +136,7 @@
             />
             <SfButton
               class="sf-button--full-width color-primary empty-cart__button"
+              @click="processStartShopping"
             >
               Start shopping
             </SfButton>
@@ -151,6 +164,7 @@
   </div>
 </template>
 <script>
+import debounce from 'lodash-es/debounce';
 import {
   SfPrice,
   SfList,
@@ -160,16 +174,68 @@ import {
   SfImage,
   SfProperty,
   SfHeading,
-  SfBreadcrumbs,
-  SfIcon
+  SfIcon,
+  SfQuantitySelector
 } from '@storefront-ui/vue';
 import { OrderSummary } from './DetailedCart/index.js';
 import { mapGetters, mapState } from 'vuex';
-import { getProductPrice } from 'theme/helpers';
+import { getCartItemPrice } from 'src/modules/shared';
+import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
-import { formatProductLink } from '@vue-storefront/core/modules/url/helpers';
 import { onlineHelper } from '@vue-storefront/core/helpers';
 import { ProductId } from 'src/modules/budsies';
+import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
+import CartEvents from 'src/modules/shared/types/cart-events';
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
+import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
+import { getBundleOptionsValues, getSelectedBundleOptions } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions'
+import { CART_UPD_ITEM } from '@vue-storefront/core/modules/cart/store/mutation-types'
+import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
+import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
+import { htmlDecode } from '@vue-storefront/core/filters';
+import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
+
+const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
+
+const foreversProductsSkus = [
+  'ForeversDog_bundle',
+  'ForeversCat_bundle',
+  'ForeversOther_bundle'
+]
+
+const golfHeadCoversProductsSkus = [
+  'golfHeadCoversDog_bundle',
+  'golfHeadCoversCat_bundle',
+  'golfHeadCoversOther_bundle'
+]
+
+const printedProductSkus = [
+  'customPrintedSocks_bundle',
+  'customPrintedMasks_bundle',
+  'customPrintedKeychains_bundle',
+  'customFeltedMagnets_bundle'
+]
+
+const blanketProductsSkus = [
+  'customRenaissanceBlankets_bundle',
+  'customCutOutBlankets_bundle'
+]
+
+const clayPlushieProductSkus = [
+  'petsiesFigurines_bundle',
+  'petsiesBobbleheads_bundle'
+]
+
+const pajamaProductSku = 'customPajamas_bundle';
+
+const editableProductsSkus = [
+  ...foreversProductsSkus,
+  ...printedProductSkus,
+  ...blanketProductsSkus,
+  ...clayPlushieProductSkus,
+  ...golfHeadCoversProductsSkus,
+  pajamaProductSku
+];
 
 export default {
   name: 'DetailedCart',
@@ -178,13 +244,14 @@ export default {
     SfList,
     SfDropdown,
     SfCollectedProduct,
-    SfBreadcrumbs,
     SfImage,
     SfButton,
     SfHeading,
     SfProperty,
     SfIcon,
-    OrderSummary
+    SfQuantitySelector,
+    OrderSummary,
+    ProductionSpotCountdown
   },
   data () {
     return {
@@ -193,11 +260,15 @@ export default {
       dropdownActions: [
         {
           label: 'Petsies',
-          url: '/forevers-pet-plush'
+          url: '/forevers-pet-plush/'
+        },
+        {
+          label: this.$t('Golf Club Headcovers'),
+          url: '/golf-headcovers/'
         },
         {
           label: 'Pet Pillow',
-          url: '/pet-pillow'
+          url: '/pet-pillow/'
         },
         {
           label: 'Photo Pillow',
@@ -209,37 +280,44 @@ export default {
           }
         },
         {
+          label: this.$t('Pet Photo Blankets'),
+          url: {
+            name: 'cut-out-blankets'
+          }
+        },
+        {
+          label: this.$t('Renaissance Blankets'),
+          url: {
+            name: 'renaissance-blankets'
+          }
+        },
+        {
           label: 'Socks',
           url: {
-            name: 'printed-product',
-            params: {
-              parentSku: 'customPrintedSocks_bundle',
-              slug: 'printed-socks'
-            }
+            name: 'printed-socks-creation-page'
           }
         },
         {
           label: 'Pet Keychains',
           url: {
-            name: 'printed-product',
-            params: {
-              parentSku: 'customPrintedKeychains_bundle',
-              slug: 'face-keychains'
-            }
+            name: 'printed-keychains-creation-page'
+          }
+        },
+        {
+          label: 'Pet Magnets',
+          url: {
+            name: 'felted-magnets-creation-page'
+          }
+        },
+        {
+          label: 'Pet Ornaments',
+          url: {
+            name: 'felted-ornaments-creation-page'
           }
         }
       ],
-      breadcrumbs: [
-        {
-          text: 'Home',
-          link: '/'
-        },
-        {
-          text: 'Cart',
-          link: '/cart'
-        }
-      ],
-      isMounted: false
+      isMounted: false,
+      syncQuantityDebounced: undefined
     };
   },
   props: {
@@ -255,6 +333,7 @@ export default {
     ...mapGetters({
       products: 'cart/getCartItems'
     }),
+    ...mapMobileObserver(),
     totalItems () {
       return this.products.reduce(
         (totalItems, product) => totalItems + parseInt(product.qty, 10),
@@ -263,15 +342,86 @@ export default {
     },
     isLoading () {
       return !this.isMounted || !this.cartIsLoaded;
+    },
+    canShowProductionSpotCountdown () {
+      return this.products.some((product) => isCustomProduct(product.id));
     }
   },
   async mounted () {
+    this.syncQuantityDebounced = debounce(this.syncQuantity, CHANGE_QUANTITY_DEBOUNCE_TIME);
     await this.$nextTick();
     this.isMounted = true;
   },
+  beforeDestroy () {
+    this.syncQuantityDebounced.cancel();
+  },
   methods: {
+    getPlushieName (product) {
+      if (!product.plushieName) {
+        return '';
+      }
+
+      let name = product.plushieName;
+
+      if (product.plushieBreed) {
+        name += ', ' + product.plushieBreed;
+      }
+
+      return this.truncate(name);
+    },
+    getPlushieDesc (product) {
+      if (!product.plushieDescription) {
+        return '';
+      }
+
+      return this.truncate(product.plushieDescription, 150, 50);
+    },
     editHandler (product) {
-      this.$router.push({ name: 'forevers-create', query: { id: product.plushieId } })
+      if (product.sku === pajamaProductSku) {
+        this.$router.push({
+          name: 'pajamas-creation',
+          query: {
+            existingPlushieId: product.plushieId,
+            product_design: this.getProductDesign(product)
+          }
+        });
+      } else if (golfHeadCoversProductsSkus.includes(product.sku)) {
+        this.$router.push({ name: 'golf-covers-create', query: { id: product.plushieId } });
+      } else if (foreversProductsSkus.includes(product.sku)) {
+        this.$router.push({ name: 'forevers-create', query: { id: product.plushieId } });
+      } else if (printedProductSkus.includes(product.sku)) {
+        this.$router.push({
+          name: 'printed-product',
+          params: { sku: product.sku },
+          query: {
+            product_design: this.getProductDesign(product),
+            existingPlushieId: product.plushieId
+          }
+        });
+      } else if (blanketProductsSkus.includes(product.sku)) {
+        const routeName = product.sku === 'customCutOutBlankets_bundle'
+          ? 'cut-out-blankets'
+          : 'renaissance-blankets';
+
+        this.$router.push({
+          name: routeName,
+          query: {
+            product_design: this.getProductDesign(product),
+            existingPlushieId: product.plushieId
+          }
+        });
+      } else if (clayPlushieProductSkus.includes(product.sku)) {
+        const routeName = product.sku === 'petsiesBobbleheads_bundle'
+          ? 'bobbleheads-creation'
+          : 'figurines-creation';
+
+        this.$router.push({
+          name: routeName,
+          query: {
+            existingPlushieId: product.plushieId
+          }
+        });
+      }
     },
     getProductOptions (product) {
       return onlineHelper.isOnline && product.totals && product.totals.options
@@ -285,14 +435,11 @@ export default {
 
       return product.custom_options.find(option => option.title === productOption.label) !== undefined;
     },
-    getProductLink (product) {
-      return formatProductLink(product);
-    },
     getProductRegularPrice (product) {
-      return getProductPrice(product, {}).regular;
+      return getCartItemPrice(product, {}).regular;
     },
     getProductSpecialPrice (product) {
-      return getProductPrice(product, {}).special;
+      return getCartItemPrice(product, {}).special;
     },
     removeHandler (product) {
       this.$store.dispatch('cart/removeItem', { product: product });
@@ -318,13 +465,6 @@ export default {
       const productBundleOptions = product.product_option.extension_attributes.bundle_options;
 
       product.bundle_options.forEach(option => {
-        // Hide Forevers simple products
-        if ([ProductId.FOREVERS_DOG, ProductId.FOREVERS_CAT, ProductId.FOREVERS_OTHER]
-          .includes(product.id) && option.title.toLowerCase() === 'product'
-        ) {
-          return;
-        }
-
         if (!productBundleOptions.hasOwnProperty(option.option_id)) {
           return
         }
@@ -348,14 +488,58 @@ export default {
 
       return result;
     },
-    changeQuantity (product, newQuantity) {
+    async changeProductQuantity (product, qty) {
+      this.$store.commit(`cart/${CART_UPD_ITEM}`, { product, qty });
+
+      if (this.$store.getters['cart/isCartSyncEnabled']) {
+        this.syncQuantityDebounced();
+      }
+    },
+    showQuantitySelectorForProduct (product) {
+      return getProductMaxSaleQuantity(product) > 1;
+    },
+    syncQuantity () {
       this.isUpdatingQuantity = true;
 
-      this.$store.dispatch('cart/updateQuantity', {
-        product: product,
-        qty: newQuantity
-      }).finally(() => { this.isUpdatingQuantity = false });
+      return this.$store.dispatch('cart/sync', {
+        forceClientState: true
+      }).finally(() => {
+        this.isUpdatingQuantity = false;
+      });
+    },
+    onDropdownActionClick (action) {
+      EventBus.$emit(CartEvents.MAKE_ANOTHER_FROM_CART, action.label);
+    },
+    showEditButton (productSku) {
+      return editableProductsSkus.includes(productSku);
+    },
+    truncate (text, desktopLength = 75, mobileLength = 50) {
+      const maxLength = this.isMobile ? mobileLength : desktopLength;
+
+      if (text.length <= maxLength) {
+        return text;
+      }
+
+      return text.substring(0, maxLength) + '...';
+    },
+    getProductDesign (product) {
+      const selectedBundleOptions = getSelectedBundleOptions(product);
+      const productBundleOptions = product.bundle_options.filter((option) => option.title.toLowerCase() === 'product');
+      const selectedBundleOptionsValues = getBundleOptionsValues(selectedBundleOptions, productBundleOptions);
+
+      return selectedBundleOptionsValues[0].sku;
+    },
+    getCartItemKey (cartItem) {
+      return getCartItemKey(cartItem);
+    },
+    processStartShopping () {
+      this.$router.push(localizedRoute('/'));
     }
+  },
+  metaInfo () {
+    return {
+      title: htmlDecode(this.$t('Shopping Cart'))
+    };
   }
 };
 </script>
@@ -370,7 +554,8 @@ export default {
 
   @include for-desktop {
     max-width: 1272px;
-    margin: 0 auto;
+    width: 100%;
+    margin: auto;
     padding: 0 var(--spacer-sm);
   }
 }
@@ -394,10 +579,11 @@ export default {
   }
 }
 
-.breadcrumbs {
-  padding: var(--spacer-base) 0;
-}
 .detailed-cart {
+  ._production-spot-countdown {
+    margin: var(--spacer-sm) 0;
+  }
+
   .sf-collected-product {
     --collected-product-image-background: none;
     --collected-product-main-margin: 0 var(--spacer-sm);
@@ -434,6 +620,13 @@ export default {
       }
     }
   }
+  .sf-quantity-selector {
+    ::v-deep {
+      .sf-quantity-selector__button {
+        --button-background: transparent;
+      }
+    }
+  }
   &__main {
     padding: 0 var(--spacer-sm);
     position: relative;
@@ -454,6 +647,14 @@ export default {
       line-height: 1.6;
     }
   }
+
+  ._quantity {
+    line-height: initial;
+    text-align: center;
+    margin-top: var(--spacer-sm);
+    font-size: var(--font-lg);
+  }
+
   @include for-desktop {
     display: flex;
     .sf-collected-product {
@@ -461,7 +662,7 @@ export default {
         flex-direction: row;
       }
       ::v-deep &__details {
-        flex-grow: 1.5;
+        flex-grow: 3;
       }
       ::v-deep &__actions {
         flex-grow: 1;
@@ -485,8 +686,16 @@ export default {
   --collected-product-title-font-weight: var(--font-semibold);
   border: 1px solid var(--c-light);
   border-width: 1px 0 0 0;
+
+  ::v-deep {
+    .sf-link {
+      pointer-events: none;
+      cursor: default;
+    }
+  }
+
   &__properties {
-    font-size: var(--font-sm);
+    font-size: var(--font-xs);
     margin-bottom: var(--spacer-sm);
 
     &__icon {
@@ -510,25 +719,19 @@ export default {
 .actions {
   &__button {
     margin-bottom: var(--spacer-xs);
+    align-self: flex-start;
   }
 }
 .empty-cart {
   --heading-title-color: var(--c-primary);
-  --heading-title-margin: 0 0 var(--spacer-base) 0;
+  --heading-title-margin: var(--spacer-2xl) 0 var(--spacer-base) 0;
   --heading-subtitle-margin: 0 0 var(--spacer-xl) 0;
   --heading-title-font-weight: var(--font-semibold);
   display: flex;
   flex: 1;
   align-items: center;
   flex-direction: column;
-  &__image {
-    --image-width: 13.1875rem;
-    margin: var(--spacer-2xl) 0;
-  }
   @include for-desktop {
-    &__image {
-      --image-width: 22rem;
-    }
     &__button {
       --button-width: 20.9375rem;
     }

@@ -1,15 +1,7 @@
 <template>
   <div id="category">
-    <SfBreadcrumbs class="breadcrumbs desktop-only" :breadcrumbs="breadcrumbs">
-      <template #link="{breadcrumb}">
-        <router-link :to="breadcrumb.route.link" class="sf-breadcrumbs__breadcrumb">
-          {{ breadcrumb.text }}
-        </router-link>
-      </template>
-    </SfBreadcrumbs>
-
     <div class="page-header">
-      <SfHeading :level="1" :title="$t(getCurrentCategory.name)" class="navbar__title" />
+      <SfHeading :level="1" :title="getCurrentCategory.name" class="navbar__title" />
     </div>
 
     <div
@@ -28,7 +20,7 @@
             @click="isFilterSidebarOpen = true"
           >
             <SfIcon size="18px" class="navbar__filters-icon" color="#BEBFC4" icon="filter" />
-            {{ $t("Filters") }}
+            {{ $t('Filters') }}
           </SfButton>
           <template v-if="activeFiltersCount">
             ({{ activeFiltersCount }})
@@ -39,11 +31,12 @@
           </template>
         </div>
         <div class="navbar__sort">
-          <span class="navbar__label desktop-only">{{ $t("Sort By") }}:</span>
+          <span class="navbar__label desktop-only">{{ $t('Sort By') }}:</span>
           <SfSelect
             class="navbar__select sort-by"
             ref="SortBy"
             :selected="sortOrder"
+            :should-lock-scroll-on-open="isMobile"
             @change="changeSortOder"
           >
             <SfSelectOption
@@ -65,11 +58,11 @@
         </div>
         <div class="navbar__counter">
           <span class="navbar__label desktop-only">
-            {{ $t("Products found") }}:
+            {{ $t('Products found') }}:
           </span>
           <strong class="desktop-only">{{ getCategoryProductsTotal }}</strong>
           <span class="navbar__label mobile-only">
-            {{ $t("{count} items", { count: getCategoryProductsTotal }) }}
+            {{ $t('{count} items', { count: getCategoryProductsTotal }) }}
           </span>
         </div>
       </div>
@@ -122,6 +115,18 @@
               />
             </transition-group>
           </lazy-hydrate>
+
+          <div class="nextPageLoadingThreshold" ref="nextPageLoadingThreshold" />
+
+          <div
+            class="_product-loading-indicator"
+            v-show="isInfinityScrollingEnabled"
+          >
+            <SfLoader
+              :loading="isProductsLoading"
+            />
+          </div>
+
           <SfPagination
             v-if="totalPages > 1"
             class="products__pagination desktop-only"
@@ -173,28 +178,31 @@
             class="sf-button--full-width"
             @click="isFilterSidebarOpen = false"
           >
-            {{ $t("Done") }}
+            {{ $t('Done') }}
           </SfButton>
           <SfButton
             class="sf-button--full-width filters__button-clear"
             @click="clearAllFilters"
           >
-            {{ $t("Clear all") }}
+            {{ $t('Clear all') }}
           </SfButton>
         </div>
       </template>
     </SfSidebar>
 
-    <div
-      class="category__description"
-      v-html="getCurrentCategory.description"
-    />
+    <div class="_description-story">
+      <MCategoryDescriptionStory
+        :category="getCurrentCategory"
+        v-if="showCategoryDescription"
+      />
+    </div>
   </div>
 </template>
 
 <script>
 import LazyHydrate from 'vue-lazy-hydration';
 import { mapGetters } from 'vuex';
+import { ref } from '@vue/composition-api';
 import castArray from 'lodash-es/castArray';
 import config from 'config';
 import {
@@ -203,20 +211,14 @@ import {
   isServer
 } from '@vue-storefront/core/helpers';
 import i18n from '@vue-storefront/i18n';
-import onBottomScroll from '@vue-storefront/core/mixins/onBottomScroll';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { quickSearchByQuery } from '@vue-storefront/core/lib/search';
 import { getSearchOptionsFromRouteParams } from '@vue-storefront/core/modules/catalog-next/helpers/categoryHelpers';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { getTopLevelCategories, prepareCategoryMenuItem, prepareCategoryProduct } from 'theme/helpers';
 import { formatProductLink } from '@vue-storefront/core/modules/url/helpers';
-import { getProductPrice } from 'theme/helpers';
 import {
-  localizedRoute,
-  currentStoreView
-} from '@vue-storefront/core/lib/multistore';
-import ASortIcon from 'theme/components/atoms/a-sort-icon';
-import {
+  SfLoader,
   SfIcon,
   SfList,
   SfColor,
@@ -227,14 +229,27 @@ import {
   SfHeading,
   SfMenuItem,
   SfAccordion,
-  SfPagination,
-  SfBreadcrumbs
+  SfPagination
 } from '@storefront-ui/vue';
 
+import {
+  localizedRoute,
+  currentStoreView
+} from '@vue-storefront/core/lib/multistore';
+import store from '@vue-storefront/core/store'
+import {
+  mapMobileObserver,
+  unMapMobileObserver
+} from '@storefront-ui/vue/src/utilities/mobile-observer';
+
+import isObjectEmpty from 'theme/helpers/is-object-empty.function';
+import { useInfinityScroll } from 'theme/helpers/use-infinity-scroll';
+
+import ASortIcon from 'theme/components/atoms/a-sort-icon';
+import MCategoryDescriptionStory from 'theme/components/molecules/m-category-description-story.vue';
 import OProductCard from 'theme/components/organisms/o-product-card';
 
 const THEME_PAGE_SIZE = 12;
-const LAZY_LOADING_ACTIVATION_BREAKPOINT = 1024;
 
 const composeInitialPageState = async (store, route, forceLoad = false) => {
   try {
@@ -242,6 +257,7 @@ const composeInitialPageState = async (store, route, forceLoad = false) => {
     const cachedCategory = store.getters['category-next/getCategoryFrom'](
       route.path
     );
+
     const currentCategory =
       cachedCategory && !forceLoad
         ? cachedCategory
@@ -251,21 +267,29 @@ const composeInitialPageState = async (store, route, forceLoad = false) => {
       category: currentCategory,
       pageSize: THEME_PAGE_SIZE
     });
-    const breadCrumbsLoader = store.dispatch(
-      'category-next/loadCategoryBreadcrumbs',
-      {
-        category: currentCategory,
-        currentRouteName: currentCategory.name,
-        omitCurrent: true
-      }
-    );
 
-    if (isServer) await breadCrumbsLoader;
     catalogHooksExecutors.categoryPageVisited(currentCategory);
   } catch (e) {
     //
   }
 };
+
+const getPageFromRoute = (route) => {
+  return route.query.page ? Number.parseInt(route.query.page, 10) : 1;
+};
+
+async function loadProducts (isProductsLoading) {
+  if (isProductsLoading.value) {
+    return;
+  }
+
+  try {
+    isProductsLoading.value = true;
+    await store.dispatch('category-next/loadMoreCategoryProducts');
+  } finally {
+    isProductsLoading.value = false;
+  }
+}
 
 export default {
   name: 'CategoryPage',
@@ -284,22 +308,37 @@ export default {
     SfMenuItem,
     SfAccordion,
     SfPagination,
-    SfBreadcrumbs
+    MCategoryDescriptionStory,
+    SfLoader
   },
-  mixins: [onBottomScroll],
+  setup () {
+    const nextPageLoadingThreshold = ref(null);
+    const isProductsLoading = ref(false);
+
+    const {
+      isInfinityScrollingEnabled
+    } = useInfinityScroll(
+      () => loadProducts(isProductsLoading),
+      nextPageLoadingThreshold
+    );
+
+    return {
+      nextPageLoadingThreshold,
+      isInfinityScrollingEnabled,
+      isProductsLoading
+    }
+  },
   data () {
     return {
       loading: true,
-      loadingProducts: false,
       currentPage: 1,
-      getMoreCategoryProducts: [],
-      browserWidth: 0,
       isFilterSidebarOpen: false,
       unsubscribeFromStoreAction: null,
       aggregations: null
     };
   },
   computed: {
+    ...mapMobileObserver(),
     ...mapGetters({
       getCurrentSearchQuery: 'category-next/getCurrentSearchQuery',
       getCategoryProducts: 'category-next/getCategoryProducts',
@@ -309,29 +348,13 @@ export default {
       getCurrentFilters: 'category-next/getCurrentFilters',
       getSystemFilterNames: 'category-next/getSystemFilterNames',
       getCategories: 'category/getCategories',
-      getBreadcrumbsRoutes: 'breadcrumbs/getBreadcrumbsRoutes',
-      getBreadcrumbsCurrent: 'breadcrumbs/getBreadcrumbsCurrent'
+      getCurrentPageProducts: 'category-next/getCurrentPageProducts'
     }),
     isLazyHydrateEnabled () {
       return config.ssr.lazyHydrateFor.includes('category-next.products');
     },
     isCategoryEmpty () {
       return this.getCategoryProductsTotal === 0;
-    },
-    isLazyLoadingEnabled () {
-      return this.browserWidth < LAZY_LOADING_ACTIVATION_BREAKPOINT;
-    },
-    breadcrumbs () {
-      return this.getBreadcrumbsRoutes
-        .map(route => ({
-          text: htmlDecode(route.name),
-          route: {
-            link: route.route_link
-          }
-        }))
-        .concat({
-          text: htmlDecode(this.getBreadcrumbsCurrent)
-        });
     },
     categories () {
       return getTopLevelCategories(this.getCategories)
@@ -364,13 +387,13 @@ export default {
       // so products from store have to be filtered out because there could
       // be more than THEME_PAGE_SIZE of them - they could be fetched earlier
       // when lazy loading was enabled
-      return this.isLazyLoadingEnabled || this.currentPage === 1
+      return this.isInfinityScrollingEnabled || this.currentPage === 1
         ? this.getCategoryProducts
           .filter((product, i) => {
-            return this.isLazyLoadingEnabled || i < THEME_PAGE_SIZE;
+            return this.isInfinityScrollingEnabled || i < THEME_PAGE_SIZE;
           })
           .map(prepareCategoryProduct)
-        : this.getMoreCategoryProducts.map(prepareCategoryProduct);
+        : this.getCurrentPageProducts.map(prepareCategoryProduct);
     },
     totalPages () {
       return Math.ceil(this.getCategoryProductsTotal / THEME_PAGE_SIZE);
@@ -424,6 +447,9 @@ export default {
         castArray(this.getCurrentFilters[filter.type]).find(
           variant => variant && variant.id === filter.id
         ) !== undefined;
+    },
+    showCategoryDescription () {
+      return !isObjectEmpty(this.getCurrentCategory);
     }
   },
   watch: {
@@ -431,38 +457,47 @@ export default {
       if (this.currentPage > 1) {
         this.changePage();
       }
-    },
-    $route: {
-      immediate: true,
-      handler (to, from) {
-        if (to.query.page && to.path === from.path) {
-          this.changePage(parseInt(to.query.page) || 1);
-        } else {
-          this.initPagination()
-        }
-      }
     }
   },
-  async asyncData ({ store, route, context }) {
-    // this is for SSR purposes to prefetch data - and it's always executed before parent component methods
-    if (context) context.output.cacheTags.add('category')
-    await composeInitialPageState(store, route);
+  async serverPrefetch () {
+    if (this.$ssrContext) this.$ssrContext.output.cacheTags.add('category');
+
+    return this.onCategoryChangedHandler(this.$route);
+  },
+  async beforeRouteUpdate (to, from, next) {
+    if (to.params.slug === from.params.slug) {
+      await this.updatePage(to);
+      next();
+      return;
+    }
+
+    await this.onCategoryChangedHandler(to);
+    next();
   },
   async beforeRouteEnter (to, from, next) {
     if (isServer) next();
+
+    const page = getPageFromRoute(to);
+
     // SSR no need to invoke SW caching here
-    else if (!from.name) {
-      // SSR but client side invocation, we need to cache products and invoke requests from asyncData for offline support
+    if (!from.name) {
       next(async vm => {
         vm.loading = true;
-        await composeInitialPageState(vm.$store, to, true);
+        vm.currentPage = page;
         await vm.$store.dispatch('category-next/cacheProducts', { route: to }); // await here is because we must wait for the hydration
         vm.loading = false;
       });
     } else {
       // Pure CSR, with no initial category state
+      await composeInitialPageState(store, to);
+
+      if (page !== 1) {
+        await store.dispatch('category-next/fetchPageProducts', { page, pageSize: THEME_PAGE_SIZE, route: to });
+      }
+
       next(async vm => {
         vm.loading = true;
+        vm.currentPage = page;
         vm.$store.dispatch('category-next/cacheProducts', { route: to });
         vm.loading = false;
       });
@@ -475,62 +510,16 @@ export default {
       }
     });
     this.$bus.$on('product-after-list', this.initPagination);
-    window.addEventListener('resize', this.getBrowserWidth);
-    this.getBrowserWidth();
   },
   beforeDestroy () {
+    unMapMobileObserver();
+    this.$store.dispatch('category-next/resetCurrentCategoryData');
     this.unsubscribeFromStoreAction();
     this.$bus.$off('product-after-list', this.initPagination);
-    window.removeEventListener('resize', this.getBrowserWidth);
   },
   methods: {
-    getBrowserWidth () {
-      return (this.browserWidth = window.innerWidth);
-    },
-    async onBottomScroll () {
-      if (!this.isLazyLoadingEnabled || this.loadingProducts) {
-        return;
-      }
-
-      this.loadingProducts = true;
-      await this.$store.dispatch('category-next/loadMoreCategoryProducts');
-      this.loadingProducts = false;
-    },
     async changePage (page = this.currentPage) {
-      const start = (page - 1) * THEME_PAGE_SIZE;
-
-      if (
-        start < 0 ||
-        start >= this.getCategoryProductsTotal ||
-        this.getCategoryProductsTotal < THEME_PAGE_SIZE
-      ) {
-        return;
-      }
-
-      const { includeFields, excludeFields } = config.entities.productList;
-      const { filters } = this.getCurrentSearchQuery;
-      const filterQuery = buildFilterProductsQuery(
-        this.getCurrentCategory,
-        filters
-      );
-
-      const searchResult = await quickSearchByQuery({
-        query: filterQuery,
-        sort: this.sortOrder,
-        start: start,
-        size: THEME_PAGE_SIZE,
-        includeFields: includeFields,
-        excludeFields: excludeFields
-      });
-
-      this.getMoreCategoryProducts = await this.$store.dispatch(
-        'category-next/processCategoryProducts',
-        {
-          products: searchResult.items,
-          filters: filters
-        }
-      );
-
+      await this.$store.dispatch('category-next/fetchPageProducts', { page, pageSize: THEME_PAGE_SIZE, route: this.$route });
       this.currentPage = page;
     },
     initPagination () {
@@ -578,6 +567,17 @@ export default {
       return category.position === 0
         ? this.getCurrentCategory.path === category.path
         : this.getCurrentCategory.path.startsWith(category.path);
+    },
+    async onCategoryChangedHandler (categoryRoute) {
+      await composeInitialPageState(store, categoryRoute);
+      await this.updatePage(categoryRoute);
+    },
+    async updatePage (route) {
+      if (route.query.page) {
+        await this.changePage(getPageFromRoute(route));
+      } else {
+        this.initPagination();
+      }
     }
   },
   metaInfo () {
@@ -612,13 +612,26 @@ export default {
 
 #category {
   box-sizing: border-box;
+  padding-top: var(--spacer-base);
+
   @include for-desktop {
     max-width: 1272px;
+    width: 100%;
     margin: 0 auto;
   }
 
-  .category__short-description,
-  .category__description {
+  ._product-loading-indicator {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--spacer-base);
+
+    .sf-loader {
+      width: 2rem;
+      height: 2rem;
+    }
+  }
+
+  .category__short-description {
     margin: var(--spacer-sm) auto 0 auto;
     max-width: 60em;
     padding: 0 var(--spacer-xs);
@@ -663,9 +676,6 @@ export default {
       padding: 0;
     }
   }
-}
-.breadcrumbs {
-  padding: var(--spacer-base) var(--spacer-base) var(--spacer-base) var(--spacer-sm);
 }
 .navbar {
   position: relative;
@@ -830,6 +840,13 @@ export default {
     }
   }
 }
+
+._description-story {
+  padding: 0 var(--spacer-xs);
+  max-width: 60em;
+  margin: auto;
+}
+
 .products {
   box-sizing: border-box;
   flex: 1;

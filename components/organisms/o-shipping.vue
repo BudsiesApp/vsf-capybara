@@ -1,17 +1,18 @@
 <template>
   <div class="o-shipping">
     <SfHeading
-      :title="`2. ${$t('Shipping')}`"
-      :level="2"
+      :title="`${$t('Shipping address')}`"
+      :level="3"
       class="sf-heading--left sf-heading--no-underline title"
     />
-    <div class="form">
+    <div class="form" :disabled="isAddressFormDisabled">
       <SfCheckbox
-        v-if="currentUser && hasShippingDetails()"
+        v-if="currentUser && hasDefaultShippingAddress"
         v-model="shipToMyAddress"
-        class="form__element form__checkbox"
+        class="form__element form__checkbox -always-enabled"
         name="shipToMyAddress"
         :label="$t('Ship to my default address')"
+        :disabled="isFormFieldsDisabled"
       />
       <SfInput
         v-model.trim="shipping.firstName"
@@ -19,6 +20,7 @@
         name="first-name"
         :label="$t('First name')"
         :required="true"
+        :disabled="isFormFieldsDisabled"
         :valid="!$v.shipping.firstName.$error"
         :error-message="
           !$v.shipping.firstName.required
@@ -29,10 +31,11 @@
       />
       <SfInput
         v-model.trim="shipping.lastName"
-        class="form__element form__element--half form__element--half-even"
+        class="form__element form__element--half"
         name="last-name"
         :label="$t('Last name')"
         :required="true"
+        :disabled="isFormFieldsDisabled"
         :valid="!$v.shipping.lastName.$error"
         :error-message="$t('Field is required')"
         @blur="$v.shipping.lastName.$touch()"
@@ -43,57 +46,15 @@
         name="street-address"
         :label="$t('Address')"
         :required="true"
+        :disabled="isFormFieldsDisabled"
         :valid="!$v.shipping.streetAddress.$error"
         :error-message="$t('Field is required')"
         @blur="$v.shipping.streetAddress.$touch()"
       />
-      <SfInput
-        v-model.trim="shipping.city"
-        class="form__element form__element--half"
-        name="city"
-        :label="$t('City')"
-        :required="true"
-        :valid="!$v.shipping.city.$error"
-        :error-message="$t('Field is required')"
-        @blur="$v.shipping.city.$touch()"
-      />
-      <SfInput
-        v-if="!isSelectedCountryHasStates"
-        v-model.trim="shipping.state"
-        class="form__element form__element--half form__element--half-even"
-        name="state"
-        :label="$t('State / Province')"
-      />
-      <MMultiselect
-        v-if="isSelectedCountryHasStates && canShowStateSelector"
-        v-model.trim="shipping.state"
-        class="form__element form__element--half form__element--half-even form__select"
-        name="state"
-        :label="$t('State / Province')"
-        :required="true"
-        id-field="code"
-        label-field="name"
-        :options="getStatesForSelectedCountry"
-        :valid="!$v.shipping.state.$error"
-        :error-message="$t('Field is required')"
-      />
-      <SfInput
-        v-model.trim="shipping.zipCode"
-        class="form__element form__element--half"
-        name="zipCode"
-        :label="$t('Zip-code')"
-        :required="true"
-        :valid="!$v.shipping.zipCode.$error"
-        :error-message="
-          !$v.shipping.zipCode.required
-            ? $t('Field is required')
-            : $t('Name must have at least 3 letters.')
-        "
-        @blur="$v.shipping.zipCode.$touch()"
-      />
+
       <MMultiselect
         v-model="shipping.country"
-        class="form__element form__element--half form__element--half-even form__select"
+        class="form__element form__element--half form__select"
         name="countries"
         :label="$t('Country')"
         :required="true"
@@ -102,13 +63,76 @@
         :options="countries"
         :valid="!$v.shipping.country.$error"
         :error-message="$t('Field is required')"
-        @change="changeCountry"
+        :disabled="isFormFieldsDisabled"
+        @change="onChangeCountry"
       />
+
+      <SfInput
+        v-if="!isSelectedCountryHasStates"
+        v-model.trim="shipping.state"
+        class="form__element form__element--half"
+        name="state"
+        :label="$t('State / Province')"
+        :disabled="isFormFieldsDisabled"
+      />
+
+      <MMultiselect
+        v-else
+        v-model.trim="shipping.state"
+        class="form__element form__element--half form__select"
+        name="state"
+        :label="$t('State / Province')"
+        :required="true"
+        id-field="code"
+        label-field="name"
+        :options="getStatesForSelectedCountry"
+        :valid="!$v.shipping.state.$error"
+        :error-message="$t('Field is required')"
+        :disabled="isFormFieldsDisabled"
+      />
+
+      <SfInput
+        v-model.trim="shipping.city"
+        class="form__element form__element--half"
+        name="city"
+        :label="$t('City')"
+        :required="true"
+        :disabled="isFormFieldsDisabled"
+        :valid="!$v.shipping.city.$error"
+        :error-message="$t('Field is required')"
+        @blur="$v.shipping.city.$touch()"
+      />
+
+      <SfInput
+        v-model.trim="shipping.zipCode"
+        class="form__element form__element--half"
+        name="zipCode"
+        :label="$t('Zip-code')"
+        :required="true"
+        :disabled="isFormFieldsDisabled"
+        :valid="!$v.shipping.zipCode.$error"
+        :error-message="
+          !$v.shipping.zipCode.required
+            ? $t('Field is required')
+            : $t('Name must have at least 3 letters.')
+        "
+        @blur="onZipCodeBlur"
+      />
+
       <SfInput
         v-model.trim="shipping.phoneNumber"
+        :required="isPhoneNumberRequired"
+        :valid="!$v.shipping.phoneNumber.$error"
+        :error-message="
+          !$v.shipping.phoneNumber || !$v.shipping.phoneNumber.required
+            ? $t('Field is required')
+            : $t('Please, enter valid phone number')
+        "
         class="form__element"
         name="phone"
-        :label="$t('Phone Number')"
+        :label="$t('Phone number')"
+        :disabled="isFormFieldsDisabled"
+        @blur="$v.shipping.phoneNumber.$touch()"
       />
     </div>
     <SfHeading
@@ -146,23 +170,23 @@
       <div class="form__action">
         <SfButton
           class="sf-button--full-width form__action-button"
-          :disabled="$v.shipping.$invalid || !shippingMethods.length"
+          :disabled="!shippingMethods.length"
           @click="saveDataToCheckout"
         >
-          {{ $t("Continue to payment") }}
+          {{ $t('Continue to payment') }}
         </SfButton>
         <SfButton
           class="sf-button--full-width sf-button--text form__action-button form__action-button--secondary"
           @click="$bus.$emit('checkout-before-edit', 'personalDetails')"
         >
-          {{ $t("Edit Details") }}
+          {{ $t('Edit contact') }}
         </SfButton>
       </div>
     </div>
   </div>
 </template>
 <script>
-import { required, requiredIf, minLength } from 'vuelidate/lib/validators';
+import { required, requiredIf, minLength, helpers } from 'vuelidate/lib/validators';
 import { unicodeAlpha, unicodeAlphaNum } from '@vue-storefront/core/helpers/validators';
 import { Shipping } from '@vue-storefront/core/modules/checkout/components/Shipping';
 import {
@@ -174,7 +198,14 @@ import {
 } from '@storefront-ui/vue';
 import { createSmoothscroll } from 'theme/helpers';
 import MMultiselect from 'theme/components/molecules/m-multiselect';
+import {
+  KEY as AMAZON_PAY_MODULE_KEY,
+  METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
+} from 'src/modules/vsf-amazon-pay/index';
+
 const States = require('@vue-storefront/i18n/resource/states.json');
+
+const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/);
 
 export default {
   name: 'OShipping',
@@ -216,16 +247,26 @@ export default {
       city: {
         required,
         unicodeAlpha
+      },
+      phoneNumber: {
+        required: requiredIf(function () { return this.isPhoneNumberRequired }),
+        phoneValidator
       }
     }
   },
   data: () => {
     return {
       states: States,
-      fCanShowStateSelector: true
+      fZipCodeChanged: false
     };
   },
   computed: {
+    isAddressFormDisabled () {
+      return this.shipToMyAddress;
+    },
+    isPhoneNumberRequired () {
+      return this.shipping.country && this.shipping.country !== 'US';
+    },
     isSelectedCountryHasStates () {
       if (!this.shipping.country || !this.states) {
         return false;
@@ -240,34 +281,74 @@ export default {
 
       return this.states[this.shipping.country];
     },
-    canShowStateSelector () {
-      return this.fCanShowStateSelector
-    },
     getShippingCountry () {
       return this.shipping.country;
+    },
+    getZipCode () {
+      return this.shipping.zipCode;
+    },
+    isFormFieldsDisabled () {
+      if (this.$store.getters['checkout/getPaymentDetails'].paymentMethod !== AMAZON_PAY_PAYMENT_METHOD_CODE) {
+        return false;
+      }
+
+      let amazonOrderState = this.$store.state[AMAZON_PAY_MODULE_KEY].orderState;
+
+      if (amazonOrderState) {
+        return true;
+      }
+
+      return false;
     }
   },
   methods: {
+    async onChangeCountry () {
+      this.changeCountry();
+      await this.$nextTick();
+      this.shipping.state = '';
+      this.validateCountryRelatedFields();
+    },
+    onZipCodeBlur () {
+      this.$v.shipping.zipCode.$touch();
+
+      if (!this.fZipCodeChanged) {
+        return;
+      }
+
+      if (this.$v.shipping.country.$invalid) {
+        return;
+      }
+
+      if (this.$v.shipping.zipCode.$invalid) {
+        return;
+      }
+
+      this.fZipCodeChanged = false;
+
+      this.$bus.$emit('checkout-before-shippingMethods', this.shipping.country)
+    },
     saveDataToCheckout () {
+      this.$v.$touch();
+
+      if (this.$v.$invalid) {
+        return;
+      }
+
       this.sendDataToCheckout();
       this.$store.dispatch('cart/syncTotals', { forceServerSync: true });
+    },
+    validateCountryRelatedFields () {
+      this.$v.shipping.state.$touch();
+      this.$v.shipping.phoneNumber.$touch();
     }
   },
   mounted () {
     createSmoothscroll(document.documentElement.scrollTop || document.body.scrollTop, 0);
   },
   watch: {
-    getShippingCountry: {
-      handler (after, before) {
-        this.fCanShowStateSelector = false;
-
-        if (after && before) {
-          this.shipping.state = '';
-        }
-
-        this.$nextTick(() => {
-          this.fCanShowStateSelector = true;
-        })
+    getZipCode: {
+      handler () {
+        this.fZipCodeChanged = true;
       },
       immediate: true
     }
@@ -280,8 +361,7 @@ export default {
 .title {
   --heading-padding: var(--spacer-base) 0;
   @include for-desktop {
-    --heading-title-font-size: var(--h3-font-size);
-    --heading-padding: var(--spacer-2xl) 0 var(--spacer-base) 0;
+    --heading-padding: var(--spacer-xl) 0 var(--spacer-base) 0;
     &:last-of-type {
       --heading-padding: var(--spacer-xs) 0 var(--spacer-base) 0;
     }
@@ -309,22 +389,30 @@ export default {
   &__radio-group {
     flex: 0 0 100%;
   }
+  &__element {
+      margin: 0 0 var(--spacer-sm) 0;
+  }
+
+  &[disabled] {
+    .form__element {
+      &:not(.-always-enabled) {
+        pointer-events: none;
+        opacity: 0.75;
+      }
+    }
+  }
+
   @include for-desktop {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    column-gap: var(--spacer-xl);
     margin: 0 var(--spacer-2xl) 0 0;
-    &:last-of-type {
-      margin: 0 calc(var(--spacer-2xl) - var(--spacer-sm)) 0 0;
-    }
+
     &__element {
-      margin: 0 0 var(--spacer-sm) 0;
       flex: 0 0 100%;
       &--half {
-        flex: 1 1 50%;
-        &-even {
-          padding: 0 0 0 var(--spacer-xl);
-        }
+        flex: 1 1 40%;
       }
     }
     &__action {
@@ -335,7 +423,7 @@ export default {
       --button-width: auto;
     }
     &__radio-group {
-      margin: 0 calc(var(--spacer-sm) * -1);
+      margin: 0;
     }
   }
 }
