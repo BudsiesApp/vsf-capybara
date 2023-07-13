@@ -1,13 +1,22 @@
 <template>
   <footer class="o-footer">
-    <SfFooter :column="6" :multiple="true">
+    <SfFooter :column="5" :multiple="true" class="_footer">
+      <SfFooterColumn :title="$t('Industry Awards')" class="desktop-only">
+        <div class="_awards-container">
+          <BaseImage src="/assets/industry_awards.png" :width="262" />
+
+          <div class="_award-text">
+            {{ $t('2017 Oppenheimer Best Toy Award') }}
+          </div>
+        </div>
+      </SfFooterColumn>
+
       <SfFooterColumn
-        v-for="linkGroup in links"
-        :key="linkGroup.name"
-        :title="linkGroup.name"
+        class="_links-column"
+        :title="$t('Quick Links')"
       >
-        <SfList>
-          <SfListItem v-for="link in linkGroup.children" :key="link.name">
+        <SfList class="_links-list">
+          <SfListItem v-for="link in links" :key="link.name">
             <router-link
               :to="localizedRoute(link.link)"
               :target="link.target"
@@ -21,9 +30,18 @@
         </SfList>
       </SfFooterColumn>
 
-      <SfFooterColumn title="Get more @Petsies cuteness" class="social-column">
-        <MNewsletterSubscription />
-        <div class="social-icon desktop-only">
+      <SfFooterColumn :title="$t('Industry Awards')" class="mobile-only">
+        <div class="_awards-container">
+          <BaseImage src="/assets/industry_awards.png" :width="262" />
+
+          <div class="_award-text">
+            {{ $t('2017 Oppenheimer Best Toy Award') }}
+          </div>
+        </div>
+      </SfFooterColumn>
+
+      <SfFooterColumn :title="$t('Social')" class="social-column desktop-only">
+        <div class="social-icon">
           <a
             :href="item.url"
             v-for="item in social"
@@ -46,49 +64,57 @@
         />
       </div>
 
-      <div class="_additional-information">
-        <router-link to="//support.mypetsies.com/support/home" target="_blank" exact>
-          <SfMenuItem
-            class="sf-footer__menu-item"
-            :label="$t('Contact Us')"
-            icon=""
-          />
-        </router-link>
+      <div class="_contact-us">
+        <div class="_title">
+          {{ $t('Have Questions?') }}
 
-        <div class="_legal-information">
-          ©{{ new Date().getFullYear() }} Budsies Co LLC. All Rights Reserved.
-          |
-          <router-link to="/terms-of-service/" exact>
-            {{ $t('Terms of Service') }}
-          </router-link>
-          |
-          <router-link to="/privacy-policy" exact>
-            {{ $t('Privacy Policy') }}
-          </router-link>
+          <span class="desktop-only">
+            {{ $t('GIVE US A SHOUT!') }}
+          </span>
         </div>
+
+        <SfButton class="color-secondary _contact-button">
+          <a href="http://support.budsies.com/" target="_blank">
+            {{ $t('Contact Us') }}
+          </a>
+        </SfButton>
       </div>
     </SfFooter>
+
+    <div class="_foot">
+      <div class="_shark-tank">
+        {{ $t('As Seen On Shark Tank') }}
+      </div>
+
+      <p class="_copyright">
+        © 2023 {{ $t('Budsies Co LLC. All Rights Reserved') }}. |
+        <router-link to="/privacy-policy/">
+          {{ $t('Privacy Policy') }}
+        </router-link>
+      </p>
+    </div>
   </footer>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import MNewsletterSubscription from 'theme/components/molecules/m-newsletter-subscription.vue';
-import { SfFooter, SfList, SfMenuItem, SfInput, SfButton } from '@storefront-ui/vue';
+import { SfButton, SfFooter, SfList, SfMenuItem, SfHeading } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
 import config from 'config';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import get from 'lodash-es/get';
 
+import { BaseImage } from 'src/modules/budsies';
+
 export default {
   name: 'OFooter',
   components: {
-    MNewsletterSubscription,
+    SfButton,
     SfFooter,
     SfList,
     SfMenuItem,
-    SfInput,
-    SfButton
+    BaseImage,
+    SfHeading
   },
   props: {
     subscribeEmail: {
@@ -101,23 +127,27 @@ export default {
       social: [
         {
           name: 'facebook',
-          url: 'https://www.facebook.com/petsies/'
-        },
-        {
-          name: 'instagram',
-          url: 'https://www.instagram.com/petsies/'
+          url: 'https://www.facebook.com/budsies/'
         },
         {
           name: 'twitter',
-          url: 'https://twitter.com/petsiesofficial/'
+          url: 'http://twitter.com/budsiestoys'
         },
         {
-          name: 'pinterest',
-          url: 'https://www.pinterest.com/petsies/'
+          name: 'google-plus',
+          url: 'https://plus.google.com/communities/107022527148701273112'
+        },
+        {
+          name: 'linkedin',
+          url: 'https://www.linkedin.com/company/budsies'
+        },
+        {
+          name: 'instagram',
+          url: 'http://instagram.com/budsies'
         },
         {
           name: 'tiktok',
-          url: 'https://www.tiktok.com/@mypetsies'
+          url: 'https://www.tiktok.com/@budsies'
         }
       ]
     };
@@ -132,100 +162,103 @@ export default {
       return `${i18n.defaultCountry} / ${i18n.defaultLanguage} / ${i18n.currencyCode}`;
     },
     links () {
-      return {
-        about: {
-          name: 'Company',
-          children: [
-            {
-              name: this.$t('About'),
-              link: '/about-petsies/'
-            },
-            {
-              name: this.$t('Blog'),
-              link: '/blog/',
-              target: '_blank'
-            },
-            {
-              name: this.$t('Refund & Return Policy'),
-              link: '/craftsmanship-promise/'
-            },
-            {
-              name: this.$t('Media'),
-              link: '//support.mypetsies.com/support/solutions/folders/13000003990',
-              target: '_blank'
-            },
-            {
-              name: this.$t('How it Works'),
-              link: '/how-it-works/'
-            },
-            {
-              name: this.$t('Reviews'),
-              link: '/reviews/'
-            }
-          ]
+      return [
+        {
+          name: this.$t('Budsies'),
+          link: '/budsies-services/'
         },
-        services: {
-          name: this.$t('Services'),
-          children: [
-            { name: this.$t('Custom Forevers'), link: '/forevers-pet-plush/' },
-            { name: this.$t('Custom Pillows'), link: '/custom-pillows/' },
-            { name: this.$t('Custom Blankets'), link: '/custom-blankets/' },
-            { name: this.$t('Custom Socks'), link: { name: 'printed-socks-creation-page' } },
-            { name: this.$t('Custom Face Masks'), link: { name: 'printed-masks-creation-page' } },
-            { name: this.$t('Bobbleheads & Figurines'), link: '/pet-bobblehead-figurines/' },
-            {
-              name: this.$t('Pajamas'),
-              link: {
-                name: 'pajamas-creation'
-              }
-            },
-            { name: this.$t('Custom Golf Headcovers'), link: '/golf-headcovers/' },
-            { name: this.$t('Custom Keychains'), link: { name: 'printed-keychains-creation-page' } },
-            { name: this.$t('Custom Magnets'), link: { name: 'felted-magnets-creation-page' } },
-            { name: this.$t('Custom Ornaments'), link: { name: 'felted-ornaments-creation-page' } },
-            { name: this.$t('Custom Bulk'), link: '/bulk-custom-stuffed-animal-manufacture/' },
-            { name: this.$t('Gift Cards'), link: { name: 'gift-cards' } },
-            { name: this.$t('Gift Box'), link: { name: 'giftbox' } },
-            { name: this.$t('Accessories'),
-              link: {
-                name: 'category',
-                params: {
-                  slug: 'petsies-accessories-11'
-                }
-              }
-            }
-          ]
+        {
+          name: this.$t('Selfies'),
+          link: '/selfies-services/'
         },
-        account: {
-          name: this.$t('Account'),
-          children: [
-            {
-              name: this.$t('My account'),
-              link: { name: 'my-account' },
-              event: this.isLoggedIn ? 'click' : 'false',
-              clickHandler: () => {
-                if (!this.isLoggedIn) {
-                  this.openModal({ name: ModalList.Auth, payload: 'login' })
-                }
-              }
-            },
-            { name: this.$t('My Cart'), link: { name: 'detailed-cart' } },
-            { name: this.$t('Rising Stars'), link: '/rising-stars/' }
-          ]
+        {
+          name: this.$t('Puppets'),
+          link: '/custom-puppets/'
         },
-        quickLInks: {
-          name: this.$t('Quick Links'),
-          children: [
-            { name: this.$t('Veterinarians'), link: '/partners/' },
-            { name: this.$t('Become a Partner'), link: '/partners/' },
-            { name: this.$t('Resellers'), link: '/partners/' },
-            { name: this.$t('Affiliates'), link: '/affiliate-home/' },
-            { name: this.$t('Corporate Buying'), link: '/partners/' },
-            { name: this.$t('FAQ'), link: '//support.mypetsies.com/support/home', target: '_blank' },
-            { name: this.$t('Referral Rewards'), link: '//referrals.mypetsies.com/', target: '_blank' }
-          ]
+        {
+          name: this.$t('OC Commissions'),
+          link: '/commissions/'
+        },
+        {
+          name: this.$t('Buddy Pillows'),
+          link: '/buddy-pillows/'
+        },
+        {
+          name: this.$t('Photo Pillows'),
+          link: '/photo-pillows/'
+        },
+        {
+          name: this.$t('Custom Socks'),
+          link: {
+            name: 'printed-socks-creation-page'
+          }
+        },
+        {
+          name: this.$t('Cartoon Pillows'),
+          link: '/plushie/index/cartoonPillows/'
+        },
+        {
+          name: this.$t('Cartoon Keychains'),
+          link: {
+            name: 'printed-keychains-creation-page'
+          }
+        },
+        {
+          name: this.$t('Bobbleheads & Figurines'),
+          link: '/bobblehead-figurines/'
+        },
+        {
+          name: this.$t('Pajamas'),
+          link: '/pajamas/index/create/'
+        },
+        {
+          name: this.$t('Gift Cards'),
+          link: '/purchase-gift-card/'
+        },
+        {
+          name: this.$t('Giving Back'),
+          link: '/giving-back-stuffed-toys/'
+        },
+        {
+          name: this.$t('Accessories'),
+          link: '/accessories/'
+        },
+        {
+          name: this.$t('Gallery'),
+          link: '/reviews/'
+        },
+        {
+          name: this.$t('FAQ\'s'),
+          link: 'http://support.budsies.com/',
+          target: '_blank'
+        },
+        {
+          name: this.$t('Drawing Templates'),
+          link: '/inspiration/',
+          target: '_blank'
+        },
+        {
+          name: this.$t('About Us'),
+          link: '/about/'
+        },
+        {
+          name: this.$t('Terms of Service'),
+          link: '/terms-of-service/'
+        },
+        {
+          name: this.$t('Blog'),
+          link: '/blog/',
+          target: '_blank'
+        },
+        {
+          name: this.$t('How It Works'),
+          link: '/how-we-create-plush-toys-from-art/'
+        },
+        {
+          name: this.$t('Newsletter'),
+          link: '/newsletter/'
         }
-      };
+      ];
     }
   },
   methods: {
@@ -250,6 +283,8 @@ export default {
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .o-footer {
+  $brand-icons-path: '../../assets/brands';
+
   background-color: var(--c-footer);
   // padding-bottom: var(--spacer-lg);
   margin-top: calc(var(--spacer-2xl) + var(--spacer-xl));
@@ -302,9 +337,78 @@ export default {
       }
     }
   }
+
+  ._award-text {
+    font-size: var(--font-2xs);
+    font-weight: 100;
+    margin: var(--spacer-xs) 0;
+    text-transform: none;
+    color: var(--c-white);
+    text-align: center;
+  }
+
+  ._awards-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  ._links-list {
+    column-count: 1;
+  }
+
+  ._contact-us {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: var(--spacer-xl);
+    width: 100%;
+
+    ._contact-button {
+      margin-top: var(--spacer-sm);
+
+      a {
+        color: inherit;
+      }
+    }
+  }
+
+  ._title {
+    color: var(--c-white);
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+
+  ._foot {
+    text-align: center;
+    text-transform: uppercase;
+    padding-bottom: var(--spacer-2xl);
+  }
+
+  ._shark-tank {
+    background: var(--c-blue);
+    color: var(--c-white);
+    display: inline-block;
+    font-size: var(--font-sm);
+    font-weight: bold;
+    transform: translateY(-50%);
+    z-index: 2;
+    padding: var(--spacer-xs) var(--spacer-lg);
+  }
+
   .social-column {
     flex-basis: auto;
   }
+
+  ._copyright {
+    color: var(--c-footer-gray);
+    font-size: var(--font-2xs);
+
+    a {
+      color: inherit;
+    }
+  }
+
   .social-icon {
     display: flex;
     justify-content: flex-start;
@@ -316,30 +420,34 @@ export default {
     }
 
     &__link {
-      background-image: url(../../assets/footer-socials-mobile.png);
       display: block;
-      height: 30px;
-      width: 30px;
+      height: 16px;
+      width: 16px;
       margin-right: var(--spacer-base);
+      background-repeat: no-repeat;
 
       &.-facebook {
-        background-position: -1px -1px;
+        background-image: url('#{$brand-icons-path}/facebook.svg');
+      }
+
+      &.-google-plus {
+        background-image: url('#{$brand-icons-path}/google-plus.svg');
       }
 
       &.-instagram {
-        background-position: -30px -1px;
+        background-image: url('#{$brand-icons-path}/instagram.svg');
       }
 
-      &.-twitter {
-        background-position: -60px -1px;
-      }
-
-      &.-pinterest {
-        background-position: -90px -1px;
+      &.-linkedin {
+        background-image: url('#{$brand-icons-path}/linkedin.svg');
       }
 
       &.-tiktok {
-        background-position: -120px -1px;
+        background-image: url('#{$brand-icons-path}/tiktok.svg');
+      }
+
+      &.-twitter {
+        background-image: url('#{$brand-icons-path}/twitter.svg');
       }
 
       &:last-child {
@@ -369,6 +477,19 @@ export default {
   }
 
   @include for-desktop {
+    ._links-column,
+    .social-column {
+      margin-left: var(--spacer-sm);
+    }
+
+    ._links-column {
+      flex-grow: 1;
+      max-width: 35rem;
+    }
+
+    ._links-list {
+      column-count: 3;
+    }
     .sf-footer {
       background-image: url(../../assets/footer-bg.png);
       padding: 225px 0 100px;
@@ -383,34 +504,6 @@ export default {
     max-width: 100%;
     ::v-deep .sf-footer-column__content {
       padding: 0;
-    }
-
-    ._additional-information {
-      padding: 0;
-    }
-
-    .social-icon {
-      &__link {
-        background-image: url(../../assets/footer-socials.png);
-        height: 42px;
-        width: 42px;
-
-        &.-instagram {
-          background-position: -45px -1px;
-        }
-
-        &.-twitter {
-          background-position: -89px -1px;
-        }
-
-        &.-pinterest {
-          background-position: -133px -1px;
-        }
-
-        &.-tiktok {
-          background-position: -177px -1px;
-        }
-      }
     }
   }
 }

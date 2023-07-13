@@ -14,7 +14,7 @@
       :visible="visible"
     >
       <SfMegaMenuColumn
-        :title="$t('Custom Pet Lookalikes')"
+        :title="$t('Custom Lookalikes')"
       >
         <SfList>
           <SfListItem
@@ -135,55 +135,34 @@ export default Vue.extend({
     return {
       customProductsItems: [
         {
-          label: this.$t('Petsies Stuffed Animals'),
-          url: '/forevers-pet-plush/'
+          label: this.$t('Budsies'),
+          url: '/budsies-services/'
         },
         {
-          label: this.$t('Golf Club Headcovers'),
-          url: '/golf-headcovers/'
+          label: this.$t('Selfies'),
+          url: '/selfies-services/'
+        },
+        {
+          label: this.$t('Puppets'),
+          url: '/custom-puppets/'
         },
         {
           label: this.$t('Bobbleheads & Figurines'),
-          url: '/pet-bobblehead-figurines/'
+          url: '/bobblehead-figurines/'
         },
         {
-          label: this.$t('Magnets'),
-          url: {
-            name: 'felted-magnets-creation-page'
-          }
-        },
-        {
-          label: this.$t('Ornaments'),
-          url: {
-            name: 'felted-ornaments-creation-page'
-          }
+          label: this.$t('Specialty Commissions'),
+          url: '/commissions/'
         }
       ],
       householdItems: [
         {
-          label: this.$t('Pet Shaped Pillows'),
-          url: '/pet-pillow/'
+          label: this.$t('Pillows'),
+          url: '/custom-pillows/'
         },
         {
-          label: this.$t('Square Photo Pillows'),
-          url: {
-            name: 'category',
-            params: {
-              slug: 'custom-photo-pillows-80'
-            }
-          }
-        },
-        {
-          label: this.$t('Pet Photo Blankets'),
-          url: {
-            name: 'cut-out-blankets'
-          }
-        },
-        {
-          label: this.$t('Renaissance Blankets'),
-          url: {
-            name: 'renaissance-blankets'
-          }
+          label: this.$t('Pajamas'),
+          url: '/pajamas/index/create/'
         }
       ],
       accessoriesItems: [
@@ -194,13 +173,17 @@ export default Vue.extend({
           }
         },
         {
-          label: this.$t('Pet Keychains'),
+          label: this.$t('Keychains'),
           url: {
             name: 'printed-keychains-creation-page'
           }
         }
       ],
       otherProductsItems: [
+        {
+          label: this.$t('Gift Cards'),
+          url: '/purchase-gift-card/'
+        },
         {
           label: this.$t('Gift Boxes'),
           url: {
@@ -212,17 +195,16 @@ export default Vue.extend({
           }
         },
         {
-          label: this.$t('Gift Add-ons'),
-          url: {
-            name: 'category',
-            params: {
-              slug: 'petsies-accessories-9'
-            }
-          }
+          label: this.$t('Budsies Pals'),
+          url: '/budsiespals/'
+        },
+        {
+          label: this.$t('Petsies'),
+          url: '/petsies/'
         },
         {
           label: this.$t('Bulk Orders'),
-          url: '/bulk-custom-stuffed-animal-manufacture/'
+          url: '/plush-production/'
         }
       ],
       usefulLinksItems: [
