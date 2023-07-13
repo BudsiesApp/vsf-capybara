@@ -60,36 +60,48 @@ export default Vue.extend({
     return {
       dropdownActions: [
         {
-          label: 'Custom Petsies',
-          url: '/forevers-pet-plush/'
+          label: 'Budsies',
+          url: '/budsies-services/'
         },
         {
-          label: 'Golf Headcovers',
-          url: '/golf-headcovers/'
+          label: 'Selfies',
+          url: '/selfies-services/'
         },
         {
-          label: 'Custom Pillows',
-          url: '/custom-pillows/'
+          label: 'Puppets',
+          url: '/custom-puppets/'
         },
         {
-          label: 'Custom Blankets',
-          url: '/custom-blankets/'
+          label: 'Buddy Pillows',
+          url: '/buddy-pillows/'
         },
         {
-          label: 'Custom Socks',
+          label: 'Photo Pillows',
+          url: '/photo-pillows/'
+        },
+        {
+          label: 'Socks',
           url: {
             name: 'printed-socks-creation-page'
           }
         },
         {
-          label: 'Face Masks',
+          label: 'Cartoon Pillows',
+          url: '/plushie/index/cartoonPillows/'
+        },
+        {
+          label: 'Keychains',
           url: {
-            name: 'printed-masks-creation-page'
+            name: 'printed-keychains-creation-page'
           }
         },
         {
-          label: 'Bobbleheads & Figurines',
-          url: '/pet-bobblehead-figurines/'
+          label: 'Bobbleheads',
+          url: '/bobbleheads/create/'
+        },
+        {
+          label: 'Figurines',
+          url: '/figurines/create/'
         },
         {
           label: this.$t('Pajamas'),
@@ -98,26 +110,18 @@ export default Vue.extend({
           }
         },
         {
-          label: 'Pet Keychains',
+          label: 'Accessories',
+          url: '/accessories/'
+        },
+        {
+          label: 'Gift Boxes',
           url: {
-            name: 'printed-keychains-creation-page'
+            name: 'giftbox'
           }
         },
         {
-          label: 'Pet Magnets',
-          url: {
-            name: 'felted-magnets-creation-page'
-          }
-        },
-        {
-          label: 'Pet Ornaments',
-          url: {
-            name: 'felted-ornaments-creation-page'
-          }
-        },
-        {
-          label: 'Gift Box',
-          url: { name: 'giftbox' }
+          label: this.$t('Gift Cards'),
+          url: '/purchase-gift-card/'
         }
       ],
       isDropdownOpen: false

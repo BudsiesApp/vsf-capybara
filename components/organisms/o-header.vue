@@ -42,7 +42,7 @@
           <router-link
             to="/reviews/"
           >
-            Reviews
+            Gallery
           </router-link>
         </SfHeaderNavigationItem>
         <SfHeaderNavigationItem>
