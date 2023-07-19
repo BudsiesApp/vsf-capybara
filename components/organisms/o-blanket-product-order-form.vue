@@ -653,10 +653,6 @@ export default defineComponent({
         throw new Error('FileProcessingRepository is not defined');
       }
 
-      if (!this.product.id) {
-        throw new Error('Product doesn\'t have an ID');
-      }
-
       const image = await this.fileProcessingRepository.uploadFileFromUrl(
         this.galleryImages[0].big,
         ImageType.Artwork,
