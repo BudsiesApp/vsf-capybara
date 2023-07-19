@@ -210,7 +210,7 @@ import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import { getProductGallery as getGalleryByProduct, setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 
 import { ProductValue, Dictionary } from 'src/modules/budsies';
-import { ImageHandlerService, Item } from 'src/modules/file-storage';
+import { FileProcessingRepositoryFactory, ImageHandlerService, ImageType, Item } from 'src/modules/file-storage';
 import { CustomerImage, getProductDefaultPrice, ServerError } from 'src/modules/shared';
 import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
@@ -242,8 +242,11 @@ const DESIGN_PROCESSING_LEVEL_BUNDLE_OPTION_TITLE = 'design processing level';
 
 export default defineComponent({
   name: 'OBlanketProductOrderForm',
-  setup (_, setupContext) {
+  setup ({ artworkUploadUrl }, setupContext) {
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
+    const fileProcessingRepositoryFactory = inject<FileProcessingRepositoryFactory>('FileProcessingRepositoryFactory')
+
+    const fileProcessingRepository = fileProcessingRepositoryFactory?.create(artworkUploadUrl);
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
 
     if (!imageHandlerService) {
@@ -251,6 +254,7 @@ export default defineComponent({
     }
 
     return {
+      fileProcessingRepository,
       imageHandlerService,
       validationObserver,
       ...useFormValidation(
@@ -541,17 +545,20 @@ export default defineComponent({
 
       this.isSubmitting = true;
 
-      await this.$store.dispatch(
-        'product/setBundleOptions',
-        { product: this.product, bundleOptions: this.$store.state.product.current_bundle_options }
-      );
+      const [customerImages] = await Promise.all([
+        this.getCustomerImagesWithSelectedDesignImage(),
+        this.$store.dispatch(
+          'product/setBundleOptions',
+          { product: this.product, bundleOptions: this.$store.state.product.current_bundle_options }
+        )
+      ]);
 
       try {
         try {
           await this.$store.dispatch('cart/addItem', {
             productToAdd: Object.assign({}, this.product, {
               qty: this.quantity,
-              customerImages: [this.customerImage],
+              customerImages,
               uploadMethod: 'upload-now'
             })
           });
@@ -634,6 +641,33 @@ export default defineComponent({
     },
     getDesignOptionValidationProvider (): InstanceType<typeof ValidationProvider> | undefined {
       return this.$refs['design-option-validation-provider'] as InstanceType<typeof ValidationProvider> | undefined;
+    },
+    async getCustomerImagesWithSelectedDesignImage (): Promise<CustomerImage[]> {
+      if (!this.customerImage) {
+        return [];
+      }
+
+      const customerImages = [this.customerImage];
+
+      if (!this.fileProcessingRepository) {
+        throw new Error('FileProcessingRepository is not defined');
+      }
+
+      if (!this.product.id) {
+        throw new Error('Product doesn\'t have an ID');
+      }
+
+      const image = await this.fileProcessingRepository.uploadFileFromUrl(
+        this.galleryImages[0].big,
+        ImageType.Artwork,
+        this.backendProductId
+      );
+
+      if (image) {
+        customerImages.push(image);
+      }
+
+      return customerImages;
     },
     getLabelForSizeOptionByProductLink (productLink: BundleOptionsProductLink): string {
       if (!productLink.product) {
@@ -750,12 +784,14 @@ export default defineComponent({
 
       this.isSubmitting = true;
 
+      const customerImages = await this.getCustomerImagesWithSelectedDesignImage();
+
       try {
         try {
           await this.updateClientAndServerItem({
             product: Object.assign({}, this.existingCartItem, {
               qty: this.quantity,
-              customerImages: [this.customerImage],
+              customerImages,
               product_option: setBundleProductOptionsAsync(null, { product: this.existingCartItem, bundleOptions: this.$store.state.product.current_bundle_options }),
               uploadMethod: 'upload-now'
             }),
