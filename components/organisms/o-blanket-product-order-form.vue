@@ -609,7 +609,7 @@ export default defineComponent({
       }
 
       this.customerImage = cartItem.customerImages[0];
-      this.artworkUploadInitialItems = cartItem.customerImages;
+      this.artworkUploadInitialItems = [cartItem.customerImages[0]];
     },
     fillExistingCartItemSize (cartItem: CartItem): void {
       if (!this.sizeBundleOption) {
