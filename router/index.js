@@ -313,7 +313,7 @@ let routes = [
     redirect: {
       name: 'category',
       params: {
-        slug: 'petsies-accessories-11'
+        slug: 'accessories-for-custom-products-9'
       }
     }
   },
