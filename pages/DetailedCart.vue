@@ -226,7 +226,11 @@ const clayPlushieProductSkus = [
   'petsiesBobbleheads_bundle'
 ]
 
-const pajamaProductSku = 'customPajamas_bundle';
+const clothesProductSkus = [
+  'customPajamas_bundle',
+  'customHawaiianShirts_bundle',
+  'customGolfShirts_bundle'
+];
 
 const editableProductsSkus = [
   ...foreversProductsSkus,
@@ -234,7 +238,7 @@ const editableProductsSkus = [
   ...blanketProductsSkus,
   ...clayPlushieProductSkus,
   ...golfHeadCoversProductsSkus,
-  pajamaProductSku
+  ...clothesProductSkus
 ];
 
 export default {
@@ -311,6 +315,18 @@ export default {
           label: this.$t('Pajamas'),
           url: {
             name: 'pajamas-creation'
+          }
+        },
+        {
+          label: this.$t('Hawaiian Shirts'),
+          url: {
+            name: 'hawaiian-shirts-creation'
+          }
+        },
+        {
+          label: this.$t('Golf Shirts'),
+          url: {
+            name: 'golf-shirts-creation'
           }
         },
         {
@@ -393,12 +409,15 @@ export default {
       return this.truncate(product.plushieDescription, 150, 50);
     },
     editHandler (product) {
-      if (product.sku === pajamaProductSku) {
+      if (clothesProductSkus.includes(product.sku)) {
+        const designOptionName = product.sku === 'customPajamas_bundle' ? 'product' : 'design';
+
         this.$router.push({
-          name: 'pajamas-creation',
+          name: 'clothes-product',
+          params: { sku: product.sku },
           query: {
             existingPlushieId: product.plushieId,
-            product_design: this.getProductDesign(product)
+            product_design: this.getProductDesign(product, designOptionName)
           }
         });
       } else if (golfHeadCoversProductsSkus.includes(product.sku)) {
@@ -538,10 +557,12 @@ export default {
 
       return text.substring(0, maxLength) + '...';
     },
-    getProductDesign (product) {
+    getProductDesign (product, designOptionTitle = 'product') {
       const selectedBundleOptions = getSelectedBundleOptions(product);
-      const productBundleOptions = product.bundle_options.filter((option) => option.title.toLowerCase() === 'product');
+      const productBundleOptions = product.bundle_options.filter((option) => option.title.toLowerCase() === designOptionTitle);
       const selectedBundleOptionsValues = getBundleOptionsValues(selectedBundleOptions, productBundleOptions);
+      console.log(selectedBundleOptions);
+      console.log(productBundleOptions);
 
       return selectedBundleOptionsValues[0].sku;
     },
