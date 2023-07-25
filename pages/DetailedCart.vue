@@ -317,18 +317,18 @@ export default {
             name: 'pajamas-creation'
           }
         },
-        {
-          label: this.$t('Hawaiian Shirts'),
-          url: {
-            name: 'hawaiian-shirts-creation'
-          }
-        },
-        {
-          label: this.$t('Golf Shirts'),
-          url: {
-            name: 'golf-shirts-creation'
-          }
-        },
+        // {
+        //   label: this.$t('Hawaiian Shirts'),
+        //   url: {
+        //     name: 'hawaiian-shirts-creation'
+        //   }
+        // },
+        // {
+        //   label: this.$t('Golf Shirts'),
+        //   url: {
+        //     name: 'golf-shirts-creation'
+        //   }
+        // },
         {
           label: 'Pet Keychains',
           url: {
@@ -561,8 +561,6 @@ export default {
       const selectedBundleOptions = getSelectedBundleOptions(product);
       const productBundleOptions = product.bundle_options.filter((option) => option.title.toLowerCase() === designOptionTitle);
       const selectedBundleOptionsValues = getBundleOptionsValues(selectedBundleOptions, productBundleOptions);
-      console.log(selectedBundleOptions);
-      console.log(productBundleOptions);
 
       return selectedBundleOptionsValues[0].sku;
     },
