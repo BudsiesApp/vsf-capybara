@@ -199,18 +199,18 @@ export default Vue.extend({
             name: 'pajamas-creation'
           }
         },
-        {
-          label: this.$t('Hawaiian Shirts'),
-          url: {
-            name: 'hawaiian-shirts-creation'
-          }
-        },
-        {
-          label: this.$t('Golf Shirts'),
-          url: {
-            name: 'golf-shirts-creation'
-          }
-        },
+        // {
+        //   label: this.$t('Hawaiian Shirts'),
+        //   url: {
+        //     name: 'hawaiian-shirts-creation'
+        //   }
+        // },
+        // {
+        //   label: this.$t('Golf Shirts'),
+        //   url: {
+        //     name: 'golf-shirts-creation'
+        //   }
+        // },
         {
           label: this.$t('Face Masks'),
           url: {
