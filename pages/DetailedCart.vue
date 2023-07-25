@@ -410,12 +410,14 @@ export default {
     },
     editHandler (product) {
       if (clothesProductSkus.includes(product.sku)) {
+        const designOptionName = product.sku === 'customPajamas_bundle' ? 'product' : 'design';
+
         this.$router.push({
           name: 'clothes-product',
           params: { sku: product.sku },
           query: {
             existingPlushieId: product.plushieId,
-            product_design: this.getProductDesign(product, 'design')
+            product_design: this.getProductDesign(product, designOptionName)
           }
         });
       } else if (golfHeadCoversProductsSkus.includes(product.sku)) {
@@ -559,6 +561,8 @@ export default {
       const selectedBundleOptions = getSelectedBundleOptions(product);
       const productBundleOptions = product.bundle_options.filter((option) => option.title.toLowerCase() === designOptionTitle);
       const selectedBundleOptionsValues = getBundleOptionsValues(selectedBundleOptions, productBundleOptions);
+      console.log(selectedBundleOptions);
+      console.log(productBundleOptions);
 
       return selectedBundleOptionsValues[0].sku;
     },
