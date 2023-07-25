@@ -133,6 +133,7 @@ export default Vue.extend({
     padding: 0;
 
     ._design-option {
+      cursor: pointer;
       flex-shrink: 0;
       flex-grow: 0;
       display: block;
@@ -147,6 +148,7 @@ export default Vue.extend({
 
       ._option-label {
         background: none;
+        cursor: pointer;
         font-size: 1em;
         line-height: 1.2;
         margin: 0;

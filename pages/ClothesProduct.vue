@@ -1,6 +1,6 @@
 <template>
-  <div id="pajama-product" itemscope itemtype="http://schema.org/Product">
-    <o-pajama-product-order-form
+  <div id="clothes-product" itemscope itemtype="http://schema.org/Product">
+    <o-clothes-product-order-form
       v-if="getCurrentProduct"
       :artwork-upload-url="artworkUploadUrl"
       :product="getCurrentProduct"
@@ -21,16 +21,18 @@ import CartItem from 'core/modules/cart/types/CartItem';
 
 import Product from 'core/modules/catalog/types/Product';
 
-import OPajamaProductOrderForm from 'theme/components/organisms/o-pajama-product-order-form.vue';
-
-const pajamaProductSku = 'customPajamas_bundle';
+import OClothesProductOrderForm from 'theme/components/organisms/o-clothes-product-order-form.vue';
 
 export default Vue.extend({
-  name: 'PajamaProduct',
+  name: 'ClothesProduct',
   components: {
-    OPajamaProductOrderForm
+    OClothesProductOrderForm
   },
   props: {
+    sku: {
+      type: String,
+      required: true
+    },
     productDesign: {
       type: String as PropType<string | undefined>,
       default: undefined
@@ -43,7 +45,7 @@ export default Vue.extend({
   computed: {
     getCurrentProduct (): Product | null {
       const product = this.$store.getters['product/getCurrentProduct'];
-      if (!product?.sku || product.sku !== pajamaProductSku) {
+      if (!product?.sku || product.sku !== this.sku) {
         return null;
       }
 
@@ -80,7 +82,7 @@ export default Vue.extend({
   methods: {
     async loadData (): Promise<void> {
       const product = await this.$store.dispatch('product/loadProduct', {
-        parentSku: pajamaProductSku,
+        parentSku: this.sku,
         setCurrent: true
       });
 
@@ -99,6 +101,12 @@ export default Vue.extend({
   watch: {
     sku: async function () {
       await this.loadData();
+
+      if (!document || !document.scrollingElement) {
+        return;
+      }
+
+      document.scrollingElement.scrollTop = 0;
     }
   },
   metaInfo () {
@@ -106,7 +114,7 @@ export default Vue.extend({
 
     return {
       title: htmlDecode(
-        this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name
+        this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name || this.$t('Clothes')
       ),
       meta: description
         ? [
@@ -125,7 +133,7 @@ export default Vue.extend({
   <style lang="scss" scoped>
   @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-  #pajama-product {
+  #clothes-product {
     box-sizing: border-box;
     padding: 0 1rem;
 
@@ -140,7 +148,7 @@ export default Vue.extend({
       width: 100%;
       margin: 0 auto;
 
-      .o-pajama-product-order-form {
+      .o-clothes-product-order-form {
         margin-top: var(--spacer-lg);
       }
     }

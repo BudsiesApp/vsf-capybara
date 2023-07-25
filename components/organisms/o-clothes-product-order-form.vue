@@ -1,5 +1,5 @@
 <template>
-  <div class="o-pajama-product-order-form">
+  <div class="o-clothes-product-order-form">
     <div class="_info">
       <div class="_zoom-gallery-container">
         <SfHeading
@@ -28,7 +28,7 @@
           ref="validationObserver"
         >
           <form @submit.prevent="onSubmit">
-            <div class="_step">
+            <div class="_step" v-if="showStyleSelectorStep">
               <div
                 class="_step-title"
                 :ref="getFieldAnchorName('Style Option')"
@@ -43,9 +43,9 @@
                 class="_step-content"
                 tag="div"
               >
-                <m-pajama-style-selector
+                <m-clothes-style-selector
                   :options="styleOptions"
-                  name="pajama-style-selector"
+                  name="clothes-style-selector"
                   :disabled="isDisabled"
                   :value="selectedStyle"
                   @input="onStyleSelected"
@@ -250,7 +250,7 @@
                   type="submit"
                   :disabled="isSubmitButtonDisabled"
                 >
-                  Add to Cart
+                  {{ $t('Add to Cart') }}
                 </SfButton>
               </div>
             </div>
@@ -295,7 +295,7 @@ import { useFormValidation } from 'theme/helpers/use-form-validation';
 
 import DesignProduct from '../interfaces/design-product.interface';
 import GalleryProductImages from '../interfaces/gallery-product-images.interface';
-import PajamaStyleOption from '../interfaces/pajama-style-option.interface';
+import ClothesStyleOption from '../interfaces/clothes-style-option.interface';
 import ExtraPhotoAddonOption from '../interfaces/extra-photo-addon-option.interface';
 import ExtraFacesConfiguratorData from '../interfaces/extra-faces-configurator-data.interface';
 
@@ -305,7 +305,7 @@ import MArtworkUpload from '../molecules/m-artwork-upload.vue';
 import MDesignSelector from '../molecules/m-design-selector.vue';
 import MProductDescriptionStory from '../molecules/m-product-description-story.vue';
 import MZoomGallery from '../molecules/m-zoom-gallery.vue';
-import MPajamaStyleSelector from './OPajamaProductOrderForm/m-pajama-style-selector.vue';
+import MClothesStyleSelector from './OClothesProductOrderForm/m-clothes-style-selector.vue';
 import MExtraFaces from '../molecules/m-extra-faces.vue';
 import MFormErrors from '../molecules/m-form-errors.vue';
 
@@ -319,13 +319,15 @@ interface SelectOptionItem {
   label: string
 }
 
-const DESIGN_BUNDLE_OPTION_TITLE = 'product';
+const SHIRTS_DESIGN_BUNDLE_OPTION_TITLE = 'design';
+const SHIRTS_SIMPLE_PRODUCT_BUNDLE_OPTION_TITLE = 'product';
+const PAJAMAS_DESIGN_BUNDLE_OPTION_TITLE = 'product';
 const SIZE_BUNDLE_OPTION_TITLE = 'size';
 const EXTRA_FACES_BUNDLE_OPTION_TITLE = 'extra faces';
 const VARIANT_BUNDLE_OPTION_TITLE = 'variant';
 
 export default defineComponent({
-  name: 'OPajamaProductOrderForm',
+  name: 'OClothesProductOrderForm',
   setup (_, setupContext) {
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
@@ -355,7 +357,7 @@ export default defineComponent({
     MArtworkUpload,
     ACustomProductQuantity,
     MProductDescriptionStory,
-    MPajamaStyleSelector,
+    MClothesStyleSelector,
     MExtraFaces,
     MFormErrors
   },
@@ -471,10 +473,14 @@ export default defineComponent({
         this.extraFacesAddons.length > 0
       );
     },
-    backendProductId (): ProductValue {
+    backendProductId (): ProductValue.PAJAMAS | ProductValue.HAWAIIAN_SHIRTS | ProductValue.GOLF_SHIRTS {
       switch (this.product.id) {
         case 558:
           return ProductValue.PAJAMAS;
+        case 645:
+          return ProductValue.HAWAIIAN_SHIRTS;
+        case 626:
+          return ProductValue.GOLF_SHIRTS;
         default:
           throw new Error(
             `Can't resolve Backend product id for Magento '${this.product.id}' product ID`
@@ -502,8 +508,17 @@ export default defineComponent({
       }
 
       return this.product.bundle_options.find(
-        (bundleOption) => bundleOption.title.toLowerCase() === DESIGN_BUNDLE_OPTION_TITLE
+        (bundleOption) => bundleOption.title.toLowerCase() === this.designBundleOptionTitle
       );
+    },
+    designBundleOptionTitle (): string {
+      switch (this.backendProductId) {
+        case ProductValue.PAJAMAS:
+          return PAJAMAS_DESIGN_BUNDLE_OPTION_TITLE;
+        case ProductValue.GOLF_SHIRTS:
+        case ProductValue.HAWAIIAN_SHIRTS:
+          return SHIRTS_DESIGN_BUNDLE_OPTION_TITLE;
+      }
     },
     designProductOptions (): DesignProduct[] {
       const designs: DesignProduct[] = [];
@@ -682,26 +697,34 @@ export default defineComponent({
       return this.totalPrice.special;
     },
     totalPrice (): {regular: number, special: number} {
-      const variantPrice = getProductDefaultPrice(this.selectedVariantProduct, {}, false);
-      const defaultVariantPrice = getProductDefaultPrice(this.defaultVariantProduct, {}, false);
       const extraFacesPrice = getProductDefaultPrice(this.selectedExtraFaceProduct, {}, false);
-
-      const finalVariantPrice = variantPrice.regular ? variantPrice : defaultVariantPrice;
 
       return {
         regular: this.selectedDesignProductPrice.regular +
-          finalVariantPrice.regular +
+          this.simpleProductPrice.regular +
           extraFacesPrice.regular,
         special: this.selectedDesignProductPrice.special +
-          finalVariantPrice.special +
+          this.simpleProductPrice.special +
           extraFacesPrice.special
       }
     },
     customerImageId (): string | undefined {
       return this.customerImage?.id;
     },
-    styleOptions (): PajamaStyleOption[] {
-      const styleCodes: Record<string, PajamaStyleOption> = {};
+    simpleProductPrice (): {regular: number, special: number} {
+      switch (this.backendProductId) {
+        case ProductValue.PAJAMAS:
+          const variantPrice = getProductDefaultPrice(this.selectedVariantProduct, {}, false);
+          const defaultVariantPrice = getProductDefaultPrice(this.defaultVariantProduct, {}, false);
+
+          return variantPrice.regular ? variantPrice : defaultVariantPrice;
+        case ProductValue.GOLF_SHIRTS:
+        case ProductValue.HAWAIIAN_SHIRTS:
+          return getProductDefaultPrice(this.product, {}, false);
+      }
+    },
+    styleOptions (): ClothesStyleOption[] {
+      const styleCodes: Record<string, ClothesStyleOption> = {};
 
       this.variantBundleOptionProductLinks.forEach((productLink) => {
         if (!productLink.product) {
@@ -766,6 +789,9 @@ export default defineComponent({
       })
 
       return options;
+    },
+    showStyleSelectorStep (): boolean {
+      return this.styleOptions.length > 0;
     },
     showVariantSelectStep (): boolean {
       return this.variantOptions.length > 0;
@@ -893,12 +919,12 @@ export default defineComponent({
       this.fillExistingCartItemCustomerImage(cartItem);
       this.fillExistingCartItemSize(cartItem);
       this.fillExistingCartItemVariant(cartItem);
-      this.fillExistingCartItemStyle(cartItem);
+      this.fillExistingCartItemStyle();
       this.fillAdditionalArtworksData(cartItem);
       this.fillExtraFacesDataAddon(cartItem);
       this.fillExistingQuantity(cartItem);
     },
-    fillExistingCartItemStyle (cartItem: CartItem): void {
+    fillExistingCartItemStyle (): void {
       this.selectedStyle = undefined;
 
       if (!this.selectedVariantProduct) {
@@ -1248,7 +1274,7 @@ export default defineComponent({
   <style lang="scss" scoped>
   @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-  .o-pajama-product-order-form {
+  .o-clothes-product-order-form {
     --select-selected-padding: 0 var(--spacer-lg) var(--spacer-xs) var(--spacer-2xs);
 
     ._info {
