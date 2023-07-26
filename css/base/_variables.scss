@@ -49,6 +49,8 @@ $color-overlay: #000;
 $forms-border-color: #a3a3a3;
 $forms-color-placeholder: #a09999;
 
+$primary-color: #8eba4c;
+
 // override storefront-ui variables
 :root {
     --font-size-base: #{$font-size-base-mobile};
@@ -89,7 +91,7 @@ $forms-color-placeholder: #a09999;
     @include generate-color-variants(--c-white, #ffffff);
     @include generate-color-variants(--c-blue, #303b40);
     // @include generate-color-variants(--_c-green-primary, #18ae0c);
-    @include generate-color-variants(--_c-green-primary, #8eba4c);
+    @include generate-color-variants(--_c-green-primary, $primary-color);
     // @include generate-color-variants(--_c-green-secondary, #81d57b);
     @include generate-color-variants(--_c-green-secondary, #779918);
     @include generate-color-variants(--_c-dark-primary, #535353);
