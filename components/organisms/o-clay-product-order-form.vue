@@ -612,7 +612,7 @@ export default defineComponent({
               bodyparts: this.getBodypartsData(),
               customerImages: this.isUploadNow && this.customerImages ? this.customerImages : [],
               uploadMethod: this.uploadMethod,
-              upgrade_option_values: this.getUpgradeOptionValues()
+              upgradeOptionValues: this.getUpgradeOptionValues()
             })
           });
         } catch (error) {
@@ -668,7 +668,7 @@ export default defineComponent({
         let optionsValues = {};
 
         if (addon) {
-          const upgradeOptionValues = cartItem.upgrade_option_values?.find(
+          const upgradeOptionValues = cartItem.upgradeOptionValues?.find(
             ({ upgradeSku }) => upgradeSku === addon.sku
           );
 
@@ -942,7 +942,7 @@ export default defineComponent({
               bodyparts: this.getBodypartsData(),
               customerImages: this.isUploadNow && this.customerImages ? this.customerImages : [],
               uploadMethod: this.uploadMethod,
-              upgrade_option_values: this.getUpgradeOptionValues(),
+              upgradeOptionValues: this.getUpgradeOptionValues(),
               product_option: setBundleProductOptionsAsync(
                 null,
                 {
