@@ -129,6 +129,8 @@ export default Vue.extend({
   },
   methods: {
     async loadData (): Promise<void> {
+      this.isDataLoaded = false;
+
       const product = await this.$store.dispatch('product/loadProduct', {
         parentSku: this.sku,
         setCurrent: true
