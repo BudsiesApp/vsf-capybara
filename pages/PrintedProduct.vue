@@ -79,7 +79,7 @@ export default Vue.extend({
 
     await (this as any).loadData();
   },
-  async mounted () {
+  async beforeMount () {
     if (!this.getCurrentProduct) {
       await this.loadData();
     }
