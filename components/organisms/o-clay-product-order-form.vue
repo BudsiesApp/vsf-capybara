@@ -933,8 +933,8 @@ export default defineComponent({
 
       try {
         try {
-          await this.$store.dispatch('cart/addItem', {
-            productToAdd: Object.assign({}, existingCartItem, {
+          await this.updateClientAndServerItem({
+            product: Object.assign({}, existingCartItem, {
               qty: this.quantity,
               plushieId: this.plushieId + '',
               email: this.email,
@@ -950,7 +950,8 @@ export default defineComponent({
                   bundleOptions: this.$store.state.product.current_bundle_options
                 }
               )
-            })
+            }),
+            forceUpdateServerItem: true
           });
         } catch (error) {
           if (error instanceof ServerError) {
