@@ -395,7 +395,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
               bodyparts: this.getBodypartsData(),
               uploadMethod: this.imageUploadStepData.uploadMethod,
               customerImages: this.customerImages,
-              upgrade_option_values: this.getUpgradeOptionValues()
+              upgradeOptionValues: this.getUpgradeOptionValues()
             })
           });
         } catch (error) {
@@ -473,7 +473,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         let optionsValues = {};
 
         if (addon) {
-          const upgradeOptionValues = cartItem.upgrade_option_values?.find(
+          const upgradeOptionValues = cartItem.upgradeOptionValues?.find(
             ({ upgradeSku }) => upgradeSku === addon.sku
           );
 
@@ -819,7 +819,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
               uploadMethod: this.imageUploadStepData.uploadMethod,
               product_option: setBundleProductOptionsAsync(null, { product: this.existingCartItem, bundleOptions: this.$store.state.product.current_bundle_options }),
               customerImages: this.customerImages,
-              upgrade_option_values: this.getUpgradeOptionValues()
+              upgradeOptionValues: this.getUpgradeOptionValues()
             }),
             forceUpdateServerItem: true
           });
