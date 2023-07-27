@@ -5,7 +5,7 @@
       :product="getCurrentProduct"
       :plushie-id="plushieId"
       @make-another="onMakeAnother"
-      v-if="getCurrentProduct"
+      v-if="showForm"
     />
   </div>
 </template>
@@ -30,7 +30,8 @@ export default {
   },
   data () {
     return {
-      plushieId: undefined as number | undefined
+      plushieId: undefined as number | undefined,
+      isDataLoaded: false
     };
   },
   computed: {
@@ -48,12 +49,16 @@ export default {
     },
     getProductBySkuDictionary (): Record<string, Product> {
       return this.$store.getters['product/getProductBySkuDictionary'];
+    },
+    showForm (): boolean {
+      return this.isDataLoaded && !!this.getCurrentProduct;
     }
   },
   async mounted (): Promise<void> {
     // TODO check ID in URL and load plushie instead of create a new one
     await this.setCurrentProduct();
     this.plushieId = await this.createPlushie();
+    this.isDataLoaded = true;
   },
   async asyncData ({ store, route, context }): Promise<void> {
     if (context) context.output.cacheTags.add('product')
