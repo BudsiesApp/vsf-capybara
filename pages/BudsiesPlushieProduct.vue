@@ -2,125 +2,167 @@
   <div id="budsies-plushie-product" itemscope itemtype="http://schema.org/Product">
     <o-budsies-plushie-product-order-form
       :artwork-upload-url="artworkUploadUrl"
+      :artwork-upload-top-helper-text="artworkUploadTopHelperText"
+      :customize-step-subtitle="customizeStepSubtitle"
+      :page-title="pageTitle"
+      :top-story-slug="topStorySlug"
+      :upgrades-subtitle="upgradesSubtitle"
+      :upgrades-text="upgradesText"
       :product="getCurrentProduct"
-      :plushie-id="plushieId"
-      @make-another="onMakeAnother"
-      v-if="getCurrentProduct"
+      :existing-plushie-id="existingPlushieId"
+      v-if="showForm"
     />
   </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import Vue, { PropType } from 'vue';
 import config from 'config';
 import { htmlDecode } from '@vue-storefront/core/filters';
-import { isServer } from '@vue-storefront/core/helpers';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 
 import Product from 'core/modules/catalog/types/Product';
 
-import OBudsiesPlushieProductOrderForm from '../components/organisms/o-budsies-plushie-product-order-form.vue';
+import OBudsiesPlushieProductOrderForm from 'theme/components/organisms/o-budsies-plushie-product-order-form.vue';
+
+const budsieProductSku = 'CustomBudsie1_bundle';
 
 export default Vue.extend({
   name: 'BudsiesPlushieProduct',
+  components: {
+    OBudsiesPlushieProductOrderForm
+  },
   props: {
     sku: {
       type: String,
       required: true
     },
     existingPlushieId: {
-      type: String,
-      default: ''
+      type: String as PropType<string | undefined>,
+      default: undefined
     }
-  },
-  components: {
-    OBudsiesPlushieProductOrderForm
   },
   data () {
     return {
-      plushieId: undefined as number | undefined
+      isDataLoaded: false
     };
   },
   computed: {
     getCurrentProduct (): Product | null {
       const product = this.$store.getters['product/getCurrentProduct'];
-
-      if (product?.sku !== this.sku) {
+      if (!product?.sku || product.sku !== this.sku) {
         return null;
       }
 
       return product;
     },
-    artworkUploadUrl (): string {
+    artworkUploadUrl () {
       return config.images.fileuploaderUploadUrl;
     },
-    getProductBySkuDictionary (): Record<string, Product> {
-      return this.$store.getters['product/getProductBySkuDictionary'];
-    }
-  },
-  async mounted (): Promise<void> {
-    // TODO check ID in URL and load plushie instead of create a new one
-    await this.setCurrentProduct();
-    this.plushieId = await this.createPlushie();
-  },
-  async asyncData ({ store, route, context }): Promise<void> {
-    if (context) context.output.cacheTags.add('product')
-
-    const product = await store.dispatch('product/loadProduct',
-      {
-        parentSku: this.sku,
-        setCurrent: false
+    artworkUploadTopHelperText (): string {
+      return this.$t(
+        'Please order each unique design as a separate {product}',
+        {
+          product: this.productName
+        }
+      ).toString();
+    },
+    customizeStepSubtitle (): string {
+      return this.$t(
+        'Describe Your {product}',
+        { product: this.productName }
+      ).toString();
+    },
+    pageTitle (): string {
+      return this.$t(
+        '{product} Order Form',
+        { product: this.productName }
+      ).toString();
+    },
+    productName (): string {
+      switch (this.sku) {
+        case budsieProductSku:
+          return 'Budsies';
+        default:
+          throw new Error('Unexpected product sku');
       }
-    );
+    },
+    topStorySlug (): string {
+      switch (this.sku) {
+        case budsieProductSku:
+          return 'budsies-creation-page-top-block';
+        default:
+          throw new Error('Unexpected product sku');
+      }
+    },
+    upgradesSubtitle (): string {
+      return this.$t(
+        'Upgrade Your {product} (optional)',
+        { product: this.productName }
+      ).toString();
+    },
+    upgradesText (): string {
+      return this.$t(
+        'Make your {product} even more special with these common add-ons',
+        { product: this.productName }
+      ).toString();
+    },
+    showForm (): boolean {
+      return this.isDataLoaded && !!this.getCurrentProduct;
+    }
+  },
+  async serverPrefetch () {
+    if (this.$ssrContext) this.$ssrContext.output.cacheTags.add('product')
 
-    await Promise.all([
-      store.dispatch('budsies/loadProductBodyparts', { productId: product.id }),
-      store.dispatch('budsies/loadProductRushAddons', { productId: product.id })
-    ]);
-
-    if (isServer) {
-      await store.dispatch('product/setCurrent', product);
+    await (this as any).loadData();
+  },
+  async beforeMount () {
+    if (!this.getCurrentProduct) {
+      await this.loadData();
     }
 
-    catalogHooksExecutors.productPageVisited(product);
+    this.isDataLoaded = true;
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
     next();
   },
   methods: {
-    async onMakeAnother (): Promise<void> {
-      this.plushieId = await this.createPlushie();
-    },
-    async createPlushie (): Promise<number> {
-      if (!this.getCurrentProduct) {
-        throw new Error('Current product is not set!');
-      }
+    async loadData (): Promise<void> {
+      this.isDataLoaded = false;
 
-      const task = await this.$store.dispatch('budsies/createNewPlushie', { productId: this.getCurrentProduct.id });
-      return task.result;
-    },
-    async setCurrentProduct (): Promise<void> {
-      if (this.getCurrentProduct) {
-        return;
-      }
+      const product = await this.$store.dispatch('product/loadProduct', {
+        parentSku: this.sku,
+        setCurrent: true
+      });
 
-      const product = this.getProductBySkuDictionary[this.sku];
-      await this.$store.dispatch('product/setCurrent', product);
+      catalogHooksExecutors.productPageVisited(product);
+
+      await this.$store.dispatch('budsies/loadProductRushAddons', { productId: product.id });
+      await this.$store.dispatch('budsies/loadProductBodyparts', { productId: product.id })
+
+      this.isDataLoaded = true;
     }
   },
-  metaInfo (): Record<string, any> {
+  watch: {
+    sku: async function () {
+      await this.loadData();
+    }
+  },
+  metaInfo () {
+    const description = this.getCurrentProduct?.meta_description || this.getCurrentProduct?.short_description;
+
     return {
       title: htmlDecode(
         this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name
       ),
-      meta: this.getCurrentProduct?.meta_description
+      meta: description
         ? [
           {
             vmid: 'description',
             name: 'description',
-            content: htmlDecode(this.getCurrentProduct?.meta_description)
+            content: htmlDecode(description)
           }
         ]
         : []
@@ -129,18 +171,17 @@ export default Vue.extend({
 });
 </script>
 
-  <style lang="scss" scoped>
+<style lang="scss" scoped>
   @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-  #budsies-plushie-product {
-    box-sizing: border-box;
-    padding: var(--spacer-lg) 1rem 0;
+#budsies-plushie-product {
+  box-sizing: border-box;
+  padding: var(--spacer-lg) 1rem 0;
 
-    @media (min-width: $tablet-min) {
-      max-width: 1272px;
-      width: 100%;
-      margin: 0 auto;
-    }
+  @media (min-width: $tablet-min) {
+    max-width: 1272px;
+    width: 100%;
+    margin: 0 auto;
   }
-
-  </style>
+}
+</style>
