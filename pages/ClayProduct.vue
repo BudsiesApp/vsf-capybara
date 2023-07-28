@@ -1,7 +1,7 @@
 <template>
   <div id="clay-product" itemscope itemtype="http://schema.org/Product">
     <o-clay-product-order-form
-      v-if="getCurrentProduct"
+      v-if="showForm"
       :artwork-upload-url="artworkUploadUrl"
       :product="getCurrentProduct"
       :customize-step-subtitle="customizeStepSubtitle"
@@ -46,7 +46,8 @@ export default Vue.extend({
   },
   data () {
     return {
-      plushieId: undefined as number | undefined
+      plushieId: undefined as number | undefined,
+      isDataLoaded: false
     };
   },
   computed: {
@@ -105,6 +106,9 @@ export default Vue.extend({
     },
     isFigurines (): boolean {
       return this.sku === figurinesSku;
+    },
+    showForm (): boolean {
+      return this.isDataLoaded && !!this.getCurrentProduct;
     }
   },
   async serverPrefetch () {
@@ -116,6 +120,8 @@ export default Vue.extend({
     if (!this.getCurrentProduct) {
       await this.loadData();
     }
+
+    this.isDataLoaded = true;
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
@@ -123,6 +129,8 @@ export default Vue.extend({
   },
   methods: {
     async loadData (): Promise<void> {
+      this.isDataLoaded = false;
+
       const product = await this.$store.dispatch('product/loadProduct', {
         parentSku: this.sku,
         setCurrent: true
@@ -131,6 +139,8 @@ export default Vue.extend({
       catalogHooksExecutors.productPageVisited(product);
 
       await this.$store.dispatch('budsies/loadProductBodyparts', { productId: product.id })
+
+      this.isDataLoaded = true;
     }
   },
   watch: {

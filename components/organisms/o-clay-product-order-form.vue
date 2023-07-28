@@ -612,7 +612,7 @@ export default defineComponent({
               bodyparts: this.getBodypartsData(),
               customerImages: this.isUploadNow && this.customerImages ? this.customerImages : [],
               uploadMethod: this.uploadMethod,
-              upgrade_option_values: this.getUpgradeOptionValues()
+              upgradeOptionValues: this.getUpgradeOptionValues()
             })
           });
         } catch (error) {
@@ -668,7 +668,7 @@ export default defineComponent({
         let optionsValues = {};
 
         if (addon) {
-          const upgradeOptionValues = cartItem.upgrade_option_values?.find(
+          const upgradeOptionValues = cartItem.upgradeOptionValues?.find(
             ({ upgradeSku }) => upgradeSku === addon.sku
           );
 
@@ -933,8 +933,8 @@ export default defineComponent({
 
       try {
         try {
-          await this.$store.dispatch('cart/addItem', {
-            productToAdd: Object.assign({}, existingCartItem, {
+          await this.updateClientAndServerItem({
+            product: Object.assign({}, existingCartItem, {
               qty: this.quantity,
               plushieId: this.plushieId + '',
               email: this.email,
@@ -942,7 +942,7 @@ export default defineComponent({
               bodyparts: this.getBodypartsData(),
               customerImages: this.isUploadNow && this.customerImages ? this.customerImages : [],
               uploadMethod: this.uploadMethod,
-              upgrade_option_values: this.getUpgradeOptionValues(),
+              upgradeOptionValues: this.getUpgradeOptionValues(),
               product_option: setBundleProductOptionsAsync(
                 null,
                 {
@@ -950,7 +950,8 @@ export default defineComponent({
                   bundleOptions: this.$store.state.product.current_bundle_options
                 }
               )
-            })
+            }),
+            forceUpdateServerItem: true
           });
         } catch (error) {
           if (error instanceof ServerError) {
