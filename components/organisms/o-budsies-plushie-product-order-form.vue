@@ -257,6 +257,7 @@
               v-model="selectedAddons"
               :addons="addons"
               :disabled="isSubmitting"
+              :get-field-anchor-name="getFieldAnchorName"
             />
           </div>
         </div>
@@ -328,6 +329,21 @@
           class="_bottom-block"
           v-if="bottomStorySlug"
         />
+
+        <div class="_agreement">
+          {{ $t('I agree to') }}
+          <router-link to="/terms-of-service/" target="_blank">
+            {{ $t('Terms of Service') }},
+          </router-link>
+
+          <router-link to="/privacy-policy/" target="_blank">
+            {{ $t('Privacy Policy') }},
+          </router-link>
+
+          {{ $t('and') }}
+          <a href="http://support.budsies.com/support/solutions/folders/5000249005" target="_blank">{{ $t('Refund Policy') }}</a>.
+          {{ $t('I understand that Budsies happily takes care of all tears, defects, and shipping damage with either a refund or a repair.') }}
+        </div>
       </form>
     </validation-observer>
 
@@ -1223,6 +1239,13 @@ export default defineComponent({
 
   ._bottom-block {
     margin-top: var(--spacer-base);
+  }
+
+  ._agreement {
+    margin: var(--spacer-xl) auto 0;
+    font-size: var(--font-xs);
+    text-align: left;
+    max-width: 45rem;
   }
 
   @media (min-width: $tablet-min) {
