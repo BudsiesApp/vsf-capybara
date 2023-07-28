@@ -265,8 +265,10 @@
           <div class="_content">
             <MAddonsSelector
               v-model="selectedAddons"
+              ref="addons-selector"
               :addons="addons"
               :disabled="isSubmitting"
+              :get-field-anchor-name="getFieldAnchorName"
             />
           </div>
         </div>
@@ -410,7 +412,7 @@ import {
 import { BundleOption } from 'core/modules/catalog/types/BundleOption';
 import Product from 'core/modules/catalog/types/Product';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
-import { InjectType, CustomerImage, ServerError } from 'src/modules/shared';
+import { CustomerImage, ServerError } from 'src/modules/shared';
 import { getAddonOptionsFromBundleOption } from 'theme/helpers/get-addon-options-from-bundle-option.function';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 
@@ -434,6 +436,20 @@ extend('email', {
   message: 'Please, provide the correct email address'
 });
 
+function getAllFormRefs (
+  refs: Record<string, Vue | Element | Vue[] | Element[]>
+): Record<string, Vue | Element | Vue[] | Element[]> {
+  const addonsSelector = refs['addons-selector'] as InstanceType<typeof MAddonsSelector> | undefined;
+
+  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = { ...refs };
+
+  if (addonsSelector) {
+    refsDictionary = { ...refsDictionary, ...addonsSelector.$refs };
+  }
+
+  return refsDictionary;
+}
+
 export default defineComponent({
   name: 'OClayProductOrderForm',
   setup (_, setupContext) {
@@ -456,7 +472,7 @@ export default defineComponent({
       window,
       ...useFormValidation(
         validationObserver,
-        () => setupContext.refs
+        () => getAllFormRefs(setupContext.refs)
       )
     }
   },
@@ -612,7 +628,7 @@ export default defineComponent({
               bodyparts: this.getBodypartsData(),
               customerImages: this.isUploadNow && this.customerImages ? this.customerImages : [],
               uploadMethod: this.uploadMethod,
-              upgrade_option_values: this.getUpgradeOptionValues()
+              upgradeOptionValues: this.getUpgradeOptionValues()
             })
           });
         } catch (error) {
@@ -668,7 +684,7 @@ export default defineComponent({
         let optionsValues = {};
 
         if (addon) {
-          const upgradeOptionValues = cartItem.upgrade_option_values?.find(
+          const upgradeOptionValues = cartItem.upgradeOptionValues?.find(
             ({ upgradeSku }) => upgradeSku === addon.sku
           );
 
@@ -933,8 +949,8 @@ export default defineComponent({
 
       try {
         try {
-          await this.$store.dispatch('cart/addItem', {
-            productToAdd: Object.assign({}, existingCartItem, {
+          await this.updateClientAndServerItem({
+            product: Object.assign({}, existingCartItem, {
               qty: this.quantity,
               plushieId: this.plushieId + '',
               email: this.email,
@@ -942,7 +958,7 @@ export default defineComponent({
               bodyparts: this.getBodypartsData(),
               customerImages: this.isUploadNow && this.customerImages ? this.customerImages : [],
               uploadMethod: this.uploadMethod,
-              upgrade_option_values: this.getUpgradeOptionValues(),
+              upgradeOptionValues: this.getUpgradeOptionValues(),
               product_option: setBundleProductOptionsAsync(
                 null,
                 {
@@ -950,7 +966,8 @@ export default defineComponent({
                   bundleOptions: this.$store.state.product.current_bundle_options
                 }
               )
-            })
+            }),
+            forceUpdateServerItem: true
           });
         } catch (error) {
           if (error instanceof ServerError) {
