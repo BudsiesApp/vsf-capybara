@@ -265,8 +265,10 @@
           <div class="_content">
             <MAddonsSelector
               v-model="selectedAddons"
+              ref="addons-selector"
               :addons="addons"
               :disabled="isSubmitting"
+              :get-field-anchor-name="getFieldAnchorName"
             />
           </div>
         </div>
@@ -410,7 +412,7 @@ import {
 import { BundleOption } from 'core/modules/catalog/types/BundleOption';
 import Product from 'core/modules/catalog/types/Product';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
-import { InjectType, CustomerImage, ServerError } from 'src/modules/shared';
+import { CustomerImage, ServerError } from 'src/modules/shared';
 import { getAddonOptionsFromBundleOption } from 'theme/helpers/get-addon-options-from-bundle-option.function';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 
@@ -434,6 +436,20 @@ extend('email', {
   message: 'Please, provide the correct email address'
 });
 
+function getAllFormRefs (
+  refs: Record<string, Vue | Element | Vue[] | Element[]>
+): Record<string, Vue | Element | Vue[] | Element[]> {
+  const addonsSelector = refs['addons-selector'] as InstanceType<typeof MAddonsSelector> | undefined;
+
+  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = { ...refs };
+
+  if (addonsSelector) {
+    refsDictionary = { ...refsDictionary, ...addonsSelector.$refs };
+  }
+
+  return refsDictionary;
+}
+
 export default defineComponent({
   name: 'OClayProductOrderForm',
   setup (_, setupContext) {
@@ -456,7 +472,7 @@ export default defineComponent({
       window,
       ...useFormValidation(
         validationObserver,
-        () => setupContext.refs
+        () => getAllFormRefs(setupContext.refs)
       )
     }
   },

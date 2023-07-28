@@ -189,8 +189,10 @@
 
             <MAddonsSelector
               v-model="selectedAddons"
+              ref="addons-selector"
               :addons="addons"
               :disabled="disabled"
+              :get-field-anchor-name="getFieldAnchorName"
             />
           </div>
         </div>
@@ -264,6 +266,20 @@ extend('required', {
   message: 'The {_field_} field is required'
 });
 
+function getAllFormRefs (
+  refs: Record<string, Vue | Element | Vue[] | Element[]>
+): Record<string, Vue | Element | Vue[] | Element[]> {
+  const addonsSelector = refs['addons-selector'] as InstanceType<typeof MAddonsSelector> | undefined;
+
+  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = { ...refs };
+
+  if (addonsSelector) {
+    refsDictionary = { ...refsDictionary, ...addonsSelector.$refs };
+  }
+
+  return refsDictionary;
+}
+
 export default defineComponent({
   name: 'MCustomizeStep',
   setup (_, setupContext) {
@@ -273,7 +289,7 @@ export default defineComponent({
       validationObserver,
       ...useFormValidation(
         validationObserver,
-        () => setupContext.refs
+        () => getAllFormRefs(setupContext.refs)
       )
     }
   },
