@@ -68,13 +68,7 @@
                   v-if="backendProductId"
                 />
 
-                <p>
-                  {{ $t('Don\'t have a good character? Get inspired by our') }}
-
-                  <router-link target="_blank" :to="{name: 'inspiration-machine'}">
-                    {{ $t('Inspiration Machine') }}!
-                  </router-link>
-                </p>
+                <slot name="artwork-upload-bottom-block" />
 
                 <div class="_error-text">
                   {{ errors[0] }}
@@ -105,7 +99,7 @@
             <p>
               {{ $t('Don\'t worry, we\'ll send you a reminder with this code after you complete your order.') }}
               <br>
-              {{ $t('You may include up to 3 images per Budsie to help us understand it.') }}
+              {{ emailUploadImagesCountText }}
               <br> <a
                 class="_popup-link"
                 href="mailto:art@budsies.com"
@@ -391,7 +385,7 @@ import {
 import { BundleOption } from 'core/modules/catalog/types/BundleOption';
 import Product from 'core/modules/catalog/types/Product';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
-import { InjectType, CustomerImage, ServerError } from 'src/modules/shared';
+import { CustomerImage, ServerError } from 'src/modules/shared';
 import { getAddonOptionsFromBundleOption } from 'theme/helpers/get-addon-options-from-bundle-option.function';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import getProductionTimeOptions from 'theme/helpers/get-production-time-options';
@@ -496,6 +490,10 @@ export default defineComponent({
     existingPlushieId: {
       type: String,
       default: undefined
+    },
+    emailUploadImagesCountText: {
+      type: String,
+      required: true
     }
   },
   data () {
@@ -547,6 +545,7 @@ export default defineComponent({
     backendProductId (): ProductValue | undefined {
       switch (this.product.id) {
         case 11:
+        case 428:
           return ProductValue.BUDSIE;
         default:
           throw new Error(

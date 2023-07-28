@@ -32,6 +32,8 @@ const ClayProduct = () =>
   import(/* webpackChunkName: "vsf-plushie-product" */ 'theme/pages/ClayProduct');
 const ClothesProduct = () =>
   import(/* webpackChunkName: "vsf-clothes-product" */ 'theme/pages/ClothesProduct');
+const BudsiesPlushieProduct = () =>
+import(/* webpackChunkName: "vsf-budsies-plushie-product" */ 'theme/pages/BudsiesPlushieProduct');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -172,6 +174,9 @@ let routes = [
       let parentSku = '';
 
       switch (params.productId) {
+        case '11':
+          parentSku = 'CustomBudsie1_bundle';
+          break;
         case '73':
           parentSku = 'ForeversDog_bundle';
           break;
@@ -195,6 +200,9 @@ let routes = [
           break;
         case '353':
           parentSku = 'customPrintedKeychains_bundle';
+          break;
+        case '428':
+          parentSku = 'budsiesPuppet_bundle';
           break;
         case '446':
           parentSku = 'customFeltedMagnets_bundle';
@@ -430,6 +438,48 @@ let routes = [
     component: ClayProduct,
     props: (route) => ({
       sku: 'petsiesBobbleheads_bundle',
+      existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
+    name: 'budsies-creation-alias',
+    path: '/plushie/index/create/id/:plushieId/type/budsie/',
+    redirect: (route) => {
+      return {
+        name: 'budsie-creation',
+        query: {
+          existingPlushieId: route.params.plushieId
+        }
+      }
+    }
+  },
+  {
+    name: 'budsie-creation',
+    path: '/budsie/create/',
+    component: BudsiesPlushieProduct,
+    props: (route) => ({
+      sku: 'CustomBudsie1_bundle',
+      existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
+    name: 'budsies-puppets-creation-alias',
+    path: '/plushie/index/create/id/:plushieId/type/budsies-puppet/',
+    redirect: (route) => {
+      return {
+        name: 'budsies-puppets-creation',
+        query: {
+          existingPlushieId: route.params.plushieId
+        }
+      }
+    }
+  },
+  {
+    name: 'budsies-puppets-creation',
+    path: '/budsies-puppets/create/',
+    component: BudsiesPlushieProduct,
+    props: (route) => ({
+      sku: 'budsiesPuppet_bundle',
       existingPlushieId: route.query.existingPlushieId
     })
   },

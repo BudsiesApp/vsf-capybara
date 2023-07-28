@@ -233,7 +233,8 @@ const clothesProductSkus = [
 ];
 
 const budsiesPlushieProductSkus = [
-  'CustomBudsie1_bundle'
+  'CustomBudsie1_bundle',
+  'budsiesPuppet_bundle'
 ];
 
 const editableProductsSkus = [
@@ -406,8 +407,12 @@ export default {
     },
     editHandler (product) {
       if (budsiesPlushieProductSkus.includes(product.sku)) {
+        const routeName = product.sku === 'CustomBudsie1_bundle'
+          ? 'budsie-creation'
+          : 'budsies-puppets-creation';
+
         this.$router.push({
-          name: 'budsie-creation',
+          name: routeName,
           query: {
             existingPlushieId: product.plushieId
           }

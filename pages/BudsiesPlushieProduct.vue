@@ -4,6 +4,7 @@
       :artwork-upload-url="artworkUploadUrl"
       :artwork-upload-top-helper-text="artworkUploadTopHelperText"
       :customize-step-subtitle="customizeStepSubtitle"
+      :email-upload-images-count-text="emailUploadImagesCountText"
       :page-title="pageTitle"
       :top-story-slug="topStorySlug"
       :upgrades-subtitle="upgradesSubtitle"
@@ -11,7 +12,17 @@
       :product="getCurrentProduct"
       :existing-plushie-id="existingPlushieId"
       v-if="showForm"
-    />
+    >
+      <template #artwork-upload-bottom-block>
+        <p v-if="isBudsieProduct">
+          {{ $t('Don\'t have a good character? Get inspired by our') }}
+
+          <router-link target="_blank" :to="{name: 'inspiration-machine'}">
+            {{ $t('Inspiration Machine') }}!
+          </router-link>
+        </p>
+      </template>
+    </o-budsies-plushie-product-order-form>
   </div>
 </template>
 
@@ -27,6 +38,7 @@ import Product from 'core/modules/catalog/types/Product';
 import OBudsiesPlushieProductOrderForm from 'theme/components/organisms/o-budsies-plushie-product-order-form.vue';
 
 const budsieProductSku = 'CustomBudsie1_bundle';
+const budsiesPuppetsProductSku = 'budsiesPuppet_bundle';
 
 export default Vue.extend({
   name: 'BudsiesPlushieProduct',
@@ -74,6 +86,17 @@ export default Vue.extend({
         { product: this.productName }
       ).toString();
     },
+    emailUploadImagesCountText (): string {
+      return this.$t(
+        'You may include up to 3 images per {product} to help us understand it.',
+        {
+          product: this.productName
+        }
+      ).toString();
+    },
+    isBudsieProduct (): boolean {
+      return this.sku === budsieProductSku;
+    },
     pageTitle (): string {
       return this.$t(
         '{product} Order Form',
@@ -84,6 +107,8 @@ export default Vue.extend({
       switch (this.sku) {
         case budsieProductSku:
           return 'Budsies';
+        case budsiesPuppetsProductSku:
+          return 'Budsies Puppets';
         default:
           throw new Error('Unexpected product sku');
       }
@@ -92,6 +117,8 @@ export default Vue.extend({
       switch (this.sku) {
         case budsieProductSku:
           return 'budsies-creation-page-top-block';
+        case budsiesPuppetsProductSku:
+          return 'budsies-puppet-creation-page-top-block';
         default:
           throw new Error('Unexpected product sku');
       }
