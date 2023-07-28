@@ -421,6 +421,20 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         this.isSubmitting = false;
       }
     },
+    clearPlushieRelatedStepsData (): void {
+      this.imageUploadStepData.uploadMethod = ImageUploadMethod.NOW;
+      this.imageUploadStepData.customerImages = [];
+
+      this.petInfoStepData.name = undefined;
+      this.petInfoStepData.breed = undefined;
+
+      this.customizeStepData.bodypartsValues = {};
+      this.customizeStepData.addons = [];
+      this.customizeStepData.description = undefined;
+      this.customizeStepData.productionTime = undefined;
+      this.customizeStepData.size = undefined;
+      this.customizeStepData.quantity = 1;
+    },
     async setProductType (type: string): Promise<void> {
       const productSku: string = getPlushieSkuByTypes(type, this.plushieType);
 
@@ -442,6 +456,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       if (!this.existingCartItem) {
         await this.persistProductTypeStepData(this.productTypeStepData);
       }
+
+      this.clearPlushieRelatedStepsData();
 
       this.fillSizeByPreselectedParamAndCurrentProduct();
 
