@@ -322,6 +322,12 @@
             {{ $t('Save & Make Another') }}
           </SfButton>
         </div>
+
+        <MBlockStory
+          :story-slug="bottomStorySlug"
+          class="_bottom-block"
+          v-if="bottomStorySlug"
+        />
       </form>
     </validation-observer>
 
@@ -460,6 +466,10 @@ export default defineComponent({
       required: true
     },
     artworkUploadTopHelperText: {
+      type: String,
+      required: true
+    },
+    bottomStorySlug: {
       type: String,
       required: true
     },
@@ -1209,6 +1219,10 @@ export default defineComponent({
 
   ._form-errors {
     margin-top: var(--spacer-xl);
+  }
+
+  ._bottom-block {
+    margin-top: var(--spacer-base);
   }
 
   @media (min-width: $tablet-min) {

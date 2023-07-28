@@ -3,6 +3,7 @@
     <o-budsies-plushie-product-order-form
       :artwork-upload-url="artworkUploadUrl"
       :artwork-upload-top-helper-text="artworkUploadTopHelperText"
+      :bottom-story-slug="bottomStorySlug"
       :customize-step-subtitle="customizeStepSubtitle"
       :email-upload-images-count-text="emailUploadImagesCountText"
       :page-title="pageTitle"
@@ -116,9 +117,19 @@ export default Vue.extend({
     topStorySlug (): string {
       switch (this.sku) {
         case budsieProductSku:
-          return 'budsies-creation-page-top-block';
+          return 'budsies_creation_page_top';
         case budsiesPuppetsProductSku:
-          return 'budsies-puppet-creation-page-top-block';
+          return 'budsies_puppet_creation_page_top';
+        default:
+          throw new Error('Unexpected product sku');
+      }
+    },
+    bottomStorySlug (): string {
+      switch (this.sku) {
+        case budsieProductSku:
+          return 'budsies_creation_page_bottom';
+        case budsiesPuppetsProductSku:
+          return 'budsies_puppet_creation_page_bottom';
         default:
           throw new Error('Unexpected product sku');
       }
