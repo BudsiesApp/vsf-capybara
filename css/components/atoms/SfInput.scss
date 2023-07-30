@@ -3,6 +3,9 @@
     --input-label-font-family: var(--font-family-primary);
     --input-error-message-font-family: var(--font-family-primary);
 
+    --input-error-message-color: var(--c-danger-variant);
+    --input-error-message-font-weight: var(--font-light);
+
     input {
         &:focus {
             outline: none;

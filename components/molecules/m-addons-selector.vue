@@ -75,6 +75,7 @@
                       :name="option.title"
                       :error-message="errors[0]"
                       :valid="!errors.length"
+                      :ref="getFieldAnchorName(option.title)"
                       @input="onCustomOptionInput($event, option, addon.optionValueId)"
                     />
 
@@ -146,6 +147,10 @@ export default Vue.extend({
     wideImage: {
       type: Boolean,
       default: false
+    },
+    getFieldAnchorName: {
+      type: Function as PropType<(field: string) => string>,
+      required: true
     }
   },
   data () {
@@ -435,6 +440,7 @@ export default Vue.extend({
 
   ._characters-count {
     font-size: var(--font-sm);
+    margin-top: var(--spacer-2xs);
 
     &.-limit-reached {
       font-weight: 400;
