@@ -16,7 +16,7 @@
     <SfSelect
       v-model="selectedOption"
       name="rush_addons"
-      class="_rush-addons"
+      class="_rush-addons sf-select--underlined"
       :disabled="disabled"
       :should-lock-scroll-on-open="isMobile"
     >
