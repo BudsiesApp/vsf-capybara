@@ -763,7 +763,7 @@ export default defineComponent({
             customerType: this.customerType,
             plushieId: this.plushieId.toString(),
             uploadMethod: ImageUploadMethod.NOW,
-            upgrade_option_values: this.getUpgradeOptionValues()
+            upgradeOptionValues: this.getUpgradeOptionValues()
           }
 
           if (this.type === BulksampleProduct.PLUSH) {
@@ -821,7 +821,7 @@ export default defineComponent({
         let optionsValues = {};
 
         if (addon) {
-          const upgradeOptionValues = existingCartItem.upgrade_option_values?.find(
+          const upgradeOptionValues = existingCartItem.upgradeOptionValues?.find(
             ({ upgradeSku }) => upgradeSku === addon.sku
           );
 
@@ -1078,7 +1078,7 @@ export default defineComponent({
                 bundleOptions: this.$store.state.product.current_bundle_options
               }
             ),
-            upgrade_option_values: this.getUpgradeOptionValues()
+            upgradeOptionValues: this.getUpgradeOptionValues()
           }
 
           if (this.type === BulksampleProduct.PLUSH) {
