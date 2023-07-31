@@ -158,10 +158,10 @@ let routes = [
       existingPlushieId: route.query.existingPlushieId
     })
   },
-  { name: 'pillow-product', path: '/pillows/create/', component: PillowProduct },
+  { name: 'pillow-product', path: '/buddy-pillows/create/', component: PillowProduct },
   {
     name: 'pillow-product-alias',
-    path: '/plushie/index/create/id/:plushieId/type/pillow/',
+    path: '/plushie/index/create/id/:plushieId/type/buddy-pillow/',
     redirect: {
       name: 'pillow-product'
     }
@@ -188,6 +188,9 @@ let routes = [
           break;
         case '253':
           parentSku = 'customPillow_bundle';
+          break;
+        case '273':
+          parentSku = 'customBuddyPillow_bundle'
           break;
         case '277':
           parentSku = 'customPrintedSocks_bundle';
