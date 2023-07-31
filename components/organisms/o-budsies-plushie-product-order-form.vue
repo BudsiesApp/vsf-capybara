@@ -135,14 +135,12 @@
                 name="description"
                 rows="4"
                 v-model="description"
-                :placeholder="$t('Oinker is a pig that\'s purple with green spots. Has a ball-shaped nose, really big toes, one green eye and one red eye, and a green curly tail.')"
+                :placeholder="descriptionPlaceholderText"
                 :disabled="isSubmitting"
               />
 
               <div class="_helper-text">
-                {{ $t('Please provide as much direction as possible to help us understand the artwork.') }}
-                <br>
-                {{ $t('Features, colors, & even mood are all helpful') }}
+                <slot name="description-helper-text" />
               </div>
 
               <div class="_error-text">
@@ -237,7 +235,7 @@
           </div>
         </div>
 
-        <div class="_step">
+        <div class="_step" v-if="showAddonsStep">
           <SfDivider class="_step-divider" />
 
           <SfHeading class="_step-title" :level="3" :title="$t('Step {number}', {number: 3})" />
@@ -265,7 +263,11 @@
         <div class="_step" v-show="showEmailStep">
           <SfDivider class="_step-divider" />
 
-          <SfHeading class="_step-title" :level="3" :title="$t('Step {number}', {number: 4})" />
+          <SfHeading
+            class="_step-title"
+            :level="3"
+            :title="$t('Step {number}', {number: emailStepNumber})"
+          />
 
           <SfHeading
             class="_step-subtitle -required"
@@ -353,29 +355,6 @@
     >
       <div class="_popup-content">
         <MBlockStory story-slug="budsies_shipping_qty_discount_popup_content" />
-      </div>
-    </SfModal>
-
-    <SfModal
-      :visible="showPhotoTips"
-      @close="showPhotoTips = false"
-    >
-      <div class="_popup-content">
-        <SfHeading :title="$t('Photo Tips')" :level="3" />
-
-        <ul class="_photo-tips">
-          <li>
-            {{ $t('Provide a clear photo of the face') }}
-          </li>
-
-          <li>
-            {{ $t('Please include a photo of the full body') }}
-          </li>
-
-          <li>
-            {{ $t('Side and back views are also encouraged') }}
-          </li>
-        </ul>
       </div>
     </SfModal>
   </div>
@@ -493,6 +472,10 @@ export default defineComponent({
       type: String,
       required: true
     },
+    descriptionPlaceholderText: {
+      type: String,
+      required: true
+    },
     pageTitle: {
       type: String,
       required: true
@@ -535,7 +518,6 @@ export default defineComponent({
       uploadMethod: ImageUploadMethod.NOW,
       selectedAddons: [] as SelectedAddon[],
       description: '',
-      showPhotoTips: false,
       initialCustomerImages: [] as CustomerImage[],
       plushieId: undefined as number | undefined,
       productionTime: undefined as ProductionTimeOption | undefined
@@ -565,6 +547,9 @@ export default defineComponent({
 
       return this.cartItems.find((item) => item.plushieId && item.plushieId === this.existingPlushieId);
     },
+    emailStepNumber (): number {
+      return this.showAddonsStep ? 4 : 3;
+    },
     isUploadNow (): boolean {
       return this.uploadMethod === ImageUploadMethod.NOW;
     },
@@ -573,6 +558,9 @@ export default defineComponent({
         case 11:
         case 428:
           return ProductValue.BUDSIE;
+        case 12:
+        case 430:
+          return ProductValue.SELFIE;
         default:
           throw new Error(
             `Can't resolve Backend product ID for Magento '${this.product.id}' product ID`
@@ -606,6 +594,9 @@ export default defineComponent({
       return this.existingCartItem
         ? this.$t('Update')
         : this.$t('Add to Cart');
+    },
+    showAddonsStep (): boolean {
+      return this.addons.length > 0;
     },
     showProductionTimeOptions (): boolean {
       return this.productionTimeOptions.length > 0;
@@ -1141,10 +1132,6 @@ export default defineComponent({
 
     display: inline-block;
     text-transform: uppercase;
-  }
-
-  ._photo-tips {
-    margin-top: var(--spacer-base);
   }
 
   ._step-subtitle {

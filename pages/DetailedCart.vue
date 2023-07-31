@@ -237,6 +237,11 @@ const budsiesPlushieProductSkus = [
   'budsiesPuppet_bundle'
 ];
 
+const selfiesProductSkus = [
+  'CustomSelfie_bundle',
+  'selfiesPuppet_bundle'
+];
+
 const editableProductsSkus = [
   ...foreversProductsSkus,
   ...printedProductSkus,
@@ -244,7 +249,8 @@ const editableProductsSkus = [
   ...clayPlushieProductSkus,
   ...golfHeadCoversProductsSkus,
   ...clothesProductSkus,
-  ...budsiesPlushieProductSkus
+  ...budsiesPlushieProductSkus,
+  ...selfiesProductSkus
 ];
 
 export default {
@@ -406,7 +412,18 @@ export default {
       return this.truncate(product.plushieDescription, 150, 50);
     },
     editHandler (product) {
-      if (budsiesPlushieProductSkus.includes(product.sku)) {
+      if (selfiesProductSkus.includes(product.sku)) {
+        const routeName = product.sku === 'CustomSelfie_bundle'
+          ? 'selfies-creation'
+          : 'selfies-puppets-creation';
+
+        this.$router.push({
+          name: routeName,
+          query: {
+            existingPlushieId: product.plushieId
+          }
+        });
+      } else if (budsiesPlushieProductSkus.includes(product.sku)) {
         const routeName = product.sku === 'CustomBudsie1_bundle'
           ? 'budsie-creation'
           : 'budsies-puppets-creation';

@@ -5,6 +5,7 @@
       :artwork-upload-top-helper-text="artworkUploadTopHelperText"
       :bottom-story-slug="bottomStorySlug"
       :customize-step-subtitle="customizeStepSubtitle"
+      :description-placeholder-text="descriptionPlaceholderText"
       :email-upload-images-count-text="emailUploadImagesCountText"
       :page-title="pageTitle"
       :top-story-slug="topStorySlug"
@@ -22,8 +23,58 @@
             {{ $t('Inspiration Machine') }}!
           </router-link>
         </p>
+
+        <div class="_helper-text" v-if="isSelfiesProduct">
+          {{ $t('You may provide up to 3 photos for each person.') }}
+
+          <br>
+
+          {{ $t('Read our') }} <a
+            class="_popup-link"
+            href="javascript:void(0)"
+            @click.stop.prevent="showPhotoTips = true"
+          >{{ $t('photo tips!') }}</a>
+        </div>
+      </template>
+
+      <template #description-helper-text>
+        <template v-if="showBudsiesDescriptionHelperText">
+          {{ $t('Please provide as much direction as possible to help us understand the artwork.') }}
+          <br>
+          {{ $t('Features, colors, & even mood are all helpful') }}
+        </template>
+
+        <template v-if="showSelfiesDescriptionHelperText">
+          {{
+            $t(
+              'Please provide a description of the photo to help us most accurately create the {product}. Features, colors, clothing, accessories, and even mood are all helpful',
+              {
+                product: productName
+              }
+            )
+          }}
+        </template>
       </template>
     </o-budsies-plushie-product-order-form>
+
+    <SfModal
+      :visible="showPhotoTips"
+      @close="showPhotoTips = false"
+    >
+      <div class="_popup-content">
+        <SfHeading :title="$t('Photo Tips')" :level="3" />
+
+        <ul class="_photo-tips">
+          <li>
+            {{ $t('Most customers just upload one photo') }}
+          </li>
+
+          <li>
+            {{ $t('Some customers use multiple photos to mix and match outfits or accessories') }}
+          </li>
+        </ul>
+      </div>
+    </SfModal>
   </div>
 </template>
 
@@ -33,6 +84,7 @@ import config from 'config';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
+import { SfHeading, SfModal } from '@storefront-ui/vue';
 
 import Product from 'core/modules/catalog/types/Product';
 
@@ -41,10 +93,25 @@ import OBudsiesPlushieProductOrderForm from 'theme/components/organisms/o-budsie
 const budsieProductSku = 'CustomBudsie1_bundle';
 const budsiesPuppetsProductSku = 'budsiesPuppet_bundle';
 
+const budsiesProductSkus = [
+  budsieProductSku,
+  budsiesPuppetsProductSku
+];
+
+const selfieProductSku = 'CustomSelfie_bundle';
+const selfiesPuppetsProductSku = 'selfiesPuppet_bundle';
+
+const selfiesProductSkus = [
+  selfieProductSku,
+  selfiesPuppetsProductSku
+];
+
 export default Vue.extend({
   name: 'BudsiesPlushieProduct',
   components: {
-    OBudsiesPlushieProductOrderForm
+    OBudsiesPlushieProductOrderForm,
+    SfHeading,
+    SfModal
   },
   props: {
     sku: {
@@ -58,7 +125,8 @@ export default Vue.extend({
   },
   data () {
     return {
-      isDataLoaded: false
+      isDataLoaded: false,
+      showPhotoTips: false
     };
   },
   computed: {
@@ -74,6 +142,15 @@ export default Vue.extend({
       return config.images.fileuploaderUploadUrl;
     },
     artworkUploadTopHelperText (): string {
+      if (this.isSelfiesProduct) {
+        return this.$t(
+          'Please order each person in the photo as a separate {product}',
+          {
+            product: this.productName
+          }
+        ).toString();
+      }
+
       return this.$t(
         'Please order each unique design as a separate {product}',
         {
@@ -82,12 +159,36 @@ export default Vue.extend({
       ).toString();
     },
     customizeStepSubtitle (): string {
+      if (this.isSelfiesProduct) {
+        return this.$t(
+          'Customize Your {product}',
+          {
+            product: this.productName
+          }
+        ).toString();
+      }
+
       return this.$t(
         'Describe Your {product}',
         { product: this.productName }
       ).toString();
     },
+    descriptionPlaceholderText (): string {
+      if (this.isSelfiesProduct) {
+        return this.$t(
+          'Grandpa is a happy man with a big bushy white beard. He\'s wearing a red baseball cap, green short sleeved shirt, and jeans. He\'s wearing white sneakers.'
+        ).toString();
+      }
+
+      return this.$t('Oinker is a pig that\'s purple with green spots. Has a ball-shaped nose, really big toes, one green eye and one red eye, and a green curly tail.').toString();
+    },
     emailUploadImagesCountText (): string {
+      if (this.isSelfiesProduct) {
+        return this.$t(
+          'You may include up to 3 photos in your email (all of the same person)'
+        ).toString();
+      }
+
       return this.$t(
         'You may include up to 3 images per {product} to help us understand it.',
         {
@@ -97,6 +198,9 @@ export default Vue.extend({
     },
     isBudsieProduct (): boolean {
       return this.sku === budsieProductSku;
+    },
+    isSelfiesProduct (): boolean {
+      return selfiesProductSkus.includes(this.sku);
     },
     pageTitle (): string {
       return this.$t(
@@ -110,6 +214,10 @@ export default Vue.extend({
           return 'Budsies';
         case budsiesPuppetsProductSku:
           return 'Budsies Puppets';
+        case selfieProductSku:
+          return 'Budsies Selfies';
+        case selfiesPuppetsProductSku:
+          return 'Selfies Puppets'
         default:
           throw new Error('Unexpected product sku');
       }
@@ -120,6 +228,10 @@ export default Vue.extend({
           return 'budsies_creation_page_top';
         case budsiesPuppetsProductSku:
           return 'budsies_puppet_creation_page_top';
+        case selfieProductSku:
+          return 'selfies_creation_page_top';
+        case selfiesPuppetsProductSku:
+          return 'selfies_puppet_creation_page_top';
         default:
           throw new Error('Unexpected product sku');
       }
@@ -130,6 +242,10 @@ export default Vue.extend({
           return 'budsies_creation_page_bottom';
         case budsiesPuppetsProductSku:
           return 'budsies_puppet_creation_page_bottom';
+        case selfieProductSku:
+          return 'selfies_creation_page_bottom';
+        case selfiesPuppetsProductSku:
+          return 'selfies_puppet_creation_page_bottom';
         default:
           throw new Error('Unexpected product sku');
       }
@@ -145,6 +261,12 @@ export default Vue.extend({
         'Make your {product} even more special with these common add-ons',
         { product: this.productName }
       ).toString();
+    },
+    showBudsiesDescriptionHelperText (): boolean {
+      return budsiesProductSkus.includes(this.sku);
+    },
+    showSelfiesDescriptionHelperText (): boolean {
+      return selfiesProductSkus.includes(this.sku);
     },
     showForm (): boolean {
       return this.isDataLoaded && !!this.getCurrentProduct;
@@ -215,6 +337,21 @@ export default Vue.extend({
 #budsies-plushie-product {
   box-sizing: border-box;
   padding: var(--spacer-lg) 1rem 0;
+
+  ._popup-content {
+    --modal-content-padding: var(--spacer-sm);
+
+    text-align: left;
+
+    ._photo-tips {
+      margin-top: var(--spacer-base);
+      padding: 0;
+    }
+  }
+
+  ._popup-link {
+    font-weight: var(--font-medium);
+  }
 
   @media (min-width: $tablet-min) {
     max-width: 1272px;
