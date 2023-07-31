@@ -222,8 +222,14 @@ let routes = [
         case '504':
           parentSku = 'customCutOutBlankets_bundle';
           break;
+        case '526':
+          parentSku = 'bobbleheads_bundle';
+          break;
         case '528':
           parentSku = 'petsiesBobbleheads_bundle';
+          break;
+        case '530':
+          parentSku = 'figurines_bundle';
           break;
         case '532':
           parentSku = 'petsiesFigurines_bundle';
@@ -407,7 +413,7 @@ let routes = [
   },
   {
     name: 'figurines-alias-1',
-    path: '/plushie/index/create/id/:plushieId/type/petsies-figurine/',
+    path: '/plushie/index/create/id/:plushieId/type/figurine/',
     redirect: (route) => {
       return {
         name: 'figurines-creation',
@@ -419,16 +425,16 @@ let routes = [
   },
   {
     name: 'figurines-creation',
-    path: '/petsies-figurines/create/',
+    path: '/figurines/create/',
     component: ClayProduct,
     props: (route) => ({
-      sku: 'petsiesFigurines_bundle',
+      sku: 'figurines_bundle',
       existingPlushieId: route.query.existingPlushieId
     })
   },
   {
     name: 'bobbleheads-alias-1',
-    path: '/plushie/index/create/id/:plushieId/type/petsies-bobblehead/',
+    path: '/plushie/index/create/id/:plushieId/type/bobblehead/',
     redirect: (route) => {
       return {
         name: 'bobbleheads-creation',
@@ -440,10 +446,10 @@ let routes = [
   },
   {
     name: 'bobbleheads-creation',
-    path: '/petsies-bobbleheads/create/',
+    path: '/bobbleheads/create/',
     component: ClayProduct,
     props: (route) => ({
-      sku: 'petsiesBobbleheads_bundle',
+      sku: 'bobbleheads_bundle',
       existingPlushieId: route.query.existingPlushieId
     })
   },

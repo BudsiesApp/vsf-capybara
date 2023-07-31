@@ -222,8 +222,8 @@ const blanketProductsSkus = [
 ]
 
 const clayPlushieProductSkus = [
-  'petsiesFigurines_bundle',
-  'petsiesBobbleheads_bundle'
+  'figurines_bundle',
+  'bobbleheads_bundle'
 ]
 
 const clothesProductSkus = [
@@ -471,7 +471,7 @@ export default {
           }
         });
       } else if (clayPlushieProductSkus.includes(product.sku)) {
-        const routeName = product.sku === 'petsiesBobbleheads_bundle'
+        const routeName = product.sku === 'bobbleheads_bundle'
           ? 'bobbleheads-creation'
           : 'figurines-creation';
 

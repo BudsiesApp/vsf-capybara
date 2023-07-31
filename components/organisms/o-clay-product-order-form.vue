@@ -18,8 +18,6 @@
     >
       <form @submit.prevent="onSubmit">
         <div class="_step">
-          <SfDivider class="_step-divider" />
-
           <SfHeading
             class="_step-title" :level="3" :title="$t('Step {number}', {number: 1})"
           />
@@ -34,7 +32,7 @@
           <div class="_content">
             <div class="_upload-now" v-show="isUploadNow">
               <p>
-                {{ $t('We recommend 3 photos from different angles. Please try to show your pet\'s special markings') }}.
+                {{ artworkUploadTopHelperText }}
               </p>
 
               <p>
@@ -101,8 +99,8 @@
             <p>
               {{ $t('When you\'re ready, please email a photo of the design to:') }} <br> <a
                 class="_popup-link"
-                href="mailto:photos@mypetsies.com"
-              >photos@mypetsies.com</a>
+                href="mailto:art@budsies.com"
+              >art@budsies.com</a>
             </p>
 
             <p>{{ $t('Include this design\'s magic word in the subject line of the email:') }}</p>
@@ -111,11 +109,11 @@
             <p>
               {{ $t('Don\'t worry, we\'ll send you a reminder with this code after you complete your order.') }}
               <br>
-              {{ $t('You may include up to 3 photos in your email (all of the same pet)') }}
+              {{ $t('You may include up to 3 photos in your email (all of the same person)') }}.
               <br> <a
                 class="_popup-link"
-                href="mailto:photos@mypetsies.com"
-              >photos@mypetsies.com</a>
+                href="mailto:art@budsies.com"
+              >Art@budsies.com</a>
               {{ $t('is an automated inbox used only for receiving images.') }}
             </p>
 
@@ -147,9 +145,13 @@
                 name="description"
                 rows="4"
                 v-model="description"
-                :placeholder="$t('Tell us about your pet\'s coloration and defining feature(s).')"
+                :placeholder="$t('Grandpa is a happy man with a big bushy white beard. He\'s wearing a red baseball cap, green short sleeved shirt, and jeans. He\'s wearing white sneakers.')"
                 :disabled="isSubmitting"
               />
+
+              <div class="_helper-text">
+                {{ descriptionHelperText }}
+              </div>
 
               <div class="_error-text">
                 {{ errors[0] }}
@@ -172,23 +174,6 @@
                 :ref="getFieldAnchorName(bodypart.name)"
               />
 
-              <div
-                class="_helper-text"
-                v-if="bodypart.code === 'forevers_color_palette'"
-              >
-                {{ $t('You may select up to 3 most prominent color(s) of your animal to assist our team.') }}
-              </div>
-
-              <div
-                v-if="bodypart.code === 'eye_color'"
-              >
-                (<a
-                  class="_popup-link"
-                  href="javascript:void(0)"
-                  @click="showEyeColorNotes = true"
-                ><b>?</b></a>)
-              </div>
-
               <m-bodypart-option-configurator
                 class="_options-list"
                 :name="bodypart.code"
@@ -198,15 +183,6 @@
                 type="bodypart"
                 :disabled="isSubmitting"
               />
-
-              <div
-                class="_helper-text"
-                v-if="bodypart.code === 'forevers_color_palette'"
-              >
-                {{ $t('Click a selected color to deselect it') }}. <br>
-
-                {{ $t('Your color input is especially helpful when photos are blurry or poorly lit. If left blank, our designers will use their professional judgement.') }}
-              </div>
 
               <div class="_error-text">
                 {{ errors[0] }}
@@ -247,7 +223,7 @@
           </div>
         </div>
 
-        <div class="_step">
+        <div class="_step" v-if="showAddonsStep">
           <SfDivider class="_step-divider" />
 
           <SfHeading class="_step-title" :level="3" :title="$t('Step {number}', {number: 3})" />
@@ -276,7 +252,11 @@
         <div class="_step" v-show="showEmailStep">
           <SfDivider class="_step-divider" />
 
-          <SfHeading class="_step-title" :level="3" :title="$t('Step {number}', {number: 4})" />
+          <SfHeading
+            class="_step-title"
+            :level="3"
+            :title="$t('Step {number}', {number: emailStepNumber})"
+          />
 
           <SfHeading
             class="_step-subtitle -required"
@@ -337,8 +317,24 @@
 
         <MBlockStory
           :story-slug="bottomStorySlug"
+          class="_bottom-block"
           v-if="bottomStorySlug"
         />
+
+        <div class="_agreement">
+          {{ $t('I agree to') }}
+          <router-link to="/terms-of-service/" target="_blank">
+            {{ $t('Terms of Service') }},
+          </router-link>
+
+          <router-link to="/privacy-policy/" target="_blank">
+            {{ $t('Privacy Policy') }},
+          </router-link>
+
+          {{ $t('and') }}
+          <a href="http://support.budsies.com/support/solutions/folders/5000249005" target="_blank">{{ $t('Refund Policy') }}</a>.
+          {{ $t('I understand that Budsies happily takes care of all tears, defects, and shipping damage with either a refund or a repair.') }}
+        </div>
       </form>
     </validation-observer>
 
@@ -347,17 +343,7 @@
       @close="showQuantityNotes = false"
     >
       <div class="_popup-content">
-        <MBlockStory story-slug="petsies_shipping_qty_discount_popup_content" />
-      </div>
-    </SfModal>
-
-    <SfModal
-      :visible="showEyeColorNotes"
-      @close="showEyeColorNotes = false"
-    >
-      <div class="_popup-content">
-        {{ $t('If your pet has different color eyes,') }} <br>
-        {{ $t('please indicate in Special Instructions') }}
+        <MBlockStory story-slug="budsies_shipping_qty_discount_popup_content" />
       </div>
     </SfModal>
 
@@ -496,7 +482,15 @@ export default defineComponent({
       type: String,
       required: true
     },
+    artworkUploadTopHelperText: {
+      type: String,
+      required: true
+    },
     customizeStepSubtitle: {
+      type: String,
+      required: true
+    },
+    descriptionHelperText: {
       type: String,
       required: true
     },
@@ -542,7 +536,6 @@ export default defineComponent({
       uploadMethod: ImageUploadMethod.NOW,
       selectedAddons: [] as SelectedAddon[],
       description: '',
-      showEyeColorNotes: false,
       showPhotoTips: false,
       initialCustomerImages: [] as CustomerImage[],
       plushieId: undefined as number | undefined
@@ -577,10 +570,10 @@ export default defineComponent({
     },
     backendProductId (): ProductValue | undefined {
       switch (this.product.id) {
-        case 532:
-          return ProductValue.PETSIES_FIGURINES;
-        case 528:
-          return ProductValue.PETSIES_BOBBLEHEADS;
+        case 526:
+          return ProductValue.BOBBLEHEADS;
+        case 530:
+          return ProductValue.FIGURINES;
         default:
           throw new Error(
             `Can't resolve Backend product ID for Magento '${this.product.id}' product ID`
@@ -589,6 +582,9 @@ export default defineComponent({
     },
     bodyparts (): Bodypart[] {
       return this.$store.getters['budsies/getProductBodyparts'](this.product.id);
+    },
+    emailStepNumber (): number {
+      return this.showAddonsStep ? 4 : 3;
     },
     getBodypartOptions (): (id: string) => BodypartOption[] {
       return this.$store.getters['budsies/getBodypartOptions']
@@ -600,6 +596,9 @@ export default defineComponent({
       return this.existingCartItem
         ? this.$t('Update')
         : this.$t('Add to Cart');
+    },
+    showAddonsStep (): boolean {
+      return this.addons.length > 0;
     }
   },
   methods: {
@@ -1183,6 +1182,17 @@ export default defineComponent({
 
   ._form-errors {
     margin-top: var(--spacer-xl);
+  }
+
+  ._bottom-block {
+    margin-top: var(--spacer-base);
+  }
+
+  ._agreement {
+    margin: var(--spacer-xl) auto 0;
+    font-size: var(--font-xs);
+    text-align: left;
+    max-width: 45rem;
   }
 
   @media (min-width: $tablet-min) {
