@@ -45,7 +45,14 @@
         </template>
 
         <template v-if="showSelfiesDescriptionHelperText">
-          {{ $t('Please provide a description of the photo to help us most accurately create the Selfie. Features, colors, clothing, accessories, and even mood are all helpful') }}
+          {{
+            $t(
+              'Please provide a description of the photo to help us most accurately create the {product}. Features, colors, clothing, accessories, and even mood are all helpful',
+              {
+                product: productName
+              }
+            )
+          }}
         </template>
       </template>
     </o-budsies-plushie-product-order-form>

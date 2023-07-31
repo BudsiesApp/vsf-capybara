@@ -235,7 +235,7 @@
           </div>
         </div>
 
-        <div class="_step">
+        <div class="_step" v-if="showAddonsStep">
           <SfDivider class="_step-divider" />
 
           <SfHeading class="_step-title" :level="3" :title="$t('Step {number}', {number: 3})" />
@@ -263,7 +263,11 @@
         <div class="_step" v-show="showEmailStep">
           <SfDivider class="_step-divider" />
 
-          <SfHeading class="_step-title" :level="3" :title="$t('Step {number}', {number: 4})" />
+          <SfHeading
+            class="_step-title"
+            :level="3"
+            :title="$t('Step {number}', {number: emailStepNumber})"
+          />
 
           <SfHeading
             class="_step-subtitle -required"
@@ -543,6 +547,9 @@ export default defineComponent({
 
       return this.cartItems.find((item) => item.plushieId && item.plushieId === this.existingPlushieId);
     },
+    emailStepNumber (): number {
+      return this.showAddonsStep ? 4 : 3;
+    },
     isUploadNow (): boolean {
       return this.uploadMethod === ImageUploadMethod.NOW;
     },
@@ -587,6 +594,9 @@ export default defineComponent({
       return this.existingCartItem
         ? this.$t('Update')
         : this.$t('Add to Cart');
+    },
+    showAddonsStep (): boolean {
+      return this.addons.length > 0;
     },
     showProductionTimeOptions (): boolean {
       return this.productionTimeOptions.length > 0;
