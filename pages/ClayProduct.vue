@@ -6,6 +6,7 @@
       :artwork-upload-top-helper-text="artworkUploadTopHelperText"
       :product="getCurrentProduct"
       :customize-step-subtitle="customizeStepSubtitle"
+      :description-helper-text="descriptionHelperText"
       :page-title="pageTitle"
       :top-story-slug="topStorySlug"
       :bottom-story-slug="bottomStorySlug"
@@ -74,7 +75,15 @@ export default Vue.extend({
       return this.$t(
         'Customize Your {product}',
         {
-          product: this.isFigurines ? 'Figurines' : 'Bobbleheads'
+          product: this.productName
+        }
+      ).toString();
+    },
+    descriptionHelperText (): string {
+      return this.$t(
+        'Please provide a description of the photo to help us most accurately create the {product}. Features, colors, clothing, accessories, and even mood are all helpful',
+        {
+          product: this.productName
         }
       ).toString();
     },
@@ -82,7 +91,7 @@ export default Vue.extend({
       return this.$t(
         '{product} Order Form',
         {
-          product: this.isFigurines ? 'Figurines' : 'Bobbleheads'
+          product: this.productName
         }
       ).toString();
     },
@@ -93,7 +102,7 @@ export default Vue.extend({
       return this.$t(
         'Upgrade Your {product} (optional)',
         {
-          product: this.isFigurines ? 'Figurines' : 'Bobbleheads'
+          product: this.productName
         }
       ).toString();
     },
@@ -101,7 +110,7 @@ export default Vue.extend({
       return this.$t(
         'Make your {product} even more special with these common add-ons',
         {
-          product: this.isFigurines ? 'Figurines' : 'Bobbleheads'
+          product: this.productName
         }
       ).toString();
     },
