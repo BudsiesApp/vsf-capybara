@@ -177,6 +177,9 @@ let routes = [
         case '11':
           parentSku = 'CustomBudsie1_bundle';
           break;
+        case '12':
+          parentSku = 'CustomSelfie_bundle';
+          break;
         case '73':
           parentSku = 'ForeversDog_bundle';
           break;
@@ -203,6 +206,9 @@ let routes = [
           break;
         case '428':
           parentSku = 'budsiesPuppet_bundle';
+          break;
+        case '430':
+          parentSku = 'selfiesPuppet_bundle';
           break;
         case '446':
           parentSku = 'customFeltedMagnets_bundle';
@@ -459,6 +465,48 @@ let routes = [
     component: BudsiesPlushieProduct,
     props: (route) => ({
       sku: 'CustomBudsie1_bundle',
+      existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
+    name: 'selfies-creation-alias',
+    path: '/plushie/index/create/id/:plushieId/type/selfie/',
+    redirect: (route) => {
+      return {
+        name: 'selfies-creation',
+        query: {
+          existingPlushieId: route.params.plushieId
+        }
+      }
+    }
+  },
+  {
+    name: 'selfies-creation',
+    path: '/selfies/create/',
+    component: BudsiesPlushieProduct,
+    props: (route) => ({
+      sku: 'CustomSelfie_bundle',
+      existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
+    name: 'selfies-puppets-creation-alias',
+    path: '/plushie/index/create/id/:plushieId/type/selfies-puppets/',
+    redirect: (route) => {
+      return {
+        name: 'selfies-puppets-creation',
+        query: {
+          existingPlushieId: route.params.plushieId
+        }
+      }
+    }
+  },
+  {
+    name: 'selfies-puppets-creation',
+    path: '/selfies-puppets/create/',
+    component: BudsiesPlushieProduct,
+    props: (route) => ({
+      sku: 'selfiesPuppet_bundle',
       existingPlushieId: route.query.existingPlushieId
     })
   },
