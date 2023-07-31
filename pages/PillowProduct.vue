@@ -21,7 +21,7 @@ import Product from 'core/modules/catalog/types/Product';
 
 import OPillowProductOrderForm from '../components/organisms/o-pillow-product-order-form.vue';
 
-const pillowSku = 'customPillow_bundle';
+const pillowSku = 'customBuddyPillow_bundle';
 
 export default {
   name: 'PillowProduct',
