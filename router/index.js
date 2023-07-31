@@ -192,6 +192,9 @@ let routes = [
         case '277':
           parentSku = 'customPrintedSocks_bundle';
           break;
+        case '303':
+          parentSku = 'phrasePillow_bundle';
+          break;
         case '333':
           parentSku = 'petsiesPhrasePillow_bundle';
           break;
