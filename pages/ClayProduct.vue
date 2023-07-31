@@ -3,6 +3,7 @@
     <o-clay-product-order-form
       v-if="showForm"
       :artwork-upload-url="artworkUploadUrl"
+      :artwork-upload-top-helper-text="artworkUploadTopHelperText"
       :product="getCurrentProduct"
       :customize-step-subtitle="customizeStepSubtitle"
       :page-title="pageTitle"
@@ -25,9 +26,8 @@ import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/stor
 import Product from 'core/modules/catalog/types/Product';
 
 import OClayProductOrderForm from 'theme/components/organisms/o-clay-product-order-form.vue';
-import { TranslateResult } from 'vue-i18n';
 
-const figurinesSku = 'petsiesFigurines_bundle';
+const figurinesSku = 'figurines_bundle';
 
 export default Vue.extend({
   name: 'ClayProduct',
@@ -62,47 +62,58 @@ export default Vue.extend({
     artworkUploadUrl () {
       return config.images.fileuploaderUploadUrl;
     },
-    customizeStepSubtitle (): TranslateResult {
+    artworkUploadTopHelperText (): string {
       return this.$t(
-        'Customize Your Petsies {product}',
+        'Please upload a full body photo, side view and back view, so our designers can accurately design your 3D {product}',
         {
-          product: this.isFigurines ? 'Figurines' : 'Bobbleheads'
+          product: this.productName
         }
-      );
+      ).toString();
     },
-    pageTitle (): TranslateResult {
+    customizeStepSubtitle (): string {
       return this.$t(
-        'Petsies {product} Order Form',
+        'Customize Your {product}',
         {
           product: this.isFigurines ? 'Figurines' : 'Bobbleheads'
         }
-      );
+      ).toString();
     },
-    upgradesSubtitle (): TranslateResult {
+    pageTitle (): string {
       return this.$t(
-        'Upgrade Your Petsies {product} (optional)',
+        '{product} Order Form',
         {
           product: this.isFigurines ? 'Figurines' : 'Bobbleheads'
         }
-      );
+      ).toString();
     },
-    upgradesText (): TranslateResult {
+    productName (): string {
+      return this.isFigurines ? 'Figurines' : 'Bobbleheads';
+    },
+    upgradesSubtitle (): string {
       return this.$t(
-        'Make your Petsies {product} even more special with these common add-ons',
+        'Upgrade Your {product} (optional)',
         {
           product: this.isFigurines ? 'Figurines' : 'Bobbleheads'
         }
-      );
+      ).toString();
+    },
+    upgradesText (): string {
+      return this.$t(
+        'Make your {product} even more special with these common add-ons',
+        {
+          product: this.isFigurines ? 'Figurines' : 'Bobbleheads'
+        }
+      ).toString();
     },
     topStorySlug (): string {
       return this.isFigurines
-        ? 'petsies_figurines_creation_page_top'
-        : 'petsies_bobbleheads_creation_page_top';
+        ? 'figurines_creation_page_top'
+        : 'bobbleheads_creation_page_top';
     },
     bottomStorySlug (): string {
       return this.isFigurines
-        ? 'petsies_figurines_creation_page_bottom'
-        : 'petsies_bobbleheads_creation_page_bottom';
+        ? 'figurines_creation_page_bottom'
+        : 'bobbleheads_creation_page_bottom';
     },
     isFigurines (): boolean {
       return this.sku === figurinesSku;
