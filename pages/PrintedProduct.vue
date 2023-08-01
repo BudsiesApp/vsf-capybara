@@ -6,7 +6,7 @@
       :selected-style="productDesign"
       :existing-cart-item="existingCartItem"
       @style-selected="onStyleSelected"
-      v-if="getCurrentProduct"
+      v-if="showForm"
     />
   </div>
 </template>
@@ -44,7 +44,8 @@ export default Vue.extend({
   },
   data () {
     return {
-      isProductDesignSelectedByForm: false
+      isProductDesignSelectedByForm: false,
+      isDataLoaded: false
     };
   },
   computed: {
@@ -68,6 +69,9 @@ export default Vue.extend({
       }
 
       return this.cartItems.find((item) => item.plushieId && item.plushieId === this.existingPlushieId);
+    },
+    showForm (): boolean {
+      return this.isDataLoaded && !!this.getCurrentProduct;
     }
   },
   async serverPrefetch () {
@@ -75,10 +79,12 @@ export default Vue.extend({
 
     await (this as any).loadData();
   },
-  async mounted () {
+  async beforeMount () {
     if (!this.getCurrentProduct) {
       await this.loadData();
     }
+
+    this.isDataLoaded = true;
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
@@ -86,6 +92,8 @@ export default Vue.extend({
   },
   methods: {
     async loadData (): Promise<void> {
+      this.isDataLoaded = false;
+
       const product = await this.$store.dispatch('product/loadProduct', {
         parentSku: this.sku,
         setCurrent: true
@@ -95,6 +103,8 @@ export default Vue.extend({
         this.$store.dispatch('budsies/loadExtraPhotosAddons', { productId: product.id }),
         this.$store.dispatch('budsies/loadProductBodyparts', { productId: product.id })
       ]);
+
+      this.isDataLoaded = true;
 
       catalogHooksExecutors.productPageVisited(product);
     },

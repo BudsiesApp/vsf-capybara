@@ -222,8 +222,8 @@ const blanketProductsSkus = [
 ]
 
 const clayPlushieProductSkus = [
-  'petsiesFigurines_bundle',
-  'petsiesBobbleheads_bundle'
+  'figurines_bundle',
+  'bobbleheads_bundle'
 ]
 
 const clothesProductSkus = [
@@ -232,13 +232,25 @@ const clothesProductSkus = [
   'customGolfShirts_bundle'
 ];
 
+const budsiesPlushieProductSkus = [
+  'CustomBudsie1_bundle',
+  'budsiesPuppet_bundle'
+];
+
+const selfiesProductSkus = [
+  'CustomSelfie_bundle',
+  'selfiesPuppet_bundle'
+];
+
 const editableProductsSkus = [
   ...foreversProductsSkus,
   ...printedProductSkus,
   ...blanketProductsSkus,
   ...clayPlushieProductSkus,
   ...golfHeadCoversProductsSkus,
-  ...clothesProductSkus
+  ...clothesProductSkus,
+  ...budsiesPlushieProductSkus,
+  ...selfiesProductSkus
 ];
 
 export default {
@@ -400,7 +412,29 @@ export default {
       return this.truncate(product.plushieDescription, 150, 50);
     },
     editHandler (product) {
-      if (clothesProductSkus.includes(product.sku)) {
+      if (selfiesProductSkus.includes(product.sku)) {
+        const routeName = product.sku === 'CustomSelfie_bundle'
+          ? 'selfies-creation'
+          : 'selfies-puppets-creation';
+
+        this.$router.push({
+          name: routeName,
+          query: {
+            existingPlushieId: product.plushieId
+          }
+        });
+      } else if (budsiesPlushieProductSkus.includes(product.sku)) {
+        const routeName = product.sku === 'CustomBudsie1_bundle'
+          ? 'budsie-creation'
+          : 'budsies-puppets-creation';
+
+        this.$router.push({
+          name: routeName,
+          query: {
+            existingPlushieId: product.plushieId
+          }
+        });
+      } else if (clothesProductSkus.includes(product.sku)) {
         const designOptionName = product.sku === 'customPajamas_bundle' ? 'product' : 'design';
 
         this.$router.push({
@@ -437,7 +471,7 @@ export default {
           }
         });
       } else if (clayPlushieProductSkus.includes(product.sku)) {
-        const routeName = product.sku === 'petsiesBobbleheads_bundle'
+        const routeName = product.sku === 'bobbleheads_bundle'
           ? 'bobbleheads-creation'
           : 'figurines-creation';
 

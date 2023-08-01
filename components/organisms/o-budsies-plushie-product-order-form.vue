@@ -1,5 +1,5 @@
 <template>
-  <div class="o-clay-product-order-form">
+  <div class="o-budsies-plushie-product-order-form">
     <SfHeading
       :level="1"
       :title="pageTitle"
@@ -25,14 +25,14 @@
           <SfHeading
             class="_step-subtitle -required"
             :level="3"
-            :title="$t('Upload Your Photo')"
+            :title="$t('Upload Your Artwork')"
             :ref="getFieldAnchorName('Artwork')"
           />
 
           <div class="_content">
             <div class="_upload-now" v-show="isUploadNow">
               <p>
-                {{ artworkUploadTopHelperText }}
+                {{ artworkUploadTopHelperText }}.
               </p>
 
               <p>
@@ -68,22 +68,12 @@
                   v-if="backendProductId"
                 />
 
+                <slot name="artwork-upload-bottom-block" />
+
                 <div class="_error-text">
                   {{ errors[0] }}
                 </div>
               </validation-provider>
-
-              <div class="_helper-text">
-                {{ $t('You may provide up to 3 photos') }}
-
-                <br>
-
-                {{ $t('Read our') }} <a
-                  class="_popup-link"
-                  href="javascript:void(0)"
-                  @click.stop.prevent="showPhotoTips = true"
-                >{{ $t('photo tips!') }}</a>
-              </div>
             </div>
           </div>
 
@@ -109,7 +99,7 @@
             <p>
               {{ $t('Don\'t worry, we\'ll send you a reminder with this code after you complete your order.') }}
               <br>
-              {{ $t('You may include up to 3 photos in your email (all of the same person)') }}.
+              {{ emailUploadImagesCountText }}
               <br> <a
                 class="_popup-link"
                 href="mailto:art@budsies.com"
@@ -145,12 +135,12 @@
                 name="description"
                 rows="4"
                 v-model="description"
-                :placeholder="$t('Grandpa is a happy man with a big bushy white beard. He\'s wearing a red baseball cap, green short sleeved shirt, and jeans. He\'s wearing white sneakers.')"
+                :placeholder="descriptionPlaceholderText"
                 :disabled="isSubmitting"
               />
 
               <div class="_helper-text">
-                {{ descriptionHelperText }}
+                <slot name="description-helper-text" />
               </div>
 
               <div class="_error-text">
@@ -220,6 +210,28 @@
                 >{{ $t('Quantity & Shipping Discounts') }}</a>
               </div>
             </validation-provider>
+
+            <div
+              class="_production-time-selector-section"
+              v-if="showProductionTimeOptions"
+            >
+              <MProductionTimeSelector
+                v-model="productionTime"
+                :production-time-options="productionTimeOptions"
+                :product-id="product.id"
+                :disabled="isSubmitting"
+              >
+                <template #subtitle>
+                  <p>
+                    {{ $t('Skip to the front of the line!') }}
+                  </p>
+                </template>
+              </MProductionTimeSelector>
+
+              <span class="_production-time-hint">
+                {{ $t('*We will refund the rush fee in the unlikely event we do not meet a promised delivery date.') }}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -241,7 +253,6 @@
           <div class="_content">
             <MAddonsSelector
               v-model="selectedAddons"
-              ref="addons-selector"
               :addons="addons"
               :disabled="isSubmitting"
               :get-field-anchor-name="getFieldAnchorName"
@@ -346,29 +357,6 @@
         <MBlockStory story-slug="budsies_shipping_qty_discount_popup_content" />
       </div>
     </SfModal>
-
-    <SfModal
-      :visible="showPhotoTips"
-      @close="showPhotoTips = false"
-    >
-      <div class="_popup-content">
-        <SfHeading :title="$t('Photo Tips')" :level="3" />
-
-        <ul class="_photo-tips">
-          <li>
-            {{ $t('Provide a clear photo of the face') }}
-          </li>
-
-          <li>
-            {{ $t('Please include a photo of the full body') }}
-          </li>
-
-          <li>
-            {{ $t('Side and back views are also encouraged') }}
-          </li>
-        </ul>
-      </div>
-    </SfModal>
   </div>
 </template>
 
@@ -401,9 +389,11 @@ import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage, ServerError } from 'src/modules/shared';
 import { getAddonOptionsFromBundleOption } from 'theme/helpers/get-addon-options-from-bundle-option.function';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
+import getProductionTimeOptions from 'theme/helpers/get-production-time-options';
 
 import AddonOption from '../interfaces/addon-option.interface';
 import SelectedAddon from '../interfaces/selected-addon.interface';
+import ProductionTimeOption from '../interfaces/production-time-option.interface';
 
 import ACustomProductQuantity from '../atoms/a-custom-product-quantity.vue';
 import MAddonsSelector from '../molecules/m-addons-selector.vue';
@@ -411,6 +401,7 @@ import MArtworkUpload from '../molecules/m-artwork-upload.vue';
 import MBlockStory from '../molecules/m-block-story.vue';
 import MFormErrors from '../molecules/m-form-errors.vue';
 import MBodypartOptionConfigurator from '../molecules/m-bodypart-option-configurator.vue';
+import MProductionTimeSelector from '../molecules/m-production-time-selector.vue';
 
 extend('required', {
   ...required,
@@ -422,22 +413,8 @@ extend('email', {
   message: 'Please, provide the correct email address'
 });
 
-function getAllFormRefs (
-  refs: Record<string, Vue | Element | Vue[] | Element[]>
-): Record<string, Vue | Element | Vue[] | Element[]> {
-  const addonsSelector = refs['addons-selector'] as InstanceType<typeof MAddonsSelector> | undefined;
-
-  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = { ...refs };
-
-  if (addonsSelector) {
-    refsDictionary = { ...refsDictionary, ...addonsSelector.$refs };
-  }
-
-  return refsDictionary;
-}
-
 export default defineComponent({
-  name: 'OClayProductOrderForm',
+  name: 'OBudsiesPlushieProductOrderForm',
   setup (_, setupContext) {
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
     const window = inject<Window>('WindowObject');
@@ -458,7 +435,7 @@ export default defineComponent({
       window,
       ...useFormValidation(
         validationObserver,
-        () => getAllFormRefs(setupContext.refs)
+        () => setupContext.refs
       )
     }
   },
@@ -470,6 +447,7 @@ export default defineComponent({
     ACustomProductQuantity,
     MArtworkUpload,
     MAddonsSelector,
+    MProductionTimeSelector,
     SfButton,
     SfDivider,
     SfModal,
@@ -486,11 +464,15 @@ export default defineComponent({
       type: String,
       required: true
     },
+    bottomStorySlug: {
+      type: String,
+      required: true
+    },
     customizeStepSubtitle: {
       type: String,
       required: true
     },
-    descriptionHelperText: {
+    descriptionPlaceholderText: {
       type: String,
       required: true
     },
@@ -514,13 +496,13 @@ export default defineComponent({
       type: String,
       required: true
     },
-    bottomStorySlug: {
-      type: String,
-      default: undefined
-    },
     existingPlushieId: {
       type: String,
       default: undefined
+    },
+    emailUploadImagesCountText: {
+      type: String,
+      required: true
     }
   },
   data () {
@@ -536,9 +518,9 @@ export default defineComponent({
       uploadMethod: ImageUploadMethod.NOW,
       selectedAddons: [] as SelectedAddon[],
       description: '',
-      showPhotoTips: false,
       initialCustomerImages: [] as CustomerImage[],
-      plushieId: undefined as number | undefined
+      plushieId: undefined as number | undefined,
+      productionTime: undefined as ProductionTimeOption | undefined
     }
   },
   computed: {
@@ -565,15 +547,20 @@ export default defineComponent({
 
       return this.cartItems.find((item) => item.plushieId && item.plushieId === this.existingPlushieId);
     },
+    emailStepNumber (): number {
+      return this.showAddonsStep ? 4 : 3;
+    },
     isUploadNow (): boolean {
       return this.uploadMethod === ImageUploadMethod.NOW;
     },
     backendProductId (): ProductValue | undefined {
       switch (this.product.id) {
-        case 526:
-          return ProductValue.BOBBLEHEADS;
-        case 530:
-          return ProductValue.FIGURINES;
+        case 11:
+        case 428:
+          return ProductValue.BUDSIE;
+        case 12:
+        case 430:
+          return ProductValue.SELFIE;
         default:
           throw new Error(
             `Can't resolve Backend product ID for Magento '${this.product.id}' product ID`
@@ -583,11 +570,22 @@ export default defineComponent({
     bodyparts (): Bodypart[] {
       return this.$store.getters['budsies/getProductBodyparts'](this.product.id);
     },
-    emailStepNumber (): number {
-      return this.showAddonsStep ? 4 : 3;
-    },
     getBodypartOptions (): (id: string) => BodypartOption[] {
       return this.$store.getters['budsies/getBodypartOptions']
+    },
+    productionTimeBundleOption (): BundleOption | undefined {
+      if (!this.product?.bundle_options) {
+        return undefined;
+      }
+
+      return this.product.bundle_options.find(item => item.title.toLowerCase() === 'production time');
+    },
+    productionTimeOptions (): ProductionTimeOption[] {
+      if (!this.productionTimeBundleOption) {
+        return []
+      }
+
+      return getProductionTimeOptions(this.productionTimeBundleOption, this.product, this.$store);
     },
     shortcode (): string | undefined {
       return this.$store.getters['budsies/getPlushieShortcode'](this.plushieId);
@@ -599,6 +597,9 @@ export default defineComponent({
     },
     showAddonsStep (): boolean {
       return this.addons.length > 0;
+    },
+    showProductionTimeOptions (): boolean {
+      return this.productionTimeOptions.length > 0;
     }
   },
   methods: {
@@ -741,6 +742,26 @@ export default defineComponent({
       this.fillCustomerImagesData(existingCartItem);
       this.fillBodypartsValues(existingCartItem);
       this.fillAddons(existingCartItem);
+      this.fillProductionTime(existingCartItem);
+    },
+    fillProductionTime (cartItem: CartItem): void {
+      const productOption = cartItem.product_option;
+      this.productionTime = undefined;
+
+      if (!this.productionTimeBundleOption || !productOption) {
+        return;
+      }
+
+      if (this.productionTimeOptions.length) {
+        this.productionTime = this.productionTimeOptions[0];
+      }
+
+      if (!productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id]) {
+        return;
+      }
+
+      const selectedOptionValueId = productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id].option_selections[0];
+      this.productionTime = this.productionTimeOptions.find((item) => item.optionValueId === selectedOptionValueId);
     },
     getArtworkUploadComponent (): InstanceType<typeof MArtworkUpload> | undefined {
       return this.$refs['artwork-upload'] as InstanceType<typeof MArtworkUpload> | undefined;
@@ -844,6 +865,11 @@ export default defineComponent({
       const uploader = this.getUploader();
       if (uploader) {
         uploader.clearInput();
+      }
+
+      this.productionTime = undefined;
+      if (this.productionTimeOptions.length) {
+        this.productionTime = this.productionTimeOptions[0];
       }
 
       this.validationObserver?.reset();
@@ -1045,6 +1071,20 @@ export default defineComponent({
         1,
         newValue.map(({ addonOptionValueId }) => addonOptionValueId)
       );
+    },
+    productionTime: {
+      handler (newValue: ProductionTimeOption | undefined) {
+        if (!this.productionTimeBundleOption) {
+          return
+        }
+
+        this.setBundleOptionValue(
+          this.productionTimeBundleOption.option_id,
+          1,
+          newValue?.optionValueId ? [newValue.optionValueId] : []
+        );
+      },
+      immediate: false
     }
   }
 });
@@ -1054,7 +1094,7 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "~@storefront-ui/shared/styles/helpers/layout";
 
-.o-clay-product-order-form {
+.o-budsies-plushie-product-order-form {
   text-align: center;
 
   ._title {
@@ -1092,10 +1132,6 @@ export default defineComponent({
 
     display: inline-block;
     text-transform: uppercase;
-  }
-
-  ._photo-tips {
-    margin-top: var(--spacer-base);
   }
 
   ._step-subtitle {
@@ -1153,6 +1189,10 @@ export default defineComponent({
       margin: var(--spacer-lg) 0 0 0;
       font-size: var(--font-sm);
     }
+  }
+
+  ._production-time-selector-section {
+    margin-top: var(--spacer-base);
   }
 
   ._qty-container {

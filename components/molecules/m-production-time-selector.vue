@@ -8,6 +8,8 @@
       :title="$t('Choose your production time')"
     />
 
+    <slot name="subtitle" />
+
     <MBlockStory
       v-if="blockSlug"
       :story-slug="blockSlug"
@@ -16,7 +18,7 @@
     <SfSelect
       v-model="selectedOption"
       name="rush_addons"
-      class="_rush-addons"
+      class="_rush-addons sf-select--underlined"
       :disabled="disabled"
       :should-lock-scroll-on-open="isMobile"
     >
