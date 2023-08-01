@@ -33,7 +33,9 @@ const ClayProduct = () =>
 const ClothesProduct = () =>
   import(/* webpackChunkName: "vsf-clothes-product" */ 'theme/pages/ClothesProduct');
 const BudsiesPlushieProduct = () =>
-import(/* webpackChunkName: "vsf-budsies-plushie-product" */ 'theme/pages/BudsiesPlushieProduct');
+  import(/* webpackChunkName: "vsf-budsies-plushie-product" */ 'theme/pages/BudsiesPlushieProduct');
+const SpecialtyCommissionProduct = () =>
+  import(/* webpackChunkName: "vsf-specialty-commission-product" */ 'theme/pages/SpecialtyCommissionProduct');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -188,6 +190,9 @@ let routes = [
           break;
         case '75':
           parentSku = 'ForeversOther_bundle';
+          break;
+        case '163':
+          parentSku = 'specialtyCommission_bundle';
           break;
         case '253':
           parentSku = 'customPillow_bundle';
@@ -541,6 +546,39 @@ let routes = [
     props: (route) => ({
       sku: 'budsiesPuppet_bundle',
       existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
+    name: 'specialty-commissions-creation-alias-1',
+    path: '/plushie/index/create/id/:plushieId/type/commission/',
+    redirect: (route) => {
+      return {
+        name: 'specialty-commissions-creation',
+        query: {
+          existingPlushieId: route.params.plushieId
+        }
+      }
+    }
+  },
+  {
+    name: 'specialty-commissions-creation-alias-2',
+    path: '/commissions/create/token/:token/',
+    redirect: (route) => {
+      return {
+        name: 'specialty-commissions-creation',
+        query: {
+          token: route.params.token
+        }
+      }
+    }
+  },
+  {
+    name: 'specialty-commissions-creation',
+    path: '/commissions/create/',
+    component: SpecialtyCommissionProduct,
+    props: (route) => ({
+      existingPlushieId: route.query.existingPlushieId,
+      token: route.query.token
     })
   },
   {

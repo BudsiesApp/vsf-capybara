@@ -242,6 +242,8 @@ const selfiesProductSkus = [
   'selfiesPuppet_bundle'
 ];
 
+const specialtyCommissionSku = 'specialtyCommission_bundle';
+
 const editableProductsSkus = [
   ...foreversProductsSkus,
   ...printedProductSkus,
@@ -250,7 +252,8 @@ const editableProductsSkus = [
   ...golfHeadCoversProductsSkus,
   ...clothesProductSkus,
   ...budsiesPlushieProductSkus,
-  ...selfiesProductSkus
+  ...selfiesProductSkus,
+  specialtyCommissionSku
 ];
 
 export default {
@@ -412,7 +415,14 @@ export default {
       return this.truncate(product.plushieDescription, 150, 50);
     },
     editHandler (product) {
-      if (selfiesProductSkus.includes(product.sku)) {
+      if (product.sku === specialtyCommissionSku) {
+        this.$router.push({
+          name: 'specialty-commissions-creation',
+          query: {
+            existingPlushieId: product.plushieId
+          }
+        });
+      } else if (selfiesProductSkus.includes(product.sku)) {
         const routeName = product.sku === 'CustomSelfie_bundle'
           ? 'selfies-creation'
           : 'selfies-puppets-creation';
