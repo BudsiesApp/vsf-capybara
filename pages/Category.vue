@@ -249,7 +249,7 @@ import ASortIcon from 'theme/components/atoms/a-sort-icon';
 import MCategoryDescriptionStory from 'theme/components/molecules/m-category-description-story.vue';
 import OProductCard from 'theme/components/organisms/o-product-card';
 
-const THEME_PAGE_SIZE = 12;
+const THEME_PAGE_SIZE = 15;
 
 const composeInitialPageState = async (store, route, forceLoad = false) => {
   try {
