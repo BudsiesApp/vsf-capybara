@@ -302,7 +302,7 @@
 
             <validation-provider
               v-slot="{ errors, classes }"
-              rules="required"
+              :rules="isAccentColorSelectorVisible ? 'required' : ''"
               :ref="customizerStepsData.customOptions.id"
               :name="'Accent Color'"
               :detect-input="false"
