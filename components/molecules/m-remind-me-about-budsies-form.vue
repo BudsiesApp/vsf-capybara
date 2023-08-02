@@ -8,7 +8,7 @@
       <validation-provider
         v-slot="{errors}"
         rules="required|email"
-        name="email"
+        name="'E-mail'"
       >
         <SfInput
           v-model="email"
@@ -24,10 +24,11 @@
       <validation-provider
         v-slot="{errors}"
         rules="required"
-        name="date"
+        name="'Remind Date'"
       >
         <DatePicker
           class="_date-picker"
+          :class="{'-error': errors.length}"
           v-model="date"
           placeholder="mm/dd/yy"
           format="MM/DD/YY"
@@ -154,11 +155,11 @@ export default Vue.extend({
     }
 
     ._error-text {
-      color: var(--c-danger);
       margin-top: var(--spacer-xs);
       height: calc(var(--font-xs) * 1.2);
-
-      font: var(--input-error-message-font, var(--input-error-message-font-weight, var(--font-medium)) var(--input-error-message-font-size, var(--font-xs))/var(--input-error-message-font-line-height, 1.2) var(--input-error-message-font-family, var(--font-family-secondary)));
+      color: var(--c-danger-variant);
+      font-weight: var(--font-light);
+      font-size: var(--font-xs);
     }
 
     ._success-message {
