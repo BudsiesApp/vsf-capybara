@@ -486,7 +486,7 @@
 
                   <div class="_bottom-static-block">
                     <MBlockStory
-                      story-slug="petsies_phrase_pillows_bottom"
+                      story-slug="budsies_phrase_pillows_bottom"
                     />
                   </div>
 
@@ -764,7 +764,7 @@ export default (
   computed: {
     ...mapMobileObserver(),
     skinClass (): string {
-      return '-skin-petsies';
+      return '-skin-budsies';
     },
     accentColor (): string | undefined {
       if (!this.selectedAccentColorPartValue) {
@@ -2054,6 +2054,7 @@ export default (
     }
   }
 
+  &.-skin-budsies,
   &.-skin-petsies {
     $color-customizer-step-background: #ededed;
     $color-add-to-cart-step-background: #43c5e4;

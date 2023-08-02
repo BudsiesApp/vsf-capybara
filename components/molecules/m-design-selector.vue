@@ -91,7 +91,7 @@ export default Vue.extend({
   },
   computed: {
     skinClass (): string {
-      return `-skin-petsies`;
+      return `-skin-budsies`;
     },
     selectedDesign (): DesignProduct | undefined {
       if (!this.value) {
@@ -198,6 +198,7 @@ export default Vue.extend({
     opacity: 0.6;
   }
 
+  &.-skin-budsies,
   &.-skin-petsies {
     ._design-option {
       &.-selected {

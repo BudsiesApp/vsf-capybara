@@ -89,8 +89,8 @@
       <p>
         {{ $t('When you\'re ready, please email photo to:') }} <br> <a
           class="_popup-link"
-          href="mailto:photos@mypetsies.com"
-        >photos@mypetsies.com</a>
+          href="mailto:art@budsies.com"
+        >art@budsies.com</a>
       </p>
 
       <p>
@@ -105,8 +105,8 @@
       <p>
         * <a
           class="_popup-link"
-          href="mailto:photos@mypetsies.com"
-        >Photos@mypetsies.com</a>
+          href="mailto:art@budsies.com"
+        >art@budsies.com</a>
         {{ $t('is an automated inbox used only for receiving images') }}.
       </p>
     </div>

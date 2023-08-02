@@ -64,12 +64,12 @@ let routes = [
   },
   {
     name: 'pillowSideDesign-product-redirect',
-    path: '/p/phrasePetsies:parentSku?/:slug?/',
+    path: '/p/phraseBudsies:parentSku?/:slug?/',
     redirect: (route) => ({
       name: 'phrase-pillow-customize',
       query: {
         back_design: route.query.back_design,
-        front_design: 'phrasePetsies' + route.params.parentSku
+        front_design: 'phraseBudsies' + route.params.parentSku
       }
     })
   },

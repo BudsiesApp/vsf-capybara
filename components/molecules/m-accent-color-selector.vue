@@ -52,7 +52,7 @@ export default Vue.extend({
   },
   computed: {
     skinClass (): string {
-      return `-skin-petsies`;
+      return `-skin-budsies`;
     },
     selectedOption: {
       get (): AccentColorPart | undefined {
@@ -142,6 +142,7 @@ export default Vue.extend({
     }
   }
 
+  &.-skin-budsies,
   &.-skin-petsies {
     ._option-value input[type="radio"] {
       &:checked + ._value-representation {

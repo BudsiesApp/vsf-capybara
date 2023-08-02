@@ -150,12 +150,12 @@
 
         <div class="_shipping-handling-block">
           <SfHeading :level="3" title="Shipping &amp; Handling" />
-          <p>Once completed, your order will ship via USPS</p>
+          <p>Once completed, your Budsies will ship via USPS Priority Mail (US); First Class Mail (Int'l)</p>
           <ul>
-            <li>Petsies: (<strong>US</strong>) $13.95, $5.95 for each additional; (<strong>International</strong>) $25.95, $5.95 for each additional</li>
-            <li>Pillows: <strong>(US</strong>) starting at $9.95;&nbsp;(<strong>International)</strong> $20.95</li>
-            <li>Petsies Socks, Masks &amp; Keychains: (<strong>US</strong>) $4.95; (<strong>International</strong>)&nbsp;$9.95</li>
-            <li>Read more about rates&nbsp;<a href="http://support.mypetsies.com/support/solutions/articles/13000017023-shipping-handling-fees" target="_blank">here</a>. Rates determined by weight</li>
+            <li>Custom Plushies: (<strong>US</strong>) $14.95, $7.95 for each additional; (<strong>International</strong>) $26.95, $7.95 for each additional</li>
+            <li>Custom Pillows: <strong>(US</strong>) starting at $9.95;&nbsp;(<strong>International)</strong> $20.95</li>
+            <li>International shipping rates will increase if supersized items are purchased.</li>
+            <li>Read more about rates&nbsp;<a href="https://support.budsies.com/support/solutions/articles/13000033713-shipping-handling-fees" target="_blank">here</a>. Rates determined by weight</li>
             <li>Tracking number will be emailed to you at time of shipment</li>
           </ul>
         </div>

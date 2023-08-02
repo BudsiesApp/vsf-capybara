@@ -161,7 +161,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   },
   computed: {
     classes (): string[] {
-      const result = ['-skin-petsies'];
+      const result = ['-skin-budsies'];
 
       if (this.allowMultiple) {
         result.push('-multiple-items');
@@ -705,6 +705,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       }
     }
 
+    &.-skin-budsies,
     &.-skin-petsies {
         ::v-deep {
             .filepond--root {

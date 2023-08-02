@@ -182,7 +182,7 @@ export default Vue.extend({
       otherProductsItems: [
         {
           label: this.$t('Gift Cards'),
-          url: '/purchase-gift-card/'
+          url: '/giftcards/'
         },
         {
           label: this.$t('Gift Boxes'),
@@ -214,7 +214,7 @@ export default Vue.extend({
         },
         {
           label: this.$t('About'),
-          url: '/about-petsies/'
+          url: '/about/'
         },
         {
           label: this.$t('Blog'),

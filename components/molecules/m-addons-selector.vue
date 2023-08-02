@@ -162,7 +162,7 @@ export default Vue.extend({
   },
   computed: {
     skinClass (): string {
-      return `-skin-petsies`;
+      return `-skin-budsies`;
     },
     selectedValues (): number[] {
       return this.value.map(({ addonOptionValueId }) => addonOptionValueId);
