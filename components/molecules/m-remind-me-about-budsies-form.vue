@@ -131,7 +131,7 @@ export default Vue.extend({
       this.isSubmitting = true;
 
       try {
-        await this.$store.dispatch('budsies/remindAboutBudsies', {
+        await this.$store.dispatch('budsies/createPlushieReminder', {
           customerEmail: this.email,
           remindDate: this.date.toISOString().split('T')[0]
         });
