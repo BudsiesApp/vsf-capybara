@@ -132,9 +132,11 @@ export default Vue.extend({
 
       try {
         await this.$store.dispatch('budsies/remindAboutBudsies', {
-          email: this.email,
-          date: this.date.toISOString().split('T')[0]
+          customerEmail: this.email,
+          remindDate: this.date.toISOString().split('T')[0]
         });
+
+        this.isSubmitted = true;
       } finally {
         this.isSubmitting = false;
       }
@@ -157,6 +159,12 @@ export default Vue.extend({
       height: calc(var(--font-xs) * 1.2);
 
       font: var(--input-error-message-font, var(--input-error-message-font-weight, var(--font-medium)) var(--input-error-message-font-size, var(--font-xs))/var(--input-error-message-font-line-height, 1.2) var(--input-error-message-font-family, var(--font-family-secondary)));
+    }
+
+    ._success-message {
+      text-align: center;
+      color: var(--c-primary);
+      margin-top: var(--spacer-sm);
     }
   }
   </style>
