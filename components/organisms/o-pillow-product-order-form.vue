@@ -6,10 +6,8 @@
     />
 
     <MBlockStory
-      story-slug="pillow_creation_page_top"
+      story-slug="buddy_pillow_creation_page_top"
     />
-
-    <SfDivider class="_step-divider" />
 
     <validation-observer
       v-slot="{ errors: formErrors }"
@@ -17,6 +15,7 @@
       ref="validationObserver"
     >
       <form
+        class="_form"
         @submit.prevent="onSubmit"
       >
         <div
@@ -68,7 +67,7 @@
 
             <p>
               <strong>
-                Please Note: We recommend high resolution, clear photos for our Petsies Pillows!
+                Please Note: We recommend high resolution, clear photos for our Pillows!
                 <br>
                 Low quality, dark or blurry photos may impact photo clarity on your Pillow.
               </strong>
@@ -92,8 +91,8 @@
           <p>
             When you're ready, please email a photo of the design to: <br> <a
               class="_popup-link"
-              href="mailto:photos@mypetsies.com"
-            >photos@mypetsies.com</a>
+              href="mailto:art@budsies.com"
+            >art@budsies.com</a>
           </p>
 
           <p>Include this design's magic word in the subject line of the email:</p>
@@ -102,8 +101,8 @@
           <p>
             Don't worry, we'll send you a reminder with this code after you complete your order. <br> You may include only one photo per Pillow. <br> <a
               class="_popup-link"
-              href="mailto:photos@mypetsies.com"
-            >Photos@mypetsies.com</a> is an automated inbox used only for receiving images.
+              href="mailto:art@budsies.com"
+            >Art@budsies.com</a> is an automated inbox used only for receiving images.
           </p>
 
           <p>NOTE: Proceed to Step 2 to complete your order. You may send us your photo within the next 5 days.</p>
@@ -188,34 +187,9 @@
 
         <div
           class="_step-number"
-          ref="pet-name-field-anchor"
         >
           Step 4
         </div>
-
-        <SfHeading
-          class="_step-title -required "
-          :level="2"
-          title="Your Pet's Name"
-          :ref="getFieldAnchorName('Pet name')"
-        />
-
-        <validation-provider
-          v-slot="{ errors }"
-          rules="required"
-          name="'Pet Name'"
-          tag="div"
-        >
-          <SfInput
-            name="pet_name"
-            v-model="name"
-            placeholder="Name"
-            :disabled="isSubmitting"
-            :required="false"
-            :valid="!errors.length"
-            :error-message="errors[0]"
-          />
-        </validation-provider>
 
         <validation-provider
           v-slot="{ errors, classes }"
@@ -240,12 +214,6 @@
             <div class="_error-text">
               {{ errors[0] }}
             </div>
-
-            <a
-              class="_popup-link"
-              href="javascript:void(0)"
-              @click="areQuantityNotesVisible = true"
-            >Quantity & Shipping Discounts</a>
           </div>
         </validation-provider>
 
@@ -329,36 +297,27 @@
             Save & Make Another
           </SfButton>
 
-          <p class="_order-agreement">
-            I agree to
+          <div class="_agreement">
+            {{ $t('I agree to') }}
             <router-link to="/terms-of-service/" target="_blank">
-              Terms of Service
-            </router-link>,
+              {{ $t('Terms of Service') }},
+            </router-link>
+
             <router-link to="/privacy-policy/" target="_blank">
-              Privacy Policy
-            </router-link>,
-            and <a href="http://support.mypetsies.com/support/solutions/folders/13000003991" target="_blank">Refund Policy</a>.
-            I understand that Petsies happily takes care of all tears, defects, and shipping damage with either a refund or a repair.
-            I also understand that my custom Petsies order is backed by the Petsies Guarantee.
-          </p>
+              {{ $t('Privacy Policy') }},
+            </router-link>
+
+            {{ $t('and') }}
+            <a href="http://support.budsies.com/support/solutions/folders/5000249005" target="_blank">{{ $t('Refund Policy') }}</a>.
+            {{ $t('I understand that Budsies happily takes care of all tears, defects, and shipping damage with either a refund or a repair.') }}
+          </div>
         </div>
       </form>
     </validation-observer>
 
     <MBlockStory
-      story-slug="pillow_creation_page_bottom"
+      story-slug="buddy_pillow_creation_page_bottom"
     />
-
-    <SfModal
-      :visible="areQuantityNotesVisible"
-      @close="areQuantityNotesVisible = false"
-    >
-      <div class="_popup-content">
-        <MBlockStory
-          story-slug="petsies_shipping_qty_discount_popup_content"
-        />
-      </div>
-    </SfModal>
   </div>
 </template>
 
@@ -481,11 +440,9 @@ export default defineComponent({
       customerImage: undefined as CustomerImage | undefined,
       size: undefined as SizeOption | undefined,
       bodypartsValues: {} as unknown as Record<string, BodypartOption | BodypartOption[] | undefined>,
-      name: undefined as string | undefined,
       email: undefined as string | undefined,
       isSubmitting: false,
       shouldMakeAnother: false,
-      areQuantityNotesVisible: false,
       showEmailStep: true,
       uploadMethod: ImageUploadMethod.NOW,
       productionTime: undefined as ProductionTimeOption | undefined
@@ -493,14 +450,14 @@ export default defineComponent({
   },
   computed: {
     skinClass (): string {
-      return '-skin-petsies';
+      return '-skin-budsies';
     },
     isUploadNow (): boolean {
       return this.uploadMethod === ImageUploadMethod.NOW;
     },
     backendProductId (): ProductValue | undefined {
       switch (this.product.id) {
-        case 253:
+        case 273:
           return ProductValue.PILLOW;
         default:
           throw new Error(
@@ -635,7 +592,6 @@ export default defineComponent({
       this.customerImage = undefined;
       this.uploadMethod = ImageUploadMethod.NOW;
       this.size = undefined;
-      this.name = undefined;
 
       for (const bodypart of this.bodyparts) {
         this.bodypartsValues[bodypart.id] = undefined;
@@ -716,7 +672,6 @@ export default defineComponent({
               qty: this.quantity,
               plushieId: this.plushieId + '',
               email: this.email,
-              plushieName: this.name,
               bodyparts: this.getBodypartsData(),
               customerImages: this.isUploadNow && this.customerImage ? [this.customerImage] : [],
               uploadMethod: this.uploadMethod
@@ -840,6 +795,10 @@ export default defineComponent({
     font-weight: var(--font-semibold);
   }
 
+  ._form {
+    margin-top: var(--spacer-lg);
+  }
+
   ._step-divider {
     display: none;
   }
@@ -931,13 +890,15 @@ export default defineComponent({
     margin-top: var(--spacer-xl);
   }
 
-  ._order-agreement {
-    max-width: 50em;
+  ._agreement {
+    margin: var(--spacer-xl) auto 0;
     font-size: var(--font-xs);
-
+    text-align: left;
+    max-width: 45rem;
   }
 
-  &.-skin-petsies {
+  &.-skin-petsies,
+  &.-skin-budsies {
       ._error-text {
           color: var(--c-danger-variant);
       }

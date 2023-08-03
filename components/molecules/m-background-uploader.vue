@@ -74,7 +74,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   },
   computed: {
     skinClass (): string {
-      return `-skin-petsies`;
+      return `-skin-budsies`;
     },
     scopeId (): string {
       return (this.$options as any)._scopeId;
@@ -237,6 +237,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
   }
 
+  &.-skin-budsies,
   &.-skin-petsies {
     ._error-text {
       color: var(--c-danger-variant);

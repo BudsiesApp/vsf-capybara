@@ -397,7 +397,7 @@ export default defineComponent({
       getProductGallery: 'product/getProductGallery'
     }),
     skinClass (): string {
-      return '-skin-petsies';
+      return '-skin-budsies';
     },
     addonsBundleOption (): BundleOption | undefined {
       if (!this.product?.bundle_options) {
@@ -1264,6 +1264,7 @@ export default defineComponent({
       opacity: 0.8;
     }
 
+    &.-skin-budsies,
     &.-skin-petsies {
         ._error-text {
             color: var(--c-danger-variant);

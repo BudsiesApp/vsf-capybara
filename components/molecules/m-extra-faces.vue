@@ -188,7 +188,7 @@ export default Vue.extend({
       }
     },
     skinClass (): string {
-      return `-skin-petsies`;
+      return `-skin-budsies`;
     },
     inputsCount (): number {
       if (!this.selectedVariant) {
@@ -325,6 +325,7 @@ export default Vue.extend({
         margin-top: 0.5em;
     }
 
+    &.-skin-budsies,
     &.-skin-petsies {
         ._error-text {
             color: var(--c-danger-variant);

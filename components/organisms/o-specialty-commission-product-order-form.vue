@@ -1,15 +1,14 @@
 <template>
-  <div class="o-budsies-plushie-product-order-form">
+  <div class="o-specialty-commission-product-order-form">
     <SfHeading
       :level="1"
-      :title="pageTitle"
+      :title="$t('Specialty Commission Order Form')"
       class="_title"
     />
 
     <MBlockStory
-      :story-slug="topStorySlug"
+      story-slug="specialty-commission-top"
       class="_top-block"
-      v-if="topStorySlug"
     />
 
     <validation-observer
@@ -25,28 +24,20 @@
           <SfHeading
             class="_step-subtitle -required"
             :level="3"
-            :title="$t('Upload Your Artwork')"
+            :title="$t('Please upload your illustration')"
             :ref="getFieldAnchorName('Artwork')"
           />
 
           <div class="_content">
-            <div class="_upload-now" v-show="isUploadNow">
+            <div class="_upload-now">
               <p>
-                {{ artworkUploadTopHelperText }}.
-              </p>
-
-              <p>
-                {{ $t('Don\'t have your photos? You can finalize your order and') }} <a
-                  class="_popup-link"
-                  href="javascript:void(0)"
-                  @click.stop.prevent="switchToUploadLater"
-                >{{ $t('send them to us later.') }}</a>
+                {{ $t('Please order each unique design as a separate Budsies plush') }}
               </p>
 
               <validation-provider
                 v-slot="{ errors }"
                 name="'Artwork'"
-                :rules="isUploadNow ? 'required' : ''"
+                rules="required"
                 tag="div"
               >
                 <input
@@ -68,48 +59,15 @@
                   v-if="backendProductId"
                 />
 
-                <slot name="artwork-upload-bottom-block" />
+                <p class="_artwork-upload-bottom-block">
+                  {{ $t('One image is typically sufficient, but you may upload up to three images of your design') }}
+                </p>
 
                 <div class="_error-text">
                   {{ errors[0] }}
                 </div>
               </validation-provider>
             </div>
-          </div>
-
-          <div class="_upload-email" v-show="!isUploadNow">
-            <p>
-              {{ $t('Want to upload photos now? Please use') }} <a
-                class="_popup-link"
-                href="javascript:void(0)"
-                @click.stop.prevent="switchToUploadNow"
-              >{{ $t('our uploader.') }}</a>
-            </p>
-
-            <p>
-              {{ $t('When you\'re ready, please email a photo of the design to:') }} <br> <a
-                class="_popup-link"
-                href="mailto:art@budsies.com"
-              >art@budsies.com</a>
-            </p>
-
-            <p>{{ $t('Include this design\'s magic word in the subject line of the email:') }}</p>
-            <p><b>{{ shortcode }}</b></p>
-
-            <p>
-              {{ $t('Don\'t worry, we\'ll send you a reminder with this code after you complete your order.') }}
-              <br>
-              {{ emailUploadImagesCountText }}
-              <br> <a
-                class="_popup-link"
-                href="mailto:art@budsies.com"
-              >Art@budsies.com</a>
-              {{ $t('is an automated inbox used only for receiving images.') }}
-            </p>
-
-            <p>
-              {{ $t('NOTE: Proceed to Step 2 to complete your order. You may send us your photo within the next 5 days.') }}
-            </p>
           </div>
         </div>
 
@@ -121,7 +79,7 @@
           <SfHeading
             class="_step-subtitle -required"
             :level="3"
-            :title="customizeStepSubtitle"
+            :title="$t('Customize What Your Character Looks Like')"
             :ref="getFieldAnchorName('Description')"
           />
 
@@ -140,7 +98,7 @@
               />
 
               <div class="_helper-text">
-                <slot name="description-helper-text" />
+                <span>{{ $t('Please describe the key features and colors of your character') }}</span>
               </div>
 
               <div class="_error-text">
@@ -164,6 +122,13 @@
                 :ref="getFieldAnchorName(bodypart.name)"
               />
 
+              <div
+                class="_body-part-helper-text"
+                v-if="bodypart.code === 'spec_comm_color_palette'"
+              >
+                {{ $t('Select your character\'s primary colors.') }}
+              </div>
+
               <m-bodypart-option-configurator
                 class="_options-list"
                 :name="bodypart.code"
@@ -173,6 +138,15 @@
                 type="bodypart"
                 :disabled="isSubmitting"
               />
+
+              <div
+                class="_body-part-helper-text"
+                v-if="bodypart.code === 'spec_comm_color_palette'"
+              >
+                {{ $t('Click a selected color to deselect it') }}. <br>
+
+                {{ $t('Please note any special requests in the description above') }}
+              </div>
 
               <div class="_error-text">
                 {{ errors[0] }}
@@ -243,11 +217,11 @@
           <SfHeading
             class="_step-subtitle"
             :level="3"
-            :title="upgradesSubtitle"
+            :title="$t('Upgrade Your Plush (optional)')"
           />
 
           <p>
-            {{ upgradesText }}
+            {{ $t('Make your Specialty Commission even more special with these common add-ons') }}
           </p>
 
           <div class="_content">
@@ -256,6 +230,7 @@
               :addons="addons"
               :disabled="isSubmitting"
               :get-field-anchor-name="getFieldAnchorName"
+              block-slug="commission_creation_page_production_time"
             />
           </div>
         </div>
@@ -327,9 +302,8 @@
         </div>
 
         <MBlockStory
-          :story-slug="bottomStorySlug"
+          story-slug="specialty_commission_creation_page_bottom"
           class="_bottom-block"
-          v-if="bottomStorySlug"
         />
 
         <div class="_agreement">
@@ -414,7 +388,7 @@ extend('email', {
 });
 
 export default defineComponent({
-  name: 'OBudsiesPlushieProductOrderForm',
+  name: 'OSpecialtyCommissionProductOrderForm',
   setup (_, setupContext) {
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
     const window = inject<Window>('WindowObject');
@@ -460,49 +434,13 @@ export default defineComponent({
       type: String,
       required: true
     },
-    artworkUploadTopHelperText: {
-      type: String,
-      required: true
-    },
-    bottomStorySlug: {
-      type: String,
-      required: true
-    },
-    customizeStepSubtitle: {
-      type: String,
-      required: true
-    },
-    descriptionPlaceholderText: {
-      type: String,
-      required: true
-    },
-    pageTitle: {
-      type: String,
-      required: true
-    },
     product: {
       type: Object as PropType<Product>,
-      required: true
-    },
-    topStorySlug: {
-      type: String,
-      required: true
-    },
-    upgradesSubtitle: {
-      type: String,
-      required: true
-    },
-    upgradesText: {
-      type: String,
       required: true
     },
     existingPlushieId: {
       type: String,
       default: undefined
-    },
-    emailUploadImagesCountText: {
-      type: String,
-      required: true
     }
   },
   data () {
@@ -515,7 +453,6 @@ export default defineComponent({
       shouldMakeAnother: false,
       showQuantityNotes: false,
       showEmailStep: true,
-      uploadMethod: ImageUploadMethod.NOW,
       selectedAddons: [] as SelectedAddon[],
       description: '',
       initialCustomerImages: [] as CustomerImage[],
@@ -550,17 +487,10 @@ export default defineComponent({
     emailStepNumber (): number {
       return this.showAddonsStep ? 4 : 3;
     },
-    isUploadNow (): boolean {
-      return this.uploadMethod === ImageUploadMethod.NOW;
-    },
     backendProductId (): ProductValue | undefined {
       switch (this.product.id) {
-        case 11:
-        case 428:
-          return ProductValue.BUDSIE;
-        case 12:
-        case 430:
-          return ProductValue.SELFIE;
+        case 163:
+          return ProductValue.SPECIALITY_COMMISSION;
         default:
           throw new Error(
             `Can't resolve Backend product ID for Magento '${this.product.id}' product ID`
@@ -572,6 +502,11 @@ export default defineComponent({
     },
     getBodypartOptions (): (id: string) => BodypartOption[] {
       return this.$store.getters['budsies/getBodypartOptions']
+    },
+    descriptionPlaceholderText (): string {
+      return this.$t(
+        'Firesquirrel has a bushy long squirrel tail. I\'d like it if her tail was made of some kind of longer fabric. She has three big toe\'s on each foot and four fingered cartoon hands. Primary fur is a rich golden yellow. Secondary fur is a light cream yellow.'
+      ).toString();
     },
     productionTimeBundleOption (): BundleOption | undefined {
       if (!this.product?.bundle_options) {
@@ -586,9 +521,6 @@ export default defineComponent({
       }
 
       return getProductionTimeOptions(this.productionTimeBundleOption, this.product, this.$store);
-    },
-    shortcode (): string | undefined {
-      return this.$store.getters['budsies/getPlushieShortcode'](this.plushieId);
     },
     submitButtonText (): TranslateResult {
       return this.existingCartItem
@@ -626,8 +558,8 @@ export default defineComponent({
               email: this.email,
               plushieDescription: this.description,
               bodyparts: this.getBodypartsData(),
-              customerImages: this.isUploadNow && this.customerImages ? this.customerImages : [],
-              uploadMethod: this.uploadMethod,
+              customerImages: this.customerImages ? this.customerImages : [],
+              uploadMethod: ImageUploadMethod.NOW,
               upgradeOptionValues: this.getUpgradeOptionValues()
             })
           });
@@ -712,15 +644,12 @@ export default defineComponent({
           key,
           this.getBodypartOptions(key).filter(
             (bodypartOption: BodypartOption) => bodyparts[key].includes(bodypartOption.id) ||
-              bodyparts[key].includes(Number(bodypartOption.id))
+                bodyparts[key].includes(Number(bodypartOption.id))
           )
         );
       });
     },
     fillCustomerImagesData (existingCartItem: CartItem): void {
-      this.uploadMethod = existingCartItem.uploadMethod
-        ? existingCartItem.uploadMethod as ImageUploadMethod
-        : ImageUploadMethod.NOW;
       this.customerImages = existingCartItem.customerImages ? existingCartItem.customerImages : [];
       this.initialCustomerImages = this.customerImages;
 
@@ -856,7 +785,6 @@ export default defineComponent({
       this.quantity = this.product.qty || 1;
       this.customerImages = [];
       this.initialCustomerImages = [];
-      this.uploadMethod = ImageUploadMethod.NOW;
       this.selectedAddons = [];
       this.bodypartsValues = {};
       this.description = '';
@@ -873,27 +801,6 @@ export default defineComponent({
       }
 
       this.validationObserver?.reset();
-    },
-    switchToUploadNow (): void {
-      if (this.isSubmitting) {
-        return;
-      }
-
-      this.uploadMethod = ImageUploadMethod.NOW;
-    },
-    switchToUploadLater (): void {
-      if (this.isSubmitting) {
-        return;
-      }
-
-      this.uploadMethod = ImageUploadMethod.EMAIL;
-    },
-    toggleUploadMethod (): void {
-      if (this.isSubmitting) {
-        return;
-      }
-
-      this.uploadMethod = this.uploadMethod === ImageUploadMethod.EMAIL ? ImageUploadMethod.NOW : ImageUploadMethod.EMAIL;
     },
     onArtworkAdd (value: Item): void {
       this.customerImages.push({
@@ -981,8 +888,8 @@ export default defineComponent({
               email: this.email,
               plushieDescription: this.description,
               bodyparts: this.getBodypartsData(),
-              customerImages: this.isUploadNow && this.customerImages ? this.customerImages : [],
-              uploadMethod: this.uploadMethod,
+              customerImages: this.customerImages ? this.customerImages : [],
+              uploadMethod: ImageUploadMethod.NOW,
               upgradeOptionValues: this.getUpgradeOptionValues(),
               product_option: setBundleProductOptionsAsync(
                 null,
@@ -1041,13 +948,6 @@ export default defineComponent({
 
       this.fillPlushieDataFromCartItem(this.existingCartItem);
     },
-    async plushieId (id: number | undefined): Promise<void> {
-      if (!id) {
-        return;
-      }
-
-      await this.$store.dispatch('budsies/loadPlushieShortcode', { plushieId: id });
-    },
     async 'product.sku' () {
       if (!this.existingCartItem || this.existingCartItem.sku !== this.product.sku) {
         if (this.existingCartItem) {
@@ -1094,7 +994,7 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "~@storefront-ui/shared/styles/helpers/layout";
 
-.o-budsies-plushie-product-order-form {
+.o-specialty-commission-product-order-form {
   text-align: center;
 
   ._title {
@@ -1233,6 +1133,15 @@ export default defineComponent({
     font-size: var(--font-xs);
     text-align: left;
     max-width: 45rem;
+  }
+
+  ._artwork-upload-bottom-block {
+    font-weight: var(--font-semibold);
+    font-size: var(--font-xs);
+  }
+
+  ._body-part-helper-text {
+    margin-top: var(--spacer-sm);
   }
 
   @media (min-width: $tablet-min) {

@@ -5,7 +5,7 @@
 
       <div class="_notes">
         <MBlockStory
-          story-slug="petsies_phrase_pillows_top"
+          story-slug="budsies_phrase_pillows_top"
         />
       </div>
 
@@ -302,7 +302,7 @@
 
             <validation-provider
               v-slot="{ errors, classes }"
-              rules="required"
+              :rules="isAccentColorSelectorVisible ? 'required' : ''"
               :ref="customizerStepsData.customOptions.id"
               :name="'Accent Color'"
               :detect-input="false"
@@ -486,7 +486,7 @@
 
                   <div class="_bottom-static-block">
                     <MBlockStory
-                      story-slug="petsies_phrase_pillows_bottom"
+                      story-slug="budsies_phrase_pillows_bottom"
                     />
                   </div>
 
@@ -764,7 +764,7 @@ export default (
   computed: {
     ...mapMobileObserver(),
     skinClass (): string {
-      return '-skin-petsies';
+      return '-skin-budsies';
     },
     accentColor (): string | undefined {
       if (!this.selectedAccentColorPartValue) {
@@ -869,7 +869,7 @@ export default (
     },
     uploadProductType (): ProductValue {
       switch (this.product.id) {
-        case 333:
+        case 303:
           return ProductValue.PHRASE_PILLOW;
         default:
           throw new Error(
@@ -2054,6 +2054,7 @@ export default (
     }
   }
 
+  &.-skin-budsies,
   &.-skin-petsies {
     $color-customizer-step-background: #ededed;
     $color-add-to-cart-step-background: #43c5e4;

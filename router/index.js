@@ -33,7 +33,9 @@ const ClayProduct = () =>
 const ClothesProduct = () =>
   import(/* webpackChunkName: "vsf-clothes-product" */ 'theme/pages/ClothesProduct');
 const BudsiesPlushieProduct = () =>
-import(/* webpackChunkName: "vsf-budsies-plushie-product" */ 'theme/pages/BudsiesPlushieProduct');
+  import(/* webpackChunkName: "vsf-budsies-plushie-product" */ 'theme/pages/BudsiesPlushieProduct');
+const SpecialtyCommissionProduct = () =>
+  import(/* webpackChunkName: "vsf-specialty-commission-product" */ 'theme/pages/SpecialtyCommissionProduct');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -62,12 +64,12 @@ let routes = [
   },
   {
     name: 'pillowSideDesign-product-redirect',
-    path: '/p/phrasePetsies:parentSku?/:slug?/',
+    path: '/p/phraseBudsies:parentSku?/:slug?/',
     redirect: (route) => ({
       name: 'phrase-pillow-customize',
       query: {
         back_design: route.query.back_design,
-        front_design: 'phrasePetsies' + route.params.parentSku
+        front_design: 'phraseBudsies' + route.params.parentSku
       }
     })
   },
@@ -158,10 +160,10 @@ let routes = [
       existingPlushieId: route.query.existingPlushieId
     })
   },
-  { name: 'pillow-product', path: '/pillows/create/', component: PillowProduct },
+  { name: 'pillow-product', path: '/buddy-pillows/create/', component: PillowProduct },
   {
     name: 'pillow-product-alias',
-    path: '/plushie/index/create/id/:plushieId/type/pillow/',
+    path: '/plushie/index/create/id/:plushieId/type/buddy-pillow/',
     redirect: {
       name: 'pillow-product'
     }
@@ -177,6 +179,9 @@ let routes = [
         case '11':
           parentSku = 'CustomBudsie1_bundle';
           break;
+        case '12':
+          parentSku = 'CustomSelfie_bundle';
+          break;
         case '73':
           parentSku = 'ForeversDog_bundle';
           break;
@@ -186,11 +191,20 @@ let routes = [
         case '75':
           parentSku = 'ForeversOther_bundle';
           break;
+        case '163':
+          parentSku = 'specialtyCommission_bundle';
+          break;
         case '253':
           parentSku = 'customPillow_bundle';
           break;
+        case '273':
+          parentSku = 'customBuddyPillow_bundle'
+          break;
         case '277':
           parentSku = 'customPrintedSocks_bundle';
+          break;
+        case '303':
+          parentSku = 'phrasePillow_bundle';
           break;
         case '333':
           parentSku = 'petsiesPhrasePillow_bundle';
@@ -204,6 +218,9 @@ let routes = [
         case '428':
           parentSku = 'budsiesPuppet_bundle';
           break;
+        case '430':
+          parentSku = 'selfiesPuppet_bundle';
+          break;
         case '446':
           parentSku = 'customFeltedMagnets_bundle';
           break;
@@ -216,8 +233,14 @@ let routes = [
         case '504':
           parentSku = 'customCutOutBlankets_bundle';
           break;
+        case '526':
+          parentSku = 'bobbleheads_bundle';
+          break;
         case '528':
           parentSku = 'petsiesBobbleheads_bundle';
+          break;
+        case '530':
+          parentSku = 'figurines_bundle';
           break;
         case '532':
           parentSku = 'petsiesFigurines_bundle';
@@ -401,7 +424,7 @@ let routes = [
   },
   {
     name: 'figurines-alias-1',
-    path: '/plushie/index/create/id/:plushieId/type/petsies-figurine/',
+    path: '/plushie/index/create/id/:plushieId/type/figurine/',
     redirect: (route) => {
       return {
         name: 'figurines-creation',
@@ -413,16 +436,16 @@ let routes = [
   },
   {
     name: 'figurines-creation',
-    path: '/petsies-figurines/create/',
+    path: '/figurines/create/',
     component: ClayProduct,
     props: (route) => ({
-      sku: 'petsiesFigurines_bundle',
+      sku: 'figurines_bundle',
       existingPlushieId: route.query.existingPlushieId
     })
   },
   {
     name: 'bobbleheads-alias-1',
-    path: '/plushie/index/create/id/:plushieId/type/petsies-bobblehead/',
+    path: '/plushie/index/create/id/:plushieId/type/bobblehead/',
     redirect: (route) => {
       return {
         name: 'bobbleheads-creation',
@@ -434,10 +457,10 @@ let routes = [
   },
   {
     name: 'bobbleheads-creation',
-    path: '/petsies-bobbleheads/create/',
+    path: '/bobbleheads/create/',
     component: ClayProduct,
     props: (route) => ({
-      sku: 'petsiesBobbleheads_bundle',
+      sku: 'bobbleheads_bundle',
       existingPlushieId: route.query.existingPlushieId
     })
   },
@@ -463,6 +486,48 @@ let routes = [
     })
   },
   {
+    name: 'selfies-creation-alias',
+    path: '/plushie/index/create/id/:plushieId/type/selfie/',
+    redirect: (route) => {
+      return {
+        name: 'selfies-creation',
+        query: {
+          existingPlushieId: route.params.plushieId
+        }
+      }
+    }
+  },
+  {
+    name: 'selfies-creation',
+    path: '/selfies/create/',
+    component: BudsiesPlushieProduct,
+    props: (route) => ({
+      sku: 'CustomSelfie_bundle',
+      existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
+    name: 'selfies-puppets-creation-alias',
+    path: '/plushie/index/create/id/:plushieId/type/selfies-puppets/',
+    redirect: (route) => {
+      return {
+        name: 'selfies-puppets-creation',
+        query: {
+          existingPlushieId: route.params.plushieId
+        }
+      }
+    }
+  },
+  {
+    name: 'selfies-puppets-creation',
+    path: '/selfies-puppets/create/',
+    component: BudsiesPlushieProduct,
+    props: (route) => ({
+      sku: 'selfiesPuppet_bundle',
+      existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
     name: 'budsies-puppets-creation-alias',
     path: '/plushie/index/create/id/:plushieId/type/budsies-puppet/',
     redirect: (route) => {
@@ -481,6 +546,39 @@ let routes = [
     props: (route) => ({
       sku: 'budsiesPuppet_bundle',
       existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
+    name: 'specialty-commissions-creation-alias-1',
+    path: '/plushie/index/create/id/:plushieId/type/commission/',
+    redirect: (route) => {
+      return {
+        name: 'specialty-commissions-creation',
+        query: {
+          existingPlushieId: route.params.plushieId
+        }
+      }
+    }
+  },
+  {
+    name: 'specialty-commissions-creation-alias-2',
+    path: '/commissions/create/token/:token/',
+    redirect: (route) => {
+      return {
+        name: 'specialty-commissions-creation',
+        query: {
+          token: route.params.token
+        }
+      }
+    }
+  },
+  {
+    name: 'specialty-commissions-creation',
+    path: '/commissions/create/',
+    component: SpecialtyCommissionProduct,
+    props: (route) => ({
+      existingPlushieId: route.query.existingPlushieId,
+      token: route.query.token
     })
   },
   {

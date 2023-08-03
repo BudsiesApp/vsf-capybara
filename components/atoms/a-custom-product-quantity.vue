@@ -35,7 +35,7 @@ export default Vue.extend({
   },
   computed: {
     skinClass (): string {
-      return '-skin-petsies';
+      return '-skin-budsies';
     },
     valueText (): number {
       return this.value;
@@ -110,6 +110,7 @@ export default Vue.extend({
         }
     }
 
+    &.-skin-budsies,
     &.-skin-petsies {
       ._handle {
         border: 1px solid var(--c-text);
