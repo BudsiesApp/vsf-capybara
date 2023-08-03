@@ -7,9 +7,7 @@
   >
     <editor-block-icons :item="itemData" />
 
-    <script type="application/ld+json">
-      {{ ratingDataString }}
-    </script>
+    <script type="application/ld+json" v-html="ratingDataString" />
 
     <div class="_website-rating" :data-average-rating="averageValue">
       <div class="_rating">
@@ -43,7 +41,9 @@
 </template>
 
 <script lang="ts">
+import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
+
 import WebsiteRatingData from './interfaces/website-rating-data.interface';
 import StarRating from 'vue-star-rating/src';
 
@@ -81,10 +81,12 @@ export default Blok.extend({
       return this.itemData.link_text;
     },
     ratingDataString (): string {
+      const storeView = currentStoreView();
+
       const data = {
         '@context': 'http://schema.org',
         '@type': 'Organization',
-        'name': 'Petsies', // get for a specific store
+        'name': storeView.name,
         'image': this.getStoreImageUrl(),
         'aggregateRating': {
           '@type': 'AggregateRating',
