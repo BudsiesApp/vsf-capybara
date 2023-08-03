@@ -7,6 +7,7 @@
     <editor-block-icons :item="itemData" />
 
     <m-remind-me-about-budsies-form
+      class="_form"
       :button-text="buttonText"
       :input-placeholder="inputPlaceholder"
       :success-message="successMessage"
@@ -25,14 +26,6 @@ export default Blok.extend({
   name: 'StoryblokRemindMeAboutBudsies',
   components: {
     MRemindMeAboutBudsiesForm
-  },
-  data () {
-    return {
-      email: '',
-      date: null,
-      isSubmitting: false,
-      isSubmitted: false
-    }
   },
   computed: {
     buttonText (): string {
@@ -61,5 +54,11 @@ export default Blok.extend({
 
 .storyblok-remind-me-about-budsies {
   @include display-property-handling;
+
+  &.-editor-preview-mode {
+    ._form {
+      pointer-events: none
+    }
+  }
 }
 </style>
