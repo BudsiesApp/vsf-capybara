@@ -30,8 +30,9 @@
           class="_date-picker"
           :class="{'-error': errors.length}"
           v-model="date"
-          placeholder="mm/dd/yy"
-          format="MM/DD/YY"
+          :placeholder="$t('Remind date')"
+          :formatter="defaultSystemDateFormatFormatter"
+          :disabled-date="isDateDisabled"
           :disabled="isFormDisabled"
           :editable="false"
         />
@@ -64,6 +65,8 @@ import { ValidationObserver, ValidationProvider, extend } from 'vee-validate';
 import { required, email } from 'vee-validate/dist/rules';
 
 import { SfButton, SfInput, SfHeading } from '@storefront-ui/vue';
+
+import toIsoDateString from 'theme/helpers/to-iso-date-string.function';
 
 extend('required', {
   ...required,
@@ -105,10 +108,18 @@ export default Vue.extend({
   },
   data () {
     return {
-      email: '',
-      date: null as Date | null,
+      email: undefined as string | undefined,
+      date: undefined as Date | undefined,
       isSubmitting: false,
-      isSubmitted: false
+      isSubmitted: false,
+      defaultSystemDateFormatFormatter: {
+        stringify: (date: Date) => {
+          return date ? date.toLocaleDateString() : '';
+        },
+        parse: (value: string) => {
+          return value ? new Date(value) : undefined;
+        }
+      }
     }
   },
   computed: {
@@ -120,6 +131,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    isDateDisabled (date: Date): boolean {
+      return date.getTime() < Date.now();
+    },
     async onSubmit (): Promise<void> {
       if (!this.date || !this.email) {
         throw new Error('Date or E-mail fields is not defined');
@@ -134,7 +148,7 @@ export default Vue.extend({
       try {
         await this.$store.dispatch('budsies/createPlushieReminder', {
           customerEmail: this.email,
-          remindDate: this.date.toISOString().split('T')[0]
+          remindDate: toIsoDateString(this.date)
         });
 
         this.isSubmitted = true;
@@ -146,26 +160,28 @@ export default Vue.extend({
 })
 </script>
 
-  <style lang="scss" scoped>
-  .m-remind-me-about-budsies-form{
-    ._button-row {
-      margin-top: var(--spacer-base);
-      display: flex;
-      justify-content: center;
-    }
+<style lang="scss" scoped>
+.m-remind-me-about-budsies-form {
+  max-width: 30rem;
 
-    ._error-text {
-      margin-top: var(--spacer-xs);
-      height: calc(var(--font-xs) * 1.2);
-      color: var(--c-danger-variant);
-      font-weight: var(--font-light);
-      font-size: var(--font-xs);
-    }
-
-    ._success-message {
-      text-align: center;
-      color: var(--c-primary);
-      margin-top: var(--spacer-sm);
-    }
+  ._button-row {
+    margin-top: var(--spacer-base);
+    display: flex;
+    justify-content: center;
   }
-  </style>
+
+  ._error-text {
+    margin-top: var(--spacer-xs);
+    height: calc(var(--font-xs) * 1.2);
+    color: var(--c-danger-variant);
+    font-weight: var(--font-light);
+    font-size: var(--font-xs);
+  }
+
+  ._success-message {
+    text-align: center;
+    color: var(--c-primary);
+    margin-top: var(--spacer-sm);
+  }
+}
+</style>
