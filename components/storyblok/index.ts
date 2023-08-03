@@ -20,6 +20,7 @@ export default function registerComponents () {
   add('hr', () => import('./HorizontalRule.vue'))
   add('parallax', () => import('./Parallax.vue'))
   add('mailing_list_subscribe_form', () => import('./MailingListSubscribeForm.vue'))
+  add('remind_me_about_budsies', () => import('./RemindMeAboutBudsies.vue'))
 
   // add('product', () => import('./Product.vue'))
   // add('category', () => import('./Category.vue'))
