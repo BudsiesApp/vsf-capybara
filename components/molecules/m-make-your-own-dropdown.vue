@@ -80,6 +80,16 @@ export default Vue.extend({
           url: '/photo-pillows/'
         },
         {
+          label: this.$t('Shirts'),
+          url: '/custom-shirts/'
+        },
+        {
+          label: this.$t('Blankets'),
+          url: {
+            name: 'cut-out-blankets'
+          }
+        },
+        {
           label: 'Socks',
           url: {
             name: 'printed-socks-creation-page'
