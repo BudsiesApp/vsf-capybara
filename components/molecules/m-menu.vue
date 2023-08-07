@@ -161,8 +161,10 @@ export default Vue.extend({
           url: '/custom-pillows/'
         },
         {
-          label: this.$t('Pajamas'),
-          url: '/pajamas/index/create/'
+          label: this.$t('Blankets'),
+          url: {
+            name: 'cut-out-blankets'
+          }
         }
       ],
       accessoriesItems: [
@@ -171,6 +173,14 @@ export default Vue.extend({
           url: {
             name: 'printed-socks-creation-page'
           }
+        },
+        {
+          label: this.$t('Pajamas'),
+          url: '/pajamas/index/create/'
+        },
+        {
+          label: this.$t('Shirts'),
+          url: '/custom-shirts/'
         },
         {
           label: this.$t('Keychains'),
