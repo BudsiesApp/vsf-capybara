@@ -624,6 +624,13 @@ let routes = [
     })
   },
   {
+    name: 'raffle-alias-1',
+    path: '/commissions-closed/',
+    redirect: {
+      name: 'raffle'
+    }
+  },
+  {
     name: 'raffle',
     path: '/raffle/',
     component: Raffle,
