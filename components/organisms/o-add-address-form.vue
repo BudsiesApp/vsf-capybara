@@ -71,7 +71,7 @@ export default Vue.extend({
         lastname: this.address.lastName,
         street: [this.address.streetAddress],
         city: this.address.city,
-        region: this.address.state,
+        region: { region: this.address.state },
         postcode: this.address.zipCode,
         country_id: this.address.country,
         telephone: this.address.phoneNumber,
