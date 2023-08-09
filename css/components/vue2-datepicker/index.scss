@@ -1,0 +1,24 @@
+@import '~vue2-datepicker/scss/index.scss';
+
+
+.mx-datepicker {
+  width: 100%;
+
+  .mx-input {
+    border-radius: 0;
+    height: 100%;
+    box-shadow: none;
+
+    padding: var(--input-padding, var(--spacer-sm) 0 var(--spacer-xs) 0);
+    border: var(--input-border, var(--input-border-style, solid) var(--input-border-color, var(--c-light)));
+    border-width: var(--input-border-width, 0 0 1px 0);
+    background: var(--input-background);
+    color: var(--input-color, var(--c-text));
+    font: var(--input-font, var(--input-font-weight, var(--font-normal)) var(--input-font-size, var(--font-lg))/var(--input-font-line-height, 1) var(--input-font-family, var(--font-family-secondary)));
+    text-align: var(--input-text-align);
+  }
+
+  &.-error {
+    --input-border-color: var(--c-danger);
+  }
+}

@@ -39,7 +39,7 @@
 
     <div class="_step-description">
       <div class="_step-title">
-        Add more pets
+        {{ $t(stepTitle) }}
       </div>
       <div class="_step-subtitle">
         How many additional faces do you want to add to the same design?
@@ -130,6 +130,14 @@ export default Vue.extend({
     initialArtworks: {
       type: Array as PropType<CustomerImage[]>,
       default: () => []
+    },
+    stepTitle: {
+      type: String,
+      default: 'Add more pets'
+    },
+    defaultOptionLabel: {
+      type: String,
+      default: 'No Extra Pets'
     }
   },
   data () {
@@ -147,7 +155,7 @@ export default Vue.extend({
     selectOptions (): SelectOptionItem[] {
       const defaultOption = {
         id: defaultOptionId,
-        label: this.$t('No Extra Pets').toString(),
+        label: this.$t(this.defaultOptionLabel).toString(),
         value: undefined
       }
       const options: SelectOptionItem[] = [defaultOption];

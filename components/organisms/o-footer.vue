@@ -212,6 +212,16 @@ export default {
           link: '/pajamas/index/create/'
         },
         {
+          name: this.$t('Shirts'),
+          link: '/custom-shirts/'
+        },
+        {
+          name: this.$t('Blankets'),
+          link: {
+            name: 'cut-out-blankets'
+          }
+        },
+        {
           name: this.$t('Gift Cards'),
           link: '/purchase-gift-card/'
         },
