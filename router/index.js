@@ -36,6 +36,8 @@ const BudsiesPlushieProduct = () =>
   import(/* webpackChunkName: "vsf-budsies-plushie-product" */ 'theme/pages/BudsiesPlushieProduct');
 const SpecialtyCommissionProduct = () =>
   import(/* webpackChunkName: "vsf-specialty-commission-product" */ 'theme/pages/SpecialtyCommissionProduct');
+const Raffle = () =>
+  import(/* webpackChunkName: "vsf-raffle" */ 'theme/pages/Raffle');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -620,6 +622,11 @@ let routes = [
       productDesign: route.query.product_design,
       existingPlushieId: route.query.existingPlushieId
     })
+  },
+  {
+    name: 'raffle',
+    path: '/raffle/',
+    component: Raffle
   }
 ];
 
