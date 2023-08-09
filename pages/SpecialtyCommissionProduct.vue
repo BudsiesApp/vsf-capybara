@@ -76,7 +76,11 @@ export default Vue.extend({
     await (this as any).loadData();
   },
   async beforeMount () {
-    const isAvailable = await this.checkPageAvailability();
+    let isAvailable = this.participantData?.isWinner;
+
+    if (!isAvailable) {
+      isAvailable = await this.checkPageAvailability();
+    }
 
     if (!isAvailable) {
       await this.$router.replace({ name: 'raffle' });
