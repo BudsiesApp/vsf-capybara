@@ -33,6 +33,8 @@ import { getters, actions, mutations, RafflePending, RaffleRegistrationForm, Raf
 
 import { ModalList } from 'theme/store/ui/modals';
 
+import MBlockStory from 'theme/components/molecules/m-block-story.vue';
+
 export default Vue.extend({
   props: {
     referrerToken: {
@@ -41,6 +43,7 @@ export default Vue.extend({
     }
   },
   components: {
+    MBlockStory,
     RafflePending,
     RaffleRegistrationForm,
     RaffleWinner
