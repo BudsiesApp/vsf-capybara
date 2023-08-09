@@ -17,6 +17,7 @@ import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 
 import Product from 'core/modules/catalog/types/Product';
+import { SN_RAFFLE, getters, ParticipantData, actions } from 'src/modules/raffle';
 
 import OSpecialtyCommissionProductOrderForm from 'theme/components/organisms/o-specialty-commission-product-order-form.vue';
 
@@ -57,14 +58,31 @@ export default Vue.extend({
     },
     showForm (): boolean {
       return this.isDataLoaded && !!this.getCurrentProduct;
+    },
+    participantData (): ParticipantData | undefined {
+      return this.$store.getters[`${SN_RAFFLE}/${getters.GET_PARTICIPANT_DATA}`];
     }
   },
   async serverPrefetch () {
     if (this.$ssrContext) this.$ssrContext.output.cacheTags.add('product')
 
+    const isAvailable = await (this as any).checkPageAvailability();
+
+    if (!isAvailable) {
+      await this.$router.replace({ name: 'raffle' });
+      return;
+    }
+
     await (this as any).loadData();
   },
   async beforeMount () {
+    const isAvailable = await this.checkPageAvailability();
+
+    if (!isAvailable) {
+      await this.$router.replace({ name: 'raffle' });
+      return;
+    }
+
     if (!this.getCurrentProduct) {
       await this.loadData();
     }
@@ -76,6 +94,19 @@ export default Vue.extend({
     next();
   },
   methods: {
+    async checkPageAvailability (): Promise<boolean> {
+      if (!this.token) {
+        return false;
+      }
+
+      await this.$store.dispatch(`${SN_RAFFLE}/${actions.VERIFY_TOKEN}`, this.token);
+
+      if (!this.participantData) {
+        return false;
+      }
+
+      return this.participantData.isWinner;
+    },
     async loadData (): Promise<void> {
       this.isDataLoaded = false;
 

@@ -626,7 +626,10 @@ let routes = [
   {
     name: 'raffle',
     path: '/raffle/',
-    component: Raffle
+    component: Raffle,
+    props: (route) => ({
+      referrerToken: route.query.referral_code
+    })
   }
 ];
 

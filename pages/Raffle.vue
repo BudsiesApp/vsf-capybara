@@ -1,14 +1,23 @@
 <template>
   <div id="raffle-page">
+    <MBlockStory
+      :story-slug="storySlug"
+      v-if="storySlug"
+    />
+
     <div class="_registration-section" v-if="showRegistrationSection">
       <raffle-registration-form
         :capacity="currentState.capacity"
         :next-drawing-date="currentState.nextDrawing"
+        @show-previous-winning-tickets-button-click="onShowPreviousWinningTicketsButtonClick"
       />
     </div>
 
     <div class="_pending-section" v-if="showPendingSection">
-      <raffle-pending :participant-data="participantData" />
+      <raffle-pending
+        :participant-data="participantData"
+        @show-previous-winning-tickets-button-click="onShowPreviousWinningTicketsButtonClick"
+      />
     </div>
 
     <div class="_winner-section" v-if="showWinnerSection">
@@ -18,23 +27,23 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import Vue, { PropType } from 'vue';
 
-import { getters, actions, RafflePending, RaffleRegistrationForm, RaffleWinner, SN_RAFFLE } from 'src/modules/raffle';
-import ParticipantData from 'src/modules/raffle/models/participant-data.model';
+import { getters, actions, mutations, RafflePending, RaffleRegistrationForm, RaffleWinner, SN_RAFFLE, ParticipantData, CurrentState } from 'src/modules/raffle';
 
-import CurrentState from 'src/modules/raffle/models/current-state.model';
+import { ModalList } from 'theme/store/ui/modals';
 
-export default defineComponent({
+export default Vue.extend({
+  props: {
+    referrerToken: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    }
+  },
   components: {
     RafflePending,
     RaffleRegistrationForm,
     RaffleWinner
-  },
-  data () {
-    return {
-      isDataLoaded: false
-    }
   },
   computed: {
     isRaffleModuleSynced (): boolean {
@@ -54,21 +63,32 @@ export default defineComponent({
     },
     currentState (): CurrentState | undefined {
       return this.$store.getters[`${SN_RAFFLE}/${getters.GET_CURRENT_STATE}`];
+    },
+    storySlug (): string {
+      return ''; // TODO should return appropriate story slug based on raffle state.
     }
   },
   beforeMount (): void {
     void this.loadRaffleData();
+
+    if (!this.referrerToken) {
+      return;
+    }
+
+    this.$store.commit(`${SN_RAFFLE}/${mutations.REFERRER_TOKEN_SET}`, this.referrerToken);
+  },
+  async serverPrefetch (): Promise<void> {
+    await (this as any).loadRaffleData();
   },
   methods: {
     async loadRaffleData (): Promise<void> {
-      this.isDataLoaded = false;
-
       await Promise.all([
         this.$store.dispatch(`${SN_RAFFLE}/${actions.FETCH_CURRENT_STATE}`),
         this.$store.dispatch(`${SN_RAFFLE}/${actions.FETCH_WINNING_TICKETS}`)
       ]);
-
-      this.isDataLoaded = true;
+    },
+    onShowPreviousWinningTicketsButtonClick (): void {
+      this.$store.dispatch('ui/openModal', { name: ModalList.RafflePreviousWinningTickets });
     }
   }
 })
