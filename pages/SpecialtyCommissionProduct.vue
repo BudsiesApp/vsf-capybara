@@ -1,5 +1,5 @@
 <template>
-  <div id="specialty-commission-product" itemscope itemtype="http://schema.org/Product">
+  <div id="specialty-commission-product">
     <o-specialty-commission-product-order-form
       :artwork-upload-url="artworkUploadUrl"
       :product="getCurrentProduct"
