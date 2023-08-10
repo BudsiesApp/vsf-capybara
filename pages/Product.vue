@@ -1,6 +1,10 @@
 <template>
   <div id="product" itemscope itemtype="http://schema.org/Product">
     <template v-if="getCurrentProduct">
+      <product-structured-data
+        :product="getCurrentProduct"
+      />
+
       <OProductDetails
         :product="getCurrentProduct"
         :product-gallery="getProductGallery"
@@ -47,6 +51,8 @@ import { filterChangedProduct } from '@vue-storefront/core/modules/catalog/event
 import { getMediaGallery } from '@vue-storefront/core/modules/catalog/helpers';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 
+import { ProductStructuredData } from 'src/modules/budsies';
+
 import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
 
 const getSkusFromRoute = (route) => {
@@ -66,7 +72,8 @@ export default {
     LazyHydrate,
     MRelatedProducts,
     OProductDetails,
-    MProductDescriptionStory
+    MProductDescriptionStory,
+    ProductStructuredData
   },
   provide () {
     return {
