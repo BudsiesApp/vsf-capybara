@@ -1,5 +1,5 @@
 <template>
-  <div id="product" itemscope itemtype="http://schema.org/Product">
+  <div id="product">
     <template v-if="getCurrentProduct">
       <product-structured-data
         :product="getCurrentProduct"
