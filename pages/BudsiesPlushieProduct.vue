@@ -1,5 +1,10 @@
 <template>
-  <div id="budsies-plushie-product" itemscope itemtype="http://schema.org/Product">
+  <div id="budsies-plushie-product">
+    <product-structured-data
+      v-if="getCurrentProduct"
+      :product="getCurrentProduct"
+    />
+
     <o-budsies-plushie-product-order-form
       :artwork-upload-url="artworkUploadUrl"
       :artwork-upload-top-helper-text="artworkUploadTopHelperText"
@@ -88,6 +93,8 @@ import { SfHeading, SfModal } from '@storefront-ui/vue';
 
 import Product from 'core/modules/catalog/types/Product';
 
+import { ProductStructuredData } from 'src/modules/budsies';
+
 import OBudsiesPlushieProductOrderForm from 'theme/components/organisms/o-budsies-plushie-product-order-form.vue';
 
 const budsieProductSku = 'CustomBudsie1_bundle';
@@ -111,7 +118,8 @@ export default Vue.extend({
   components: {
     OBudsiesPlushieProductOrderForm,
     SfHeading,
-    SfModal
+    SfModal,
+    ProductStructuredData
   },
   props: {
     sku: {
