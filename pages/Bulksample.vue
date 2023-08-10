@@ -1,5 +1,10 @@
 <template>
   <div id="bulksample-page">
+    <product-structured-data
+      v-if="getCurrentProduct"
+      :product="getCurrentProduct"
+    />
+
     <o-bulksample-creation-form
       :artwork-upload-url="artworkUploadUrl"
       :product="getCurrentProduct"
@@ -19,6 +24,8 @@ import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next
 
 import BulksampleProduct from 'theme/interfaces/bulksample-product.type';
 
+import { ProductStructuredData } from 'src/modules/budsies';
+
 import OBulksampleCreationForm from 'theme/components/organisms/o-bulksample-creation-form.vue';
 
 export default Vue.extend({
@@ -37,7 +44,8 @@ export default Vue.extend({
     }
   },
   components: {
-    OBulksampleCreationForm
+    OBulksampleCreationForm,
+    ProductStructuredData
   },
   computed: {
     artworkUploadUrl () {
