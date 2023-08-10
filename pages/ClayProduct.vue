@@ -1,5 +1,10 @@
 <template>
-  <div id="clay-product" itemscope itemtype="http://schema.org/Product">
+  <div id="clay-product">
+    <product-structured-data
+      v-if="getCurrentProduct"
+      :product="getCurrentProduct"
+    />
+
     <o-clay-product-order-form
       v-if="showForm"
       :artwork-upload-url="artworkUploadUrl"
@@ -23,8 +28,11 @@ import config from 'config';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
+import { TranslateResult } from 'vue-i18n';
 
 import Product from 'core/modules/catalog/types/Product';
+
+import { ProductStructuredData } from 'src/modules/budsies';
 
 import OClayProductOrderForm from 'theme/components/organisms/o-clay-product-order-form.vue';
 
@@ -33,7 +41,8 @@ const figurinesSku = 'figurines_bundle';
 export default Vue.extend({
   name: 'ClayProduct',
   components: {
-    OClayProductOrderForm
+    OClayProductOrderForm,
+    ProductStructuredData
   },
   props: {
     sku: {

@@ -1,9 +1,10 @@
 <template>
-  <div
-    id="phrase-pillow-product"
-    itemscope
-    itemtype="http://schema.org/Product"
-  >
+  <div id="phrase-pillow-product">
+    <product-structured-data
+      v-if="getCurrentProduct"
+      :product="getCurrentProduct"
+    />
+
     <OPhrasePillowProductOrderForm
       :product="getCurrentProduct"
       :image-upload-url="imageUploadUrl"
@@ -26,6 +27,8 @@ import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/stor
 
 import Product from 'core/modules/catalog/types/Product';
 
+import { ProductStructuredData } from 'src/modules/budsies';
+
 import OPhrasePillowProductOrderForm, { DesignSelectedEventPayload } from 'theme/components/organisms/o-phrase-pillow-product-order-form.vue';
 
 const phrasePillowSku = 'phrasePillow_bundle';
@@ -43,7 +46,8 @@ export default Vue.extend({
     }
   },
   components: {
-    OPhrasePillowProductOrderForm
+    OPhrasePillowProductOrderForm,
+    ProductStructuredData
   },
   computed: {
     getCurrentProduct (): Product | null {

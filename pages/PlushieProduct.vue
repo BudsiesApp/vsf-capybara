@@ -1,5 +1,5 @@
 <template>
-  <div id="plushie-product" itemscope itemtype="http://schema.org/Product">
+  <div id="plushie-product">
     <o-plushie-creation-wizard
       :plushie-type="plushieType"
       :artwork-upload-url="artworkUploadUrl"

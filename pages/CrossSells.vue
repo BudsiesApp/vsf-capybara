@@ -1,5 +1,5 @@
 <template>
-  <div id="cross-sells" itemscope>
+  <div id="cross-sells">
     <div class="_actions-container">
       <header class="sf-heading">
         <h2 class="sf-heading__title">

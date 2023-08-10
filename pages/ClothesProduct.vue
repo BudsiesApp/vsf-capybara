@@ -1,5 +1,10 @@
 <template>
-  <div id="clothes-product" itemscope itemtype="http://schema.org/Product">
+  <div id="clothes-product">
+    <product-structured-data
+      v-if="getCurrentProduct"
+      :product="getCurrentProduct"
+    />
+
     <o-clothes-product-order-form
       v-if="getCurrentProduct"
       :artwork-upload-url="artworkUploadUrl"
@@ -21,12 +26,15 @@ import CartItem from 'core/modules/cart/types/CartItem';
 
 import Product from 'core/modules/catalog/types/Product';
 
+import { ProductStructuredData } from 'src/modules/budsies';
+
 import OClothesProductOrderForm from 'theme/components/organisms/o-clothes-product-order-form.vue';
 
 export default Vue.extend({
   name: 'ClothesProduct',
   components: {
-    OClothesProductOrderForm
+    OClothesProductOrderForm,
+    ProductStructuredData
   },
   props: {
     sku: {
