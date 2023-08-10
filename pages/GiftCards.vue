@@ -18,6 +18,11 @@
       </template>
     </SfModal>
 
+    <product-structured-data
+      v-if="product"
+      :product="product"
+    />
+
     <div class="_content">
       <div class="_col -left">
         <GiftCardTemplateComponent
@@ -78,6 +83,8 @@ import { InjectType } from 'src/modules/shared';
 import { GiftCardOptions, GiftCardTemplateSize } from 'src/modules/gift-card';
 import ServerError from 'src/modules/shared/types/server-error';
 
+import { ProductStructuredData } from 'src/modules/budsies';
+
 import GiftCardOrderFormData from 'theme/components/interfaces/gift-card-order-form-data.interface';
 
 const defaultGiftCardOrderFormData: GiftCardOrderFormData = {
@@ -104,7 +111,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     GiftCardTemplateComponent,
     OGiftCardOrderForm,
     SfModal,
-    MProductDescriptionStory
+    MProductDescriptionStory,
+    ProductStructuredData
   },
   inject: {
     imageHandlerService: { from: 'ImageHandlerService' }
