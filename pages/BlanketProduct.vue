@@ -1,5 +1,10 @@
 <template>
-  <div id="blanket-product" itemscope itemtype="http://schema.org/Product">
+  <div id="blanket-product">
+    <product-structured-data
+      v-if="getCurrentProduct"
+      :product="getCurrentProduct"
+    />
+
     <o-blanket-product-order-form
       v-if="getCurrentProduct"
       :artwork-upload-url="artworkUploadUrl"
@@ -21,12 +26,15 @@ import CartItem from 'core/modules/cart/types/CartItem';
 
 import Product from 'core/modules/catalog/types/Product';
 
+import { ProductStructuredData } from 'src/modules/budsies';
+
 import OBlanketProductOrderForm from 'theme/components/organisms/o-blanket-product-order-form.vue';
 
 export default Vue.extend({
   name: 'BlanketProduct',
   components: {
-    OBlanketProductOrderForm
+    OBlanketProductOrderForm,
+    ProductStructuredData
   },
   props: {
     sku: {

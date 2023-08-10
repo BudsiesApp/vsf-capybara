@@ -1,5 +1,10 @@
 <template>
-  <div id="pillow-product" itemscope itemtype="http://schema.org/Product">
+  <div id="pillow-product">
+    <product-structured-data
+      v-if="getCurrentProduct"
+      :product="getCurrentProduct"
+    />
+
     <o-pillow-product-order-form
       :artwork-upload-url="artworkUploadUrl"
       :product="getCurrentProduct"
@@ -19,6 +24,8 @@ import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/stor
 
 import Product from 'core/modules/catalog/types/Product';
 
+import { ProductStructuredData } from 'src/modules/budsies';
+
 import OPillowProductOrderForm from '../components/organisms/o-pillow-product-order-form.vue';
 
 const pillowSku = 'customPillow_bundle';
@@ -26,7 +33,8 @@ const pillowSku = 'customPillow_bundle';
 export default {
   name: 'PillowProduct',
   components: {
-    OPillowProductOrderForm
+    OPillowProductOrderForm,
+    ProductStructuredData
   },
   data () {
     return {
