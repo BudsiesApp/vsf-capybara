@@ -1,5 +1,5 @@
 <template>
-  <div class="m-pets-birthday-form">
+  <div class="m-share-birthday-form">
     <validation-observer slim v-slot="{ passes }">
       <div class="_birthday-added" v-if="isBirthdayAdded">
         <p class="_thank-you">
@@ -11,32 +11,32 @@
           type="button"
           @click.prevent="() => isBirthdayAdded = false"
         >
-          {{ $t('Add another pet') }}
+          {{ addAnotherButtonText }}
         </SfButton>
       </div>
 
       <form class="_form" v-else>
         <p class="_text">
-          {{ $t('Enter your pet\'s birthday so we can send you a special gift') }}
+          {{ topHelperText }}
         </p>
 
         <div class="_fields">
           <validation-provider
             rules="required"
-            :name="$t('Pet\'s name')"
+            :name="nameInputLabel"
             tag="div"
             class="_field -input"
             v-slot="{ errors }"
           >
             <SfInput
               class="_input"
-              name="petName"
+              name="name"
               :required="true"
               v-model="name"
               :valid="!errors.length"
               :error-message="errors[0]"
               :disabled="isDisabled"
-              :label="$t('Pet\'s name')"
+              :label="nameInputLabel"
             />
           </validation-provider>
 
@@ -104,7 +104,7 @@
             :disabled="isDisabled"
             @click.prevent="() => passes(() => onSubmit())"
           >
-            {{ $t('Add Pet') }}
+            {{ submitButtonText }}
           </SfButton>
         </div>
       </form>
@@ -159,7 +159,25 @@ interface NonReactiveData {
 }
 
 export default (Vue as VueConstructor<Vue & NonReactiveData>).extend({
-  name: 'MPetsBirthdayForm',
+  name: 'MShareBirthdayForm',
+  props: {
+    addAnotherButtonText: {
+      type: String,
+      required: true
+    },
+    topHelperText: {
+      type: String,
+      required: true
+    },
+    nameInputLabel: {
+      type: String,
+      required: true
+    },
+    submitButtonText: {
+      type: String,
+      required: true
+    }
+  },
   components: {
     SfButton,
     SfInput,
@@ -198,7 +216,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveData>).extend({
 
       this.isDisabled = true;
       try {
-        await this.$store.dispatch('budsies/sharePetBirthday', {
+        await this.$store.dispatch('budsies/shareBirthday', {
           name: this.name,
           birthMonth: this.birthMonth,
           birthDay: this.birthDay,
@@ -228,7 +246,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveData>).extend({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-.m-pets-birthday-form {
+.m-share-birthday-form {
   ._text {
     text-align: center;
   }
