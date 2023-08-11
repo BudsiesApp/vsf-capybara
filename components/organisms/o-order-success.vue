@@ -8,7 +8,7 @@
       />
       <SfHeading
         class="_main-subtitle"
-        :title="$t('Thank you for placing your Petsies order.')"
+        :title="$t('Thank you for placing your Budsies order.')"
         :level="3"
       />
       <SfHeading
@@ -17,7 +17,7 @@
         <template #title>
           <h4 class="sf-heading__title sf-heading__title--h4">
             {{ $t('Please feel free to email') }}
-            <a href="mailto:support@mypetsies.com">support@mypetsies.com</a>
+            <a href="mailto:support@budsies.com">support@budsies.com</a>
             {{ $t('if you have any questions.') }}
           </h4>
         </template>
@@ -29,10 +29,6 @@
     </div>
 
     <div class="_content">
-      <div class="_left">
-        <img class="_success-icon" src="/assets/images/success-icon.jpg" alt="">
-      </div>
-
       <div class="_right">
         <div class="_section">
           <div class="_title">
@@ -41,12 +37,18 @@
             </div>
 
             <SfHeading
-              :title="$t('Get special birthday savings for your pet(s) (optional)')"
+              :title="$t('Extra gift for the artist (Optional)')"
               :level="3"
             />
           </div>
 
-          <MPetsBirthdayForm class="_section_content" />
+          <m-share-birthday-form
+            class="_section_content"
+            :add-another-button-text="$t('Add another artist')"
+            :top-helper-text="$t('Enter the artist\'s birthday so we can send you a special gift')"
+            :name-input-label="$t('Artist\'s name')"
+            :submit-button-text="$t('Add artist')"
+          />
         </div>
 
         <div class="_section">
@@ -56,12 +58,15 @@
             </div>
 
             <SfHeading
-              :title="$t('Does your pet have a special story?')"
+              :title="$t('Do you have a special story?')"
               :level="3"
             />
           </div>
 
-          <m-pet-special-story-form class="m-pet-special-story-form _section_content" />
+          <m-share-special-story-form
+            class="m-share-special-story-form _section_content"
+            :submit-button-text="$t('Share with Budsies')"
+          />
         </div>
 
         <div class="_section">
@@ -71,16 +76,12 @@
             </div>
 
             <SfHeading
-              :title="$t('Are you a trendsetter?')"
+              :title="$t('Be a Trendsetter. Share your creation!')"
               :level="3"
             />
           </div>
 
           <div class="_sharing-content _section_content">
-            <p class="_text">
-              {{ $t('Let your friends know about Petsies so they can make their own amazing custom plushies.') }}
-            </p>
-
             <m-social-sharing
               :sharing-url="sharingData.sharingUrl"
               :sharing-description="sharingData.sharingDescription"
@@ -94,20 +95,46 @@
             </p>
           </div>
         </div>
+
+        <div class="_section">
+          <div class="_title">
+            <div class="_number">
+              4
+            </div>
+
+            <SfHeading
+              :title="$t('Love Budsies? Share the love with friends and get VIP perks!')"
+              :level="3"
+            />
+          </div>
+
+          <div class="_section_content">
+            <a :href="referralLink" target="_blank">
+              <SfButton>
+                {{ $t('Referral Program') }}
+              </SfButton>
+            </a>
+
+            <p class="_text -small">
+              {{ $t('Rewards dollars may be applied onto existing orders within 7 days of checkout.') }}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import Vue, { VueConstructor } from 'vue'
-import { SfHeading } from '@storefront-ui/vue';
+import Vue, { PropType, VueConstructor } from 'vue'
+import { SfButton, SfHeading } from '@storefront-ui/vue';
 
 import MSocialSharing from 'theme/components/molecules/m-social-sharing.vue';
 
-import MPetSpecialStoryForm from './OOrderSuccess/m-pet-special-story-form.vue';
-import MPetsBirthdayForm from './OOrderSuccess/m-pets-birthday-form.vue';
+import MShareSpecialStoryForm from './OOrderSuccess/m-pet-special-story-form.vue'; // TODO replace path after merge Petsies branch
+import MShareBirthdayForm from './OOrderSuccess/m-pets-birthday-form.vue';
 import { InjectType } from 'src/modules/shared';
+import { Order } from 'core/modules/order/types/Order';
 
 interface NonReactiveState {
   sharingData: {
@@ -123,25 +150,52 @@ interface InjectedServices {
   window: Window
 }
 
+const referralBaseUrl = 'https://referrals.budsies.com';
+
 export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>).extend({
   name: 'OOrderSuccess',
+  props: {
+    confirmation: {
+      type: Object as PropType<any>,
+      required: true
+    },
+    order: {
+      type: Object as PropType<Order>,
+      required: true
+    }
+  },
   inject: {
     window: { from: 'WindowObject' }
   } as unknown as InjectType<InjectedServices>,
   components: {
-    MPetSpecialStoryForm,
-    MPetsBirthdayForm,
+    MShareSpecialStoryForm,
+    MShareBirthdayForm,
     MSocialSharing,
+    SfButton,
     SfHeading
+  },
+  computed: {
+    email (): string {
+      return this.order.personalDetails.emailAddress;
+    },
+    fullName (): string {
+      return `${this.order.personalDetails.firstName} ${this.order.personalDetails.lastName}`;
+    },
+    orderId (): number {
+      return this.confirmation.magentoOrderId;
+    },
+    referralLink (): string {
+      return `${referralBaseUrl}/?skipreg=1&refid=${this.orderId}&name=${this.fullName}&email=${this.email}`;
+    }
   },
   created () {
     const baseUrl = this.window.location ? `${this.window.location.protocol}//${this.window.location.host}` : ''
     this.sharingData = {
       sharingUrl: baseUrl,
-      sharingDescription: `${this.$t('Woah! @Petsies makes a custom plush lookalike of your pet (just send them a photo!). Check out')} ${baseUrl}`,
-      eMailSubject: this.$t('Check out Petsies - they make a custom plush lookalike of your pet!') as string,
-      twitterDescription: this.$t('Now you can get a custom plush lookalike of your pet from @PetsiesOfficial. Check it out! https://t.co/YxtXW7CYJQ') as string,
-      image: 'http://pbs.twimg.com/media/CqFVJ8bVYAI2fK0.jpg'
+      sharingDescription: `${this.$t('Just brought a drawing to life by making a custom stuffed toy!')} ${baseUrl}`,
+      eMailSubject: this.$t('Check out Budsies!').toString(),
+      twitterDescription: `${this.$t('Just brought a drawing to life by making a custom stuffed toy!')} ${baseUrl} 'http://pic.twitter.com/H0WOKFdc4l'`,
+      image: baseUrl + '/assets/images/order_success_pinterest_share.jpg'
     };
   },
   destroyed () {
@@ -157,6 +211,7 @@ $number-size: 50px;
 $number-margin-right-desktop: var(--spacer-sm);
 
 .o-order-success {
+
   ._heading {
     padding: 0 var(--spacer-sm);
   }
@@ -179,6 +234,7 @@ $number-margin-right-desktop: var(--spacer-sm);
   ._content {
     display: flex;
     flex-direction: column;
+    max-width: 71.25rem;
 
     ._left {
       display: flex;
@@ -207,7 +263,7 @@ $number-margin-right-desktop: var(--spacer-sm);
 
     ._number {
       flex-shrink: 0;
-      background: var(--c-primary);
+      background: var(--c-info);
       border-radius: 25px;
       color: var(--c-white);
       display: inline-block;
