@@ -90,8 +90,9 @@ $forms-color-placeholder: #a09999;
     @include generate-color-variants(--c-blue, #303b40);
     // @include generate-color-variants(--_c-green-primary, #18ae0c);
     @include generate-color-variants(--_c-green-primary, #8eba4c);
+    @include generate-color-variants(--_c-green-primary-darken, #7a9d1a);
     // @include generate-color-variants(--_c-green-secondary, #81d57b);
-    @include generate-color-variants(--_c-green-secondary, #779918);
+    @include generate-color-variants(--_c-green-secondary, #e9f0d8);
     @include generate-color-variants(--_c-dark-primary, #535353);
     @include generate-color-variants(--_c-dark-secondary, #a3a3a3);
     @include generate-color-variants(--_c-gray-primary, #72757E);
@@ -138,7 +139,7 @@ $forms-color-placeholder: #a09999;
     @include assign-color-variants(--c-info, --_c-blue-primary);
     --c-info-variant: var(--_c-blue-secondary);
     
-    @include assign-color-variants(--c-success, --_c-green-secondary);
+    @include assign-color-variants(--c-success, --_c-green-primary);
     --c-success-variant: var(--_c-green-primary);
     
     @include assign-color-variants(--c-warning, --_c-light-primary);

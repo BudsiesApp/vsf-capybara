@@ -1,6 +1,7 @@
 <template>
   <div
     class="sharing-buttons"
+    :class="skinClass"
   >
     <a class="sharing-button -email" :href="shareEmailHref" target="_blank" />
     <a class="sharing-button -pinterest" :href="sharePinterestHref" target="_blank" />
@@ -11,6 +12,8 @@
 
 <script lang="ts">
 import Vue from 'vue';
+
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 export default Vue.extend({
   name: 'MSocialSharing',
@@ -51,6 +54,9 @@ export default Vue.extend({
     },
     shareFacebookHref (): string {
       return `http://www.facebook.com/sharer.php?u=${this.sharingUrl}`;
+    },
+    skinClass (): string {
+      return getCurrentThemeClass();
     }
   }
 })
@@ -95,6 +101,45 @@ export default Vue.extend({
 
       &:hover {
         background-position: 0 -30px;
+      }
+    }
+  }
+
+  &.-skin-budsies {
+    .sharing-button {
+      height: 63px;
+      width: 60px;
+
+      &.-facebook {
+        background-position: 0 0;
+
+        &:hover {
+          background-position: 0 -63px;
+        }
+      }
+
+      &.-pinterest {
+        background-position: -60px 0;
+
+        &:hover {
+          background-position: -60px -63px;
+        }
+      }
+
+      &.-twitter {
+        background-position: -120px 0;
+
+        &:hover {
+          background-position: -120px -63px;
+        }
+      }
+
+      &.-email {
+        background-position: -302px 0;
+
+        &:hover {
+          background-position: -302px -63px;
+        }
       }
     }
   }
