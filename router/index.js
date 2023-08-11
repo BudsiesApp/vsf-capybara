@@ -620,6 +620,13 @@ let routes = [
       productDesign: route.query.product_design,
       existingPlushieId: route.query.existingPlushieId
     })
+  },
+  {
+    name: 'gift-card-alias',
+    path: '/purchase-gift-card/',
+    redirect: {
+      name: 'gift-cards'
+    }
   }
 ];
 

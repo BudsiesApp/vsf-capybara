@@ -1,0 +1,14 @@
+@mixin wave-section {
+  position: relative;
+
+  &::before {
+    background: url(/assets/images/wave.png) repeat-x 0 0;
+    content: "";
+    display: block;
+    height: 10px;
+    left: 0;
+    position: absolute;
+    top: -10px;
+    width: 100%;
+  }
+}
