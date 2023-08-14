@@ -46,7 +46,13 @@
             />
           </div>
 
-          <MPetsBirthdayForm class="_section_content" />
+          <m-share-birthday-form
+            class="_section_content"
+            :add-another-button-text="$t('Add another pet')"
+            :top-helper-text="$t('Enter your pet\'s birthday so we can send you a special gift')"
+            :name-input-label="$t('Pet\'s name')"
+            :submit-button-text="$t('Add Pet')"
+          />
         </div>
 
         <div class="_section">
@@ -61,7 +67,10 @@
             />
           </div>
 
-          <m-pet-special-story-form class="m-pet-special-story-form _section_content" />
+          <m-share-special-story-form
+            class="m-share-special-story-form _section_content"
+            :submit-button-text="$t('Share with Petsies')"
+          />
         </div>
 
         <div class="_section">
@@ -103,11 +112,12 @@
 import Vue, { VueConstructor } from 'vue'
 import { SfHeading } from '@storefront-ui/vue';
 
+import { InjectType } from 'src/modules/shared';
+
 import MSocialSharing from 'theme/components/molecules/m-social-sharing.vue';
 
-import MPetSpecialStoryForm from './OOrderSuccess/m-pet-special-story-form.vue';
-import MPetsBirthdayForm from './OOrderSuccess/m-pets-birthday-form.vue';
-import { InjectType } from 'src/modules/shared';
+import MShareSpecialStoryForm from './OOrderSuccess/m-share-special-story-form.vue';
+import MShareBirthdayForm from './OOrderSuccess/m-share-birthday-form.vue';
 
 interface NonReactiveState {
   sharingData: {
@@ -129,8 +139,8 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
     window: { from: 'WindowObject' }
   } as unknown as InjectType<InjectedServices>,
   components: {
-    MPetSpecialStoryForm,
-    MPetsBirthdayForm,
+    MShareSpecialStoryForm,
+    MShareBirthdayForm,
     MSocialSharing,
     SfHeading
   },
