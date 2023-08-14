@@ -59,10 +59,10 @@ export default Vue.extend({
       return !this.participantData && !!this.currentState;
     },
     showWinnerSection (): boolean {
-      return !!this.participantData && this.participantData.isWinner;
+      return !!this.participantData && this.participantData.canPurchaseSpecComm;
     },
     showPendingSection (): boolean {
-      return !!this.participantData && !this.participantData.isWinner;
+      return !!this.participantData && !this.participantData.canPurchaseSpecComm;
     },
     currentState (): CurrentState | undefined {
       return this.$store.getters[`${SN_RAFFLE}/${getters.GET_CURRENT_STATE}`];

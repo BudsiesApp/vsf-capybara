@@ -76,7 +76,7 @@ export default Vue.extend({
     await (this as any).loadData();
   },
   async beforeMount () {
-    let isAvailable = this.participantData?.isWinner;
+    let isAvailable = this.participantData?.canPurchaseSpecComm;
 
     if (!isAvailable) {
       isAvailable = await this.checkPageAvailability();
@@ -109,7 +109,7 @@ export default Vue.extend({
         return false;
       }
 
-      return this.participantData.isWinner;
+      return this.participantData.canPurchaseSpecComm;
     },
     async loadData (): Promise<void> {
       this.isDataLoaded = false;
