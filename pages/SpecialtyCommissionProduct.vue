@@ -15,6 +15,7 @@ import config from 'config';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
+import rootStore from '@vue-storefront/core/store'
 
 import Product from 'core/modules/catalog/types/Product';
 import { SN_RAFFLE, getters, ParticipantData, actions } from 'src/modules/raffle';
@@ -58,35 +59,38 @@ export default Vue.extend({
     },
     showForm (): boolean {
       return this.isDataLoaded && !!this.getCurrentProduct;
-    },
-    participantData (): ParticipantData | undefined {
-      return this.$store.getters[`${SN_RAFFLE}/${getters.GET_PARTICIPANT_DATA}`];
     }
   },
-  async serverPrefetch () {
-    if (this.$ssrContext) this.$ssrContext.output.cacheTags.add('product')
+  async beforeRouteEnter (to, from, next): Promise<void> {
+    const existingParticipantData: ParticipantData | undefined = rootStore.getters[`${SN_RAFFLE}/${getters.GET_PARTICIPANT_DATA}`];
 
-    const isAvailable = await (this as any).checkPageAvailability();
-
-    if (!isAvailable) {
-      await this.$router.replace({ name: 'raffle' });
+    if (existingParticipantData?.canPurchaseSpecComm) {
+      next();
       return;
     }
+
+    if (!to.query.token) {
+      next({ name: 'raffle' });
+      return;
+    }
+
+    await rootStore.dispatch(`${SN_RAFFLE}/${actions.VERIFY_TOKEN}`, to.query.token);
+
+    const participantData: ParticipantData = rootStore.getters[`${SN_RAFFLE}/${getters.GET_PARTICIPANT_DATA}`];
+
+    if (!participantData?.canPurchaseSpecComm) {
+      next({ name: 'raffle' });
+      return;
+    }
+
+    next();
+  },
+  async serverPrefetch (): Promise<void> {
+    if (this.$ssrContext) this.$ssrContext.output.cacheTags.add('product')
 
     await (this as any).loadData();
   },
-  async beforeMount () {
-    let isAvailable = this.participantData?.canPurchaseSpecComm;
-
-    if (!isAvailable) {
-      isAvailable = await this.checkPageAvailability();
-    }
-
-    if (!isAvailable) {
-      await this.$router.replace({ name: 'raffle' });
-      return;
-    }
-
+  async beforeMount (): Promise<void> {
     if (!this.getCurrentProduct) {
       await this.loadData();
     }
@@ -98,19 +102,6 @@ export default Vue.extend({
     next();
   },
   methods: {
-    async checkPageAvailability (): Promise<boolean> {
-      if (!this.token) {
-        return false;
-      }
-
-      await this.$store.dispatch(`${SN_RAFFLE}/${actions.VERIFY_TOKEN}`, this.token);
-
-      if (!this.participantData) {
-        return false;
-      }
-
-      return this.participantData.canPurchaseSpecComm;
-    },
     async loadData (): Promise<void> {
       this.isDataLoaded = false;
 
