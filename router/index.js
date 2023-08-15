@@ -620,6 +620,15 @@ let routes = [
       productDesign: route.query.product_design,
       existingPlushieId: route.query.existingPlushieId
     })
+  },
+  {
+    name: 'cartoon-pillow-product',
+    path: '/plushie/index/cartoonPillows/',
+    component: PrintedProduct,
+    props: route => ({
+      sku: 'customCartoonPillows_bundle',
+      productDesign: route.query.product_design
+    })
   }
 ];
 
