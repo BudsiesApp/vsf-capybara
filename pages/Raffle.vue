@@ -49,9 +49,6 @@ export default Vue.extend({
     RaffleWinner
   },
   computed: {
-    isRaffleModuleSynced (): boolean {
-      return this.$store.getters[`${SN_RAFFLE}/${getters.GET_IS_SYNCED}`];
-    },
     participantData (): ParticipantData | undefined {
       return this.$store.getters[`${SN_RAFFLE}/${getters.GET_PARTICIPANT_DATA}`];
     },
