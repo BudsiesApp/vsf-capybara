@@ -103,15 +103,41 @@
             </p>
           </div>
         </div>
+
+        <div class="_section">
+          <div class="_title">
+            <div class="_number">
+              4
+            </div>
+
+            <SfHeading
+              :title="$t('Love Petsies? Share the love with friends and get VIP perks!')"
+              :level="3"
+            />
+          </div>
+
+          <div class="_section_content">
+            <a :href="referralLink" target="_blank" class="_referral-link">
+              <SfButton class="_button">
+                {{ $t('Referral Program') }}
+              </SfButton>
+            </a>
+
+            <p class="_text -small">
+              {{ $t('Rewards dollars may be applied onto existing orders within 7 days of checkout.') }}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import Vue, { VueConstructor } from 'vue'
-import { SfHeading } from '@storefront-ui/vue';
+import Vue, { PropType, VueConstructor } from 'vue'
+import { SfButton, SfHeading } from '@storefront-ui/vue';
 
+import { Order } from 'core/modules/order/types/Order';
 import { InjectType } from 'src/modules/shared';
 
 import MSocialSharing from 'theme/components/molecules/m-social-sharing.vue';
@@ -133,8 +159,20 @@ interface InjectedServices {
   window: Window
 }
 
+const referralBaseUrl = 'https://referrals.mypetsies.com';
+
 export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>).extend({
   name: 'OOrderSuccess',
+  props: {
+    confirmation: {
+      type: Object as PropType<any>,
+      required: true
+    },
+    order: {
+      type: Object as PropType<Order>,
+      required: true
+    }
+  },
   inject: {
     window: { from: 'WindowObject' }
   } as unknown as InjectType<InjectedServices>,
@@ -142,7 +180,22 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
     MShareSpecialStoryForm,
     MShareBirthdayForm,
     MSocialSharing,
+    SfButton,
     SfHeading
+  },
+  computed: {
+    email (): string {
+      return this.order.personalDetails.emailAddress;
+    },
+    fullName (): string {
+      return `${this.order.personalDetails.firstName} ${this.order.personalDetails.lastName}`;
+    },
+    orderId (): number {
+      return this.confirmation.magentoOrderId;
+    },
+    referralLink (): string {
+      return `${referralBaseUrl}/?skipreg=1&refid=${this.orderId}&name=${this.fullName}&email=${this.email}`;
+    }
   },
   created () {
     const baseUrl = this.window.location ? `${this.window.location.protocol}//${this.window.location.host}` : ''
@@ -239,9 +292,20 @@ $number-margin-right-desktop: var(--spacer-sm);
 
   ._text {
     text-align: center;
+    margin-top: var(--spacer-sm);
 
     &.-small {
       font-size: var(--font-sm);
+    }
+  }
+
+  ._referral-link {
+    display: inline-block;
+    width: 100%;
+    margin-top: var(--spacer-sm);
+
+    ._button {
+      margin: 0 auto;
     }
   }
 
@@ -289,6 +353,10 @@ $number-margin-right-desktop: var(--spacer-sm);
 
     ._text {
       text-align: start;
+    }
+
+    ._referral-link {
+      width: auto;
     }
   }
 }
