@@ -2,26 +2,29 @@
   <div id="raffle-page">
     <MBlockStory
       :story-slug="storySlug"
+      class="_intro-block"
       v-if="storySlug"
     />
 
-    <div class="_registration-section" v-if="showRegistrationSection">
-      <raffle-registration-form
-        :capacity="currentState.capacity"
-        :next-drawing-date="currentState.nextDrawing"
-        @show-previous-winning-tickets-button-click="onShowPreviousWinningTicketsButtonClick"
-      />
-    </div>
+    <div class="_raffle-content">
+      <div class="_registration-section" v-if="showRegistrationSection">
+        <raffle-registration-form
+          :capacity="currentState.capacity"
+          :next-drawing-date="currentState.nextDrawing"
+          @show-previous-winning-tickets-button-click="onShowPreviousWinningTicketsButtonClick"
+        />
+      </div>
 
-    <div class="_pending-section" v-if="showPendingSection">
-      <raffle-pending
-        :participant-data="participantData"
-        @show-previous-winning-tickets-button-click="onShowPreviousWinningTicketsButtonClick"
-      />
-    </div>
+      <div class="_pending-section" v-else-if="participantState === 'registered'">
+        <raffle-pending
+          :participant-data="participantData"
+          @show-previous-winning-tickets-button-click="onShowPreviousWinningTicketsButtonClick"
+        />
+      </div>
 
-    <div class="_winner-section" v-if="showWinnerSection">
-      <raffle-winner :token="participantData.token" />
+      <div class="_winner-section" v-else-if="participantState === 'winner'">
+        <raffle-winner :token="participantData.token" />
+      </div>
     </div>
   </div>
 </template>
@@ -52,20 +55,27 @@ export default Vue.extend({
     participantData (): ParticipantData | undefined {
       return this.$store.getters[`${SN_RAFFLE}/${getters.GET_PARTICIPANT_DATA}`];
     },
+    participantState (): 'not-registered' | 'registered' | 'winner' {
+      if (!!this.participantData && !this.participantData.canPurchaseSpecComm) {
+        return 'registered';
+      } else if (!!this.participantData && this.participantData.canPurchaseSpecComm) {
+        return 'winner'
+      } else {
+        return 'not-registered';
+      }
+    },
     showRegistrationSection (): boolean {
-      return !this.participantData && !!this.currentState;
-    },
-    showWinnerSection (): boolean {
-      return !!this.participantData && this.participantData.canPurchaseSpecComm;
-    },
-    showPendingSection (): boolean {
-      return !!this.participantData && !this.participantData.canPurchaseSpecComm;
+      return this.participantState === 'not-registered' && !!this.currentState;
     },
     currentState (): CurrentState | undefined {
       return this.$store.getters[`${SN_RAFFLE}/${getters.GET_CURRENT_STATE}`];
     },
-    storySlug (): string {
-      return ''; // TODO should return appropriate story slug based on raffle state.
+    storySlug (): string | undefined {
+      if (this.participantState === 'not-registered') {
+        return 'raffle_landing_top';
+      } else {
+        return undefined;
+      }
     }
   },
   beforeMount (): void {
@@ -99,6 +109,10 @@ export default Vue.extend({
 
 #raffle-page {
   padding: var(--spacer-lg) var(--spacer-base) 0;
+
+  ._intro-block + ._raffle-content {
+    margin-top: var(--spacer-xl);
+  }
 
   ._registration-section,
   ._pending-section {
