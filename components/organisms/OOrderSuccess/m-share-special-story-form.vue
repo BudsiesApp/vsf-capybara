@@ -1,5 +1,5 @@
 <template>
-  <div class="m-pets-birthday-form">
+  <div class="m-share-special-story-form">
     <div class="_text" v-if="isShared">
       {{ $t('Your story has just been broadcast to the design team. Thank you very much for giving us the opportunity to be a part of your family.') }}
     </div>
@@ -37,7 +37,7 @@
           :disabled="isDisabled"
           @click.prevent="() => passes(() => onSubmit())"
         >
-          {{ $t('Share with Petsies') }}
+          {{ submitButtonText }}
         </SfButton>
       </div>
     </validation-observer>
@@ -59,11 +59,17 @@ extend('required', {
 });
 
 export default Vue.extend({
-  name: 'MPetSpecialStoryForm',
+  name: 'MShareSpecialStoryForm',
   components: {
     SfButton,
     ValidationProvider,
     ValidationObserver
+  },
+  props: {
+    submitButtonText: {
+      type: String,
+      required: true
+    }
   },
   data () {
     return {
@@ -112,7 +118,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-.m-pet-special-story-form {
+.m-share-special-story-form {
   ._text {
     text-align: center;
   }

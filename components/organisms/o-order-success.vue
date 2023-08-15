@@ -109,8 +109,8 @@
           </div>
 
           <div class="_section_content">
-            <a :href="referralLink" target="_blank">
-              <SfButton>
+            <a :href="referralLink" target="_blank" class="_referral-link">
+              <SfButton class="_button">
                 {{ $t('Referral Program') }}
               </SfButton>
             </a>
@@ -129,12 +129,13 @@
 import Vue, { PropType, VueConstructor } from 'vue'
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 
+import { Order } from 'core/modules/order/types/Order';
+import { InjectType } from 'src/modules/shared';
+
 import MSocialSharing from 'theme/components/molecules/m-social-sharing.vue';
 
-import MShareSpecialStoryForm from './OOrderSuccess/m-pet-special-story-form.vue'; // TODO replace path after merge Petsies branch
-import MShareBirthdayForm from './OOrderSuccess/m-pets-birthday-form.vue';
-import { InjectType } from 'src/modules/shared';
-import { Order } from 'core/modules/order/types/Order';
+import MShareSpecialStoryForm from './OOrderSuccess/m-share-special-story-form.vue';
+import MShareBirthdayForm from './OOrderSuccess/m-share-birthday-form.vue';
 
 interface NonReactiveState {
   sharingData: {
@@ -285,9 +286,20 @@ $number-margin-right-desktop: var(--spacer-sm);
 
   ._text {
     text-align: center;
+    margin-top: var(--spacer-sm);
 
     &.-small {
       font-size: var(--font-sm);
+    }
+  }
+
+  ._referral-link {
+    display: inline-block;
+    width: 100%;
+    margin-top: var(--spacer-sm);
+
+    ._button {
+      margin: 0 auto;
     }
   }
 
@@ -335,6 +347,10 @@ $number-margin-right-desktop: var(--spacer-sm);
 
     ._text {
       text-align: start;
+    }
+
+    ._referral-link {
+      width: auto;
     }
   }
 }
