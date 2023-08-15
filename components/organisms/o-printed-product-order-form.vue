@@ -358,6 +358,10 @@ export default defineComponent({
       type: String,
       required: true
     },
+    styleBundleOptionTitle: {
+      type: String,
+      required: true
+    },
     product: {
       type: Object as PropType<Product>,
       required: true
@@ -462,11 +466,7 @@ export default defineComponent({
       return bodyparts;
     },
     styleBundleOption (): BundleOption | undefined {
-      if (!this.product?.bundle_options) {
-        return undefined;
-      }
-
-      return this.product.bundle_options.find(item => item.title.toLowerCase() === 'product');
+      return this.product?.bundle_options?.find(item => item.title.toLowerCase() === this.styleBundleOptionTitle);
     },
     designSelectorOptions (): {
       value: string,

@@ -7,6 +7,7 @@
 
     <o-printed-product-order-form
       :artwork-upload-url="artworkUploadUrl"
+      :style-bundle-option-title="styleBundleOptionTitle"
       :product="getCurrentProduct"
       :selected-style="productDesign"
       :existing-cart-item="existingCartItem"
@@ -24,11 +25,16 @@ import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import CartItem from 'core/modules/cart/types/CartItem';
 
+import { BundleOption } from 'core/modules/catalog/types/BundleOption';
 import Product from 'core/modules/catalog/types/Product';
 
 import { ProductStructuredData } from 'src/modules/budsies';
 
 import OPrintedProductOrderForm from 'theme/components/organisms/o-printed-product-order-form.vue';
+
+const shouldLoadStyleOptionsBodyPartsForProductSkus = [
+  'customCartoonPillows_bundle'
+];
 
 export default Vue.extend({
   name: 'PrintedProduct',
@@ -57,6 +63,9 @@ export default Vue.extend({
     };
   },
   computed: {
+    styleBundleOptionTitle (): string {
+      return 'product';
+    },
     getCurrentProduct (): Product | null {
       const product = this.$store.getters['product/getCurrentProduct'];
       if (!product?.sku || product.sku !== this.sku) {
@@ -80,6 +89,9 @@ export default Vue.extend({
     },
     showForm (): boolean {
       return this.isDataLoaded && !!this.getCurrentProduct;
+    },
+    styleBundleOption (): BundleOption | undefined {
+      return this.getCurrentProduct?.bundle_options?.find(item => item.title.toLowerCase() === this.styleBundleOptionTitle);
     }
   },
   async serverPrefetch () {
@@ -107,10 +119,33 @@ export default Vue.extend({
         setCurrent: true
       });
 
-      await Promise.all([
+      const dataLoadingPromises = [
         this.$store.dispatch('budsies/loadExtraPhotosAddons', { productId: product.id }),
         this.$store.dispatch('budsies/loadProductBodyparts', { productId: product.id })
-      ]);
+      ];
+
+      if (
+        this.styleBundleOption &&
+        shouldLoadStyleOptionsBodyPartsForProductSkus.includes(this.sku)
+      ) {
+        const productIds: number[] = [];
+
+        for (const productLink of this.styleBundleOption.product_links) {
+          if (!productLink.product || !productLink.product.id) {
+            continue;
+          }
+
+          productIds.push(+productLink.product.id);
+        }
+
+        dataLoadingPromises.push(
+          this.$store.dispatch('budsies/loadProductsBodyParts', {
+            productIds
+          })
+        );
+      }
+
+      await Promise.all(dataLoadingPromises);
 
       this.isDataLoaded = true;
 
