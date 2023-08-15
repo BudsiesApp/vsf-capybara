@@ -36,6 +36,8 @@ const BudsiesPlushieProduct = () =>
   import(/* webpackChunkName: "vsf-budsies-plushie-product" */ 'theme/pages/BudsiesPlushieProduct');
 const SpecialtyCommissionProduct = () =>
   import(/* webpackChunkName: "vsf-specialty-commission-product" */ 'theme/pages/SpecialtyCommissionProduct');
+const Raffle = () =>
+  import(/* webpackChunkName: "vsf-raffle" */ 'theme/pages/Raffle');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -619,6 +621,21 @@ let routes = [
       sku: 'customGolfShirts_bundle',
       productDesign: route.query.product_design,
       existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
+    name: 'raffle-alias-1',
+    path: '/commissions-closed/',
+    redirect: {
+      name: 'raffle'
+    }
+  },
+  {
+    name: 'raffle',
+    path: '/raffle/',
+    component: Raffle,
+    props: (route) => ({
+      referrerToken: route.query.referral_code
     })
   }
 ];
