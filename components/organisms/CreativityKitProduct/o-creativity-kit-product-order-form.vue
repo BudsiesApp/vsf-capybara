@@ -312,7 +312,7 @@ export default Vue.extend({
       flex-wrap: wrap;
       justify-content: center;
       column-gap: var(--spacer-lg);
-      row-gap: var(--spacer-lg);
+      row-gap: var(--spacer-xl);
     }
 
     ._option {

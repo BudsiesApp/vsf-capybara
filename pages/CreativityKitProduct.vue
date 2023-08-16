@@ -461,7 +461,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   }
 
   ._form {
-    margin-top: var(--spacer-lg);
+    margin-top: var(--spacer-xl);
   }
 
   ._content-title {
@@ -495,7 +495,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   }
 
   ._form-wrapper {
-    margin: var(--spacer-2xl) auto 0;
+    margin: var(--spacer-xl) auto 0;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -518,7 +518,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
 
     ._form-container {
-      margin-top: var(--spacer-2xl);
+      margin-top: var(--spacer-xl);
       flex-grow: 1;
     }
   }

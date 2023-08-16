@@ -73,6 +73,10 @@ export default Vue.extend({
     flex-basis: 100%;
   }
 
+  ._description {
+    text-align: center;
+  }
+
   @include for-tablet-up {
     .sf-heading {
       --heading-text-align: start;
@@ -94,6 +98,10 @@ export default Vue.extend({
 
     ._image {
       width: 100%;
+    }
+
+    ._description {
+      text-align: left;
     }
   }
 }
