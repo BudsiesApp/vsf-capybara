@@ -38,7 +38,7 @@
 
         <o-creativity-kit-product-order-form
           class="_form"
-          :budsie-product-price="budsieProductSize"
+          :budsie-product-price="budsieProductPrice"
           :superized-addon-price="superizedAddonPrice"
           :product="getCurrentProduct"
           v-if="showForm"
@@ -255,7 +255,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       const productBySku = this.$store.getters['product/getProductBySkuDictionary'];
       return productBySku[budsieProductSku];
     },
-    budsieProductSize (): number {
+    budsieProductPrice (): number {
       const price = getProductDefaultPrice(
         this.getBudsieProduct,
         {},
