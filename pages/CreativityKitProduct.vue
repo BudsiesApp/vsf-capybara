@@ -311,7 +311,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       const productLink = addonsBundleOption.product_links.find((productLink) => {
         return productLink.product &&
-        productLink.product.sku === superizeAddonSku;
+          productLink.product.sku === superizeAddonSku;
       });
 
       return productLink?.product;
@@ -530,25 +530,21 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     &:nth-child(even) {
       @include wave-section-yellow;
 
-      background: linear-gradient(
-        to bottom,
+      background: linear-gradient(to bottom,
           #fbf5e7 0%,
           #fcf7ed 47%,
-          #ffffff 100%
-      );
+          #ffffff 100%);
     }
 
     &:nth-child(odd) {
       @include wave-section-blue;
 
-      background: linear-gradient(
-        to bottom,
-        #e4f5f1 0%,
-        #e9f9f2 47%,
-        #e9f9f2 47%,
-        #fcfefd 87%,
-        #ffffff 100%
-      );
+      background: linear-gradient(to bottom,
+          #e4f5f1 0%,
+          #e9f9f2 47%,
+          #e9f9f2 47%,
+          #fcfefd 87%,
+          #ffffff 100%);
     }
 
     ._title {
@@ -595,8 +591,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       ::v-deep {
         .sf-heading {
-        --heading-text-align: start;
-      }
+          --heading-text-align: start;
+        }
       }
     }
 
@@ -614,44 +610,44 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         }
       }
 
-    ._content {
-      display: flex;
-      flex-wrap: wrap;
-      margin-top: var(--spacer-2xl);
+      ._content {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: var(--spacer-2xl);
 
-      .sf-heading {
-    --heading-text-align: start;
-    }
+        .sf-heading {
+          --heading-text-align: start;
+        }
 
-      ._image {
-        flex-basis: 40%;
-      }
+        ._image {
+          flex-basis: 40%;
+        }
 
-      ._subtitle {
-        text-align: start;
-      }
+        ._subtitle {
+          text-align: start;
+        }
 
-      ._description {
-        margin: 0 0 0 var(--spacer-lg);
-        flex-grow: 1;
-        flex-basis: 50%;
-      }
+        ._description {
+          margin: 0 0 0 var(--spacer-lg);
+          flex-grow: 1;
+          flex-basis: 50%;
+        }
 
-      ._image {
-        img {
+        ._image {
+          img {
+            margin-top: 0;
+          }
+        }
+
+        ._content-title {
           margin-top: 0;
         }
-      }
 
-      ._content-title {
-        margin-top: 0;
-      }
-
-      ._dot-list {
-        margin-top: var(--spacer-base);
+        ._dot-list {
+          margin-top: var(--spacer-base);
+        }
       }
     }
-  }
 
     ._featured-items {
       border-top: none;

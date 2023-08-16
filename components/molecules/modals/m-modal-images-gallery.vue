@@ -131,7 +131,7 @@ export default Vue.extend({
 
   ._navigation {
     position: absolute;
-    top:  0;
+    top: 0;
     height: 100%;
     width: 40%;
     cursor: pointer;
