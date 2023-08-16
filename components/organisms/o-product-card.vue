@@ -67,14 +67,14 @@ export default {
           --badge-height: #{$size};
           --badge-width: #{$size};
           --badge-padding: 0;
-          --badge-border: #{$border-width} solid var(--_c-light-primary);
+          --badge-border: #{$border-width} solid var(--c-accent);
           --badge-border-radius: #{$size / 2};
           --badge-font-weight: 800;
           --badge-background: #fff;
           --badge-font-size: 1rem;
 
         ::v-deep .sf-badge {
-            color: var(--_c-light-primary);
+            color: var(--c-accent);
             line-height: $size - $border-width * 2;
             pointer-events: none;
         }

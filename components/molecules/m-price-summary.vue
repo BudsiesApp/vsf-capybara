@@ -141,8 +141,8 @@ export default {
 
   &.-skin-budsies {
     .sf-property.--marked {
-      --property-name-color: var(--c-info);
-      --property-value-color: var(--c-info);
+      --property-name-color: var(--c-accent);
+      --property-value-color: var(--c-accent);
     }
   }
 }

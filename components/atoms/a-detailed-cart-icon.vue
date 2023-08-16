@@ -59,7 +59,7 @@ export default {
 
   &.-skin-budsies {
     .sf-badge--number {
-      --badge-background: var(--c-primary);
+      --badge-background: var(--c-accent);
     }
   }
 }

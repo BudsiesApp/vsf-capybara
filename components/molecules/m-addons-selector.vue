@@ -475,7 +475,7 @@ export default Vue.extend({
   &.-skin-budsies {
     ._item {
       ._price {
-        color: var(--c-info);
+        color: var(--c-accent);
       }
     }
   }

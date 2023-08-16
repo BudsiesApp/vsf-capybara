@@ -226,7 +226,7 @@ $number-margin-right-desktop: var(--spacer-sm);
   }
 
   ._confirmation {
-    color: var(--c-danger-variant);
+    color: var(--c-accent);
     text-align: center;
     font-size: var(--font-base);
     margin-top: var(--spacer-base);
