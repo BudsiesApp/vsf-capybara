@@ -15,8 +15,10 @@ import config from 'config';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
+import rootStore from '@vue-storefront/core/store'
 
 import Product from 'core/modules/catalog/types/Product';
+import { SN_RAFFLE, getters, ParticipantData, actions } from 'src/modules/raffle';
 
 import OSpecialtyCommissionProductOrderForm from 'theme/components/organisms/o-specialty-commission-product-order-form.vue';
 
@@ -59,12 +61,36 @@ export default Vue.extend({
       return this.isDataLoaded && !!this.getCurrentProduct;
     }
   },
-  async serverPrefetch () {
+  async beforeRouteEnter (to, from, next): Promise<void> {
+    const existingParticipantData: ParticipantData | undefined = rootStore.getters[`${SN_RAFFLE}/${getters.GET_PARTICIPANT_DATA}`];
+
+    if (existingParticipantData?.canPurchaseSpecComm) {
+      next();
+      return;
+    }
+
+    if (!to.query.token) {
+      next({ name: 'raffle' });
+      return;
+    }
+
+    await rootStore.dispatch(`${SN_RAFFLE}/${actions.VERIFY_TOKEN}`, to.query.token);
+
+    const participantData: ParticipantData = rootStore.getters[`${SN_RAFFLE}/${getters.GET_PARTICIPANT_DATA}`];
+
+    if (!participantData?.canPurchaseSpecComm) {
+      next({ name: 'raffle' });
+      return;
+    }
+
+    next();
+  },
+  async serverPrefetch (): Promise<void> {
     if (this.$ssrContext) this.$ssrContext.output.cacheTags.add('product')
 
     await (this as any).loadData();
   },
-  async beforeMount () {
+  async beforeMount (): Promise<void> {
     if (!this.getCurrentProduct) {
       await this.loadData();
     }

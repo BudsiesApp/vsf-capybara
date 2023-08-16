@@ -29,7 +29,12 @@
         </transition>
       </div>
     </div>
-    <OOrderSuccess v-else class="_order-success" />
+    <OOrderSuccess
+      v-else
+      class="_order-success"
+      :confirmation="confirmation"
+      :order="order"
+    />
   </div>
 </template>
 <script>
