@@ -66,7 +66,7 @@ export default Blok.extend({
     },
     reviewsCount (): number {
     // value should be fetched from Magento config
-      return 149;
+      return 315;
     },
     reviewsLink (): string {
       if (!this.itemData.link_url.url) {
