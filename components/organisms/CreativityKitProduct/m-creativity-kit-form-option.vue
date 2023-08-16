@@ -104,9 +104,11 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-$border-color-unchecked: #dbdbdb;
+@import "theme/css/base/_breakpoints.scss";
 
 .m-creativity-kit-form-option {
+  $border-color-unchecked: #dbdbdb;
+
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -159,14 +161,6 @@ $border-color-unchecked: #dbdbdb;
     ._input {
       visibility: hidden;
       position: absolute;
-    }
-
-    &:hover {
-      ._overlay {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
     }
   }
 
@@ -254,6 +248,18 @@ $border-color-unchecked: #dbdbdb;
     left: 0;
     width: 100%;
     transform: translateY(-50%) rotate(33deg);
+  }
+
+  @include for-desktop {
+    ._label {
+      &:hover {
+        ._overlay {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+      }
+    }
   }
 }
 </style>
