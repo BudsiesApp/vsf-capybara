@@ -1,0 +1,19 @@
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+
+@mixin for-tablet-up {
+  @media(min-width: $tablet-min) {
+    @content;
+  }
+}
+
+@media (max-width: $mobile-max) {
+  .tablet-up-only {
+    display: none;
+  }
+}
+
+.small-mobile-only {
+  @include for-tablet-up {
+    display: none;
+  }
+}

@@ -12,3 +12,21 @@
     width: 100%;
   }
 }
+
+@mixin wave-section-yellow {
+  @include wave-section();
+
+  &::before {
+    background: url(/assets/images/wave-yellow.png) repeat-x 0 0;
+    height: 8px;
+    top: -8px;
+  }
+}
+
+@mixin wave-section-blue {
+  @include wave-section();
+
+  &::before {
+    background: url(/assets/images/wave-blue.png) repeat-x 0 0;
+  }
+}
