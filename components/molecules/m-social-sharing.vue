@@ -4,14 +4,19 @@
     :class="skinClass"
   >
     <a class="sharing-button -email" :href="shareEmailHref" target="_blank" />
-    <a class="sharing-button -pinterest" :href="sharePinterestHref" target="_blank" />
+    <a
+      class="sharing-button -pinterest"
+      :href="sharePinterestHref"
+      target="_blank"
+      v-if="sharePinterestHref"
+    />
     <a class="sharing-button -twitter" :href="shareTwitterHref" target="_blank" />
     <a class="sharing-button -facebook" :href="shareFacebookHref" target="_blank" />
   </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import Vue, { PropType } from 'vue';
 
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
@@ -35,8 +40,8 @@ export default Vue.extend({
       required: true
     },
     image: {
-      type: String,
-      required: true
+      type: String as PropType<string | undefined>,
+      default: undefined
     }
   },
   computed: {
@@ -45,7 +50,11 @@ export default Vue.extend({
       const emailText = this.sharingDescription + lineBreak + lineBreak + 'Link:' + lineBreak + this.sharingUrl;
       return `mailto:?subject=${this.eMailSubject}&body=${emailText}`;
     },
-    sharePinterestHref (): string {
+    sharePinterestHref (): string | undefined {
+      if (!this.image) {
+        return;
+      }
+
       return `http://pinterest.com/pin/create/button/?media=${this.image}` +
       `&description=${this.sharingDescription}&url=${this.sharingUrl}`;
     },

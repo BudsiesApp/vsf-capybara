@@ -36,6 +36,8 @@ const BudsiesPlushieProduct = () =>
   import(/* webpackChunkName: "vsf-budsies-plushie-product" */ 'theme/pages/BudsiesPlushieProduct');
 const SpecialtyCommissionProduct = () =>
   import(/* webpackChunkName: "vsf-specialty-commission-product" */ 'theme/pages/SpecialtyCommissionProduct');
+const Raffle = () =>
+  import(/* webpackChunkName: "vsf-raffle" */ 'theme/pages/Raffle');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -627,6 +629,21 @@ let routes = [
     redirect: {
       name: 'gift-cards'
     }
+  },
+  {
+    name: 'raffle-alias-1',
+    path: '/commissions-closed/',
+    redirect: {
+      name: 'raffle'
+    }
+  },
+  {
+    name: 'raffle',
+    path: '/raffle/',
+    component: Raffle,
+    props: (route) => ({
+      referrerToken: route.query.referral_code
+    })
   }
 ];
 
