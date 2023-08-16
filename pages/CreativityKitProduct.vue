@@ -391,12 +391,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 @import "theme/css/mixins/wave.scss";
 
 #creativity-kit-product {
-  --heading-padding: 0;
+  $max-section-width: 1272px;
+  --section-side-padding: var(--spacer-sm);
 
   box-sizing: border-box;
 
   ._story {
-    max-width: 1272px;
+    max-width: $max-section-width;
     width: 100%;
     margin-left: auto;
     margin-right: auto;
@@ -499,8 +500,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    padding: 0 var(--spacer-base);
-    max-width: 1272px;
+    padding: 0 var(--section-side-padding);
+    max-width: $max-section-width;
+    box-sizing: border-box;
 
     ._image {
       ._image-caption {
@@ -524,7 +526,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   }
 
   ._section {
-    padding: var(--spacer-2xl) var(--spacer-base) 0;
+    padding: var(--spacer-2xl) var(--section-side-padding) 0;
     margin-top: var(--spacer-2xl);
 
     &:nth-child(even) {
@@ -558,7 +560,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
 
     ._content {
-      max-width: 1272px;
+      box-sizing: border-box;
+      max-width: calc(#{$max-section-width} - 2 * var(--section-side-padding));
       width: 100%;
       margin: 0 auto;
     }
@@ -586,6 +589,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   }
 
   @media (min-width: $tablet-min) {
+    --section-side-padding: var(--spacer-base);
+
     .o-creativity-kit-product-order-form {
       margin-top: var(--spacer-lg);
 
@@ -677,6 +682,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   }
 
   @include for-desktop {
+    ._image {
+      justify-content: flex-start;
+    }
+
     ._form-wrapper {
       flex-wrap: nowrap;
       column-gap: var(--spacer-xl);
