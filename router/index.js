@@ -36,6 +36,8 @@ const BudsiesPlushieProduct = () =>
   import(/* webpackChunkName: "vsf-budsies-plushie-product" */ 'theme/pages/BudsiesPlushieProduct');
 const SpecialtyCommissionProduct = () =>
   import(/* webpackChunkName: "vsf-specialty-commission-product" */ 'theme/pages/SpecialtyCommissionProduct');
+const CreativityKitProduct = () =>
+  import(/* webpackChunkName: "vsf-creativity-kit-product" */ 'theme/pages/CreativityKitProduct');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -372,15 +374,8 @@ let routes = [
   { name: 'gift-cards', path: '/giftcards/', component: GiftCards },
   {
     name: 'giftbox',
-    path: '/giftbox/',
-    redirect: {
-      name: 'configurable-product',
-      params: {
-        parentSku: 'gift_box',
-        slug: 'gift-box-240',
-        childSku: 'gift_box_dog'
-      }
-    }
+    path: '/gift-box/',
+    component: CreativityKitProduct
   },
   {
     name: 'renaissance-blankets',
