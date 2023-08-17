@@ -631,23 +631,26 @@ export default defineComponent({
       const style = this.availableStyles.find(
         (item) => item.value === this.selectedStyle
       );
+      const sizePrice = this.selectedSize?.regularPrice || 0;
 
       if (!style || !style.price) {
-        return this.bundleProductPrice.regular;
+        return this.bundleProductPrice.regular + sizePrice;
       }
 
-      return style.price;
+      return style.price + sizePrice;
     },
     specialPrice (): number {
       const style = this.availableStyles.find(
         (item) => item.value === this.selectedStyle
       );
 
+      const sizePrice = this.selectedSize?.specialPrice || 0;
+
       if (!style || !style.specialPrice) {
-        return this.bundleProductPrice.special;
+        return this.bundleProductPrice.special + sizePrice;
       }
 
-      return style.specialPrice;
+      return style.specialPrice + sizePrice;
     },
     hasStyleSelections (): boolean {
       return !(

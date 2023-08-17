@@ -271,6 +271,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           id: String(productLink.product.id),
           label: productLink.product.name,
           finalPrice: price.special ? price.special : price.regular,
+          specialPrice: price.special,
+          regularPrice: price.regular,
           value: productLink.product.sku,
           isSelected: false,
           contentTypeId: BodyPartValueContentType.IMAGE,

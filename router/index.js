@@ -257,6 +257,9 @@ let routes = [
         case '575':
           parentSku = 'golfHeadCoversOther_bundle';
           break;
+        case '603':
+          parentSku = 'customCartoonPillows_bundle';
+          break;
         case '626':
           parentSku = 'customGolfShirts_bundle';
           break;
