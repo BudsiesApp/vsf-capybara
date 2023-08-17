@@ -93,3 +93,16 @@ $font-path: $path + "Roselina-Script";
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
   @include font-face("Roselina", $font-path, 400, normal, svg);
 }
+
+$font-name: "GothamRounded";
+@each $font-weight in 300, 400, 500, 700 {
+  $font-path: $path + $font-name + "_" + $font-weight + "_normal";
+  @include font-face($font-name, $font-path, $font-weight, normal);
+}
+
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  @each $font-weight in 300, 400, 500, 700 {
+    $font-path: $path + $font-name + "_" + $font-weight + "_normal";
+    @include font-face($font-name, $font-path, $font-weight, null, svg);
+  }
+}

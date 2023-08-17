@@ -1,9 +1,9 @@
 <template>
-  <div id="cross-sells">
+  <div id="cross-sells" :class="skinClass">
     <div class="_actions-container">
       <header class="sf-heading">
         <h2 class="sf-heading__title">
-          Other pet gifts you might like
+          {{ $t('Other custom gifts you might like') }}
         </h2>
       </header>
       <SfButton class="sf-button actions__button" @click="goToCart">
@@ -37,7 +37,7 @@
     <div class="_up-sells-list" v-if="upSellsProducts.length">
       <header class="sf-heading">
         <h2 class="sf-heading__title">
-          Accessorize Your Pet(sies)
+          {{ $t('Budsies Accessories') }}
         </h2>
       </header>
       <div class="products">
@@ -76,6 +76,7 @@ import { SfButton } from '@storefront-ui/vue';
 import OProductCard from 'theme/components/organisms/o-product-card.vue';
 import { prepareCategoryProduct } from 'theme/helpers';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 const getSkuFromRoute = (route: Route): string | undefined => {
   return route.params.parentSku;
@@ -118,6 +119,9 @@ export default Vue.extend({
     },
     getProductBySkuDictionary (): Record<string, Product> {
       return this.$store.getters['product/getProductBySkuDictionary'];
+    },
+    skinClass (): string {
+      return getCurrentThemeClass();
     }
   },
   async serverPrefetch () {
@@ -281,6 +285,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "theme/css/mixins/wave.scss";
 
 #cross-sells {
   box-sizing: border-box;
@@ -300,7 +305,7 @@ export default Vue.extend({
 
   ._cross-sells-list,
   ._up-sells-list {
-    margin: 2em 0;
+    margin: var(--spacer-xl) 0;
   }
 
   .products {
@@ -329,7 +334,7 @@ export default Vue.extend({
       row-gap: var(--spacer-sm);
     }
     &__product-card {
-      --product-card-max-width: none;
+      --product-card-max-width: 15rem;
       margin: 0 var(--spacer-xs);
       flex: 1 1 50%;
     }
@@ -343,6 +348,15 @@ export default Vue.extend({
     &__slide-enter-active {
       transition: all 0.2s ease;
       transition-delay: calc(0.1s * var(--index));
+    }
+  }
+
+  &.-skin-budsies {
+    ._cross-sells-list {
+      padding: var(--spacer-lg) 0;
+      background-color: #f5f6de;
+
+      @include wave-section;
     }
   }
 
@@ -386,6 +400,12 @@ export default Vue.extend({
 
     ._cross-sells-list {
       background: #e3f9ff;
+    }
+
+    &.-skin-budsies {
+      ._cross-sells-list {
+        padding: 0;
+      }
     }
   }
 

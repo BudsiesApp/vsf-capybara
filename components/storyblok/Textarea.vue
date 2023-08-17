@@ -31,7 +31,7 @@ export default Blok.extend({
 .storyblok-textarea {
   ::v-deep .storyblok-rich-text {
     .-accent-color {
-      color: var(--c-warning);
+      color: var(--c-accent);
     }
 
     .-action-color {
@@ -47,7 +47,7 @@ export default Blok.extend({
     }
 
     .-large-accent-text {
-      color: var(--c-warning);
+      color: var(--c-accent);
       font-size: 24px;
     }
 

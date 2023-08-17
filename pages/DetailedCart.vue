@@ -1,5 +1,8 @@
 <template>
-  <div id="detailed-cart" :class="{ '-loading': isLoading }">
+  <div
+    id="detailed-cart"
+    :class="{ '-loading': isLoading, [skinClass]: true }"
+  >
     <div class="loader-container" v-if="isLoading">
       <div class="loader" />
     </div>
@@ -194,6 +197,7 @@ import ProductionSpotCountdown from 'src/modules/promotion-platform/components/P
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
 
@@ -394,6 +398,9 @@ export default {
     },
     canShowProductionSpotCountdown () {
       return this.products.some((product) => isCustomProduct(product.id));
+    },
+    skinClass () {
+      return getCurrentThemeClass();
     }
   },
   async mounted () {
@@ -638,6 +645,18 @@ export default {
     width: 100%;
     margin: auto;
     padding: 0 var(--spacer-sm);
+  }
+
+  &.-skin-budsies {
+    ._dropdown-container {
+      .sf-dropdown {
+        .sf-list__item {
+          &:hover {
+            background-color: var(--c-primary-variant);
+          }
+        }
+      }
+    }
   }
 }
 
