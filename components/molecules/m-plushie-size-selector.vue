@@ -213,6 +213,7 @@ $size-item-width: 145px;
       font-size: var(--font-xs);
       font-weight: var(--font-medium);
       margin-top: var(--spacer-sm);
+      text-align: center;
 
       ._price-delta {
         color: var(--c-primary);
