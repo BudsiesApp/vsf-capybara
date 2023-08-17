@@ -38,6 +38,26 @@
           <form
             @submit.prevent="onSubmit"
           >
+            <validation-provider
+              v-slot="{ errors }"
+              rules="required"
+              name="'Size'"
+              tag="div"
+              v-if="sizesOptions.length"
+            >
+              <m-plushie-size-selector
+                name="pillow_size"
+                v-model="selectedSize"
+                :options="sizesOptions"
+                :disabled="isSubmitting"
+                :small="true"
+              />
+
+              <div class="_error-text">
+                {{ errors[0] }}
+              </div>
+            </validation-provider>
+
             <div class="_additional-options">
               <div v-show="hasStyleSelections">
                 <div
@@ -86,8 +106,8 @@
               <MTitledArtworkUpload
                 ref="artwork-upload"
                 class="_titled-artwork-upload"
-                field-name="'Pet Photo'"
-                :title="$t('Upload your pet\'s photo')"
+                field-name="'Photo'"
+                :title="$t('Upload photo')"
                 :backend-product-id="backendProductId"
                 :upload-url="artworkUploadUrl"
                 :disabled="isSubmitting"
@@ -133,7 +153,9 @@
                 @file-removed="onAdditionalArtworkRemove"
                 @is-busy-changed="onArtworkUploadBusyStatusChanged('back', $event)"
               />
+            </div>
 
+            <div class="_body-parts" v-if="bodyparts.length">
               <div class="_bodypart-selector-container" v-for="bodypart in bodyparts" :key="bodypart.code">
                 <div
                   class="_step-title"
@@ -261,7 +283,9 @@ import { Bodypart, BodypartOption, Dictionary, ExtraPhotoAddon, ProductValue } f
 import ServerError from 'src/modules/shared/types/server-error';
 import { CustomerImage, getProductDefaultPrice, InjectType } from 'src/modules/shared';
 
+import { useBundleOption } from 'theme/helpers/use-bundle-options';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { useSizeSelector } from 'theme/helpers/use-size-selector';
 
 import GalleryProductImages from '../interfaces/gallery-product-images.interface';
 
@@ -276,6 +300,8 @@ import ExtraPhotoAddonOption from '../interfaces/extra-photo-addon-option.interf
 import ExtraFacesConfiguratorData from '../interfaces/extra-faces-configurator-data.interface';
 import MBodypartOptionConfigurator from '../molecules/m-bodypart-option-configurator.vue';
 import MFormErrors from '../molecules/m-form-errors.vue';
+import MPlushieSizeSelector from '../molecules/m-plushie-size-selector.vue';
+import SizeOption from '../interfaces/size-option';
 
 extend('required', {
   ...required,
@@ -290,11 +316,14 @@ export interface SelectOption {
   description: string,
   shortDescription: string,
   price: number,
-  specialPrice: number
+  specialPrice: number,
+  productId?: string
 }
 
 const feltedMagnetSku = 'customFeltedMagnets_bundle';
 const feltedOrnamentsSku = 'customFeltedOrnaments_bundle';
+
+const sizeBundleOptionTitle = 'size';
 
 function getAllFormRefs (
   refs: Record<string, Vue | Element | Vue[] | Element[]>
@@ -322,17 +351,25 @@ function getAllFormRefs (
 
 export default defineComponent({
   name: 'OPrintedProductOrderForm',
-  setup (_, setupContext) {
+  setup ({ product, styleBundleOptionTitle }, setupContext) {
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
 
     if (!imageHandlerService) {
       throw new Error('ImageHandlerService is not defined');
     }
+    const { bundleOption: styleBundleOption } = useBundleOption(product, styleBundleOptionTitle);
+
+    const { bundleOption: sizeBundleOption } = useBundleOption(product, sizeBundleOptionTitle);
+    const { selectedSize, sizesOptions } = useSizeSelector(sizeBundleOption);
 
     return {
       imageHandlerService,
       validationObserver,
+      sizeBundleOption,
+      styleBundleOption,
+      selectedSize,
+      sizesOptions,
       ...useFormValidation(
         validationObserver,
         () => getAllFormRefs(setupContext.refs)
@@ -351,7 +388,8 @@ export default defineComponent({
     MProductDescriptionStory,
     MTitledArtworkUpload,
     MBodypartOptionConfigurator,
-    MFormErrors
+    MFormErrors,
+    MPlushieSizeSelector
   },
   props: {
     artworkUploadUrl: {
@@ -453,20 +491,23 @@ export default defineComponent({
       return result;
     },
     bodyparts (): Bodypart[] {
-      if (!this.product) {
-        return [];
+      const productIds: string[] = [];
+
+      if (this.product && this.product.id) {
+        productIds.push(this.product.id.toString());
       }
 
-      const bodyparts = this.$store.getters['budsies/getProductBodyparts'](this.product.id);
+      if (this.selectedStyleOption && this.selectedStyleOption.productId) {
+        productIds.push(this.selectedStyleOption.productId);
+      }
+
+      const bodyparts = this.$store.getters['budsies/getProductsBodyPartsByProductIds'](productIds);
 
       if (!bodyparts.length) {
         return [];
       }
 
       return bodyparts;
-    },
-    styleBundleOption (): BundleOption | undefined {
-      return this.product?.bundle_options?.find(item => item.title.toLowerCase() === this.styleBundleOptionTitle);
     },
     designSelectorOptions (): {
       value: string,
@@ -499,11 +540,15 @@ export default defineComponent({
           description: productLink.product.description,
           shortDescription: productLink.product.short_description ? productLink.product.short_description : '',
           price: priceData.regular,
-          specialPrice: priceData.special
+          specialPrice: priceData.special,
+          productId: productLink.product.id?.toString()
         });
       }
 
       return availableStyles;
+    },
+    selectedStyleOption (): SelectOption | undefined {
+      return this.availableStyles.find((style) => style.value === this.selectedStyle);
     },
     backendProductId (): ProductValue {
       switch (this.product.id) {
@@ -517,6 +562,8 @@ export default defineComponent({
           return ProductValue.FELTED_MAGNETS;
         case 448:
           return ProductValue.FELTED_ORNAMENTS;
+        case 603:
+          return ProductValue.CARTOON_PILLOW;
         default:
           throw new Error(
             `Can't resolve Backend product ID for Magento '${this.product.id}' product ID`
@@ -892,6 +939,14 @@ export default defineComponent({
       this.customerImage = existingCartItem.customerImages[0];
       this.artworkInitialItems = [{ ...this.customerImage }]
     },
+    fillDefaultSize (): void {
+      if (!this.sizesOptions.length) {
+        this.fillEmptySize();
+        return;
+      }
+
+      this.selectedSize = this.sizesOptions[0];
+    },
     fillEmptyAdditionalArtworks (): void {
       this.initialAdditionalArtworks = [];
       this.additionalArtworks = [];
@@ -907,6 +962,9 @@ export default defineComponent({
       this.extraFacesDataAddon = undefined;
       this.initialAddonItemId = undefined;
     },
+    fillEmptySize (): void {
+      this.selectedSize = undefined;
+    },
     fillProductDataFromExistingCartItem (existingCartItem: CartItem): void {
       if (!existingCartItem) {
         throw new Error('Existing cart item is undefined');
@@ -917,6 +975,7 @@ export default defineComponent({
       this.fillAdditionalArtworksData(existingCartItem);
       this.fillBodypartsValues(existingCartItem);
       this.fillExtraFacesDataAddon(existingCartItem);
+      this.fillSize(existingCartItem);
 
       this.fillQuantity(existingCartItem);
     },
@@ -942,6 +1001,23 @@ export default defineComponent({
 
       this.extraFacesDataAddon = selectedAddon;
       this.initialAddonItemId = selectedAddon.id;
+    },
+    fillSize (existingCartItem: CartItem): void {
+      const selectedBundleOptions = getSelectedBundleOptions(existingCartItem);
+
+      if (!this.sizesOptions.length || !selectedBundleOptions.length) {
+        this.fillEmptySize();
+        return;
+      }
+
+      const selectedSize: SizeOption | undefined = this.sizesOptions.find(
+        (sizeOption) => selectedBundleOptions.find(
+          (selectedOption) => selectedOption.option_id === sizeOption.optionId &&
+          selectedOption.option_selections.includes(Number.parseInt(sizeOption.optionValueId))
+        )
+      );
+
+      this.selectedSize = selectedSize;
     },
     fillQuantity (existingCartItem: CartItem): void {
       this.quantity = existingCartItem.qty;
@@ -1011,6 +1087,12 @@ export default defineComponent({
     if (this.existingCartItem) {
       this.fillProductDataFromExistingCartItem(this.existingCartItem);
     }
+
+    if (this.selectedSize) {
+      return;
+    }
+
+    this.fillDefaultSize();
   },
   beforeDestroy () {
     unMapMobileObserver();
@@ -1048,6 +1130,9 @@ export default defineComponent({
           return;
         }
 
+        this.fillEmptyBodypartsValues();
+        this.fillDefaultSize();
+
         if (!this.selectedStyle && this.hasOnlyOneAvailableStyle) {
           this.selectStyle(this.availableStyles[0].value);
         }
@@ -1066,6 +1151,8 @@ export default defineComponent({
         if (val === oldVal) {
           return;
         }
+
+        this.fillEmptyBodypartsValues();
 
         if (!this.styleBundleOption) {
           Logger.error('styleBundleOption is not defined while attempt to set style was performed', 'budsies')();
