@@ -226,7 +226,7 @@ $number-margin-right-desktop: var(--spacer-sm);
   }
 
   ._confirmation {
-    color: var(--c-danger-variant);
+    color: var(--c-accent);
     text-align: center;
     font-size: var(--font-base);
     margin-top: var(--spacer-base);
@@ -264,7 +264,7 @@ $number-margin-right-desktop: var(--spacer-sm);
 
     ._number {
       flex-shrink: 0;
-      background: var(--c-info);
+      background: var(--c-accent);
       border-radius: 25px;
       color: var(--c-white);
       display: inline-block;

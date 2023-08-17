@@ -168,7 +168,8 @@ export default {
 }
 
 .o-order-review {
-  &.-skin-petsies {
+  &.-skin-petsies,
+  &.-skin-budsies {
     .content {
       color: var(--c-text);
     }

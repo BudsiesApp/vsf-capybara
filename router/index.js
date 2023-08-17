@@ -619,6 +619,13 @@ let routes = [
     })
   },
   {
+    name: 'gift-card-alias',
+    path: '/purchase-gift-card/',
+    redirect: {
+      name: 'gift-cards'
+    }
+  },
+  {
     name: 'raffle-alias-1',
     path: '/commissions-closed/',
     redirect: {

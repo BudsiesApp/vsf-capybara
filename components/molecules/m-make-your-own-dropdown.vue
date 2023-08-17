@@ -1,7 +1,7 @@
 <template>
   <div
     class="m-make-your-own-dropdown"
-    :class="{ '-small': size === 'small' }"
+    :class="{ '-small': size === 'small', [skinClass]: true }"
     @mouseover="toggleDropdownOnDesktop(true)"
     @mouseleave="toggleDropdownOnDesktop(false)"
   >
@@ -42,6 +42,8 @@ import {
   mapMobileObserver,
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
+
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 export default Vue.extend({
   name: 'MMakeYourOwnDropdown',
@@ -150,7 +152,10 @@ export default Vue.extend({
     };
   },
   computed: {
-    ...mapMobileObserver()
+    ...mapMobileObserver(),
+    skinClass (): string {
+      return getCurrentThemeClass();
+    }
   },
   beforeDestroy (): void {
     unMapMobileObserver();
@@ -211,6 +216,16 @@ export default Vue.extend({
 
     .sf-dropdown {
       left: 0;
+    }
+  }
+
+  &.-skin-budsies {
+    .sf-dropdown {
+      .sf-list__item {
+        &:hover {
+          background-color: var(--c-primary-variant);
+        }
+      }
     }
   }
 }

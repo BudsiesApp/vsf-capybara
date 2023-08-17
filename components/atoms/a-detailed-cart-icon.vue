@@ -56,5 +56,11 @@ export default {
   .sf-header__icon {
     cursor: pointer;
   }
+
+  &.-skin-budsies {
+    .sf-badge--number {
+      --badge-background: var(--c-accent);
+    }
+  }
 }
 </style>
