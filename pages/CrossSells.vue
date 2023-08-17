@@ -305,7 +305,7 @@ export default Vue.extend({
 
   ._cross-sells-list,
   ._up-sells-list {
-    margin: 2em 0;
+    margin: var(--spacer-xl) 0;
   }
 
   .products {
@@ -334,7 +334,7 @@ export default Vue.extend({
       row-gap: var(--spacer-sm);
     }
     &__product-card {
-      --product-card-max-width: none;
+      --product-card-max-width: 15rem;
       margin: 0 var(--spacer-xs);
       flex: 1 1 50%;
     }
@@ -353,11 +353,10 @@ export default Vue.extend({
 
   &.-skin-budsies {
     ._cross-sells-list {
-      .products {
-        background-color: #f5f6de;
+      padding: var(--spacer-lg) 0;
+      background-color: #f5f6de;
 
-        @include wave-section;
-      }
+      @include wave-section;
     }
   }
 
@@ -401,6 +400,12 @@ export default Vue.extend({
 
     ._cross-sells-list {
       background: #e3f9ff;
+    }
+
+    &.-skin-budsies {
+      ._cross-sells-list {
+        padding: 0;
+      }
     }
   }
 

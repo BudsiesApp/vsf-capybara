@@ -1,15 +1,11 @@
 .sf-button {
     &.color-secondary {
         --button-color: var(--c-white);
-        --c-secondary: linear-gradient(to bottom, #5c696f 0%, #475359 48%, #313c41 100%);
+        --c-secondary: var(--c-blue);
         --button-border: none;
 
-        &:hover, &:focus {
-            --button-background: linear-gradient(to bottom, #313c41 0%, #475359 48%, #5c696f 100%);
-        }
-
         &:active {
-            --button-background: var(--c-secondary-variant);
+            --button-background: var(--c-dark);
         }
 
         &.sf-button--text {
