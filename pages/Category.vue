@@ -864,6 +864,8 @@ export default {
   &__product-card {
     --product-card-max-width: none;
     flex: 1 1 50%;
+    text-align: center;
+    --price-justify-content: center;
   }
   &__product-card-horizontal {
     flex: 0 0 100%;
