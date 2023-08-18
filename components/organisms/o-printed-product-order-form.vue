@@ -43,6 +43,7 @@
               rules="required"
               name="'Size'"
               tag="div"
+              class="_size-selector"
               v-if="sizesOptions.length"
             >
               <m-plushie-size-selector
@@ -1237,6 +1238,7 @@ export default defineComponent({
     }
 
     ._price,
+    ._size-selector,
     ._additional-options,
     ._artwork-upload,
     ._qty-container,

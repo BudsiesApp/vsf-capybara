@@ -113,7 +113,7 @@ export default Vue.extend({
       catalogHooksExecutors.productPageVisited(product);
 
       await this.$store.dispatch('budsies/loadProductRushAddons', { productId: product.id });
-      await this.$store.dispatch('budsies/loadProductBodyparts', { productId: product.id })
+      await this.$store.dispatch('budsies/loadProductsBodyParts', { productIds: [product.id] })
 
       this.isDataLoaded = true;
     }

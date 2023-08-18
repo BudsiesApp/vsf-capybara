@@ -119,17 +119,12 @@ export default Vue.extend({
         setCurrent: true
       });
 
-      const dataLoadingPromises = [
-        this.$store.dispatch('budsies/loadExtraPhotosAddons', { productId: product.id }),
-        this.$store.dispatch('budsies/loadProductBodyparts', { productId: product.id })
-      ];
+      const productIds: number[] = [product.id];
 
       if (
         this.styleBundleOption &&
         shouldLoadStyleOptionsBodyPartsForProductSkus.includes(this.sku)
       ) {
-        const productIds: number[] = [];
-
         for (const productLink of this.styleBundleOption.product_links) {
           if (!productLink.product || !productLink.product.id) {
             continue;
@@ -137,15 +132,12 @@ export default Vue.extend({
 
           productIds.push(+productLink.product.id);
         }
-
-        dataLoadingPromises.push(
-          this.$store.dispatch('budsies/loadProductsBodyParts', {
-            productIds
-          })
-        );
       }
 
-      await Promise.all(dataLoadingPromises);
+      await Promise.all([
+        this.$store.dispatch('budsies/loadExtraPhotosAddons', { productId: product.id }),
+        this.$store.dispatch('budsies/loadProductsBodyParts', { productIds })
+      ]);
 
       this.isDataLoaded = true;
 
