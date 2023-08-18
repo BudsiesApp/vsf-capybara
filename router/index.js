@@ -261,6 +261,9 @@ let routes = [
         case '575':
           parentSku = 'golfHeadCoversOther_bundle';
           break;
+        case '603':
+          parentSku = 'customCartoonPillows_bundle';
+          break;
         case '626':
           parentSku = 'customGolfShirts_bundle';
           break;
@@ -638,6 +641,15 @@ let routes = [
     component: Raffle,
     props: (route) => ({
       referrerToken: route.query.referral_code
+    })
+  },
+  {
+    name: 'cartoon-pillow-product',
+    path: '/plushie/index/cartoonPillows/',
+    component: PrintedProduct,
+    props: route => ({
+      sku: 'customCartoonPillows_bundle',
+      productDesign: route.query.product_design
     })
   }
 ];

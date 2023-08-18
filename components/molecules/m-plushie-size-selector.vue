@@ -1,5 +1,8 @@
 <template>
-  <div class="m-plushie-size-selector" :class="{'-disabled': disabled}">
+  <div
+    class="m-plushie-size-selector"
+    :class="{'-disabled': disabled, '-small': small}"
+  >
     <ul class="_selector">
       <li class="_selector-value"
           v-for="option in options"
@@ -63,6 +66,10 @@ export default Vue.extend({
     },
     disabled: {
       type: Boolean as PropType<boolean>,
+      default: false
+    },
+    small: {
+      type: Boolean,
       default: false
     }
   },
@@ -206,6 +213,7 @@ $size-item-width: 145px;
       font-size: var(--font-xs);
       font-weight: var(--font-medium);
       margin-top: var(--spacer-sm);
+      text-align: center;
 
       ._price-delta {
         color: var(--c-primary);
@@ -265,6 +273,12 @@ $size-item-width: 145px;
       > label {
        cursor: default;
       }
+    }
+  }
+
+  &.-small {
+    ._selector-value {
+      max-width: 6.5rem;
     }
   }
 }
