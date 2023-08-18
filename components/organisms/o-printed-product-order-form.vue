@@ -173,6 +173,8 @@
               :upload-url="artworkUploadUrl"
               :initial-variant="initialAddonItemId"
               :initial-artworks="initialAdditionalArtworks"
+              step-title="Add more people"
+              default-option-label="No extra people"
               v-if="hasExtraFaceAddons"
               @input="extraFacesData = $event"
               @is-busy-changed="onArtworkUploadBusyStatusChanged('extra-faces', $event)"

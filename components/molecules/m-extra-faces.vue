@@ -133,11 +133,11 @@ export default Vue.extend({
     },
     stepTitle: {
       type: String,
-      default: 'Add more pets'
+      default: 'Add more people'
     },
     defaultOptionLabel: {
       type: String,
-      default: 'No Extra Pets'
+      default: 'No Extra People'
     }
   },
   data () {
