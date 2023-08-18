@@ -1,5 +1,5 @@
 <template>
-  <div class="o-clay-product-order-form">
+  <div class="o-clay-product-order-form" :class="skinClass">
     <SfHeading
       :level="1"
       :title="pageTitle"
@@ -168,7 +168,7 @@
               tag="div"
             >
               <SfHeading
-                class="-required _step-subtitle"
+                class="-required _step-subtitle _body-part-heading"
                 :level="3"
                 :title="bodypart.name"
                 :ref="getFieldAnchorName(bodypart.name)"
@@ -401,6 +401,7 @@ import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage, ServerError } from 'src/modules/shared';
 import { getAddonOptionsFromBundleOption } from 'theme/helpers/get-addon-options-from-bundle-option.function';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 import AddonOption from '../interfaces/addon-option.interface';
 import SelectedAddon from '../interfaces/selected-addon.interface';
@@ -599,6 +600,9 @@ export default defineComponent({
     },
     showAddonsStep (): boolean {
       return this.addons.length > 0;
+    },
+    skinClass (): string {
+      return getCurrentThemeClass();
     }
   },
   methods: {

@@ -20,6 +20,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 export default Vue.extend({
   name: 'ACustomProductQuantity',
@@ -35,7 +36,7 @@ export default Vue.extend({
   },
   computed: {
     skinClass (): string {
-      return '-skin-budsies';
+      return getCurrentThemeClass();
     },
     valueText (): number {
       return this.value;

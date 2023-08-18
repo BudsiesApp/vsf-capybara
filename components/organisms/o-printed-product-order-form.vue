@@ -136,7 +136,7 @@
 
               <div class="_bodypart-selector-container" v-for="bodypart in bodyparts" :key="bodypart.code">
                 <div
-                  class="_step-title"
+                  class="_step-title _body-part-heading"
                   :ref="getFieldAnchorName(bodypart.name)"
                 >
                   {{ $t(bodypart.name) }}
@@ -262,6 +262,7 @@ import ServerError from 'src/modules/shared/types/server-error';
 import { CustomerImage, getProductDefaultPrice, InjectType } from 'src/modules/shared';
 
 import { useFormValidation } from 'theme/helpers/use-form-validation';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 import GalleryProductImages from '../interfaces/gallery-product-images.interface';
 
@@ -397,7 +398,7 @@ export default defineComponent({
       getProductGallery: 'product/getProductGallery'
     }),
     skinClass (): string {
-      return '-skin-budsies';
+      return getCurrentThemeClass();
     },
     addonsBundleOption (): BundleOption | undefined {
       if (!this.product?.bundle_options) {
