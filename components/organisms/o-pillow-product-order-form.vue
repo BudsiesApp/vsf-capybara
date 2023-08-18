@@ -787,6 +787,7 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/typography";
 @import "~@storefront-ui/shared/styles/helpers/layout";
 @import "~@storefront-ui/shared/styles/components/atoms/SfHeading";
+@import "theme/css/mixins/body-part";
 
 .o-pillow-product-order-form {
   text-align: center;
@@ -903,6 +904,12 @@ export default defineComponent({
       ._error-text {
           color: var(--c-danger-variant);
       }
+  }
+
+  &.-skin-budsies {
+    ._body-part-heading {
+      @include heading-background;
+    }
   }
 
   @media (min-width: $tablet-min) {
