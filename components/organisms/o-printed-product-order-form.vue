@@ -159,7 +159,7 @@
             <div class="_body-parts" v-if="bodyparts.length">
               <div class="_bodypart-selector-container" v-for="bodypart in bodyparts" :key="bodypart.code">
                 <div
-                  class="_step-title"
+                  class="_step-title _body-part-heading"
                   :ref="getFieldAnchorName(bodypart.name)"
                 >
                   {{ $t(bodypart.name) }}
@@ -196,6 +196,8 @@
               :upload-url="artworkUploadUrl"
               :initial-variant="initialAddonItemId"
               :initial-artworks="initialAdditionalArtworks"
+              step-title="Add more people"
+              default-option-label="No extra people"
               v-if="hasExtraFaceAddons"
               @input="extraFacesData = $event"
               @is-busy-changed="onArtworkUploadBusyStatusChanged('extra-faces', $event)"
@@ -287,6 +289,7 @@ import { CustomerImage, getProductDefaultPrice, InjectType } from 'src/modules/s
 import { useBundleOption } from 'theme/helpers/use-bundle-options';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useSizeSelector } from 'theme/helpers/use-size-selector';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 import GalleryProductImages from '../interfaces/gallery-product-images.interface';
 
@@ -440,7 +443,7 @@ export default defineComponent({
       getProductGallery: 'product/getProductGallery'
     }),
     skinClass (): string {
-      return '-skin-budsies';
+      return getCurrentThemeClass();
     },
     addonsBundleOption (): BundleOption | undefined {
       if (!this.product?.bundle_options) {
@@ -1210,6 +1213,7 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "~@storefront-ui/shared/styles/helpers/typography";
 @import "~@storefront-ui/shared/styles/components/atoms/SfHeading";
+@import "theme/css/mixins/body-part";
 
 .o-printed-product-order-form {
     ._info {
@@ -1362,6 +1366,12 @@ export default defineComponent({
             color: var(--c-danger-variant);
         }
     }
+
+  &.-skin-budsies {
+    ._body-part-heading {
+      @include heading-background;
+    }
+  }
 
   @media (min-width: $tablet-min) {
     ._info {

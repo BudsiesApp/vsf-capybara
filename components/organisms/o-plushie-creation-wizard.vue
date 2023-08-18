@@ -110,6 +110,7 @@ import { getAddonOptionsFromBundleOption } from 'theme/helpers/get-addon-options
 import { PlushieType } from 'theme/interfaces/plushie.type';
 import getPlushieSkuByTypes from 'theme/helpers/get-plushie-sku-by-types.function';
 import PlushieProductType from 'theme/interfaces/plushie-product-type';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 import MProductTypeChooseStep from './OPlushieCreationWizard/m-product-type-choose-step.vue';
 import MImageUploadStep from './OPlushieCreationWizard/m-image-upload-step.vue';
@@ -230,7 +231,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
        this.isWizardInitializing;
     },
     skinClass (): string {
-      return '-skin-petsies';
+      return getCurrentThemeClass();
     },
     activeProduct (): Product | CartItem | null {
       return this.existingCartItem ? this.existingCartItem : this.product;
@@ -1086,6 +1087,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
   }
 
+  &.-skin-budsies,
   &.-skin-petsies {
       ._error-text {
           color: var(--c-danger-variant);

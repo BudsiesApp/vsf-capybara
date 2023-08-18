@@ -156,7 +156,7 @@
           :key="bodypart.id"
         >
           <SfHeading
-            class="_step-title -required "
+            class="_step-title -required _body-part-heading"
             :level="2"
             :title="bodypart.name"
             :ref="getFieldAnchorName(bodypart.name)"
@@ -366,6 +366,7 @@ import getProductionTimeOptions from '../../helpers/get-production-time-options'
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MProductionTimeSelector from 'theme/components/molecules/m-production-time-selector.vue';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 extend('required', {
   ...required,
@@ -450,7 +451,7 @@ export default defineComponent({
   },
   computed: {
     skinClass (): string {
-      return '-skin-budsies';
+      return getCurrentThemeClass();
     },
     isUploadNow (): boolean {
       return this.uploadMethod === ImageUploadMethod.NOW;
@@ -788,6 +789,7 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/typography";
 @import "~@storefront-ui/shared/styles/helpers/layout";
 @import "~@storefront-ui/shared/styles/components/atoms/SfHeading";
+@import "theme/css/mixins/body-part";
 
 .o-pillow-product-order-form {
   text-align: center;
@@ -904,6 +906,12 @@ export default defineComponent({
       ._error-text {
           color: var(--c-danger-variant);
       }
+  }
+
+  &.-skin-budsies {
+    ._body-part-heading {
+      @include heading-background;
+    }
   }
 
   @media (min-width: $tablet-min) {

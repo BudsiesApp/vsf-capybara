@@ -1,0 +1,6 @@
+@mixin heading-background {
+    background: url("/assets/images/option-name-bg.png") no-repeat;
+    background-position: center center;
+    background-size: 280px 37px;
+    --heading-title-font-line-height: 2;
+}
