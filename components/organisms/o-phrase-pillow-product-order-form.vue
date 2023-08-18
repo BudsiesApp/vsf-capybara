@@ -585,6 +585,8 @@ import {
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
+
 import MBackgroundUploader from '../molecules/m-background-uploader.vue';
 import MBackgroundEditor from '../molecules/m-background-editor.vue';
 import MLivePreview from '../molecules/m-live-preview.vue';
@@ -764,7 +766,7 @@ export default (
   computed: {
     ...mapMobileObserver(),
     skinClass (): string {
-      return '-skin-petsies';
+      return getCurrentThemeClass();
     },
     accentColor (): string | undefined {
       if (!this.selectedAccentColorPartValue) {

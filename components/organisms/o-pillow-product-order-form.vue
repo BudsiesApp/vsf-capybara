@@ -157,7 +157,7 @@
           :key="bodypart.id"
         >
           <SfHeading
-            class="_step-title -required "
+            class="_step-title -required _body-part-heading"
             :level="2"
             :title="bodypart.name"
             :ref="getFieldAnchorName(bodypart.name)"
@@ -407,6 +407,7 @@ import getProductionTimeOptions from '../../helpers/get-production-time-options'
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MProductionTimeSelector from 'theme/components/molecules/m-production-time-selector.vue';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 extend('required', {
   ...required,
@@ -493,7 +494,7 @@ export default defineComponent({
   },
   computed: {
     skinClass (): string {
-      return '-skin-petsies';
+      return getCurrentThemeClass();
     },
     isUploadNow (): boolean {
       return this.uploadMethod === ImageUploadMethod.NOW;
