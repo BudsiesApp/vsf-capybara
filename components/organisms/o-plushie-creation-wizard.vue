@@ -1085,6 +1085,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
   }
 
+  &.-skin-budsies,
   &.-skin-petsies {
       ._error-text {
           color: var(--c-danger-variant);

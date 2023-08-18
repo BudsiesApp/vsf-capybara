@@ -1057,6 +1057,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "~@storefront-ui/shared/styles/helpers/layout";
+@import "theme/css/mixins/body-part";
 
 .o-clay-product-order-form {
   text-align: center;
@@ -1197,6 +1198,12 @@ export default defineComponent({
     font-size: var(--font-xs);
     text-align: left;
     max-width: 45rem;
+  }
+
+  &.-skin-budsies {
+    ._body-part-heading {
+      @include heading-background;
+    }
   }
 
   @media (min-width: $tablet-min) {

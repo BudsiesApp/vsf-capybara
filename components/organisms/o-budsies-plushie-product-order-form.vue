@@ -1,5 +1,5 @@
 <template>
-  <div class="o-budsies-plushie-product-order-form">
+  <div class="o-budsies-plushie-product-order-form" :class="skinClass">
     <SfHeading
       :level="1"
       :title="pageTitle"
@@ -158,7 +158,7 @@
               tag="div"
             >
               <SfHeading
-                class="-required _step-subtitle"
+                class="-required _step-subtitle _body-part-heading"
                 :level="3"
                 :title="bodypart.name"
                 :ref="getFieldAnchorName(bodypart.name)"
@@ -390,6 +390,7 @@ import { CustomerImage, ServerError } from 'src/modules/shared';
 import { getAddonOptionsFromBundleOption } from 'theme/helpers/get-addon-options-from-bundle-option.function';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import getProductionTimeOptions from 'theme/helpers/get-production-time-options';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 import AddonOption from '../interfaces/addon-option.interface';
 import SelectedAddon from '../interfaces/selected-addon.interface';
@@ -600,6 +601,9 @@ export default defineComponent({
     },
     showProductionTimeOptions (): boolean {
       return this.productionTimeOptions.length > 0;
+    },
+    skinClass (): string {
+      return getCurrentThemeClass();
     }
   },
   methods: {
@@ -1093,6 +1097,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "~@storefront-ui/shared/styles/helpers/layout";
+@import "theme/css/mixins/body-part";
 
 .o-budsies-plushie-product-order-form {
   text-align: center;
@@ -1233,6 +1238,12 @@ export default defineComponent({
     font-size: var(--font-xs);
     text-align: left;
     max-width: 45rem;
+  }
+
+  &.-skin-budsies {
+    ._body-part-heading {
+      @include heading-background;
+    }
   }
 
   @media (min-width: $tablet-min) {

@@ -1120,6 +1120,7 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "~@storefront-ui/shared/styles/helpers/typography";
 @import "~@storefront-ui/shared/styles/components/atoms/SfHeading";
+@import "theme/css/mixins/body-part";
 
 .o-printed-product-order-form {
     ._info {
@@ -1271,6 +1272,12 @@ export default defineComponent({
             color: var(--c-danger-variant);
         }
     }
+
+  &.-skin-budsies {
+    ._body-part-heading {
+      @include heading-background;
+    }
+  }
 
   @media (min-width: $tablet-min) {
     ._info {
