@@ -40,6 +40,8 @@ const CreativityKitProduct = () =>
   import(/* webpackChunkName: "vsf-creativity-kit-product" */ 'theme/pages/CreativityKitProduct');
 const Raffle = () =>
   import(/* webpackChunkName: "vsf-raffle" */ 'theme/pages/Raffle');
+const InspirationMachine = () =>
+  import(/* webpackChunkName: "vsf-inspiration-machine" */ 'theme/pages/InspirationMachine');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -639,6 +641,11 @@ let routes = [
     props: (route) => ({
       referrerToken: route.query.referral_code
     })
+  },
+  {
+    name: 'inspiration-machine',
+    path: '/inspiration/',
+    component: InspirationMachine
   }
 ];
 
