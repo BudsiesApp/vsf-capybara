@@ -17,10 +17,12 @@
       :for="inputId"
     >
       <div class="_icon-wrapper">
-        <div
-          class="_icon"
-          :style="iconStyle"
-        />
+        <div class="_icon-container">
+          <div
+            class="_icon"
+            :style="iconStyle"
+          />
+        </div>
       </div>
 
       <div class="_name">
@@ -191,12 +193,20 @@ $color-selector-selected-border-color: #51a7f9;
     width: 25.1%;
 
     ._icon-wrapper {
-      border-radius: 50%;
-      border: 4px solid transparent;
       width: 100%;
       height: 0;
       position: relative;
       padding-top: 100%;
+    }
+
+    ._icon-container {
+      border: 4px solid transparent;
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+      position: absolute;
+      top: 0;
+      border-radius: 50%;
     }
 
     ._icon {
@@ -211,7 +221,9 @@ $color-selector-selected-border-color: #51a7f9;
     input:checked {
       & + label {
         ._icon-wrapper {
-          border-color: $color-selector-selected-border-color;
+          ._icon-container {
+            border-color: $color-selector-selected-border-color;
+          }
         }
 
         ._icon::before,
@@ -226,7 +238,7 @@ $color-selector-selected-border-color: #51a7f9;
     width: $bodypart-item-width;
 
     &.-color-value {
-      width: 90px;
+      width: 98px;
     }
   }
 }

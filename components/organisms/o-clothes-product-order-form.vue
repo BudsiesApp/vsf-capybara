@@ -167,14 +167,14 @@
             <div class="_step">
               <div
                 class="_step-title"
-                :ref="getFieldAnchorName('Pet\'s photo')"
+                :ref="getFieldAnchorName('Photo')"
               >
-                {{ $t('Upload your pet\'s photo') }}
+                {{ $t('Upload photo') }}
               </div>
 
               <validation-provider
                 v-slot="{ errors }"
-                name="'Pet's photo'"
+                name="'Photo'"
                 tag="div"
                 class="_step-content"
               >
@@ -210,6 +210,8 @@
                 :upload-url="artworkUploadUrl"
                 :initial-variant="initialAddonItemId"
                 :initial-artworks="initialAdditionalArtworks"
+                step-title="Add more people"
+                default-option-label="No extra people"
                 v-if="hasExtraFaceAddons"
                 @input="extraFacesData = $event"
                 @is-busy-changed="onArtworkUploadBusyStatusChanged('extra-faces', $event)"
