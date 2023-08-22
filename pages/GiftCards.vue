@@ -411,7 +411,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     --modal-content-padding: 0;
     --modal-close-right: -18px;
     --modal-close-top: -15px;
-    --modal-width: 29.375rem;
+    --modal-width: auto;
     --modal-top: 50%;
     --modal-left: 50%;
     --modal-bottom: none;
@@ -431,7 +431,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
     ::v-deep {
       .sf-modal__container {
-        width: 900px;
         max-width: calc(100% - var(--spacer-xl));
       }
 

@@ -93,7 +93,7 @@
 
           <SfInput
             name="customer_name"
-            v-model.trim="customerName"
+            v-model="customerName"
             :disabled="isDisabled"
           />
         </div>
@@ -109,7 +109,7 @@
 
             <SfInput
               name="recipient_name"
-              v-model.trim="recipientName"
+              v-model="recipientName"
               :required="true"
               :disabled="isDisabled"
               :valid="!errors.length"
