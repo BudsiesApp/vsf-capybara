@@ -9,7 +9,7 @@
         class="_subtitle"
       />
 
-      <p class="_text">
+      <p class="_text" ref="scroll-target">
         {{ $t('Not sure what to draw for your awesome Budsies creation!? Our Inspiration Machine is here to help! Simply make your selections at each step and we’ll provide you with a helpful DIY kit to inspire your own amazing art.') }}
       </p>
 
@@ -113,22 +113,14 @@
 </template>
 
 <script lang="ts">
-import Vue, { VueConstructor } from 'vue';
+import Vue from 'vue';
 
 import { SfHeading, SfSteps } from '@storefront-ui/vue';
 
 import { InspirationMachineCharacterStep, InspirationMachineDownloadGuideStep, InspirationMachineDownloadKit, InspirationMachineExtrasStep, InspirationMachineThemeStep, SN_INSPIRATION_MACHINE, SelectableItem, Theme, actions, getters } from 'src/modules/inspiration-machine';
-import { InjectType } from 'src/modules/shared';
 
-interface InjectedServices {
-  window: Window
-}
-
-export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
+export default Vue.extend({
   name: 'InspirationMachine',
-  inject: {
-    window: { from: 'WindowObject' }
-  } as unknown as InjectType<InjectedServices>,
   components: {
     InspirationMachineThemeStep,
     InspirationMachineCharacterStep,
@@ -207,10 +199,12 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     onSkipRequestKitButtonClick (): void {
       this.isSendToEmail = false;
       this.showDownloadPage = true;
+      this.scrollToTop();
     },
     onRequestKitFormSubmitted (): void {
       this.isSendToEmail = true;
       this.showDownloadPage = true;
+      this.scrollToTop();
     },
     nextStep (): void {
       if (this.currentStep === 3) {
@@ -222,7 +216,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.scrollToTop();
     },
     scrollToTop (): void {
-      this.window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      (this.$refs['scroll-target'] as HTMLElement).scrollIntoView({ behavior: 'smooth', inline: 'start' })
     }
   },
   watch: {
