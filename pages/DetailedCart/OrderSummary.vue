@@ -10,11 +10,13 @@
       {{ $t('All pricing in USD') }}
     </div>
     <div class="actions">
-      <APromoCode :allow-promo-code-removal="false" />
-
-      <p class="_helper-text">
-        {{ $t('Please apply gift certificates during checkout (next step)') }}
-      </p>
+      <APromoCode :allow-promo-code-removal="false">
+        <template #bottom-helper-text="{ isCouponApplied }">
+          <p class="_helper-text" v-if="!isCouponApplied">
+            {{ $t('Please apply gift certificates during checkout (next step)') }}
+          </p>
+        </template>
+      </APromoCode>
 
       <SfButton
         class="sf-button--full-width actions__button"
