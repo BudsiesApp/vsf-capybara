@@ -27,6 +27,7 @@ import { BackendSettings } from 'src/modules/backend-settings';
 import { ErrorLoggingModule } from 'src/modules/error-logging';
 import { PageLoadingIndicatorModule } from 'src/modules/page-loading-indicator';
 import { RaffleModule } from 'src/modules/raffle'
+import { InspirationMachineModule } from 'src/modules/inspiration-machine'
 
 import registerStoryblokComponents from 'theme/components/storyblok'
 
@@ -78,6 +79,7 @@ export function registerClientModules () {
   registerModule(BackendSettings)
   registerModule(ErrorLoggingModule)
   registerModule(RaffleModule)
+  registerModule(InspirationMachineModule)
 }
 
 // Deprecated API, will be removed in 2.0
