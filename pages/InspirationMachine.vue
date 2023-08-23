@@ -171,11 +171,6 @@ export default Vue.extend({
     }
   },
   async beforeMount (): Promise<void> {
-    if (this.availableThemes.length && this.availableExtras.length) {
-      this.isDataLoaded = true;
-      return
-    }
-
     await this.loadData();
   },
   methods: {
@@ -253,7 +248,7 @@ export default Vue.extend({
   --steps-content-padding: var(--spacer-xl) var(--spacer-sm);
 
   box-sizing: border-box;
-  padding: var(--spacer-lg) var(--spacer-sm) 0;
+  padding: var(--spacer-lg) 0;
 
   ._subtitle {
     margin-top: var(--spacer-lg);
@@ -274,6 +269,11 @@ export default Vue.extend({
     border-bottom: 1px solid var(--c-secondary);
   }
 
+  ._top-block,
+  ._bottom-block {
+    padding: 0 var(--spacer-sm);
+  }
+
   ._bottom-block {
     margin-top: var(--spacer-lg);
   }
@@ -282,10 +282,11 @@ export default Vue.extend({
     margin-top: var(--spacer-base);
   }
 
-  @media (min-width: $tablet-min) {
+  @include for-desktop {
     max-width: 71.25rem;
     width: 100%;
     margin: 0 auto;
+    padding: var(--spacer-lg) var(--spacer-sm) 0;
   }
 }
 </style>
