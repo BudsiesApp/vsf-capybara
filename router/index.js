@@ -40,6 +40,8 @@ const CreativityKitProduct = () =>
   import(/* webpackChunkName: "vsf-creativity-kit-product" */ 'theme/pages/CreativityKitProduct');
 const Raffle = () =>
   import(/* webpackChunkName: "vsf-raffle" */ 'theme/pages/Raffle');
+const BudsiesPalsKitProduct = () =>
+  import(/* webpackChunkName: "vsf-pals-kit" */ 'theme/pages/BudsiesPalsKitProduct');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -651,6 +653,11 @@ let routes = [
       sku: 'customCartoonPillows_bundle',
       productDesign: route.query.product_design
     })
+  },
+  {
+    name: 'budsies-pals-kits',
+    path: '/sponsors/',
+    component: BudsiesPalsKitProduct
   }
 ];
 
