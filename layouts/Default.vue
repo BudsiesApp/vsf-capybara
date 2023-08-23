@@ -46,6 +46,7 @@ import { isServer } from '@vue-storefront/core/helpers';
 import Head from 'theme/head';
 import config from 'config';
 import { ModalList } from 'theme/store/ui/modals';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 import PromotionPlatformBanner from 'src/modules/promotion-platform/components/Banner.vue';
 
@@ -79,6 +80,9 @@ export default {
     },
     hideFooterOnMobile () {
       return this.$route.name === 'phrase-pillow-customize';
+    },
+    skinClass () {
+      return getCurrentThemeClass();
     }
   },
   beforeMount () {
@@ -112,16 +116,18 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .default-layout {
   $medium-breakpoint: 641px;
 
   &.storyblok-preview-mode {
-    a,
-    button {
-      pointer-events: none;
+    ::v-deep {
+      a,
+      button {
+        pointer-events: none;
+      }
     }
   }
 

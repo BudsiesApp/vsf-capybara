@@ -1,6 +1,10 @@
 <template>
   <div class="m-spinner-button">
-    <SfButton :class="buttonClass" :disabled="showSpinner">
+    <SfButton
+      :class="buttonClass"
+      :disabled="showSpinner"
+      @click="$emit('click')"
+    >
       <ALoadingSpinner v-show="showSpinner" />
       <span :style="{visibility: showSpinner ? 'hidden' : 'visible'}">
         <slot />
@@ -38,9 +42,19 @@ export default Vue.extend({
   .a-loading-spinner {
     --loader-overlay-background: transparent;
     --loader-spinner-stroke: var(--c-white);
+
     position: absolute;
-    width: var(--font-sm);
-    height: var(--font-sm);
+    width: var(--spinner-button-width, var(--font-sm));
+    height: var(--spinner-button-height, var(--font-sm));
+  }
+
+  .sf-button {
+    &.-icon-button {
+      --button-background: var(--c-primary);
+      --button-border-radius: 50%;
+
+      display: var(--spinner-button-display, flex);
+    }
   }
 }
 </style>
