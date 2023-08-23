@@ -58,13 +58,15 @@
         :class="{'sf-property--large': isLarge}"
       />
     </template>
-    <SfButton
+    <MSpinnerButton
       v-if="isCouponCode"
-      class="sf-button sf-button--outline promo-code__button"
+      class="promo-code__button"
+      button-class="color-secondary"
+      :show-spinner="isCouponRemoving"
       @click="removeCoupon"
     >
       {{ $t('Delete discount code') }}
-    </SfButton>
+    </MSpinnerButton>
     <SfDivider class="divider" />
     <SfProperty
       :name="$t('Grand Total')"
@@ -77,14 +79,16 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { SfProperty, SfDivider, SfButton } from '@storefront-ui/vue';
+import { SfProperty, SfDivider } from '@storefront-ui/vue';
+
+import MSpinnerButton from 'theme/components/molecules/m-spinner-button.vue';
 
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 export default {
   name: 'MPriceSummary',
   components: {
-    SfButton,
+    MSpinnerButton,
     SfProperty,
     SfDivider
   },
@@ -92,6 +96,11 @@ export default {
     isLarge: {
       type: Boolean,
       default: false
+    }
+  },
+  data () {
+    return {
+      isCouponRemoving: false
     }
   },
   computed: {
@@ -118,8 +127,18 @@ export default {
     }
   },
   methods: {
-    removeCoupon () {
-      this.$store.dispatch('cart/removeCoupon');
+    async removeCoupon () {
+      if (this.isCouponRemoving) {
+        return;
+      }
+
+      this.isCouponRemoving = true;
+
+      try {
+        await this.$store.dispatch('cart/removeCoupon');
+      } finally {
+        this.isCouponRemoving = false;
+      }
     }
   }
 };
