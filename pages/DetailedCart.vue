@@ -54,7 +54,7 @@
                         v-if="isCustomOption(product, option)"
                         :key="option.label"
                         :name="option.label"
-                        :value="option.value"
+                        :value="option.value | htmlDecode"
                       />
                       <div
                         v-else

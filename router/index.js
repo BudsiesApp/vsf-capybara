@@ -42,6 +42,8 @@ const Raffle = () =>
   import(/* webpackChunkName: "vsf-raffle" */ 'theme/pages/Raffle');
 const InspirationMachine = () =>
   import(/* webpackChunkName: "vsf-inspiration-machine" */ 'theme/pages/InspirationMachine');
+const BudsiesPalsKitProduct = () =>
+  import(/* webpackChunkName: "vsf-pals-kit" */ 'theme/pages/BudsiesPalsKitProduct');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -658,6 +660,11 @@ let routes = [
     name: 'inspiration-machine',
     path: '/inspiration/',
     component: InspirationMachine
+  },
+  {
+    name: 'budsies-pals-kits',
+    path: '/sponsors/',
+    component: BudsiesPalsKitProduct
   }
 ];
 
