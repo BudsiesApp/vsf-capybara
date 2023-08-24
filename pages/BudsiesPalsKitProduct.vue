@@ -27,20 +27,11 @@
           :title="$t('Purchase a Budsies Pals Kit')"
           :level="3"
         />
-
-        <ul class="_dot-list">
-          <li class="_dot-item">
-            {{ $t('Each child is paired with a sponsor from our Budsies Community (that\'s you!).') }}
-          </li>
-
-          <li class="_dot-item">
-            {{ $t('The Budsies Pals Kits are delivered to the kiddos, so they can draw and create their own Budsies stuffed animal.') }}
-          </li>
-
-          <li class="_dot-item">
-            {{ $t('The Budsies stuffed animals are handmade with love by our designers and sent to the kiddos or their loved ones to offer them comfort & happiness.') }}
-          </li>
-        </ul>
+        <div
+          class="_description"
+          v-if="getCurrentProduct"
+          v-html="getCurrentProduct.short_description"
+        />
 
         <o-budsies-pals-kit-product-order-form
           class="_form"
@@ -220,16 +211,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
   }
 
-  ._dot-list {
+  ._description {
     margin-top: var(--spacer-lg);
-  }
-
-  ._dot-item {
-    margin-top: var(--spacer-sm);
-
-    &:first-child {
-      margin-top: 0;
-    }
   }
 
   @include for-desktop {
