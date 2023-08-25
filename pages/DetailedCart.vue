@@ -248,6 +248,7 @@ const selfiesProductSkus = [
 ];
 
 const specialtyCommissionSku = 'specialtyCommission_bundle';
+const budsiesPalsSku = 'customPals_bundle';
 
 const editableProductsSkus = [
   ...foreversProductsSkus,
@@ -258,7 +259,8 @@ const editableProductsSkus = [
   ...clothesProductSkus,
   ...budsiesPlushieProductSkus,
   ...selfiesProductSkus,
-  specialtyCommissionSku
+  specialtyCommissionSku,
+  budsiesPalsSku
 ];
 
 export default {
@@ -433,7 +435,14 @@ export default {
       return this.truncate(product.plushieDescription, 150, 50);
     },
     editHandler (product) {
-      if (product.sku === specialtyCommissionSku) {
+      if (product.sku === budsiesPalsSku) {
+        this.$router.push({
+          name: 'budsies-pals-creation',
+          query: {
+            existingPlushieId: product.plushieId
+          }
+        });
+      } else if (product.sku === specialtyCommissionSku) {
         this.$router.push({
           name: 'specialty-commissions-creation',
           query: {

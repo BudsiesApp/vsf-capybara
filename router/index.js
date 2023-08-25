@@ -44,6 +44,8 @@ const InspirationMachine = () =>
   import(/* webpackChunkName: "vsf-inspiration-machine" */ 'theme/pages/InspirationMachine');
 const BudsiesPalsKitProduct = () =>
   import(/* webpackChunkName: "vsf-pals-kit" */ 'theme/pages/BudsiesPalsKitProduct');
+const BudsiesPalsProduct = () =>
+  import(/* webpackChunkName: "vsf-budsies-pals-product" */ 'theme/pages/BudsiesPalsProduct');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -204,6 +206,9 @@ let routes = [
           break;
         case '253':
           parentSku = 'customPillow_bundle';
+          break;
+        case '266':
+          parentSku = 'customPals_bundle';
           break;
         case '273':
           parentSku = 'customBuddyPillow_bundle'
@@ -665,6 +670,24 @@ let routes = [
     name: 'budsies-pals-kits',
     path: '/sponsors/',
     component: BudsiesPalsKitProduct
+  },
+  {
+    name: 'budsies-pals-creation',
+    path: '/budsie/index/create/type/pals/',
+    component: BudsiesPalsProduct,
+    props: (route) => ({
+      existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
+    name: 'budsies-pals-product-alias',
+    path: '/plushie/index/create/id/:existingPlushieId/type/pals/',
+    redirect: (route) => ({
+      name: 'budsies-pals-product',
+      query: {
+        existingPlushieId: route.params.existingPlushieId
+      }
+    })
   }
 ];
 
