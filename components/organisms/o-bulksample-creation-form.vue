@@ -60,7 +60,14 @@
         </div>
 
         <span class="_artwork-hint">
-          {{ $t('One image is typically sufficient, but you may upload up to three images of your design') }}
+          {{
+            $t(
+              'Please upload more than one image - a front, side and back view will help our designers make the best {productName} sample',
+              {
+                productName: productNameByType
+              }
+            )
+          }}
         </span>
       </validation-provider>
 
