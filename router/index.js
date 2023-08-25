@@ -672,7 +672,7 @@ let routes = [
     component: BudsiesPalsKitProduct
   },
   {
-    name: 'budsies-pals-product',
+    name: 'budsies-pals-creation',
     path: '/budsie/index/create/type/pals/',
     component: BudsiesPalsProduct,
     props: (route) => ({

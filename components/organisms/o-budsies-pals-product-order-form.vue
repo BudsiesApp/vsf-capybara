@@ -163,6 +163,7 @@
               rules="required"
               name="'Budsies Pals Participant Name'"
               tag="div"
+              class="_field"
               :ref="getFieldAnchorName('Budsies Pals Participant Name')"
             >
               <SfInput
@@ -180,6 +181,7 @@
               rules="required"
               name="'Parent Name'"
               tag="div"
+              class="_field"
               :ref="getFieldAnchorName('Parent Name')"
             >
               <SfInput
@@ -197,6 +199,7 @@
               rules="required|email"
               name="'Email'"
               tag="div"
+              class="_field"
               :ref="getFieldAnchorName('Email')"
               v-show="showEmailStep"
             >
@@ -218,7 +221,7 @@
 
         <validation-provider
           v-slot="{ errors }"
-          rules="required"
+          :rules="{ required: { allowFalse: false } }"
           name="'Agreement'"
           tag="div"
           :ref="getFieldAnchorName('Agreement')"
@@ -430,7 +433,10 @@ export default defineComponent({
               email: this.email,
               plushieDescription: this.description,
               customerImages: this.customerImages ? this.customerImages : [],
-              uploadMethod: ImageUploadMethod.NOW
+              uploadMethod: ImageUploadMethod.NOW,
+              participantName: this.participantName,
+              hospitalId: this.selectedHospitalId,
+              parentName: this.parentName
             })
           });
         } catch (error) {
@@ -569,9 +575,6 @@ export default defineComponent({
         action1: { label: i18n.t('OK') }
       });
     },
-    setBundleOptionValue (optionId: number, optionQty: number, optionSelections: number[]): void {
-      this.$store.commit('product' + '/' + catalogTypes.PRODUCT_SET_BUNDLE_OPTION, { optionId, optionQty, optionSelections });
-    },
     async updateClientAndServerItem (payload: {
       product: CartItem,
       forceUpdateServerItem?: boolean,
@@ -589,7 +592,10 @@ export default defineComponent({
               email: this.email,
               plushieDescription: this.description,
               customerImages: this.customerImages ? this.customerImages : [],
-              uploadMethod: ImageUploadMethod.NOW
+              uploadMethod: ImageUploadMethod.NOW,
+              participantName: this.participantName,
+              hospitalId: this.selectedHospitalId,
+              parentName: this.parentName
             }),
             forceUpdateServerItem: true
           });
@@ -696,11 +702,22 @@ export default defineComponent({
     }
   }
 
-  .sf-input {
-    --input-width: 20em;
+  .sf-input,
+  .sf-select {
+    margin-left: auto;
+    margin-right: auto;
+  }
 
+  .sf-input {
     text-align: center;
-    display: inline-block;
+  }
+
+  ._field {
+    margin-top: var(--spacer-sm);
+
+    &:first-child {
+      margin-top: 0;
+    }
   }
 
   .sf-divider {
@@ -746,9 +763,18 @@ export default defineComponent({
     max-width: 45rem;
   }
 
+  ._checkbox {
+    --m-checkbox-align-items: flex-start;
+  }
+
   @media (min-width: $tablet-min) {
     ._step-divider {
       display: block;
+    }
+
+    .sf-input,
+    .sf-select {
+      max-width: 30rem;
     }
   }
 }
