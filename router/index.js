@@ -42,6 +42,8 @@ const Raffle = () =>
   import(/* webpackChunkName: "vsf-raffle" */ 'theme/pages/Raffle');
 const InspirationMachine = () =>
   import(/* webpackChunkName: "vsf-inspiration-machine" */ 'theme/pages/InspirationMachine');
+const BudsiesPalsKitProduct = () =>
+  import(/* webpackChunkName: "vsf-pals-kit" */ 'theme/pages/BudsiesPalsKitProduct');
 const BudsiesPalsProduct = () =>
   import(/* webpackChunkName: "vsf-budsies-pals-product" */ 'theme/pages/BudsiesPalsProduct');
 
@@ -663,6 +665,11 @@ let routes = [
     name: 'inspiration-machine',
     path: '/inspiration/',
     component: InspirationMachine
+  },
+  {
+    name: 'budsies-pals-kits',
+    path: '/sponsors/',
+    component: BudsiesPalsKitProduct
   },
   {
     name: 'budsies-pals-product',
