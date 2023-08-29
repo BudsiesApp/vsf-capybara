@@ -95,7 +95,7 @@ export default Vue.extend({
 
       const skus = this.getProductLinkSkusByType('crosssell');
 
-      return this.getSellsProductsBySkus(skus);
+      return this.getSellsProductsBySkus(skus, false);
     },
     upSellsProducts (): any[] {
       if (!this.getCurrentProduct) {
@@ -104,7 +104,7 @@ export default Vue.extend({
 
       const skus = this.getProductLinkSkusByType('upsell');
 
-      return this.getSellsProductsBySkus(skus);
+      return this.getSellsProductsBySkus(skus, true);
     },
     getCurrentProduct (): Product | null {
       const product = this.$store.getters['product/getCurrentProduct'];
@@ -165,14 +165,14 @@ export default Vue.extend({
 
       return skus;
     },
-    getSellsProductsBySkus (skus: string[]): any[] {
+    getSellsProductsBySkus (skus: string[], isUpSells: boolean): any[] {
       let products: Product[] = [];
 
       for (const sku of skus) {
         for (const key in this.getProductBySkuDictionary) {
           const product = this.getProductBySkuDictionary[key];
 
-          if (product.parentSku === sku && !!product.landing_page_url) {
+          if (product.parentSku === sku && (!!product.landing_page_url || isUpSells)) {
             products.push(this.getProductBySkuDictionary[key]);
 
             break;
