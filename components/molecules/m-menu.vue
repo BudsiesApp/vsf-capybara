@@ -219,11 +219,6 @@ export default Vue.extend({
       ],
       usefulLinksItems: [
         {
-          label: this.$t('FAQ\'s'),
-          url: '//support.budsies.com/',
-          target: '_blank'
-        },
-        {
           label: this.$t('Pricing'),
           url: '/pricing/'
         },
@@ -231,6 +226,12 @@ export default Vue.extend({
           label: this.$t('About'),
           url: '/about/'
         },
+        {
+          label: this.$t('FAQ\'s'),
+          url: '//support.budsies.com/',
+          target: '_blank'
+        },
+
         {
           label: this.$t('Blog'),
           url: '/blog/',
