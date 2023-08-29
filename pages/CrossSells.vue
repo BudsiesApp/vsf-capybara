@@ -37,7 +37,7 @@
     <div class="_up-sells-list" v-if="upSellsProducts.length">
       <header class="sf-heading">
         <h2 class="sf-heading__title">
-          {{ $t('Budsies Accessories') }}
+          {{ upSellsTitle }}
         </h2>
       </header>
       <div class="products">
@@ -71,7 +71,7 @@ import config from 'config';
 import { SearchQuery } from 'storefront-query-builder';
 import { isServer } from '@vue-storefront/core/helpers';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
-import Product, { ProductLink } from 'core/modules/catalog/types/Product';
+import Product from 'core/modules/catalog/types/Product';
 import { SfButton } from '@storefront-ui/vue';
 import OProductCard from 'theme/components/organisms/o-product-card.vue';
 import { prepareCategoryProduct } from 'theme/helpers';
@@ -81,6 +81,11 @@ import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 const getSkuFromRoute = (route: Route): string | undefined => {
   return route.params.parentSku;
 }
+
+const selfiesSkus = [
+  'CustomSelfie_bundle',
+  'selfiesPuppet_bundle'
+]
 
 export default Vue.extend({
   name: 'CrossSells',
@@ -96,7 +101,7 @@ export default Vue.extend({
 
       const skus = this.getProductLinkSkusByType('crosssell');
 
-      return this.getSellsProductsBySkus(skus);
+      return this.getSellsProductsBySkus(skus, false);
     },
     upSellsProducts (): any[] {
       if (!this.getCurrentProduct) {
@@ -105,7 +110,7 @@ export default Vue.extend({
 
       const skus = this.getProductLinkSkusByType('upsell');
 
-      return this.getSellsProductsBySkus(skus);
+      return this.getSellsProductsBySkus(skus, true);
     },
     getCurrentProduct (): Product | null {
       const product = this.$store.getters['product/getCurrentProduct'];
@@ -122,6 +127,17 @@ export default Vue.extend({
     },
     skinClass (): string {
       return getCurrentThemeClass();
+    },
+    upSellsTitle (): string {
+      if (!this.getCurrentProduct) {
+        return '';
+      }
+
+      return (
+        selfiesSkus.includes(this.getCurrentProduct.sku)
+          ? this.$t('Selfies Accessories')
+          : this.$t('Budsies Accessories')
+      ).toString();
     }
   },
   async serverPrefetch () {
@@ -169,16 +185,18 @@ export default Vue.extend({
 
       return skus;
     },
-    getSellsProductsBySkus (skus: string[]): any[] {
+    getSellsProductsBySkus (skus: string[], isUpSells: boolean): any[] {
       let products: Product[] = [];
 
       for (const sku of skus) {
         for (const key in this.getProductBySkuDictionary) {
           const product = this.getProductBySkuDictionary[key];
 
-          if (product.parentSku === sku && !!product.landing_page_url) {
+          if (
+            product.parentSku === sku &&
+              (!!product.landing_page_url || isUpSells)
+          ) {
             products.push(this.getProductBySkuDictionary[key]);
-
             break;
           }
         }
@@ -330,12 +348,13 @@ export default Vue.extend({
     &__grid {
       justify-content: space-between;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(50%, 1fr));
-      row-gap: var(--spacer-sm);
+      grid-template-columns: repeat(auto-fit, minmax(46%, 1fr));
+      row-gap: calc(var(--spacer-sm) + var(--spacer-xs));
+      column-gap: calc(var(--spacer-sm) + var(--spacer-xs));
+      padding: 0 calc(var(--spacer-sm) + var(--spacer-xs));
     }
     &__product-card {
       --product-card-max-width: 15rem;
-      margin: 0 var(--spacer-xs);
       flex: 1 1 50%;
     }
     &__product-card-horizontal {
@@ -363,7 +382,7 @@ export default Vue.extend({
   @media (min-width: $tablet-min) {
     .products {
       &__grid {
-        grid-template-columns: repeat(auto-fit, minmax(33%, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(31%, 1fr));
       }
 
       &__product-card {
@@ -379,7 +398,7 @@ export default Vue.extend({
       padding: 2em 0;
 
       &__grid {
-        grid-template-columns: repeat(auto-fit, minmax(25%, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(23%, 1fr));
       }
 
       &__pagination {

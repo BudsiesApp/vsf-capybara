@@ -60,6 +60,16 @@
           }}
         </template>
       </template>
+
+      <template #actions-helper-text v-if="showSelfiesActionsHelperText">
+        <span class="_actions-helper-text">
+          {{ $t('Please order') }}
+          <b>{{ $t('two') }}</b>
+          {{ $t('Selfies if you have') }}
+          <b>{{ $t('two') }}</b>
+          {{ $t('people in your photo') }}
+        </span>
+      </template>
     </o-budsies-plushie-product-order-form>
 
     <SfModal
@@ -276,6 +286,9 @@ export default Vue.extend({
     showSelfiesDescriptionHelperText (): boolean {
       return selfiesProductSkus.includes(this.sku);
     },
+    showSelfiesActionsHelperText (): boolean {
+      return this.sku === selfieProductSku;
+    },
     showForm (): boolean {
       return this.isDataLoaded && !!this.getCurrentProduct;
     }
@@ -361,6 +374,11 @@ export default Vue.extend({
 
   ._popup-link {
     font-weight: var(--font-medium);
+  }
+
+  ._actions-helper-text {
+    font-size: var(--font-sm);
+    margin-top: var(--spacer-sm);
   }
 
   @media (min-width: $tablet-min) {
