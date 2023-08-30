@@ -76,7 +76,7 @@ import { SfButton } from '@storefront-ui/vue';
 import OProductCard from 'theme/components/organisms/o-product-card.vue';
 import { prepareCategoryProduct } from 'theme/helpers';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
-import { isBundleProduct } from '@vue-storefront/core/modules/catalog/helpers';
+import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 
 const getSkuFromRoute = (route: Route): string | undefined => {
   return route.params.parentSku;
@@ -172,13 +172,18 @@ export default Vue.extend({
       for (const sku of skus) {
         for (const key in this.getProductBySkuDictionary) {
           const product = this.getProductBySkuDictionary[key];
-          const isProductInStock = product.stock.is_in_stock;
-          const isChildProduct = product.parentSku === sku;
-          const hasLandingPage = !!product.landing_page_url || !isBundleProduct(product);
+
+          if (!product.id) {
+            continue;
+          }
+
+          // VSF replace sku with it's default variant SKU for configurable and bundle products
+          // So as workaround better to use parentSku instead sku to compare
+          const isRequiredProduct = product.parentSku === sku;
+          const hasLandingPage = !!product.landing_page_url || !isCustomProduct(+product.id);
 
           if (
-            isChildProduct &&
-            isProductInStock &&
+            isRequiredProduct &&
             hasLandingPage
           ) {
             products.push(this.getProductBySkuDictionary[key]);
@@ -193,10 +198,9 @@ export default Vue.extend({
       let productsQuery = new SearchQuery()
       productsQuery = productsQuery
         .applyFilter({ key: 'sku', value: { 'in': skus } })
-        .applyFilter({ key: 'status', value: { 'in': [1] } });
-      if (config.products.listOutOfStockProducts === false) {
-        productsQuery = productsQuery.applyFilter({ key: 'stock.is_in_stock', value: { 'eq': true } });
-      }
+        .applyFilter({ key: 'status', value: { 'in': [1] } })
+        .applyFilter({ key: 'stock.is_in_stock', value: { 'eq': true } });
+
       return productsQuery;
     },
     async loadProductsList (type: string): Promise<void> {
