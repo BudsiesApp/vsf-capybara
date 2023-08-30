@@ -912,6 +912,11 @@ export default defineComponent({
     ._body-part-heading {
       @include heading-background;
     }
+
+    ._step-number {
+      color: var(--c-danger);
+      @include border(--step-border, 0 0 4px 0, solid, var(--c-danger));
+    }
   }
 
   @media (min-width: $tablet-min) {

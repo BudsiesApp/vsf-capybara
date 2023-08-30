@@ -9,46 +9,6 @@ $font-size-base-mobile: 15px;
 $font-family-base: "GothamRounded", "Helvetica", sans-serif;
 $font-family-intro: "GothamRounded", "Helvetica", sans-serif;
 
-$page-color: #fff;
-$color-regular-text: #535353;
-$color-page-title: #003e6b;
-$color-titles: $color-page-title;
-$color-subtitle: $color-titles;
-$color-helper-subtext: #a3a3a3;
-$color-action: #43c5e4;
-$color-action-light: #c3e8fd;
-$color-accent: #f78f9e;
-$color-accent-light: #fce0e1;
-$color-accent-highlight: $color-action;
-$color-menu-item: $color-action;
-$color-secondary-menu-item: #848484;
-$color-mobile-menu-items: $color-action;
-$color-highlighted-section: #e3f9ff;
-
-$color-light: $page-color;
-$color-dark: $color-regular-text;
-$color-solid: $color-regular-text;
-$color-special-price: $color-accent;
-
-$color-cart-icon: $color-action;
-
-$color-link: $color-action;
-
-$color-error: #fa5347;
-$color-success: #18ae0c;
-
-$color-messages-success: #81d57b;
-$color-messages-error: #f9a284;
-$color-messages-warning: #fce0e1;
-$color-messages-notice: #9fd2f1;
-$color-success-text: $color-messages-success;
-
-$color-background: #fff;
-$color-overlay: #000;
-
-$forms-border-color: #a3a3a3;
-$forms-color-placeholder: #a09999;
-
 // override storefront-ui variables
 :root {
     --font-size-base: #{$font-size-base-mobile};

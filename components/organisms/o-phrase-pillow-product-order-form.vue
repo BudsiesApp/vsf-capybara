@@ -2101,12 +2101,6 @@ export default (
     }
 
     ._customization-section {
-      label {
-        ._step-marker {
-          color: var(--_c-light-primary);
-        }
-      }
-
       .-invalid {
         label {
           color: var(--c-danger);
