@@ -1204,6 +1204,11 @@ export default defineComponent({
     ._body-part-heading {
       @include heading-background;
     }
+
+    ._step-title {
+      @include border(--step-border, 0 0 4px 0, solid, var(--c-danger));
+    --heading-title-color: var(--c-danger);
+    }
   }
 
   @media (min-width: $tablet-min) {

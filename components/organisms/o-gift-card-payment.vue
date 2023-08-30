@@ -1,5 +1,5 @@
 <template>
-  <div class="gift-card-payment">
+  <div class="gift-card-payment" :class="skinClass">
     <div class="_notice-message" v-if="showNoticeMessage">
       Gift Cards cannot be used to purchase Gift Card products
     </div>
@@ -83,6 +83,7 @@ import { SfInput, SfButton, SfCheckbox, SfLoader } from '@storefront-ui/vue';
 import { ValidationObserver, ValidationProvider } from 'vee-validate';
 
 import GiftCardPayment from 'src/modules/gift-card/mixins/Payment';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 import MAppliedGiftCard from 'theme/components/molecules/m-applied-gift-card.vue';
 
@@ -95,6 +96,11 @@ export default GiftCardPayment.extend({
     SfLoader,
     ValidationObserver,
     ValidationProvider
+  },
+  computed: {
+    skinClass (): string {
+      return getCurrentThemeClass();
+    }
   }
 });
 </script>
@@ -182,6 +188,12 @@ export default GiftCardPayment.extend({
 
     &.-gift-card {
       margin-bottom: var(--spacer-base);
+    }
+  }
+
+  &.-skin-budsies {
+    ._code-error {
+      background-color: var(--c-danger);
     }
   }
 

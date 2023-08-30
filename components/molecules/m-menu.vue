@@ -14,7 +14,7 @@
       :visible="visible"
     >
       <SfMegaMenuColumn
-        :title="$t('Custom Lookalikes')"
+        :title="$t('Plush Products')"
       >
         <SfList>
           <SfListItem
@@ -32,11 +32,11 @@
       </SfMegaMenuColumn>
 
       <SfMegaMenuColumn
-        :title="$t('Household')"
+        :title="$t('Apparel')"
       >
         <SfList>
           <SfListItem
-            v-for="item in householdItems"
+            v-for="item in accessoriesItems"
             :key="item.label"
           >
             <router-link
@@ -50,11 +50,11 @@
       </SfMegaMenuColumn>
 
       <SfMegaMenuColumn
-        :title="$t('Apparel and Accessories')"
+        :title="$t('Household & Accessories')"
       >
         <SfList>
           <SfListItem
-            v-for="item in accessoriesItems"
+            v-for="item in householdItems"
             :key="item.label"
           >
             <router-link
@@ -147,8 +147,8 @@ export default Vue.extend({
           url: '/custom-puppets/'
         },
         {
-          label: this.$t('Bobbleheads & Figurines'),
-          url: '/bobblehead-figurines/'
+          label: this.$t('Petsies'),
+          url: '/petsies/'
         },
         {
           label: this.$t('Specialty Commissions'),
@@ -165,6 +165,16 @@ export default Vue.extend({
           url: {
             name: 'cut-out-blankets'
           }
+        },
+        {
+          label: this.$t('Keychains'),
+          url: {
+            name: 'printed-keychains-creation-page'
+          }
+        },
+        {
+          label: this.$t('Bobbleheads & Figurines'),
+          url: '/bobblehead-figurines/'
         }
       ],
       accessoriesItems: [
@@ -181,12 +191,6 @@ export default Vue.extend({
         {
           label: this.$t('Shirts'),
           url: '/custom-shirts/'
-        },
-        {
-          label: this.$t('Keychains'),
-          url: {
-            name: 'printed-keychains-creation-page'
-          }
         }
       ],
       otherProductsItems: [
@@ -209,10 +213,6 @@ export default Vue.extend({
           url: '/budsiespals/'
         },
         {
-          label: this.$t('Petsies'),
-          url: '/petsies/'
-        },
-        {
           label: this.$t('Bulk Orders'),
           url: '/plush-production/'
         }
@@ -226,6 +226,12 @@ export default Vue.extend({
           label: this.$t('About'),
           url: '/about/'
         },
+        {
+          label: this.$t('FAQ\'s'),
+          url: '//support.budsies.com/',
+          target: '_blank'
+        },
+
         {
           label: this.$t('Blog'),
           url: '/blog/',

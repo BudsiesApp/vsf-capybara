@@ -101,7 +101,7 @@
                     <SfIcon
                       icon="check"
                       size="xxs"
-                      color="blue-primary"
+                      color="green-primary"
                       class="collected-product__option__icon"
                     />
                     {{ option }}

@@ -47,7 +47,7 @@
           <SfIcon
             icon="check"
             size="xxs"
-            color="blue-primary"
+            color="green-primary"
             class="bundle-product-option__icon"
           />
           {{ option }}

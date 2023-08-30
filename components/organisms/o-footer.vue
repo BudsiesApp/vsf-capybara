@@ -239,7 +239,7 @@ export default {
         },
         {
           name: this.$t('FAQ\'s'),
-          link: 'http://support.budsies.com/',
+          link: '//support.budsies.com/',
           target: '_blank'
         },
         {
