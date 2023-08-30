@@ -179,11 +179,11 @@ export default Vue.extend({
 
           // VSF replace sku with it's default variant SKU for configurable and bundle products
           // So as workaround better to use parentSku instead sku to compare
-          const isRequiredProduct = product.parentSku === sku;
+          const isSkusListIncludesProduct = product.parentSku === sku;
           const hasLandingPage = !!product.landing_page_url || !isCustomProduct(+product.id);
 
           if (
-            isRequiredProduct &&
+            isSkusListIncludesProduct &&
             hasLandingPage
           ) {
             products.push(this.getProductBySkuDictionary[key]);
