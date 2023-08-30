@@ -71,11 +71,12 @@ import config from 'config';
 import { SearchQuery } from 'storefront-query-builder';
 import { isServer } from '@vue-storefront/core/helpers';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
-import Product, { ProductLink } from 'core/modules/catalog/types/Product';
+import Product from 'core/modules/catalog/types/Product';
 import { SfButton } from '@storefront-ui/vue';
 import OProductCard from 'theme/components/organisms/o-product-card.vue';
 import { prepareCategoryProduct } from 'theme/helpers';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
+import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 
 const getSkuFromRoute = (route: Route): string | undefined => {
   return route.params.parentSku;
@@ -172,9 +173,20 @@ export default Vue.extend({
         for (const key in this.getProductBySkuDictionary) {
           const product = this.getProductBySkuDictionary[key];
 
-          if (product.parentSku === sku && !!product.landing_page_url) {
-            products.push(this.getProductBySkuDictionary[key]);
+          if (!product.id) {
+            continue;
+          }
 
+          // VSF replace sku with it's default variant SKU for configurable and bundle products
+          // So as workaround better to use parentSku instead sku to compare
+          const isSkusListIncludesProduct = product.parentSku === sku;
+          const hasLandingPage = !!product.landing_page_url || !isCustomProduct(+product.id);
+
+          if (
+            isSkusListIncludesProduct &&
+            hasLandingPage
+          ) {
+            products.push(this.getProductBySkuDictionary[key]);
             break;
           }
         }
@@ -187,9 +199,11 @@ export default Vue.extend({
       productsQuery = productsQuery
         .applyFilter({ key: 'sku', value: { 'in': skus } })
         .applyFilter({ key: 'status', value: { 'in': [1] } });
-      if (config.products.listOutOfStockProducts === false) {
+
+      if (config.products.listOutOfStockProducts === false || config.products.hideOutOfStockProductsInCategories === true) {
         productsQuery = productsQuery.applyFilter({ key: 'stock.is_in_stock', value: { 'eq': true } });
       }
+
       return productsQuery;
     },
     async loadProductsList (type: string): Promise<void> {
