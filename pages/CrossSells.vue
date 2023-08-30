@@ -77,7 +77,6 @@ import OProductCard from 'theme/components/organisms/o-product-card.vue';
 import { prepareCategoryProduct } from 'theme/helpers';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
-import { isBundleProduct } from '@vue-storefront/core/modules/catalog/helpers';
 
 const getSkuFromRoute = (route: Route): string | undefined => {
   return route.params.parentSku;
@@ -193,11 +192,9 @@ export default Vue.extend({
         for (const key in this.getProductBySkuDictionary) {
           const product = this.getProductBySkuDictionary[key];
 
-          if (
-            product.parentSku === sku &&
-              (!!product.landing_page_url || !isBundleProduct(product))
-          ) {
+          if (product.parentSku === sku && !!product.landing_page_url) {
             products.push(this.getProductBySkuDictionary[key]);
+
             break;
           }
         }
