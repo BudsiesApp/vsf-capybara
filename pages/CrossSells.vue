@@ -172,13 +172,16 @@ export default Vue.extend({
       for (const sku of skus) {
         for (const key in this.getProductBySkuDictionary) {
           const product = this.getProductBySkuDictionary[key];
+          const isProductInStock = product.stock.is_in_stock;
+          const isChildProduct = product.parentSku === sku;
+          const hasLandingPage = !!product.landing_page_url || !isBundleProduct(product);
 
           if (
-            product.parentSku === sku &&
-              (!!product.landing_page_url || !isBundleProduct(product))
+            isChildProduct &&
+            isProductInStock &&
+            hasLandingPage
           ) {
             products.push(this.getProductBySkuDictionary[key]);
-
             break;
           }
         }
