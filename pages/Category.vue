@@ -859,7 +859,10 @@ export default {
   &__grid {
     justify-content: space-between;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(50%, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(46%, 1fr));
+    row-gap: calc(var(--spacer-sm) + var(--spacer-xs));
+    column-gap: calc(var(--spacer-sm) + var(--spacer-xs));
+    padding: 0 calc(var(--spacer-sm) + var(--spacer-xs));
   }
   &__product-card {
     --product-card-max-width: none;
@@ -881,7 +884,7 @@ export default {
 
   @media (min-width: $tablet-min) {
     &__grid {
-      grid-template-columns: repeat(auto-fill, minmax(33%, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(31%, 1fr));
     }
 
     &__product-card {
@@ -893,7 +896,7 @@ export default {
     margin: var(--spacer-sm) 0 0 var(--spacer-sm);
 
     &__grid {
-      grid-template-columns: repeat(auto-fill, minmax(25%, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(23%, 1fr));
     }
 
     &__pagination {
@@ -914,7 +917,7 @@ export default {
 
   @media (min-width: $desktop-l-min) {
     &__grid {
-      grid-template-columns: repeat(auto-fill, minmax(20%, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(18%, 1fr));
     }
 
     &__product-card {

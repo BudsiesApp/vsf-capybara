@@ -113,6 +113,9 @@ $forms-color-placeholder: #a09999;
     --c-blockquote: var(--c-text-muted);
     --c-blockquote-border: var(--_c-gray-accent);
     --c-divider: var(--_c-gray-accent);
+    --c-accent: var(--_c-light-primary);
+    --c-final-price: var(--c-primary);
+
     @include assign-color-variants(--c-primary, --_c-blue-primary);
     --c-primary-variant: var(--_c-blue-primary-darken);
     @include assign-color-variants(--c-secondary, --_c-blue-secondary);
