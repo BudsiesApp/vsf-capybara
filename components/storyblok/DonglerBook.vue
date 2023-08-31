@@ -163,6 +163,10 @@ export default Blok.extend({
     width: 100%;
   }
 
+  ._sub-title {
+    margin-top: var(--spacer-sm);
+  }
+
   &.-editor-preview-mode {
     ._button-row {
       pointer-events: none

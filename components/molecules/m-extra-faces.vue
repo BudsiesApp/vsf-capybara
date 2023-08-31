@@ -11,7 +11,7 @@
       >
         <validation-provider
           v-slot="{ errors }"
-          :name="'Extra Face ' + index.toString()"
+          :name="`'Extra Face ${index.toString()}'`"
         >
           <input
             name="uploaded_artwork_ids[]"

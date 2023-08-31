@@ -65,7 +65,7 @@
               v-if="backendProductId"
             />
 
-            <p>
+            <p class="_artwork-upload-helper">
               <strong>
                 Please Note: We recommend high resolution, clear photos for our Pillows!
                 <br>
@@ -268,7 +268,7 @@
               :error-message="errors[0]"
             />
 
-            <div><b>Sometimes our team has questions about your design</b></div>
+            <div>{{ $t('Sometimes our team has questions about your design') }}</div>
           </validation-provider>
         </div>
 
@@ -916,6 +916,10 @@ export default defineComponent({
     ._step-number {
       color: var(--c-danger);
       @include border(--step-border, 0 0 4px 0, solid, var(--c-danger));
+    }
+
+    ._artwork-upload-helper {
+      font-size: var(--font-xs);
     }
   }
 

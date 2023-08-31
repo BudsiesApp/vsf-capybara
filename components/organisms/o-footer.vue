@@ -134,10 +134,6 @@ export default {
           url: 'http://twitter.com/budsiestoys'
         },
         {
-          name: 'google-plus',
-          url: 'https://plus.google.com/communities/107022527148701273112'
-        },
-        {
           name: 'linkedin',
           url: 'https://www.linkedin.com/company/budsies'
         },
@@ -198,7 +194,7 @@ export default {
           link: '/plushie/index/cartoonPillows/'
         },
         {
-          name: this.$t('Cartoon Keychains'),
+          name: this.$t('Custom Keychains'),
           link: {
             name: 'printed-keychains-creation-page'
           }

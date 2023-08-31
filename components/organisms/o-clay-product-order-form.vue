@@ -283,7 +283,7 @@
                 :error-message="errors[0]"
               />
 
-              <div><b>{{ $t('Sometimes our team has questions about your design') }}</b></div>
+              <div>{{ $t('Sometimes our team has questions about your design') }}</div>
             </validation-provider>
           </div>
         </div>

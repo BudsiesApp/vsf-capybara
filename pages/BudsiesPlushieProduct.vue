@@ -21,7 +21,7 @@
       v-if="showForm"
     >
       <template #artwork-upload-bottom-block>
-        <p v-if="isBudsieProduct">
+        <p v-if="isBudsieProduct" class="_inspiration-machine">
           {{ $t('Don\'t have a good character? Get inspired by our') }}
 
           <router-link target="_blank" :to="{name: 'inspiration-machine'}">
@@ -358,6 +358,8 @@ export default Vue.extend({
   @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 #budsies-plushie-product {
+  $inspirationMachineBackground: #f5ebb7;
+
   box-sizing: border-box;
   padding: var(--spacer-lg) 1rem 0;
 
@@ -379,6 +381,13 @@ export default Vue.extend({
   ._actions-helper-text {
     font-size: var(--font-sm);
     margin-top: var(--spacer-sm);
+  }
+
+  ._inspiration-machine {
+    background: $inspirationMachineBackground;
+    border-radius: var(--spacer-lg);
+    display: inline-block;
+    padding: var(--spacer-xs) var(--spacer-lg);
   }
 
   @media (min-width: $tablet-min) {

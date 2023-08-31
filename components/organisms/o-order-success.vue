@@ -303,6 +303,14 @@ $number-margin-right-desktop: var(--spacer-sm);
     }
   }
 
+  p {
+    margin: 0;
+  }
+
+  ._section_content {
+    margin-top: var(--spacer-base);
+  }
+
   @include for-desktop {
     ._content {
       flex-direction: row;
