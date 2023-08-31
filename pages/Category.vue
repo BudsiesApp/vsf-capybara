@@ -859,7 +859,7 @@ export default {
   &__grid {
     justify-content: space-between;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(50%, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(46%, 1fr));
     row-gap: calc(var(--spacer-sm) + var(--spacer-xs));
     column-gap: calc(var(--spacer-sm) + var(--spacer-xs));
     padding: 0 calc(var(--spacer-sm) + var(--spacer-xs));
@@ -917,7 +917,7 @@ export default {
 
   @media (min-width: $desktop-l-min) {
     &__grid {
-      grid-template-columns: repeat(auto-fill, minmax(20%, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(18%, 1fr));
     }
 
     &__product-card {

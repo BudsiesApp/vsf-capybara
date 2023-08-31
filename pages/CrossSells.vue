@@ -443,7 +443,7 @@ export default Vue.extend({
   @media (min-width: $desktop-l-min) {
     .products {
       &__grid {
-        grid-template-columns: repeat(auto-fit, minmax(20%, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(18%, 1fr));
       }
 
       &__product-card {
