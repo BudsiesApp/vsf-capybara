@@ -339,8 +339,10 @@ export default Vue.extend({
     &__grid {
       justify-content: space-between;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(50%, 1fr));
-      row-gap: var(--spacer-sm);
+      grid-template-columns: repeat(auto-fit, minmax(46%, 1fr));
+      row-gap: calc(var(--spacer-sm) + var(--spacer-xs));
+      column-gap: calc(var(--spacer-sm) + var(--spacer-xs));
+      padding: 0 calc(var(--spacer-sm) + var(--spacer-xs));
     }
     &__product-card {
       --product-card-max-width: none;
@@ -363,7 +365,7 @@ export default Vue.extend({
   @media (min-width: $tablet-min) {
     .products {
       &__grid {
-        grid-template-columns: repeat(auto-fit, minmax(33%, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(31%, 1fr));
       }
 
       &__product-card {
@@ -379,7 +381,7 @@ export default Vue.extend({
       padding: 2em 0;
 
       &__grid {
-        grid-template-columns: repeat(auto-fit, minmax(25%, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(23%, 1fr));
       }
 
       &__pagination {
@@ -406,7 +408,7 @@ export default Vue.extend({
   @media (min-width: $desktop-l-min) {
     .products {
       &__grid {
-        grid-template-columns: repeat(auto-fit, minmax(20%, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(18%, 1fr));
       }
 
       &__product-card {
