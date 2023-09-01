@@ -1,24 +1,27 @@
 <template>
   <div class="m-extra-faces" :class="skinClass">
     <div class="_artwork-upload">
-      <div class="_step-title" v-if="isUploadersSubtitleVisible">
+      <div class="_step-title" v-show="isUploadersSubtitleVisible">
         Upload additional photos
       </div>
       <div
-        v-for="index in inputsCount"
+        v-for="index in maxInputsCount"
         :key="'uploader_wrapper_' + index.toString()"
         class="_extra-face-uploader-wrapper"
       >
         <validation-provider
           v-slot="{ errors }"
-          :name="'Extra Face ' + index.toString()"
+          :name="getInputName(index)"
+          :rules="showImageUploader(index - 1) ? 'required' : ''"
+          :ref="getFieldAnchorName(getInputName(index))"
+          v-show="showImageUploader(index - 1)"
         >
           <input
             name="uploaded_artwork_ids[]"
             type="hidden"
             :value="getUploadedArtworkId(index - 1)"
-            required
           >
+
           <MArtworkUpload
             ref="artwork-upload"
             :product-id="backendProductId"
@@ -138,6 +141,10 @@ export default Vue.extend({
     defaultOptionLabel: {
       type: String,
       default: 'No Extra Pets'
+    },
+    getFieldAnchorName: {
+      type: Function as PropType<(fieldName: string) => string>,
+      required: true
     }
   },
   data () {
@@ -187,6 +194,8 @@ export default Vue.extend({
           extraPhotosCount
         );
 
+        this.clearUnusedUploaders();
+
         const eventData: ExtraFacesConfiguratorData = {
           addon: value,
           storageItems: [...this.uploaderValues]
@@ -197,6 +206,17 @@ export default Vue.extend({
     },
     skinClass (): string {
       return `-skin-petsies`;
+    },
+    maxInputsCount (): number {
+      let maxInputsCount = 0;
+
+      for (const option of this.availableOptions) {
+        if (option.value > maxInputsCount) {
+          maxInputsCount = option.value;
+        }
+      }
+
+      return maxInputsCount;
     },
     inputsCount (): number {
       if (!this.selectedVariant) {
@@ -233,7 +253,12 @@ export default Vue.extend({
       setBundleOptionValue: types.PRODUCT_SET_BUNDLE_OPTION
     }),
     artworkUploadInitialItems (index: number): CustomerImage[] | undefined {
-      return this.initialArtworks.length ? [this.initialArtworks[index]] : undefined;
+      if (!this.initialArtworks.length) {
+        return;
+      }
+
+      const artwork = this.initialArtworks[index];
+      return artwork ? [artwork] : undefined;
     },
     clearUploaders (): void {
       const uploaders = this.getUploaders();
@@ -243,6 +268,22 @@ export default Vue.extend({
       }
 
       uploaders.forEach(uploader => uploader.clearInput());
+    },
+    clearUnusedUploaders (): void {
+      const uploaders = this.getUploaders();
+
+      if (!uploaders) {
+        return;
+      }
+
+      uploaders.forEach((uploader, index) => {
+        if (index >= this.uploaderValues.length) {
+          uploader.clearInput();
+        }
+      });
+    },
+    getInputName (index: number): string {
+      return `'Extra Face ${index}'`;
     },
     getUploaders (): InstanceType<typeof MArtworkUpload>[] | undefined {
       return this.$refs['artwork-upload'] as InstanceType<typeof MArtworkUpload>[] | undefined;
@@ -287,6 +328,9 @@ export default Vue.extend({
       const isSomeUploaderBusy = !!Object.values(this.artworkUploaderBusyState).find((isBusy) => isBusy);
 
       this.$emit('is-busy-changed', isSomeUploaderBusy);
+    },
+    showImageUploader (uploaderIndex: number): boolean {
+      return uploaderIndex < this.inputsCount;
     }
   },
   watch: {
