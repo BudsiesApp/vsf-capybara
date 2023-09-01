@@ -43,6 +43,8 @@ $font-family-intro: "GothamRounded", "Helvetica", sans-serif;
 
     --button-font-size: var(--font-sm);
 
+    --button-border-radius-size: 10px;
+
     // Colors
     // @include generate-color-variants(--c-black, #535353);
     @include generate-color-variants(--c-black, #4d546c);
