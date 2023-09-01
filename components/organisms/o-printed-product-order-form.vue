@@ -196,6 +196,7 @@
               :upload-url="artworkUploadUrl"
               :initial-variant="initialAddonItemId"
               :initial-artworks="initialAdditionalArtworks"
+              :get-field-anchor-name="getFieldAnchorName"
               step-title="Add more people"
               default-option-label="No extra people"
               v-if="hasExtraFaceAddons"
@@ -335,6 +336,7 @@ function getAllFormRefs (
   const artworkUpload = refs['artwork-upload'] as InstanceType<typeof MTitledArtworkUpload> | undefined;
   const sideViewUpload = refs['side-view-upload'] as InstanceType<typeof MTitledArtworkUpload> | undefined;
   const backViewUpload = refs['back-view-upload'] as InstanceType<typeof MTitledArtworkUpload> | undefined;
+  const extraFaces = refs['extra-faces'] as InstanceType<typeof MExtraFaces> | undefined;
 
   let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = { ...refs };
 
@@ -348,6 +350,10 @@ function getAllFormRefs (
 
   if (backViewUpload) {
     refsDictionary = { ...refsDictionary, ...backViewUpload.$refs };
+  }
+
+  if (extraFaces) {
+    refsDictionary = { ...refsDictionary, ...extraFaces.$refs };
   }
 
   return refsDictionary;

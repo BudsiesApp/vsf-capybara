@@ -51,6 +51,7 @@
                 :valid="!errors.length"
                 :error-message="errors[0]"
                 :value="giftCardCode"
+                :disabled="isSubmitting"
                 @input="onGiftCardCodeChangeHandler"
               />
             </div>
