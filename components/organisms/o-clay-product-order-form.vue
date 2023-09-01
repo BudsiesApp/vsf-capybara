@@ -168,7 +168,8 @@
               tag="div"
             >
               <SfHeading
-                class="-required _step-subtitle _body-part-heading"
+                class="_step-subtitle _body-part-heading"
+                :class="{ '-required': bodypart.isRequired }"
                 :level="3"
                 :title="bodypart.name"
                 :ref="getFieldAnchorName(bodypart.name)"

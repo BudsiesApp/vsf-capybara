@@ -157,7 +157,8 @@
           :key="bodypart.id"
         >
           <SfHeading
-            class="_step-title -required _body-part-heading"
+            class="_step-title _body-part-heading"
+            :class="{ '-required': bodypart.isRequired }"
             :level="2"
             :title="bodypart.name"
             :ref="getFieldAnchorName(bodypart.name)"
@@ -165,7 +166,7 @@
 
           <validation-provider
             v-slot="{ errors }"
-            rules="required"
+            :rules="bodypart.isRequired ? 'required' : ''"
             :name="`'${bodypart.name}'`"
             tag="div"
           >
