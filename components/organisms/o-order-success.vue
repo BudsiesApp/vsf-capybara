@@ -212,6 +212,7 @@ $number-size: 50px;
 $number-margin-right-desktop: var(--spacer-sm);
 
 .o-order-success {
+  --heading-padding: 0;
 
   ._heading {
     padding: 0 var(--spacer-sm);
@@ -250,11 +251,7 @@ $number-margin-right-desktop: var(--spacer-sm);
 
   ._section {
     padding: 0 var(--spacer-sm);
-    margin-bottom: var(--spacer-xl);
-
-    &:last-child {
-      margin-bottom: 0;
-    }
+    margin-top: calc(var(--spacer-xl) + var(--spacer-lg));
 
     ._title {
       display: flex;
@@ -296,7 +293,6 @@ $number-margin-right-desktop: var(--spacer-sm);
   ._referral-link {
     display: inline-block;
     width: 100%;
-    margin-top: var(--spacer-sm);
 
     ._button {
       margin: 0 auto;
@@ -342,10 +338,6 @@ $number-margin-right-desktop: var(--spacer-sm);
 
       ._section_content {
         padding-left: calc(#{$number-size} + #{$number-margin-right-desktop});
-      }
-
-      &:first-child {
-        margin-top: 3rem;
       }
     }
 
