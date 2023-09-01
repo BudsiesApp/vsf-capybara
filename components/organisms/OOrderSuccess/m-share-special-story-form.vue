@@ -119,12 +119,16 @@ export default Vue.extend({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .m-share-special-story-form {
+  p {
+    margin: 0;
+  }
+
   ._text {
     text-align: center;
   }
 
   ._field {
-    margin-bottom: var(--spacer-sm);
+    margin-top: var(--spacer-sm);
   }
 
   ._story-textarea {
@@ -150,6 +154,7 @@ export default Vue.extend({
   ._button-container {
     display: flex;
     justify-content: center;
+    margin-top: var(--spacer-sm);
   }
 
   ._error-text {

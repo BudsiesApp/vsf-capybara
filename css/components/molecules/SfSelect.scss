@@ -23,6 +23,9 @@
             }
         }
     }
+    &__selected {
+        --select-option-font-size: var(--font-base);
+    }
 
     @include for-desktop {
         &__options {

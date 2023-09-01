@@ -168,7 +168,8 @@
               tag="div"
             >
               <SfHeading
-                class="-required _step-subtitle _body-part-heading"
+                class="_step-subtitle _body-part-heading"
+                :class="{ '-required': bodypart.isRequired }"
                 :level="3"
                 :title="bodypart.name"
                 :ref="getFieldAnchorName(bodypart.name)"
@@ -283,7 +284,7 @@
                 :error-message="errors[0]"
               />
 
-              <div><b>{{ $t('Sometimes our team has questions about your design') }}</b></div>
+              <div>{{ $t('Sometimes our team has questions about your design') }}</div>
             </validation-provider>
           </div>
         </div>
@@ -1114,10 +1115,6 @@ export default defineComponent({
         content: "*";
       }
     }
-  }
-
-  ._popup-link {
-    font-weight: var(--font-medium);
   }
 
   ._popup-content {
