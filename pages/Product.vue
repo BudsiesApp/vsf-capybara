@@ -86,7 +86,6 @@ export default {
         isLoading: false,
         max: 0,
         manageQuantity: true,
-        manageStock: true,
         isInStock: false
       }
     };
