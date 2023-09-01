@@ -103,7 +103,10 @@
                 </template>
               </SfCollectedProduct>
             </transition-group>
-            <div class="_dropdown-container">
+            <div
+              class="_dropdown-container"
+              :class="{ '-open': isDropdownOpen }"
+            >
               <SfButton
                 class="color-secondary"
                 @click.prevent.self="isDropdownOpen = !isDropdownOpen"
@@ -659,10 +662,29 @@ export default {
   &.-skin-budsies {
     ._dropdown-container {
       .sf-dropdown {
+        --dropdown-background: var(--c-blue);
+      }
+
+      --button-transition: box-shadow, border-radius 150ms ease-in-out;
+
+      .sf-dropdown {
         .sf-list__item {
           &:hover {
-            background-color: var(--c-primary-variant);
+            background-color: var(--c-black);
           }
+        }
+      }
+
+      ::v-deep {
+        .sf-dropdown__container {
+          overflow: hidden;
+          border-radius: 0 0 var(--button-border-radius-size) var(--button-border-radius-size);
+        }
+      }
+
+      &.-open {
+        .sf-button {
+          --button-border-radius: var(--button-border-radius-size) var(--button-border-radius-size) 0 0;
         }
       }
     }

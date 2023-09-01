@@ -1,7 +1,11 @@
 <template>
   <div
     class="m-make-your-own-dropdown"
-    :class="{ '-small': size === 'small', [skinClass]: true }"
+    :class="{
+      '-small': size === 'small',
+      [skinClass]: true,
+      '-open': isDropdownOpen
+    }"
     @mouseover="toggleDropdownOnDesktop(true)"
     @mouseleave="toggleDropdownOnDesktop(false)"
   >
@@ -187,6 +191,7 @@ export default Vue.extend({
   .sf-button {
     --button-font-size: var(--font-sm);
     --button-font-line-height: 1;
+    --button-transition: box-shadow, border-radius 150ms ease-in-out;
   }
 
   .sf-dropdown {
@@ -200,7 +205,7 @@ export default Vue.extend({
         background-color: var(--c-light);
       }
 
-      > a {
+      >a {
         width: 100%;
         display: block;
       }
@@ -220,11 +225,24 @@ export default Vue.extend({
   }
 
   &.-skin-budsies {
+    ::v-deep {
+      .sf-dropdown__container {
+        overflow: hidden;
+        border-radius: 0 0 var(--button-border-radius-size) var(--button-border-radius-size);
+      }
+    }
+
     .sf-dropdown {
       .sf-list__item {
         &:hover {
           background-color: var(--c-primary-variant);
         }
+      }
+    }
+
+    &.-open {
+      .sf-button {
+        --button-border-radius: var(--button-border-radius-size) var(--button-border-radius-size) 0 0;
       }
     }
   }

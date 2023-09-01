@@ -1,4 +1,6 @@
 .sf-button {
+    --button-border-radius: var(--button-border-radius-size);
+
     &.color-secondary {
         --button-color: var(--c-white);
         --c-secondary: var(--c-blue);
