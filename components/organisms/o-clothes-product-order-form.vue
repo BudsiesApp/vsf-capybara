@@ -210,6 +210,7 @@
                 :upload-url="artworkUploadUrl"
                 :initial-variant="initialAddonItemId"
                 :initial-artworks="initialAdditionalArtworks"
+                :get-field-anchor-name="getFieldAnchorName"
                 step-title="Add more people"
                 default-option-label="No extra people"
                 v-if="hasExtraFaceAddons"
@@ -322,11 +323,24 @@ interface SelectOptionItem {
 }
 
 const SHIRTS_DESIGN_BUNDLE_OPTION_TITLE = 'design';
-const SHIRTS_SIMPLE_PRODUCT_BUNDLE_OPTION_TITLE = 'product';
 const PAJAMAS_DESIGN_BUNDLE_OPTION_TITLE = 'product';
 const SIZE_BUNDLE_OPTION_TITLE = 'size';
 const EXTRA_FACES_BUNDLE_OPTION_TITLE = 'extra faces';
 const VARIANT_BUNDLE_OPTION_TITLE = 'variant';
+
+function getAllFormRefs (
+  refs: Record<string, Vue | Element | Vue[] | Element[]>
+): Record<string, Vue | Element | Vue[] | Element[]> {
+  const extraFaces = refs['extra-faces'] as InstanceType<typeof MExtraFaces> | undefined;
+
+  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = { ...refs };
+
+  if (extraFaces) {
+    refsDictionary = { ...refsDictionary, ...extraFaces.$refs };
+  }
+
+  return refsDictionary;
+}
 
 export default defineComponent({
   name: 'OClothesProductOrderForm',
@@ -343,7 +357,7 @@ export default defineComponent({
       validationObserver,
       ...useFormValidation(
         validationObserver,
-        () => setupContext.refs
+        () => getAllFormRefs(setupContext.refs)
       )
     }
   },
