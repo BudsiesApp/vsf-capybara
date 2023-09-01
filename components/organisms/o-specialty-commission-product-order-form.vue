@@ -1047,10 +1047,6 @@ export default defineComponent({
     }
   }
 
-  ._popup-link {
-    font-weight: var(--font-medium);
-  }
-
   ._popup-content {
     text-align: left;
   }
@@ -1092,7 +1088,7 @@ export default defineComponent({
   }
 
   ._production-time-selector-section {
-    margin-top: var(--spacer-base);
+    margin-top: var(--spacer-xl);
   }
 
   ._qty-container {

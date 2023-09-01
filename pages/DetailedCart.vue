@@ -439,7 +439,7 @@ export default {
     editHandler (product) {
       if (product.sku === buddyPillowSku) {
         this.$router.push({
-          name: '',
+          name: 'pillow-product',
           query: {
             existingPlushieId: product.plushieId
           }

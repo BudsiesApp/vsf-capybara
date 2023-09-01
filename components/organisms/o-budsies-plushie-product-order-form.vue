@@ -1155,10 +1155,6 @@ export default defineComponent({
     }
   }
 
-  ._popup-link {
-    font-weight: var(--font-medium);
-  }
-
   ._popup-content {
     text-align: left;
   }

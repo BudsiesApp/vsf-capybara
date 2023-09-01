@@ -374,10 +374,6 @@ export default Vue.extend({
     }
   }
 
-  ._popup-link {
-    font-weight: var(--font-medium);
-  }
-
   ._actions-helper-text {
     font-size: var(--font-sm);
     margin-top: var(--spacer-sm);
