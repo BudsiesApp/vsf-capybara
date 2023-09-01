@@ -67,7 +67,7 @@ $font-family-intro: "GothamRounded", "Helvetica", sans-serif;
     @include generate-color-variants(--_c-yellow-primary, #ecc713);
     @include generate-color-variants(--_c-yellow-secondary, #f6e389);
     // @include generate-color-variants(--_c-blue-primary, #43c5e4);
-    @include generate-color-variants(--_c-blue-primary, #2fb9f3);
+    @include generate-color-variants(--_c-blue-primary, #008CBA);
     @include generate-color-variants(--_c-blue-secondary, #c3e8fd);
 
     --c-body: var(--c-white);

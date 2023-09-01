@@ -85,7 +85,8 @@ export default {
       stock: {
         isLoading: false,
         max: 0,
-        manageQuantity: true
+        manageQuantity: true,
+        isInStock: false
       }
     };
   },
@@ -215,8 +216,9 @@ export default {
           product: this.getCurrentProduct,
           qty: this.getCurrentProduct.qty
         });
-        this.stock.manageQuantity = res.isManageStock;
+        this.stock.manageQuantity = !!res.isManageStock;
         this.stock.max = res.isManageStock ? res.qty : null;
+        this.stock.isInStock = res.isInStock;
       } finally {
         this.stock.isLoading = false;
       }

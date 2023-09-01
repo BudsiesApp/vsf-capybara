@@ -247,6 +247,10 @@ export default (Vue as VueConstructor<Vue & NonReactiveData>).extend({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .m-share-birthday-form {
+  p {
+    margin: 0;
+  }
+
   ._text {
     text-align: center;
   }
@@ -258,7 +262,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveData>).extend({
 
   ._fields {
     display: flex;
-    margin-bottom: var(--spacer-sm);
+    margin-top: var(--spacer-sm);
   }
 
   ._field {
@@ -297,6 +301,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveData>).extend({
   ._button-container {
     display: flex;
     justify-content: center;
+    margin-top: var(--spacer-sm);
   }
 
   ._error-text {

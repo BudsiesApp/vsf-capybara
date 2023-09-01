@@ -22,7 +22,7 @@
           v-model="qty"
           :max-quantity="stock.max"
           :loading="stock.isLoading"
-          :unlimit-quantity="!isSimpleOrConfigurable"
+          :unlimit-quantity="!stock.manageQuantity"
           @input="$emit('input', $event)"
           @error="handleQuantityValidationError"
         />
@@ -73,12 +73,7 @@ export default Vue.extend({
       return !!this.qtyValidationError || this.stock.isLoading || !this.isAvailable
     },
     isAvailable () {
-      return !this.isOnline || !!this.stock.max || !this.stock.manageQuantity || !this.isSimpleOrConfigurable
-    },
-    isSimpleOrConfigurable () {
-      return ['simple', 'configurable'].includes(
-        this.product.type_id
-      );
+      return !this.isOnline || this.stock.isInStock || !this.stock.manageQuantity
     },
     alert () {
       if (this.qtyValidationError) {
