@@ -173,6 +173,7 @@
               :upload-url="artworkUploadUrl"
               :initial-variant="initialAddonItemId"
               :initial-artworks="initialAdditionalArtworks"
+              :get-field-anchor-name="getFieldAnchorName"
               v-if="hasExtraFaceAddons"
               @input="extraFacesData = $event"
               @is-busy-changed="onArtworkUploadBusyStatusChanged('extra-faces', $event)"
@@ -303,6 +304,7 @@ function getAllFormRefs (
   const artworkUpload = refs['artwork-upload'] as InstanceType<typeof MTitledArtworkUpload> | undefined;
   const sideViewUpload = refs['side-view-upload'] as InstanceType<typeof MTitledArtworkUpload> | undefined;
   const backViewUpload = refs['back-view-upload'] as InstanceType<typeof MTitledArtworkUpload> | undefined;
+  const extraFaces = refs['extra-faces'] as InstanceType<typeof MExtraFaces> | undefined;
 
   let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = { ...refs };
 
@@ -316,6 +318,10 @@ function getAllFormRefs (
 
   if (backViewUpload) {
     refsDictionary = { ...refsDictionary, ...backViewUpload.$refs };
+  }
+
+  if (extraFaces) {
+    refsDictionary = { ...refsDictionary, ...extraFaces.$refs };
   }
 
   return refsDictionary;
