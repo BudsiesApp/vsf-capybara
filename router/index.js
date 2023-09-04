@@ -32,6 +32,8 @@ const ClayProduct = () =>
   import(/* webpackChunkName: "vsf-plushie-product" */ 'theme/pages/ClayProduct');
 const ClothesProduct = () =>
   import(/* webpackChunkName: "vsf-clothes-product" */ 'theme/pages/ClothesProduct');
+const PasswordReset = () =>
+  import(/* webpackChunkName: "vsf-password-reset" */ 'theme/pages/PasswordReset');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -471,6 +473,15 @@ let routes = [
       sku: 'customGolfShirts_bundle',
       productDesign: route.query.product_design,
       existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
+    name: 'password-reset',
+    path: '/customer/account/resetpassword/',
+    component: PasswordReset,
+    props: (route) => ({
+      id: route.query.id,
+      token: route.query.token
     })
   }
 ];
