@@ -62,6 +62,11 @@ export default Vue.extend({
     }
   },
   async beforeRouteEnter (to, from, next): Promise<void> {
+    if (!config.budsies.enableRaffle) {
+      next();
+      return;
+    }
+
     const existingParticipantData: ParticipantData | undefined = rootStore.getters[`${SN_RAFFLE}/${getters.GET_PARTICIPANT_DATA}`];
 
     if (existingParticipantData?.canPurchaseSpecComm) {
