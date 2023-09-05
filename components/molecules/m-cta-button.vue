@@ -6,7 +6,7 @@
   >
     <MMakeYourOwnDropdown v-show="showDefaultButton" :size="size" />
 
-    <SfButton v-show="showGoToCheckoutButton" @click="goToCheckout">
+    <SfButton class="_checkout-button" v-show="showGoToCheckoutButton" @click="goToCheckout">
       Go to Checkout
     </SfButton>
   </div>
