@@ -30,6 +30,7 @@
 </template>
 
 <script lang="ts">
+import config from 'config';
 import Vue, { PropType } from 'vue';
 
 import { getters, actions, mutations, RafflePending, RaffleRegistrationForm, RaffleWinner, SN_RAFFLE, ParticipantData, CurrentState } from 'src/modules/raffle';
@@ -77,6 +78,17 @@ export default Vue.extend({
         return undefined;
       }
     }
+  },
+  beforeRouteEnter (to, from, next): void {
+    if (!config.budsies.enableRaffle) {
+      next({
+        name: 'specialty-commissions-creation'
+      });
+
+      return;
+    }
+
+    next();
   },
   beforeMount (): void {
     void this.loadRaffleData();
