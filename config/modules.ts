@@ -28,6 +28,7 @@ import { ErrorLoggingModule } from 'src/modules/error-logging';
 import { PageLoadingIndicatorModule } from 'src/modules/page-loading-indicator';
 import { RaffleModule } from 'src/modules/raffle'
 import { InspirationMachineModule } from 'src/modules/inspiration-machine'
+import { MailchimpModule } from 'src/modules/mailchimp'
 
 import registerStoryblokComponents from 'theme/components/storyblok'
 
@@ -80,6 +81,7 @@ export function registerClientModules () {
   registerModule(ErrorLoggingModule)
   registerModule(RaffleModule)
   registerModule(InspirationMachineModule)
+  registerModule(MailchimpModule)
 }
 
 // Deprecated API, will be removed in 2.0

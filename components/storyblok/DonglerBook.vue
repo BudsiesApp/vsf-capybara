@@ -51,7 +51,7 @@
       </div>
     </form>
 
-    <div v-show="isSubmitted">
+    <div class="_success-message" v-show="isSubmitted">
       <p>
         <strong>
           {{ $t('Success! Your storybook is on it\'s way') }}

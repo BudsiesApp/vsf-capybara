@@ -19,7 +19,7 @@
       </APromoCode>
 
       <SfButton
-        class="sf-button--full-width actions__button"
+        class="sf-button--full-width actions__button _checkout-button"
         @click="goToCheckout"
       >
         {{ $t('Go to checkout') }}

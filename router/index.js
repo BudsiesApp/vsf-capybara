@@ -46,6 +46,8 @@ const BudsiesPalsKitProduct = () =>
   import(/* webpackChunkName: "vsf-pals-kit" */ 'theme/pages/BudsiesPalsKitProduct');
 const BudsiesPalsProduct = () =>
   import(/* webpackChunkName: "vsf-budsies-pals-product" */ 'theme/pages/BudsiesPalsProduct');
+const PasswordReset = () =>
+  import(/* webpackChunkName: "vsf-password-reset" */ 'theme/pages/PasswordReset');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -697,6 +699,15 @@ let routes = [
       query: {
         existingPlushieId: route.params.existingPlushieId
       }
+    })
+  },
+  {
+    name: 'password-reset',
+    path: '/customer/account/resetpassword/',
+    component: PasswordReset,
+    props: (route) => ({
+      id: route.query.id,
+      token: route.query.token
     })
   }
 ];
