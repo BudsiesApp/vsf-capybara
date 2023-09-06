@@ -25,6 +25,7 @@ import { mappingFallbackForUrlRewrite } from 'src/modules/url-rewrite/mappingFal
 import { BackendSettings } from 'src/modules/backend-settings';
 import { ErrorLoggingModule } from 'src/modules/error-logging';
 import { PageLoadingIndicatorModule } from 'src/modules/page-loading-indicator';
+import { MailchimpModule } from 'src/modules/mailchimp'
 
 import registerStoryblokComponents from 'theme/components/storyblok'
 
@@ -74,6 +75,7 @@ export function registerClientModules () {
   registerModule(UrlRewriteModule)
   registerModule(BackendSettings)
   registerModule(ErrorLoggingModule)
+  registerModule(MailchimpModule)
 }
 
 // Deprecated API, will be removed in 2.0

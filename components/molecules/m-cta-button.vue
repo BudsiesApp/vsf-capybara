@@ -10,7 +10,7 @@
       </router-link>
     </SfButton>
 
-    <SfButton v-show="showGoToCheckoutButton" @click="goToCheckout">
+    <SfButton class="_checkout-button" v-show="showGoToCheckoutButton" @click="goToCheckout">
       {{ $t('Go to Checkout') }}
     </SfButton>
   </div>

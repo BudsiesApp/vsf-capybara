@@ -81,7 +81,7 @@
             </template>
           </SfProperty>
           <SfButton
-            class="sf-button--full-width color-secondary"
+            class="sf-button--full-width color-secondary _checkout-button"
             @click.native="goToCheckout"
           >
             {{ $t('Go to checkout') }}

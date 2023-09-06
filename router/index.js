@@ -22,6 +22,8 @@ const BulkorderConfirmation = () =>
 import(/* webpackChunkName: "vsf-bulkorder-confirmation" */ 'theme/pages/BulkorderConfirmation');
 const BulkorderQuotation = () =>
 import(/* webpackChunkName: "vsf-bulkorder-quotation" */ 'theme/pages/BulkorderQuotation');
+const PasswordReset = () =>
+  import(/* webpackChunkName: "vsf-password-reset" */ 'theme/pages/PasswordReset');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -165,6 +167,15 @@ let routes = [
         }
       }
     }
+  },
+  {
+    name: 'password-reset',
+    path: '/customer/account/resetpassword/',
+    component: PasswordReset,
+    props: (route) => ({
+      id: route.query.id,
+      token: route.query.token
+    })
   }
 ];
 
