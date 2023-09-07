@@ -213,6 +213,15 @@
               </div>
             </validation-provider>
 
+            <MProductionTimeSelector
+              class="_production-time-selector"
+              v-model="selectedProductionTimeOption"
+              :production-time-options="productionTimeOptions"
+              :product-id="product.id"
+              :disabled="isSubmitting"
+              v-if="hasProductionTimeOptions"
+            />
+
             <validation-provider
               v-slot="{ errors, classes }"
               rules="required"
@@ -416,6 +425,7 @@ import { CustomerImage, ServerError } from 'src/modules/shared';
 import { getAddonOptionsFromBundleOption } from 'theme/helpers/get-addon-options-from-bundle-option.function';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
+import { useProductionTimeSelector } from 'theme/helpers/use-production-time-selector';
 
 import AddonOption from '../interfaces/addon-option.interface';
 import SelectedAddon from '../interfaces/selected-addon.interface';
@@ -426,6 +436,7 @@ import MArtworkUpload from '../molecules/m-artwork-upload.vue';
 import MBlockStory from '../molecules/m-block-story.vue';
 import MFormErrors from '../molecules/m-form-errors.vue';
 import MBodypartOptionConfigurator from '../molecules/m-bodypart-option-configurator.vue';
+import MProductionTimeSelector from '../molecules/m-production-time-selector.vue';
 
 extend('required', {
   ...required,
@@ -453,7 +464,7 @@ function getAllFormRefs (
 
 export default defineComponent({
   name: 'OClayProductOrderForm',
-  setup (_, setupContext) {
+  setup ({ product }, setupContext) {
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
     const window = inject<Window>('WindowObject');
 
@@ -474,7 +485,8 @@ export default defineComponent({
       ...useFormValidation(
         validationObserver,
         () => getAllFormRefs(setupContext.refs)
-      )
+      ),
+      ...useProductionTimeSelector(product)
     }
   },
   components: {
@@ -490,7 +502,8 @@ export default defineComponent({
     SfModal,
     SfHeading,
     MBlockStory,
-    MFormErrors
+    MFormErrors,
+    MProductionTimeSelector
   },
   props: {
     artworkUploadUrl: {
@@ -746,6 +759,7 @@ export default defineComponent({
       this.fillCustomerImagesData(existingCartItem);
       this.fillBodypartsValues(existingCartItem);
       this.fillAddons(existingCartItem);
+      this.fillProductionTimeFromCartItem(existingCartItem);
     },
     getArtworkUploadComponent (): InstanceType<typeof MArtworkUpload> | undefined {
       return this.$refs['artwork-upload'] as InstanceType<typeof MArtworkUpload> | undefined;
@@ -845,6 +859,7 @@ export default defineComponent({
       this.bodypartsValues = {};
       this.description = '';
       this.plushieId = undefined;
+      this.resetSelectedProductionTimeOption();
 
       const uploader = this.getUploader();
       if (uploader) {
@@ -1142,6 +1157,10 @@ export default defineComponent({
   .m-artwork-upload {
     margin: var(--spacer-lg) auto;
     max-width: 610px;
+  }
+
+  ._production-time-selector {
+    margin-top: var(--spacer-base);
   }
 
   ._qty-container {
