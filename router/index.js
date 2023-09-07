@@ -526,13 +526,6 @@ let routes = [
     }
   },
   {
-    name: 'budsies-creation-alias-3',
-    path: '/budsie/create/',
-    redirect: {
-      name: 'budsie-creation'
-    }
-  },
-  {
     name: 'budsie-creation',
     path: '/budsies/create/',
     component: BudsiesPlushieProduct,
