@@ -181,7 +181,7 @@ let routes = [
     })
   },
   {
-    name: 'pillow-product-alias',
+    name: 'pillow-product-alias-1',
     path: '/plushie/index/create/id/:plushieId/type/buddy-pillow/',
     redirect: (route) => ({
       name: 'pillow-product',
@@ -189,6 +189,13 @@ let routes = [
         existingPlushieId: route.params.plushieId
       }
     })
+  },
+  {
+    name: 'pillow-product-alias-2',
+    path: '/plushie/index/create/type/buddy-pillow/',
+    redirect: {
+      name: 'pillow-product'
+    }
   },
   { name: 'cross-sells', path: '/cross-sells/p/:parentSku/', component: CrossSells },
   {
@@ -456,6 +463,13 @@ let routes = [
     }
   },
   {
+    name: 'figurines-alias-2',
+    path: '/plushie/index/create/type/figurine/',
+    redirect: {
+      name: 'figurines-creation'
+    }
+  },
+  {
     name: 'figurines-creation',
     path: '/figurines/create/',
     component: ClayProduct,
@@ -477,6 +491,13 @@ let routes = [
     }
   },
   {
+    name: 'bobbleheads-alias-2',
+    path: '/plushie/index/create/type/bobblehead/',
+    redirect: {
+      name: 'bobbleheads-creation'
+    }
+  },
+  {
     name: 'bobbleheads-creation',
     path: '/bobbleheads/create/',
     component: ClayProduct,
@@ -486,7 +507,7 @@ let routes = [
     })
   },
   {
-    name: 'budsies-creation-alias',
+    name: 'budsies-creation-alias-1',
     path: '/plushie/index/create/id/:plushieId/type/budsie/',
     redirect: (route) => {
       return {
@@ -498,8 +519,15 @@ let routes = [
     }
   },
   {
+    name: 'budsies-creation-alias-2',
+    path: '/plushie/index/create/type/budsie/',
+    redirect: {
+      name: 'budsie-creation'
+    }
+  },
+  {
     name: 'budsie-creation',
-    path: '/budsie/create/',
+    path: '/budsies/create/',
     component: BudsiesPlushieProduct,
     props: (route) => ({
       sku: 'CustomBudsie1_bundle',
@@ -507,7 +535,7 @@ let routes = [
     })
   },
   {
-    name: 'selfies-creation-alias',
+    name: 'selfies-creation-alias-1',
     path: '/plushie/index/create/id/:plushieId/type/selfie/',
     redirect: (route) => {
       return {
@@ -516,6 +544,13 @@ let routes = [
           existingPlushieId: route.params.plushieId
         }
       }
+    }
+  },
+  {
+    name: 'selfies-creation-alias-2',
+    path: '/plushie/index/create/type/selfie/',
+    redirect: {
+      name: 'selfies-creation'
     }
   },
   {
@@ -528,7 +563,7 @@ let routes = [
     })
   },
   {
-    name: 'selfies-puppets-creation-alias',
+    name: 'selfies-puppets-creation-alias-1',
     path: '/plushie/index/create/id/:plushieId/type/selfies-puppets/',
     redirect: (route) => {
       return {
@@ -537,6 +572,13 @@ let routes = [
           existingPlushieId: route.params.plushieId
         }
       }
+    }
+  },
+  {
+    name: 'selfies-puppets-creation-alias-2',
+    path: '/plushie/index/create/type/selfies-puppet/',
+    redirect: {
+      name: 'selfies-puppets-creation'
     }
   },
   {
@@ -549,7 +591,7 @@ let routes = [
     })
   },
   {
-    name: 'budsies-puppets-creation-alias',
+    name: 'budsies-puppets-creation-alias-1',
     path: '/plushie/index/create/id/:plushieId/type/budsies-puppet/',
     redirect: (route) => {
       return {
@@ -558,6 +600,13 @@ let routes = [
           existingPlushieId: route.params.plushieId
         }
       }
+    }
+  },
+  {
+    name: 'budsies-puppets-creation-alias-2',
+    path: '/plushie/index/create/type/budsies-puppet/',
+    redirect: {
+      name: 'budsies-puppets-creation'
     }
   },
   {
@@ -591,6 +640,13 @@ let routes = [
           token: route.params.token
         }
       }
+    }
+  },
+  {
+    name: 'specialty-commissions-creation-alias-3',
+    path: '/plushie/index/create/type/commission/',
+    redirect: {
+      name: 'specialty-commissions-creation'
     }
   },
   {
