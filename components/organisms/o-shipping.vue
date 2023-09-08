@@ -189,7 +189,7 @@
         <SfButton
           type="submit"
           class="sf-button--full-width sf-button--text form__action-button form__action-button--secondary"
-          @click.prevent="$bus.$emit('checkout-before-edit', 'personalDetails')"
+          @click="$bus.$emit('checkout-before-edit', 'personalDetails')"
         >
           {{ $t('Edit contact') }}
         </SfButton>
