@@ -67,7 +67,7 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue';
-import Multiselect from '../vue-multiselect/src/Multiselect.vue';
+import Multiselect from 'vue-multiselect';
 import { SfChevron } from '@storefront-ui/vue';
 import {
   mapMobileObserver,
@@ -331,15 +331,9 @@ export default Vue.extend({
         return;
       }
 
-      const value = event.data;
-
-      if (!value) {
-        return;
-      }
-
       const selectedOption = this.findOptionByAutocompletedField(
         this.autocompleteField,
-        value
+        (event.target as HTMLInputElement).value
       );
 
       if (!selectedOption) {
@@ -498,7 +492,6 @@ export default Vue.extend({
     position: absolute;
     opacity: 0;
     pointer-events: none;
-    visibility: hidden;
   }
 
   &__error-message {
