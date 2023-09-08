@@ -21,6 +21,8 @@
       :show-pointer="true"
       :preserve-search="shouldPreserveSearch"
       :max-height="190"
+      :autocomplete="autocomplete"
+      :autocomplete-field="autocompleteField"
       open-direction="below"
       :disabled="disabled"
       ref="multiselect"
@@ -31,6 +33,15 @@
         <SfChevron class="_chevron" />
       </template>
     </multiselect>
+
+    <input
+      type="text"
+      class="_autocomplete"
+      v-if="autocomplete"
+      :autocomplete="autocomplete"
+      :name="autocomplete"
+      @input="onAutocompleteFieldInput"
+    >
 
     <label
       :for="inputId"
@@ -56,7 +67,7 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue';
-import Multiselect from 'vue-multiselect';
+import Multiselect from '../vue-multiselect/src/Multiselect.vue';
 import { SfChevron } from '@storefront-ui/vue';
 import {
   mapMobileObserver,
@@ -135,6 +146,14 @@ export default Vue.extend({
     errorMessage: {
       type: String,
       default: 'This field value is not correct.'
+    },
+    autocomplete: {
+      type: String,
+      default: undefined
+    },
+    autocompleteField: {
+      type: String,
+      default: undefined
     }
   },
   data () {
@@ -306,6 +325,40 @@ export default Vue.extend({
       } else {
         enableBodyScroll(scrollableContainer);
       }
+    },
+    onAutocompleteFieldInput (event: InputEvent) {
+      if (!this.autocomplete || !event || !event.target) {
+        return;
+      }
+
+      const value = event.data;
+
+      if (!value) {
+        return;
+      }
+
+      const selectedOption = this.findOptionByAutocompletedField(
+        this.autocompleteField,
+        value
+      );
+
+      if (!selectedOption) {
+        return;
+      }
+
+      this.selectedOption = selectedOption;
+    },
+    findOptionByAutocompletedField (
+      fieldName: string,
+      value: string
+    ): Option | undefined {
+      return this.options.find((option) => {
+        if (!fieldName || typeof option === 'string') {
+          return option === value;
+        }
+
+        return option[fieldName] === value;
+      })
     }
   },
   watch: {
@@ -439,6 +492,13 @@ export default Vue.extend({
 
   ._input {
     margin: var(--input-margin, 0 0 var(--spacer-xs) 0);
+  }
+
+  ._autocomplete {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
   }
 
   &__error-message {
