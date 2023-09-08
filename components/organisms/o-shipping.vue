@@ -316,19 +316,10 @@ export default {
   methods: {
     async onChangeCountry () {
       this.changeCountry();
-      // if (this.isSelectedCountryHasStates) {
-      //   const selectedState = this.getStatesForSelectedCountry.find((state) => {
-      //     return state.code === this.shipping.state || state.name === this.shipping.state;
-      //   });
-
-      //   if (!selectedState) {
-      //     this.shipping.state = '';
-      //   }
-      // } else {
-      this.shipping.state = '';
-      // }
 
       await this.$nextTick();
+
+      this.shipping.state = '';
 
       this.validateCountryRelatedFields();
     },
