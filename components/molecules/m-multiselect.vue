@@ -21,8 +21,6 @@
       :show-pointer="true"
       :preserve-search="shouldPreserveSearch"
       :max-height="190"
-      :autocomplete="autocomplete"
-      :autocomplete-field="autocompleteField"
       open-direction="below"
       :disabled="disabled"
       ref="multiselect"
