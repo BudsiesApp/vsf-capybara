@@ -18,6 +18,7 @@
         v-model.trim="shipping.firstName"
         class="form__element form__element--half"
         name="first-name"
+        autocomplete="given-name"
         :label="$t('First name')"
         :required="true"
         :disabled="isFormFieldsDisabled"
@@ -33,6 +34,7 @@
         v-model.trim="shipping.lastName"
         class="form__element form__element--half"
         name="last-name"
+        autocomplete="family-name"
         :label="$t('Last name')"
         :required="true"
         :disabled="isFormFieldsDisabled"
@@ -44,6 +46,7 @@
         v-model.trim="shipping.streetAddress"
         class="form__element"
         name="street-address"
+        autocomplete="street-address"
         :label="$t('Address')"
         :required="true"
         :disabled="isFormFieldsDisabled"
@@ -55,7 +58,9 @@
       <MMultiselect
         v-model="shipping.country"
         class="form__element form__element--half form__select"
-        name="countries"
+        name="country-name"
+        autocomplete="country-name"
+        autocomplete-field="name"
         :label="$t('Country')"
         :required="true"
         id-field="code"
@@ -71,7 +76,8 @@
         v-if="!isSelectedCountryHasStates"
         v-model.trim="shipping.state"
         class="form__element form__element--half"
-        name="state"
+        name="address-level1"
+        autocomplete="address-level1"
         :label="$t('State / Province')"
         :disabled="isFormFieldsDisabled"
       />
@@ -80,7 +86,9 @@
         v-else
         v-model.trim="shipping.state"
         class="form__element form__element--half form__select"
-        name="state"
+        name="address-level1"
+        autocomplete="address-level1"
+        autocomplete-field="name"
         :label="$t('State / Province')"
         :required="true"
         id-field="code"
@@ -95,6 +103,7 @@
         v-model.trim="shipping.city"
         class="form__element form__element--half"
         name="city"
+        autocomplete="address-level2"
         :label="$t('City')"
         :required="true"
         :disabled="isFormFieldsDisabled"
@@ -107,6 +116,7 @@
         v-model.trim="shipping.zipCode"
         class="form__element form__element--half"
         name="zipCode"
+        autocomplete="postal-code"
         :label="$t('Zip-code')"
         :required="true"
         :disabled="isFormFieldsDisabled"
@@ -130,6 +140,7 @@
         "
         class="form__element"
         name="phone"
+        autocomplete="tel"
         :label="$t('Phone number')"
         :disabled="isFormFieldsDisabled"
         @blur="$v.shipping.phoneNumber.$touch()"
@@ -176,8 +187,9 @@
           {{ $t('Continue to payment') }}
         </SfButton>
         <SfButton
+          type="submit"
           class="sf-button--full-width sf-button--text form__action-button form__action-button--secondary"
-          @click="$bus.$emit('checkout-before-edit', 'personalDetails')"
+          @click.prevent="$bus.$emit('checkout-before-edit', 'personalDetails')"
         >
           {{ $t('Edit contact') }}
         </SfButton>
@@ -304,8 +316,20 @@ export default {
   methods: {
     async onChangeCountry () {
       this.changeCountry();
-      await this.$nextTick();
+      // if (this.isSelectedCountryHasStates) {
+      //   const selectedState = this.getStatesForSelectedCountry.find((state) => {
+      //     return state.code === this.shipping.state || state.name === this.shipping.state;
+      //   });
+
+      //   if (!selectedState) {
+      //     this.shipping.state = '';
+      //   }
+      // } else {
       this.shipping.state = '';
+      // }
+
+      await this.$nextTick();
+
       this.validateCountryRelatedFields();
     },
     onZipCodeBlur () {
