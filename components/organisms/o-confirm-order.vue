@@ -222,7 +222,7 @@
       <SfButton
         v-show="showPlaceOrderButton"
         class="sf-button--full-width actions__button place-order-btn"
-        :disabled="!productsInCart.length || isCheckoutInProgress"
+        :disabled="isPlaceOrderButtonDisabled"
         @click="onPlaceOrder"
       >
         {{ $t('Place the order') }}
@@ -295,7 +295,8 @@ export default {
       shippingMethods: 'checkout/getShippingMethods',
       paymentDetails: 'checkout/getPaymentDetails',
       paymentMethods: 'checkout/getPaymentMethods',
-      personalDetails: 'checkout/getPersonalDetails'
+      personalDetails: 'checkout/getPersonalDetails',
+      isGiftCardProcessing: 'giftCard/isGiftCardProcessing'
     }),
     ...mapMobileObserver(),
     cartItems () {
@@ -330,6 +331,9 @@ export default {
     },
     isBraintreeMethodSelected () {
       return Object.values(braintreeSupportedMethodsCodes).includes(this.paymentDetails.paymentMethod);
+    },
+    isPlaceOrderButtonDisabled () {
+      return !this.productsInCart.length || this.isCheckoutInProgress || this.isGiftCardProcessing;
     }
   },
   beforeCreate () {
