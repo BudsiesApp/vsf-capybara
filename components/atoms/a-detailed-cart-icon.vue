@@ -1,6 +1,7 @@
 <template>
   <SfButton
-    class="sf-button--pure a-microcart-icon"
+    class="sf-button--pure a-microcart-icon a-detailed-cart-icon"
+    :class="extraCssClasses"
     @click="openDetailedCart"
   >
     <SfIcon
@@ -22,6 +23,8 @@
 import { mapGetters } from 'vuex';
 import { SfIcon, SfButton, SfBadge } from '@storefront-ui/vue';
 
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
+
 export default {
   components: { SfIcon, SfButton, SfBadge },
   props: {
@@ -33,7 +36,10 @@ export default {
   computed: {
     ...mapGetters({
       totalQuantity: 'cart/getItemsTotalQuantity'
-    })
+    }),
+    extraCssClasses () {
+      return [getCurrentThemeClass()];
+    }
   },
   methods: {
     openDetailedCart () {
@@ -46,8 +52,15 @@ export default {
 <style lang="scss" scoped>
 .a-detailed-cart-icon {
   position: relative;
+
   .sf-header__icon {
     cursor: pointer;
+  }
+
+  &.-skin-budsies {
+    .sf-badge--number {
+      --badge-background: var(--c-accent);
+    }
   }
 }
 </style>

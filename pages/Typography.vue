@@ -17,6 +17,19 @@
     >
       <SfContentPage :title="navigation[0].title">
         <SfHeading title="Store Front Heading" subtitle="with default level" />
+        <SfHeading :level="1" title="SfHeading H1" subtitle="and subtitle" />
+        <p> Default text </p>
+        <SfHeading :level="2" title="SfHeading H2" subtitle="and subtitle" />
+        <p> Default text </p>
+        <SfHeading :level="3" title="SfHeading H3" subtitle="and subtitle" />
+        <p> Default text </p>
+        <SfHeading :level="4" title="SfHeading H4" subtitle="and subtitle" />
+        <p> Default text </p>
+        <SfHeading :level="5" title="SfHeading H5" subtitle="and subtitle" />
+        <p> Default text </p>
+        <SfHeading :level="6" title="SfHeading H6" subtitle="and subtitle" />
+        <p> Default text </p>
+
         <h1>Heading H1</h1>
         <h2>Heading H2</h2>
         <h3>Heading H3</h3>
@@ -58,7 +71,7 @@
       <SfContentPage :title="navigation[1].title">
         <h4>Form elements</h4>
         <form>
-          <SfInput v-model="email" name="email" label="Your email" :required="true" :valid="true" />
+          <SfInput v-model="email" name="email" type="email" label="Your email" :required="true" :valid="true" />
           <SfInput v-model="firstname" name="firstname" label="Your Firstname" :required="true" :valid="false" error-message="Field is required." />
           <SfInput name="name" label="Disabled Field" :required="true" :valid="true" disabled />
           <br>

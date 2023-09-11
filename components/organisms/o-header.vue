@@ -7,11 +7,11 @@
     />
     <SfHeader
       :active-icon="activeIcon"
+      class="_header"
       :class="[
         {
           'sf-header--has-mobile-search': isSearchPanelVisible,
-        },
-        'sf-header--is-sticky'
+        }
       ]"
     >
       <template #logo>
@@ -19,7 +19,7 @@
       </template>
       <template #navigation>
         <SfHeaderNavigationItem
-          @mouseover="isHoveredMenu = true"
+          @mouseover="onMainMenuMouseOver"
           @mouseleave="isHoveredMenu = false"
         >
           <div class="o-header__submenu">
@@ -27,176 +27,97 @@
           </div>
           <MMenu
             :visible="isHoveredMenu && !isSearchPanelVisible"
-            @close="isHoveredMenu = false"
+            @transitionend.native="onMainMenuTransitionEnd"
+            @close="onMainMenuClose"
           />
         </SfHeaderNavigationItem>
         <SfHeaderNavigationItem>
           <router-link
-            to="/giftcards"
+            :to="{ name: 'gift-cards' }"
           >
             Gift Cards
           </router-link>
         </SfHeaderNavigationItem>
         <SfHeaderNavigationItem>
           <router-link
-            to="/reviews"
+            to="/reviews/"
           >
-            Reviews
+            Gallery
           </router-link>
         </SfHeaderNavigationItem>
         <SfHeaderNavigationItem>
           <router-link
-            to="/pricing"
+            to="/pricing/"
           >
             Pricing
           </router-link>
         </SfHeaderNavigationItem>
-        <div
-          class="_dropdown-container"
-          @mouseover="isDropdownOpen = true"
-          @mouseleave="isDropdownOpen = false"
-        >
-          <SfButton>
-            Make your own
-          </SfButton>
-          <SfDropdown
-            :is-open="isDropdownOpen"
-          >
-            <SfList>
-              <SfListItem
-                v-for="action in dropdownActions"
-                :key="action.label"
-              >
-                <router-link
-                  :to="action.url"
-                >
-                  {{ action.label }}
-                </router-link>
-              </SfListItem>
-            </SfList>
-          </SfDropdown>
-        </div>
+
+        <MCtaButton />
       </template>
       <template #search>
         <div />
-        <!-- <OSearch :class="{'desktop-only': !isSearchPanelVisible}" />
-        <SfButton
-          v-if="isSearchPanelVisible"
-          class="sf-button--text form__action-button form__action-button--secondary mobile-only"
-          @click="$store.commit('ui/setSearchpanel', false)"
-        >
-          {{ $t("Cancel") }}
-        </SfButton> -->
       </template>
       <template #header-icons>
         <div class="sf-header__icons">
           <AAccountIcon class="sf-header__action" />
-          <!-- <AMicrocartIcon class="sf-header__action" /> -->
           <ADetailedCartIcon class="sf-header__action" />
         </div>
       </template>
     </SfHeader>
-    <MMenu
-      v-show="isMobileMenu"
-      class="mobile-menu"
-      @close="$store.commit('ui/closeMenu')"
-    />
   </div>
 </template>
 
 <script>
-import { SfHeader, SfOverlay, SfButton, SfDropdown, SfList } from '@storefront-ui/vue';
+import { SfHeader, SfOverlay } from '@storefront-ui/vue';
 import ALogo from 'theme/components/atoms/a-logo';
 import AAccountIcon from 'theme/components/atoms/a-account-icon';
-import AMicrocartIcon from 'theme/components/atoms/a-microcart-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
-import OSearch from 'theme/components/organisms/o-search';
 import { mapState, mapGetters } from 'vuex';
 import MMenu from 'theme/components/molecules/m-menu';
+import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
 export default {
   name: 'OHeader',
   components: {
     SfHeader,
-    SfButton,
-    SfDropdown,
-    SfList,
     ALogo,
     AAccountIcon,
-    AMicrocartIcon,
     ADetailedCartIcon,
-    OSearch,
     MMenu,
-    SfOverlay
+    SfOverlay,
+    MCtaButton
   },
   data () {
     return {
       isHoveredMenu: false,
-      isDropdownOpen: false,
-      dropdownActions: [
-        {
-          label: 'Custom Petsies',
-          url: '/forevers-pet-plush'
-        },
-        {
-          label: 'Custom Pillows',
-          url: '/custom-pillows'
-        },
-        {
-          label: 'Custom Socks',
-          url: {
-            name: 'printed-product',
-            params: {
-              parentSku: 'customPrintedSocks_bundle',
-              slug: 'printed-socks'
-            }
-          }
-        },
-        {
-          label: 'Face Masks',
-          url: {
-            name: 'printed-product',
-            params: {
-              parentSku: 'customPrintedMasks_bundle',
-              slug: 'printed-masks'
-            }
-          }
-        },
-        {
-          label: 'Pet Keychains',
-          url: {
-            name: 'printed-product',
-            params: {
-              parentSku: 'customPrintedKeychains_bundle',
-              slug: 'face-keychains'
-            }
-          }
-        },
-        {
-          label: 'Gift Box',
-          url: '/giftbox'
-        }
-      ]
+      isMouseOverLocked: false
     }
   },
   computed: {
     ...mapState({
       isSearchPanelVisible: state => state.ui.searchpanel
     }),
-    ...mapState('ui', ['isMobileMenu']),
     ...mapGetters('user', ['isLoggedIn']),
     activeIcon () {
       return this.isLoggedIn ? 'account' : '';
     }
   },
-  watch: {
-    async isMobileMenu (status) {
-      if (this.isMobileMenu) {
-        // we can't add this style to body because sfui also add/remove overflow to body and there may be conflict
-        document.documentElement.style.overflow = 'hidden'
-      } else {
-        document.documentElement.style.overflow = ''
+  methods: {
+    onMainMenuClose () {
+      this.isHoveredMenu = false;
+      this.isMouseOverLocked = true;
+    },
+    onMainMenuMouseOver () {
+      if (this.isMouseOverLocked) {
+        return;
       }
+
+      this.isHoveredMenu = true;
+    },
+    async onMainMenuTransitionEnd () {
+      await this.$nextTick();
+      this.isMouseOverLocked = false;
     }
   }
 };
@@ -219,7 +140,8 @@ export default {
   --header-navigation-item-color: var(--c-dark);
   box-sizing: border-box;
 
-  .sf-header--is-sticky {
+  ._header {
+    position: relative;
     z-index: 200;
   }
 
@@ -263,27 +185,8 @@ export default {
     }
   }
 
-  ._dropdown-container {
-    position: relative;
+  .m-cta-button {
     align-self: center;
-
-    .sf-button {
-      --button-font-size: var(--font-sm);
-      --button-font-line-height: 1;
-    }
-
-    .sf-dropdown {
-      --dropdown-background: var(--c-primary);
-      --c-link: var(--c-light-variant);
-      --c-link-hover: var(--c-light-variant);
-      --list-item-padding: var(--spacer-xs) var(--spacer-sm);
-
-      .sf-list__item {
-        &:hover {
-          background-color: var(--c-light);
-        }
-      }
-    }
   }
 
   .sf-header {
@@ -291,7 +194,7 @@ export default {
   }
 
   ::v-deep .sf-header {
-    --header-logo-margin: 0 0 var(--spacer-sm) 0;
+    --header-logo-margin: 0 0 0 0;
 
     &__navigation {
       --header-navigation-margin: 0 var(--spacer-base);
@@ -301,25 +204,12 @@ export default {
 
     &__actions {
       justify-content: space-between;
+      flex: 1;
     }
-  }
-
-  .mobile-menu {
-    position: fixed;
-    opacity: 1;
-    visibility: visible;
-    top: var(--bottom-navigation-height);
-    z-index: 12;
-    --mega-menu-aside-menu-height: calc(100vh - var(--bottom-navigation-height));
   }
 
   @include for-desktop {
     --header-box-shadow: 0px -2px 10px rgba(var(--c-dark-base), 0.15);
-
-    .mobile-menu {
-      opacity: 0;
-      visibility: hidden;
-    }
 
     .sf-header {
       display: block;

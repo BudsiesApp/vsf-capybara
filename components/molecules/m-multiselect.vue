@@ -3,7 +3,8 @@
     class="m-multiselect"
     :class="{
       '--invalid': !valid,
-      '--focused': isOpen
+      '--focused': isOpen,
+      '--disabled': disabled
     }"
     @keydown.enter.capture="onEnterPressed"
   >
@@ -27,7 +28,7 @@
       @close="onClose"
     >
       <template #caret>
-        <SfChevron class="sf-select__chevron" />
+        <SfChevron class="_chevron" />
       </template>
     </multiselect>
 
@@ -43,7 +44,7 @@
       {{ label }}
     </label>
 
-    <div v-if="!valid" class="m-multiselect__error-message">
+    <div class="m-multiselect__error-message">
       <transition name="fade">
         <div v-if="!valid">
           {{ errorMessage }}
@@ -57,10 +58,17 @@
 import Vue, { PropType } from 'vue';
 import Multiselect from 'vue-multiselect';
 import { SfChevron } from '@storefront-ui/vue';
+import {
+  mapMobileObserver,
+  unMapMobileObserver
+} from '@storefront-ui/vue/src/utilities/mobile-observer';
+import { disableBodyScroll, enableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
 
 type Option = Record<string, any> | string;
 
 let instanceId = 0;
+
+const onePasswordInputIgnoreAttribute = 'data-1p-ignore';
 
 export default Vue.extend({
   name: 'MMultiselect',
@@ -72,6 +80,16 @@ export default Vue.extend({
   created: function (): void {
     this.instanceId = instanceId.toString();
     instanceId += 1;
+
+    if (!this.allowFreeText || !this.value) {
+      return;
+    }
+
+    const option = this.getCustomOptionForValue(this.value);
+    this.customOptions.push(option);
+  },
+  mounted (): void {
+    this.disableOnePasswordForMultiselect();
   },
   props: {
     placeholder: {
@@ -127,6 +145,7 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapMobileObserver(),
     selectedOption: {
       get (): Option | undefined {
         if (!this.value) {
@@ -180,9 +199,60 @@ export default Vue.extend({
       return this.allowFreeText;
     }
   },
+  beforeDestroy (): void {
+    unMapMobileObserver();
+    this.enableBodyScroll();
+  },
   methods: {
+    disableOnePasswordForMultiselect (): void {
+      const input = this.getMultiselectInput();
+
+      if (!input) {
+        return;
+      }
+
+      input.setAttribute(onePasswordInputIgnoreAttribute, '');
+    },
+    enableBodyScroll (): void {
+      const scrollableContainer = this.getMultiselectScrollableContainer();
+
+      if (!scrollableContainer) {
+        clearAllBodyScrollLocks();
+        return;
+      }
+
+      enableBodyScroll(scrollableContainer);
+    },
+    getCustomOptionForValue (value: string): Option {
+      if (!this.idField || !this.labelField) {
+        return value;
+      }
+
+      return {
+        [this.idField]: value,
+        [this.labelField]: value
+      };
+    },
     getMultiselect (): Multiselect | undefined {
       return this.$refs['multiselect'] as Multiselect | undefined;
+    },
+    getMultiselectInput (): Element | undefined {
+      const multiselect = this.getMultiselect();
+
+      if (!multiselect) {
+        return;
+      }
+
+      return multiselect.$refs.search as Element | undefined;
+    },
+    getMultiselectScrollableContainer (): Element | null {
+      const multiselect = this.getMultiselect();
+
+      if (!multiselect) {
+        return null;
+      }
+
+      return multiselect.$el.querySelector('.multiselect__content-wrapper');
     },
     processFreeText (): Option | undefined {
       const multiselect = this.getMultiselect();
@@ -198,13 +268,7 @@ export default Vue.extend({
         return;
       }
 
-      let option: Option = searchValue;
-      if (this.idField && this.labelField) {
-        option = {
-          [this.idField]: searchValue,
-          [this.labelField]: searchValue
-        };
-      }
+      let option = this.getCustomOptionForValue(searchValue);
 
       this.customOptions.push(option);
       return option;
@@ -229,6 +293,33 @@ export default Vue.extend({
       }
 
       this.processFreeText();
+    },
+    toggleBodyScrollLock (): void {
+      const scrollableContainer = this.getMultiselectScrollableContainer();
+
+      if (!scrollableContainer) {
+        return;
+      }
+
+      if (this.isOpen && this.isMobile) {
+        disableBodyScroll(scrollableContainer);
+      } else {
+        enableBodyScroll(scrollableContainer);
+      }
+    }
+  },
+  watch: {
+    isOpen: {
+      handler (): void {
+        this.toggleBodyScrollLock();
+      },
+      immediate: true
+    },
+    isMobile: {
+      handler (): void {
+        this.toggleBodyScrollLock();
+      },
+      immediate: true
     }
   }
 });
@@ -244,6 +335,13 @@ export default Vue.extend({
   position: relative;
   box-sizing: border-box;
   align-self: flex-start;
+
+  ._chevron {
+    --chevron-position: absolute;
+    right: var(--spacer-xs);
+    top: 50%;
+    transform: translateY(-50%);
+  }
 
   ::v-deep .multiselect {
     &__tags {
@@ -372,12 +470,20 @@ export default Vue.extend({
     }
   }
 
+  &.--disabled {
+    --input-border-color: var(--c-text-disabled);
+    --input-label-color: var(--c-text-disabled);
+    --chevron-color: var(--c-text-disabled);
+
+    ::v-deep .multiselect {
+      color: var(--c-text-disabled);
+      background-color: transparent;
+      opacity: 1;
+    }
+  }
+
   @include for-desktop {
     margin: 0 0 var(--spacer-sm) 0;
-
-    &__label {
-      left: calc(var(--spacer-xl));
-    }
   }
 
   @media (prefers-color-scheme: dark) {

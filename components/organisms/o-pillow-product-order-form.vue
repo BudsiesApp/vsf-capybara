@@ -5,16 +5,18 @@
       title="Pillow Order Form"
     />
 
-    <div class="_top-notes">
-      <p><strong>Estimated Delivery: 2 weeks</strong></p>
-      <p><strong>Please make sure everything is correct before submitting. Your pillow goes straight to print!</strong></p>
-    </div>
+    <MBlockStory
+      story-slug="buddy_pillow_creation_page_top"
+    />
 
-    <SfDivider class="_step-divider" />
-
-    <validation-observer v-slot="{ passes, errors: formErrors }" slim ref="validation-observer">
+    <validation-observer
+      v-slot="{ errors: formErrors }"
+      slim
+      ref="validationObserver"
+    >
       <form
-        @submit.prevent="(event) => passes(() => onSubmit(event))"
+        class="_form"
+        @submit.prevent="onSubmit"
       >
         <div
           class="_step-number"
@@ -27,6 +29,7 @@
           class="_step-title -required "
           :level="2"
           title="Upload your photo"
+          :ref="getFieldAnchorName('Artwork')"
         />
 
         <div class="_upload-now" v-show="isUploadNow">
@@ -57,14 +60,15 @@
               :product-id="backendProductId"
               :disabled="isSubmitting"
               :upload-url="artworkUploadUrl"
+              :initial-items="initialCustomerImages"
               @file-added="onArtworkAdd"
               @file-removed="onArtworkRemove"
               v-if="backendProductId"
             />
 
-            <p>
+            <p class="_artwork-upload-helper">
               <strong>
-                Please Note: We recommend high resolution, clear photos for our Petsies Pillows!
+                Please Note: We recommend high resolution, clear photos for our Pillows!
                 <br>
                 Low quality, dark or blurry photos may impact photo clarity on your Pillow.
               </strong>
@@ -88,8 +92,8 @@
           <p>
             When you're ready, please email a photo of the design to: <br> <a
               class="_popup-link"
-              href="mailto:photos@mypetsies.com"
-            >photos@mypetsies.com</a>
+              href="mailto:art@budsies.com"
+            >art@budsies.com</a>
           </p>
 
           <p>Include this design's magic word in the subject line of the email:</p>
@@ -98,8 +102,8 @@
           <p>
             Don't worry, we'll send you a reminder with this code after you complete your order. <br> You may include only one photo per Pillow. <br> <a
               class="_popup-link"
-              href="mailto:photos@mypetsies.com"
-            >Photos@mypetsies.com</a> is an automated inbox used only for receiving images.
+              href="mailto:art@budsies.com"
+            >Art@budsies.com</a> is an automated inbox used only for receiving images.
           </p>
 
           <p>NOTE: Proceed to Step 2 to complete your order. You may send us your photo within the next 5 days.</p>
@@ -118,6 +122,7 @@
           class="_step-title -required "
           :level="2"
           title="Size"
+          :ref="getFieldAnchorName('Size')"
         />
 
         <validation-provider
@@ -126,7 +131,7 @@
           name="'Size'"
           tag="div"
         >
-          <m-bodypart-option-configurator
+          <m-plushie-size-selector
             name="pillow_size"
             v-model="size"
             :options="sizes"
@@ -152,14 +157,16 @@
           :key="bodypart.id"
         >
           <SfHeading
-            class="_step-title -required "
+            class="_step-title _body-part-heading"
+            :class="{ '-required': bodypart.isRequired }"
             :level="2"
             :title="bodypart.name"
+            :ref="getFieldAnchorName(bodypart.name)"
           />
 
           <validation-provider
             v-slot="{ errors }"
-            rules="required"
+            :rules="bodypart.isRequired ? 'required' : ''"
             :name="`'${bodypart.name}'`"
             tag="div"
           >
@@ -167,7 +174,7 @@
               :name="bodypart.code"
               v-model="bodypartsValues[bodypart.id]"
               :max-values="bodypart.maxValues"
-              :options="getBodypartValuesOptions(bodypart)"
+              :options="getBodypartOptions(bodypart.id)"
               type="bodypart"
               :disabled="isSubmitting"
             />
@@ -182,33 +189,9 @@
 
         <div
           class="_step-number"
-          ref="pet-name-field-anchor"
         >
           Step 4
         </div>
-
-        <SfHeading
-          class="_step-title -required "
-          :level="2"
-          title="Your Pet's Name"
-        />
-
-        <validation-provider
-          v-slot="{ errors }"
-          rules="required"
-          name="'Pet Name'"
-          tag="div"
-        >
-          <SfInput
-            name="pet_name"
-            v-model="name"
-            placeholder="Name"
-            :disabled="isSubmitting"
-            :required="false"
-            :valid="!errors.length"
-            :error-message="errors[0]"
-          />
-        </validation-provider>
 
         <validation-provider
           v-slot="{ errors, classes }"
@@ -221,6 +204,7 @@
               class="_step-title -required "
               :level="2"
               title="Quantity"
+              :ref="getFieldAnchorName('Quantity')"
             />
 
             <ACustomProductQuantity
@@ -232,55 +216,26 @@
             <div class="_error-text">
               {{ errors[0] }}
             </div>
-
-            <a
-              class="_popup-link"
-              href="javascript:void(0)"
-              @click="areQuantityNotesVisible = true"
-            >Quantity & Shipping Discounts</a>
           </div>
         </validation-provider>
 
-        <validation-provider
-          v-slot="{ errors, classes }"
-          name="Production time"
-          v-if="isProductionOptionsAvailable"
-          slim
+        <div
+          class="_production-time-selector-section"
+          v-if="showProductionTimeOptions"
         >
-          <div
-            class="_production-time-field"
-            :class="classes"
-          >
-            <SfHeading
-              class="_step-title -required"
-              :level="3"
-              :title="$t('Choose your production time')"
-            />
-
-            *{{ $t('We will refund the rush fee in the unlikely event we do not meet a promised delivery date') }}.
-
-            <SfSelect
-              v-model="productionTime"
-              name="rush_addons"
-              class="_rush-addons"
-              :disabled="isSubmitting"
-              :valid="!errors.length"
-              :error-message="errors[0]"
-            >
-              <SfSelectOption
-                v-for="option in productionTimeOptions"
-                :key="option.id"
-                :value="option"
-              >
-                {{ option.text }}
-              </SfSelectOption>
-            </SfSelect>
-          </div>
-        </validation-provider>
+          <MProductionTimeSelector
+            v-model="productionTime"
+            :production-time-options="productionTimeOptions"
+            :product-id="product.id"
+            :disabled="isSubmitting"
+          />
+        </div>
 
         <div v-show="showEmailStep">
+          <SfDivider class="_step-divider" />
+
           <div
-            class="_step-number _email-step"
+            class="_step-number"
             ref="email-field-anchor"
           >
             Step 5
@@ -290,6 +245,7 @@
             class="_step-title -required"
             :level="2"
             title="Enter your email address"
+            :ref="getFieldAnchorName('email')"
           />
 
           <validation-provider
@@ -300,6 +256,7 @@
           >
             <SfInput
               name="email"
+              type="email"
               v-model="email"
               placeholder="sample@email.com"
               :disabled="isSubmitting"
@@ -308,29 +265,15 @@
               :error-message="errors[0]"
             />
 
-            <div><b>Sometimes our team has questions about your design</b></div>
+            <div>{{ $t('Sometimes our team has questions about your design') }}</div>
           </validation-provider>
         </div>
 
-        <div class="_form-errors">
-          <template
-            v-for="(fieldErrors, field) in formErrors"
-          >
-            <div
-              class="_error-text"
-              :key="field"
-              v-if="fieldErrors.length > 0"
-            >
-              <a
-                class="_error-link"
-                href="javascript:void(0)"
-                @click.prevent="goToFieldByName(field.toString())"
-              >
-                {{ fieldErrors.join('. ') }}
-              </a>
-            </div>
-          </template>
-        </div>
+        <m-form-errors
+          class="_form-errors"
+          :form-errors="formErrors"
+          @item-click="goToFieldByName"
+        />
 
         <div class="_actions">
           <SfButton
@@ -339,7 +282,7 @@
             :disabled="isSubmitting"
             @click="shouldMakeAnother = false"
           >
-            Add to Cart
+            {{ submitButtonText }}
           </SfButton>
 
           <SfButton
@@ -347,54 +290,38 @@
             type="submit"
             :disabled="isSubmitting"
             @click="shouldMakeAnother = true"
+            v-show="!existingCartItem"
           >
-            Save & Make Another
+            {{ $t('Save & Make Another') }}
           </SfButton>
 
-          <p class="_order-agreement">
-            I agree to
+          <div class="_agreement">
+            {{ $t('I agree to') }}
             <router-link to="/terms-of-service/" target="_blank">
-              Terms of Service
-            </router-link>,
+              {{ $t('Terms of Service') }},
+            </router-link>
+
             <router-link to="/privacy-policy/" target="_blank">
-              Privacy Policy
-            </router-link>,
-            and <a href="http://support.mypetsies.com/support/solutions/folders/13000003991" target="_blank">Refund Policy</a>.
-            I understand that Petsies happily takes care of all tears, defects, and shipping damage with either a refund or a repair.
-            I also understand that my custom Petsies order is backed by the Petsies Guarantee.
-          </p>
+              {{ $t('Privacy Policy') }},
+            </router-link>
+
+            {{ $t('and') }}
+            <a href="http://support.budsies.com/support/solutions/folders/5000249005" target="_blank">{{ $t('Refund Policy') }}</a>.
+            {{ $t('I understand that Budsies happily takes care of all tears, defects, and shipping damage with either a refund or a repair.') }}
+          </div>
         </div>
       </form>
     </validation-observer>
 
-    <SfModal
-      :visible="areQuantityNotesVisible"
-      @close="areQuantityNotesVisible = false"
-    >
-      <div class="_popup-content">
-        <p><b>Quantity Discounts</b></p>
-        <p>All quantity discounts applied automatically at checkout:</p>
-
-        <ul>
-          <li>10% discount on 10+ Petsies</li>
-          <li>20% discount on 20+ Petsies</li>
-        </ul>
-
-        <p><b>Shipping Discounts</b></p>
-
-        <ul>
-          <li>First custom Petsie: $13.95 domestic</li>
-          <li>Each additional Petsie in same order: $5.95</li>
-          <li>All domestic Petsies ship via USPS 2 day priority mail.</li>
-          <li>International orders ship via USPS First Class Mail for just $24.95 worldwide, with $5.95 per each additional Petsie in the order.</li>
-        </ul>
-      </div>
-    </SfModal>
+    <MBlockStory
+      story-slug="buddy_pillow_creation_page_bottom"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import Vue, { PropType, VueConstructor } from 'vue';
+import Vue from 'vue';
+import { PropType, Ref, ref, defineComponent, inject } from '@vue/composition-api';
 import { mapMutations } from 'vuex';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
@@ -415,24 +342,32 @@ import { BundleOption } from 'core/modules/catalog/types/BundleOption';
 import Product from 'core/modules/catalog/types/Product';
 
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
-import { InjectType } from 'src/modules/shared';
+import { CustomerImage, getProductDefaultPrice } from 'src/modules/shared';
 import {
   vuexTypes as budsiesTypes,
   Bodypart,
-  BodypartValue,
   ImageUploadMethod,
   BodyPartValueContentType,
-  ProductValue
+  ProductValue,
+  BodypartOption
 } from 'src/modules/budsies';
+import ServerError from 'src/modules/shared/types/server-error';
+import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
+import { getSelectedBundleOptions } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions';
+import { setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 
 import ACustomProductQuantity from '../atoms/a-custom-product-quantity.vue';
 import MArtworkUpload from '../molecules/m-artwork-upload.vue';
 import MBodypartOptionConfigurator from '../molecules/m-bodypart-option-configurator.vue';
-import BodypartOption from '../interfaces/bodypart-option';
+import MPlushieSizeSelector from '../molecules/m-plushie-size-selector.vue';
+import MFormErrors from '../molecules/m-form-errors.vue';
 import SizeOption from '../interfaces/size-option';
 import ProductionTimeOption from '../interfaces/production-time-option.interface';
 import getProductionTimeOptions from '../../helpers/get-production-time-options';
-import CustomerImage from '../interfaces/customer-image.interface';
+import MBlockStory from 'theme/components/molecules/m-block-story.vue';
+import MProductionTimeSelector from 'theme/components/molecules/m-production-time-selector.vue';
+import { useFormValidation } from 'theme/helpers/use-form-validation';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 extend('required', {
   ...required,
@@ -444,13 +379,32 @@ extend('email', {
   message: 'Please, provide the correct email address'
 });
 
-interface InjectedServices {
-  window: Window,
-  imageHandlerService: ImageHandlerService
-}
-
-export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
+export default defineComponent({
   name: 'OPillowProductOrderForm',
+  setup (_, setupContext) {
+    const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
+    const window = inject<Window>('WindowObject');
+
+    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+
+    if (!window) {
+      throw new Error('Window is not defined');
+    }
+
+    if (!imageHandlerService) {
+      throw new Error('ImageHandlerService is not defined');
+    }
+
+    return {
+      imageHandlerService,
+      validationObserver,
+      window,
+      ...useFormValidation(
+        validationObserver,
+        () => setupContext.refs
+      )
+    }
+  },
   components: {
     MBodypartOptionConfigurator,
     ValidationObserver,
@@ -462,12 +416,12 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     SfInput,
     SfModal,
     SfHeading,
-    SfSelect
+    SfSelect,
+    MBlockStory,
+    MProductionTimeSelector,
+    MPlushieSizeSelector,
+    MFormErrors
   },
-  inject: {
-    window: { from: 'WindowObject' },
-    imageHandlerService: { from: 'ImageHandlerService' }
-  } as unknown as InjectType<InjectedServices>,
   props: {
     artworkUploadUrl: {
       type: String,
@@ -477,8 +431,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       type: Object as PropType<Product>,
       required: true
     },
-    plushieId: {
-      type: Number as PropType<number | undefined>,
+    existingPlushieId: {
+      type: String,
       default: undefined
     }
   },
@@ -488,26 +442,26 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       customerImage: undefined as CustomerImage | undefined,
       size: undefined as SizeOption | undefined,
       bodypartsValues: {} as unknown as Record<string, BodypartOption | BodypartOption[] | undefined>,
-      name: undefined as string | undefined,
       email: undefined as string | undefined,
       isSubmitting: false,
       shouldMakeAnother: false,
-      areQuantityNotesVisible: false,
       showEmailStep: true,
       uploadMethod: ImageUploadMethod.NOW,
-      productionTime: undefined as ProductionTimeOption | undefined
+      productionTime: undefined as ProductionTimeOption | undefined,
+      plushieId: undefined as number | undefined,
+      initialCustomerImages: [] as CustomerImage[]
     }
   },
   computed: {
     skinClass (): string {
-      return '-skin-petsies';
+      return getCurrentThemeClass();
     },
     isUploadNow (): boolean {
       return this.uploadMethod === ImageUploadMethod.NOW;
     },
     backendProductId (): ProductValue | undefined {
       switch (this.product.id) {
-        case 253:
+        case 273:
           return ProductValue.PILLOW;
         default:
           throw new Error(
@@ -517,9 +471,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     bodyparts (): Bodypart[] {
       return this.$store.getters['budsies/getProductBodyparts'](this.product.id);
-    },
-    isProductionOptionsAvailable (): boolean {
-      return this.productionTimeOptions.length !== 0;
     },
     productionTimeBundleOption (): BundleOption | undefined {
       if (!this.product?.bundle_options) {
@@ -553,15 +504,21 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           continue;
         }
 
+        const price = getProductDefaultPrice(productLink.product, {}, false);
+
         availableSizes.push({
           id: String(productLink.product.id),
-          label: productLink.product.name + ' - $' + productLink.product.price,
+          label: productLink.product.name,
+          finalPrice: price.special ? price.special : price.regular,
+          specialPrice: price.special,
+          regularPrice: price.regular,
           value: productLink.product.sku,
           isSelected: false,
           contentTypeId: BodyPartValueContentType.IMAGE,
           image: productLink.product.image,
           optionId: this.sizeBundleOption.option_id,
-          optionValueId: productLink.id.toString()
+          optionValueId: productLink.id.toString(),
+          group: 'default'
         });
       }
 
@@ -569,34 +526,167 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     shortcode (): string | undefined {
       return this.$store.getters['budsies/getPlushieShortcode'](this.plushieId);
+    },
+    cartItems (): CartItem[] {
+      return this.$store.getters['cart/getCartItems'];
+    },
+    existingCartItem (): CartItem | undefined {
+      if (!this.existingPlushieId) {
+        return;
+      }
+
+      return this.cartItems.find((item) => item.plushieId && item.plushieId === this.existingPlushieId);
+    },
+    getBodypartOptions (): (id: string) => BodypartOption[] {
+      return this.$store.getters['budsies/getBodypartOptions']
+    },
+    submitButtonText (): string {
+      return (
+        this.existingCartItem
+          ? this.$t('Update')
+          : this.$t('Add to Cart')
+      ).toString();
+    },
+    showProductionTimeOptions (): boolean {
+      return this.productionTimeOptions.length > 0;
     }
+  },
+  async mounted (): Promise<void> {
+    if (this.existingCartItem) {
+      this.fillPlushieDataFromCartItem(this.existingCartItem);
+      return;
+    }
+
+    this.plushieId = await this.createPlushie();
   },
   methods: {
     ...mapMutations('product', {
       setBundleOptionValue: catalogTypes.PRODUCT_SET_BUNDLE_OPTION
     }),
-    getBodypartValuesOptions (bodypart: Bodypart): BodypartOption[] {
-      const bodypartsValues: BodypartValue[] = this.$store.getters['budsies/getBodypartBodypartsValues'](bodypart.id);
+    async addToCart (): Promise<void> {
+      const shouldMakeAnother = this.shouldMakeAnother;
+      this.shouldMakeAnother = false;
 
-      if (!bodypartsValues.length) {
-        return [];
-      }
+      await this.$store.dispatch(
+        'product/setBundleOptions',
+        { product: this.product, bundleOptions: this.$store.state.product.current_bundle_options }
+      );
 
-      const result: BodypartOption[] = [];
+      this.$store.commit(
+        budsiesTypes.SN_BUDSIES + '/' + budsiesTypes.CUSTOMER_EMAIL_SET,
+        { email: this.email }
+      );
 
-      for (const bodypartValue of bodypartsValues) {
-        result.push({
-          id: bodypartValue.id,
-          label: bodypartValue.name,
-          value: bodypartValue.code,
-          isSelected: false,
-          contentTypeId: bodypartValue.contentTypeId,
-          color: bodypartValue.color,
-          image: bodypartValue.image
+      try {
+        await this.$store.dispatch('cart/addItem', {
+          productToAdd: Object.assign({}, this.product, {
+            qty: this.quantity,
+            plushieId: this.plushieId + '',
+            email: this.email,
+            bodyparts: this.getBodypartsData(),
+            customerImages: this.isUploadNow && this.customerImage ? [this.customerImage] : [],
+            uploadMethod: this.uploadMethod
+          })
         });
+      } catch (error) {
+        if (error instanceof ServerError) {
+          throw error;
+        }
+
+        Logger.error(error, 'budsies')();
       }
 
-      return result;
+      this.showEmailStep = false;
+
+      if (!shouldMakeAnother) {
+        this.goToCrossSells();
+        return;
+      }
+
+      this.onSuccessAndMakeAnother();
+    },
+    fillPlushieDataFromCartItem (cartItem: CartItem): void {
+      this.quantity = cartItem.qty || 1;
+      this.plushieId = Number(cartItem.plushieId);
+
+      this.fillCustomerImagesFromCartItem(cartItem);
+      this.fillSizeFromCartItem(cartItem);
+      this.fillBodypartsValuesFromCartItem(cartItem);
+      this.fillProductionTimeFromCartItem(cartItem);
+    },
+    fillBodypartsValuesFromCartItem (cartItem: CartItem): void {
+      this.bodypartsValues = {};
+
+      if (!cartItem.bodyparts) {
+        return;
+      }
+
+      const bodyparts: Record<string, any[]> = cartItem.bodyparts as Record<string, any[]>;
+
+      Object.keys(bodyparts).forEach((key: string) => {
+        Vue.set(
+          this.bodypartsValues,
+          key,
+          this.getBodypartOptions(key).filter(
+            (bodypartOption: BodypartOption) => bodyparts[key].includes(bodypartOption.id) ||
+              bodyparts[key].includes(Number(bodypartOption.id))
+          )
+        );
+      });
+    },
+    fillCustomerImagesFromCartItem (cartItem: CartItem): void {
+      this.customerImage = cartItem.customerImages ? cartItem.customerImages[0] : undefined;
+      this.initialCustomerImages = this.customerImage ? [this.customerImage] : [];
+      this.uploadMethod = cartItem.uploadMethod as ImageUploadMethod || ImageUploadMethod.NOW;
+
+      const artworkUploadComponent = this.getArtworkUploadComponent();
+
+      if (!artworkUploadComponent) {
+        return;
+      }
+
+      this.$nextTick(() => {
+        artworkUploadComponent.initFiles();
+      });
+    },
+    fillProductionTimeFromCartItem (cartItem: CartItem): void {
+      const productOption = cartItem.product_option;
+      this.productionTime = undefined;
+
+      if (!this.productionTimeBundleOption || !productOption) {
+        return;
+      }
+
+      if (this.productionTimeOptions.length) {
+        this.productionTime = this.productionTimeOptions[0];
+      }
+
+      if (!productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id]) {
+        return;
+      }
+
+      const selectedOptionValueId = productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id].option_selections[0];
+      this.productionTime = this.productionTimeOptions.find((item) => item.optionValueId === selectedOptionValueId);
+    },
+    fillSizeFromCartItem (cartItem: CartItem): void {
+      const selectedBundleOptions = getSelectedBundleOptions(cartItem);
+
+      if (!this.sizes.length || !selectedBundleOptions.length) {
+        this.size = undefined;
+        return;
+      }
+
+      const selectedSize: SizeOption | undefined = this.sizes.find(
+        (sizeOption) => selectedBundleOptions.find(
+          (selectedOption) => selectedOption.option_id === sizeOption.optionId &&
+          selectedOption.option_selections.includes(Number.parseInt(sizeOption.optionValueId))
+        )
+      );
+
+      this.size = selectedSize;
+    },
+    getArtworkUploadComponent (): InstanceType<typeof MArtworkUpload> | undefined {
+      return this.$refs['artwork-upload'] as InstanceType<typeof MArtworkUpload> | undefined;
     },
     getBodypartsData (): Record<string, string[]> {
       let data: Record<string, string[]> = {};
@@ -620,30 +710,21 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     getUploader (): InstanceType<typeof MArtworkUpload> | undefined {
       return this.$refs['artwork-upload'] as InstanceType<typeof MArtworkUpload> | undefined;
     },
-    getValidationObserver (): InstanceType<typeof ValidationObserver> | undefined {
-      return this.$refs['validation-observer'] as InstanceType<typeof ValidationObserver> | undefined;
+    goToCrossSells (): void {
+      this.$router.push(localizedRoute({
+        name: 'cross-sells',
+        params: {
+          parentSku: this.product.sku
+        }
+      }));
     },
     goToCart (): void {
-      this.$router.push(localizedRoute('/cart'));
-    },
-    goToFieldByName (field: string): void {
-      // Strip quotes
-      let refName = field.replace(/^['"]+|['"]+$/g, '');
-      // Strip spaces & convert to lower case
-      refName = refName.toLowerCase().replace(/ /g, '-');
-
-      refName += '-field-anchor';
-
-      const ref = this.$refs[refName] as HTMLElement | undefined;
-      if (!ref) {
-        Logger.warn(`Reference for the field with error not found. Field: ${field}, ref: ${refName}`, 'budsies')();
-        return;
-      }
-
-      ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      this.$router.push(localizedRoute({
+        name: 'detailed-cart'
+      }));
     },
     prefillEmail (): void {
-      const customerEmail = this.$store.getters['budsies/getCustomerEmail'];
+      const customerEmail = this.$store.getters['budsies/getPrefilledCustomerEmail'];
       if (customerEmail) {
         this.email = customerEmail;
         this.showEmailStep = false;
@@ -652,8 +733,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     resetForm (): void {
       this.quantity = this.product.qty || 1;
       this.customerImage = undefined;
+      this.uploadMethod = ImageUploadMethod.NOW;
       this.size = undefined;
-      this.name = undefined;
+      this.plushieId = undefined;
 
       for (const bodypart of this.bodyparts) {
         this.bodypartsValues[bodypart.id] = undefined;
@@ -669,8 +751,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         this.productionTime = this.productionTimeOptions[0];
       }
 
-      const validator = this.getValidationObserver();
-      validator?.reset();
+      this.validationObserver?.reset();
     },
     switchToUploadNow (): void {
       if (this.isSubmitting) {
@@ -702,63 +783,29 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     onArtworkRemove (storageItemId: string): void {
       this.customerImage = undefined;
     },
-    async onSubmit (event: Event): Promise<void> {
+    async onSubmit (): Promise<void> {
       if (this.isSubmitting) {
+        return;
+      }
+
+      const isValid = await this.validateAndGoToFirstError();
+
+      if (!isValid) {
         return;
       }
 
       this.isSubmitting = true;
 
-      const shouldMakeAnother = this.shouldMakeAnother;
-      this.shouldMakeAnother = false;
-
-      await this.$store.dispatch(
-        'product/setBundleOptions',
-        { product: this.product, bundleOptions: this.$store.state.product.current_bundle_options }
-      );
-
-      this.$store.commit(
-        budsiesTypes.SN_BUDSIES + '/' + budsiesTypes.CUSTOMER_EMAIL_SET,
-        { email: this.email }
-      );
-
       try {
-        await this.$store.dispatch('cart/addItem', {
-          productToAdd: Object.assign({}, this.product, {
-            qty: this.quantity,
-            plushieId: this.plushieId + '',
-            email: this.email,
-            plushieName: this.name,
-            bodyparts: this.getBodypartsData(),
-            customerImages: this.isUploadNow && this.customerImage ? [this.customerImage] : [],
-            uploadMethod: this.uploadMethod
-          })
-        });
-
-        if (!shouldMakeAnother) {
-          this.goToCart();
-          return;
+        if (!this.existingCartItem) {
+          await this.addToCart();
+        } else {
+          await this.updateExistingCartItem(this.existingCartItem);
         }
+      } catch (error) {
+        Logger.error(error, 'budsies')();
 
-        this.resetForm();
-        this.window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-
-        const notification = notifications.createNotification({
-          type: 'info',
-          message: 'Product was added to the cart',
-          timeToLive: 5 * 1000
-        });
-
-        this.$store.dispatch(
-          'notification/spawnNotification',
-          notification,
-          { root: true }
-        );
-        this.$emit('make-another');
-      } catch (err) {
-        Logger.error(err, 'budsies')();
-
-        this.onFailure('Unexpected error: ' + err);
+        this.onFailure('Unexpected error: ' + error);
       } finally {
         this.isSubmitting = false;
       }
@@ -769,6 +816,74 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         message: message,
         action1: { label: i18n.t('OK') }
       });
+    },
+    async onSuccessAndMakeAnother (): Promise<void> {
+      this.resetForm();
+      this.window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+
+      const notification = notifications.createNotification({
+        type: 'info',
+        message: 'Product was added to the cart',
+        timeToLive: 5 * 1000
+      });
+
+      this.$store.dispatch(
+        'notification/spawnNotification',
+        notification,
+        { root: true }
+      );
+
+      this.plushieId = await this.createPlushie();
+    },
+    async createPlushie (): Promise<number> {
+      if (!this.product) {
+        throw new Error('Current product is not set!');
+      }
+
+      const task = await this.$store.dispatch(
+        'budsies/createNewPlushie',
+        {
+          productId: this.product.id
+        }
+      );
+      return task.result;
+    },
+    async updateClientAndServerItem (payload: {
+      product: CartItem,
+      forceUpdateServerItem?: boolean,
+      forceClientState?: boolean
+    }): Promise<void> {
+      await this.$store.dispatch('cart/updateClientAndServerItem', payload);
+    },
+    async updateExistingCartItem (existingCartItem: CartItem): Promise<void> {
+      try {
+        await this.updateClientAndServerItem({
+          product: Object.assign({}, existingCartItem, {
+            qty: this.quantity,
+            plushieId: existingCartItem.plushieId,
+            email: this.email,
+            bodyparts: this.getBodypartsData(),
+            customerImages: this.isUploadNow && this.customerImage ? [this.customerImage] : [],
+            uploadMethod: this.uploadMethod,
+            product_option: setBundleProductOptionsAsync(
+              null,
+              {
+                product: existingCartItem,
+                bundleOptions: this.$store.state.product.current_bundle_options
+              }
+            )
+          }),
+          forceUpdateServerItem: true
+        });
+      } catch (error) {
+        if (error instanceof ServerError) {
+          throw error;
+        }
+
+        Logger.error(error, 'budsies')();
+      }
+
+      this.goToCart();
     }
   },
   beforeMount () {
@@ -821,6 +936,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         this.$store.dispatch('budsies/loadPlushieShortcode', { plushieId: this.plushieId });
       },
       immediate: true
+    },
+    existingPlushieId (): void {
+      if (!this.existingCartItem) {
+        return;
+      }
+
+      this.fillPlushieDataFromCartItem(this.existingCartItem);
     }
   }
 })
@@ -831,6 +953,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 @import "~@storefront-ui/shared/styles/helpers/typography";
 @import "~@storefront-ui/shared/styles/helpers/layout";
 @import "~@storefront-ui/shared/styles/components/atoms/SfHeading";
+@import "theme/css/mixins/body-part";
 
 .o-pillow-product-order-form {
   text-align: center;
@@ -838,6 +961,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   b,
   strong {
     font-weight: var(--font-semibold);
+  }
+
+  ._form {
+    margin-top: var(--spacer-lg);
   }
 
   ._step-divider {
@@ -852,10 +979,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     font-size: var(--font-xl);
     font-weight: var(--font-semibold);
     @include border(--step-border, 0 0 4px 0, solid, var(--_c-light-primary));
-
-    &._email-step {
-      margin-top: var(--spacer-2xl);
-    }
   }
 
   ._step-title {
@@ -871,29 +994,24 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
   }
 
-  ._popup-link {
-    font-weight: var(--font-medium);
-  }
-
   ._popup-content {
     text-align: left;
   }
 
   .sf-input {
+    --input-width: 20em;
+
+    max-width: 100%;
     text-align: center;
     display: inline-block;
-    --input-width: 20em;
-  }
-
-  .sf-modal {
-    --modal-top: 3.75rem;
   }
 
   .sf-divider {
     margin-top: var(--spacer-xl);
   }
 
-  .m-bodypart-option-configurator {
+  .m-bodypart-option-configurator,
+  .m-plushie-size-selector {
     margin-top: var(--spacer-base);
   }
 
@@ -904,18 +1022,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
   ._qty-container {
       margin-top: var(--spacer-xs);
-  }
-
-  ._production-time-field {
-    max-width: 47em;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: var(--spacer-xl);
-    text-align: center;
-
-    ::v-deep .sf-select__selected {
-      justify-content: center;
-    }
   }
 
   ._actions {
@@ -939,30 +1045,46 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   }
 
   ._error-text {
-      font-size: var(--font-xs);
-      margin-top: var(--spacer-sm);
-      height: calc(var(--font-xs) * 1.2);
+    font-size: var(--font-xs);
+    margin-top: var(--spacer-xs);
+    height: calc(var(--font-xs) * 1.2);
   }
 
   ._form-errors {
     margin-top: var(--spacer-xl);
-    min-height: calc(var(--font-xs) * 1.2 * 4);
-
-    ._error-link {
-      color: inherit;
-    }
   }
 
-  ._order-agreement {
-    max-width: 50em;
+  ._agreement {
+    margin: var(--spacer-xl) auto 0;
     font-size: var(--font-xs);
-
+    text-align: left;
+    max-width: 45rem;
   }
 
-  &.-skin-petsies {
+  ._production-time-selector-section {
+    margin-top: var(--spacer-xl);
+  }
+
+  &.-skin-petsies,
+  &.-skin-budsies {
       ._error-text {
           color: var(--c-danger-variant);
       }
+  }
+
+  &.-skin-budsies {
+    ._body-part-heading {
+      @include heading-background;
+    }
+
+    ._step-number {
+      color: var(--c-danger);
+      @include border(--step-border, 0 0 4px 0, solid, var(--c-danger));
+    }
+
+    ._artwork-upload-helper {
+      font-size: var(--font-xs);
+    }
   }
 
   @media (min-width: $tablet-min) {

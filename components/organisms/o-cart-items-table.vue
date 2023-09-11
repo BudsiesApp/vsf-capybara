@@ -1,99 +1,30 @@
 <template>
-  <SfTable
-    class="sf-table--bordered o-cart-items-table desktop-only"
-    :class="{'o-cart-items-table--hidden-header': !shouldShowHeader}"
-  >
-    <SfTableHeading class="table__row" v-if="shouldShowHeader">
-      <SfTableHeader class="table__header table__image">
-        {{ $t('Thumbnail') }}
-      </SfTableHeader>
-      <SfTableHeader
-        v-for="tableHeader in tableHeaders"
-        :key="tableHeader"
-        class="table__header"
-        :class="{
-          table__description: tableHeader === $t('Description'),
-          table__price: tableHeader === $t('Price')
-        }"
-      >
-        {{ tableHeader }}
-      </SfTableHeader>
-    </SfTableHeading>
-    <SfTableRow
-      v-for="product in cartItems"
-      :key="product.id && product.checksum ? product.id + product.checksum : product.name"
-      class="table__row"
-    >
-      <SfTableData class="table__image">
-        <SfImage :src="getThumbnailForProduct(product)" />
-      </SfTableData>
-      <SfTableData class="table__description">
-        <div class="product-title">
-          {{ product.name | htmlDecode }}
-        </div>
-        <div
-          class="bundle-product-option"
-          v-for="option in getBundleProductOptions(product)"
-          :key="option"
-        >
-          <SfIcon
-            icon="check"
-            size="xxs"
-            color="blue-primary"
-            class="bundle-product-option__icon"
-          />
-          {{ option }}
-        </div>
-        <div
-          class="product-options"
-          v-for="option in getProductOptions(product)"
-          :key="option.label"
-        >
-          <template v-if="isCustomOption(product, option)">
-            {{ option.label }}: {{ option.value }}
-          </template>
-          <template v-else>
-            {{ option.value }}
-          </template>
-        </div>
-      </SfTableData>
-      <SfTableData class="table__data">
-        {{ getProductQuantity(product) }}
-      </SfTableData>
-      <SfTableData class="table__data">
-        <SfPrice
-          :regular="getProductRegularPrice(product)"
-          :special="getProductSpecialPrice(product)"
-          class="product-price"
-        />
-      </SfTableData>
-    </SfTableRow>
-  </SfTable>
+  <o-order-content
+    :should-show-header="shouldShowHeader"
+    :table-items="tableItems"
+    class="desktop-only"
+  />
 </template>
 
 <script lang="ts">
 import { PropType } from 'vue';
-import {
-  SfIcon,
-  SfImage,
-  SfPrice,
-  SfTable
-} from '@storefront-ui/vue';
 import { onlineHelper } from '@vue-storefront/core/helpers';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
 
-import { getProductPrice } from 'theme/helpers';
+import { getCartItemPrice } from 'src/modules/shared';
 import CartItem from 'core/modules/cart/types/CartItem';
 import CartItemOption from 'core/modules/cart/types/CartItemOption';
 import { ProductId } from 'src/modules/budsies';
+import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
+
+import { OrderContentItem } from '../interfaces/order-content-item.interface';
+
+import OOrderContent from './o-order-content.vue';
 
 export default {
   name: 'OCartItemsTable',
   components: {
-    SfIcon,
-    SfImage,
-    SfPrice,
-    SfTable
+    OOrderContent
   },
   props: {
     shouldShowHeader: {
@@ -112,6 +43,24 @@ export default {
         this.$t('Quantity'),
         this.$t('Price')
       ]
+    }
+  },
+  computed: {
+    tableItems (): OrderContentItem[] {
+      return this.cartItems.map((cartItem) => {
+        return {
+          key: this.getCartItemKey(cartItem),
+          thumbnail: this.getThumbnailForProduct(cartItem),
+          name: cartItem.name,
+          plushieName: cartItem.plushieName,
+          plushieBreed: cartItem.plushieBreed,
+          qty: cartItem.qty,
+          customOptions: this.getProductOptions(cartItem),
+          specialPrice: this.getProductSpecialPrice(cartItem),
+          regularPrice: this.getProductRegularPrice(cartItem),
+          bundleOptions: this.getBundleProductOptions(cartItem)
+        }
+      });
     }
   },
   methods: {
@@ -166,14 +115,11 @@ export default {
         ? product.totals.options
         : product.options || [];
     },
-    getProductQuantity (product: CartItem): number | string {
-      return this.shouldShowHeader ? product.qty : `x ${product.qty}`;
-    },
     getProductRegularPrice (product: CartItem): string {
-      return getProductPrice(product, {}).regular;
+      return getCartItemPrice(product, {}).regular;
     },
     getProductSpecialPrice (product: CartItem): string {
-      return getProductPrice(product, {}).special;
+      return getCartItemPrice(product, {}).special;
     },
     getThumbnailForProduct (product: CartItem): string {
       if (product.thumbnail && product.thumbnail.includes('://')) {
@@ -182,97 +128,9 @@ export default {
 
       return getThumbnailForProduct(product);
     },
-    isCustomOption (product: CartItem, productOption: CartItemOption) {
-      if (!product.custom_options) {
-        return false;
-      }
-
-      return product.custom_options.find(option => option.title === productOption.label) !== undefined;
+    getCartItemKey (cartItem: CartItem): string {
+      return getCartItemKey(cartItem);
     }
   }
 }
 </script>
-
-<style lang="scss" scoped>
-@import "~@storefront-ui/shared/styles/helpers/breakpoints";
-
-.o-cart-items-table {
-  margin: 0 0 var(--spacer-base) 0;
-
-  .table__row {
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .sf-table {
-    &__data {
-      --table-data-color: var(--c-text);
-    }
-
-    &__row {
-      --table-row-box-shadow: none;
-    }
-  }
-
-  .product-price {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-  }
-
-  &.o-cart-items-table--hidden-header {
-      .product-price {
-        ::v-deep .sf-price__old {
-            margin: 0;
-        }
-      }
-
-      .table__description {
-        flex-basis: 6rem;
-      }
-
-      .table__image {
-        --image-width: 8.125rem;
-        min-width: var(--image-width);
-        margin-right: 1em;
-      }
-  }
-
-  @include for-desktop {
-    .table__header {
-      text-align: center;
-
-      &:last-child {
-        text-align: right;
-      }
-    }
-
-    .table__data {
-      text-align: center;
-    }
-
-    .table__description {
-      text-align: left;
-      flex: 1 0 12rem;
-
-      .product-title {
-        font-weight: var(--font-semibold);
-
-      }
-
-      .bundle-product-option {
-        font-size: var(--font-xs);
-
-        &__icon {
-          display: inline-block;
-        }
-      }
-    }
-
-    .table__image {
-      --image-width: 5.125rem;
-      text-align: left;
-    }
-  }
-}
-</style>

@@ -1,35 +1,42 @@
 <template>
-  <div :style="styles" class="storyblok-button">
-    <SfButton
-      class="_button"
-      :link="link"
+  <div
+    :style="styles"
+    class="storyblok-button layout-regular-component"
+    :class="cssClasses"
+  >
+    <editor-block-icons :item="itemData" />
+
+    <sb-router-link
+      class="_button sf-button"
       :class="cssClasses"
-      @click="openLink"
+      :link="linkField"
+      :is-new-window="shouldOpenInNewWindow"
     >
       {{ itemData.link_text }}
-    </SfButton>
+    </sb-router-link>
   </div>
 </template>
 
 <script lang="ts">
-import { SfButton } from '@storefront-ui/vue';
-import { localizedRoute } from '@vue-storefront/core/lib/multistore';
+import { VueConstructor } from 'vue';
+import { InjectType } from 'src/modules/shared';
 
-import { Blok } from 'src/modules/vsf-storyblok-module/components'
+import { Blok, LinkField } from 'src/modules/vsf-storyblok-module'
+
 import ButtonItemData from './interfaces/button-item-data.interface';
-import getUrlFromLink from './get-url-from-link';
 
-export default Blok.extend({
+interface InjectedServices {
+  window: Window
+}
+
+export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServices>).extend({
   name: 'StoryblokButton',
-  components: {
-    SfButton
-  },
+  inject: {
+    window: { from: 'WindowObject' }
+  } as unknown as InjectType<InjectedServices>,
   computed: {
     itemData (): ButtonItemData {
       return this.item as ButtonItemData;
-    },
-    link (): string {
-      return getUrlFromLink(this.itemData.link_url);
     },
     shouldOpenInNewWindow (): boolean {
       return !!this.itemData.target_blank;
@@ -42,29 +49,18 @@ export default Blok.extend({
       }
 
       return result;
-    }
-  },
-  methods: {
-    openLink (): void {
-      const url = getUrlFromLink(this.itemData.link_url);
+    },
+    linkField (): LinkField {
+      const linkUrl = this.itemData.link_url;
+      const url = linkUrl.email !== undefined
+        ? linkUrl.email
+        : linkUrl.url;
 
-      const isExternalUrl = url.startsWith('//') || url.startsWith('http://') || url.startsWith('https://') || url.startsWith('ftp://');
-
-      if (isExternalUrl) {
-        window.open(url, '_blank');
-        return;
+      if (url === undefined) {
+        throw new Error('Url is not set');
       }
 
-      const route = this.$router.resolve({
-        path: localizedRoute(url)
-      });
-
-      if (this.shouldOpenInNewWindow) {
-        window.open(route.href, '_blank');
-        return;
-      }
-
-      this.$router.push(route.location);
+      return { ...this.itemData.link_url, url: url };
     }
   }
 })
@@ -72,9 +68,18 @@ export default Blok.extend({
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+
 .storyblok-button {
+  --button-wrap: normal;
+
   ._button {
     display: inline-block;
+
+    &:hover {
+      --c-link-hover: var(--button-color, var(--c-light-variant));
+    }
   }
 
   &.-editor-preview-mode {
@@ -82,5 +87,7 @@ export default Blok.extend({
       pointer-events: none
     }
   }
+
+  @include display-property-handling;
 }
 </style>

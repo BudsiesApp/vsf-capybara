@@ -20,6 +20,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 export default Vue.extend({
   name: 'ACustomProductQuantity',
@@ -35,7 +36,7 @@ export default Vue.extend({
   },
   computed: {
     skinClass (): string {
-      return '-skin-petsies';
+      return getCurrentThemeClass();
     },
     valueText (): number {
       return this.value;
@@ -104,8 +105,13 @@ export default Vue.extend({
 
     &.-disabled {
         opacity: 0.6;
+
+        ._handle {
+          cursor: default;
+        }
     }
 
+    &.-skin-budsies,
     &.-skin-petsies {
       ._handle {
         border: 1px solid var(--c-text);
@@ -114,12 +120,15 @@ export default Vue.extend({
 
         &:hover,
         &:focus {
-          &.-up {
-            background: var(--c-light);
-          }
+          background: var(--c-light);
+        }
+      }
 
-          &.-down {
-            background: var(--c-light);
+      &.-disabled {
+        ._handle {
+          &:hover,
+          &:focus {
+            background: unset;
           }
         }
       }

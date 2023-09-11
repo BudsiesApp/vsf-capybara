@@ -1,11 +1,18 @@
 <template>
-  <div class="storyblok-heading" :class="cssClasses" :style="styles">
+  <div
+    class="storyblok-heading layout-heading-component"
+    :class="cssClasses"
+    :style="styles"
+  >
+    <editor-block-icons :item="itemData" />
+
     <div class="_container">
       <div class="_intro" v-if="isCustomStyled && itemData.intro_text">
         {{ itemData.intro_text }}
       </div>
 
       <SfHeading
+        :id="headingId"
         class="_heading"
         :level="headingSize"
         :title="itemData.title"
@@ -17,6 +24,7 @@
 <script lang="ts">
 import { SfHeading } from '@storefront-ui/vue';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
+import getHeaderId from 'src/modules/vsf-storyblok-module/helpers/get-header-id';
 import HeadingData from './interfaces/heading-data.interface';
 
 export default Blok.extend({
@@ -37,6 +45,10 @@ export default Blok.extend({
         result.push('-custom-styled');
       }
 
+      if (this.itemData.intro_text) {
+        result.push('-with-intro');
+      }
+
       if (this.itemData.alignment) {
         result.push('-aligned-' + this.itemData.alignment);
       }
@@ -49,6 +61,9 @@ export default Blok.extend({
     },
     isCustomStyled (): boolean {
       return !!this.itemData.is_custom_styled;
+    },
+    headingId (): string {
+      return getHeaderId(this.headingSize, [{ type: 'text', text: this.itemData.title }]);
     }
   }
 });
@@ -56,8 +71,13 @@ export default Blok.extend({
 
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+
+$intro-left-margin: 1em;
 
 .storyblok-heading {
+  --heading-title-margin: 0;
+  --heading-padding: 0;
   text-align: center;
 
   ._heading {
@@ -68,78 +88,67 @@ export default Blok.extend({
     overflow: hidden;
     margin-left: 1em;
     margin-right: 1em;
-    padding: var(--heading-padding, var(--spacer-xs) 0 var(--spacer-xs) 0);
     text-align: center;
 
     ._container {
       display: inline-block;
+      position: relative;
+      padding-left: 0.5 * $intro-left-margin;
+      padding-right: 0.5 * $intro-left-margin;
     }
 
     ._intro {
+      display: inline;
+      position: absolute;
+      left: auto;
       color: var(--c-warning);
-
       font-family: var(--font-family-intro);
       font-weight: 400;
-      margin-left: -0.4em;
-      padding-left: 0.2em;
-      padding-right: 0.2em;
-      text-align: left;
+      margin-top: -0.75em;
+      margin-left: -0.5 * $intro-left-margin;
     }
 
     ._heading {
+      display: inline;
       padding: 0;
-    }
 
-    ._intro + ._heading ::v-deep .sf-heading__title {
-      line-height: 1;
-    }
-
-    &.-h1,
-    &.-h2 {
-      ._intro + ._heading {
-        margin-top: -0.6em;
-      }
-    }
-
-    &.-h3,
-    &.-h4 {
-      ._intro + ._heading {
-        margin-top: -0.4em;
-      }
-    }
-
-    &.-h5 {
-      ._intro + ._heading {
-        margin-top: -0.2em;
+      ::v-deep .sf-heading__title {
+        display: inline;
       }
     }
 
     @for $i from 1 through 6 {
       &.-h#{$i} {
-        ._intro {
+        ._container {
           font-size: calc(var(--h#{$i}-font-size) * 1.15);
         }
       }
     }
 
-    &.-aligned-left,
-    &.-aligned-right {
-      ._intro {
-        margin-left: 0;
+    &.-with-intro {
+      ._container {
+        padding-top: 0.75em;
       }
     }
 
+    &.-aligned-left {
+      text-align: left;
+    }
+
     &.-aligned-right {
-      ._intro {
-        text-align: right;
-      }
+      text-align: right;
     }
   }
 
   @media (min-width: $tablet-min) {
     &.-custom-styled {
+      ._container {
+        padding-left: $intro-left-margin;
+        padding-right: $intro-left-margin;
+      }
+
       ._intro {
-        margin-left: -0.6em;
+        margin-left: -1 * $intro-left-margin;
       }
 
       ._heading {
@@ -180,19 +189,6 @@ export default Blok.extend({
 
   @include for-desktop {
     &.-custom-styled {
-      &.-h1,
-      &.-h2 {
-        ._intro + ._heading {
-          margin-top: -1em;
-        }
-      }
-
-      &.-h3 {
-        ._intro + ._heading {
-          margin-top: -0.6em;
-        }
-      }
-
       &.-h2 {
         ._heading {
           &::after,
@@ -203,5 +199,7 @@ export default Blok.extend({
       }
     }
   }
+
+  @include display-property-handling;
 }
 </style>

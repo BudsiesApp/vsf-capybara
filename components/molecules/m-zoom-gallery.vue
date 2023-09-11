@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="zoomGallery"
     class="m-zoom-gallery"
     :class="{
       '-horizontal': isHorizontalThumbnails,
@@ -27,10 +28,12 @@
           <div class="_thumbnail-item-content-wrapper">
             <BaseImage
               class="_image"
+              object-fit="cover"
               :src="getImageSrc(image, 'thumb')"
               :srcsets="getImageSrcSets(image, 'thumb')"
               :alt="image.alt"
               :title="image.title"
+              :aspect-ratio="1.0"
             />
           </div>
         </div>
@@ -51,6 +54,7 @@
             :srcsets="getImageSrcSets(stageImage, 'stage')"
             :alt="stageImage.alt"
             :title="stageImage.title"
+            :aspect-ratio="1.0"
           />
         </div>
       </div>
@@ -59,12 +63,9 @@
 </template>
 
 <script lang="ts">
+import debounce from 'lodash.debounce';
 import Vue, { PropType } from 'vue';
 
-import {
-  mapMobileObserver,
-  unMapMobileObserver
-} from '@storefront-ui/vue/src/utilities/mobile-observer';
 import VueSlickCarousel from 'vue-slick-carousel';
 import jQuery from 'jquery';
 import 'vue-slick-carousel/dist/vue-slick-carousel.css';
@@ -77,6 +78,9 @@ require('@cabbiepete/cloud-zoom');
 require('@cabbiepete/cloud-zoom/cloud-zoom.css');
 
 type ImageKeys = keyof ZoomGalleryImage;
+
+const maximumZoomGalleryWidthAllowedForCloudZoomInit = 50;
+const debounceTime = 300;
 
 export default Vue.extend({
   name: 'MZoomGallery',
@@ -97,11 +101,12 @@ export default Vue.extend({
   data () {
     return {
       fCurrentIndex: undefined as number | undefined,
-      fShouldInitThumbnailsSlider: false
+      fShouldInitThumbnailsSlider: false,
+      fWindowResizeHandler: undefined as () => void | undefined,
+      fIsClodZoomInitialized: false
     }
   },
   computed: {
-    ...mapMobileObserver(),
     isHorizontalThumbnails (): boolean {
       if (this.horizontalThumbnails) {
         return true;
@@ -129,39 +134,49 @@ export default Vue.extend({
           return;
         }
 
-        if (this.isMobile) {
-          return;
-        }
-
         this.$nextTick(() => {
-          const imageWrapper = this.getStageImageWrapper();
-
-          if (!imageWrapper) {
-            return;
+          if (this.canCloudZoomInit()) {
+            this.initCloudZoom();
           }
-
-          jQuery(imageWrapper).CloudZoom({ adjustX: 10, showTitle: false });
         });
       }
     },
     shouldInitThumbnailsSlider: function (): boolean {
-      return this.fShouldInitThumbnailsSlider
+      return this.fShouldInitThumbnailsSlider;
     }
   },
-  created () {
-    this.currentIndex = undefined;
+  mounted () {
+    this.fWindowResizeHandler = debounce(
+      () => this.onWindowResizeHandler(),
+      debounceTime
+    );
 
-    if (this.images.length > 0) {
-      this.currentIndex = 0;
-    }
+    window.addEventListener('resize', this.fWindowResizeHandler);
   },
   beforeDestroy () {
-    unMapMobileObserver();
-  },
-  destroyed () {
     this.detachZoom();
+
+    if (!this.fWindowResizeHandler) {
+      return;
+    }
+
+    window.removeEventListener('resize', this.fWindowResizeHandler);
   },
   methods: {
+    canCloudZoomInit (): boolean {
+      const zoomGallery = this.getZoomGallery();
+
+      if (!zoomGallery) {
+        return false;
+      }
+      const zoomGalleryWidthInPercent =
+            (zoomGallery.clientWidth / window.innerWidth) * 100;
+
+      return (
+        zoomGalleryWidthInPercent <=
+            maximumZoomGalleryWidthAllowedForCloudZoomInit
+      );
+    },
     getImageSrc (image: ZoomGalleryImage, variant: ImageKeys): string | undefined {
       const value = image[variant];
       if (typeof value !== 'string') {
@@ -187,6 +202,10 @@ export default Vue.extend({
       }
     },
     detachZoom (): void {
+      if (!this.fIsCloudZoomInitialized) {
+        return;
+      }
+
       const imageWrapper = this.getStageImageWrapper();
 
       if (!imageWrapper) {
@@ -200,9 +219,41 @@ export default Vue.extend({
       }
 
       zoom.destroy();
+      this.fIsCloudZoomInitialized = false;
     },
     getStageImageWrapper (): HTMLElement | undefined {
       return this.$refs['stageImageWrapper'] as HTMLElement | undefined;
+    },
+    getZoomGallery (): HTMLElement | undefined {
+      return this.$refs.zoomGallery as HTMLElement | undefined;
+    },
+    initCloudZoom (): void {
+      if (this.fIsCloudZoomInitialized) {
+        return;
+      }
+
+      const imageWrapper = this.getStageImageWrapper();
+
+      if (!imageWrapper) {
+        return;
+      }
+
+      (jQuery(imageWrapper) as any).CloudZoom({
+        adjustX: 10,
+        showTitle: false,
+        transparentImage: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+      });
+      this.fIsCloudZoomInitialized = true;
+    },
+    onWindowResizeHandler (): void {
+      if (!this.canCloudZoomInit()) {
+        this.detachZoom();
+      } else {
+        this.detachZoom();
+        this.$nextTick(() => {
+          this.initCloudZoom();
+        });
+      }
     }
   },
   watch: {
@@ -243,11 +294,8 @@ export default Vue.extend({
             display: block !important;
             position: relative;
             cursor: pointer;
-            padding-top: 108.1%;
-
-            &:first-child {
-                margin-top: 0;
-            }
+            padding-top: 100%;
+            margin-bottom: 8.1%;
         }
 
         ._thumbnail-item-content-wrapper {
@@ -265,6 +313,18 @@ export default Vue.extend({
 
             .slick-slide {
               border: none;
+
+              &:first-child {
+                ._thumbnail-item {
+                  margin-top: 0;
+                }
+              }
+
+              &:last-child {
+                ._thumbnail-item {
+                    margin-bottom: 0;
+                }
+              }
             }
         }
     }

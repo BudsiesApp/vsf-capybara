@@ -7,7 +7,7 @@
       <SfInput
         v-model="firstName"
         name="firstName"
-        :label="$t('First Name')"
+        :label="$t('First name')"
         required
         :valid="!$v.firstName.$error"
         :error-message="!$v.firstName.required ? $t('Field is required.') : $t('Name must have at least 2 letters.')"
@@ -16,7 +16,7 @@
       <SfInput
         v-model="lastName"
         name="lastName"
-        :label="$t('Last Name')"
+        :label="$t('Last name')"
         required
         :valid="!$v.lastName.$error"
         :error-message="$t('Field is required.')"
@@ -41,8 +41,8 @@
       </SfButton>
     </div>
     <p class="notice">
-      {{ $t('At Brand name, we attach great importance to privacy issues and are committed to protecting the personal data of our users. Learn more about how we care and use your personal data in the') }}
-      <a :href="localizedRoute('/privacy')">{{ $t('Privacy Policy') }}</a>.
+      {{ $t('At Budsies, we attach great importance to privacy issues and are committed to protecting the personal data of our users. Learn more about how we care and use your personal data in the') }}
+      <a :href="localizedRoute('/privacy-policy')">{{ $t('Privacy Policy') }}</a>.
     </p>
   </div>
 </template>

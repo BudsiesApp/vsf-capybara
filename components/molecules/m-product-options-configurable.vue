@@ -6,7 +6,9 @@
         v-if="attribute.attribute_code !== 'color'"
         :label="getAttributeLabel(attribute)"
         :value="getActiveOption(attribute)"
+        :should-lock-scroll-on-open="isMobile"
         @change="handleChangeOption"
+        :disabled="isDisabled"
         class="sf-select--underlined product__select-size"
       >
         <SfSelectOption
@@ -26,6 +28,7 @@
           :key="attributeOption.id"
           :color="getColorValue(attributeOption)"
           class="product__color"
+          :class="{ '-disabled': isDisabled }"
           :selected="isColorSelected(attributeOption)"
           @click="handleChangeOption(attributeOption)"
         />
@@ -39,6 +42,11 @@ import { mapGetters } from 'vuex';
 import get from 'lodash-es/get'
 import { SfSelect, SfProductOption, SfColor } from '@storefront-ui/vue';
 import { getAvailableFiltersByProduct } from '@vue-storefront/core/modules/catalog/helpers/filters'
+import {
+  mapMobileObserver,
+  unMapMobileObserver
+} from '@storefront-ui/vue/src/utilities/mobile-observer';
+
 export default {
   name: 'MProductOptionsConfigurable',
   inject: {
@@ -60,8 +68,10 @@ export default {
     }
   },
   computed: {
+    ...mapMobileObserver(),
     ...mapGetters({
-      getCurrentProductOptions: 'product/getCurrentProductOptions'
+      getCurrentProductOptions: 'product/getCurrentProductOptions',
+      isAddingToCart: 'cart/getIsAdding'
     }),
     getActiveOption () {
       return (attribute) => get(this.configuration, `${attribute.attribute_code}.id`, attribute.id)
@@ -87,7 +97,13 @@ export default {
     },
     isColorSelected () {
       return attributeOption => this.configuration.color && parseInt(this.configuration.color.id) === parseInt(attributeOption.id);
+    },
+    isDisabled () {
+      return this.isAddingToCart;
     }
+  },
+  beforeDestroy () {
+    unMapMobileObserver();
   },
   methods: {
     handleChangeOption (option) {
@@ -103,14 +119,8 @@ export default {
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .m-product-options-configurable {
-  border-bottom: 1px solid #f1f2f3;
-  padding-bottom: 10px;
   display: flex;
   flex-wrap: wrap;
-  @include for-desktop {
-    border: 0;
-    padding-bottom: 0;
-  }
 }
 .attribute {
   margin-bottom: var(--spacer-xl);
@@ -138,6 +148,11 @@ export default {
   }
   &__color {
     margin: 0 var(--spacer-2xs);
+
+    &.-disabled {
+      opacity: 0.8;
+      pointer-events: none;
+    }
   }
 }
 </style>

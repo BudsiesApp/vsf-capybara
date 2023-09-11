@@ -20,8 +20,8 @@
               :key="product.id"
               :image="getThumbnailForProductExtend(product)"
               :title="product.name"
-              :regular-price="getProductPrice(product).regular"
-              :special-price="getProductPrice(product).special"
+              :regular-price="getCartItemPrice(product).regular"
+              :special-price="getCartItemPrice(product).special"
               :stock="10"
               :qty="product.qty"
               class="collected-product"
@@ -81,10 +81,10 @@
             </template>
           </SfProperty>
           <SfButton
-            class="sf-button--full-width color-secondary"
+            class="sf-button--full-width color-secondary _checkout-button"
             @click.native="goToCheckout"
           >
-            {{ $t("Go to checkout") }}
+            {{ $t('Go to checkout') }}
           </SfButton>
         </div>
         <div v-else>
@@ -92,7 +92,7 @@
             class="sf-button--full-width color-primary"
             @click.native="startShopping"
           >
-            {{ $t("Start shopping") }}
+            {{ $t('Start shopping') }}
           </SfButton>
         </div>
       </transition>
@@ -105,7 +105,7 @@ import { mapState, mapGetters } from 'vuex';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { onlineHelper } from '@vue-storefront/core/helpers';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
-import { getProductPrice, getProductPriceFromTotals } from 'theme/helpers';
+import { getCartItemPrice, getProductPriceFromTotals } from 'src/modules/shared';
 import VueOfflineMixin from 'vue-offline/mixin';
 import onEscapePress from '@vue-storefront/core/mixins/onEscapePress';
 
@@ -168,10 +168,10 @@ export default {
     getThumbnailForProductExtend (product) {
       return getThumbnailForProduct(product);
     },
-    getProductPrice (product) {
+    getCartItemPrice (product) {
       return onlineHelper.isOnline && product.totals && product.totals.options
         ? getProductPriceFromTotals(product)
-        : getProductPrice(product);
+        : getCartItemPrice(product);
     },
     getProductOptions (product) {
       return onlineHelper.isOnline && product.totals && product.totals.options
@@ -182,7 +182,7 @@ export default {
       this.$store.dispatch('cart/removeItem', { product: product });
     },
     goToCheckout () {
-      this.$router.push(localizedRoute('/checkout'));
+      this.$router.push(localizedRoute({ name: 'checkout' }));
       this.closeMicrocartExtend();
     },
     changeQuantity (product, newQuantity) {

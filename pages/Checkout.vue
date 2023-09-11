@@ -1,20 +1,27 @@
 <template>
   <div id="checkout">
-    <div v-if="!isThankYouPage" class="checkout">
+    <div v-if="!showThankYouPage" class="checkout">
       <div class="checkout__main">
         <SfSteps
           :active="currentStep"
-          :steps="steps.map(step => step.name)"
+          :steps="availableSteps.map(step => step.name)"
           @change="changeStep"
         >
-          <SfStep v-for="step in steps" :key="step.key" :name="step.name">
-            <component :is="step.component" :is-active="true" />
-          </SfStep>
+          <template>
+            <ProductionSpotCountdown
+              :can-show="canShowProductionSpotCountdown"
+              class="_production-spot-countdown"
+            />
+
+            <SfStep v-for="step in availableSteps" :key="step.key" :name="step.name">
+              <component :is="step.component" :is-active="true" />
+            </SfStep>
+          </template>
         </SfSteps>
       </div>
       <div class="checkout__aside desktop-only">
         <transition name="fade">
-          <div v-if="currentStep <= 2">
+          <div v-if="!isReviewStep">
             <OCartItemsTable :cart-items="productsInCart" :should-show-header="false" />
             <OOrderSummary class="checkout__aside-order" />
           </div>
@@ -22,34 +29,57 @@
         </transition>
       </div>
     </div>
-    <OOrderConfirmation v-if="isThankYouPage" />
+    <OOrderSuccess
+      v-else
+      class="_order-success"
+      :confirmation="confirmation"
+      :order="order"
+    />
   </div>
 </template>
 <script>
 import Checkout from '@vue-storefront/core/pages/Checkout';
 import { SfSteps } from '@storefront-ui/vue';
-import OPayment from 'theme/components/organisms/o-payment';
+import { mapGetters } from 'vuex';
+import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
+import { htmlDecode } from '@vue-storefront/core/filters';
+import { currentStoreView } from '@vue-storefront/core/lib/multistore';
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
+import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
+
+import OBillingAddress from 'theme/components/organisms/o-billing-address';
 import OShipping from 'theme/components/organisms/o-shipping';
 import OConfirmOrder from 'theme/components/organisms/o-confirm-order';
 import OOrderReview from 'theme/components/organisms/o-order-review';
 import OOrderSummary from 'theme/components/organisms/o-order-summary';
-import OOrderConfirmation from 'theme/components/organisms/o-order-confirmation';
+import OOrderSuccess from 'theme/components/organisms/o-order-success';
 import OPersonalDetails from 'theme/components/organisms/o-personal-details';
 import OCartItemsTable from 'theme/components/organisms/o-cart-items-table';
-import { mapGetters } from 'vuex';
+import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
+import { ModalList } from 'theme/store/ui/modals';
+
+const successParamValue = 'success';
+const orderReviewStepKey = 'orderReview';
 
 export default {
   name: 'Checkout',
+  props: {
+    success: {
+      type: String,
+      default: undefined
+    }
+  },
   components: {
     SfSteps,
-    OPayment,
+    OBillingAddress,
     OShipping,
     OOrderReview,
     OOrderSummary,
     OConfirmOrder,
     OPersonalDetails,
     OCartItemsTable,
-    OOrderConfirmation
+    OOrderSuccess,
+    ProductionSpotCountdown
   },
   mixins: [Checkout],
   data () {
@@ -57,7 +87,7 @@ export default {
       steps: [
         {
           key: 'personalDetails',
-          name: this.$t('Details'),
+          name: this.$t('Contact'),
           component: OPersonalDetails
         },
         {
@@ -67,8 +97,8 @@ export default {
         },
         {
           key: 'payment',
-          name: this.$t('Payment'),
-          component: OPayment
+          name: this.$t('Billing address'),
+          component: OBillingAddress
         },
         {
           key: 'orderReview',
@@ -80,17 +110,63 @@ export default {
   },
   computed: {
     ...mapGetters({
-      productsInCart: 'cart/getCartItems'
+      productsInCart: 'cart/getCartItems',
+      isVirtualCart: 'cart/isVirtualCart'
     }),
     currentStep () {
-      return this.steps.findIndex(step => this.activeSection[step.key]);
+      return this.availableSteps.findIndex(step => this.activeSection[step.key]);
+    },
+    isSuccess () {
+      return this.success === successParamValue;
+    },
+    showThankYouPage () {
+      return this.isThankYouPage && this.isSuccess;
+    },
+    availableSteps () {
+      if (this.isVirtualCart) {
+        return this.steps.filter(step => step.key !== 'shipping');
+      }
+
+      return this.steps;
+    },
+    isReviewStep () {
+      return this.availableSteps[this.currentStep].key === orderReviewStepKey;
+    },
+    canShowProductionSpotCountdown () {
+      return this.productsInCart.some((product) => isCustomProduct(product.id));
     }
   },
+  beforeMount () {
+    this.$bus.$on('order-after-placed', this.onOrderAfterPlacedHandler);
+    EventBus.$on(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
+  },
+  beforeDestroy () {
+    this.$bus.$off('order-after-placed', this.onOrderAfterPlacedHandler);
+    EventBus.$off(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
+  },
   methods: {
-    changeStep (nextStep) {
-      if (nextStep < this.currentStep) {
-        this.$bus.$emit('checkout-before-edit', this.steps[nextStep].key);
+    activateHashSection () {
+      if (!this.showThankYouPage) {
+        Checkout.methods.activateHashSection.bind(this)();
       }
+    },
+    changeStep (newStepIndex) {
+      if (newStepIndex < this.currentStep) {
+        this.$bus.$emit('checkout-before-edit', this.availableSteps[newStepIndex].key);
+      }
+    },
+    async onOrderAfterPlacedHandler () {
+      if (!this.isSuccess) {
+        await this.$router.push({
+          name: 'checkout',
+          params: {
+            success: successParamValue
+          }
+        });
+      }
+    },
+    onOrderErrorEventHandler (payload) {
+      this.$store.dispatch('ui/openModal', { name: ModalList.OrderError, payload });
     },
     showNotification ({ type, message }) {
       this.$store.dispatch('notification/spawnNotification', {
@@ -135,6 +211,14 @@ export default {
         )
       });
     }
+  },
+  metaInfo () {
+    const storeName = currentStoreView().name;
+
+    return {
+      title: htmlDecode(this.showThankYouPage ? this.$t('Thank You - You\'ve Ordered a Custom {storeName} Plushie', { storeName }) : this.$t('Checkout')),
+      description: this.showThankYouPage ? [{ vmid: 'description', name: 'description', content: htmlDecode(this.$t('Thank you for ordering a custom {storeName} toy', { storeName })) }] : []
+    };
   }
 };
 </script>
@@ -147,10 +231,22 @@ export default {
     padding: 0 var(--spacer-sm);
     max-width: 1272px;
     margin: 0 auto;
-  }
+    width: 100%;
+}
+
+._order-success {
+  flex: 1;
+  padding: var(--spacer-xl) 0 0 0;
+}
+
 }
 .checkout {
   --steps-content-padding: 0 var(--spacer-sm);
+
+  ._production-spot-countdown {
+    margin-top: var(--spacer-sm);
+  }
+
   @include for-desktop {
     --steps-content-padding: 0;
     display: flex;

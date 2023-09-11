@@ -1,9 +1,11 @@
 <template>
   <div
-    class="storyblok-textarea"
+    class="storyblok-textarea layout-transparent-container"
     :class="cssClasses"
     :style="styles"
   >
+    <editor-block-icons :item="itemData" />
+
     <sb-rich-text v-if="itemData.content" :text="itemData.content" />
   </div>
 </template>
@@ -23,10 +25,39 @@ export default Blok.extend({
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+
 .storyblok-textarea {
-  ::v-deep ul, ol, dl {
-    display: inline-block;
-    text-align: left;
+  ::v-deep .storyblok-rich-text {
+    .-accent-color {
+      color: var(--c-accent);
+    }
+
+    .-action-color {
+      color: var(--c-primary);
+    }
+
+    .-large-text {
+      font-size: 24px;
+    }
+
+    .-small-text {
+      font-size: 10px;
+    }
+
+    .-large-accent-text {
+      color: var(--c-accent);
+      font-size: 24px;
+    }
+
+    .-large-action-text {
+      color: var(--c-primary);
+      font-size: 24px;
+    }
   }
+
+  @include storyblok-transparent-container-layout;
+  @include display-property-handling;
 }
 </style>

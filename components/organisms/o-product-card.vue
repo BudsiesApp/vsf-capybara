@@ -5,7 +5,7 @@
       :image="product.image"
       :regular-price="product.price.regular"
       :special-price="product.price.special"
-      :link="product.link"
+      :link="productLink"
       :link-tag="linkTag"
       :wishlist-icon="wishlistIcon"
       :image-height="imageHeight"
@@ -19,7 +19,7 @@
 import { SfProductCard } from '@storefront-ui/vue';
 
 export default {
-  name: 'MProductCard',
+  name: 'OProductCard',
   components: {
     SfProductCard
   },
@@ -36,6 +36,10 @@ export default {
       type: Object,
       required: true
     },
+    link: {
+      type: String,
+      default: undefined
+    },
     linkTag: {
       type: String,
       default: undefined
@@ -44,30 +48,42 @@ export default {
       type: [String, Array, Boolean],
       default: 'heart'
     }
+  },
+  computed: {
+    productLink (): string {
+      return this.link ? this.link : this.product.link;
+    }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-    $size: 66px;
-    $border-width: 2px;
+@import "theme/css/base/_breakpoints.scss";
 
-    .o-product-card {
-          --product-card-badge-left: calc(95% - #{$size});
-          --product-card-badge-top: 5%;
-          --badge-height: #{$size};
-          --badge-width: #{$size};
-          --badge-padding: 0;
-          --badge-border: #{$border-width} solid var(--_c-light-primary);
-          --badge-border-radius: #{$size / 2};
-          --badge-font-weight: 800;
-          --badge-background: #fff;
-          --badge-font-size: 1rem;
+$border-width: 2px;
 
-        ::v-deep .sf-badge {
-            color: var(--_c-light-primary);
-            line-height: $size - $border-width * 2;
-            pointer-events: none;
-        }
-    }
+.o-product-card {
+  --o-product-card-badge-size: 50px;
+
+  --product-card-badge-left: calc(100% - calc(var(--o-product-card-badge-size) / 2));
+  --product-card-badge-top: calc(var(--o-product-card-badge-size) / 2 * -1);
+  --badge-height: var(--o-product-card-badge-size);
+  --badge-width: var(--o-product-card-badge-size);
+  --badge-padding: 0;
+  --badge-border: #{$border-width} solid var(--c-accent);
+  --badge-border-radius: calc(var(--o-product-card-badge-size) / 2);
+  --badge-font-weight: 800;
+  --badge-background: var(--c-white);
+  --badge-font-size: var(--font-sm);
+
+  ::v-deep .sf-badge {
+    color: var(--c-accent);
+    line-height: calc(var(--o-product-card-badge-size) - #{$border-width} * 2);
+    pointer-events: none;
+  }
+
+  @include for-tablet-up {
+    --o-product-card-badge-size: 58px;
+  }
+}
 </style>

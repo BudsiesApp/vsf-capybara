@@ -18,6 +18,11 @@
       </template>
     </SfModal>
 
+    <product-structured-data
+      v-if="product"
+      :product="product"
+    />
+
     <div class="_content">
       <div class="_col -left">
         <GiftCardTemplateComponent
@@ -45,11 +50,11 @@
         />
       </div>
 
-      <component
-        v-if="showGiftCardDetailedInformation"
-        :item="story.content"
-        :is="story.content.component"
+      <MProductDescriptionStory
+        v-if="showStory"
         class="_giftcard-detailed-information"
+        :product="product"
+        :product-sku="product.sku"
       />
     </div>
   </div>
@@ -58,22 +63,27 @@
 <script lang="ts">
 import Vue, { VueConstructor } from 'vue';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
-import { getThumbnailPath } from '@vue-storefront/core/helpers';
+import { getThumbnailPath, isServer } from '@vue-storefront/core/helpers';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import i18n from '@vue-storefront/i18n';
+import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
+import { htmlDecode } from '@vue-storefront/core/filters';
 
 import { SfModal } from '@storefront-ui/vue';
-import { components } from 'src/modules/vsf-storyblok-module/components';
 
 import GiftCardTemplateComponent from 'src/modules/gift-card/components/GiftCardTemplate.vue';
 import OGiftCardOrderForm from 'theme/components/organisms/o-gift-card-order-form.vue';
+import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
 
 import GiftCardTemplate from 'src/modules/gift-card/types/GiftCardTemplate.interface';
 import { ImageHandlerService } from 'src/modules/file-storage';
 import { InjectType } from 'src/modules/shared';
 import { GiftCardOptions, GiftCardTemplateSize } from 'src/modules/gift-card';
+import ServerError from 'src/modules/shared/types/server-error';
+
+import { ProductStructuredData } from 'src/modules/budsies';
 
 import GiftCardOrderFormData from 'theme/components/interfaces/gift-card-order-form-data.interface';
 
@@ -90,6 +100,8 @@ const defaultGiftCardOrderFormData: GiftCardOrderFormData = {
   customPriceAmount: 200
 };
 
+const giftCardSku = 'GiftCard';
+
 interface InjectedServices {
   imageHandlerService: ImageHandlerService
 }
@@ -99,7 +111,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     GiftCardTemplateComponent,
     OGiftCardOrderForm,
     SfModal,
-    Block: components.block
+    MProductDescriptionStory,
+    ProductStructuredData
   },
   inject: {
     imageHandlerService: { from: 'ImageHandlerService' }
@@ -118,8 +131,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     firstGiftCardTemplate (): GiftCardTemplate | undefined {
       return this.giftCardTemplatesList[0];
     },
+    getProductBySkuDictionary (): Record<string, Product> {
+      return this.$store.getters['product/getProductBySkuDictionary'];
+    },
     giftCardTemplatesList (): GiftCardTemplate[] {
-      return this.$store.getters['giftCard/giftCardTemplates'];
+      return this.$store.getters['giftCard/currentStoreGiftCardTemplates'];
     },
     loggedUser () {
       return this.$store.state.user.current;
@@ -150,12 +166,18 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       );
     },
     product (): Product | null {
-      return this.$store.getters['product/getCurrentProduct'];
+      const product = this.$store.getters['product/getCurrentProduct'];
+
+      if (product?.sku !== giftCardSku) {
+        return null;
+      }
+
+      return product;
     },
     recipientEmail (): string {
       return this.giftCardOrderFormData.shouldShipPhysically
-        ? this.giftCardOrderFormData.recipientEmail
-        : '';
+        ? ''
+        : this.giftCardOrderFormData.recipientEmail;
     },
     recipientName (): string {
       return this.giftCardOrderFormData.shouldSendFriend
@@ -184,8 +206,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         )
       };
     },
-    showGiftCardDetailedInformation (): boolean {
-      return !!(this.story && (this.story as any).content && (this.story as any).content.component);
+    showStory (): boolean {
+      return !!this.product;
     }
   },
   data () {
@@ -193,26 +215,36 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       giftCardOrderFormData:
         defaultGiftCardOrderFormData as GiftCardOrderFormData,
       showPreviewModal: false,
-      isSubmitting: false,
-      story: undefined
+      isSubmitting: false
     };
   },
-  mounted (): void {
+  async mounted (): Promise<void> {
+    await this.setCurrentProduct();
     this.updateCustomerName();
     this.initEventBusListeners();
-    this.loadGiftCardDetailedInformationStory();
 
     this.giftCardOrderFormData.selectedTemplateId =
       this.firstGiftCardTemplate?.id;
+  },
+  beforeRouteLeave (to, from, next) {
+    this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
+    next();
   },
   beforeDestroy (): void {
     this.removeEventBusListeners();
   },
   async asyncData ({ store }): Promise<void> {
-    await Promise.all([
+    const [, product] = await Promise.all([
       store.dispatch('giftCard/loadGiftCardsTemplates'),
-      store.dispatch('product/loadProduct', { parentSku: 'GiftCard' })
+      store.dispatch('product/loadProduct', {
+        parentSku: giftCardSku,
+        setCurrent: false
+      })
     ]);
+
+    if (isServer) {
+      await store.dispatch('product/setCurrent', product);
+    }
   },
   methods: {
     async addCartItem (): Promise<void> {
@@ -232,45 +264,48 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           customer_name: this.customerName,
           recipient_name: this.recipientName,
           recipient_email: this.recipientEmail,
-          recipient_ship: this.giftCardOrderFormData.shouldShipPhysically
-            ? 'yes'
-            : 'no',
           recipient_address: '',
           message: this.customMessage,
           notify_success: 0
         };
 
-        await this.$store.dispatch('cart/addItem', {
-          productToAdd: {
-            ...this.product,
-            qty: this.giftCardOrderFormData.qty,
-            giftcard_options: giftCardOptions
+        if (this.giftCardOrderFormData.shouldShipPhysically) {
+          giftCardOptions.recipient_ship = 'yes';
+        }
+
+        try {
+          await this.$store.dispatch('cart/addItem', {
+            productToAdd: {
+              ...this.product,
+              qty: this.giftCardOrderFormData.qty,
+              giftcard_options: giftCardOptions
+            }
+          });
+        } catch (error) {
+          if (error instanceof ServerError) {
+            throw error;
           }
-        });
+
+          Logger.error(error, 'budsies')();
+        }
 
         this.goToCart();
-      } catch (err) {
-        Logger.error(err, 'budsies')();
+      } catch (error) {
+        Logger.error(error, 'budsies')();
 
-        this.onFailure('Unexpected error: ' + err);
+        this.onFailure('Unexpected error: ' + error);
       }
     },
     closePreviewModal (): void {
       this.showPreviewModal = false;
     },
     goToCart (): void {
-      this.$router.push(localizedRoute('/cart'));
+      this.$router.push(localizedRoute({ name: 'detailed-cart' }));
     },
     initEventBusListeners (): void {
       EventBus.$on('session-after-started', this.updateCustomerName);
       EventBus.$on('user-after-logout', this.updateCustomerName);
       EventBus.$on('user-after-loggedin', this.updateCustomerName);
-    },
-    async loadGiftCardDetailedInformationStory (): Promise<void> {
-      const response = await this.$store.dispatch(`storyblok/loadStory`, {
-        fullSlug: 'blocks/giftcard_detailed_information'
-      });
-      this.story = response;
     },
     onFailure (message: any): void {
       this.$store.dispatch('notification/spawnNotification', {
@@ -295,9 +330,33 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       EventBus.$off('user-after-logout', this.updateCustomerName);
       EventBus.$off('user-after-loggedin', this.updateCustomerName);
     },
+    async setCurrentProduct (): Promise<void> {
+      if (this.product) {
+        return;
+      }
+
+      const product = this.getProductBySkuDictionary[giftCardSku];
+      await this.$store.dispatch('product/setCurrent', product)
+    },
     updateCustomerName (): void {
       this.giftCardOrderFormData.customerName = this.loggedUserFullName;
     }
+  },
+  metaInfo () {
+    return {
+      title: htmlDecode(
+        this.product?.meta_title || this.product?.name
+      ),
+      meta: this.product?.meta_description
+        ? [
+          {
+            vmid: 'description',
+            name: 'description',
+            content: htmlDecode(this.product?.meta_description)
+          }
+        ]
+        : []
+    };
   }
 });
 </script>
@@ -352,7 +411,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     --modal-content-padding: 0;
     --modal-close-right: -18px;
     --modal-close-top: -15px;
-    --modal-width: 29.375rem;
+    --modal-width: auto;
     --modal-top: 50%;
     --modal-left: 50%;
     --modal-bottom: none;
@@ -372,7 +431,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
     ::v-deep {
       .sf-modal__container {
-        width: 900px;
         max-width: calc(100% - var(--spacer-xl));
       }
 
@@ -388,6 +446,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
   @media (min-width: $tablet-min) {
     max-width: 71.75rem;
+    width: 100%;
     margin: 0 auto;
   }
 

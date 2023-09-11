@@ -1,5 +1,11 @@
 <template>
   <div class="o-personal-details">
+    <SfHeading
+      :title="`${$t('Contact')}`"
+      :level="3"
+      class="sf-heading--left sf-heading--no-underline title"
+    />
+
     <div v-if="!currentUser" class="log-in desktop-only">
       <SfButton class="log-in__button color-secondary" @click="login">
         {{ $t('Log in to your account') }}
@@ -8,11 +14,6 @@
         {{ $t('or fill the details below') }}:
       </p>
     </div>
-    <SfHeading
-      :title="`1. ${$t('Details')}`"
-      :level="2"
-      class="sf-heading--left sf-heading--no-underline title"
-    />
     <div class="form">
       <SfInput
         v-model.trim="personalDetails.firstName"
@@ -21,11 +22,7 @@
         :label="$t('First name')"
         :required="true"
         :valid="!$v.personalDetails.firstName.$error"
-        :error-message="
-          !$v.personalDetails.firstName.required
-            ? $t('Field is required')
-            : $t('Name must have at least 2 letters.')
-        "
+        :error-message="$t('Field is required')"
         @blur="$v.personalDetails.firstName.$touch()"
       />
       <SfInput
@@ -62,57 +59,38 @@
           />
         </div>
         <template v-if="createAccount">
-          <SfInput
-            v-model="password"
-            type="password"
-            class="form__element"
-            name="password"
-            :has-show-password="true"
-            :label="$t('Password')"
-            :required="true"
-            :valid="!$v.password.$error"
-            :error-message="
-              !$v.password.required
-                ? $t('Field is required')
-                : !$v.password.minLength
-                  ? $t('Password must have at least 8 letters.')
-                  : $t(
-                    'Password must contain at least 3 different character classes: lower case, upper case, digits, special characters.'
-                  )
-            "
-            @blur="$v.password.$touch()"
-          />
-          <SfInput
-            v-model="rPassword"
-            type="password"
-            class="form__element"
-            name="password-confirm"
-            :has-show-password="true"
-            :label="$t('Repeat password')"
-            :required="true"
-            :valid="!$v.rPassword.$error"
-            :error-message="
-              !$v.rPassword.required
-                ? $t('Field is required')
-                : $t('Passwords must be identical.')
-            "
-            @blur="$v.rPassword.$touch()"
-          />
+          <m-password ref="password" v-model="passwordData" />
+
           <div class="form__element form__group">
             <SfCheckbox
               v-model="acceptConditions"
-              class="form__element form__checkbox"
+              class="form__checkbox"
               name="acceptConditions"
               :required="true"
               @blur="$v.acceptConditions.$touch()"
             >
               <template #label>
-                <span class="sf-checkbox__label no-flex">
-                  {{ $t("I accept ") }}
+                <span class="sf-checkbox__label">
+                  {{ $t('I accept') }}
+
+                  <router-link
+                    target="_blank"
+                    to="/terms-of-service/"
+                  >
+                    {{ $t('Terms of Service') }}
+                  </router-link>
+
+                  <span>
+                    {{ $t('and') }}
+                  </span>
+
+                  <router-link
+                    target="_blank"
+                    to="/privacy-policy/"
+                  >
+                    {{ $t('Privacy Policy') }}
+                  </router-link>
                 </span>
-                <SfButton class="sf-button sf-button--text terms" @click.prevent="openTermsAndConditionsModal">
-                  {{ $t("Terms and conditions") }}
-                </SfButton>
               </template>
             </SfCheckbox>
           </div>
@@ -121,8 +99,8 @@
       <APromoCode :allow-promo-code-removal="false" class="mobile-only">
         <template #title>
           <SfHeading
-            :title="$t('Discount Code')"
-            :level="2"
+            :title="$t('Discount code')"
+            :level="3"
             class="sf-heading--left"
           />
         </template>
@@ -130,8 +108,7 @@
       <div class="form__action">
         <SfButton
           class="sf-button--full-width form__action-button"
-          :disabled="createAccount ? $v.$invalid : $v.personalDetails.$invalid"
-          @click="sendDataToCheckout"
+          @click="onContinueButtonClick"
         >
           {{
             $t(isVirtualCart ? "Continue to payment" : "Continue to shipping")
@@ -142,19 +119,23 @@
           class="sf-button--full-width sf-button--text form__action-button form__action-button--secondary mobile-only"
           @click="login"
         >
-          {{ $t("or login to your account") }}
+          {{ $t('or login to your account') }}
         </SfButton>
       </div>
     </div>
   </div>
 </template>
 <script>
-import { required, minLength, email, sameAs } from 'vuelidate/lib/validators';
+import { required, minLength, email } from 'vuelidate/lib/validators';
 import { PersonalDetails } from '@vue-storefront/core/modules/checkout/components/PersonalDetails';
 import { SfInput, SfButton, SfHeading, SfCheckbox } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
-import APromoCode from 'theme/components/atoms/a-promo-code'
 import { mapActions } from 'vuex';
+
+import { createSmoothscroll } from 'theme/helpers';
+
+import APromoCode from 'theme/components/atoms/a-promo-code'
+import MPassword from 'theme/components/molecules/m-password'
 
 export default {
   name: 'OPersonalDetails',
@@ -163,7 +144,8 @@ export default {
     SfInput,
     SfButton,
     SfHeading,
-    SfCheckbox
+    SfCheckbox,
+    MPassword
   },
   mixins: [PersonalDetails],
   validations: {
@@ -180,26 +162,6 @@ export default {
         email
       }
     },
-    password: {
-      required,
-      minLength: minLength(8),
-      complex: value => {
-        // Check if minimum 3 different classes of characters are used in password.
-        // Classes of characters: lower case, upper case, digits and special characters.
-        return (
-          [
-            /(?=[a-z])/.test(value),
-            /(?=[A-Z])/.test(value),
-            /(?=[0-9])/.test(value),
-            /(?=\W)/.test(value)
-          ].filter(result => result).length >= 3
-        );
-      }
-    },
-    rPassword: {
-      required,
-      sameAsPassword: sameAs('password')
-    },
     acceptConditions: {
       required
     }
@@ -211,6 +173,12 @@ export default {
       this.personalDetails.emailAddress = customerEmail;
     }
   },
+  mounted () {
+    createSmoothscroll(
+      document.documentElement.scrollTop || document.body.scrollTop,
+      0
+    );
+  },
   methods: {
     ...mapActions('ui', {
       openModal: 'openModal'
@@ -218,8 +186,21 @@ export default {
     login () {
       this.openModal({ name: ModalList.Auth, payload: 'login' })
     },
-    openTermsAndConditionsModal () {
-      this.openModal({ name: ModalList.TermsAndConditions })
+    async onContinueButtonClick () {
+      let isInvalid = false;
+
+      if (this.createAccount) {
+        const isPasswordValid = await this.$refs.password.getIsPasswordValid();
+        this.$v.$touch();
+        isInvalid = this.$v.$invalid || !isPasswordValid;
+      } else {
+        this.$v.personalDetails.$touch();
+        isInvalid = this.$v.personalDetails.$invalid;
+      }
+
+      if (isInvalid) return;
+
+      this.sendDataToCheckout();
     }
   }
 };
@@ -227,10 +208,17 @@ export default {
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
+.o-personal-details {
+  --password-inputs-margin: 0 0 var(--spacer-sm) 0;
+
+  .m-password {
+    flex: 0 0 100%;
+  }
+}
+
 .title {
   --heading-padding: var(--spacer-base) 0;
   @include for-desktop {
-    --heading-title-font-size: var(--h3-font-size);
     --heading-padding: var(--spacer-xl) 0 var(--spacer-base) 0;
   }
 }
@@ -241,16 +229,16 @@ export default {
     @include for-desktop {
       font-weight: var(--font-normal);
       font-size: var(--font-sm);
+      margin: var(--spacer-lg) 0;
     }
   }
-  &__button {
-    margin: var(--spacer-2xl) 0 var(--spacer-base) 0;
-  }
 }
+
+.a-promo-code {
+  margin-top: var(--spacer-xl);
+}
+
 .form {
-  &__checkbox {
-    margin: var(--spacer-base) 0;
-  }
   &__action {
     margin: var(--spacer-sm) 0;
     &-button {
@@ -261,6 +249,10 @@ export default {
         margin: var(--spacer-base) 0;
       }
     }
+  }
+
+  &__element {
+      margin: 0 0 var(--spacer-sm) 0;
   }
   @include for-mobile {
     &__checkbox {
@@ -275,7 +267,6 @@ export default {
     flex-wrap: wrap;
     align-items: center;
     &__element {
-      margin: 0 0 var(--spacer-base) 0;
       flex: 0 0 100%;
       &--half {
         flex: 1 1 50%;
@@ -285,11 +276,5 @@ export default {
       }
     }
   }
-  .terms {
-    margin: 0 0 0 0.4em;
-  }
-}
-.no-flex {
-  flex: unset;
 }
 </style>

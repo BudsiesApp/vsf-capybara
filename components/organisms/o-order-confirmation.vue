@@ -35,10 +35,10 @@
           </p>
           <template v-else>
             <p class="paragraph">
-              {{ $t("You can allow us to remind you about the order via push notification after coming back online. You'll only need to click on it to confirm.") }}
+              {{ $t('You can allow us to remind you about the order via push notification after coming back online. You\'ll only need to click on it to confirm.') }}
             </p>
             <p class="paragraph">
-              {{ $t(`Or if you will stay on "Order confirmation" page, the order will be placed automatically without confirmation, once the internet connection will be back.`) }}
+              {{ $t('Or if you will stay on \'Order confirmation\' page, the order will be placed automatically without confirmation, once the internet connection will be back.') }}
             </p>
           </template>
         </template>
@@ -94,6 +94,7 @@ import { isServer } from '@vue-storefront/core/helpers';
 import { registerModule } from '@vue-storefront/core/lib/modules';
 import { MailerModule } from '@vue-storefront/core/modules/mailer';
 import { SfHeading, SfButton } from '@storefront-ui/vue';
+import { createSmoothscroll } from 'theme/helpers';
 
 export default {
   name: 'OOrderConfirmation',
@@ -123,6 +124,9 @@ export default {
   },
   beforeCreate () {
     registerModule(MailerModule);
+  },
+  mounted () {
+    createSmoothscroll(document.documentElement.scrollTop || document.body.scrollTop, 0);
   },
   destroyed () {
     this.$store.dispatch('checkout/setThankYouPage', false);

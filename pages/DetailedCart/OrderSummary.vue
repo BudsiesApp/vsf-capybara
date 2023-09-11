@@ -7,15 +7,22 @@
     />
     <MPriceSummary :is-large="true" />
     <div class="_total-notes">
-      All pricing in USD
+      {{ $t('All pricing in USD') }}
     </div>
     <div class="actions">
-      <APromoCode :allow-promo-code-removal="false" />
+      <APromoCode :allow-promo-code-removal="false">
+        <template #bottom-helper-text="{ isCouponApplied }">
+          <p class="_helper-text" v-if="!isCouponApplied">
+            {{ $t('Please apply gift certificates during checkout (next step)') }}
+          </p>
+        </template>
+      </APromoCode>
+
       <SfButton
-        class="sf-button--full-width actions__button"
+        class="sf-button--full-width actions__button _checkout-button"
         @click="goToCheckout"
       >
-        Go to checkout
+        {{ $t('Go to checkout') }}
       </SfButton>
     </div>
     <SfLoader v-if="isUpdatingQuantity" :loading="isUpdatingQuantity" />
@@ -28,8 +35,14 @@ import {
   SfButton
 } from '@storefront-ui/vue';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
+
+import CartEvents from 'src/modules/shared/types/cart-events';
+
 import APromoCode from 'theme/components/atoms/a-promo-code.vue';
 import MPriceSummary from 'theme/components/molecules/m-price-summary.vue';
+import { mapActions } from 'vuex'
+
 export default {
   name: 'OrderSummary',
   components: {
@@ -46,8 +59,12 @@ export default {
     }
   },
   methods: {
+    ...mapActions('ui', {
+      openModal: 'openModal'
+    }),
     goToCheckout () {
-      this.$router.push(localizedRoute('/checkout'));
+      EventBus.$emit(CartEvents.GO_TO_CHECKOUT_FROM_CART)
+      this.$router.push(localizedRoute({ name: 'checkout' }));
     }
   }
 };
@@ -59,6 +76,8 @@ export default {
   position: relative;
   background: var(--c-light);
   padding: var(--spacer-xl);
+
+  --heading-title-margin: 0 0 var(--spacer-base) 0;
 
   .title {
     @include for-desktop {
@@ -88,6 +107,13 @@ export default {
   .promo-code {
     padding: 0;
   }
+
+  ._helper-text {
+    margin: var(--spacer-xs) 0 0;
+    font-size: var(--font-2xs);
+    font-weight: var(--font-medium);
+  }
+
   .sf-loader {
     position: absolute;
     top: 0;

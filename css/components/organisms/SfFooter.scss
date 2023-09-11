@@ -4,4 +4,10 @@
   &__title {
     color: var(--footer-column-title-color, var(--c-text));
   }
+
+  .m-newsletter-subscription {
+    ._success-message {
+      --c-text: var(--footer-column-title-color);
+    }
+  }
 }

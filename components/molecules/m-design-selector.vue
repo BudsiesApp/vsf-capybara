@@ -8,51 +8,14 @@
       skinClass,
     ]"
   >
-    <div class="_compact-view" v-if="isCollapsed && selectedDesign">
-      <div class="_image-wrapper">
-        <BaseImage
-          class="_image"
-          :src="selectedDesign.thumbnail"
-          :aspect-ratio="1"
-        />
-      </div>
-
-      <div
-        class="_content-wrapper"
-        :class="{ '-has-price': selectedDesign.price }"
-      >
-        <div class="_name">
-          {{ selectedDesign.name }}
-        </div>
-
-        <div class="_price" v-if="selectedDesign.price > 0">
-          <span>+</span>
-          {{ selectedDesign.price | currency("$", 0) }}
-        </div>
-
-        <div class="_change-button-wrapper">
-          <a
-            href="javascript:void(0)"
-            class="_change-button"
-            :class="{ '-disabled': disabled }"
-            @click="expandSelector"
-          >Try a different style</a>
-
-          <div class="_helper-text">
-            (saves your uploaded photo)
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <ul class="_options-list" v-else>
+    <ul class="_options-list">
       <li
         v-for="design in designProducts"
         :key="design.sku"
         class="_design-option"
         :class="{
           '-selected': design.sku == selectedValue,
-          '-accent-color': design.defaultAccentColor
+          '-accent-color': design.defaultAccentColor,
         }"
       >
         <input
@@ -64,10 +27,7 @@
           :disabled="disabled"
         >
 
-        <label
-          class="_option-label"
-          :for="getInputId(design)"
-        >
+        <label class="_option-label" :for="getInputId(design)">
           <div class="_image-wrapper">
             <div class="_accent-color-icon" />
             <BaseImage
@@ -119,10 +79,6 @@ export default Vue.extend({
       type: Boolean,
       default: false
     },
-    shouldCollapse: {
-      type: Boolean,
-      default: true
-    },
     value: {
       type: String as PropType<string | undefined>,
       default: undefined
@@ -130,20 +86,19 @@ export default Vue.extend({
   },
   data () {
     return {
-      isCollapsed: false,
       instanceId: ''
     };
   },
   computed: {
     skinClass (): string {
-      return `-skin-petsies`;
+      return `-skin-budsies`;
     },
     selectedDesign (): DesignProduct | undefined {
       if (!this.value) {
         return undefined;
       }
 
-      return this.designProducts.find(item => item.sku === this.value);
+      return this.designProducts.find((item) => item.sku === this.value);
     },
     selectedValue: {
       get: function (): string | undefined {
@@ -157,99 +112,43 @@ export default Vue.extend({
   methods: {
     getInputId (design: DesignProduct): string {
       return `design-product-${this.instanceId}-${design.sku}`;
-    },
-    expandSelector (): void {
-      if (this.disabled) {
-        return;
-      }
-
-      this.isCollapsed = false;
     }
   },
   created (): void {
-    this.isCollapsed = Boolean(this.value) && this.shouldCollapse;
-
     this.instanceId = instanceId.toString();
 
     instanceId += 1;
   }
-})
+});
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+
 .m-design-selector {
-
-  ._compact-view {
-    align-items: stretch;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    text-align: left;
-
-    ._content-wrapper {
-      align-items: flex-start;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      margin-left: 1em;
-
-      &.-has-price {
-        justify-content: space-between;
-      }
-    }
-
-    ._image-wrapper {
-      ._image {
-        width: 100px;
-      }
-    }
-
-    ._name {
-      font-weight: 600;
-    }
-
-    ._change-button-wrapper {
-      margin-top: 0.5em;
-    }
-
-    ._change-button {
-      margin: 0.5em 0 4px;
-    }
-
-    ._helper-text {
-      font-size: var(--font-xs);
-      font-weight: var(--font-medium);
-      margin-top: var(--spacer-xs);
-    }
-  }
-
   ._options-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    list-style-image: none;
+    display: grid;
+    justify-content: space-around;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
     padding: 0;
 
     ._design-option {
-      box-sizing: border-box;
+      cursor: pointer;
       flex-shrink: 0;
       flex-grow: 0;
       display: block;
-      padding: 2%;
-      min-width: 114px;
-      width: 25%;
+      padding: 0.75em;
 
       > input {
-        display: block;
         opacity: 0;
         height: 0;
         width: 0;
-        padding: 0;
-        margin: 0;
+        position: absolute;
       }
 
       ._option-label {
         background: none;
+        cursor: pointer;
         font-size: 1em;
         line-height: 1.2;
         margin: 0;
@@ -289,6 +188,7 @@ export default Vue.extend({
           position: absolute;
           right: 0.25em;
           top: 0.25em;
+          z-index: 2;
         }
       }
     }
@@ -298,11 +198,25 @@ export default Vue.extend({
     opacity: 0.6;
   }
 
+  &.-skin-budsies,
   &.-skin-petsies {
     ._design-option {
       &.-selected {
         background: var(--c-primary);
       }
+    }
+  }
+
+  @media (min-width: $tablet-min) {
+    ._options-list {
+      justify-content: flex-start;
+      padding: 0;
+    }
+  }
+
+  @include for-desktop {
+    ._options-list {
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     }
   }
 }

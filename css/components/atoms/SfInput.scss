@@ -1,7 +1,14 @@
 .sf-input {
+    --input-error-message-color: var(--c-danger-variant);
+    --input-error-message-font-weight: var(--font-light);
+
     input {
         &:focus {
             outline: none;
+        }
+
+        &:disabled {
+            --input-border-color: var(--c-text-disabled);
         }
     }
 }

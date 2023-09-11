@@ -1,6 +1,6 @@
 <template>
   <div class="o-top-navigation">
-    <SfBottomNavigation>
+    <SfBottomNavigation class="_bottom-navigation">
       <SfBottomNavigationItem
         v-for="item in navigationItems"
         :key="item.icon"
@@ -8,13 +8,17 @@
         :label="item.label"
         :is-floating="item.isFloating"
         :is-active="isActive(item.icon)"
+        class="_item"
         @click.native="item.onClick"
       />
-      <ALogo />
-      <SfButton>
-        Make your own
-      </SfButton>
-      <ADetailedCartIcon class="sf-header__action" />
+
+      <AAccountIcon class="sf-header__action _item" />
+
+      <ALogo class="_item" />
+
+      <MCtaButton size="small" class="_item" />
+
+      <ADetailedCartIcon class="sf-header__action _item" />
     </SfBottomNavigation>
   </div>
 </template>
@@ -26,23 +30,25 @@ import AHomeIcon from 'theme/components/atoms/a-home-icon';
 import ASearchIcon from 'theme/components/atoms/a-search-icon';
 import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
-import { SfBottomNavigation, SfButton } from '@storefront-ui/vue';
+import { SfBottomNavigation } from '@storefront-ui/vue';
 import ALogo from 'theme/components/atoms/a-logo.vue';
+import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
 export default {
   name: 'OTopNavigation',
   components: {
     SfBottomNavigation,
-    SfButton,
     ALogo,
-    ADetailedCartIcon
+    ADetailedCartIcon,
+    MCtaButton,
+    AAccountIcon
   },
   data () {
     return {
       navigationItems: [
-        { icon: 'list', label: '', onClick: this.goToMenu },
+        { icon: 'list', label: '', onClick: this.goToMenu }
         // { icon: 'search', label: '', onClick: this.goToSearch },
-        { icon: 'account', label: '', onClick: this.goToAccount }
+        // { icon: 'account', label: '', onClick: this.goToAccount }
       ]
     }
   },
@@ -102,7 +108,7 @@ export default {
     goToAccount () {
       this.$store.commit('ui/closeMenu')
       if (this.isLoggedIn) {
-        this.$router.push(this.localizedRoute('/my-account'))
+        this.$router.push(this.localizedRoute({ name: 'my-account' }))
       } else {
         this.openModal({ name: ModalList.Auth, payload: 'login' })
       }
@@ -114,42 +120,42 @@ export default {
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .o-top-navigation {
+  --header-logo-height: 1.5rem;
+
   position: relative;
-  min-height: calc(var(--bottom-navigation-height) + var(--spacer-base));
+  min-height: var(--bottom-navigation-height);
   z-index: 10;
 
-  .a-logo {
-    display: none;
+  ._bottom-navigation {
+    position: relative;
   }
 
-  .sf-button {
-    --button-font-size: var(--font-2xs);
-    --button-font-line-height: 1;
-    --button-padding: calc(var(--spacer-2xs) * 3) var(--spacer-sm);
+  .m-cta-button {
+    --button-padding: var(--spacer-sm);
   }
-  .a-microcart-icon {
-    margin: 0;
-    padding: var(--spacer-sm) var(--spacer-xs);
-  }
-  ::v-deep .sf-header {
-      &__logo {
-        --header-logo-height: 1.5rem;
-      }
+
+  ._item {
+    margin-left: var(--spacer-sm);
+
+    &:first-child {
+      margin-left: 0;
     }
+  }
+
+  .a-microcart-icon {
+    margin: 0 0 0 var(--spacer-sm);
+    padding: var(--spacer-sm) 0;
+  }
+
   ::v-deep .sf-bottom-navigation {
     top: auto;
     bottom: auto;
     --bottom-navigation-z-index: 11;
     align-items: center;
     justify-content: space-between;
+
     .sf-bottom-navigation-item {
       cursor: pointer;
-    }
-  }
-
-  @media (min-width: 375px) {
-    .a-logo {
-      display: block;
     }
   }
 

@@ -2,6 +2,14 @@
   <transition name="fade" appear>
     <div v-show="isOpen" class="m-cookie-notification">
       <div class="cookie">
+        <div class="cookie__icon">
+          <SfIcon
+            icon="cross"
+            size="xxs"
+            @click="accept"
+          />
+        </div>
+
         <div class="cookie__message">
           {{ message }}
           <router-link
@@ -11,13 +19,6 @@
           >
             {{ detailsLinkText }}
           </router-link>
-        </div>
-        <div class="cookie__icon">
-          <SfIcon
-            icon="cross"
-            size="xxs"
-            @click="accept"
-          />
         </div>
       </div>
     </div>
@@ -79,6 +80,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+
 .m-cookie-notification {
   z-index: 100;
   position: fixed;
@@ -88,25 +91,37 @@ export default {
   color: var(--c-light-darken);
   .cookie {
     box-sizing: border-box;
-    padding: 0 1.5rem;
+    padding: 0 calc(var(--spacer-2xl) + var(--spacer-2xs)) 0 var(--spacer-sm);
     margin: auto;
     display: flex;
-    justify-content: space-between;
     align-items: center;
     width: 1272px;
     max-width: 100%;
-    height: 3rem;
-    &__message-link {
-      padding-left: 1rem;
-      --c-link: var(--c-gray);
-      --c-link-hover: var(--c-light);
-    }
+    height: 4.5rem;
+
     &__icon {
       cursor: pointer;
-      --icon-color: var(--c-gray);
+      --icon-color: var(--c-link);
       &:hover {
-        --icon-color: var(--c-light);
+        --icon-color: var(--c-link-hover);
       }
+    }
+
+    &__message {
+      margin-left: var(--spacer-sm);
+    }
+  }
+
+  @media (min-width: 390px) {
+    .cookie {
+      height: 3rem;
+      padding-left: var(--spacer-base);
+    }
+  }
+
+  @media (min-width: $desktop-xl-min) {
+    .cookie {
+      padding: 0 var(--spacer-base);
     }
   }
 }

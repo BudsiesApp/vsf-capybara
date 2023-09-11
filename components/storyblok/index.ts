@@ -15,8 +15,12 @@ export default function registerComponents () {
   add('dongler_book', () => import('./DonglerBook.vue'))
   add('website_rating', () => import('./WebsiteRating.vue'))
   add('sharing', () => import('./Sharing.vue'))
+  add('newsletter_subscribe_form', () => import('./NewsletterSubscribeForm.vue'))
   add('expandable_text_block', () => import('./ExpandableText.vue'))
   add('hr', () => import('./HorizontalRule.vue'))
+  add('parallax', () => import('./Parallax.vue'))
+  add('mailing_list_subscribe_form', () => import('./MailingListSubscribeForm.vue'))
+  add('remind_me_about_budsies', () => import('./RemindMeAboutBudsies.vue'))
 
   // add('product', () => import('./Product.vue'))
   // add('category', () => import('./Category.vue'))

@@ -1,15 +1,15 @@
 <template>
   <div
     v-if="ratingEnabled"
-    class="website-rating-container"
+    class="storyblok-website-rating layout-regular-component"
     :class="cssClasses"
     :style="styles"
   >
-    <script type="application/ld+json">
-      {{ ratingDataString }}
-    </script>
+    <editor-block-icons :item="itemData" />
 
-    <div class="website-rating" :data-average-rating="averageValue">
+    <script type="application/ld+json" v-html="ratingDataString" />
+
+    <div class="_website-rating" :data-average-rating="averageValue">
       <div class="_rating">
         Rating: {{ averageValue }} / 5
       </div>
@@ -41,7 +41,9 @@
 </template>
 
 <script lang="ts">
+import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
+
 import WebsiteRatingData from './interfaces/website-rating-data.interface';
 import StarRating from 'vue-star-rating/src';
 
@@ -64,11 +66,11 @@ export default Blok.extend({
     },
     reviewsCount (): number {
     // value should be fetched from Magento config
-      return 149;
+      return 315;
     },
     reviewsLink (): string {
       if (!this.itemData.link_url.url) {
-        return 'reviews';
+        return '/reviews';
       }
       return this.itemData.link_url.url;
     },
@@ -79,10 +81,12 @@ export default Blok.extend({
       return this.itemData.link_text;
     },
     ratingDataString (): string {
+      const storeView = currentStoreView();
+
       const data = {
         '@context': 'http://schema.org',
         '@type': 'Organization',
-        'name': 'Petsies', // get for a specific store
+        'name': storeView.name,
         'image': this.getStoreImageUrl(),
         'aggregateRating': {
           '@type': 'AggregateRating',
@@ -103,24 +107,29 @@ export default Blok.extend({
 </script>
 
 <style lang="scss" scoped>
-.website-rating {
-  text-align: center;
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
-  ._rating {
-    font-size: 1.5em;
+.storyblok-website-rating  {
+  ._website-rating {
+    text-align: center;
 
-    ._averageValue {
-      display: inline;
+    ._rating {
+      font-size: 1.5em;
+
+      ._averageValue {
+        display: inline;
+      }
     }
-  }
 
-  ._rating-stars {
-    display: inline-block;
-  }
+    ._rating-stars {
+      display: inline-block;
+    }
 
-  ._reviewsCount {
-    font-size: 0.75em;
-    font-weight: 600;
+    ._reviewsCount {
+      font-size: 0.75em;
+      font-weight: 600;
+    }
   }
 
   &.-editor-preview-mode {
@@ -128,5 +137,7 @@ export default Blok.extend({
       pointer-events: none
     }
   }
+
+  @include display-property-handling;
 }
 </style>

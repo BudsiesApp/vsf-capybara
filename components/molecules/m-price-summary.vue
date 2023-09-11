@@ -1,5 +1,5 @@
 <template>
-  <div class="m-price-summary">
+  <div class="m-price-summary" :class="skinClass">
     <SfProperty
       :name="$t('Products')"
       :value="totalItems"
@@ -58,13 +58,15 @@
         :class="{'sf-property--large': isLarge}"
       />
     </template>
-    <SfButton
+    <MSpinnerButton
       v-if="isCouponCode"
-      class="sf-button sf-button--outline promo-code__button"
+      class="promo-code__button"
+      button-class="color-secondary"
+      :show-spinner="isCouponRemoving"
       @click="removeCoupon"
     >
-      {{ $t("Delete discount code") }}
-    </SfButton>
+      {{ $t('Delete discount code') }}
+    </MSpinnerButton>
     <SfDivider class="divider" />
     <SfProperty
       :name="$t('Grand Total')"
@@ -77,12 +79,16 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { SfProperty, SfDivider, SfButton } from '@storefront-ui/vue';
+import { SfProperty, SfDivider } from '@storefront-ui/vue';
+
+import MSpinnerButton from 'theme/components/molecules/m-spinner-button.vue';
+
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 export default {
   name: 'MPriceSummary',
   components: {
-    SfButton,
+    MSpinnerButton,
     SfProperty,
     SfDivider
   },
@@ -90,6 +96,11 @@ export default {
     isLarge: {
       type: Boolean,
       default: false
+    }
+  },
+  data () {
+    return {
+      isCouponRemoving: false
     }
   },
   computed: {
@@ -110,11 +121,24 @@ export default {
     },
     isCouponCode () {
       return this.$store.state.cart.platformTotals ? this.$store.state.cart.platformTotals.coupon_code : false;
+    },
+    skinClass () {
+      return getCurrentThemeClass();
     }
   },
   methods: {
-    removeCoupon () {
-      this.$store.dispatch('cart/removeCoupon');
+    async removeCoupon () {
+      if (this.isCouponRemoving) {
+        return;
+      }
+
+      this.isCouponRemoving = true;
+
+      try {
+        await this.$store.dispatch('cart/removeCoupon');
+      } finally {
+        this.isCouponRemoving = false;
+      }
     }
   }
 };
@@ -126,6 +150,19 @@ export default {
   .sf-property.--marked {
     --property-name-color: var(--_c-light-primary);
     --property-value-color: var(--_c-light-primary);
+  }
+
+  .divider {
+    --divider-border-color: var(--c-white);
+    --divider-width: 100%;
+    --divider-margin: 0 0 var(--spacer-base) 0;
+  }
+
+  &.-skin-budsies {
+    .sf-property.--marked {
+      --property-name-color: var(--c-accent);
+      --property-value-color: var(--c-accent);
+    }
   }
 }
 
@@ -144,11 +181,7 @@ export default {
     }
   }
 }
-.divider {
-  --divider-border-color: var(--c-white);
-  --divider-width: 100%;
-  --divider-margin: 0 0 var(--spacer-base) 0;
-}
+
 .promo-code {
   &__button {
     --button-height: 2rem;

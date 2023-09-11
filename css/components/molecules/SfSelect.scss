@@ -1,4 +1,7 @@
 .sf-select {
+    --select-error-message-color: var(--c-danger-variant);
+    --input-error-message-font-weight: var(--font-light);
+
     &__overlay {
         --overlay-z-index: 20
     }
@@ -19,6 +22,9 @@
                 background: var(--c-dark-variant);
             }
         }
+    }
+    &__selected {
+        --select-option-font-size: var(--font-base);
     }
 
     @include for-desktop {
