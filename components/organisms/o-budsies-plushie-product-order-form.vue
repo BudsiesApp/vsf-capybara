@@ -561,6 +561,7 @@ export default defineComponent({
       switch (this.product.id) {
         case 11:
         case 428:
+        case 460:
           return ProductValue.BUDSIE;
         case 12:
         case 430:

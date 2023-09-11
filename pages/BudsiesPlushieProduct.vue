@@ -21,7 +21,10 @@
       v-if="showForm"
     >
       <template #artwork-upload-bottom-block>
-        <p v-if="isBudsieProduct" class="_inspiration-machine">
+        <p
+          v-if="isBudsieProduct || isNftBudsieProduct"
+          class="_inspiration-machine"
+        >
           {{ $t('Don\'t have a good character? Get inspired by our') }}
 
           <router-link target="_blank" :to="{name: 'inspiration-machine'}">
@@ -123,6 +126,8 @@ const selfiesProductSkus = [
   selfiesPuppetsProductSku
 ];
 
+const nftBudsieProductSku = 'budsieNft_bundle';
+
 export default Vue.extend({
   name: 'BudsiesPlushieProduct',
   components: {
@@ -217,6 +222,9 @@ export default Vue.extend({
     isBudsieProduct (): boolean {
       return this.sku === budsieProductSku;
     },
+    isNftBudsieProduct (): boolean {
+      return this.sku === nftBudsieProductSku;
+    },
     isSelfiesProduct (): boolean {
       return selfiesProductSkus.includes(this.sku);
     },
@@ -236,6 +244,8 @@ export default Vue.extend({
           return 'Budsies Selfies';
         case selfiesPuppetsProductSku:
           return 'Selfies Puppets'
+        case nftBudsieProductSku:
+          return 'Budsies NFT';
         default:
           throw new Error('Unexpected product sku');
       }
@@ -243,6 +253,7 @@ export default Vue.extend({
     topStorySlug (): string {
       switch (this.sku) {
         case budsieProductSku:
+        case nftBudsieProductSku:
           return 'budsies_creation_page_top';
         case budsiesPuppetsProductSku:
           return 'budsies_puppet_creation_page_top';
@@ -257,6 +268,7 @@ export default Vue.extend({
     bottomStorySlug (): string {
       switch (this.sku) {
         case budsieProductSku:
+        case nftBudsieProductSku:
           return 'budsies_creation_page_bottom';
         case budsiesPuppetsProductSku:
           return 'budsies_puppet_creation_page_bottom';
