@@ -22,142 +22,149 @@
         :label="$t('Use my default billing data')"
         :disabled="isFormFieldsDisabled"
       />
-      <SfInput
-        v-model.trim="payment.firstName"
-        class="form__element form__element--half"
-        name="first-name"
-        autocomplete="given-name"
-        :label="$t('First name')"
-        :required="true"
-        :disabled="isFormFieldsDisabled"
-        :valid="!$v.payment.firstName.$error"
-        :error-message="
-          !$v.payment.firstName.required
-            ? $t('Field is required')
-            : $t('Name must have at least 2 letters.')
-        "
-        @blur="$v.payment.firstName.$touch()"
-      />
-      <SfInput
-        v-model.trim="payment.lastName"
-        class="form__element form__element--half"
-        name="last-name"
-        autocomplete="family-name"
-        :label="$t('Last name')"
-        :required="true"
-        :disabled="isFormFieldsDisabled"
-        :valid="!$v.payment.lastName.$error"
-        :error-message="$t('Field is required')"
-        @blur="$v.payment.lastName.$touch()"
-      />
-      <SfInput
-        v-model.trim="payment.streetAddress"
-        class="form__element"
-        name="street-address"
-        autocomplete="street-address"
-        :label="$t('Address')"
-        :required="true"
-        :disabled="isFormFieldsDisabled"
-        :valid="!$v.payment.streetAddress.$error"
-        :error-message="$t('Field is required')"
-        @blur="$v.payment.streetAddress.$touch()"
-      />
 
-      <MMultiselect
-        v-model="payment.country"
-        class="
+      <div
+        class="_form-fields"
+        v-show="showAddressFormFields"
+      >
+        <SfInput
+          v-model.trim="payment.firstName"
+          class="form__element form__element--half"
+          name="first-name"
+          autocomplete="given-name"
+          :label="$t('First name')"
+          :required="true"
+          :disabled="isFormFieldsDisabled"
+          :valid="!$v.payment.firstName.$error"
+          :error-message="
+            !$v.payment.firstName.required
+              ? $t('Field is required')
+              : $t('Name must have at least 2 letters.')
+          "
+          @blur="$v.payment.firstName.$touch()"
+        />
+        <SfInput
+          v-model.trim="payment.lastName"
+          class="form__element form__element--half"
+          name="last-name"
+          autocomplete="family-name"
+          :label="$t('Last name')"
+          :required="true"
+          :disabled="isFormFieldsDisabled"
+          :valid="!$v.payment.lastName.$error"
+          :error-message="$t('Field is required')"
+          @blur="$v.payment.lastName.$touch()"
+        />
+        <SfInput
+          v-model.trim="payment.streetAddress"
+          class="form__element"
+          name="street-address"
+          autocomplete="street-address"
+          :label="$t('Address')"
+          :required="true"
+          :disabled="isFormFieldsDisabled"
+          :valid="!$v.payment.streetAddress.$error"
+          :error-message="$t('Field is required')"
+          @blur="$v.payment.streetAddress.$touch()"
+        />
+
+        <MMultiselect
+          v-model="payment.country"
+          class="
           form__element
           form__element--half
           form__select
         "
-        name="country-name"
-        autocomplete="country-name"
-        :label="$t('Country')"
-        :required="true"
-        id-field="code"
-        label-field="name"
-        :options="countries"
-        :valid="!$v.payment.country.$error"
-        :error-message="$t('Field is required')"
-        :disabled="isFormFieldsDisabled"
-        @change="changeCountry"
-      />
+          name="country-name"
+          autocomplete="country-name"
+          :label="$t('Country')"
+          :required="true"
+          id-field="code"
+          label-field="name"
+          :options="countries"
+          :valid="!$v.payment.country.$error"
+          :error-message="$t('Field is required')"
+          :disabled="isFormFieldsDisabled"
+          @change="changeCountry"
+        />
 
-      <SfInput
-        v-if="!isSelectedCountryHasStates"
-        v-model.trim="payment.state"
-        class="form__element form__element--half"
-        name="address-level1"
-        autocomplete="address-level1"
-        :label="$t('State / Province')"
-        :disabled="isFormFieldsDisabled"
-      />
+        <SfInput
+          v-if="!isSelectedCountryHasStates"
+          v-model.trim="payment.state"
+          class="form__element form__element--half"
+          name="address-level1"
+          autocomplete="address-level1"
+          :label="$t('State / Province')"
+          :disabled="isFormFieldsDisabled"
+        />
 
-      <MMultiselect
-        v-else
-        v-model.trim="payment.state"
-        name="address-level1"
-        autocomplete="address-level1"
-        class="
+        <MMultiselect
+          v-else
+          v-model.trim="payment.state"
+          name="address-level1"
+          autocomplete="address-level1"
+          class="
           form__element
           form__element--half
           form__select
         "
-        :label="$t('State / Province')"
-        :required="true"
-        id-field="code"
-        label-field="name"
-        :options="getStatesForSelectedCountry"
-        :valid="!$v.payment.state.$error"
-        :error-message="$t('Field is required')"
-        :disabled="isFormFieldsDisabled"
-      />
+          :label="$t('State / Province')"
+          :required="true"
+          id-field="code"
+          label-field="name"
+          :options="getStatesForSelectedCountry"
+          :valid="!$v.payment.state.$error"
+          :error-message="$t('Field is required')"
+          :disabled="isFormFieldsDisabled"
+        />
 
-      <SfInput
-        v-model.trim="payment.city"
-        class="form__element form__element--half"
-        name="city"
-        autocomplete="address-level2"
-        :label="$t('City')"
-        :required="true"
-        :disabled="isFormFieldsDisabled"
-        :valid="!$v.payment.city.$error"
-        :error-message="$t('Field is required')"
-        @blur="$v.payment.city.$touch()"
-      />
-      <SfInput
-        v-model.trim="payment.zipCode"
-        class="form__element form__element--half"
-        name="zipCode"
-        autocomplete="postal-code"
-        :label="$t('Zip-code')"
-        :required="true"
-        :disabled="isFormFieldsDisabled"
-        :valid="!$v.payment.zipCode.$error"
-        :error-message="
-          !$v.payment.zipCode.required
-            ? $t('Field is required')
-            : $t('Name must have at least 3 letters.')
-        "
-        @blur="$v.payment.zipCode.$touch()"
-      />
-      <SfInput
-        v-model.trim="payment.phoneNumber"
-        :required="isPhoneNumberRequired"
-        :valid="!$v.payment.phoneNumber.$error"
-        :error-message="
-          !$v.payment.phoneNumber || !$v.payment.phoneNumber.required
-            ? $t('Field is required')
-            : $t('Please, enter valid phone number')
-        "
-        class="form__element"
-        name="phone"
-        autocomplete="tel"
-        :label="$t('Phone number')"
-        :disabled="isFormFieldsDisabled"
-        @blur="$v.payment.phoneNumber.$touch()"
-      />
+        <SfInput
+          v-model.trim="payment.city"
+          class="form__element form__element--half"
+          name="city"
+          autocomplete="address-level2"
+          :label="$t('City')"
+          :required="true"
+          :disabled="isFormFieldsDisabled"
+          :valid="!$v.payment.city.$error"
+          :error-message="$t('Field is required')"
+          @blur="$v.payment.city.$touch()"
+        />
+        <SfInput
+          v-model.trim="payment.zipCode"
+          class="form__element form__element--half"
+          name="zipCode"
+          autocomplete="postal-code"
+          :label="$t('Zip-code')"
+          :required="true"
+          :disabled="isFormFieldsDisabled"
+          :valid="!$v.payment.zipCode.$error"
+          :error-message="
+            !$v.payment.zipCode.required
+              ? $t('Field is required')
+              : $t('Name must have at least 3 letters.')
+          "
+          @blur="$v.payment.zipCode.$touch()"
+        />
+        <SfInput
+          v-model.trim="payment.phoneNumber"
+          :required="isPhoneNumberRequired"
+          :valid="!$v.payment.phoneNumber.$error"
+          :error-message="
+            !$v.payment.phoneNumber || !$v.payment.phoneNumber.required
+              ? $t('Field is required')
+              : $t('Please, enter valid phone number')
+          "
+          class="form__element"
+          name="phone"
+          autocomplete="tel"
+          :label="$t('Phone number')"
+          :disabled="isFormFieldsDisabled"
+          @blur="$v.payment.phoneNumber.$touch()"
+        />
+      </div>
     </div>
+
     <div class="form">
       <div class="form__action">
         <SfButton
@@ -323,6 +330,9 @@ export default {
       }
 
       return false;
+    },
+    showAddressFormFields () {
+      return !this.sendToShippingAddress;
     }
   },
   mounted () {
@@ -420,6 +430,13 @@ export default {
     align-items: center;
     column-gap: var(--spacer-xl);
     margin-right: var(--spacer-2xl);
+
+    ._form-fields {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      column-gap: var(--spacer-xl);
+    }
 
     &__element {
       flex: 0 0 100%;
