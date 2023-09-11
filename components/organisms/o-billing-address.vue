@@ -72,7 +72,6 @@
         "
         name="country-name"
         autocomplete="country-name"
-        autocomplete-field="name"
         :label="$t('Country')"
         :required="true"
         id-field="code"
@@ -99,7 +98,6 @@
         v-model.trim="payment.state"
         name="address-level1"
         autocomplete="address-level1"
-        autocomplete-field="name"
         class="
           form__element
           form__element--half

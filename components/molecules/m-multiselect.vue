@@ -148,10 +148,6 @@ export default Vue.extend({
     autocomplete: {
       type: String,
       default: undefined
-    },
-    autocompleteField: {
-      type: String,
-      default: undefined
     }
   },
   data () {
@@ -329,8 +325,8 @@ export default Vue.extend({
         return;
       }
 
-      const selectedOption = this.findOptionByAutocompletedField(
-        this.autocompleteField,
+      const selectedOption = this.findOptionByFieldNameAndValue(
+        this.labelField,
         (event.target as HTMLInputElement).value
       );
 
@@ -340,7 +336,7 @@ export default Vue.extend({
 
       this.selectedOption = selectedOption;
     },
-    findOptionByAutocompletedField (
+    findOptionByFieldNameAndValue (
       fieldName: string,
       value: string
     ): Option | undefined {
