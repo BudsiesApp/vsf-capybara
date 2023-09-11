@@ -253,6 +253,7 @@ const selfiesProductSkus = [
 const specialtyCommissionSku = 'specialtyCommission_bundle';
 const budsiesPalsSku = 'customPals_bundle';
 const buddyPillowSku = 'customBuddyPillow_bundle';
+const nftBudsieSku = 'budsieNft_bundle';
 
 const editableProductsSkus = [
   ...foreversProductsSkus,
@@ -265,7 +266,8 @@ const editableProductsSkus = [
   ...selfiesProductSkus,
   specialtyCommissionSku,
   budsiesPalsSku,
-  buddyPillowSku
+  buddyPillowSku,
+  nftBudsieSku
 ];
 
 export default {
@@ -440,7 +442,14 @@ export default {
       return this.truncate(product.plushieDescription, 150, 50);
     },
     editHandler (product) {
-      if (product.sku === buddyPillowSku) {
+      if (product.sku === nftBudsieSku) {
+        this.$router.push({
+          name: 'nft-budsies-create',
+          query: {
+            existingPlushieId: product.plushieId
+          }
+        });
+      } else if (product.sku === buddyPillowSku) {
         this.$router.push({
           name: 'pillow-product',
           query: {

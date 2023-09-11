@@ -259,6 +259,9 @@ let routes = [
         case '448':
           parentSku = 'customFeltedOrnaments_bundle';
           break;
+        case '460':
+          parentSku = 'budsieNft_bundle';
+          break;
         case '487':
           parentSku = 'customRenaissanceBlankets_bundle';
           break;
@@ -765,6 +768,32 @@ let routes = [
       id: route.query.id,
       token: route.query.token
     })
+  },
+  {
+    name: 'nft-budsies-create',
+    path: '/nft-budsies/create/',
+    component: BudsiesPlushieProduct,
+    props: (route) => ({
+      sku: 'budsieNft_bundle',
+      existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
+    name: 'nft-budsies-create-alias-1',
+    path: '/plushie/index/create/id/:plushieId/type/nft-budsie/',
+    redirect: (route) => ({
+      name: 'nft-budsies-create',
+      query: {
+        existingPlushieId: route.params.plushieId
+      }
+    })
+  },
+  {
+    name: 'nft-budsies-create-alias-2',
+    path: '/plushie/index/create/type/nft-budsie/',
+    redirect: {
+      name: 'nft-budsies-create'
+    }
   }
 ];
 
