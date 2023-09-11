@@ -4,10 +4,8 @@
     :class="{ '-small': size === 'small' }"
     v-show="showCtaButtonContainer"
   >
-    <MMakeYourOwnDropdown v-show="showDefaultButton" :size="size" />
-
-    <SfButton class="_checkout-button" v-show="showGoToCheckoutButton" @click="goToCheckout">
-      Go to Checkout
+    <SfButton class="_checkout-button" @click="goToCheckout">
+      {{ $t('Go to Checkout') }}
     </SfButton>
   </div>
 </template>
@@ -18,10 +16,7 @@ import { SfButton } from '@storefront-ui/vue';
 
 import Product from 'core/modules/catalog/types/Product';
 
-import MMakeYourOwnDropdown from 'theme/components/molecules/m-make-your-own-dropdown.vue';
-
 enum HeaderCtaButtonType {
-  DEFAULT = 'default',
   GO_TO_CHECKOUT = 'go-to-checkout',
   HIDDEN = 'hidden',
 }
@@ -34,14 +29,13 @@ export default Vue.extend({
     }
   },
   components: {
-    MMakeYourOwnDropdown,
     SfButton
   },
   computed: {
     cartItems (): Product[] {
       return this.$store.getters['cart/getCartItems'];
     },
-    ctaButtonType () {
+    ctaButtonType (): HeaderCtaButtonType {
       const routeName = this.$route.name;
       if (
         routeName === 'detailed-cart' &&
@@ -51,20 +45,13 @@ export default Vue.extend({
         return HeaderCtaButtonType.GO_TO_CHECKOUT;
       }
 
-      if (routeName === 'checkout') {
-        return HeaderCtaButtonType.HIDDEN;
-      }
-
-      return HeaderCtaButtonType.DEFAULT;
+      return HeaderCtaButtonType.HIDDEN;
     },
     showCtaButtonContainer (): boolean {
-      return this.ctaButtonType !== HeaderCtaButtonType.HIDDEN;
+      return this.showGoToCheckoutButton;
     },
     showGoToCheckoutButton (): boolean {
       return this.ctaButtonType === HeaderCtaButtonType.GO_TO_CHECKOUT;
-    },
-    showDefaultButton (): boolean {
-      return this.ctaButtonType === HeaderCtaButtonType.DEFAULT;
     }
   },
   methods: {
