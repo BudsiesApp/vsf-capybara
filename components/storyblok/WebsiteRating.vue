@@ -70,7 +70,7 @@ export default Blok.extend({
         return;
       }
 
-      return 4.8;
+      return this.storeRating.averageValue;
     },
     reviewsCount (): number | undefined {
       if (!this.storeRating) {
@@ -121,7 +121,6 @@ export default Blok.extend({
   },
   methods: {
     getStoreImageUrl (): string {
-      // temporarily for Petsies only
       return '/assets/logo.png';
     },
     fetchStoreRating (): Promise<StoreRating> {
