@@ -144,13 +144,19 @@ export default {
   }
 
   .a-microcart-icon {
-    margin: 0 0 0 var(--spacer-sm);
+    margin: 0;
     padding: var(--spacer-sm) 0;
   }
 
   ._action-icons {
     display: flex;
+    gap: var(--spacer-sm);
     margin-left: var(--spacer-sm);
+
+    ._item {
+      padding-left: var(--spacer-2xs);
+      padding-right: var(--spacer-2xs);
+    }
   }
 
   ::v-deep .sf-bottom-navigation {
