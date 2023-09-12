@@ -213,7 +213,8 @@ const printedProductSkus = [
   'customPrintedSocks_bundle',
   'customPrintedMasks_bundle',
   'customPrintedKeychains_bundle',
-  'customFeltedMagnets_bundle'
+  'customFeltedMagnets_bundle',
+  'customFeltedOrnaments_bundle'
 ]
 
 const blanketProductsSkus = [
