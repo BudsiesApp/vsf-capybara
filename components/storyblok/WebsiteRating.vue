@@ -96,10 +96,12 @@ export default Blok.extend({
         return '';
       }
 
+      const storeView = currentStoreView();
+
       const data = {
         '@context': 'http://schema.org',
         '@type': 'Organization',
-        'name': this.storeRating.storeName,
+        'name': storeView.name,
         'image': this.getStoreImageUrl(),
         'aggregateRating': {
           '@type': 'AggregateRating',
