@@ -1207,7 +1207,6 @@ export default defineComponent({
       --production-time-selector-option-font-size: var(--font-base);
       --heading-title-font-size: var(--font-base);
       --heading-title-font-weight: var(--font-bold);
-      --select-padding: 0;
       --select-margin: var(--spacer-xs) 0 0;
 
       &::v-deep .sf-heading {
