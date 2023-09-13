@@ -12,13 +12,14 @@
         @click.native="item.onClick"
       />
 
-      <AAccountIcon class="sf-header__action _item" />
-
       <ALogo class="_item" :is-small="true" />
 
       <MCtaButton size="small" class="_item" />
 
-      <ADetailedCartIcon class="sf-header__action _item" />
+      <div class="_action-icons">
+        <AAccountIcon class="sf-header__action _item" />
+        <ADetailedCartIcon class="sf-header__action _item" />
+      </div>
     </SfBottomNavigation>
   </div>
 </template>
@@ -145,8 +146,19 @@ export default {
   }
 
   .a-microcart-icon {
-    margin: 0 0 0 var(--spacer-sm);
+    margin: 0;
     padding: var(--spacer-sm) 0;
+  }
+
+  ._action-icons {
+    display: flex;
+    gap: var(--spacer-sm);
+    margin-left: var(--spacer-sm);
+
+    ._item {
+      padding-left: var(--spacer-2xs);
+      padding-right: var(--spacer-2xs);
+    }
   }
 
   ::v-deep .sf-bottom-navigation {

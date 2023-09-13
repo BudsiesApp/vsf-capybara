@@ -41,11 +41,13 @@
 </template>
 
 <script lang="ts">
+import StarRating from 'vue-star-rating/src';
+
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
+import { StoreRating } from 'src/modules/budsies';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
 
 import WebsiteRatingData from './interfaces/website-rating-data.interface';
-import StarRating from 'vue-star-rating/src';
 
 export default Blok.extend({
   name: 'StoryblokWebsiteRating',
@@ -57,16 +59,25 @@ export default Blok.extend({
       return this.item as WebsiteRatingData;
     },
     ratingEnabled (): boolean {
-    // value should be fetched from Magento config
-      return true;
+      if (!this.storeRating) {
+        return false;
+      }
+
+      return this.storeRating.enabled;
     },
-    averageValue (): number {
-    // value should be fetched from Magento config
-      return 4.8;
+    averageValue (): number | undefined {
+      if (!this.storeRating) {
+        return;
+      }
+
+      return this.storeRating.averageValue;
     },
-    reviewsCount (): number {
-    // value should be fetched from Magento config
-      return 149;
+    reviewsCount (): number | undefined {
+      if (!this.storeRating) {
+        return;
+      }
+
+      return this.storeRating.reviewsCount;
     },
     reviewsLink (): string {
       if (!this.itemData.link_url.url) {
@@ -81,6 +92,10 @@ export default Blok.extend({
       return this.itemData.link_text;
     },
     ratingDataString (): string {
+      if (!this.storeRating) {
+        return '';
+      }
+
       const storeView = currentStoreView();
 
       const data = {
@@ -95,12 +110,28 @@ export default Blok.extend({
         }
       };
       return JSON.stringify(data);
+    },
+    storeRating (): StoreRating | undefined {
+      return this.$store.getters['budsies/getStoreRating'];
     }
+  },
+  async serverPrefetch (): Promise<void> {
+    await (this as any).fetchStoreRating();
+  },
+  beforeMount (): void {
+    void this.fetchStoreRating();
   },
   methods: {
     getStoreImageUrl (): string {
-      // temporarily for Petsies only
       return '/assets/logo.png';
+    },
+    fetchStoreRating (): Promise<StoreRating> {
+      const storeView = currentStoreView();
+
+      return this.$store.dispatch(
+        'budsies/fetchStoreRating',
+        { storeId: storeView.storeId }
+      );
     }
   }
 })
