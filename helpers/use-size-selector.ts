@@ -1,22 +1,30 @@
-import { ComputedRef, computed, ref, watch } from '@vue/composition-api';
+import { computed, ref, watch } from '@vue/composition-api';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
-import rootStore from '@vue-storefront/core/store'
-import { PRODUCT_SET_BUNDLE_OPTION } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
-import { BundleOption } from 'core/modules/catalog/types/BundleOption';
+import Product from 'core/modules/catalog/types/Product';
 import { BodyPartValueContentType } from 'src/modules/budsies';
 import { getProductDefaultPrice } from 'src/modules/shared';
 
 import SizeOption from 'theme/components/interfaces/size-option';
 
-export function useSizeSelector (sizeBundleOption: ComputedRef<BundleOption | undefined>) {
+import { useBundleOption } from './use-bundle-options';
+
+export function useSizeSelector (
+  product: Product,
+  bundleOptionTitle: string
+) {
+  const {
+    bundleOption,
+    setBundleOptionValue
+  } = useBundleOption(product, bundleOptionTitle);
+
   const sizesOptions = computed<SizeOption[]>(() => {
-    if (!sizeBundleOption.value) {
+    if (!bundleOption.value) {
       return [];
     }
 
     let availableSizes: SizeOption[] = [];
-    for (const productLink of sizeBundleOption.value.product_links) {
+    for (const productLink of bundleOption.value.product_links) {
       if (!productLink.product) {
         continue;
       }
@@ -33,7 +41,7 @@ export function useSizeSelector (sizeBundleOption: ComputedRef<BundleOption | un
         isSelected: false,
         contentTypeId: BodyPartValueContentType.IMAGE,
         image: productLink.product.image,
-        optionId: sizeBundleOption.value.option_id,
+        optionId: bundleOption.value.option_id,
         optionValueId: productLink.id.toString(),
         group: 'default'
       });
@@ -45,19 +53,20 @@ export function useSizeSelector (sizeBundleOption: ComputedRef<BundleOption | un
   let selectedSize = ref<SizeOption | undefined>();
 
   watch(selectedSize, (value) => {
-    if (!sizeBundleOption.value) {
+    if (!bundleOption.value) {
       Logger.error('sizeBundleOption is not defined while attempt to set size was performed', 'budsies')();
       return;
     }
 
-    rootStore.commit(`product/${PRODUCT_SET_BUNDLE_OPTION}`, {
-      optionId: sizeBundleOption.value.option_id,
-      optionQty: 1,
-      optionSelections: value ? [value.optionValueId] : []
-    });
+    setBundleOptionValue(
+      bundleOption.value.option_id,
+      1,
+      value && value.optionValueId ? [Number(value.optionValueId)] : []
+    );
   });
 
   return {
+    bundleOption,
     selectedSize,
     sizesOptions
   }

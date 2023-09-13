@@ -370,8 +370,11 @@ export default defineComponent({
     }
     const { bundleOption: styleBundleOption } = useBundleOption(product, styleBundleOptionTitle);
 
-    const { bundleOption: sizeBundleOption } = useBundleOption(product, sizeBundleOptionTitle);
-    const { selectedSize, sizesOptions } = useSizeSelector(sizeBundleOption);
+    const {
+      bundleOption: sizeBundleOption,
+      selectedSize,
+      sizesOptions
+    } = useSizeSelector(product, sizeBundleOptionTitle);
 
     return {
       imageHandlerService,
