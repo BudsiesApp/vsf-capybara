@@ -293,6 +293,7 @@ import { useSizeSelector } from 'theme/helpers/use-size-selector';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 import GalleryProductImages from '../interfaces/gallery-product-images.interface';
+import SizeOption from '../interfaces/size-option';
 
 import ACustomPrice from '../atoms/a-custom-price.vue';
 import ACustomProductQuantity from '../atoms/a-custom-product-quantity.vue';
@@ -306,7 +307,6 @@ import ExtraFacesConfiguratorData from '../interfaces/extra-faces-configurator-d
 import MBodypartOptionConfigurator from '../molecules/m-bodypart-option-configurator.vue';
 import MFormErrors from '../molecules/m-form-errors.vue';
 import MPlushieSizeSelector from '../molecules/m-plushie-size-selector.vue';
-import SizeOption from '../interfaces/size-option';
 
 extend('required', {
   ...required,
