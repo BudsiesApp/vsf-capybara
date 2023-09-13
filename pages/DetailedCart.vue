@@ -221,6 +221,7 @@ const printedProductSkus = [
   'customPrintedMasks_bundle',
   'customPrintedKeychains_bundle',
   'customFeltedMagnets_bundle',
+  'customFeltedOrnaments_bundle',
   'customCartoonPillows_bundle'
 ]
 

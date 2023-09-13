@@ -204,6 +204,15 @@
               @is-busy-changed="onArtworkUploadBusyStatusChanged('extra-faces', $event)"
             />
 
+            <MProductionTimeSelector
+              class="_production-time-selector"
+              v-model="selectedProductionTimeOption"
+              :production-time-options="productionTimeOptions"
+              :product-id="product.id"
+              :disabled="isSubmitting"
+              v-if="hasProductionTimeOptions"
+            />
+
             <validation-provider
               v-slot="{ errors, classes }"
               rules="required"
@@ -289,6 +298,7 @@ import { CustomerImage, getProductDefaultPrice, InjectType } from 'src/modules/s
 
 import { useBundleOption } from 'theme/helpers/use-bundle-options';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { useProductionTimeSelector } from 'theme/helpers/use-production-time-selector';
 import { useSizeSelector } from 'theme/helpers/use-size-selector';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
@@ -307,6 +317,7 @@ import ExtraFacesConfiguratorData from '../interfaces/extra-faces-configurator-d
 import MBodypartOptionConfigurator from '../molecules/m-bodypart-option-configurator.vue';
 import MFormErrors from '../molecules/m-form-errors.vue';
 import MPlushieSizeSelector from '../molecules/m-plushie-size-selector.vue';
+import MProductionTimeSelector from '../molecules/m-production-time-selector.vue';
 
 extend('required', {
   ...required,
@@ -386,7 +397,8 @@ export default defineComponent({
       ...useFormValidation(
         validationObserver,
         () => getAllFormRefs(setupContext.refs)
-      )
+      ),
+      ...useProductionTimeSelector(product)
     }
   },
   components: {
@@ -402,7 +414,8 @@ export default defineComponent({
     MTitledArtworkUpload,
     MBodypartOptionConfigurator,
     MFormErrors,
-    MPlushieSizeSelector
+    MPlushieSizeSelector,
+    MProductionTimeSelector
   },
   props: {
     artworkUploadUrl: {
@@ -787,6 +800,7 @@ export default defineComponent({
       this.fillEmptyExtraFacesDataAddon();
       this.fillEmptyAdditionalArtworks();
       this.fillEmptyBodypartsValues();
+      this.resetSelectedProductionTimeOption();
     },
     onArtworkAdd (value: Item): void {
       this.customerImage = {
@@ -991,6 +1005,7 @@ export default defineComponent({
       this.fillAdditionalArtworksData(existingCartItem);
       this.fillBodypartsValues(existingCartItem);
       this.fillExtraFacesDataAddon(existingCartItem);
+      this.fillProductionTimeFromCartItem(existingCartItem);
       this.fillSize(existingCartItem);
 
       this.fillQuantity(existingCartItem);
@@ -1254,8 +1269,9 @@ export default defineComponent({
     ._additional-options,
     ._artwork-upload,
     ._qty-container,
-    ._actions {
-        margin-top: 1.5em;
+    ._actions,
+    ._production-time-selector {
+        margin-top: var(--spacer-base);
     }
 
     ._design-option-list {
@@ -1282,6 +1298,17 @@ export default defineComponent({
     ._bodypart-selector {
       margin-top: var(--spacer-xs);
       text-align: center;
+    }
+
+    ._production-time-selector {
+      --production-time-selector-option-font-size: var(--font-base);
+      --heading-title-font-size: var(--font-base);
+      --heading-title-font-weight: var(--font-bold);
+      --select-margin: var(--spacer-xs) 0 0;
+
+      &::v-deep .sf-heading {
+        --heading-text-align: left;
+      }
     }
 
     ._artwork-upload {

@@ -116,6 +116,8 @@ export default Vue.extend({
   text-align: center;
 
   ::v-deep .sf-select__selected {
+    --select-option-font-size: var(--production-time-selector-option-font-size, var(--font-lg));
+
     justify-content: center;
   }
 }
