@@ -21,6 +21,7 @@
       :show-pointer="true"
       :preserve-search="shouldPreserveSearch"
       :max-height="190"
+      :autocomplete="autocomplete"
       open-direction="below"
       :disabled="disabled"
       ref="multiselect"
@@ -31,15 +32,6 @@
         <SfChevron class="_chevron" />
       </template>
     </multiselect>
-
-    <input
-      type="text"
-      class="_autocomplete"
-      v-if="autocomplete"
-      :autocomplete="autocomplete"
-      :name="autocomplete"
-      @input="onAutocompleteFieldInput"
-    >
 
     <label
       :for="inputId"
@@ -319,34 +311,6 @@ export default Vue.extend({
       } else {
         enableBodyScroll(scrollableContainer);
       }
-    },
-    onAutocompleteFieldInput (event: InputEvent) {
-      if (!this.autocomplete || !event || !event.target) {
-        return;
-      }
-
-      const selectedOption = this.findOptionByFieldNameAndValue(
-        this.labelField,
-        (event.target as HTMLInputElement).value
-      );
-
-      if (!selectedOption) {
-        return;
-      }
-
-      this.selectedOption = selectedOption;
-    },
-    findOptionByFieldNameAndValue (
-      fieldName: string,
-      value: string
-    ): Option | undefined {
-      return this.options.find((option) => {
-        if (!fieldName || typeof option === 'string') {
-          return option === value;
-        }
-
-        return option[fieldName] === value;
-      })
     }
   },
   watch: {
