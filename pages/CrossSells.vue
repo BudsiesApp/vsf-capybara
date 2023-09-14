@@ -321,6 +321,7 @@ export default Vue.extend({
     box-sizing: border-box;
     flex: 1;
     margin: 0;
+    max-width: 100%;
 
     &::v-deep {
       .sf-product-card {
