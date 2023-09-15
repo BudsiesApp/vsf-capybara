@@ -166,7 +166,7 @@ let routes = [
       name: 'pillow-product'
     }
   },
-  { name: 'cross-sells', path: '/cross-sells/p/:parentSku/', component: CrossSells },
+  { name: 'cross-sells', path: '/cross-sells/p/:parentSku/', component: CrossSells, props: true },
   {
     name: 'cross-sells-alias',
     path: '/crosssell/index/index/product_id/:productId/',

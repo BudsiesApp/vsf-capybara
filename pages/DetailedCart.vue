@@ -573,7 +573,7 @@ export default {
   },
   watch: {
     isLoading (value) {
-      if (!value) {
+      if (value) {
         return;
       }
 

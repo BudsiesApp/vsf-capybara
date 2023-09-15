@@ -112,7 +112,7 @@
                 class="products__product-card"
                 :image-height="352"
                 :image-width="352"
-                @click="() => onProductCardClick(product.sku)"
+                @click.native="() => onProductCardClick(product.sku)"
               />
             </transition-group>
           </lazy-hydrate>
@@ -511,7 +511,7 @@ export default {
     this.$bus.$on('product-after-list', this.initPagination);
 
     const category = this.getCurrentCategory;
-    this.$emit(
+    EventBus.$emit(
       ProductEvent.PRODUCT_LIST_SHOW,
       {
         products: this.products,

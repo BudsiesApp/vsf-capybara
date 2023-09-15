@@ -68,7 +68,6 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { Route } from 'vue-router';
 import config from 'config';
 import { SearchQuery } from 'storefront-query-builder';
 import { isServer } from '@vue-storefront/core/helpers';
@@ -82,12 +81,14 @@ import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/stor
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 import { ProductEvent } from 'src/modules/shared';
 
-const getSkuFromRoute = (route: Route): string | undefined => {
-  return route.params.parentSku;
-}
-
 export default Vue.extend({
   name: 'CrossSells',
+  props: {
+    parentSku: {
+      type: String,
+      default: undefined
+    }
+  },
   components: {
     SfButton,
     OProductCard
@@ -133,7 +134,7 @@ export default Vue.extend({
     },
     getCurrentProduct (): Product | null {
       const product = this.$store.getters['product/getCurrentProduct'];
-      const sku = getSkuFromRoute(this.$route);
+      const sku = this.parentSku;
 
       if (!product?.sku || product.sku !== sku) {
         return null;
@@ -149,7 +150,7 @@ export default Vue.extend({
     const product = await this.$store.dispatch(
       'product/loadProduct',
       {
-        parentSku: getSkuFromRoute(this.$route),
+        parentSku: (this as any).parentSku,
         setCurrent: false
       }
     );
@@ -281,7 +282,7 @@ export default Vue.extend({
       this.$router.replace(localizedRoute({ name: 'detailed-cart' }));
     },
     async setCurrentProduct (): Promise<void> {
-      const sku = getSkuFromRoute(this.$route);
+      const sku = this.parentSku;
 
       if (!sku || this.getCurrentProduct?.sku === sku) {
         return;
@@ -301,7 +302,7 @@ export default Vue.extend({
         {
           product,
           categoryName: listName,
-          categoryId: getSkuFromRoute(this.$route)
+          categoryId: this.parentSku
         }
       )
     }
@@ -334,12 +335,12 @@ export default Vue.extend({
           return;
         }
 
-        this.$emit(
+        EventBus.$emit(
           ProductEvent.PRODUCT_LIST_SHOW,
           {
             products: value,
             categoryName: 'Cross Sells',
-            categoryId: getSkuFromRoute(this.$route)
+            categoryId: this.parentSku
           }
         );
       },
@@ -351,12 +352,12 @@ export default Vue.extend({
           return;
         }
 
-        this.$emit(
+        EventBus.$emit(
           ProductEvent.PRODUCT_LIST_SHOW,
           {
             products: value,
             categoryName: 'Up Sells',
-            categoryId: getSkuFromRoute(this.$route)
+            categoryId: this.parentSku
           }
         );
       },
