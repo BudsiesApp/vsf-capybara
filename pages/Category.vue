@@ -104,7 +104,7 @@
               class="products__grid"
             >
               <o-product-card
-                v-for="product in products"
+                v-for="product in preparedProducts"
                 :key="product.id"
                 :product="product"
                 link-tag="router-link"
@@ -112,6 +112,7 @@
                 class="products__product-card"
                 :image-height="352"
                 :image-width="352"
+                @click="() => onProductCardClick(product.sku)"
               />
             </transition-group>
           </lazy-hydrate>
@@ -205,18 +206,12 @@ import { mapGetters } from 'vuex';
 import { ref } from '@vue/composition-api';
 import castArray from 'lodash-es/castArray';
 import config from 'config';
-import {
-  buildFilterProductsQuery,
-  productThumbnailPath,
-  isServer
-} from '@vue-storefront/core/helpers';
+import { isServer } from '@vue-storefront/core/helpers';
 import i18n from '@vue-storefront/i18n';
 import { htmlDecode } from '@vue-storefront/core/filters';
-import { quickSearchByQuery } from '@vue-storefront/core/lib/search';
 import { getSearchOptionsFromRouteParams } from '@vue-storefront/core/modules/catalog-next/helpers/categoryHelpers';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { getTopLevelCategories, prepareCategoryMenuItem, prepareCategoryProduct } from 'theme/helpers';
-import { formatProductLink } from '@vue-storefront/core/modules/url/helpers';
 import {
   SfLoader,
   SfIcon,
@@ -233,7 +228,6 @@ import {
 } from '@storefront-ui/vue';
 
 import {
-  localizedRoute,
   currentStoreView
 } from '@vue-storefront/core/lib/multistore';
 import store from '@vue-storefront/core/store'
@@ -241,6 +235,9 @@ import {
   mapMobileObserver,
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
+
+import { ProductEvent } from 'src/modules/shared';
 
 import isObjectEmpty from 'theme/helpers/is-object-empty.function';
 import { useInfinityScroll } from 'theme/helpers/use-infinity-scroll';
@@ -392,8 +389,10 @@ export default {
           .filter((product, i) => {
             return this.isInfinityScrollingEnabled || i < THEME_PAGE_SIZE;
           })
-          .map(prepareCategoryProduct)
-        : this.getCurrentPageProducts.map(prepareCategoryProduct);
+        : this.getCurrentPageProducts;
+    },
+    preparedProducts () {
+      return this.products.map(prepareCategoryProduct);
     },
     totalPages () {
       return Math.ceil(this.getCategoryProductsTotal / THEME_PAGE_SIZE);
@@ -510,6 +509,16 @@ export default {
       }
     });
     this.$bus.$on('product-after-list', this.initPagination);
+
+    const category = this.getCurrentCategory;
+    this.$emit(
+      ProductEvent.PRODUCT_LIST_SHOW,
+      {
+        products: this.products,
+        categoryName: category.name || '',
+        categoryId: category.id || ''
+      }
+    );
   },
   beforeDestroy () {
     unMapMobileObserver();
@@ -578,6 +587,19 @@ export default {
       } else {
         this.initPagination();
       }
+    },
+    onProductCardClick (sku) {
+      const product = this.products.find((product) => sku === product.sku);
+      const category = this.getCurrentCategory;
+
+      EventBus.$emit(
+        ProductEvent.PRODUCT_CARD_CLICK,
+        {
+          product,
+          categoryName: category.name || '',
+          categoryId: category.id || ''
+        }
+      );
     }
   },
   metaInfo () {
