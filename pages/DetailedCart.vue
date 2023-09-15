@@ -107,7 +107,7 @@
               >
                 Order More
               </SfButton>
-              <SfDropdown
+              <MDropdown
                 :is-open="isDropdownOpen"
                 @click:close="isDropdownOpen = false"
               >
@@ -124,7 +124,7 @@
                     </router-link>
                   </SfListItem>
                 </SfList>
-              </SfDropdown>
+              </MDropdown>
             </div>
           </div>
           <div v-else key="empty-cart" class="empty-cart">
@@ -168,7 +168,6 @@ import debounce from 'lodash-es/debounce';
 import {
   SfPrice,
   SfList,
-  SfDropdown,
   SfCollectedProduct,
   SfButton,
   SfImage,
@@ -183,7 +182,6 @@ import { getCartItemPrice } from 'src/modules/shared';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
 import { onlineHelper } from '@vue-storefront/core/helpers';
-import { ProductId } from 'src/modules/budsies';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
 import CartEvents from 'src/modules/shared/types/cart-events';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
@@ -194,6 +192,7 @@ import ProductionSpotCountdown from 'src/modules/promotion-platform/components/P
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
+import MDropdown from 'theme/components/molecules/m-dropdown.vue';
 
 const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
 
@@ -245,9 +244,9 @@ const editableProductsSkus = [
 export default {
   name: 'DetailedCart',
   components: {
+    MDropdown,
     SfPrice,
     SfList,
-    SfDropdown,
     SfCollectedProduct,
     SfImage,
     SfButton,
