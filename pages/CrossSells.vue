@@ -133,29 +133,20 @@ export default Vue.extend({
       )
     },
     getCurrentProduct (): Product | null {
-      const product = this.$store.getters['product/getCurrentProduct'];
-      const sku = this.parentSku;
-
-      if (!product?.sku || product.sku !== sku) {
-        return null;
-      }
-
-      return product;
+      return this.getProductBySkuDictionary[this.parentSku];
     },
     getProductBySkuDictionary (): Record<string, Product> {
       return this.$store.getters['product/getProductBySkuDictionary'];
     }
   },
   async serverPrefetch () {
-    const product = await this.$store.dispatch(
+    await this.$store.dispatch(
       'product/loadProduct',
       {
         parentSku: (this as any).parentSku,
         setCurrent: false
       }
     );
-
-    await this.$store.dispatch('product/setCurrent', product);
 
     await Promise.all([
       (this as any).loadCrossSellsProducts(),

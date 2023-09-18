@@ -79,7 +79,7 @@ import MProductDescriptionStory from 'theme/components/molecules/m-product-descr
 
 import GiftCardTemplate from 'src/modules/gift-card/types/GiftCardTemplate.interface';
 import { ImageHandlerService } from 'src/modules/file-storage';
-import { InjectType } from 'src/modules/shared';
+import { InjectType, ProductEvent } from 'src/modules/shared';
 import { GiftCardOptions, GiftCardTemplateSize } from 'src/modules/gift-card';
 import ServerError from 'src/modules/shared/types/server-error';
 
@@ -225,6 +225,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
     this.giftCardOrderFormData.selectedTemplateId =
       this.firstGiftCardTemplate?.id;
+
+    EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, this.product);
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);

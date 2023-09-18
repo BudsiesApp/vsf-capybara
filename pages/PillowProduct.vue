@@ -17,6 +17,7 @@
 
 <script lang="ts">
 import config from 'config';
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { isServer } from '@vue-storefront/core/helpers';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
@@ -25,6 +26,7 @@ import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/stor
 import Product from 'core/modules/catalog/types/Product';
 
 import { ProductStructuredData } from 'src/modules/budsies';
+import { ProductEvent } from 'src/modules/shared';
 
 import OPillowProductOrderForm from '../components/organisms/o-pillow-product-order-form.vue';
 
@@ -62,6 +64,7 @@ export default {
     // TODO check ID in URL and load plushie instead of create a new one
     await this.setCurrentProduct();
     this.plushieId = await this.createPlushie();
+    EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, this.getCurrentProduct);
   },
   async asyncData ({ store, route, context }): Promise<void> {
     if (context) context.output.cacheTags.add('product')

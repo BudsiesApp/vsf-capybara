@@ -42,6 +42,7 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import LazyHydrate from 'vue-lazy-hydration';
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { onlineHelper, isServer } from '@vue-storefront/core/helpers';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
@@ -52,6 +53,7 @@ import { getMediaGallery } from '@vue-storefront/core/modules/catalog/helpers';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 
 import { ProductStructuredData } from 'src/modules/budsies';
+import { ProductEvent } from 'src/modules/shared';
 
 import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
 
@@ -181,6 +183,7 @@ export default {
   async mounted () {
     await this.setCurrentProduct();
     this.getQuantity();
+    EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, this.getCurrentProduct);
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
