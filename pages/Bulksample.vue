@@ -17,7 +17,9 @@
 
 <script lang="ts">
 import config from 'config';
-import Vue, { PropType } from 'vue'
+import Vue, { PropType } from 'vue';
+
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
@@ -25,6 +27,7 @@ import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next
 import BulksampleProduct from 'theme/interfaces/bulksample-product.type';
 
 import { ProductStructuredData } from 'src/modules/budsies';
+import { ProductEvent } from 'src/modules/shared';
 
 import OBulksampleCreationForm from 'theme/components/organisms/o-bulksample-creation-form.vue';
 
@@ -79,6 +82,8 @@ export default Vue.extend({
     } else {
       this.isProductDataLoaded = true;
     }
+
+    EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, this.getCurrentProduct);
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
