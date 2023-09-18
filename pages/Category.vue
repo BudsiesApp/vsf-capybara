@@ -873,6 +873,7 @@ export default {
   box-sizing: border-box;
   flex: 1;
   margin: 0;
+  max-width: 100%;
   &__grid,
   &__list {
     display: flex;
