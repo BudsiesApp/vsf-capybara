@@ -21,6 +21,7 @@
       :show-pointer="true"
       :preserve-search="shouldPreserveSearch"
       :max-height="190"
+      :autocomplete="autocomplete"
       open-direction="below"
       :disabled="disabled"
       ref="multiselect"
@@ -135,6 +136,10 @@ export default Vue.extend({
     errorMessage: {
       type: String,
       default: 'This field value is not correct.'
+    },
+    autocomplete: {
+      type: String,
+      default: undefined
     }
   },
   data () {
@@ -439,6 +444,12 @@ export default Vue.extend({
 
   ._input {
     margin: var(--input-margin, 0 0 var(--spacer-xs) 0);
+  }
+
+  ._autocomplete {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
   }
 
   &__error-message {

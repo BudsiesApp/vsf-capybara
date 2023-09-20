@@ -12,7 +12,7 @@
     <SfButton @click="toggleDropdownOnMobile(true)">
       Make your own
     </SfButton>
-    <SfDropdown
+    <MDropdown
       :is-open="isDropdownOpen"
       @click:close="toggleDropdownOnMobile(false)"
     >
@@ -35,19 +35,21 @@
           Cancel
         </SfButton>
       </template>
-    </SfDropdown>
+    </MDropdown>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import { SfButton, SfDropdown, SfList } from '@storefront-ui/vue';
+import { SfButton, SfList } from '@storefront-ui/vue';
 import {
   mapMobileObserver,
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
+
+import MDropdown from './m-dropdown.vue';
 
 export default Vue.extend({
   name: 'MMakeYourOwnDropdown',
@@ -58,8 +60,8 @@ export default Vue.extend({
     }
   },
   components: {
+    MDropdown,
     SfButton,
-    SfDropdown,
     SfList
   },
   data () {

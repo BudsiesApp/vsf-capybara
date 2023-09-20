@@ -113,7 +113,7 @@
               >
                 Order More
               </SfButton>
-              <SfDropdown
+              <MDropdown
                 :is-open="isDropdownOpen"
                 @click:close="isDropdownOpen = false"
               >
@@ -130,7 +130,7 @@
                     </router-link>
                   </SfListItem>
                 </SfList>
-              </SfDropdown>
+              </MDropdown>
             </div>
           </div>
           <div v-else key="empty-cart" class="empty-cart">
@@ -174,7 +174,6 @@ import debounce from 'lodash-es/debounce';
 import {
   SfPrice,
   SfList,
-  SfDropdown,
   SfCollectedProduct,
   SfButton,
   SfImage,
@@ -189,7 +188,6 @@ import { getCartItemPrice } from 'src/modules/shared';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
 import { onlineHelper } from '@vue-storefront/core/helpers';
-import { ProductId } from 'src/modules/budsies';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
 import CartEvents from 'src/modules/shared/types/cart-events';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
@@ -201,6 +199,7 @@ import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.functi
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
+import MDropdown from 'theme/components/molecules/m-dropdown.vue';
 
 const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
 
@@ -241,6 +240,8 @@ const clothesProductSkus = [
   'customGolfShirts_bundle'
 ];
 
+const customPillowSku = 'customPillow_bundle';
+
 const budsiesPlushieProductSkus = [
   'CustomBudsie1_bundle',
   'budsiesPuppet_bundle'
@@ -268,15 +269,16 @@ const editableProductsSkus = [
   specialtyCommissionSku,
   budsiesPalsSku,
   buddyPillowSku,
-  nftBudsieSku
+  nftBudsieSku,
+  customPillowSku
 ];
 
 export default {
   name: 'DetailedCart',
   components: {
+    MDropdown,
     SfPrice,
     SfList,
-    SfDropdown,
     SfCollectedProduct,
     SfImage,
     SfButton,
@@ -443,7 +445,14 @@ export default {
       return this.truncate(product.plushieDescription, 150, 50);
     },
     editHandler (product) {
-      if (product.sku === nftBudsieSku) {
+      if (product.sku === customPillowSku) {
+        this.$router.push({
+          name: 'pillow-product',
+          query: {
+            existingPlushieId: product.plushieId
+          }
+        })
+      } else if (product.sku === nftBudsieSku) {
         this.$router.push({
           name: 'nft-budsies-create',
           query: {
@@ -653,6 +662,21 @@ export default {
     },
     processStartShopping () {
       this.$router.push(localizedRoute('/'));
+    }
+  },
+  watch: {
+    isLoading (value) {
+      if (value) {
+        return;
+      }
+
+      EventBus.$emit(
+        CartEvents.CART_VIEWED,
+        {
+          products: this.products,
+          platformTotals: this.$store.state.cart.platformTotals
+        }
+      );
     }
   },
   metaInfo () {

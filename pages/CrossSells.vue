@@ -20,7 +20,7 @@
           class="products__grid"
         >
           <o-product-card
-            v-for="crossSellsProduct in crossSellsProducts"
+            v-for="crossSellsProduct in preparedCrossSellsProducts"
             :key="crossSellsProduct.id"
             :product="crossSellsProduct"
             :link="crossSellsProduct.landing_page_url ? crossSellsProduct.landing_page_url : undefined"
@@ -29,12 +29,13 @@
             class="products__product-card"
             :image-height="352"
             :image-width="352"
+            @click.native="() => onProductCardClick(crossSellsProduct.sku, 'Cross Sells')"
           />
         </transition-group>
       </div>
     </div>
 
-    <div class="_up-sells-list" v-if="upSellsProducts.length">
+    <div class="_up-sells-list" v-if="preparedUpSellsProducts.length">
       <header class="sf-heading">
         <h2 class="sf-heading__title">
           {{ upSellsTitle }}
@@ -48,7 +49,7 @@
           class="products__grid"
         >
           <o-product-card
-            v-for="upSellsProduct in upSellsProducts"
+            v-for="upSellsProduct in preparedUpSellsProducts"
             :key="upSellsProduct.id"
             :product="upSellsProduct"
             :link="upSellsProduct.landing_page_url ? upSellsProduct.landing_page_url : undefined"
@@ -57,6 +58,7 @@
             class="products__product-card"
             :image-height="352"
             :image-width="352"
+            @click.native="() => onProductCardClick(upSellsProduct.sku, 'Up Sells')"
           />
         </transition-group>
       </div>
@@ -66,10 +68,9 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { Route } from 'vue-router';
 import config from 'config';
 import { SearchQuery } from 'storefront-query-builder';
-import { isServer } from '@vue-storefront/core/helpers';
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import Product from 'core/modules/catalog/types/Product';
 import { SfButton } from '@storefront-ui/vue';
@@ -78,10 +79,7 @@ import { prepareCategoryProduct } from 'theme/helpers';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
-
-const getSkuFromRoute = (route: Route): string | undefined => {
-  return route.params.parentSku;
-}
+import { ProductEvent } from 'src/modules/shared';
 
 const selfiesSkus = [
   'CustomSelfie_bundle',
@@ -90,6 +88,12 @@ const selfiesSkus = [
 
 export default Vue.extend({
   name: 'CrossSells',
+  props: {
+    parentSku: {
+      type: String,
+      required: true
+    }
+  },
   components: {
     SfButton,
     OProductCard
@@ -104,6 +108,16 @@ export default Vue.extend({
 
       return this.getSellsProductsBySkus(skus);
     },
+    preparedCrossSellsProducts (): any[] {
+      return this.crossSellsProducts.map(
+        (item: Product) => (
+          {
+            ...prepareCategoryProduct(item),
+            landing_page_url: item.landing_page_url
+          }
+        )
+      )
+    },
     upSellsProducts (): any[] {
       if (!this.getCurrentProduct) {
         return [];
@@ -113,15 +127,18 @@ export default Vue.extend({
 
       return this.getSellsProductsBySkus(skus);
     },
+    preparedUpSellsProducts (): any[] {
+      return this.upSellsProducts.map(
+        (item: Product) => (
+          {
+            ...prepareCategoryProduct(item),
+            landing_page_url: item.landing_page_url
+          }
+        )
+      )
+    },
     getCurrentProduct (): Product | null {
-      const product = this.$store.getters['product/getCurrentProduct'];
-      const sku = getSkuFromRoute(this.$route);
-
-      if (!product?.sku || product.sku !== sku) {
-        return null;
-      }
-
-      return product;
+      return this.getProductBySkuDictionary[this.parentSku];
     },
     getProductBySkuDictionary (): Record<string, Product> {
       return this.$store.getters['product/getProductBySkuDictionary'];
@@ -141,30 +158,47 @@ export default Vue.extend({
       ).toString();
     }
   },
-  async serverPrefetch () {
-    const product = await this.$store.dispatch(
-      'product/loadProduct',
-      {
-        parentSku: getSkuFromRoute(this.$route),
-        setCurrent: false
-      }
-    );
-
-    await this.$store.dispatch('product/setCurrent', product);
-
-    await Promise.all([
-      (this as any).loadCrossSellsProducts(),
-      (this as any).loadUpSellsProducts()
-    ]);
+  async serverPrefetch (): Promise<void> {
+    return (this as any).loadData();
   },
-  async mounted () {
-    await this.setCurrentProduct();
+  async beforeMount (): Promise<void> {
+    await this.loadData();
+
+    if (!this.crossSellsProducts.length && !this.upSellsProducts.length) {
+      this.redirectToCart();
+      return;
+    }
+
+    this.onAfterListsShow();
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
     next();
   },
   methods: {
+    onAfterListsShow (): void {
+      if (this.crossSellsProducts.length) {
+        EventBus.$emit(
+          ProductEvent.PRODUCT_LIST_SHOW,
+          {
+            products: this.crossSellsProducts,
+            categoryName: 'Cross Sells',
+            categoryId: this.parentSku
+          }
+        );
+      }
+
+      if (this.upSellsProducts.length) {
+        EventBus.$emit(
+          ProductEvent.PRODUCT_LIST_SHOW,
+          {
+            products: this.upSellsProducts,
+            categoryName: 'Up Sells',
+            categoryId: this.parentSku
+          }
+        );
+      }
+    },
     getProductLinkSkusByType (type: string): string[] {
       if (!this.getCurrentProduct) {
         return [];
@@ -212,7 +246,7 @@ export default Vue.extend({
         }
       }
 
-      return products.map((item: Product) => ({ ...prepareCategoryProduct(item), landing_page_url: item.landing_page_url }));
+      return products;
     },
     getSearchQuery (skus: string[]) {
       let productsQuery = new SearchQuery()
@@ -220,7 +254,7 @@ export default Vue.extend({
         .applyFilter({ key: 'sku', value: { 'in': skus } })
         .applyFilter({ key: 'status', value: { 'in': [1] } });
 
-      if (config.products.listOutOfStockProducts === false || config.products.hideOutOfStockProductsInCategories === true) {
+      if (config.products.listOutOfStockProducts === false) {
         productsQuery = productsQuery.applyFilter({ key: 'stock.is_in_stock', value: { 'eq': true } });
       }
 
@@ -270,44 +304,54 @@ export default Vue.extend({
     async loadUpSellsProducts () {
       await this.loadProductsList('upsell');
     },
+    async loadData (): Promise<void> {
+      if (!this.getCurrentProduct) {
+        await this.$store.dispatch(
+          'product/loadProduct',
+          {
+            parentSku: (this as any).parentSku,
+            setCurrent: false
+          }
+        );
+      }
+
+      await Promise.all([
+        (this as any).loadCrossSellsProducts(),
+        (this as any).loadUpSellsProducts()
+      ]);
+    },
     goToCart (): void {
       this.$router.push(localizedRoute({ name: 'detailed-cart' }));
     },
     redirectToCart (): void {
       this.$router.replace(localizedRoute({ name: 'detailed-cart' }));
     },
-    async setCurrentProduct (): Promise<void> {
-      const sku = getSkuFromRoute(this.$route);
+    onProductCardClick (
+      productSku: string,
+      listName: 'Cross Sells' | 'Up Sells'
+    ): void {
+      const product = this.getProductBySkuDictionary[productSku];
 
-      if (!sku || this.getCurrentProduct?.sku === sku) {
-        return;
-      }
-
-      const product = this.getProductBySkuDictionary[sku];
-      await this.$store.dispatch('product/setCurrent', product);
+      EventBus.$emit(
+        ProductEvent.PRODUCT_CARD_CLICK,
+        {
+          product,
+          categoryName: listName,
+          categoryId: this.parentSku
+        }
+      )
     }
   },
   watch: {
-    getCurrentProduct: {
-      async handler (val, oldVal) {
-        if (isServer) {
-          return;
-        }
+    async parentSku (): Promise<void> {
+      await this.loadData();
 
-        if (!val) {
-          return;
-        }
+      if (!this.crossSellsProducts.length && !this.upSellsProducts.length) {
+        this.redirectToCart();
+        return;
+      }
 
-        Promise.all([
-          this.loadCrossSellsProducts(),
-          this.loadUpSellsProducts()
-        ]).then(() => {
-          if (!this.crossSellsProducts.length && !this.upSellsProducts.length) {
-            this.redirectToCart();
-          }
-        });
-      },
-      immediate: true
+      this.onAfterListsShow();
     }
   }
 });
@@ -342,6 +386,7 @@ export default Vue.extend({
     box-sizing: border-box;
     flex: 1;
     margin: 0;
+    max-width: 100%;
 
     &::v-deep {
       .sf-product-card {

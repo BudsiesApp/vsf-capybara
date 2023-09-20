@@ -302,11 +302,9 @@
             </router-link>
 
             <router-link to="/privacy-policy/" target="_blank">
-              {{ $t('Privacy Policy') }},
-            </router-link>
-
-            {{ $t('and') }}
-            <a href="http://support.budsies.com/support/solutions/folders/5000249005" target="_blank">{{ $t('Refund Policy') }}</a>.
+              {{ $t('Privacy Policy') }}
+            </router-link>,
+            {{ $t('and') }} <a href="http://support.budsies.com/support/solutions/folders/5000249005" target="_blank">{{ $t('Refund Policy') }}</a>.
             {{ $t('I understand that Budsies happily takes care of all tears, defects, and shipping damage with either a refund or a repair.') }}
           </div>
         </div>

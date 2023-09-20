@@ -55,6 +55,7 @@ export function prepareCategoryProduct (product) {
   return {
     discount: getProductDefaultDiscount(product),
     id: product.id,
+    sku: product.sku,
     title: htmlDecode(product.name),
     image: getThumbnailPath(
       productThumbnailPath(product),
