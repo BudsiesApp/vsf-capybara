@@ -144,6 +144,7 @@ export default Vue.extend({
   async beforeMount (): Promise<void> {
     if (!this.parentSku) {
       this.redirectToCart();
+      return;
     }
 
     await this.loadData();
@@ -330,6 +331,7 @@ export default Vue.extend({
     async parentSku (): Promise<void> {
       if (!this.parentSku) {
         this.redirectToCart();
+        return;
       }
 
       await this.loadData();
