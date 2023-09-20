@@ -9,14 +9,13 @@
       story-slug="pillow_creation_page_top"
     />
 
-    <SfDivider class="_step-divider" />
-
     <validation-observer
       v-slot="{ errors: formErrors }"
       slim
       ref="validationObserver"
     >
       <form
+        class="_form"
         @submit.prevent="onSubmit"
       >
         <div
@@ -61,12 +60,13 @@
               :product-id="backendProductId"
               :disabled="isSubmitting"
               :upload-url="artworkUploadUrl"
+              :initial-items="initialCustomerImages"
               @file-added="onArtworkAdd"
               @file-removed="onArtworkRemove"
               v-if="backendProductId"
             />
 
-            <p>
+            <p class="_artwork-upload-helper">
               <strong>
                 Please Note: We recommend high resolution, clear photos for our Petsies Pillows!
                 <br>
@@ -157,7 +157,8 @@
           :key="bodypart.id"
         >
           <SfHeading
-            class="_step-title -required _body-part-heading"
+            class="_step-title _body-part-heading"
+            :class="{ '-required': bodypart.isRequired }"
             :level="2"
             :title="bodypart.name"
             :ref="getFieldAnchorName(bodypart.name)"
@@ -165,7 +166,7 @@
 
           <validation-provider
             v-slot="{ errors }"
-            rules="required"
+            :rules="bodypart.isRequired ? 'required' : ''"
             :name="`'${bodypart.name}'`"
             tag="div"
           >
@@ -173,7 +174,7 @@
               :name="bodypart.code"
               v-model="bodypartsValues[bodypart.id]"
               :max-values="bodypart.maxValues"
-              :options="getBodypartValuesOptions(bodypart)"
+              :options="getBodypartOptions(bodypart.id)"
               type="bodypart"
               :disabled="isSubmitting"
             />
@@ -188,7 +189,6 @@
 
         <div
           class="_step-number"
-          ref="pet-name-field-anchor"
         >
           Step 4
         </div>
@@ -249,10 +249,9 @@
           </div>
         </validation-provider>
 
-        <validation-provider
-          v-slot="{ errors }"
-          name="Production time"
-          tag="div"
+        <div
+          class="_production-time-selector-section"
+          v-if="showProductionTimeOptions"
         >
           <MProductionTimeSelector
             v-model="productionTime"
@@ -260,11 +259,7 @@
             :product-id="product.id"
             :disabled="isSubmitting"
           />
-
-          <div class="_error-text">
-            {{ errors[0] }}
-          </div>
-        </validation-provider>
+        </div>
 
         <div v-show="showEmailStep">
           <SfDivider class="_step-divider" />
@@ -300,7 +295,7 @@
               :error-message="errors[0]"
             />
 
-            <div><b>Sometimes our team has questions about your design</b></div>
+            <div>{{ $t('Sometimes our team has questions about your design') }}</div>
           </validation-provider>
         </div>
 
@@ -317,7 +312,7 @@
             :disabled="isSubmitting"
             @click="shouldMakeAnother = false"
           >
-            Add to Cart
+            {{ submitButtonText }}
           </SfButton>
 
           <SfButton
@@ -325,22 +320,24 @@
             type="submit"
             :disabled="isSubmitting"
             @click="shouldMakeAnother = true"
+            v-show="!existingCartItem"
           >
-            Save & Make Another
+            {{ $t('Save & Make Another') }}
           </SfButton>
 
-          <p class="_order-agreement">
-            I agree to
+          <div class="_agreement">
+            {{ $t('I agree to') }}
             <router-link to="/terms-of-service/" target="_blank">
-              Terms of Service
-            </router-link>,
+              {{ $t('Terms of Service') }},
+            </router-link>
+
             <router-link to="/privacy-policy/" target="_blank">
-              Privacy Policy
+              {{ $t('Privacy Policy') }}
             </router-link>,
-            and <a href="http://support.mypetsies.com/support/solutions/folders/13000003991" target="_blank">Refund Policy</a>.
-            I understand that Petsies happily takes care of all tears, defects, and shipping damage with either a refund or a repair.
-            I also understand that my custom Petsies order is backed by the Petsies Guarantee.
-          </p>
+            {{ $t('and') }} <a href="http://support.mypetsies.com/support/solutions/folders/13000003991" target="_blank">{{ $t('Refund Policy') }}</a>.
+            {{ $t('I understand that Petsies happily takes care of all tears, defects, and shipping damage with either a refund or a repair.') }}
+            {{ $t('I also understand that my custom Petsies order is backed by the Petsies Guarantee.') }}
+          </div>
         </div>
       </form>
     </validation-observer>
@@ -363,6 +360,7 @@
 </template>
 
 <script lang="ts">
+import Vue from 'vue';
 import { PropType, Ref, ref, defineComponent, inject } from '@vue/composition-api';
 import { mapMutations } from 'vuex';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
@@ -388,13 +386,15 @@ import { CustomerImage, getProductDefaultPrice } from 'src/modules/shared';
 import {
   vuexTypes as budsiesTypes,
   Bodypart,
-  BodypartValue,
   ImageUploadMethod,
   BodyPartValueContentType,
   ProductValue,
   BodypartOption
 } from 'src/modules/budsies';
 import ServerError from 'src/modules/shared/types/server-error';
+import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
+import { getSelectedBundleOptions } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions';
+import { setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 
 import ACustomProductQuantity from '../atoms/a-custom-product-quantity.vue';
 import MArtworkUpload from '../molecules/m-artwork-upload.vue';
@@ -471,8 +471,8 @@ export default defineComponent({
       type: Object as PropType<Product>,
       required: true
     },
-    plushieId: {
-      type: Number as PropType<number | undefined>,
+    existingPlushieId: {
+      type: String,
       default: undefined
     }
   },
@@ -489,7 +489,9 @@ export default defineComponent({
       areQuantityNotesVisible: false,
       showEmailStep: true,
       uploadMethod: ImageUploadMethod.NOW,
-      productionTime: undefined as ProductionTimeOption | undefined
+      productionTime: undefined as ProductionTimeOption | undefined,
+      plushieId: undefined as number | undefined,
+      initialCustomerImages: [] as CustomerImage[]
     }
   },
   computed: {
@@ -502,6 +504,7 @@ export default defineComponent({
     backendProductId (): ProductValue | undefined {
       switch (this.product.id) {
         case 253:
+        case 273:
           return ProductValue.PILLOW;
         default:
           throw new Error(
@@ -566,35 +569,169 @@ export default defineComponent({
     },
     shortcode (): string | undefined {
       return this.$store.getters['budsies/getPlushieShortcode'](this.plushieId);
+    },
+    cartItems (): CartItem[] {
+      return this.$store.getters['cart/getCartItems'];
+    },
+    existingCartItem (): CartItem | undefined {
+      if (!this.existingPlushieId) {
+        return;
+      }
+
+      return this.cartItems.find((item) => item.plushieId && item.plushieId === this.existingPlushieId);
+    },
+    getBodypartOptions (): (id: string) => BodypartOption[] {
+      return this.$store.getters['budsies/getBodypartOptions']
+    },
+    submitButtonText (): string {
+      return (
+        this.existingCartItem
+          ? this.$t('Update')
+          : this.$t('Add to Cart')
+      ).toString();
+    },
+    showProductionTimeOptions (): boolean {
+      return this.productionTimeOptions.length > 0;
     }
+  },
+  async mounted (): Promise<void> {
+    if (this.existingCartItem) {
+      this.fillPlushieDataFromCartItem(this.existingCartItem);
+      return;
+    }
+
+    this.plushieId = await this.createPlushie();
   },
   methods: {
     ...mapMutations('product', {
       setBundleOptionValue: catalogTypes.PRODUCT_SET_BUNDLE_OPTION
     }),
-    getBodypartValuesOptions (bodypart: Bodypart): BodypartOption[] {
-      const bodypartsValues: BodypartValue[] = this.$store.getters['budsies/getBodypartBodypartsValues'](bodypart.id);
+    async addToCart (): Promise<void> {
+      const shouldMakeAnother = this.shouldMakeAnother;
+      this.shouldMakeAnother = false;
 
-      if (!bodypartsValues.length) {
-        return [];
-      }
+      await this.$store.dispatch(
+        'product/setBundleOptions',
+        { product: this.product, bundleOptions: this.$store.state.product.current_bundle_options }
+      );
 
-      const result: BodypartOption[] = [];
+      this.$store.commit(
+        budsiesTypes.SN_BUDSIES + '/' + budsiesTypes.CUSTOMER_EMAIL_SET,
+        { email: this.email }
+      );
 
-      for (const bodypartValue of bodypartsValues) {
-        result.push({
-          id: bodypartValue.id,
-          label: bodypartValue.name,
-          value: bodypartValue.code,
-          isSelected: false,
-          contentTypeId: bodypartValue.contentTypeId,
-          color: bodypartValue.color,
-          image: bodypartValue.image,
-          group: 'default'
+      try {
+        await this.$store.dispatch('cart/addItem', {
+          productToAdd: Object.assign({}, this.product, {
+            qty: this.quantity,
+            plushieId: this.plushieId + '',
+            email: this.email,
+            bodyparts: this.getBodypartsData(),
+            customerImages: this.isUploadNow && this.customerImage ? [this.customerImage] : [],
+            uploadMethod: this.uploadMethod,
+            plushieName: this.name
+          })
         });
+      } catch (error) {
+        if (error instanceof ServerError) {
+          throw error;
+        }
+
+        Logger.error(error, 'budsies')();
       }
 
-      return result;
+      this.showEmailStep = false;
+
+      if (!shouldMakeAnother) {
+        this.goToCrossSells();
+        return;
+      }
+
+      this.onSuccessAndMakeAnother();
+    },
+    fillPlushieDataFromCartItem (cartItem: CartItem): void {
+      this.quantity = cartItem.qty || 1;
+      this.plushieId = Number(cartItem.plushieId);
+      this.name = cartItem.plushieName;
+
+      this.fillCustomerImagesFromCartItem(cartItem);
+      this.fillSizeFromCartItem(cartItem);
+      this.fillBodypartsValuesFromCartItem(cartItem);
+      this.fillProductionTimeFromCartItem(cartItem);
+    },
+    fillBodypartsValuesFromCartItem (cartItem: CartItem): void {
+      this.bodypartsValues = {};
+
+      if (!cartItem.bodyparts) {
+        return;
+      }
+
+      const bodyparts: Record<string, any[]> = cartItem.bodyparts as Record<string, any[]>;
+
+      Object.keys(bodyparts).forEach((key: string) => {
+        Vue.set(
+          this.bodypartsValues,
+          key,
+          this.getBodypartOptions(key).filter(
+            (bodypartOption: BodypartOption) => bodyparts[key].includes(bodypartOption.id) ||
+              bodyparts[key].includes(Number(bodypartOption.id))
+          )
+        );
+      });
+    },
+    fillCustomerImagesFromCartItem (cartItem: CartItem): void {
+      this.customerImage = cartItem.customerImages ? cartItem.customerImages[0] : undefined;
+      this.initialCustomerImages = this.customerImage ? [this.customerImage] : [];
+      this.uploadMethod = cartItem.uploadMethod as ImageUploadMethod || ImageUploadMethod.NOW;
+
+      const artworkUploadComponent = this.getArtworkUploadComponent();
+
+      if (!artworkUploadComponent) {
+        return;
+      }
+
+      this.$nextTick(() => {
+        artworkUploadComponent.initFiles();
+      });
+    },
+    fillProductionTimeFromCartItem (cartItem: CartItem): void {
+      const productOption = cartItem.product_option;
+      this.productionTime = undefined;
+
+      if (!this.productionTimeBundleOption || !productOption) {
+        return;
+      }
+
+      if (this.productionTimeOptions.length) {
+        this.productionTime = this.productionTimeOptions[0];
+      }
+
+      if (!productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id]) {
+        return;
+      }
+
+      const selectedOptionValueId = productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id].option_selections[0];
+      this.productionTime = this.productionTimeOptions.find((item) => item.optionValueId === selectedOptionValueId);
+    },
+    fillSizeFromCartItem (cartItem: CartItem): void {
+      const selectedBundleOptions = getSelectedBundleOptions(cartItem);
+
+      if (!this.sizes.length || !selectedBundleOptions.length) {
+        this.size = undefined;
+        return;
+      }
+
+      const selectedSize: SizeOption | undefined = this.sizes.find(
+        (sizeOption) => selectedBundleOptions.find(
+          (selectedOption) => selectedOption.option_id === sizeOption.optionId &&
+          selectedOption.option_selections.includes(Number.parseInt(sizeOption.optionValueId))
+        )
+      );
+
+      this.size = selectedSize;
+    },
+    getArtworkUploadComponent (): InstanceType<typeof MArtworkUpload> | undefined {
+      return this.$refs['artwork-upload'] as InstanceType<typeof MArtworkUpload> | undefined;
     },
     getBodypartsData (): Record<string, string[]> {
       let data: Record<string, string[]> = {};
@@ -626,6 +763,11 @@ export default defineComponent({
         }
       }));
     },
+    goToCart (): void {
+      this.$router.push(localizedRoute({
+        name: 'detailed-cart'
+      }));
+    },
     prefillEmail (): void {
       const customerEmail = this.$store.getters['budsies/getPrefilledCustomerEmail'];
       if (customerEmail) {
@@ -639,6 +781,7 @@ export default defineComponent({
       this.uploadMethod = ImageUploadMethod.NOW;
       this.size = undefined;
       this.name = undefined;
+      this.plushieId = undefined;
 
       for (const bodypart of this.bodyparts) {
         this.bodypartsValues[bodypart.id] = undefined;
@@ -699,48 +842,12 @@ export default defineComponent({
 
       this.isSubmitting = true;
 
-      const shouldMakeAnother = this.shouldMakeAnother;
-      this.shouldMakeAnother = false;
-
-      await this.$store.dispatch(
-        'product/setBundleOptions',
-        { product: this.product, bundleOptions: this.$store.state.product.current_bundle_options }
-      );
-
-      this.$store.commit(
-        budsiesTypes.SN_BUDSIES + '/' + budsiesTypes.CUSTOMER_EMAIL_SET,
-        { email: this.email }
-      );
-
       try {
-        try {
-          await this.$store.dispatch('cart/addItem', {
-            productToAdd: Object.assign({}, this.product, {
-              qty: this.quantity,
-              plushieId: this.plushieId + '',
-              email: this.email,
-              plushieName: this.name,
-              bodyparts: this.getBodypartsData(),
-              customerImages: this.isUploadNow && this.customerImage ? [this.customerImage] : [],
-              uploadMethod: this.uploadMethod
-            })
-          });
-        } catch (error) {
-          if (error instanceof ServerError) {
-            throw error;
-          }
-
-          Logger.error(error, 'budsies')();
+        if (!this.existingCartItem) {
+          await this.addToCart();
+        } else {
+          await this.updateExistingCartItem(this.existingCartItem);
         }
-
-        this.showEmailStep = false;
-
-        if (!shouldMakeAnother) {
-          this.goToCrossSells();
-          return;
-        }
-
-        this.onSuccessAndMakeAnother();
       } catch (error) {
         Logger.error(error, 'budsies')();
 
@@ -756,7 +863,7 @@ export default defineComponent({
         action1: { label: i18n.t('OK') }
       });
     },
-    onSuccessAndMakeAnother (): void {
+    async onSuccessAndMakeAnother (): Promise<void> {
       this.resetForm();
       this.window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
 
@@ -771,7 +878,59 @@ export default defineComponent({
         notification,
         { root: true }
       );
-      this.$emit('make-another');
+
+      this.plushieId = await this.createPlushie();
+    },
+    async createPlushie (): Promise<number> {
+      if (!this.product) {
+        throw new Error('Current product is not set!');
+      }
+
+      const task = await this.$store.dispatch(
+        'budsies/createNewPlushie',
+        {
+          productId: this.product.id
+        }
+      );
+      return task.result;
+    },
+    async updateClientAndServerItem (payload: {
+      product: CartItem,
+      forceUpdateServerItem?: boolean,
+      forceClientState?: boolean
+    }): Promise<void> {
+      await this.$store.dispatch('cart/updateClientAndServerItem', payload);
+    },
+    async updateExistingCartItem (existingCartItem: CartItem): Promise<void> {
+      try {
+        await this.updateClientAndServerItem({
+          product: Object.assign({}, existingCartItem, {
+            qty: this.quantity,
+            plushieId: existingCartItem.plushieId,
+            plushieName: this.name,
+            email: this.email,
+            bodyparts: this.getBodypartsData(),
+            customerImages: this.isUploadNow && this.customerImage ? [this.customerImage] : [],
+            uploadMethod: this.uploadMethod,
+            product_option: setBundleProductOptionsAsync(
+              null,
+              {
+                product: existingCartItem,
+                bundleOptions: this.$store.state.product.current_bundle_options
+              }
+            )
+          }),
+          forceUpdateServerItem: true
+        });
+      } catch (error) {
+        if (error instanceof ServerError) {
+          throw error;
+        }
+
+        Logger.error(error, 'budsies')();
+      }
+
+      this.goToCart();
     }
   },
   beforeMount () {
@@ -824,6 +983,13 @@ export default defineComponent({
         this.$store.dispatch('budsies/loadPlushieShortcode', { plushieId: this.plushieId });
       },
       immediate: true
+    },
+    existingPlushieId (): void {
+      if (!this.existingCartItem) {
+        return;
+      }
+
+      this.fillPlushieDataFromCartItem(this.existingCartItem);
     }
   }
 })
@@ -841,6 +1007,10 @@ export default defineComponent({
   b,
   strong {
     font-weight: var(--font-semibold);
+  }
+
+  ._form {
+    margin-top: var(--spacer-lg);
   }
 
   ._step-divider {
@@ -934,10 +1104,15 @@ export default defineComponent({
     margin-top: var(--spacer-xl);
   }
 
-  ._order-agreement {
-    max-width: 50em;
+  ._agreement {
+    margin: var(--spacer-xl) auto 0;
     font-size: var(--font-xs);
+    text-align: left;
+    max-width: 45rem;
+  }
 
+  ._production-time-selector-section {
+    margin-top: var(--spacer-xl);
   }
 
   &.-skin-petsies {
