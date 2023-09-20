@@ -200,11 +200,12 @@
 import Vue, { VueConstructor } from 'vue';
 import { SfHeading } from '@storefront-ui/vue';
 
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import Product from 'core/modules/catalog/types/Product';
-import { getProductDefaultPrice } from 'src/modules/shared';
+import { getProductDefaultPrice, ProductEvent } from 'src/modules/shared';
 
 import { ProductStructuredData } from 'src/modules/budsies';
 
@@ -328,6 +329,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
 
     this.isDataLoaded = true;
+    EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, this.getCurrentProduct);
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
