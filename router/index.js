@@ -236,6 +236,12 @@ let routes = [
           break;
       }
 
+      if (!parentSku) {
+        return {
+          name: 'detailed-cart'
+        }
+      }
+
       return {
         name: 'cross-sells',
         params: {

@@ -85,7 +85,7 @@ export default Vue.extend({
   props: {
     parentSku: {
       type: String,
-      default: undefined
+      required: true
     }
   },
   components: {
@@ -142,11 +142,6 @@ export default Vue.extend({
     return (this as any).loadData();
   },
   async beforeMount (): Promise<void> {
-    if (!this.parentSku) {
-      this.redirectToCart();
-      return;
-    }
-
     await this.loadData();
 
     if (!this.crossSellsProducts.length && !this.upSellsProducts.length) {
@@ -329,11 +324,6 @@ export default Vue.extend({
   },
   watch: {
     async parentSku (): Promise<void> {
-      if (!this.parentSku) {
-        this.redirectToCart();
-        return;
-      }
-
       await this.loadData();
 
       if (!this.crossSellsProducts.length && !this.upSellsProducts.length) {
