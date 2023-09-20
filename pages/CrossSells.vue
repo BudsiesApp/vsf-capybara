@@ -70,7 +70,6 @@
 import Vue from 'vue';
 import config from 'config';
 import { SearchQuery } from 'storefront-query-builder';
-import { isServer } from '@vue-storefront/core/helpers';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import Product from 'core/modules/catalog/types/Product';
@@ -139,28 +138,51 @@ export default Vue.extend({
       return this.$store.getters['product/getProductBySkuDictionary'];
     }
   },
-  async serverPrefetch () {
-    await this.$store.dispatch(
-      'product/loadProduct',
-      {
-        parentSku: (this as any).parentSku,
-        setCurrent: false
-      }
-    );
-
-    await Promise.all([
-      (this as any).loadCrossSellsProducts(),
-      (this as any).loadUpSellsProducts()
-    ]);
+  async serverPrefetch (): Promise<void> {
+    return (this as any).loadData();
   },
-  async mounted () {
-    await this.setCurrentProduct();
+  async beforeMount (): Promise<void> {
+    if (!this.parentSku) {
+      this.redirectToCart();
+    }
+
+    await this.loadData();
+
+    if (!this.crossSellsProducts.length && !this.upSellsProducts.length) {
+      this.redirectToCart();
+      return;
+    }
+
+    this.onAfterListsShow();
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
     next();
   },
   methods: {
+    onAfterListsShow (): void {
+      if (this.crossSellsProducts.length) {
+        EventBus.$emit(
+          ProductEvent.PRODUCT_LIST_SHOW,
+          {
+            products: this.crossSellsProducts,
+            categoryName: 'Cross Sells',
+            categoryId: this.parentSku
+          }
+        );
+      }
+
+      if (this.upSellsProducts.length) {
+        EventBus.$emit(
+          ProductEvent.PRODUCT_LIST_SHOW,
+          {
+            products: this.upSellsProducts,
+            categoryName: 'Up Sells',
+            categoryId: this.parentSku
+          }
+        );
+      }
+    },
     getProductLinkSkusByType (type: string): string[] {
       if (!this.getCurrentProduct) {
         return [];
@@ -266,21 +288,27 @@ export default Vue.extend({
     async loadUpSellsProducts () {
       await this.loadProductsList('upsell');
     },
+    async loadData (): Promise<void> {
+      if (!this.getCurrentProduct) {
+        await this.$store.dispatch(
+          'product/loadProduct',
+          {
+            parentSku: (this as any).parentSku,
+            setCurrent: false
+          }
+        );
+      }
+
+      await Promise.all([
+        (this as any).loadCrossSellsProducts(),
+        (this as any).loadUpSellsProducts()
+      ]);
+    },
     goToCart (): void {
       this.$router.push(localizedRoute({ name: 'detailed-cart' }));
     },
     redirectToCart (): void {
       this.$router.replace(localizedRoute({ name: 'detailed-cart' }));
-    },
-    async setCurrentProduct (): Promise<void> {
-      const sku = this.parentSku;
-
-      if (!sku || this.getCurrentProduct?.sku === sku) {
-        return;
-      }
-
-      const product = this.getProductBySkuDictionary[sku];
-      await this.$store.dispatch('product/setCurrent', product);
     },
     onProductCardClick (
       productSku: string,
@@ -299,60 +327,19 @@ export default Vue.extend({
     }
   },
   watch: {
-    getCurrentProduct: {
-      async handler (val, oldVal) {
-        if (isServer) {
-          return;
-        }
+    async parentSku (): Promise<void> {
+      if (!this.parentSku) {
+        this.redirectToCart();
+      }
 
-        if (!val) {
-          return;
-        }
+      await this.loadData();
 
-        Promise.all([
-          this.loadCrossSellsProducts(),
-          this.loadUpSellsProducts()
-        ]).then(() => {
-          if (!this.crossSellsProducts.length && !this.upSellsProducts.length) {
-            this.redirectToCart();
-          }
-        });
-      },
-      immediate: true
-    },
-    crossSellsProducts: {
-      handler (value) {
-        if (!value || !value.length) {
-          return;
-        }
+      if (!this.crossSellsProducts.length && !this.upSellsProducts.length) {
+        this.redirectToCart();
+        return;
+      }
 
-        EventBus.$emit(
-          ProductEvent.PRODUCT_LIST_SHOW,
-          {
-            products: value,
-            categoryName: 'Cross Sells',
-            categoryId: this.parentSku
-          }
-        );
-      },
-      immediate: true
-    },
-    upSellsProducts: {
-      handler (value) {
-        if (!value || !value.length) {
-          return;
-        }
-
-        EventBus.$emit(
-          ProductEvent.PRODUCT_LIST_SHOW,
-          {
-            products: value,
-            categoryName: 'Up Sells',
-            categoryId: this.parentSku
-          }
-        );
-      },
-      immediate: true
+      this.onAfterListsShow();
     }
   }
 });
