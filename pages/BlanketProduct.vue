@@ -19,14 +19,16 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 import config from 'config';
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
-import CartItem from 'core/modules/cart/types/CartItem';
 
+import CartItem from 'core/modules/cart/types/CartItem';
 import Product from 'core/modules/catalog/types/Product';
 
 import { ProductStructuredData } from 'src/modules/budsies';
+import { ProductEvent } from 'src/modules/shared';
 
 import OBlanketProductOrderForm from 'theme/components/organisms/o-blanket-product-order-form.vue';
 
@@ -82,6 +84,8 @@ export default Vue.extend({
     if (!this.getCurrentProduct) {
       await this.loadData();
     }
+
+    EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, this.getCurrentProduct);
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);

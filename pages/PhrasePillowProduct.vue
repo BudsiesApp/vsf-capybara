@@ -20,6 +20,7 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 import config from 'config';
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { isServer } from '@vue-storefront/core/helpers';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
@@ -28,6 +29,7 @@ import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/stor
 import Product from 'core/modules/catalog/types/Product';
 
 import { ProductStructuredData } from 'src/modules/budsies';
+import { ProductEvent } from 'src/modules/shared';
 
 import OPhrasePillowProductOrderForm, { DesignSelectedEventPayload } from 'theme/components/organisms/o-phrase-pillow-product-order-form.vue';
 
@@ -100,8 +102,9 @@ export default Vue.extend({
 
     catalogHooksExecutors.productPageVisited(product);
   },
-  mounted () {
-    this.setCurrentProduct();
+  async mounted (): Promise<void> {
+    await this.setCurrentProduct();
+    EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, this.getCurrentProduct);
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);

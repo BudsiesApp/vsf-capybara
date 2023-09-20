@@ -101,7 +101,7 @@ import {
   PlushieWizardEvents
 } from 'src/modules/budsies';
 import ServerError from 'src/modules/shared/types/server-error';
-import { CustomerImage, InjectType, getProductDefaultPrice } from 'src/modules/shared';
+import { CustomerImage, InjectType, ProductEvent, getProductDefaultPrice } from 'src/modules/shared';
 
 import foreversCreationWizardPersistedStateService from 'theme/helpers/plushie-creation-wizard-persisted-state.service';
 import getForeversSizeSkuBySizeAndType from 'theme/helpers/get-forevers-size-sku-by-size-and-type.function';
@@ -449,6 +449,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         parentSku: productSku,
         childSku: null
       });
+
+      EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, product);
 
       const plushieCreationTask = await this.$store.dispatch('budsies/createNewPlushie', { productId: product.id });
 

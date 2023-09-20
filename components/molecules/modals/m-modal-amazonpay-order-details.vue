@@ -28,8 +28,6 @@ import { SfModal, SfButton } from '@storefront-ui/vue';
 import { mapActions } from 'vuex';
 import AmazonPayAddressBook from 'src/modules/vsf-amazon-pay/components/AddressBook.vue';
 import AmazonPayWallet from 'src/modules/vsf-amazon-pay/components/Wallet.vue';
-import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
-import CartEvents from 'src/modules/shared/types/cart-events';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 
 export default {
@@ -64,7 +62,6 @@ export default {
     },
     goToCheckout () {
       this.closeModal()
-      EventBus.$emit(CartEvents.GO_TO_CHECKOUT_FROM_CART)
       this.$router.push(localizedRoute({ name: 'checkout' }))
     },
     enableOrderButton () {

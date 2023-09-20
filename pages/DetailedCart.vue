@@ -571,6 +571,21 @@ export default {
       this.$router.push(localizedRoute('/'));
     }
   },
+  watch: {
+    isLoading (value) {
+      if (value) {
+        return;
+      }
+
+      EventBus.$emit(
+        CartEvents.CART_VIEWED,
+        {
+          products: this.products,
+          platformTotals: this.$store.state.cart.platformTotals
+        }
+      );
+    }
+  },
   metaInfo () {
     return {
       title: htmlDecode(this.$t('Shopping Cart'))
