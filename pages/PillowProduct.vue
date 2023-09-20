@@ -9,17 +9,18 @@
       :artwork-upload-url="artworkUploadUrl"
       :product="getCurrentProduct"
       :plushie-id="plushieId"
+      :existing-plushie-id="existingPlushieId"
       @make-another="onMakeAnother"
-      v-if="getCurrentProduct"
+      v-if="showForm"
     />
   </div>
 </template>
 
 <script lang="ts">
+import Vue, { PropType } from 'vue';
 import config from 'config';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { htmlDecode } from '@vue-storefront/core/filters';
-import { isServer } from '@vue-storefront/core/helpers';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 
@@ -32,15 +33,22 @@ import OPillowProductOrderForm from '../components/organisms/o-pillow-product-or
 
 const pillowSku = 'customPillow_bundle';
 
-export default {
+export default Vue.extend({
   name: 'PillowProduct',
+  props: {
+    existingPlushieId: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    }
+  },
   components: {
     OPillowProductOrderForm,
     ProductStructuredData
   },
   data () {
     return {
-      plushieId: undefined as number | undefined
+      plushieId: undefined as number | undefined,
+      isDataLoaded: false
     };
   },
   computed: {
@@ -58,34 +66,23 @@ export default {
     },
     getProductBySkuDictionary (): Record<string, Product> {
       return this.$store.getters['product/getProductBySkuDictionary'];
+    },
+    showForm (): boolean {
+      return this.isDataLoaded && !!this.getCurrentProduct;
     }
   },
-  async mounted (): Promise<void> {
-    // TODO check ID in URL and load plushie instead of create a new one
-    await this.setCurrentProduct();
-    this.plushieId = await this.createPlushie();
+  async serverPrefetch () {
+    if (this.$ssrContext) this.$ssrContext.output.cacheTags.add('product')
+
+    await (this as any).loadData();
+  },
+  async beforeMount () {
+    if (!this.getCurrentProduct) {
+      await this.loadData();
+    }
+
+    this.isDataLoaded = true;
     EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, this.getCurrentProduct);
-  },
-  async asyncData ({ store, route, context }): Promise<void> {
-    if (context) context.output.cacheTags.add('product')
-
-    const product = await store.dispatch('product/loadProduct',
-      {
-        parentSku: pillowSku,
-        setCurrent: false
-      }
-    );
-
-    await Promise.all([
-      store.dispatch('budsies/loadProductBodyparts', { productId: product.id }),
-      store.dispatch('budsies/loadProductRushAddons', { productId: product.id })
-    ]);
-
-    if (isServer) {
-      await store.dispatch('product/setCurrent', product);
-    }
-
-    catalogHooksExecutors.productPageVisited(product);
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
@@ -110,6 +107,25 @@ export default {
 
       const product = this.getProductBySkuDictionary[pillowSku];
       await this.$store.dispatch('product/setCurrent', product);
+    },
+    async loadData (): Promise<void> {
+      this.isDataLoaded = false;
+
+      const product = await this.$store.dispatch('product/loadProduct',
+        {
+          parentSku: pillowSku,
+          setCurrent: true
+        }
+      );
+
+      await Promise.all([
+        this.$store.dispatch('budsies/loadProductBodyparts', { productId: product.id }),
+        this.$store.dispatch('budsies/loadProductRushAddons', { productId: product.id })
+      ]);
+
+      catalogHooksExecutors.productPageVisited(product);
+
+      this.isDataLoaded = true;
     }
   },
   metaInfo () {
@@ -128,7 +144,7 @@ export default {
         : []
     };
   }
-};
+});
 </script>
 
 <style lang="scss" scoped>

@@ -232,13 +232,16 @@ const clothesProductSkus = [
   'customGolfShirts_bundle'
 ];
 
+const customPillowSku = 'customPillow_bundle';
+
 const editableProductsSkus = [
   ...foreversProductsSkus,
   ...printedProductSkus,
   ...blanketProductsSkus,
   ...clayPlushieProductSkus,
   ...golfHeadCoversProductsSkus,
-  ...clothesProductSkus
+  ...clothesProductSkus,
+  customPillowSku
 ];
 
 export default {
@@ -409,7 +412,14 @@ export default {
       return this.truncate(product.plushieDescription, 150, 50);
     },
     editHandler (product) {
-      if (clothesProductSkus.includes(product.sku)) {
+      if (product.sku === customPillowSku) {
+        this.$router.push({
+          name: 'pillow-product',
+          query: {
+            existingPlushieId: product.plushieId
+          }
+        })
+      } else if (clothesProductSkus.includes(product.sku)) {
         const designOptionName = product.sku === 'customPajamas_bundle' ? 'product' : 'design';
 
         this.$router.push({
