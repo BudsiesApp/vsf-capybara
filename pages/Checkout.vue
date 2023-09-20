@@ -47,6 +47,8 @@ import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 
+import { CartEvents } from 'src/modules/shared';
+
 import OBillingAddress from 'theme/components/organisms/o-billing-address';
 import OShipping from 'theme/components/organisms/o-shipping';
 import OConfirmOrder from 'theme/components/organisms/o-confirm-order';
@@ -139,6 +141,7 @@ export default {
   beforeMount () {
     this.$bus.$on('order-after-placed', this.onOrderAfterPlacedHandler);
     EventBus.$on(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
+    EventBus.$emit(CartEvents.BEGIN_CHECKOUT);
   },
   beforeDestroy () {
     this.$bus.$off('order-after-placed', this.onOrderAfterPlacedHandler);
