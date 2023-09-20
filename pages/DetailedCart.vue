@@ -156,7 +156,6 @@ import debounce from 'lodash-es/debounce';
 import {
   SfPrice,
   SfList,
-  SfDropdown,
   SfCollectedProduct,
   SfButton,
   SfImage,
@@ -179,6 +178,7 @@ import { getBundleOptionsValues, getSelectedBundleOptions } from '@vue-storefron
 import { CART_UPD_ITEM } from '@vue-storefront/core/modules/cart/store/mutation-types'
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
+import MDropdown from 'theme/components/molecules/m-dropdown.vue';
 
 const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
 
@@ -199,9 +199,9 @@ const editableProductsSkus = [
 export default {
   name: 'DetailedCart',
   components: {
+    MDropdown,
     SfPrice,
     SfList,
-    SfDropdown,
     SfCollectedProduct,
     SfImage,
     SfButton,
@@ -398,6 +398,21 @@ export default {
     },
     processStartShopping () {
       this.$router.push(localizedRoute('/'));
+    }
+  },
+  watch: {
+    isLoading (value) {
+      if (value) {
+        return;
+      }
+
+      EventBus.$emit(
+        CartEvents.CART_VIEWED,
+        {
+          products: this.products,
+          platformTotals: this.$store.state.cart.platformTotals
+        }
+      );
     }
   },
   metaInfo () {

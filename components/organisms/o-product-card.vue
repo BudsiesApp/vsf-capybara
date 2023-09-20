@@ -11,25 +11,37 @@
       :image-height="imageHeight"
       :image-width="imageWidth"
       :badge-label="product.discount"
-    />
+    >
+      <template #image>
+        <BaseImage
+          :src="product.image"
+          :alt="product.title"
+          :width="`${imageWidth}px`"
+          :aspect-ratio="imageAspectRatio"
+        />
+      </template>
+    </SfProductCard>
   </div>
 </template>
 
 <script lang="ts">
 import { SfProductCard } from '@storefront-ui/vue';
 
+import BaseImage from 'src/modules/budsies/components/BaseImage.vue';
+
 export default {
   name: 'OProductCard',
   components: {
+    BaseImage,
     SfProductCard
   },
   props: {
     imageWidth: {
-      type: [String, Number],
+      type: Number,
       default: 216
     },
     imageHeight: {
-      type: [String, Number],
+      type: Number,
       default: 326
     },
     product: {
@@ -52,6 +64,9 @@ export default {
   computed: {
     productLink (): string {
       return this.link ? this.link : this.product.link;
+    },
+    imageAspectRatio (): number {
+      return this.imageWidth / this.imageHeight;
     }
   }
 }

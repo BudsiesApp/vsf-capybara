@@ -35,9 +35,6 @@ import {
   SfButton
 } from '@storefront-ui/vue';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
-import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
-
-import CartEvents from 'src/modules/shared/types/cart-events';
 
 import APromoCode from 'theme/components/atoms/a-promo-code.vue';
 import MPriceSummary from 'theme/components/molecules/m-price-summary.vue';
@@ -63,7 +60,6 @@ export default {
       openModal: 'openModal'
     }),
     goToCheckout () {
-      EventBus.$emit(CartEvents.GO_TO_CHECKOUT_FROM_CART)
       this.$router.push(localizedRoute({ name: 'checkout' }));
     }
   }
