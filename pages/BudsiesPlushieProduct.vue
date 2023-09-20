@@ -99,6 +99,8 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 import config from 'config';
+
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
@@ -107,6 +109,7 @@ import { SfHeading, SfModal } from '@storefront-ui/vue';
 import Product from 'core/modules/catalog/types/Product';
 
 import { ProductStructuredData } from 'src/modules/budsies';
+import { ProductEvent } from 'src/modules/shared';
 
 import OBudsiesPlushieProductOrderForm from 'theme/components/organisms/o-budsies-plushie-product-order-form.vue';
 
@@ -316,6 +319,8 @@ export default Vue.extend({
     }
 
     this.isDataLoaded = true;
+
+    EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, this.getCurrentProduct);
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
