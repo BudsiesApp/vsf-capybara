@@ -60,7 +60,7 @@
         </router-link>
 
         <div class="_legal-information">
-          ©{{ new Date().getFullYear() }} Budsies Co LLC. All Rights Reserved.
+          ©{{ new Date().getFullYear() }} Budsies PR LLC. All Rights Reserved.
           |
           <router-link to="/terms-of-service/" exact>
             {{ $t('Terms of Service') }}
