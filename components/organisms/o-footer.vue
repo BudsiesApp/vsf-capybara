@@ -87,7 +87,7 @@
       </div>
 
       <p class="_copyright">
-        © 2023 {{ $t('Budsies Co LLC. All Rights Reserved') }}. |
+        © 2023 {{ $t('Budsies PR LLC. All Rights Reserved') }}. |
         <router-link to="/privacy-policy/">
           {{ $t('Privacy Policy') }}
         </router-link>
