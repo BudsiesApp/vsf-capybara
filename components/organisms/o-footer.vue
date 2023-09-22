@@ -54,7 +54,7 @@
       </div>
 
       <div class="_copyright">
-        {{ $t('Copyright {year}. Budsies Co LLC. All Rights Reserved.', {year: new Date().getFullYear()}) }}
+        {{ $t('Copyright {year}. Budsies PR LLC. All Rights Reserved.', {year: new Date().getFullYear()}) }}
       </div>
     </SfFooter>
   </footer>
