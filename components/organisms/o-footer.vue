@@ -189,12 +189,12 @@ export default {
             //     name: 'hawaiian-shirts-creation'
             //   }
             // },
-            // {
-            //   name: this.$t('Golf Shirts'),
-            //   link: {
-            //     name: 'golf-shirts-creation'
-            //   }
-            // },
+            {
+              name: this.$t('Golf Shirts'),
+              link: {
+                name: 'golf-shirts-creation'
+              }
+            },
             { name: this.$t('Custom Golf Headcovers'), link: '/golf-headcovers/' },
             { name: this.$t('Custom Keychains'), link: { name: 'printed-keychains-creation-page' } },
             { name: this.$t('Custom Magnets'), link: { name: 'felted-magnets-creation-page' } },

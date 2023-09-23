@@ -105,12 +105,12 @@ export default Vue.extend({
         //     name: 'hawaiian-shirts-creation'
         //   }
         // },
-        // {
-        //   label: this.$t('Golf Shirts'),
-        //   url: {
-        //     name: 'golf-shirts-creation'
-        //   }
-        // },
+        {
+          label: this.$t('Golf Shirts'),
+          url: {
+            name: 'golf-shirts-creation'
+          }
+        },
         {
           label: 'Pet Keychains',
           url: {
