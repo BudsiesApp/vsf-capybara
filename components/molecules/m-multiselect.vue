@@ -20,6 +20,7 @@
       :show-labels="false"
       :show-pointer="true"
       :preserve-search="shouldPreserveSearch"
+      :clear-on-select="!allowFreeText"
       :max-height="190"
       :autocomplete="autocomplete"
       open-direction="below"
@@ -29,7 +30,14 @@
       @close="onClose"
     >
       <template #caret>
-        <SfChevron class="_chevron" />
+        <SfChevron
+          class="_chevron"
+          :class="{'-hidden': hideDropdownArrow}"
+        />
+      </template>
+
+      <template #noResult>
+        <slot name="noResult" />
       </template>
     </multiselect>
 
@@ -140,6 +148,10 @@ export default Vue.extend({
     autocomplete: {
       type: String,
       default: undefined
+    },
+    hideDropdownArrow: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -346,6 +358,10 @@ export default Vue.extend({
     right: var(--spacer-xs);
     top: 50%;
     transform: translateY(-50%);
+
+    &.-hidden {
+      display: none;
+    }
   }
 
   ::v-deep .multiselect {

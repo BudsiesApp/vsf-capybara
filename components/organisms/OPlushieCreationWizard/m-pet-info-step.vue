@@ -47,8 +47,13 @@
           :options="breedsList"
           :required="false"
           :allow-free-text="true"
+          :hide-dropdown-arrow="true"
           :disabled="disabled"
-        />
+        >
+          <template #noResult>
+            {{ $t('If your breed isn\'t listed in the suggested options, please add it. We do all breeds!') }}
+          </template>
+        </MMultiselect>
 
         <div class="_helper-text">
           {{ $t('Optional. Leave blank if unsure') }} <br>
