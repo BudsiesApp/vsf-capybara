@@ -1,9 +1,6 @@
 <template>
   <footer class="o-footer">
     <div class="o-footer__logo" />
-    <div class="o-footer__slogan">
-      Handmade pet keepsakes
-    </div>
     <SfFooter :column="6" :multiple="true">
       <SfFooterColumn
         v-for="linkGroup in links"
@@ -51,7 +48,7 @@
       </div>
 
       <div class="_additional-information">
-        <router-link to="//support.mypetsies.com/support/home" target="_blank" exact>
+        <router-link to="//support.waggables.com/" target="_blank" exact>
           <SfMenuItem
             class="sf-footer__menu-item"
             :label="$t('Contact Us')"
@@ -105,24 +102,24 @@ export default {
       social: [
         {
           name: 'facebook',
-          url: 'https://www.facebook.com/petsies/'
+          url: 'https://www.facebook.com/waggables/'
         },
         {
           name: 'instagram',
-          url: 'https://www.instagram.com/petsies/'
-        },
-        {
-          name: 'twitter',
-          url: 'https://twitter.com/petsiesofficial/'
-        },
-        {
-          name: 'pinterest',
-          url: 'https://www.pinterest.com/petsies/'
-        },
-        {
-          name: 'tiktok',
-          url: 'https://www.tiktok.com/@mypetsies'
+          url: 'https://www.instagram.com/waggables/'
         }
+        // {
+        //   name: 'twitter',
+        //   url: 'https://twitter.com/petsiesofficial/'
+        // },
+        // {
+        //   name: 'pinterest',
+        //   url: 'https://www.pinterest.com/petsies/'
+        // },
+        // {
+        //   name: 'tiktok',
+        //   url: 'https://www.tiktok.com/@mypetsies'
+        // }
       ]
     };
   },
@@ -142,74 +139,29 @@ export default {
           children: [
             {
               name: this.$t('About'),
-              link: '/about-petsies/'
+              link: '/about/'
             },
             {
-              name: this.$t('Blog'),
-              link: '/blog/',
+              name: this.$t('Return Policy'),
+              link: '//support.waggables.com/support/solutions/folders/13000009748',
               target: '_blank'
-            },
-            {
-              name: this.$t('Refund & Return Policy'),
-              link: '/craftsmanship-promise/'
             },
             {
               name: this.$t('Media'),
-              link: '//support.mypetsies.com/support/solutions/folders/13000003990',
+              link: '/press/'
+            },
+            {
+              name: this.$t('FAQ\'s'),
+              link: '//support.waggables.com/',
               target: '_blank'
-            },
-            {
-              name: this.$t('How it Works'),
-              link: '/how-it-works/'
-            },
-            {
-              name: this.$t('Reviews'),
-              link: '/reviews/'
             }
           ]
         },
         services: {
-          name: this.$t('Services'),
+          name: this.$t('Products'),
           children: [
-            { name: this.$t('Custom Forevers'), link: '/forevers-pet-plush/' },
-            { name: this.$t('Custom Pillows'), link: '/custom-pillows/' },
-            { name: this.$t('Custom Blankets'), link: '/custom-blankets/' },
-            { name: this.$t('Custom Socks'), link: { name: 'printed-socks-creation-page' } },
-            { name: this.$t('Custom Face Masks'), link: { name: 'printed-masks-creation-page' } },
-            { name: this.$t('Bobbleheads & Figurines'), link: '/pet-bobblehead-figurines/' },
-            {
-              name: this.$t('Pajamas'),
-              link: {
-                name: 'pajamas-creation'
-              }
-            },
-            // {
-            //   name: this.$t('Hawaiian Shirts'),
-            //   link: {
-            //     name: 'hawaiian-shirts-creation'
-            //   }
-            // },
-            {
-              name: this.$t('Golf Shirts'),
-              link: {
-                name: 'golf-shirts-creation'
-              }
-            },
-            { name: this.$t('Custom Golf Headcovers'), link: '/golf-headcovers/' },
-            { name: this.$t('Custom Keychains'), link: { name: 'printed-keychains-creation-page' } },
-            { name: this.$t('Custom Magnets'), link: { name: 'felted-magnets-creation-page' } },
-            { name: this.$t('Custom Ornaments'), link: { name: 'felted-ornaments-creation-page' } },
-            { name: this.$t('Custom Bulk'), link: '/bulk-custom-stuffed-animal-manufacture/' },
-            { name: this.$t('Gift Cards'), link: { name: 'gift-cards' } },
-            { name: this.$t('Gift Box'), link: { name: 'giftbox' } },
-            { name: this.$t('Accessories'),
-              link: {
-                name: 'category',
-                params: {
-                  slug: 'petsies-accessories-11'
-                }
-              }
-            }
+            { name: this.$t('Waggables'), link: '/products/' },
+            { name: this.$t('Gift Cards'), link: { name: 'gift-cards' } }
           ]
         },
         account: {
@@ -225,22 +177,21 @@ export default {
                 }
               }
             },
-            { name: this.$t('My Cart'), link: { name: 'detailed-cart' } },
-            { name: this.$t('Rising Stars'), link: '/rising-stars/' }
-          ]
-        },
-        quickLInks: {
-          name: this.$t('Quick Links'),
-          children: [
-            { name: this.$t('Veterinarians'), link: '/partners/' },
-            { name: this.$t('Become a Partner'), link: '/partners/' },
-            { name: this.$t('Resellers'), link: '/partners/' },
-            { name: this.$t('Affiliates'), link: '/affiliate-home/' },
-            { name: this.$t('Corporate Buying'), link: '/partners/' },
-            { name: this.$t('FAQ'), link: '//support.mypetsies.com/support/home', target: '_blank' },
-            { name: this.$t('Referral Rewards'), link: '//referrals.mypetsies.com/', target: '_blank' }
+            { name: this.$t('My Cart'), link: { name: 'detailed-cart' } }
           ]
         }
+        // quickLInks: {
+        //   name: this.$t('Quick Links'),
+        //   children: [
+        //     { name: this.$t('Veterinarians'), link: '/partners/' },
+        //     { name: this.$t('Become a Partner'), link: '/partners/' },
+        //     { name: this.$t('Resellers'), link: '/partners/' },
+        //     { name: this.$t('Affiliates'), link: '/affiliate-home/' },
+        //     { name: this.$t('Corporate Buying'), link: '/partners/' },
+        //     { name: this.$t('FAQ'), link: '//support.mypetsies.com/support/home', target: '_blank' },
+        //     { name: this.$t('Referral Rewards'), link: '//referrals.mypetsies.com/', target: '_blank' }
+        //   ]
+        // }
       };
     }
   },
@@ -266,14 +217,23 @@ export default {
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .o-footer {
-  background-color: var(--c-footer);
+  // background: url(/assets/footer-grass-bg.png);
   padding-bottom: var(--spacer-lg);
   margin-top: calc(var(--spacer-2xl) + var(--spacer-xl));
+  background-image: url(/assets/footer-grass-bg.png);
+    background-size: cover;
+    background-position: center 0;
+    background-repeat: no-repeat;
+    position: relative;
+  padding-top: var(--spacer-3xl);
+
   &__logo {
     background-image: url(../../assets/logo-footer.png);
-    height: 121px;
+    background-size: 100% auto;
+    display: block;
+    height: 98px;
     margin: -60px auto 0;
-    width: 127px;
+    width: 300px;
   }
   &__slogan {
     text-align: center;
@@ -287,9 +247,9 @@ export default {
   }
   ::v-deep .sf-menu-item {
     --menu-item-font-size: var(--font-sm);
-    --menu-item-label-color: var(--c-light-variant);
+    --menu-item-label-color: var(--c-text-darker);
     &:hover {
-      --menu-item-label-color: var(--c-light-variant);
+      --menu-item-label-color: var(--c-text-darker);
     }
     .sf-icon {
       --icon-color: var(--c-light-variant);
@@ -298,7 +258,7 @@ export default {
   .sf-footer {
     --footer-width: 1272px;
     --footer-padding: 0 var(--spacer-sm);
-    --footer-column-title-color: var(--c-light-variant);
+    --footer-column-title-color: var(--c-text-darker);
     --footer-column-title-background: var(--c-footer);
 
     --footer-column-title-font-size: --h4-font-size;
@@ -377,7 +337,7 @@ export default {
   }
 
   ._legal-information {
-    color: var(--c-light-variant);
+    color: var(--c-text-darker);
     font-size: var(--font-xs);
     margin-top: var(--spacer-xs);
 
@@ -388,12 +348,23 @@ export default {
 
   @include for-desktop {
     max-width: 100%;
+    background-image: url(/assets/footer-grass-bg-large.png);
     ::v-deep .sf-footer-column__content {
       padding: 0;
     }
 
     ._additional-information {
       padding: 0;
+    }
+
+    &__logo {
+      height: 128px;
+    width: 392px;
+
+    }
+
+    .sf-footer {
+      margin-top: var(--spacer-base);
     }
 
     .social-icon {

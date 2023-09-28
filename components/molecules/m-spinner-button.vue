@@ -50,7 +50,8 @@ export default Vue.extend({
 
   .sf-button {
     &.-icon-button {
-      --button-background: var(--c-primary);
+      // --button-background: var(--c-primary); TODO
+      --button-background: #ea86b4; // TODO
       --button-border-radius: 50%;
 
       display: var(--spinner-button-display, flex);

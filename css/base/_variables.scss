@@ -6,8 +6,11 @@ $line-height-base: 1.34;
 $font-size-base: 16px;
 $font-size-base-mobile: 15px;
 
-$font-family-base: "Avenir", sans-serif;
 $font-family-intro: "Roselina", cursive;
+
+$font-family-base: "Gotham-Medium", sans-serif;
+$font-family-bold: "Gotham-Bold", sans-serif;
+$font-family-accent: "Whale-Song-Regular", sans-serif;
 
 $page-color: #fff;
 $color-regular-text: #535353;
@@ -53,7 +56,7 @@ $forms-color-placeholder: #a09999;
 :root {
     --font-size-base: #{$font-size-base-mobile};
     // font-family
-    --font-family-primary: #{$font-family-base};
+    --font-family-primary: #{$font-family-accent};
     --font-family-secondary: #{$font-family-base};
     --font-family-intro: #{$font-family-intro};
     // font-weight
@@ -84,37 +87,43 @@ $forms-color-placeholder: #a09999;
     --button-font-size: var(--font-sm);
 
     // Colors
-    @include generate-color-variants(--c-black, #535353);
+    // @include generate-color-variants(--c-black, #535353);
+    @include generate-color-variants(--c-black, #003935);
     @include generate-color-variants(--c-white, #ffffff);
     @include generate-color-variants(--c-blue, #003e6b);
     @include generate-color-variants(--_c-green-primary, #18ae0c);
     @include generate-color-variants(--_c-green-secondary, #81d57b);
     @include generate-color-variants(--_c-dark-primary, #535353);
     @include generate-color-variants(--_c-dark-secondary, #a3a3a3);
-    @include generate-color-variants(--_c-gray-primary, #72757E);
+    @include generate-color-variants(--_c-gray-primary, #b8b9bb);
     @include generate-color-variants(--_c-gray-secondary, #8D8F9A);
     @include generate-color-variants(--_c-gray-accent, #e0e0e1);
-    @include generate-color-variants(--_c-light-primary, #f78f9e);
+    @include generate-color-variants(--_c-light-primary, #e55295);
     @include generate-color-variants(--_c-light-secondary, #e5f9ff);
     @include generate-color-variants(--_c-red-primary, #f53f00);
-    @include generate-color-variants(--_c-red-secondary, #f9a284);
+    @include generate-color-variants(--_c-red-secondary, #ffadcc);
     @include generate-color-variants(--_c-yellow-primary, #ecc713);
     @include generate-color-variants(--_c-yellow-secondary, #f6e389);
+    // @include generate-color-variants(--_c-blue-primary, #10cbc0);
     @include generate-color-variants(--_c-blue-primary, #43c5e4);
     @include generate-color-variants(--_c-blue-secondary, #c3e8fd);
+    // @include generate-color-variants(--_c-blue-secondary, #c3fffb);
     --c-body: var(--c-white);
     --c-text: var(--c-black);
+    --c-text-dark: #00665f; // TODO
+    --c-text-darker: #073936; // TODO
     --c-text-muted: var(--_c-gray-secondary);
     --c-text-disabled: var(--_c-gray-secondary-lighten);
     --c-link: var(--_c-blue-primary);
     --c-link-hover: var(--_c-blue-primary);
-    --c-footer: var(--c-blue);
+    --c-footer: transparent;
     --property-name-color: var(--property-color, var(--c-text));
     --c-blockquote: var(--c-text-muted);
     --c-blockquote-border: var(--_c-gray-accent);
     --c-divider: var(--_c-gray-accent);
-    --c-accent: var(--_c-light-primary);
+    --c-accent: var(--_c-blue-primary);
     --c-final-price: var(--c-primary);
+    --c-button-border: var(--_c-red-secondary);
 
     @include assign-color-variants(--c-primary, --_c-blue-primary);
     --c-primary-variant: var(--_c-blue-primary-darken);
@@ -130,9 +139,9 @@ $forms-color-placeholder: #a09999;
     --c-info-variant: var(--_c-blue-secondary);
     @include assign-color-variants(--c-success, --_c-green-secondary);
     --c-success-variant: var(--_c-green-primary);
-    @include assign-color-variants(--c-warning, --_c-light-primary);
+    @include assign-color-variants(--c-warning, #f53f00);
     --c-warning-variant: var(--_c-light-secondary);
-    @include assign-color-variants(--c-danger, --_c-light-primary);
+    @include assign-color-variants(--c-danger, #f53f00);
     --c-danger-variant: var(--_c-red-primary);
 
     @media (min-width: $tablet-min) {

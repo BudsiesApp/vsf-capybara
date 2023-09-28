@@ -684,6 +684,7 @@ export default {
     ::v-deep {
       .sf-quantity-selector__button {
         --button-background: transparent;
+        --button-border-size: 0;
       }
     }
   }

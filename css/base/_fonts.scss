@@ -93,3 +93,24 @@ $font-path: $path + "Roselina-Script";
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
   @include font-face("Roselina", $font-path, 400, normal, svg);
 }
+
+$font-name: "Gotham-Bold";
+$font-path: $path + $font-name;
+@include font-face($font-name, $font-path, 800, bold);
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  @include font-face($font-name, $font-path, 800, bold, svg);
+}
+
+$font-name: "Gotham-Medium";
+$font-path: $path + $font-name;
+@include font-face($font-name, $font-path, 400, normal);
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  @include font-face($font-name, $font-path, 400, normal, svg);
+}
+
+$font-name: "Whale-Song-Regular";
+$font-path: $path + $font-name;
+@include font-face($font-name, $font-path, 400, normal);
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  @include font-face($font-name, $font-path, 400, normal, svg);
+}
