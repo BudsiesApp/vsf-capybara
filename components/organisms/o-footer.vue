@@ -22,7 +22,7 @@
         </SfList>
       </SfFooterColumn>
 
-      <SfFooterColumn title="Get more @Petsies cuteness" class="social-column">
+      <SfFooterColumn title="Get more @Waggables cuteness" class="social-column">
         <MNewsletterSubscription />
         <div class="social-icon desktop-only">
           <a
