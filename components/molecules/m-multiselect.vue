@@ -21,6 +21,7 @@
       :show-pointer="true"
       :preserve-search="shouldPreserveSearch"
       :clear-on-select="!allowFreeText"
+      :show-no-results="!allowFreeText"
       :max-height="190"
       :autocomplete="autocomplete"
       open-direction="below"

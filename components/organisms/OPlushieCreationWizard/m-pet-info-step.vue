@@ -53,11 +53,7 @@
           :allow-free-text="true"
           :hide-dropdown-arrow="true"
           :disabled="disabled"
-        >
-          <template #noResult>
-            {{ $t('No suggested options found, but you can type any breed. It will be added to the list') }}
-          </template>
-        </MMultiselect>
+        />
 
         <div class="_helper-text">
           {{ $t('Optional. Leave blank if unsure') }} <br>
