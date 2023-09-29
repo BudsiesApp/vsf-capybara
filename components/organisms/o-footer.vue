@@ -193,7 +193,6 @@ export default {
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .o-footer {
-  // background: url(/assets/footer-grass-bg.png);
   padding-bottom: var(--spacer-lg);
   margin-top: calc(var(--spacer-2xl) + var(--spacer-xl));
   background-image: url(/assets/footer-grass-bg.png);
