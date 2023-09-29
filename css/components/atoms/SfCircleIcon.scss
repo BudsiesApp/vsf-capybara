@@ -1,25 +1,23 @@
 .sf-circle-icon {
-  // --button-background: var(--c-primary);
   --button-border-radius: 100%;
   --button-border-width: 0;
-  // &:hover
 
   &:hover {
-    --button-background: var(--_c-light-primary); // TODO
-    --button-box-shadow: 0 0 0 0.3125rem rgba(var(--_c-light-primary), 0.3); // TODO
+    --button-background: var(--c-button-background);
+    --button-box-shadow: 0 0 0 0.3125rem rgba(var(--c-button-background), 0.3);
   }
 
   &:active {
     --button-transition: box-shadow 150ms ease;
-    --button-box-shadow: 0 0 0 0.5rem rgba(var(--_c-light-primary), 0.3); // TODO
+    --button-box-shadow: 0 0 0 0.5rem rgba(var(--c-button-background), 0.3);
   }
   &:disabled {
     --button-box-shadow: 0;
     --icon-color: var(--c-text-disabled);
-    --button-background: #ea86b4; // TODO
+    --button-background: var(--c-button-background-disabled);
 
     &:hover {
-      --button-background: #ea86b4; // TODO
+      --button-background: var(--c-button-background-disabled);
     }
   }
 }

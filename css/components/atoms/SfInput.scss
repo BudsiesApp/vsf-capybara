@@ -11,4 +11,11 @@
             --input-border-color: var(--c-text-disabled);
         }
     }
+
+    .sf-input__password-button {
+        --button-background: transparent;
+        --button-border-color: transparent;
+        --button-border-width: 0;
+        
+    }
 }

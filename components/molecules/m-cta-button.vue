@@ -4,7 +4,18 @@
     :class="{ '-small': size === 'small' }"
     v-show="showCtaButtonContainer"
   >
-    <SfButton class="_checkout-button" @click="goToCheckout">
+    <router-link
+      v-show="showDefaultButton"
+      :to="{
+        name: 'products'
+      }"
+    >
+      <SfButton>
+        {{ $t('Shop Now') }}
+      </SfButton>
+    </router-link>
+
+    <SfButton class="_checkout-button" v-show="showGoToCheckoutButton" @click="goToCheckout">
       {{ $t('Go to Checkout') }}
     </SfButton>
   </div>
@@ -17,6 +28,7 @@ import { SfButton } from '@storefront-ui/vue';
 import Product from 'core/modules/catalog/types/Product';
 
 enum HeaderCtaButtonType {
+  DEFAULT = 'default',
   GO_TO_CHECKOUT = 'go-to-checkout',
   HIDDEN = 'hidden',
 }
@@ -45,13 +57,20 @@ export default Vue.extend({
         return HeaderCtaButtonType.GO_TO_CHECKOUT;
       }
 
-      return HeaderCtaButtonType.HIDDEN;
+      if (routeName === 'checkout') {
+        return HeaderCtaButtonType.HIDDEN;
+      }
+
+      return HeaderCtaButtonType.DEFAULT;
     },
     showCtaButtonContainer (): boolean {
-      return this.showGoToCheckoutButton;
+      return this.ctaButtonType !== HeaderCtaButtonType.HIDDEN;
     },
     showGoToCheckoutButton (): boolean {
       return this.ctaButtonType === HeaderCtaButtonType.GO_TO_CHECKOUT;
+    },
+    showDefaultButton (): boolean {
+      return this.ctaButtonType === HeaderCtaButtonType.DEFAULT;
     }
   },
   methods: {

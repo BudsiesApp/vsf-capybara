@@ -108,18 +108,6 @@ export default {
           name: 'instagram',
           url: 'https://www.instagram.com/waggables/'
         }
-        // {
-        //   name: 'twitter',
-        //   url: 'https://twitter.com/petsiesofficial/'
-        // },
-        // {
-        //   name: 'pinterest',
-        //   url: 'https://www.pinterest.com/petsies/'
-        // },
-        // {
-        //   name: 'tiktok',
-        //   url: 'https://www.tiktok.com/@mypetsies'
-        // }
       ]
     };
   },
@@ -180,18 +168,6 @@ export default {
             { name: this.$t('My Cart'), link: { name: 'detailed-cart' } }
           ]
         }
-        // quickLInks: {
-        //   name: this.$t('Quick Links'),
-        //   children: [
-        //     { name: this.$t('Veterinarians'), link: '/partners/' },
-        //     { name: this.$t('Become a Partner'), link: '/partners/' },
-        //     { name: this.$t('Resellers'), link: '/partners/' },
-        //     { name: this.$t('Affiliates'), link: '/affiliate-home/' },
-        //     { name: this.$t('Corporate Buying'), link: '/partners/' },
-        //     { name: this.$t('FAQ'), link: '//support.mypetsies.com/support/home', target: '_blank' },
-        //     { name: this.$t('Referral Rewards'), link: '//referrals.mypetsies.com/', target: '_blank' }
-        //   ]
-        // }
       };
     }
   },
@@ -247,9 +223,9 @@ export default {
   }
   ::v-deep .sf-menu-item {
     --menu-item-font-size: var(--font-sm);
-    --menu-item-label-color: var(--c-text-darker);
+    --menu-item-label-color: var(--c-text);
     &:hover {
-      --menu-item-label-color: var(--c-text-darker);
+      --menu-item-label-color: var(--c-text);
     }
     .sf-icon {
       --icon-color: var(--c-light-variant);
@@ -258,7 +234,7 @@ export default {
   .sf-footer {
     --footer-width: 1272px;
     --footer-padding: 0 var(--spacer-sm);
-    --footer-column-title-color: var(--c-text-darker);
+    --footer-column-title-color: var(--c-text);
     --footer-column-title-background: var(--c-footer);
 
     --footer-column-title-font-size: --h4-font-size;
@@ -337,7 +313,7 @@ export default {
   }
 
   ._legal-information {
-    color: var(--c-text-darker);
+    color: var(--c-text);
     font-size: var(--font-xs);
     margin-top: var(--spacer-xs);
 

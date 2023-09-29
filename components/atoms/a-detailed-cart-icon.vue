@@ -57,8 +57,10 @@ export default {
     cursor: pointer;
   }
 
-  ._badge {
-    --badge-background: #e55295; // TODO
+  &.-skin-waggables {
+    ._badge {
+      --badge-background: var(--c-button-background);
+    }
   }
 }
 </style>

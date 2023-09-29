@@ -3,12 +3,12 @@
         --button-color: var(--white);
 
         &:hover {
-            --button-background: var(--_c-light-primary); // TODO
+            --button-background: var(--c-button-background);
         }
     }
 
     &__overlay {
-        --overlay-z-index: 20
+        --overlay-z-index: 20;
     }
     &__dropdown {
         --select-dropdown-z-index: 21;

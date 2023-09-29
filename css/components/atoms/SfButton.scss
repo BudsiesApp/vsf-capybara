@@ -1,17 +1,21 @@
-.sf-button {
-    --button-background: var(--_c-light-primary); // TODO
+@mixin primary-button {
+    --button-background: var(--c-button-background);
     --button-border-radius: 4px;
     --button-border-color: var(--c-button-border);
     --button-border-width: 2px;
     --button-font-family: var(--font-family-primary);
+}
+
+.sf-button {
+    @include primary-button;
 
     &:active {
-        --button-background: var(--_c-light-primary);
-        --button-border-color: #ffe8ed; // TODO
+        --button-background: var(--c-button-background);
+        --button-border-color: var(--c-button-border-active);
     }
 
     &:disabled {
-        --button-background: #ea86b4; // TODO
+        --button-background: var(--c-button-background-disabled);
     }
 
     &.sf-button--pure {
@@ -28,24 +32,20 @@
     }
 
     &.color-primary {
-        --button-background: var(--_c-light-primary);
-        --button-border-radius: 4px;
-        --button-border-color: var(--c-button-border);
-        --button-border-width: 2px;
-        --button-font-family: var(--font-family-primary);
+        @include primary-button;
 
         &:active {
-            --button-background: var(--_c-light-primary);
-            --button-border-color: #ffe8ed; // TODO
+            --button-background: var(--c-button-background);
+            --button-border-color: var(--c-button-border-active);
         }
 
         &:disabled {
-            --button-background: #ea86b4; // TODO
+            --button-background: var(--c-button-background-disabled);
         }
     }
 
     &.color-secondary {
-        --button-color: var(--_c-light-primary);
+        --button-color: var(--c-button-background);
         --c-secondary: var(--c-light-variant);
         --button-border-width: 2px;
 
@@ -55,7 +55,7 @@
 
         &:active {
             --button-background: var(--c-white);
-            --button-border-color: #ffe8ed; // TODO
+            --button-border-color: var(--c-button-border-active);
         }
 
         &.sf-button--text {
@@ -74,7 +74,7 @@
         }
 
         &:disabled {
-            --button-background: #b8b9bb; // TODO
+            --button-background: var(--c-gray);
         }
     }
 
