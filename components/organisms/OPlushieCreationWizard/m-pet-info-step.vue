@@ -55,7 +55,7 @@
           :disabled="disabled"
         >
           <template #noResult>
-            {{ $t('We do all breeds! If yours isn\'t listed in the suggested options, please add it!') }}
+            {{ $t('No suggested options found, but you can type any breed. It will be added to the list') }}
           </template>
         </MMultiselect>
 
