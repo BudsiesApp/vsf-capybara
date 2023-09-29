@@ -64,35 +64,6 @@
 }
 
 $path: "/assets/fonts/";
-$font-name: "Avenir";
-$font-weights: (300, 500, 800);
-
-@each $font-weight in $font-weights {
-  $font-path: $path + $font-name + "_" + $font-weight;
-  @include font-face($font-name, $font-path, $font-weight, normal);
-}
-
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  @each $font-weight in $font-weights {
-    $font-path: $path + $font-name + "_" + $font-weight;
-    @include font-face($font-name, $font-path, $font-weight, normal, svg);
-  }
-}
-
-$font-path: $path + $font-name + "_500_italic";
-@include font-face($font-name, $font-path, 500, italic);
-
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  $font-path: $path + $font-name + "_500_italic";
-  @include font-face($font-name, $font-path, 500, italic, svg);
-}
-
-$font-path: $path + "Roselina-Script";
-@include font-face("Roselina", $font-path, 400, normal);
-
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  @include font-face("Roselina", $font-path, 400, normal, svg);
-}
 
 $font-name: "Gotham-Bold";
 $font-path: $path + $font-name;
