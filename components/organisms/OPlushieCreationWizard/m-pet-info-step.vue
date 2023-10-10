@@ -39,14 +39,19 @@
           {{ $t('Your Pet\'s Breed') }}
         </label>
 
+        <div class="_breed-hint">
+          {{ $t('We do all breeds! If yours isn\'t listed in the suggested options, please add it below!') }}
+        </div>
+
         <MMultiselect
           v-model.trim="breed"
-          class="form__element form__select"
+          class="form__element form__select _breed-selector"
           name="petsie_breed"
           placeholder="Golden Retriever, Labradoodle, etc."
           :options="breedsList"
           :required="false"
           :allow-free-text="true"
+          :hide-dropdown-arrow="true"
           :disabled="disabled"
         />
 
@@ -266,8 +271,17 @@ export default Vue.extend({
     margin-top: var(--spacer-2xl);
   }
 
+  ._breed-hint {
+    margin-top: var(--spacer-sm);
+    font-size: var(--font-sm);
+  }
+
+  ._breed-selector {
+    margin-top: var(--spacer-sm);
+  }
+
   @media (min-width: $tablet-min) {
-    min-width: 30em;
+    width: 30em;
   }
 }
 </style>

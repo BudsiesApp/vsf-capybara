@@ -93,7 +93,7 @@
               </validation-provider>
             </div>
 
-            <div class="_step">
+            <div class="_step" v-if="showSizeSelectStep">
               <div
                 class="_step-title"
                 :ref="getFieldAnchorName('Size Option')"
@@ -112,6 +112,7 @@
                   class="sf-select--underlined"
                   name="size_option"
                   required
+                  v-if="showSizeSelectorComponent"
                   v-model="selectedSizeOption"
                   :size="10"
                   :disabled="isDisabled"
@@ -407,6 +408,7 @@ export default defineComponent({
       selectedVariantOption: undefined as string | undefined,
       selectedStyle: undefined as string | undefined,
       showVariantSelectorComponent: true,
+      showSizeSelectorComponent: true,
       initialAddonItemId: undefined as string | undefined,
       additionalArtworks: [] as CustomerImage[],
       initialAdditionalArtworks: [] as CustomerImage[],
@@ -689,25 +691,45 @@ export default defineComponent({
         (bundleOption) => bundleOption.title.toLowerCase() === SIZE_BUNDLE_OPTION_TITLE
       );
     },
-    sizeOptions (): SelectOptionItem[] {
-      const sizeOptions: SelectOptionItem[] = [];
-
+    sizeBundleOptionProductLinks (): BundleOptionsProductLink[] {
       if (!this.sizeBundleOption) {
         return [];
       }
 
-      for (const productLink of this.sizeBundleOption.product_links) {
-        if (!productLink.product) {
-          throw new Error('Product is not defined for product link');
-        }
+      return this.sizeBundleOption.product_links
+    },
+    sizeOptions (): SelectOptionItem[] {
+      const options: SelectOptionItem[] = [];
 
-        sizeOptions.push({
-          value: productLink.id.toString(),
-          label: productLink.product.name
-        })
+      if (this.variantsBundleOption && !this.selectedStyle) {
+        return options;
       }
 
-      return sizeOptions;
+      if (!this.sizeBundleOption) {
+        return options;
+      }
+
+      this.sizeBundleOptionProductLinks.forEach((productLink) => {
+        if (!productLink.product) {
+          throw new Error('Product is defined for product link');
+        }
+
+        const styleCode = productLink.sku.split('_')[2];
+        if (!styleCode) {
+          return;
+        }
+
+        if (this.selectedStyle && this.selectedStyle !== styleCode) {
+          return;
+        }
+
+        options.push({
+          value: productLink.id.toString(),
+          label: productLink.product.name
+        });
+      })
+
+      return options;
     },
     specialPrice (): number {
       return this.totalPrice.special;
@@ -811,6 +833,9 @@ export default defineComponent({
     },
     showVariantSelectStep (): boolean {
       return this.variantOptions.length > 0;
+    },
+    showSizeSelectStep (): boolean {
+      return this.sizeOptions.length > 0;
     }
   },
   created () {
@@ -1076,12 +1101,15 @@ export default defineComponent({
     onStyleSelected (style: string | undefined) {
       this.selectedStyle = style;
       this.showVariantSelectorComponent = false;
+      this.showSizeSelectorComponent = false;
 
       this.setDefaultVariant();
+      this.setDefaultSize();
 
       this.$nextTick()
         .then(() => {
           this.showVariantSelectorComponent = true;
+          this.showSizeSelectorComponent = true;
         })
     },
     onSuccessAddToCart (): void {
@@ -1120,6 +1148,13 @@ export default defineComponent({
       }
 
       this.selectedVariantOption = this.variantOptions[0].value;
+    },
+    setDefaultSize (): void {
+      if (!this.sizeOptions.length) {
+        return;
+      }
+
+      this.selectedSizeOption = this.sizeOptions[0].value;
     },
     async updateClientAndServerItem (payload: {
       product: CartItem,
