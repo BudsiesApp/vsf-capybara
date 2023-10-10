@@ -146,7 +146,7 @@ let routes = [
     redirect: {
       name: 'category',
       params: {
-        slug: 'petsies-accessories-11' // TODO check category slug
+        slug: 'waggables-132'
       }
     }
   },
