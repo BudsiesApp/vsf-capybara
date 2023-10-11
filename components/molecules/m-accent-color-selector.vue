@@ -33,6 +33,7 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 import AccentColorPart from '../interfaces/accent-color-part.interface';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 export default Vue.extend({
   name: 'MAccentColorSelector',
@@ -52,7 +53,7 @@ export default Vue.extend({
   },
   computed: {
     skinClass (): string {
-      return `-skin-budsies`;
+      return getCurrentThemeClass();
     },
     selectedOption: {
       get (): AccentColorPart | undefined {

@@ -58,6 +58,7 @@ import Vue, { PropType } from 'vue';
 import DesignProduct from '../interfaces/design-product.interface';
 
 import { BaseImage } from 'src/modules/budsies';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 let instanceId = 0;
 
@@ -91,7 +92,7 @@ export default Vue.extend({
   },
   computed: {
     skinClass (): string {
-      return `-skin-budsies`;
+      return getCurrentThemeClass();
     },
     selectedDesign (): DesignProduct | undefined {
       if (!this.value) {
