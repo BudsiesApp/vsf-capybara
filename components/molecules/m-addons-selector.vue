@@ -105,6 +105,7 @@ import { required, max } from 'vee-validate/dist/rules';
 
 import { CustomOption } from 'core/modules/catalog/types/CustomOption';
 import { StreamingVideo } from 'src/modules/shared';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 import AddonOption from '../interfaces/addon-option.interface';
 import SelectedAddon from '../interfaces/selected-addon.interface';
@@ -162,7 +163,7 @@ export default Vue.extend({
   },
   computed: {
     skinClass (): string {
-      return `-skin-petsies`;
+      return getCurrentThemeClass();
     },
     selectedValues (): number[] {
       return this.value.map(({ addonOptionValueId }) => addonOptionValueId);
