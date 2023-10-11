@@ -1,0 +1,10 @@
+.sf-heading {
+  --heading-title-font-family: var(--font-family-primary);
+  --heading-title-color: var(--c-primary);
+
+  .sf-heading__title--h3,
+  .sf-heading__title--h4 {
+    --heading-title-color: var(--c-text-light);
+  }
+
+}

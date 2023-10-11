@@ -1,3 +1,3 @@
 export default function getCurrentThemeClass (): string {
-  return '-skin-petsies';
+  return '-skin-waggables';
 }

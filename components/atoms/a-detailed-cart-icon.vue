@@ -11,7 +11,7 @@
       :aria-label="$t('Open Cart')"
     >
       <template #badge>
-        <SfBadge v-show="!floatingIcon && totalQuantity" class="sf-icon__badge sf-badge--number">
+        <SfBadge v-show="!floatingIcon && totalQuantity" class="sf-icon__badge sf-badge--number _badge">
           {{ totalQuantity }}
         </SfBadge>
       </template>
@@ -55,6 +55,12 @@ export default {
 
   .sf-header__icon {
     cursor: pointer;
+  }
+
+  &.-skin-waggables {
+    ._badge {
+      --badge-background: var(--c-button-background);
+    }
   }
 }
 </style>

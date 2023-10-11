@@ -1,5 +1,7 @@
 @import "./atoms/SfButton.scss";
+@import "./atoms/SfCircleIcon.scss";
 @import "./atoms/SfDivider.scss";
+@import "./atoms/SfHeading.scss";
 @import "./atoms/SfQuantitySelector.scss";
 @import "./atoms/SfPrice.scss";
 @import "./atoms/SfInput.scss";
@@ -11,7 +13,9 @@
 
 @import "./organisms/SfAccordion.scss";
 @import "./organisms/SfFooter.scss";
+@import "./organisms/SfHeader.scss";
 @import "./organisms/SfList.scss";
 @import "./organisms/SfCarousel.scss";
 @import "./organisms/SfProductCard.scss";
 @import "./organisms/SfCollectedProduct.scss";
+@import "./organisms/SfTabs.scss";

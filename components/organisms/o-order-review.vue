@@ -173,5 +173,12 @@ export default {
       color: var(--c-text);
     }
   }
+
+  &.-skin-waggables {
+    .content {
+      color: var(--c-text);
+      font-family: var(--font-family-secondary);
+    }
+  }
 }
 </style>

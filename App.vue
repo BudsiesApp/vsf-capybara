@@ -18,8 +18,6 @@ import { FileProcessingRepositoryFactory, ImageHandlerService, itemFactory } fro
 import { ErrorConverterService } from 'src/modules/budsies'
 import { isServer } from '@vue-storefront/core/helpers'
 import { syncCartWhenLocalStorageChange } from '@vue-storefront/core/modules/cart/helpers'
-import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
-import { USER_LEAVING_WEBSITE } from 'src/modules/promotion-platform';
 
 const windowObject = isServer ? {} : window;
 const errorConverterService = new ErrorConverterService();
@@ -42,11 +40,9 @@ export default {
   },
   mounted () {
     syncCartWhenLocalStorageChange.addEventListener();
-    EventBus.$on(USER_LEAVING_WEBSITE, this.onUserLeavingWebsite)
   },
   beforeDestroy () {
     syncCartWhenLocalStorageChange.removeEventListener();
-    EventBus.$off(USER_LEAVING_WEBSITE, this.onUserLeavingWebsite);
   },
   serverPrefetch () {
     return this.$store.dispatch('backend-settings/fetchSettings');
@@ -58,9 +54,6 @@ export default {
     WindowObject: windowObject
   },
   methods: {
-    onUserLeavingWebsite () {
-      this.$store.dispatch('ui/openModal', { name: ModalList.WebsiteLeaving })
-    }
   }
 };
 </script>

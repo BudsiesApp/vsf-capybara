@@ -3,7 +3,7 @@
     <div class="loader-container" v-if="isLoading">
       <div class="loader" />
     </div>
-    <div class="detailed-cart" v-else>
+    <div class="detailed-cart" :class="skinClass" v-else>
       <div class="detailed-cart__main">
         <ProductionSpotCountdown
           :can-show="canShowProductionSpotCountdown"
@@ -147,18 +147,6 @@
         <OrderSummary
           :is-updating-quantity="isUpdatingQuantity"
         />
-
-        <div class="_shipping-handling-block">
-          <SfHeading :level="3" title="Shipping &amp; Handling" />
-          <p>Once completed, your order will ship via USPS</p>
-          <ul>
-            <li>Petsies: (<strong>US</strong>) $13.95, $5.95 for each additional; (<strong>International</strong>) $25.95, $5.95 for each additional</li>
-            <li>Pillows: <strong>(US</strong>) starting at $9.95;&nbsp;(<strong>International)</strong> $20.95</li>
-            <li>Petsies Socks, Masks &amp; Keychains: (<strong>US</strong>) $4.95; (<strong>International</strong>)&nbsp;$9.95</li>
-            <li>Read more about rates&nbsp;<a href="http://support.mypetsies.com/support/solutions/articles/13000017023-shipping-handling-fees" target="_blank">here</a>. Rates determined by weight</li>
-            <li>Tracking number will be emailed to you at time of shipment</li>
-          </ul>
-        </div>
       </div>
     </div>
   </div>
@@ -192,6 +180,7 @@ import ProductionSpotCountdown from 'src/modules/promotion-platform/components/P
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 import MDropdown from 'theme/components/molecules/m-dropdown.vue';
 
 const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
@@ -266,88 +255,15 @@ export default {
       isDropdownOpen: false,
       dropdownActions: [
         {
-          label: 'Petsies',
-          url: '/forevers-pet-plush/'
-        },
-        {
-          label: this.$t('Golf Club Headcovers'),
-          url: '/golf-headcovers/'
-        },
-        {
-          label: 'Pet Pillow',
-          url: '/pet-pillow/'
-        },
-        {
-          label: 'Photo Pillow',
+          label: 'Waggables',
           url: {
-            name: 'category',
-            params: {
-              slug: 'custom-photo-pillows-80'
-            }
+            name: 'products'
           }
         },
         {
-          label: this.$t('Pet Photo Blankets'),
+          label: this.$t('Gift Cards'),
           url: {
-            name: 'cut-out-blankets'
-          }
-        },
-        {
-          label: this.$t('Renaissance Blankets'),
-          url: {
-            name: 'renaissance-blankets'
-          }
-        },
-        {
-          label: 'Socks',
-          url: {
-            name: 'printed-socks-creation-page'
-          }
-        },
-        {
-          label: 'Face Masks',
-          url: {
-            name: 'printed-masks-creation-page'
-          }
-        },
-        {
-          label: 'Bobbleheads & Figurines',
-          url: '/pet-bobblehead-figurines/'
-        },
-        {
-          label: this.$t('Pajamas'),
-          url: {
-            name: 'pajamas-creation'
-          }
-        },
-        // {
-        //   label: this.$t('Hawaiian Shirts'),
-        //   url: {
-        //     name: 'hawaiian-shirts-creation'
-        //   }
-        // },
-        {
-          label: this.$t('Golf Shirts'),
-          url: {
-            name: 'golf-shirts-creation'
-          }
-        },
-        {
-          label: 'Pet Keychains',
-          url: {
-            name: 'printed-keychains-creation-page'
-          }
-        },
-        {
-          label: 'Pet Magnets',
-          url: {
-            name: 'felted-magnets-creation-page'
-          }
-        },
-        {
-          label: 'Pet Ornaments',
-          url: {
-            name: 'felted-ornaments-creation-page'
+            name: 'gift-cards'
           }
         }
       ],
@@ -380,6 +296,9 @@ export default {
     },
     canShowProductionSpotCountdown () {
       return this.products.some((product) => isCustomProduct(product.id));
+    },
+    skinClass () {
+      return getCurrentThemeClass();
     }
   },
   async mounted () {
@@ -684,6 +603,7 @@ export default {
     ::v-deep {
       .sf-quantity-selector__button {
         --button-background: transparent;
+        --button-border-size: 0;
       }
     }
   }
@@ -713,6 +633,20 @@ export default {
     text-align: center;
     margin-top: var(--spacer-sm);
     font-size: var(--font-lg);
+  }
+
+  &.-skin-waggables {
+    ._dropdown-container {
+      .sf-dropdown {
+        --dropdown-background: var(--c-button-background);
+
+        .sf-list__item {
+          &:hover {
+            background-color: var(--c-button-background-disabled);
+          }
+        }
+      }
+    }
   }
 
   @include for-desktop {

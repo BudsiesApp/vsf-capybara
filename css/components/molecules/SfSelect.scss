@@ -1,6 +1,14 @@
 .sf-select {
+    .sf-select__cancel {
+        --button-color: var(--white);
+
+        &:hover {
+            --button-background: var(--c-button-background);
+        }
+    }
+
     &__overlay {
-        --overlay-z-index: 20
+        --overlay-z-index: 20;
     }
     &__dropdown {
         --select-dropdown-z-index: 21;
@@ -19,6 +27,10 @@
                 background: var(--c-dark-variant);
             }
         }
+    }
+
+    .sf-select-option {
+        --select-option-font-family: var(--font-family-secondary);
     }
 
     @include for-desktop {

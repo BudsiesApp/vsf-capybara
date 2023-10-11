@@ -1,17 +1,7 @@
-import { PlushieType } from 'theme/interfaces/plushie.type';
-
 const ErrorPage = () =>
   import(/* webpackChunkName: "vsf-error" */ 'theme/pages/Error');
 const Product = () =>
   import(/* webpackChunkName: "vsf-product" */ 'theme/pages/Product');
-const PlushieProduct = () =>
-  import(/* webpackChunkName: "vsf-forevers-product" */ 'theme/pages/PlushieProduct');
-const PrintedProduct = () =>
-  import(/* webpackChunkName: "vsf-printed-product" */ 'theme/pages/PrintedProduct');
-const PillowProduct = () =>
-  import(/* webpackChunkName: "vsf-pillow-product" */ 'theme/pages/PillowProduct');
-const PhrasePillowProduct = () =>
-  import(/* webpackChunkName: "vsf-phrase-pillow-product" */ 'theme/pages/PhrasePillowProduct');
 const Category = () =>
   import(/* webpackChunkName: "vsf-category" */ 'theme/pages/Category');
 const Checkout = () =>
@@ -26,12 +16,6 @@ const CrossSells = () =>
   import(/* webpackChunkName: "vsf-cross-sells" */ 'theme/pages/CrossSells');
 const GiftCards = () =>
   import(/* webpackChunkName: "vsf-gift-cards" */ 'theme/pages/GiftCards');
-const BlanketProduct = () =>
-  import(/* webpackChunkName: "vsf-blankets" */ 'theme/pages/BlanketProduct');
-const ClayProduct = () =>
-  import(/* webpackChunkName: "vsf-plushie-product" */ 'theme/pages/ClayProduct');
-const ClothesProduct = () =>
-  import(/* webpackChunkName: "vsf-clothes-product" */ 'theme/pages/ClothesProduct');
 const PasswordReset = () =>
   import(/* webpackChunkName: "vsf-password-reset" */ 'theme/pages/PasswordReset');
 
@@ -60,17 +44,6 @@ let routes = [
       next(to.params.targetPath);
     }
   },
-  {
-    name: 'pillowSideDesign-product-redirect',
-    path: '/p/phrasePetsies:parentSku?/:slug?/',
-    redirect: (route) => ({
-      name: 'phrase-pillow-customize',
-      query: {
-        back_design: route.query.back_design,
-        front_design: 'phrasePetsies' + route.params.parentSku
-      }
-    })
-  },
   { name: 'my-account', path: '/my-account/', component: MyAccount },
   { name: 'page-not-found', path: '*', component: ErrorPage },
   { name: 'error', path: '/error/', component: ErrorPage, meta: { layout: 'minimal' } },
@@ -81,101 +54,8 @@ let routes = [
   { name: 'grouped-product', path: '/p/:parentSku/:slug/', component: Product },
   { name: 'configurable-product', path: '/p/:parentSku/:slug/:childSku/', component: Product },
   { name: 'plushToyAccessory-product', path: '/p/:parentSku/:slug/', component: Product },
-  { name: 'petsiesStarProduct-product', path: '/p/:parentSku/:slug/', component: Product },
   { name: 'product', path: '/p/:parentSku/:slug/:childSku/', component: Product },
   { name: 'category', path: '/c/:slug/', component: Category },
-  {
-    name: 'forevers-create',
-    path: '/forevers/create/',
-    component: PlushieProduct,
-    props: {
-      plushieType: PlushieType.FOREVERS
-    }
-  },
-  {
-    name: 'forevers-create-alias-1',
-    path: '/plushie/index/creationwizard/category_id/13/',
-    redirect: {
-      name: 'forevers-create'
-    }
-  },
-  {
-    name: 'forevers-create-alias-2',
-    path: '/plushie/index/creationwizard/category_id/13/attributeId/:plushieId/',
-    redirect: {
-      name: 'forevers-create'
-    }
-  },
-  {
-    name: 'forevers-create-alias-3',
-    path: '/plushie/index/precreate/type/forevers/product/:productType/',
-    redirect: (route) => ({
-      name: 'forevers-create',
-      query: {
-        product: route.params.productType
-      }
-    })
-  },
-  {
-    name: 'golf-covers-create',
-    path: '/golf-head-covers/create/',
-    component: PlushieProduct,
-    props: {
-      plushieType: PlushieType.GOLF_COVERS
-    }
-  },
-  {
-    name: 'golf-covers-create-alias-1',
-    path: '/plushie/index/creationwizard/category_id/124/',
-    redirect: {
-      name: 'golf-covers-create'
-    }
-  },
-  {
-    name: 'golf-covers-create-alias-2',
-    path: '/plushie/index/creationwizard/category_id/124/attributeId/:plushieId/',
-    redirect: {
-      name: 'golf-covers-create'
-    }
-  },
-  {
-    name: 'golf-covers-create-alias-3',
-    path: '/plushie/index/precreate/type/golf-head-covers/product/:productType/',
-    redirect: (route) => ({
-      name: 'golf-covers-create',
-      query: {
-        product: route.params.productType
-      }
-    })
-  },
-  {
-    name: 'printed-product',
-    path: '/printed/p/:sku/',
-    component: PrintedProduct,
-    props: route => ({
-      sku: route.params.sku,
-      productDesign: route.query.product_design,
-      existingPlushieId: route.query.existingPlushieId
-    })
-  },
-  {
-    name: 'pillow-product',
-    path: '/pillows/create/',
-    component: PillowProduct,
-    props: (route) => ({
-      existingPlushieId: route.query.existingPlushieId
-    })
-  },
-  {
-    name: 'pillow-product-alias',
-    path: '/plushie/index/create/id/:plushieId/type/pillow/',
-    redirect: (route) => ({
-      name: 'pillow-product',
-      query: {
-        existingPlushieId: route.params.plushieId
-      }
-    })
-  },
   { name: 'cross-sells', path: '/cross-sells/p/:parentSku/', component: CrossSells, props: true },
   {
     name: 'cross-sells-alias',
@@ -261,236 +141,17 @@ let routes = [
     }
   },
   {
-    name: 'printed-socks-creation-page',
-    path: '/plushie/index/printedSocks/',
-    component: PrintedProduct,
-    props: route => ({
-      sku: 'customPrintedSocks_bundle',
-      productDesign: route.query.product_design
-    })
-  },
-  {
-    name: 'printed-masks-creation-page',
-    path: '/plushie/index/printedMasks/',
-    component: PrintedProduct,
-    props: route => ({
-      sku: 'customPrintedMasks_bundle',
-      productDesign: route.query.product_design
-    })
-  },
-  {
-    name: 'printed-keychains-creation-page',
-    path: '/plushie/index/printedKeychains/',
-    component: PrintedProduct,
-    props: route => ({
-      sku: 'customPrintedKeychains_bundle',
-      productDesign: route.query.product_design
-    })
-  },
-  {
-    name: 'felted-magnets-creation-page',
-    path: '/plushie/index/feltedMagnets/',
-    component: PrintedProduct,
-    props: route => ({
-      sku: 'customFeltedMagnets_bundle',
-      productDesign: route.query.product_design
-    })
-  },
-  {
-    name: 'felted-ornaments-creation-page',
-    path: '/plushie/index/feltedOrnaments/',
-    component: PrintedProduct,
-    props: route => ({
-      sku: 'customFeltedOrnaments_bundle',
-      productDesign: route.query.product_design
-    })
-  },
-  {
-    name: 'photo-pillows-alias-1',
-    path: '/photo-pillow/designs/',
+    name: 'products',
+    path: '/products/', // TODO check path
     redirect: {
       name: 'category',
       params: {
-        slug: 'custom-photo-pillows-80'
+        slug: 'waggables-132'
       }
     }
-  },
-  {
-    name: 'photo-pillows-alias-2',
-    path: '/photo-pillows/',
-    redirect: {
-      name: 'category',
-      params: {
-        slug: 'custom-photo-pillows-80'
-      }
-    }
-  },
-  {
-    name: 'accessories-category-alias',
-    path: '/accessories/',
-    redirect: {
-      name: 'category',
-      params: {
-        slug: 'petsies-accessories-11'
-      }
-    }
-  },
-  {
-    path: '/phrasepillow/index/customize/',
-    name: 'phrase-pillow-customize',
-    component: PhrasePillowProduct,
-    props: (route) => ({
-      backDesign: route.query.back_design,
-      frontDesign: route.query.front_design
-    })
-  },
-  {
-    name: 'pillowSideDesign-product',
-    path: '/phrase-pillow/p/:parentSku?/:slug?/',
-    redirect: (route) => ({
-      name: 'phrase-pillow-customize',
-      query: {
-        back_design: route.query.back_design,
-        front_design: route.params.parentSku
-      }
-    })
   },
   { name: 'recover-cart', path: '/alerts/recover/cart/id/:id/code/:code/', component: CartRecovery },
   { name: 'gift-cards', path: '/giftcards/', component: GiftCards },
-  {
-    name: 'giftbox',
-    path: '/giftbox/',
-    redirect: {
-      name: 'configurable-product',
-      params: {
-        parentSku: 'gift_box',
-        slug: 'gift-box-240',
-        childSku: 'gift_box_dog'
-      }
-    }
-  },
-  {
-    name: 'renaissance-blankets',
-    path: '/blankets/index/create/type/renaissance-blankets/',
-    component: BlanketProduct,
-    props: (route) => ({
-      sku: 'customRenaissanceBlankets_bundle',
-      existingPlushieId: route.query.existingPlushieId,
-      productDesign: route.query.product_design
-    })
-  },
-  {
-    name: 'cut-out-blankets',
-    path: '/blankets/index/create/type/cut-out-blankets/',
-    component: BlanketProduct,
-    props: (route) => ({
-      sku: 'customCutOutBlankets_bundle',
-      existingPlushieId: route.query.existingPlushieId,
-      productDesign: route.query.product_design
-    })
-  },
-  {
-    name: 'cut-out-blankets-category',
-    path: '/blankets/cut-out-design/',
-    redirect: {
-      name: 'category',
-      params: {
-        slug: 'cut-out-design-114'
-      }
-    }
-  },
-  {
-    name: 'renaissance-blankets-category',
-    path: '/blankets/renaissance-design/',
-    redirect: {
-      name: 'category',
-      params: {
-        slug: 'renaissance-design-115'
-      }
-    }
-  },
-  {
-    name: 'figurines-alias-1',
-    path: '/plushie/index/create/id/:plushieId/type/petsies-figurine/',
-    redirect: (route) => {
-      return {
-        name: 'figurines-creation',
-        query: {
-          existingPlushieId: route.params.plushieId
-        }
-      }
-    }
-  },
-  {
-    name: 'figurines-creation',
-    path: '/petsies-figurines/create/',
-    component: ClayProduct,
-    props: (route) => ({
-      sku: 'petsiesFigurines_bundle',
-      existingPlushieId: route.query.existingPlushieId
-    })
-  },
-  {
-    name: 'bobbleheads-alias-1',
-    path: '/plushie/index/create/id/:plushieId/type/petsies-bobblehead/',
-    redirect: (route) => {
-      return {
-        name: 'bobbleheads-creation',
-        query: {
-          existingPlushieId: route.params.plushieId
-        }
-      }
-    }
-  },
-  {
-    name: 'bobbleheads-creation',
-    path: '/petsies-bobbleheads/create/',
-    component: ClayProduct,
-    props: (route) => ({
-      sku: 'petsiesBobbleheads_bundle',
-      existingPlushieId: route.query.existingPlushieId
-    })
-  },
-  {
-    name: 'clothes-product',
-    path: '/clothes/p/:sku/',
-    component: ClothesProduct,
-    props: (route) => ({
-      sku: route.params.sku,
-      productDesign: route.query.product_design,
-      existingPlushieId: route.query.existingPlushieId
-    })
-  },
-  {
-    name: 'pajamas-creation',
-    path: '/pajamas/index/create/',
-    component: ClothesProduct,
-    props: (route) => ({
-      sku: 'customPajamas_bundle',
-      productDesign: route.query.product_design,
-      existingPlushieId: route.query.existingPlushieId
-    })
-  },
-  {
-    name: 'hawaiian-shirts-creation',
-    path: '/clothes/hawaiian-shirts/create/',
-    component: ClothesProduct,
-    props: (route) => ({
-      sku: 'customHawaiianShirts_bundle',
-      productDesign: route.query.product_design,
-      existingPlushieId: route.query.existingPlushieId
-    })
-  },
-  {
-    name: 'golf-shirts-creation',
-    path: '/clothes/golf-shirts/create/',
-    component: ClothesProduct,
-    props: (route) => ({
-      sku: 'customGolfShirts_bundle',
-      productDesign: route.query.product_design,
-      existingPlushieId: route.query.existingPlushieId
-    })
-  },
   {
     name: 'password-reset',
     path: '/customer/account/resetpassword/',

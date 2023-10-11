@@ -14,71 +14,15 @@
       :visible="visible"
     >
       <SfMegaMenuColumn
-        :title="$t('Custom Pet Lookalikes')"
+        :title="$t('Products')"
       >
         <SfList>
           <SfListItem
-            v-for="item in customProductsItems"
+            v-for="item in productsItems"
             :key="item.label"
           >
             <router-link
               :to="item.url"
-              @click.native="$emit('close')"
-            >
-              <SfMenuItem :label="item.label" icon="" />
-            </router-link>
-          </SfListItem>
-        </SfList>
-      </SfMegaMenuColumn>
-
-      <SfMegaMenuColumn
-        :title="$t('Household')"
-      >
-        <SfList>
-          <SfListItem
-            v-for="item in householdItems"
-            :key="item.label"
-          >
-            <router-link
-              :to="item.url"
-              @click.native="$emit('close')"
-            >
-              <SfMenuItem :label="item.label" icon="" />
-            </router-link>
-          </SfListItem>
-        </SfList>
-      </SfMegaMenuColumn>
-
-      <SfMegaMenuColumn
-        :title="$t('Apparel and Accessories')"
-      >
-        <SfList>
-          <SfListItem
-            v-for="item in accessoriesItems"
-            :key="item.label"
-          >
-            <router-link
-              :to="item.url"
-              @click.native="$emit('close')"
-            >
-              <SfMenuItem :label="item.label" icon="" />
-            </router-link>
-          </SfListItem>
-        </SfList>
-      </SfMegaMenuColumn>
-
-      <SfMegaMenuColumn
-        :title="$t('Other Products')"
-      >
-        <SfList>
-          <SfListItem
-            v-for="item in otherProductsItems"
-            :key="item.label"
-          >
-            <router-link
-              class="_item-link"
-              :to="item.url"
-              :class="{'-active': item.isActive && item.isActive()}"
               @click.native="$emit('close')"
             >
               <SfMenuItem :label="item.label" icon="" />
@@ -133,139 +77,20 @@ export default Vue.extend({
   },
   data () {
     return {
-      customProductsItems: [
+      productsItems: [
         {
-          label: this.$t('Petsies Stuffed Animals'),
-          url: '/forevers-pet-plush/'
+          label: this.$t('Products'),
+          url: '/products/'
         },
         {
-          label: this.$t('Golf Club Headcovers'),
-          url: '/golf-headcovers/'
-        },
-        {
-          label: this.$t('Bobbleheads & Figurines'),
-          url: '/pet-bobblehead-figurines/'
-        },
-        {
-          label: this.$t('Magnets'),
-          url: {
-            name: 'felted-magnets-creation-page'
-          }
-        },
-        {
-          label: this.$t('Ornaments'),
-          url: {
-            name: 'felted-ornaments-creation-page'
-          }
-        }
-      ],
-      householdItems: [
-        {
-          label: this.$t('Pet Shaped Pillows'),
-          url: '/pet-pillow/'
-        },
-        {
-          label: this.$t('Square Photo Pillows'),
-          url: {
-            name: 'category',
-            params: {
-              slug: 'custom-photo-pillows-80'
-            }
-          }
-        },
-        {
-          label: this.$t('Pet Photo Blankets'),
-          url: {
-            name: 'cut-out-blankets'
-          }
-        },
-        {
-          label: this.$t('Renaissance Blankets'),
-          url: {
-            name: 'renaissance-blankets'
-          }
-        }
-      ],
-      accessoriesItems: [
-        {
-          label: this.$t('Socks'),
-          url: {
-            name: 'printed-socks-creation-page'
-          }
-        },
-        {
-          label: this.$t('Pajamas'),
-          url: {
-            name: 'pajamas-creation'
-          }
-        },
-        // {
-        //   label: this.$t('Hawaiian Shirts'),
-        //   url: {
-        //     name: 'hawaiian-shirts-creation'
-        //   }
-        // },
-        {
-          label: this.$t('Golf Shirts'),
-          url: {
-            name: 'golf-shirts-creation'
-          }
-        },
-        {
-          label: this.$t('Face Masks'),
-          url: {
-            name: 'printed-masks-creation-page'
-          }
-        },
-        {
-          label: this.$t('Pet Keychains'),
-          url: {
-            name: 'printed-keychains-creation-page'
-          }
-        }
-      ],
-      otherProductsItems: [
-        {
-          label: this.$t('Gift Boxes'),
-          url: {
-            name: 'giftbox'
-          },
-          isActive: () => {
-            return this.$route.name === 'configurable-product' &&
-             this.$route.params?.parentSku === 'gift_box';
-          }
-        },
-        {
-          label: this.$t('Gift Add-ons'),
-          url: {
-            name: 'category',
-            params: {
-              slug: 'petsies-accessories-11'
-            }
-          }
-        },
-        {
-          label: this.$t('Bulk Orders'),
-          url: '/bulk-custom-stuffed-animal-manufacture/'
+          label: this.$t('Gift Cards'),
+          url: '/giftcards/'
         }
       ],
       usefulLinksItems: [
         {
-          label: this.$t('Pricing'),
-          url: '/pricing/'
-        },
-        {
           label: this.$t('About'),
-          url: '/about-petsies/'
-        },
-        {
-          label: this.$t('Blog'),
-          url: '/blog/',
-          target: '_blank'
-        },
-        {
-          label: this.$t('Reviews'),
-          url: '/reviews/'
+          url: '/about/'
         }
       ]
     }

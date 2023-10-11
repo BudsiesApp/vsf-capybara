@@ -317,7 +317,7 @@ export default Vue.extend({
     }[] {
       const options = [50, 100, 150, 200, 250].map((price) => ({
         id: price,
-        value: `$${price} Petsies Gift Card`
+        value: `$${price} Waggables Gift Card`
       }));
 
       options.push({

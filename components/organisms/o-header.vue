@@ -18,18 +18,10 @@
         <ALogo />
       </template>
       <template #navigation>
-        <SfHeaderNavigationItem
-          @mouseover="onMainMenuMouseOver"
-          @mouseleave="isHoveredMenu = false"
-        >
-          <div class="o-header__submenu">
+        <SfHeaderNavigationItem>
+          <router-link :to="{ name: 'products' }">
             Products
-          </div>
-          <MMenu
-            :visible="isHoveredMenu && !isSearchPanelVisible"
-            @transitionend.native="onMainMenuTransitionEnd"
-            @close="onMainMenuClose"
-          />
+          </router-link>
         </SfHeaderNavigationItem>
         <SfHeaderNavigationItem>
           <router-link
@@ -40,16 +32,9 @@
         </SfHeaderNavigationItem>
         <SfHeaderNavigationItem>
           <router-link
-            to="/reviews/"
+            to="/about/"
           >
-            Reviews
-          </router-link>
-        </SfHeaderNavigationItem>
-        <SfHeaderNavigationItem>
-          <router-link
-            to="/pricing/"
-          >
-            Pricing
+            About
           </router-link>
         </SfHeaderNavigationItem>
 
