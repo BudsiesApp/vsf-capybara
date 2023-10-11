@@ -71,6 +71,8 @@ import {
   ImageType
 } from 'src/modules/file-storage';
 
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
+
 // Create component
 const FilePondComponent = vueFilePond(
   FilePondPluginFileValidateType,
@@ -161,7 +163,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   },
   computed: {
     classes (): string[] {
-      const result = ['-skin-petsies'];
+      const result = [getCurrentThemeClass()];
 
       if (this.allowMultiple) {
         result.push('-multiple-items');
