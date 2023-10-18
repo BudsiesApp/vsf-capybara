@@ -43,6 +43,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Vue, { VueConstructor } from 'vue';
 import { InjectType } from 'src/modules/shared';
 import { isServer } from '@vue-storefront/core/helpers';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 interface InjectedServices {
   window: Window
@@ -74,7 +75,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   },
   computed: {
     skinClass (): string {
-      return `-skin-petsies`;
+      return getCurrentThemeClass();
     },
     scopeId (): string {
       return (this.$options as any)._scopeId;

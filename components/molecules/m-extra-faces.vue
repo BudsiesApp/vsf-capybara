@@ -88,6 +88,7 @@ import { Dictionary } from 'src/modules/budsies';
 import MArtworkUpload from './m-artwork-upload.vue';
 import ExtraPhotoAddonOption from '../interfaces/extra-photo-addon-option.interface';
 import ExtraFacesConfiguratorData from '../interfaces/extra-faces-configurator-data.interface';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 extend('required', {
   ...required,
@@ -205,7 +206,7 @@ export default Vue.extend({
       }
     },
     skinClass (): string {
-      return `-skin-petsies`;
+      return getCurrentThemeClass();
     },
     maxInputsCount (): number {
       let maxInputsCount = 0;
