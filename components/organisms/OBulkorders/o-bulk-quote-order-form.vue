@@ -135,9 +135,10 @@ import i18n from '@vue-storefront/i18n';
 import { defineComponent, PropType, Ref, ref } from '@vue/composition-api';
 
 import Product from 'core/modules/catalog/types/Product';
-import { Bodypart, BodypartOption, BodypartValue, BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo, Dictionary, vuexTypes as budsiesTypes } from 'src/modules/budsies';
+import { Bodypart, BodypartOption, BodypartValue, BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo, Dictionary } from 'src/modules/budsies';
 import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { SET_LAST_USED_CUSTOMER_EMAIL, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_PHONE_NUMBER, SET_LAST_USED_CUSTOMER_SHIPPING_COUNTRY, SN_PERSISTED_CUSTOMER_DATA } from 'src/modules/persisted-customer-data';
 
 import MBaseForm from './m-base-form.vue';
 import MBodypartOptionConfigurator from '../../molecules/m-bodypart-option-configurator.vue';
@@ -307,10 +308,7 @@ export default defineComponent({
     async submitBulkorder (): Promise<void> {
       this.isSubmitting = true;
 
-      this.$store.commit(
-        budsiesTypes.SN_BUDSIES + '/' + budsiesTypes.CUSTOMER_EMAIL_SET,
-        { email: this.bulkordersBaseFormData.customerEmail }
-      );
+      this.persistCustomerData();
 
       try {
         const bulkOrderId = await this.$store.dispatch(
@@ -365,6 +363,11 @@ export default defineComponent({
         message: message,
         action1: { label: i18n.t('OK') }
       });
+    },
+    persistCustomerData (): void {
+      const baseForm = getBaseForm(this.$refs);
+
+      baseForm.persistCustomerData();
     }
   }
 })
