@@ -95,13 +95,13 @@ import CartItem from 'core/modules/cart/types/CartItem';
 
 import {
   ImageUploadMethod,
-  vuexTypes as budsiesTypes,
   BodypartOption,
   BodyPartValueContentType,
   PlushieWizardEvents
 } from 'src/modules/budsies';
 import ServerError from 'src/modules/shared/types/server-error';
 import { CustomerImage, InjectType, ProductEvent, getProductDefaultPrice } from 'src/modules/shared';
+import { SET_LAST_USED_CUSTOMER_EMAIL, SN_PERSISTED_CUSTOMER_DATA } from 'src/modules/persisted-customer-data';
 
 import foreversCreationWizardPersistedStateService from 'theme/helpers/plushie-creation-wizard-persisted-state.service';
 import getForeversSizeSkuBySizeAndType from 'theme/helpers/get-forevers-size-sku-by-size-and-type.function';
@@ -381,8 +381,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       );
 
       this.$store.commit(
-        budsiesTypes.SN_BUDSIES + '/' + budsiesTypes.CUSTOMER_EMAIL_SET,
-        { email: this.petInfoStepData.email }
+        `${SN_PERSISTED_CUSTOMER_DATA}/${SET_LAST_USED_CUSTOMER_EMAIL}`,
+        this.petInfoStepData.email
       );
 
       try {

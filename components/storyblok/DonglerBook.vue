@@ -70,7 +70,10 @@ import { SfHeading, SfInput, SfButton } from '@storefront-ui/vue';
 import { Blok } from 'src/modules/vsf-storyblok-module/components'
 import { required, email } from 'vuelidate/lib/validators';
 
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
+
 import { DonglerBookService } from 'src/modules/dongler-book';
+import { LAST_USED_CUSTOMER_EMAIL, SET_LAST_USED_CUSTOMER_EMAIL, SN_PERSISTED_CUSTOMER_DATA } from 'src/modules/persisted-customer-data';
 
 import DonglerBookData from './interfaces/dongler-book-data.interface';
 
@@ -94,6 +97,13 @@ export default Blok.extend({
       return this.item as DonglerBookData;
     }
   },
+  beforeMount () {
+    this.fillLastUsedCustomerEmail();
+    EventBus.$on('user-after-loggedin', this.fillLastUsedCustomerEmail);
+  },
+  beforeDestroy () {
+    EventBus.$off('user-after-loggedin', this.fillLastUsedCustomerEmail);
+  },
   methods: {
     async onSubmit (): Promise<void> {
       this.$v.$touch();
@@ -103,6 +113,11 @@ export default Blok.extend({
       }
 
       this.isSubmitting = true;
+
+      this.$store.commit(
+        `${SN_PERSISTED_CUSTOMER_DATA}/${SET_LAST_USED_CUSTOMER_EMAIL}`,
+        this.email
+      );
 
       try {
         const response = await DonglerBookService.requestBook(this.email);
@@ -120,6 +135,10 @@ export default Blok.extend({
       } finally {
         this.isSubmitting = false;
       }
+    },
+    fillLastUsedCustomerEmail () {
+      this.email = this.$store
+        .getters[`${SN_PERSISTED_CUSTOMER_DATA}/${LAST_USED_CUSTOMER_EMAIL}`];
     }
   },
   validations: {

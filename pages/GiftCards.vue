@@ -84,6 +84,7 @@ import { GiftCardOptions, GiftCardTemplateSize } from 'src/modules/gift-card';
 import ServerError from 'src/modules/shared/types/server-error';
 
 import { ProductStructuredData } from 'src/modules/budsies';
+import { LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_EMAIL, SN_PERSISTED_CUSTOMER_DATA } from 'src/modules/persisted-customer-data';
 
 import GiftCardOrderFormData from 'theme/components/interfaces/gift-card-order-form-data.interface';
 
@@ -137,16 +138,12 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     giftCardTemplatesList (): GiftCardTemplate[] {
       return this.$store.getters['giftCard/currentStoreGiftCardTemplates'];
     },
-    loggedUser () {
-      return this.$store.state.user.current;
-    },
     loggedUserFullName (): string {
-      if (!this.loggedUser) {
-        return '';
-      }
+      const firstName = this.$store
+        .getters[`${SN_PERSISTED_CUSTOMER_DATA}/${LAST_USED_CUSTOMER_FIRST_NAME}`];
+      const lastName = this.$store
+        .getters[`${SN_PERSISTED_CUSTOMER_DATA}/${LAST_USED_CUSTOMER_LAST_NAME}`];
 
-      const firstName = this.loggedUser.firstname;
-      const lastName = this.loggedUser.lastname;
       let fullName = '';
 
       if (firstName) {

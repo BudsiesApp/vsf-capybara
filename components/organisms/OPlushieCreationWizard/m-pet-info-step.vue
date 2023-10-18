@@ -89,7 +89,7 @@
     <SfButton
       class="_button"
       :disabled="disabled"
-      @click="(event) => passes(() => submitStep())"
+      @click="() => passes(() => submitStep())"
     >
       {{ $t('Continue') }}
     </SfButton>
@@ -97,7 +97,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue';
+import { PropType, computed, defineComponent } from '@vue/composition-api'
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
 import { required, email, max } from 'vee-validate/dist/rules';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
@@ -111,6 +111,7 @@ import MMultiselect from '../../molecules/m-multiselect.vue';
 import ForeversWizardPetInfoStepData from '../../interfaces/plushie-wizard-pet-info-step-data.interface';
 import Product from 'core/modules/catalog/types/Product';
 import { PlushieType } from 'theme/interfaces/plushie.type';
+import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 
 extend('required', {
   ...required,
@@ -124,7 +125,7 @@ extend('email', {
 
 extend('max', max);
 
-export default Vue.extend({
+export default defineComponent({
   name: 'MPetInfoStep',
   components: {
     SfHeading,
@@ -160,9 +161,20 @@ export default Vue.extend({
       required: true
     }
   },
-  data () {
+  setup (props, { emit }) {
+    const email = computed({
+      get (): string | undefined {
+        return props.value.email;
+      },
+      set (newEmail: string | undefined): void {
+        const newValue: ForeversWizardPetInfoStepData = { ...props.value, email: newEmail };
+        emit('input', newValue);
+      }
+    });
+
     return {
-      showEmailStep: true
+      email,
+      ...usePersistedEmail(email)
     }
   },
   computed: {
@@ -184,15 +196,6 @@ export default Vue.extend({
         this.$emit('input', newValue);
       }
     },
-    email: {
-      get (): string | undefined {
-        return this.value.email;
-      },
-      set (value: string): void {
-        const newValue: ForeversWizardPetInfoStepData = { ...this.value, email: value };
-        this.$emit('input', newValue);
-      }
-    },
     breedsList (): string[] {
       return this.$store.getters['budsies/getPlushieBreeds'];
     },
@@ -203,16 +206,12 @@ export default Vue.extend({
         default:
           return false;
       }
+    },
+    showEmailStep (): boolean {
+      return !this.hasPrefilledEmail;
     }
   },
   methods: {
-    prefillEmail (): void {
-      const customerEmail = this.$store.getters['budsies/getPrefilledCustomerEmail'];
-      if (customerEmail) {
-        this.email = customerEmail;
-        this.showEmailStep = false;
-      }
-    },
     clearBreed (): void {
       this.breed = undefined;
     },
@@ -224,14 +223,7 @@ export default Vue.extend({
       this.$emit('next-step');
     }
   },
-  beforeMount () {
-    this.$bus.$once('budsies-store-synchronized', this.prefillEmail);
-  },
-  beforeDestroy () {
-    this.$bus.$off('budsies-store-synchronized', this.prefillEmail);
-  },
   created (): void {
-    this.prefillEmail();
     if (!this.showBreedStep) {
       this.$nextTick().then(this.clearBreed);
     }
