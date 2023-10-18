@@ -538,11 +538,46 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       this.fillCustomizeStepDataFromCartItem(existingCartItem);
     },
-    async fillPlushieDataFromPersistedState (): Promise<void> {
+    async fillPlushieDataFromPersistedState (isPlushieExist: boolean): Promise<void> {
       const persistedState = await foreversCreationWizardPersistedStateService.getStateByPlushieId(Number.parseInt(this.existingPlushieId));
 
       if (!persistedState) {
         return;
+      }
+
+      if (!isPlushieExist && persistedState.productTypeData?.productSku) {
+        const product = await this.$store.dispatch('product/loadProduct', {
+          parentSku: persistedState.productTypeData.productSku,
+          childSku: null
+        });
+
+        const plushieCreationTask = await this.$store.dispatch(
+          'budsies/createNewPlushie',
+          { productId: product.id }
+        );
+
+        const plushieId = plushieCreationTask.result;
+
+        await foreversCreationWizardPersistedStateService.removeStateByPlushieId(persistedState.productTypeData.plushieId);
+
+        persistedState.productTypeData.plushieId = plushieId;
+        persistedState.imageUploadStepData = undefined;
+        persistedState.currentStepIndex = 1;
+
+        const saveStepDataPromises = [
+          foreversCreationWizardPersistedStateService.saveCurrentStepIndex(plushieId, persistedState.currentStepIndex),
+          foreversCreationWizardPersistedStateService.saveProductTypeStepData(plushieId, persistedState.productTypeData.productSku)
+        ];
+
+        if (persistedState.petInfoStepData) {
+          saveStepDataPromises.push(
+            foreversCreationWizardPersistedStateService.savePetInfoStepData(plushieId, persistedState.petInfoStepData)
+          );
+        }
+
+        await Promise.all(saveStepDataPromises);
+
+        this.$router.push({ query: { ...this.$route.query, id: plushieId.toString(10) } });
       }
 
       await this.fillProductTypeStepDataFromPersistedState(persistedState);
@@ -869,13 +904,26 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     this.isWizardInitializing = true;
 
     try {
+      let isPlushieExist = false;
+
+      if (this.existingPlushieId) {
+        const response = await this.$store.dispatch(
+          'budsies/fetchPlushieById',
+          { plushieId: this.existingPlushieId }
+        );
+
+        if (response.resultCode === 200 && response.result) {
+          isPlushieExist = true;
+        }
+      }
+
       if (this.existingCartItem) {
         await this.fillPlushieDataFromCartItem(this.existingCartItem);
         return;
       }
 
       if (this.existingPlushieId) {
-        await this.fillPlushieDataFromPersistedState();
+        await this.fillPlushieDataFromPersistedState(isPlushieExist);
       }
 
       if (this.preselectedProductType && !this.product) {
