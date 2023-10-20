@@ -41,6 +41,7 @@ import { Blok } from 'src/modules/vsf-storyblok-module/components';
 import { getProductDefaultPrice } from 'src/modules/shared';
 
 import ProductData from './interfaces/product-data.interface';
+import getProductImagePlaceholder from '@vue-storefront/core/modules/cart/helpers/getProductImagePlaceholder';
 
 export default Blok.extend({
   name: 'StoryblokProductBlock',
@@ -49,7 +50,7 @@ export default Blok.extend({
   },
   data: function () {
     return {
-      placeholder: '/assets/placeholder.jpg',
+      placeholder: getProductImagePlaceholder(),
       product: undefined as Product | undefined
     }
   },
