@@ -315,7 +315,7 @@ export default Vue.extend({
       id: number,
       value: string
     }[] {
-      const options = [50, 100, 150, 200, 250].map((price) => ({
+      const options = [30, 50, 100].map((price) => ({
         id: price,
         value: `$${price} Waggables Gift Card`
       }));
