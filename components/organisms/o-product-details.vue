@@ -65,6 +65,7 @@ import MProductOptionsCustom from 'theme/components/molecules/m-product-options-
 import MProductOptionsGroup from 'theme/components/molecules/m-product-options-group';
 import MSocialSharing from 'theme/components/molecules/m-social-sharing';
 import { ModalList } from 'theme/store/ui/modals';
+import getProductImagePlaceholder from '@vue-storefront/core/modules/cart/helpers/getProductImagePlaceholder';
 import { mapActions } from 'vuex';
 import { getProductDefaultPrice } from 'src/modules/shared';
 
@@ -112,13 +113,25 @@ export default {
   },
   computed: {
     gallery () {
-      return this.productGallery.map(imageObject => ({
+      const images = this.productGallery.map(imageObject => ({
         stage: imageObject.src,
         thumb: imageObject.src,
         big: imageObject.src,
         alt: this.product.name,
         title: this.product.name
       }));
+
+      if (!images.length) {
+        images.push({
+          stage: getProductImagePlaceholder(),
+          thumb: getProductImagePlaceholder(),
+          big: getProductImagePlaceholder(),
+          alt: this.product.name,
+          title: this.product.name
+        });
+      }
+
+      return images;
     },
     availability () {
       return this.product.stock && this.product.stock.is_in_stock ? 'InStock' : 'OutOfStock'
@@ -136,7 +149,7 @@ export default {
         description: rawDescription,
         eMailSubject: `Check out this cool product: ${this.product.name}`,
         twitterDescription: rawDescription,
-        image: this.productGallery[0].src
+        image: this.productGallery[0]?.src || getProductImagePlaceholder()
       }
     },
     sizeOption () {
