@@ -448,7 +448,7 @@ export default {
         ) !== undefined;
     },
     showCategoryDescription () {
-      return !isObjectEmpty(this.getCurrentCategory);
+      return !isObjectEmpty(this.getCurrentCategory) && !!this.getCurrentCategory.url_path;
     }
   },
   watch: {
