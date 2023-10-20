@@ -53,7 +53,7 @@
                       {{ getPrice(quote.productionPrice) }}
                     </div>
                   </div>
-                  <div class="_quote-description-row">
+                  <div class="_quote-description-row" v-if="quote.shippingPrice">
                     <div>
                       {{ $t('Shipping/Delivery') }}:
                     </div>
