@@ -97,21 +97,20 @@
 </template>
 
 <script lang="ts">
-import { PropType, computed, defineComponent } from '@vue/composition-api'
+import { PropType, defineComponent } from '@vue/composition-api'
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
 import { required, email, max } from 'vee-validate/dist/rules';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
 import { SfHeading, SfButton, SfInput } from '@storefront-ui/vue';
 
+import Product from 'core/modules/catalog/types/Product';
 import { PlushieWizardEvents, ProductId } from 'src/modules/budsies';
-
-import MMultiselect from '../../molecules/m-multiselect.vue';
+import { PlushieType } from 'theme/interfaces/plushie.type';
 
 import ForeversWizardPetInfoStepData from '../../interfaces/plushie-wizard-pet-info-step-data.interface';
-import Product from 'core/modules/catalog/types/Product';
-import { PlushieType } from 'theme/interfaces/plushie.type';
-import { usePersistedEmail } from 'src/modules/persisted-customer-data';
+
+import MMultiselect from '../../molecules/m-multiselect.vue';
 
 extend('required', {
   ...required,
@@ -159,22 +158,10 @@ export default defineComponent({
     plushieType: {
       type: String as PropType<PlushieType>,
       required: true
-    }
-  },
-  setup (props, { emit }) {
-    const email = computed({
-      get (): string | undefined {
-        return props.value.email;
-      },
-      set (newEmail: string | undefined): void {
-        const newValue: ForeversWizardPetInfoStepData = { ...props.value, email: newEmail };
-        emit('input', newValue);
-      }
-    });
-
-    return {
-      email,
-      ...usePersistedEmail(email)
+    },
+    showEmailStep: {
+      type: Boolean,
+      default: true
     }
   },
   computed: {
@@ -196,6 +183,15 @@ export default defineComponent({
         this.$emit('input', newValue);
       }
     },
+    email: {
+      get (): string | undefined {
+        return this.value.email;
+      },
+      set (value: string): void {
+        const newValue: ForeversWizardPetInfoStepData = { ...this.value, email: value };
+        this.$emit('input', newValue);
+      }
+    },
     breedsList (): string[] {
       return this.$store.getters['budsies/getPlushieBreeds'];
     },
@@ -206,9 +202,6 @@ export default defineComponent({
         default:
           return false;
       }
-    },
-    showEmailStep (): boolean {
-      return !this.hasPrefilledEmail;
     }
   },
   methods: {

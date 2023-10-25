@@ -84,7 +84,7 @@ import { GiftCardOptions, GiftCardTemplateSize } from 'src/modules/gift-card';
 import ServerError from 'src/modules/shared/types/server-error';
 
 import { ProductStructuredData } from 'src/modules/budsies';
-import { LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_EMAIL, SN_PERSISTED_CUSTOMER_DATA } from 'src/modules/persisted-customer-data';
+import { LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, SN_PERSISTED_CUSTOMER_DATA } from 'src/modules/persisted-customer-data';
 
 import GiftCardOrderFormData from 'theme/components/interfaces/gift-card-order-form-data.interface';
 
