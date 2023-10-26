@@ -435,12 +435,20 @@ export default defineComponent({
   },
   setup (_, setupContext) {
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService')
+    const window = inject<Window>('WindowObject');
     const getRefs: () => Record<string, Vue | Element | Vue[] | Element[]> = () => setupContext.refs;
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+    const artworkUpload = ref<InstanceType<typeof MArtworkUpload> | null>(null);
+
+    if (!window) {
+      throw new Error('Window is not provided');
+    }
 
     return {
+      artworkUpload,
       imageHandlerService,
       validationObserver,
+      window,
       ...useFormValidation(
         validationObserver,
         getRefs
@@ -885,7 +893,13 @@ export default defineComponent({
 
       this.description = existingCartItem.plushieDescription || '';
     },
-    fillPlushieDataFromCartItem (existingCartItem: CartItem): void {
+    async fillPlushieDataFromCartItem (existingCartItem: CartItem): Promise<void> {
+      const isPlushieExist = await this.checkExistingPlushie();
+
+      if (!isPlushieExist) {
+        return this.onCartItemPlushieRemoved();
+      }
+
       this.plushieName = existingCartItem.plushieName || '';
       this.customerType = existingCartItem.customerType;
 
@@ -1072,6 +1086,12 @@ export default defineComponent({
 
       try {
         try {
+          const isPlushieExist = await this.checkExistingPlushie();
+
+          if (!isPlushieExist) {
+            return this.onCartItemPlushieRemoved();
+          }
+
           const data: any = {
             plushieName: this.plushieName,
             customerImages: this.customerImages,
@@ -1115,6 +1135,53 @@ export default defineComponent({
       } finally {
         this.isSubmitting = false;
       }
+    },
+    async checkExistingPlushie (): Promise<boolean> {
+      if (!this.existingPlushieId) {
+        return false;
+      }
+
+      const response = await this.$store.dispatch(
+        'budsies/fetchPlushieById',
+        { plushieId: this.existingPlushieId }
+      );
+
+      if (response.resultCode !== 200 || !response.result) {
+        return false;
+      }
+
+      return true;
+    },
+    async onCartItemPlushieRemoved (): Promise<void> {
+      await this.$store.dispatch('cart/pullServerCart');
+
+      this.resetForm();
+      this.window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      this.showRemovedCartItemNotification();
+
+      this.plushieId = await this.createPlushie();
+    },
+    resetForm (): void {
+      this.customerImages = [];
+      this.artworkUploadInitialItems = [];
+      this.description = '';
+      this.plushieId = undefined;
+      this.size = '';
+      this.customerType = undefined;
+      this.color = undefined;
+      this.selectedAddons = [];
+      this.pillowSize = undefined;
+      this.agreement = false;
+
+      this.artworkUpload?.clearInput();
+      this.validationObserver?.reset();
+    },
+    showRemovedCartItemNotification (): void {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'info',
+        message: i18n.t('Looks like cart item was removed'),
+        action1: { label: i18n.t('OK') }
+      });
     }
   },
   created (): void {
