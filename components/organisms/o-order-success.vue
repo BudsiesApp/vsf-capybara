@@ -8,7 +8,7 @@
       />
       <SfHeading
         class="_main-subtitle"
-        :title="$t('Thank you for placing your Petsies order.')"
+        :title="$t('Thank you for placing your Waggables order.')"
         :level="3"
       />
       <SfHeading
@@ -17,7 +17,7 @@
         <template #title>
           <h4 class="sf-heading__title sf-heading__title--h4">
             {{ $t('Please feel free to email') }}
-            <a href="mailto:support@mypetsies.com">support@mypetsies.com</a>
+            <a href="mailto:support@waggables.com">support@waggables.com</a>
             {{ $t('if you have any questions.') }}
           </h4>
         </template>
@@ -30,7 +30,7 @@
 
     <div class="_content">
       <div class="_left">
-        <img class="_success-icon" src="/assets/images/success-icon.jpg" alt="">
+        <img class="_success-icon" src="/assets/images/success-icon.png" alt="">
       </div>
 
       <div class="_right">
@@ -41,17 +41,17 @@
             </div>
 
             <SfHeading
-              :title="$t('Get special birthday savings for your pet(s) (optional)')"
+              :title="$t('Get special birthday savings (optional)')"
               :level="3"
             />
           </div>
 
           <m-share-birthday-form
             class="_section_content"
-            :add-another-button-text="$t('Add another pet')"
-            :top-helper-text="$t('Enter your pet\'s birthday so we can send you a special gift')"
-            :name-input-label="$t('Pet\'s name')"
-            :submit-button-text="$t('Add Pet')"
+            :add-another-button-text="$t('Add another person')"
+            :top-helper-text="$t('Enter your birthday so we can send you a special gift')"
+            :name-input-label="$t('Your name')"
+            :submit-button-text="$t('Submit')"
           />
         </div>
 
@@ -62,24 +62,6 @@
             </div>
 
             <SfHeading
-              :title="$t('Does your pet have a special story?')"
-              :level="3"
-            />
-          </div>
-
-          <m-share-special-story-form
-            class="m-share-special-story-form _section_content"
-            :submit-button-text="$t('Share with Petsies')"
-          />
-        </div>
-
-        <div class="_section">
-          <div class="_title">
-            <div class="_number">
-              3
-            </div>
-
-            <SfHeading
               :title="$t('Are you a trendsetter?')"
               :level="3"
             />
@@ -87,7 +69,7 @@
 
           <div class="_sharing-content _section_content">
             <p class="_text">
-              {{ $t('Let your friends know about Petsies so they can make their own amazing custom plushies.') }}
+              {{ $t('Let your friends know about Waggables so they can order their own amazing cuddly stuffed animals.') }}
             </p>
 
             <m-social-sharing
@@ -100,31 +82,6 @@
 
             <p class="_text -small">
               {{ $t('Clicking link will open new tab where you can customize your message.') }}
-            </p>
-          </div>
-        </div>
-
-        <div class="_section">
-          <div class="_title">
-            <div class="_number">
-              4
-            </div>
-
-            <SfHeading
-              :title="$t('Love Petsies? Share the love with friends and get VIP perks!')"
-              :level="3"
-            />
-          </div>
-
-          <div class="_section_content">
-            <a :href="referralLink" target="_blank" class="_referral-link">
-              <SfButton class="_button">
-                {{ $t('Referral Program') }}
-              </SfButton>
-            </a>
-
-            <p class="_text -small">
-              {{ $t('Rewards dollars may be applied onto existing orders within 7 days of checkout.') }}
             </p>
           </div>
         </div>
@@ -142,7 +99,6 @@ import { InjectType } from 'src/modules/shared';
 
 import MSocialSharing from 'theme/components/molecules/m-social-sharing.vue';
 
-import MShareSpecialStoryForm from './OOrderSuccess/m-share-special-story-form.vue';
 import MShareBirthdayForm from './OOrderSuccess/m-share-birthday-form.vue';
 
 interface NonReactiveState {
@@ -159,7 +115,7 @@ interface InjectedServices {
   window: Window
 }
 
-const referralBaseUrl = 'https://referrals.mypetsies.com';
+const referralBaseUrl = 'https://referrals.waggables.com';
 
 export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>).extend({
   name: 'OOrderSuccess',
@@ -177,7 +133,6 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
     window: { from: 'WindowObject' }
   } as unknown as InjectType<InjectedServices>,
   components: {
-    MShareSpecialStoryForm,
     MShareBirthdayForm,
     MSocialSharing,
     SfButton,
@@ -201,10 +156,10 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
     const baseUrl = this.window.location ? `${this.window.location.protocol}//${this.window.location.host}` : ''
     this.sharingData = {
       sharingUrl: baseUrl,
-      sharingDescription: `${this.$t('Woah! @Petsies makes a custom plush lookalike of your pet (just send them a photo!). Check out')} ${baseUrl}`,
-      eMailSubject: this.$t('Check out Petsies - they make a custom plush lookalike of your pet!') as string,
-      twitterDescription: this.$t('Now you can get a custom plush lookalike of your pet from @PetsiesOfficial. Check it out! https://t.co/YxtXW7CYJQ') as string,
-      image: 'http://pbs.twimg.com/media/CqFVJ8bVYAI2fK0.jpg'
+      sharingDescription: `${this.$t('Woah! @Waggables makes the cutest stuffed animals with interchangeable accessories.')} ${baseUrl}`,
+      eMailSubject: this.$t('Waggables: The cutest stuffed animals with mix & match accessories!') as string,
+      twitterDescription: this.$t(`Now you can accessorize the cutest plush balls with @Waggables. Check it out!`) as string,
+      image: `${baseUrl}/assets/images/sharing-image.jpg`
     };
   },
   destroyed () {
