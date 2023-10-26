@@ -664,7 +664,13 @@ export default defineComponent({
         artworkUploadComponent.initFiles();
       });
     },
-    fillPlushieDataFromCartItem (existingCartItem: CartItem): void {
+    async fillPlushieDataFromCartItem (existingCartItem: CartItem): Promise<void> {
+      const isPlushieExist = await this.checkExistingPlushie();
+
+      if (!isPlushieExist) {
+        return this.onCartItemPlushieRemoved();
+      }
+
       this.description = existingCartItem.plushieDescription || '';
       this.quantity = existingCartItem.qty || 1;
       this.plushieId = Number(existingCartItem.plushieId);
@@ -882,6 +888,12 @@ export default defineComponent({
 
       try {
         try {
+          const isPlushieExist = await this.checkExistingPlushie();
+
+          if (!isPlushieExist) {
+            return this.onCartItemPlushieRemoved();
+          }
+
           await this.updateClientAndServerItem({
             product: Object.assign({}, existingCartItem, {
               qty: this.quantity,
@@ -921,6 +933,38 @@ export default defineComponent({
 
         this.onFailure('Unexpected error: ' + error);
       }
+    },
+    async checkExistingPlushie (): Promise<boolean> {
+      if (!this.existingPlushieId) {
+        return false;
+      }
+
+      const response = await this.$store.dispatch(
+        'budsies/fetchPlushieById',
+        { plushieId: this.existingPlushieId }
+      );
+
+      if (response.resultCode !== 200 || !response.result) {
+        return false;
+      }
+
+      return true;
+    },
+    async onCartItemPlushieRemoved (): Promise<void> {
+      await this.$store.dispatch('cart/pullServerCart');
+
+      this.resetForm();
+      this.window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      this.showRemovedCartItemNotification();
+
+      this.plushieId = await this.createPlushie();
+    },
+    showRemovedCartItemNotification (): void {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'info',
+        message: i18n.t('Looks like cart item was removed'),
+        action1: { label: i18n.t('OK') }
+      });
     }
   },
   async beforeMount () {
