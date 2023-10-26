@@ -89,7 +89,7 @@ import GiftCardOrderFormData from 'theme/components/interfaces/gift-card-order-f
 
 const defaultGiftCardOrderFormData: GiftCardOrderFormData = {
   selectedTemplateId: undefined,
-  priceAmount: 200,
+  priceAmount: 35,
   shouldSendFriend: false,
   customerName: '',
   recipientName: '',
