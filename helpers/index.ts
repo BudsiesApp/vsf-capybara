@@ -6,6 +6,8 @@ import { htmlDecode } from '@vue-storefront/core/filters'
 
 import { getProductDefaultPrice, getProductDefaultDiscount } from 'src/modules/shared';
 
+import getProductImagePlaceholder from '@vue-storefront/core/modules/cart/helpers/getProductImagePlaceholder';
+
 export function getPathForStaticPage (path: string) {
   const { storeCode } = currentStoreView()
   const isStoreCodeEquals = storeCode === config.defaultStoreCode
@@ -52,16 +54,19 @@ export function getTopLevelCategories (categoryList) {
 }
 
 export function prepareCategoryProduct (product) {
+  const imagePath = productThumbnailPath(product);
+  const thumbnailPath = !imagePath ? getProductImagePlaceholder() : getThumbnailPath(
+    imagePath,
+    config.products.thumbnails.width,
+    config.products.thumbnails.height
+  );
+
   return {
     discount: getProductDefaultDiscount(product),
     id: product.id,
     sku: product.sku,
     title: htmlDecode(product.name),
-    image: getThumbnailPath(
-      productThumbnailPath(product),
-      config.products.thumbnails.width,
-      config.products.thumbnails.height
-    ),
+    image: thumbnailPath,
     link: formatProductLink(product, currentStoreView().storeCode),
     price: getProductDefaultPrice(product, {}),
     rating: {
