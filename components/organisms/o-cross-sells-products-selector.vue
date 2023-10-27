@@ -1,6 +1,16 @@
 <template>
-  <div class="o-cross-sells-products-selector">
+  <div
+    class="o-cross-sells-products-selector"
+    v-if="productOptions.length"
+  >
+    <SfHeading
+      level="3"
+      :title="$t('Fit perfect with:')"
+      class="_title"
+    />
+
     <m-addons-selector
+      class="_selector"
       v-model="selectedProducts"
       :addons="productOptions"
       :disabled="isDisabled"
@@ -11,18 +21,20 @@
 
 <script lang="ts">
 import { PropType, defineComponent, onBeforeMount, onServerPrefetch } from '@vue/composition-api';
+import { SfHeading } from '@storefront-ui/vue';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { getProductGallery } from '@vue-storefront/core/modules/catalog/helpers';
+import { getProductDefaultPrice } from 'src/modules/shared';
+import { getFinalPrice } from 'src/modules/shared/helpers/price';
+
 import { useCrossSellsProducts } from 'theme/helpers/use-cross-sells-products';
 import { getFieldAnchorName } from 'theme/helpers/use-form-validation';
-import { getProductDefaultPrice } from 'src/modules/shared';
 
 import AddonOption from '../interfaces/addon-option.interface';
+import SelectedAddon from '../interfaces/selected-addon.interface';
 
 import MAddonsSelector from '../molecules/m-addons-selector.vue';
-import SelectedAddon from '../interfaces/selected-addon.interface';
-import { getFinalPrice } from 'src/modules/shared/helpers/price';
 
 function getAddonOptionFromProduct (product: Product): AddonOption {
   const price = getProductDefaultPrice(product, {}, false);
@@ -52,7 +64,8 @@ export default defineComponent({
     }
   },
   components: {
-    MAddonsSelector
+    MAddonsSelector,
+    SfHeading
   },
   setup ({ product }) {
     const {
@@ -106,3 +119,15 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss">
+.o-cross-sells-products-selector {
+  ._title {
+    text-align: start;
+  }
+
+  ._selector {
+    margin-top: var(--spacer-base);
+  }
+}
+</style>
