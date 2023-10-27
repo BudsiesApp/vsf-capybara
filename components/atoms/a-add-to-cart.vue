@@ -14,9 +14,6 @@ import { formatProductMessages } from '@vue-storefront/core/filters/product-mess
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import { mapGetters } from 'vuex';
 import ServerError from 'src/modules/shared/types/server-error';
-import { CART_ADDING_ITEM } from '@vue-storefront/core/modules/cart/store/mutation-types'
-import { cartHooksExecutors } from '@vue-storefront/core/modules/cart/hooks';
-import throwServerErrorFromDiffLog from '@vue-storefront/core/modules/cart/helpers/throwServerErrorFromDiffLog';
 
 export default {
   name: 'AAddToCart',
@@ -60,29 +57,25 @@ export default {
           this.product,
           ...this.additionalProducts
         ].map((product) => {
-          const productToAdd = Object.assign({}, product, { qty: this.qty })
-          const { cartItem } = cartHooksExecutors.beforeAddToCart({ cartItem: productToAdd })
-          return cartItem;
+          return Object.assign({}, product, { qty: this.qty })
         });
 
-        this.$store.commit(`cart/${CART_ADDING_ITEM}`, { isAdding: true })
+        for (const product of productsToAdd) {
+          const diffLog = await this.$store.dispatch('cart/addItem', {
+            productToAdd: product
+          });
 
-        const diffLog = await this.$store.dispatch('cart/addItems', {
-          productsToAdd
-        });
+          diffLog.clientNotifications.forEach(notificationData => {
+            notificationData.type = 'info'
+            notificationData.timeToLive = 10 * 1000
 
-        throwServerErrorFromDiffLog(diffLog);
-
-        diffLog.clientNotifications.forEach(notificationData => {
-          notificationData.type = 'info'
-          notificationData.timeToLive = 10 * 1000
-
-          this.$store.dispatch(
-            'notification/spawnNotification',
-            notificationData,
-            { root: true }
-          );
-        });
+            this.$store.dispatch(
+              'notification/spawnNotification',
+              notificationData,
+              { root: true }
+            );
+          });
+        }
       } catch (error) {
         if (!(error instanceof ServerError)) {
           return;
@@ -93,8 +86,6 @@ export default {
           notifications.createNotification({ type: 'danger', message: error, timeToLive: 10 * 1000 }),
           { root: true }
         );
-      } finally {
-        this.$store.commit(`cart/${CART_ADDING_ITEM}`, { isAdding: false })
       }
     }
   }
