@@ -60,6 +60,8 @@ export default {
           return Object.assign({}, product, { qty: this.qty })
         });
 
+        // TODO using of `addItems` action lead to unpredictable behavior.
+        // probably caused by synchronization logic.
         for (const product of productsToAdd) {
           const diffLog = await this.$store.dispatch('cart/addItem', {
             productToAdd: product
