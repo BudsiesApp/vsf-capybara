@@ -14,6 +14,9 @@ import { formatProductMessages } from '@vue-storefront/core/filters/product-mess
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import { mapGetters } from 'vuex';
 import ServerError from 'src/modules/shared/types/server-error';
+import { CART_ADDING_ITEM } from '@vue-storefront/core/modules/cart/store/mutation-types'
+import { cartHooksExecutors } from '@vue-storefront/core/modules/cart/hooks';
+import throwServerErrorFromDiffLog from '@vue-storefront/core/modules/cart/helpers/throwServerErrorFromDiffLog';
 
 export default {
   name: 'AAddToCart',
@@ -32,6 +35,10 @@ export default {
     qty: {
       type: Number,
       default: 1
+    },
+    additionalProducts: {
+      type: Array,
+      default: () => ([])
     }
   },
   computed: {
@@ -49,9 +56,23 @@ export default {
   methods: {
     async addToCart () {
       try {
-        const diffLog = await this.$store.dispatch('cart/addItem', {
-          productToAdd: Object.assign({}, this.product, { qty: this.qty })
+        const productsToAdd = [
+          this.product,
+          ...this.additionalProducts
+        ].map((product) => {
+          const productToAdd = Object.assign({}, product, { qty: this.qty })
+          const { cartItem } = cartHooksExecutors.beforeAddToCart({ cartItem: productToAdd })
+          return cartItem;
         });
+
+        this.$store.commit(`cart/${CART_ADDING_ITEM}`, { isAdding: true })
+
+        const diffLog = await this.$store.dispatch('cart/addItems', {
+          productsToAdd
+        });
+
+        throwServerErrorFromDiffLog(diffLog);
+
         diffLog.clientNotifications.forEach(notificationData => {
           notificationData.type = 'info'
           notificationData.timeToLive = 10 * 1000
@@ -72,6 +93,8 @@ export default {
           notifications.createNotification({ type: 'danger', message: error, timeToLive: 10 * 1000 }),
           { root: true }
         );
+      } finally {
+        this.$store.commit(`cart/${CART_ADDING_ITEM}`, { isAdding: false })
       }
     }
   }
