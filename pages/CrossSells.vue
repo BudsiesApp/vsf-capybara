@@ -67,20 +67,17 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import config from 'config';
-import { SearchQuery } from 'storefront-query-builder';
+import { defineComponent } from '@vue/composition-api';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import Product from 'core/modules/catalog/types/Product';
 import { SfButton } from '@storefront-ui/vue';
 import OProductCard from 'theme/components/organisms/o-product-card.vue';
-import { prepareCategoryProduct } from 'theme/helpers';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
-import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 import { ProductEvent } from 'src/modules/shared';
+import { useCrossSellsProducts } from 'theme/helpers/use-cross-sells-products';
 
-export default Vue.extend({
+export default defineComponent({
   name: 'CrossSells',
   props: {
     parentSku: {
@@ -92,48 +89,12 @@ export default Vue.extend({
     SfButton,
     OProductCard
   },
+  setup (props) {
+    return {
+      ...useCrossSellsProducts(props.parentSku)
+    }
+  },
   computed: {
-    crossSellsProducts (): any[] {
-      if (!this.getCurrentProduct) {
-        return [];
-      }
-
-      const skus = this.getProductLinkSkusByType('crosssell');
-
-      return this.getSellsProductsBySkus(skus);
-    },
-    preparedCrossSellsProducts (): any[] {
-      return this.crossSellsProducts.map(
-        (item: Product) => (
-          {
-            ...prepareCategoryProduct(item),
-            landing_page_url: item.landing_page_url
-          }
-        )
-      )
-    },
-    upSellsProducts (): any[] {
-      if (!this.getCurrentProduct) {
-        return [];
-      }
-
-      const skus = this.getProductLinkSkusByType('upsell');
-
-      return this.getSellsProductsBySkus(skus);
-    },
-    preparedUpSellsProducts (): any[] {
-      return this.upSellsProducts.map(
-        (item: Product) => (
-          {
-            ...prepareCategoryProduct(item),
-            landing_page_url: item.landing_page_url
-          }
-        )
-      )
-    },
-    getCurrentProduct (): Product | null {
-      return this.getProductBySkuDictionary[this.parentSku];
-    },
     getProductBySkuDictionary (): Record<string, Product> {
       return this.$store.getters['product/getProductBySkuDictionary'];
     }
@@ -179,128 +140,7 @@ export default Vue.extend({
         );
       }
     },
-    getProductLinkSkusByType (type: string): string[] {
-      if (!this.getCurrentProduct) {
-        return [];
-      }
-
-      if (!this.getCurrentProduct.product_links) {
-        return [];
-      }
-
-      const productLinks = this.getCurrentProduct.product_links;
-
-      if (productLinks.length === 0) {
-        return [];
-      }
-
-      const skus = productLinks
-        .filter(productLink => productLink.link_type === type)
-        .map(productLink => productLink.linked_product_sku);
-
-      return skus;
-    },
-    getSellsProductsBySkus (skus: string[]): any[] {
-      let products: Product[] = [];
-
-      for (const sku of skus) {
-        for (const key in this.getProductBySkuDictionary) {
-          const product = this.getProductBySkuDictionary[key];
-
-          if (!product.id) {
-            continue;
-          }
-
-          // VSF replace sku with it's default variant SKU for configurable and bundle products
-          // So as workaround better to use parentSku instead sku to compare
-          const isSkusListIncludesProduct = product.parentSku === sku;
-          const hasLandingPage = !!product.landing_page_url || !isCustomProduct(+product.id);
-
-          if (
-            isSkusListIncludesProduct &&
-            hasLandingPage
-          ) {
-            products.push(this.getProductBySkuDictionary[key]);
-            break;
-          }
-        }
-      }
-
-      return products;
-    },
-    getSearchQuery (skus: string[]) {
-      let productsQuery = new SearchQuery()
-      productsQuery = productsQuery
-        .applyFilter({ key: 'sku', value: { 'in': skus } })
-        .applyFilter({ key: 'status', value: { 'in': [1] } });
-
-      if (config.products.listOutOfStockProducts === false) {
-        productsQuery = productsQuery.applyFilter({ key: 'stock.is_in_stock', value: { 'eq': true } });
-      }
-
-      return productsQuery;
-    },
-    async loadProductsList (type: string): Promise<void> {
-      if (!this.getCurrentProduct) {
-        return;
-      }
-
-      const skus = this.getProductLinkSkusByType(type);
-
-      let notExistingProductsSkus: string[] = [];
-
-      for (const sku of skus) {
-        let productFound = false;
-
-        for (const key in this.getProductBySkuDictionary) {
-          if (this.getProductBySkuDictionary[key].parentSku === sku) {
-            productFound = true;
-
-            break;
-          }
-        }
-
-        if (productFound) {
-          continue;
-        }
-
-        notExistingProductsSkus.push(sku);
-      }
-
-      if (notExistingProductsSkus.length === 0) {
-        return;
-      }
-
-      await this.$store.dispatch('product/findProducts', {
-        query: this.getSearchQuery(notExistingProductsSkus),
-        options: {
-          prefetchGroupProducts: false
-        }
-      });
-    },
-    async loadCrossSellsProducts () {
-      await this.loadProductsList('crosssell');
-    },
-    async loadUpSellsProducts () {
-      await this.loadProductsList('upsell');
-    },
-    async loadData (): Promise<void> {
-      if (!this.getCurrentProduct) {
-        await this.$store.dispatch(
-          'product/loadProduct',
-          {
-            parentSku: (this as any).parentSku,
-            setCurrent: false
-          }
-        );
-      }
-
-      await Promise.all([
-        (this as any).loadCrossSellsProducts(),
-        (this as any).loadUpSellsProducts()
-      ]);
-    },
-    goToCart (): void {
+    gozToCart (): void {
       this.$router.push(localizedRoute({ name: 'detailed-cart' }));
     },
     redirectToCart (): void {
