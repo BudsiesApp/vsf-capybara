@@ -140,7 +140,7 @@ export default defineComponent({
         );
       }
     },
-    gozToCart (): void {
+    goToCart (): void {
       this.$router.push(localizedRoute({ name: 'detailed-cart' }));
     },
     redirectToCart (): void {
