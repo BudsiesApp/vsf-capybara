@@ -1164,6 +1164,7 @@ export default defineComponent({
     resetForm (): void {
       this.customerImages = [];
       this.artworkUploadInitialItems = [];
+      this.plushieName = '';
       this.description = '';
       this.plushieId = undefined;
       this.size = '';
