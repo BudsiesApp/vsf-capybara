@@ -5,6 +5,7 @@ import { SearchQuery } from 'storefront-query-builder';
 import rootStore from '@vue-storefront/core/store';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
+import { Dictionary } from 'src/modules/budsies';
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 
 import { prepareCategoryProduct } from 'theme/helpers';
@@ -29,7 +30,8 @@ function getSearchQuery (skus: string[]) {
 
 export function useCrossSellsProducts (
   parentSku: string,
-  listTypes: (ListType)[] = [CROSS_SELL, UP_SELL]
+  listTypes: (ListType)[] = [CROSS_SELL, UP_SELL],
+  loadFullProductsInfo = false
 ) {
   const productBySkuDictionary = computed<Record<string, Product>>(() => {
     return rootStore.getters['product/getProductBySkuDictionary'];
@@ -45,6 +47,15 @@ export function useCrossSellsProducts (
     const skus = getProductLinkSkusByType(CROSS_SELL);
 
     return getSellsProductsBySkus(skus);
+  });
+  const crossSellsProductDictionary = computed(() => {
+    const dictionary: Dictionary<Product> = {};
+
+    crossSellsProducts.value.forEach((product) => {
+      dictionary[product.id] = product;
+    });
+
+    return dictionary;
   });
   const preparedCrossSellsProducts = computed(() => {
     return crossSellsProducts.value.map(
@@ -140,7 +151,10 @@ export function useCrossSellsProducts (
       let productFound = false;
 
       for (const key in productBySkuDictionary.value) {
-        if (productBySkuDictionary.value[key].parentSku === sku) {
+        const product = productBySkuDictionary.value[key];
+        const hasRequiredData = loadFullProductsInfo ? !!product.media_gallery : true;
+
+        if (product.parentSku === sku && hasRequiredData) {
           productFound = true;
 
           break;
@@ -192,6 +206,7 @@ export function useCrossSellsProducts (
 
   return {
     crossSellsProducts,
+    crossSellsProductDictionary,
     upSellsProducts,
     preparedCrossSellsProducts,
     preparedUpSellsProducts,
