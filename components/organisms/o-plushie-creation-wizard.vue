@@ -65,6 +65,7 @@
               :disabled="isBusy"
               :show-size-selector="showSizeSelector"
               @next-step="nextStep"
+              v-if="activeProduct && plushieId"
             />
           </SfStep>
         </SfSteps>
