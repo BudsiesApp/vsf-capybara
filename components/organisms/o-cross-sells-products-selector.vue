@@ -4,8 +4,8 @@
     v-if="productOptions.length"
   >
     <SfHeading
-      level="3"
-      :title="$t('Fit perfect with:')"
+      :level="3"
+      :title="$t('Optional upgrades:')"
       class="_title"
     />
 
