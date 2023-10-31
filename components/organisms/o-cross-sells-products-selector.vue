@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent, onBeforeMount, onServerPrefetch } from '@vue/composition-api';
+import { PropType, defineComponent, onBeforeMount, onServerPrefetch, toRefs } from '@vue/composition-api';
 import { SfHeading } from '@storefront-ui/vue';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -28,7 +28,7 @@ import { getProductGallery } from '@vue-storefront/core/modules/catalog/helpers'
 import { getProductDefaultPrice } from 'src/modules/shared';
 import { getFinalPrice } from 'src/modules/shared/helpers/price';
 
-import { useCrossSellsProducts } from 'theme/helpers/use-cross-sells-products';
+import { CROSS_SELL, useRelatedProducts } from 'theme/helpers/use-cross-sells-products';
 import { getFieldAnchorName } from 'theme/helpers/use-form-validation';
 
 import AddonOption from '../interfaces/addon-option.interface';
@@ -67,29 +67,28 @@ export default defineComponent({
     MAddonsSelector,
     SfHeading
   },
-  setup ({ product }) {
+  setup (props) {
     const {
-      loadData,
-      crossSellsProducts,
-      crossSellsProductDictionary
-    } = useCrossSellsProducts(
-      product.sku,
-      ['crosssell'],
+      relatedProducts,
+      loadList,
+      getRelatedProductById
+    } = useRelatedProducts(
+      toRefs(props).product,
+      CROSS_SELL,
       true
     );
 
     onServerPrefetch(() => {
-      return loadData();
+      return loadList();
     });
 
     onBeforeMount(() => {
-      return loadData();
+      return loadList();
     })
 
     return {
-      loadData,
-      crossSellsProducts,
-      crossSellsProductDictionary,
+      relatedProducts,
+      getRelatedProductById,
       getFieldAnchorName
     }
   },
@@ -98,7 +97,7 @@ export default defineComponent({
       return this.$store.getters['cart/getIsAdding'];
     },
     productOptions (): AddonOption[] {
-      return this.crossSellsProducts.map(getAddonOptionFromProduct);
+      return this.relatedProducts.map(getAddonOptionFromProduct);
     },
     selectedProducts: {
       get (): SelectedAddon[] {
@@ -112,7 +111,11 @@ export default defineComponent({
       set (value: SelectedAddon[]) {
         this.$emit(
           'input',
-          value.map((option) => this.crossSellsProductDictionary[option.addonOptionValueId])
+          value.map(
+            (option) => this.getRelatedProductById(
+              option.addonOptionValueId
+            )
+          )
         );
       }
     }
