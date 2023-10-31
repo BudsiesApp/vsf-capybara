@@ -468,7 +468,7 @@ export default {
     return this.onCategoryChangedHandler(this.$route);
   },
   async beforeRouteUpdate (to, from, next) {
-    if (to.params.url_key === from.params.url_key) {
+    if (to.params.slug === from.params.slug) {
       await this.updatePage(to);
       next();
       return;
