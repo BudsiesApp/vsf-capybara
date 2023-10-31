@@ -67,7 +67,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent, toRefs } from '@vue/composition-api';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import Product from 'core/modules/catalog/types/Product';
@@ -75,7 +75,8 @@ import { SfButton } from '@storefront-ui/vue';
 import OProductCard from 'theme/components/organisms/o-product-card.vue';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { ProductEvent } from 'src/modules/shared';
-import { useCrossSellsProducts } from 'theme/helpers/use-cross-sells-products';
+import { CROSS_SELL, UP_SELL, useRelatedProducts } from 'theme/helpers/use-cross-sells-products';
+import { useProduct } from 'theme/helpers/use-product';
 
 export default defineComponent({
   name: 'CrossSells',
@@ -90,8 +91,29 @@ export default defineComponent({
     OProductCard
   },
   setup (props) {
+    const { currentProduct, loadProduct } = useProduct(
+      toRefs(props).parentSku,
+      false
+    );
+    const {
+      relatedProducts: crossSellsProducts,
+      preparedRelatedProducts: preparedCrossSellsProducts,
+      loadList: loadCrossSellsProductsList
+    } = useRelatedProducts(currentProduct, CROSS_SELL);
+    const {
+      relatedProducts: upSellsProducts,
+      preparedRelatedProducts: preparedUpSellsProducts,
+      loadList: loadUpSellsProductsList
+    } = useRelatedProducts(currentProduct, UP_SELL);
+
     return {
-      ...useCrossSellsProducts(props.parentSku)
+      crossSellsProducts,
+      preparedCrossSellsProducts,
+      upSellsProducts,
+      preparedUpSellsProducts,
+      loadCrossSellsProductsList,
+      loadUpSellsProductsList,
+      loadProduct
     }
   },
   computed: {
@@ -160,6 +182,13 @@ export default defineComponent({
           categoryId: this.parentSku
         }
       )
+    },
+    async loadData (): Promise<void> {
+      await this.loadProduct();
+      await Promise.all([
+        this.loadCrossSellsProductsList(),
+        this.loadUpSellsProductsList()
+      ]);
     }
   },
   watch: {

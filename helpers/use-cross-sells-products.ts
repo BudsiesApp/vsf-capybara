@@ -28,37 +28,34 @@ function getSearchQuery (skus: string[]) {
   return productsQuery;
 }
 
-export function useCrossSellsProducts (
-  parentSku: string,
-  listTypes: (ListType)[] = [CROSS_SELL, UP_SELL],
+export function useRelatedProducts (
+  currentProduct: Ref<Product | undefined>,
+  listType: ListType,
   loadFullProductsInfo = false
 ) {
   const productBySkuDictionary = computed<Record<string, Product>>(() => {
     return rootStore.getters['product/getProductBySkuDictionary'];
   });
-  const currentProduct = computed(() => {
-    return productBySkuDictionary.value[parentSku];
-  });
-  const crossSellsProducts = computed(() => {
-    if (!currentProduct.value || !listTypes.includes(CROSS_SELL)) {
+  const relatedProducts = computed(() => {
+    if (!currentProduct.value) {
       return [];
     }
 
-    const skus = getProductLinkSkusByType(CROSS_SELL);
+    const skus = getProductLinkSkusByType(listType);
 
     return getSellsProductsBySkus(skus);
   });
-  const crossSellsProductDictionary = computed(() => {
+  const relatedProductDictionary = computed(() => {
     const dictionary: Dictionary<Product> = {};
 
-    crossSellsProducts.value.forEach((product) => {
+    relatedProducts.value.forEach((product) => {
       dictionary[product.id] = product;
     });
 
     return dictionary;
   });
-  const preparedCrossSellsProducts = computed(() => {
-    return crossSellsProducts.value.map(
+  const preparedRelatedProducts = computed(() => {
+    return relatedProducts.value.map(
       (item: Product) => (
         {
           ...prepareCategoryProduct(item),
@@ -67,25 +64,10 @@ export function useCrossSellsProducts (
       )
     )
   });
-  const upSellsProducts = computed(() => {
-    if (!currentProduct.value) {
-      return [];
-    }
 
-    const skus = getProductLinkSkusByType(UP_SELL);
-
-    return getSellsProductsBySkus(skus);
-  });
-  const preparedUpSellsProducts = computed(() => {
-    return upSellsProducts.value.map(
-      (item: Product) => (
-        {
-          ...prepareCategoryProduct(item),
-          landing_page_url: item.landing_page_url
-        }
-      )
-    )
-  });
+  function getRelatedProductById (id: number): Product | undefined {
+    return relatedProductDictionary.value[id];
+  }
 
   function getSellsProductsBySkus (skus: string[]): any[] {
     let products: Product[] = [];
@@ -107,7 +89,7 @@ export function useCrossSellsProducts (
           isSkusListIncludesProduct &&
           hasLandingPage
         ) {
-          products.push(productBySkuDictionary.value[key]);
+          products.push(product);
           break;
         }
       }
@@ -138,12 +120,12 @@ export function useCrossSellsProducts (
     return skus;
   }
 
-  async function loadProductsList (type: ListType): Promise<void> {
+  async function loadList (): Promise<void> {
     if (!currentProduct.value) {
       return;
     }
 
-    const skus = getProductLinkSkusByType(type);
+    const skus = getProductLinkSkusByType(listType);
 
     let notExistingProductsSkus: string[] = [];
 
@@ -180,36 +162,10 @@ export function useCrossSellsProducts (
     });
   }
 
-  async function loadData (): Promise<void> {
-    if (!currentProduct.value) {
-      await rootStore.dispatch(
-        'product/loadProduct',
-        {
-          parentSku: parentSku,
-          setCurrent: false
-        }
-      );
-    }
-
-    const loadingPromises = [];
-
-    if (listTypes.includes(CROSS_SELL)) {
-      loadingPromises.push(loadProductsList(CROSS_SELL));
-    }
-
-    if (listTypes.includes(UP_SELL)) {
-      loadingPromises.push(loadProductsList(UP_SELL));
-    }
-
-    await Promise.all(loadingPromises);
-  }
-
   return {
-    crossSellsProducts,
-    crossSellsProductDictionary,
-    upSellsProducts,
-    preparedCrossSellsProducts,
-    preparedUpSellsProducts,
-    loadData
+    relatedProducts,
+    preparedRelatedProducts,
+    getRelatedProductById,
+    loadList
   }
 }
