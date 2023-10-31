@@ -55,7 +55,8 @@ let routes = [
   { name: 'configurable-product', path: '/p/:parentSku/:slug/:childSku/', component: Product },
   { name: 'plushToyAccessory-product', path: '/p/:parentSku/:slug/', component: Product },
   { name: 'product', path: '/p/:parentSku/:slug/:childSku/', component: Product },
-  { name: 'category', path: '/c/:slug/', component: Category },
+  { name: 'product-alias-1', path: '/p/:parentSku/', component: Product },
+  { name: 'category', path: '/c/:url_key/', component: Category },
   { name: 'cross-sells', path: '/cross-sells/p/:parentSku/', component: CrossSells, props: true },
   {
     name: 'cross-sells-alias',
@@ -142,11 +143,11 @@ let routes = [
   },
   {
     name: 'products',
-    path: '/products/', // TODO check path
+    path: '/products/',
     redirect: {
       name: 'category',
       params: {
-        slug: 'waggables-132'
+        url_key: 'waggables-132'
       }
     }
   },
