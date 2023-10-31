@@ -1,5 +1,5 @@
 <template>
-  <div id="category">
+  <div id="category" :class="skinClass">
     <div class="page-header">
       <SfHeading :level="1" :title="getCurrentCategory.name" class="navbar__title" />
     </div>
@@ -239,6 +239,7 @@ import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
 import { ProductEvent } from 'src/modules/shared';
 
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 import isObjectEmpty from 'theme/helpers/is-object-empty.function';
 import { useInfinityScroll } from 'theme/helpers/use-infinity-scroll';
 
@@ -449,6 +450,9 @@ export default {
     },
     showCategoryDescription () {
       return !isObjectEmpty(this.getCurrentCategory) && !!this.getCurrentCategory.url_path;
+    },
+    skinClass () {
+      return getCurrentThemeClass();
     }
   },
   watch: {
@@ -688,6 +692,45 @@ export default {
 
     ::v-deep h6 {
       @extend .sf-heading__title--h6;
+    }
+  }
+
+  &.-skin-waggables {
+    .products {
+      &__grid {
+        display: flex;
+        justify-content: center;
+      }
+
+      &__product-card {
+        flex: 1 1;
+        flex-basis: 100%;
+        max-width: 100%;
+      }
+
+      @media (min-width: 426px) {
+        &__product-card {
+          max-width: 46%;
+        }
+      }
+
+      @media (min-width: $tablet-min) {
+        &__product-card {
+          max-width: 31%;
+        }
+      }
+
+      @include for-desktop {
+        &__product-card {
+          max-width: 23%;
+        }
+      }
+
+      @media (min-width: $desktop-l-min) {
+        &__product-card {
+          max-width: 18%;
+        }
+      }
     }
   }
 }
