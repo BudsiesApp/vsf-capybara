@@ -28,7 +28,7 @@ import { getProductGallery } from '@vue-storefront/core/modules/catalog/helpers'
 import { getProductDefaultPrice } from 'src/modules/shared';
 import { getFinalPrice } from 'src/modules/shared/helpers/price';
 
-import { CROSS_SELL, useRelatedProducts } from 'theme/helpers/use-cross-sells-products';
+import { CROSS_SELL, useRelatedProducts } from 'theme/helpers/use-related-products';
 import { getFieldAnchorName } from 'theme/helpers/use-form-validation';
 
 import AddonOption from '../interfaces/addon-option.interface';
