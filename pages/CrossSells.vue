@@ -75,7 +75,7 @@ import { SfButton } from '@storefront-ui/vue';
 import OProductCard from 'theme/components/organisms/o-product-card.vue';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { ProductEvent } from 'src/modules/shared';
-import { CROSS_SELL, UP_SELL, useRelatedProducts } from 'theme/helpers/use-cross-sells-products';
+import { CROSS_SELL, UP_SELL, useRelatedProducts } from 'theme/helpers/use-related-products';
 import { useProduct } from 'theme/helpers/use-product';
 
 export default defineComponent({
