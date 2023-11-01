@@ -32,6 +32,10 @@ export default {
     qty: {
       type: Number,
       default: 1
+    },
+    additionalProducts: {
+      type: Array,
+      default: () => ([])
     }
   },
   computed: {
@@ -49,19 +53,31 @@ export default {
   methods: {
     async addToCart () {
       try {
-        const diffLog = await this.$store.dispatch('cart/addItem', {
-          productToAdd: Object.assign({}, this.product, { qty: this.qty })
+        const productsToAdd = [
+          this.product,
+          ...this.additionalProducts
+        ].map((product) => {
+          return Object.assign({}, product, { qty: this.qty })
         });
-        diffLog.clientNotifications.forEach(notificationData => {
-          notificationData.type = 'info'
-          notificationData.timeToLive = 10 * 1000
 
-          this.$store.dispatch(
-            'notification/spawnNotification',
-            notificationData,
-            { root: true }
-          );
-        });
+        // TODO using of `addItems` action lead to unpredictable behavior.
+        // probably caused by synchronization logic.
+        for (const product of productsToAdd) {
+          const diffLog = await this.$store.dispatch('cart/addItem', {
+            productToAdd: product
+          });
+
+          diffLog.clientNotifications.forEach(notificationData => {
+            notificationData.type = 'info'
+            notificationData.timeToLive = 10 * 1000
+
+            this.$store.dispatch(
+              'notification/spawnNotification',
+              notificationData,
+              { root: true }
+            );
+          });
+        }
       } catch (error) {
         if (!(error instanceof ServerError)) {
           return;
