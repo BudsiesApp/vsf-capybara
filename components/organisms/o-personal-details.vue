@@ -86,7 +86,7 @@
 
                   <router-link
                     target="_blank"
-                    to="/privacy-policy/"
+                    to="//privacy.budsies.com/privacy-policy"
                   >
                     {{ $t('Privacy Policy') }}
                   </router-link>

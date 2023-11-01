@@ -313,7 +313,7 @@
             {{ $t('Terms of Service') }},
           </router-link>
 
-          <router-link to="/privacy-policy/" target="_blank">
+          <router-link to="//privacy.budsies.com/privacy-policy" target="_blank">
             {{ $t('Privacy Policy') }},
           </router-link>
 

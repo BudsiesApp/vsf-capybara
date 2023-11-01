@@ -301,7 +301,7 @@
               {{ $t('Terms of Service') }},
             </router-link>
 
-            <router-link to="/privacy-policy/" target="_blank">
+            <router-link to="//privacy.budsies.com/privacy-policy" target="_blank">
               {{ $t('Privacy Policy') }}
             </router-link>,
             {{ $t('and') }} <a href="http://support.budsies.com/support/solutions/folders/5000249005" target="_blank">{{ $t('Refund Policy') }}</a>.

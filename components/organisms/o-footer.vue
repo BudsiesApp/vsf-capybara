@@ -88,7 +88,7 @@
 
       <p class="_copyright">
         © 2023 {{ $t('Budsies PR LLC. All Rights Reserved') }}. |
-        <router-link to="/privacy-policy/">
+        <router-link to="//privacy.budsies.com/privacy-policy" target="_blank">
           {{ $t('Privacy Policy') }}
         </router-link>
       </p>
