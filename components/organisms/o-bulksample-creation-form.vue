@@ -380,6 +380,7 @@ import { defineComponent, inject, PropType, Ref, ref } from '@vue/composition-ap
 
 import { Bodypart, BodypartOption, BodypartValue, ProductId, ProductValue, vuexTypes as budsiesTypes, ImageUploadMethod, Dictionary } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
+import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 import { CustomerImage, getProductDefaultPrice, ServerError } from 'src/modules/shared';
 
 import BulksampleProduct from 'theme/interfaces/bulksample-product.type';
@@ -438,13 +439,17 @@ export default defineComponent({
     const getRefs: () => Record<string, Vue | Element | Vue[] | Element[]> = () => setupContext.refs;
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
 
+    const email = ref<string | undefined>(undefined);
+
     return {
       imageHandlerService,
       validationObserver,
+      email,
       ...useFormValidation(
         validationObserver,
         getRefs
-      )
+      ),
+      ...usePersistedEmail(email)
     }
   },
   components: {
@@ -720,6 +725,9 @@ export default defineComponent({
     },
     showSimpleSizeInput (): boolean {
       return this.type === BulksampleProduct.PLUSH;
+    },
+    showEmailStep (): boolean {
+      return !this.hasPrefilledEmail;
     }
   },
   data () {
@@ -731,8 +739,6 @@ export default defineComponent({
       color: undefined as BodypartOption[] | undefined,
       selectedAddons: [] as SelectedAddon [],
       customerImages: [] as CustomerImage[],
-      email: '',
-      showEmailStep: true,
       plushieId: undefined as number | undefined,
       artworkUploadInitialItems: [] as CustomerImage[],
       isSubmitting: false,
@@ -757,11 +763,6 @@ export default defineComponent({
         { product: this.product, bundleOptions: this.$store.state.product.current_bundle_options }
       );
 
-      this.$store.commit(
-        budsiesTypes.SN_BUDSIES + '/' + budsiesTypes.CUSTOMER_EMAIL_SET,
-        { email: this.email }
-      );
-
       try {
         try {
           const data: any = {
@@ -783,6 +784,8 @@ export default defineComponent({
           await this.$store.dispatch('cart/addItem', {
             productToAdd: Object.assign({}, this.product, data)
           });
+
+          this.persistLastUsedCustomerEmail(this.email);
         } catch (error) {
           if (error instanceof ServerError) {
             throw error;
@@ -1031,13 +1034,6 @@ export default defineComponent({
         void this.updateExistingCartItem();
       }
     },
-    prefillEmail (): void {
-      const customerEmail = this.$store.getters['budsies/getPrefilledCustomerEmail'];
-      if (customerEmail) {
-        this.email = customerEmail;
-        this.showEmailStep = false;
-      }
-    },
     setBundleOptionValue (optionId: number, optionQty: number, optionSelections: number[]): void {
       this.$store.commit('product' + '/' + catalogTypes.PRODUCT_SET_BUNDLE_OPTION, { optionId, optionQty, optionSelections });
     },
@@ -1118,7 +1114,6 @@ export default defineComponent({
     }
   },
   created (): void {
-    this.prefillEmail();
     this.fillDefaultSelectedAddon();
     this.pillowSize = this.defaultPillowSizeValue;
 
@@ -1128,11 +1123,9 @@ export default defineComponent({
   },
   beforeMount (): void {
     EventBus.$once('cart-after-loaded', this.onCartAfterLoadedEventHandler);
-    EventBus.$once('budsies-store-synchronized', this.prefillEmail);
   },
   beforeDestroy (): void {
     EventBus.$off('cart-after-loaded', this.onCartAfterLoadedEventHandler)
-    EventBus.$off('budsies-store-synchronized', this.prefillEmail);
   },
   watch: {
     selectedAddons: {
