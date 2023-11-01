@@ -43,10 +43,15 @@
           v-else-if="product.custom_options && product.custom_options.length > 0"
           :product="product"
         />
+        <OCrossSellsProductsSelector
+          v-model="selectedCrossSellsProducts"
+          :product="product"
+        />
         <MProductAddToCart
           class="product__add-to-cart"
           :product="product"
           :stock="productStock"
+          :additional-products="selectedCrossSellsProducts"
         />
       </div>
     </div>
@@ -64,6 +69,7 @@ import MProductOptionsBundle from 'theme/components/molecules/m-product-options-
 import MProductOptionsCustom from 'theme/components/molecules/m-product-options-custom';
 import MProductOptionsGroup from 'theme/components/molecules/m-product-options-group';
 import MSocialSharing from 'theme/components/molecules/m-social-sharing';
+import OCrossSellsProductsSelector from 'theme/components/organisms/o-cross-sells-products-selector.vue';
 import { ModalList } from 'theme/store/ui/modals';
 import getProductImagePlaceholder from '@vue-storefront/core/modules/cart/helpers/getProductImagePlaceholder';
 import { mapActions } from 'vuex';
@@ -83,7 +89,8 @@ export default {
     MProductOptionsBundle,
     MProductOptionsCustom,
     MProductOptionsGroup,
-    MSocialSharing
+    MSocialSharing,
+    OCrossSellsProductsSelector
   },
   props: {
     product: {
@@ -109,6 +116,11 @@ export default {
     productStock: {
       type: Object,
       default: () => ({})
+    }
+  },
+  data () {
+    return {
+      selectedCrossSellsProducts: []
     }
   },
   computed: {
