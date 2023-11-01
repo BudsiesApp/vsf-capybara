@@ -205,7 +205,7 @@ import {
 } from '@storefront-ui/vue';
 import { createSmoothscroll } from 'theme/helpers';
 import MMultiselect from 'theme/components/molecules/m-multiselect';
-import { LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, LAST_USED_CUSTOMER_PHONE_NUMBER, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_PHONE_NUMBER, SN_PERSISTED_CUSTOMER_DATA } from 'src/modules/persisted-customer-data';
+import { LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, LAST_USED_CUSTOMER_PHONE_NUMBER, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_PHONE_NUMBER } from 'src/modules/persisted-customer-data';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
 import {
@@ -368,17 +368,17 @@ export default {
       }
 
       this.$store.commit(
-        `${SN_PERSISTED_CUSTOMER_DATA}/${SET_LAST_USED_CUSTOMER_FIRST_NAME}`,
+        SET_LAST_USED_CUSTOMER_FIRST_NAME,
         this.payment.firstName
       );
 
       this.$store.commit(
-        `${SN_PERSISTED_CUSTOMER_DATA}/${SET_LAST_USED_CUSTOMER_LAST_NAME}`,
+        SET_LAST_USED_CUSTOMER_LAST_NAME,
         this.payment.lastName
       );
 
       this.$store.commit(
-        `${SN_PERSISTED_CUSTOMER_DATA}/${SET_LAST_USED_CUSTOMER_PHONE_NUMBER}`,
+        SET_LAST_USED_CUSTOMER_PHONE_NUMBER,
         this.payment.phoneNumber
       );
 
@@ -391,11 +391,11 @@ export default {
     },
     fillLastUsedCustomerData () {
       const customerFirstName = this.$store
-        .getters[`${SN_PERSISTED_CUSTOMER_DATA}/${LAST_USED_CUSTOMER_FIRST_NAME}`];
+        .getters[LAST_USED_CUSTOMER_FIRST_NAME];
       const customerLastName = this.$store
-        .getters[`${SN_PERSISTED_CUSTOMER_DATA}/${LAST_USED_CUSTOMER_LAST_NAME}`];
+        .getters[LAST_USED_CUSTOMER_LAST_NAME];
       const customerPhoneNumber = this.$store
-        .getters[`${SN_PERSISTED_CUSTOMER_DATA}/${LAST_USED_CUSTOMER_PHONE_NUMBER}`];
+        .getters[LAST_USED_CUSTOMER_PHONE_NUMBER];
 
       if (customerFirstName && !this.payment.firstName) {
         this.payment.firstName = customerFirstName;

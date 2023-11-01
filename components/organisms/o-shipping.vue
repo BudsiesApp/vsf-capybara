@@ -212,7 +212,7 @@ import {
   KEY as AMAZON_PAY_MODULE_KEY,
   METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
 } from 'src/modules/vsf-amazon-pay/index';
-import { LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, LAST_USED_CUSTOMER_PHONE_NUMBER, LAST_USED_CUSTOMER_SHIPPING_COUNTRY, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_PHONE_NUMBER, SET_LAST_USED_CUSTOMER_SHIPPING_COUNTRY, SN_PERSISTED_CUSTOMER_DATA } from 'src/modules/persisted-customer-data';
+import { LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, LAST_USED_CUSTOMER_PHONE_NUMBER, LAST_USED_CUSTOMER_SHIPPING_COUNTRY, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_PHONE_NUMBER, SET_LAST_USED_CUSTOMER_SHIPPING_COUNTRY } from 'src/modules/persisted-customer-data';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
 const States = require('@vue-storefront/i18n/resource/states.json');
@@ -350,22 +350,22 @@ export default {
       }
 
       this.$store.commit(
-        `${SN_PERSISTED_CUSTOMER_DATA}/${SET_LAST_USED_CUSTOMER_FIRST_NAME}`,
+        SET_LAST_USED_CUSTOMER_FIRST_NAME,
         this.shipping.firstName
       );
 
       this.$store.commit(
-        `${SN_PERSISTED_CUSTOMER_DATA}/${SET_LAST_USED_CUSTOMER_LAST_NAME}`,
+        SET_LAST_USED_CUSTOMER_LAST_NAME,
         this.shipping.lastName
       );
 
       this.$store.commit(
-        `${SN_PERSISTED_CUSTOMER_DATA}/${SET_LAST_USED_CUSTOMER_PHONE_NUMBER}`,
+        SET_LAST_USED_CUSTOMER_PHONE_NUMBER,
         this.shipping.phoneNumber
       );
 
       this.$store.commit(
-        `${SN_PERSISTED_CUSTOMER_DATA}/${SET_LAST_USED_CUSTOMER_SHIPPING_COUNTRY}`,
+        SET_LAST_USED_CUSTOMER_SHIPPING_COUNTRY,
         this.shipping.country
       );
 
@@ -378,13 +378,13 @@ export default {
     },
     fillLastUsedCustomerData () {
       const customerFirstName = this.$store
-        .getters[`${SN_PERSISTED_CUSTOMER_DATA}/${LAST_USED_CUSTOMER_FIRST_NAME}`];
+        .getters[LAST_USED_CUSTOMER_FIRST_NAME];
       const customerLastName = this.$store
-        .getters[`${SN_PERSISTED_CUSTOMER_DATA}/${LAST_USED_CUSTOMER_LAST_NAME}`];
+        .getters[LAST_USED_CUSTOMER_LAST_NAME];
       const customerPhoneNumber = this.$store
-        .getters[`${SN_PERSISTED_CUSTOMER_DATA}/${LAST_USED_CUSTOMER_PHONE_NUMBER}`];
+        .getters[LAST_USED_CUSTOMER_PHONE_NUMBER];
       const customerShippingCountry = this.$store
-        .getters[`${SN_PERSISTED_CUSTOMER_DATA}/${LAST_USED_CUSTOMER_SHIPPING_COUNTRY}`];
+        .getters[LAST_USED_CUSTOMER_SHIPPING_COUNTRY];
 
       if (customerFirstName && !this.shipping.firstName) {
         this.shipping.firstName = customerFirstName;

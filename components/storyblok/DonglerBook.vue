@@ -73,7 +73,7 @@ import { required, email } from 'vuelidate/lib/validators';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
 import { DonglerBookService } from 'src/modules/dongler-book';
-import { LAST_USED_CUSTOMER_EMAIL, SET_LAST_USED_CUSTOMER_EMAIL, SN_PERSISTED_CUSTOMER_DATA } from 'src/modules/persisted-customer-data';
+import { LAST_USED_CUSTOMER_EMAIL, SET_LAST_USED_CUSTOMER_EMAIL } from 'src/modules/persisted-customer-data';
 
 import DonglerBookData from './interfaces/dongler-book-data.interface';
 
@@ -115,7 +115,7 @@ export default Blok.extend({
       this.isSubmitting = true;
 
       this.$store.commit(
-        `${SN_PERSISTED_CUSTOMER_DATA}/${SET_LAST_USED_CUSTOMER_EMAIL}`,
+        SET_LAST_USED_CUSTOMER_EMAIL,
         this.email
       );
 
@@ -138,7 +138,7 @@ export default Blok.extend({
     },
     fillLastUsedCustomerEmail () {
       this.email = this.$store
-        .getters[`${SN_PERSISTED_CUSTOMER_DATA}/${LAST_USED_CUSTOMER_EMAIL}`];
+        .getters[LAST_USED_CUSTOMER_EMAIL];
     }
   },
   validations: {

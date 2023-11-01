@@ -132,7 +132,7 @@ import { SfInput, SfButton, SfHeading, SfCheckbox } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
 import { mapActions } from 'vuex';
 
-import { LAST_USED_CUSTOMER_EMAIL, LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_EMAIL, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME, SN_PERSISTED_CUSTOMER_DATA } from 'src/modules/persisted-customer-data';
+import { LAST_USED_CUSTOMER_EMAIL, LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_EMAIL, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME } from 'src/modules/persisted-customer-data';
 
 import { createSmoothscroll } from 'theme/helpers';
 
@@ -204,17 +204,17 @@ export default {
       if (isInvalid) return;
 
       this.$store.commit(
-        `${SN_PERSISTED_CUSTOMER_DATA}/${SET_LAST_USED_CUSTOMER_EMAIL}`,
+        SET_LAST_USED_CUSTOMER_EMAIL,
         this.personalDetails.emailAddress
       );
 
       this.$store.commit(
-        `${SN_PERSISTED_CUSTOMER_DATA}/${SET_LAST_USED_CUSTOMER_FIRST_NAME}`,
+        SET_LAST_USED_CUSTOMER_FIRST_NAME,
         this.personalDetails.firstName
       );
 
       this.$store.commit(
-        `${SN_PERSISTED_CUSTOMER_DATA}/${SET_LAST_USED_CUSTOMER_LAST_NAME}`,
+        SET_LAST_USED_CUSTOMER_LAST_NAME,
         this.personalDetails.lastName
       );
 
@@ -222,11 +222,11 @@ export default {
     },
     fillLastUsedCustomerData () {
       const customerEmail = this.$store
-        .getters[`${SN_PERSISTED_CUSTOMER_DATA}/${LAST_USED_CUSTOMER_EMAIL}`];
+        .getters[LAST_USED_CUSTOMER_EMAIL];
       const customerFirstName = this.$store
-        .getters[`${SN_PERSISTED_CUSTOMER_DATA}/${LAST_USED_CUSTOMER_FIRST_NAME}`];
+        .getters[LAST_USED_CUSTOMER_FIRST_NAME];
       const customerLastName = this.$store
-        .getters[`${SN_PERSISTED_CUSTOMER_DATA}/${LAST_USED_CUSTOMER_LAST_NAME}`];
+        .getters[LAST_USED_CUSTOMER_LAST_NAME];
 
       if (customerEmail && !this.personalDetails.emailAddress) {
         this.personalDetails.emailAddress = customerEmail;
