@@ -67,20 +67,22 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import config from 'config';
-import { SearchQuery } from 'storefront-query-builder';
+import { computed, defineComponent } from '@vue/composition-api';
+import { SfButton } from '@storefront-ui/vue';
+
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
-import Product from 'core/modules/catalog/types/Product';
-import { SfButton } from '@storefront-ui/vue';
-import OProductCard from 'theme/components/organisms/o-product-card.vue';
-import { prepareCategoryProduct } from 'theme/helpers';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
-import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
+import rootStore from '@vue-storefront/core/store';
+import Product from 'core/modules/catalog/types/Product';
+
 import { ProductEvent } from 'src/modules/shared';
 
-export default Vue.extend({
+import { CROSS_SELL, UP_SELL, useRelatedProducts } from 'theme/helpers/use-related-products';
+
+import OProductCard from 'theme/components/organisms/o-product-card.vue';
+
+export default defineComponent({
   name: 'CrossSells',
   props: {
     parentSku: {
@@ -92,50 +94,34 @@ export default Vue.extend({
     SfButton,
     OProductCard
   },
-  computed: {
-    crossSellsProducts (): any[] {
-      if (!this.getCurrentProduct) {
-        return [];
-      }
+  setup (props) {
+    const productBySkuDictionary = computed<Record<string, Product>>(() => {
+      return rootStore.getters['product/getProductBySkuDictionary'];
+    });
+    const currentProduct = computed(() => {
+      return productBySkuDictionary.value[props.parentSku];
+    });
 
-      const skus = this.getProductLinkSkusByType('crosssell');
+    const {
+      relatedProducts: crossSellsProducts,
+      preparedRelatedProducts: preparedCrossSellsProducts,
+      loadList: loadCrossSellsProductsList
+    } = useRelatedProducts(currentProduct, CROSS_SELL);
+    const {
+      relatedProducts: upSellsProducts,
+      preparedRelatedProducts: preparedUpSellsProducts,
+      loadList: loadUpSellsProductsList
+    } = useRelatedProducts(currentProduct, UP_SELL);
 
-      return this.getSellsProductsBySkus(skus);
-    },
-    preparedCrossSellsProducts (): any[] {
-      return this.crossSellsProducts.map(
-        (item: Product) => (
-          {
-            ...prepareCategoryProduct(item),
-            landing_page_url: item.landing_page_url
-          }
-        )
-      )
-    },
-    upSellsProducts (): any[] {
-      if (!this.getCurrentProduct) {
-        return [];
-      }
-
-      const skus = this.getProductLinkSkusByType('upsell');
-
-      return this.getSellsProductsBySkus(skus);
-    },
-    preparedUpSellsProducts (): any[] {
-      return this.upSellsProducts.map(
-        (item: Product) => (
-          {
-            ...prepareCategoryProduct(item),
-            landing_page_url: item.landing_page_url
-          }
-        )
-      )
-    },
-    getCurrentProduct (): Product | null {
-      return this.getProductBySkuDictionary[this.parentSku];
-    },
-    getProductBySkuDictionary (): Record<string, Product> {
-      return this.$store.getters['product/getProductBySkuDictionary'];
+    return {
+      crossSellsProducts,
+      preparedCrossSellsProducts,
+      upSellsProducts,
+      preparedUpSellsProducts,
+      loadCrossSellsProductsList,
+      loadUpSellsProductsList,
+      productBySkuDictionary,
+      currentProduct
     }
   },
   async serverPrefetch (): Promise<void> {
@@ -179,127 +165,6 @@ export default Vue.extend({
         );
       }
     },
-    getProductLinkSkusByType (type: string): string[] {
-      if (!this.getCurrentProduct) {
-        return [];
-      }
-
-      if (!this.getCurrentProduct.product_links) {
-        return [];
-      }
-
-      const productLinks = this.getCurrentProduct.product_links;
-
-      if (productLinks.length === 0) {
-        return [];
-      }
-
-      const skus = productLinks
-        .filter(productLink => productLink.link_type === type)
-        .map(productLink => productLink.linked_product_sku);
-
-      return skus;
-    },
-    getSellsProductsBySkus (skus: string[]): any[] {
-      let products: Product[] = [];
-
-      for (const sku of skus) {
-        for (const key in this.getProductBySkuDictionary) {
-          const product = this.getProductBySkuDictionary[key];
-
-          if (!product.id) {
-            continue;
-          }
-
-          // VSF replace sku with it's default variant SKU for configurable and bundle products
-          // So as workaround better to use parentSku instead sku to compare
-          const isSkusListIncludesProduct = product.parentSku === sku;
-          const hasLandingPage = !!product.landing_page_url || !isCustomProduct(+product.id);
-
-          if (
-            isSkusListIncludesProduct &&
-            hasLandingPage
-          ) {
-            products.push(this.getProductBySkuDictionary[key]);
-            break;
-          }
-        }
-      }
-
-      return products;
-    },
-    getSearchQuery (skus: string[]) {
-      let productsQuery = new SearchQuery()
-      productsQuery = productsQuery
-        .applyFilter({ key: 'sku', value: { 'in': skus } })
-        .applyFilter({ key: 'status', value: { 'in': [1] } });
-
-      if (config.products.listOutOfStockProducts === false) {
-        productsQuery = productsQuery.applyFilter({ key: 'stock.is_in_stock', value: { 'eq': true } });
-      }
-
-      return productsQuery;
-    },
-    async loadProductsList (type: string): Promise<void> {
-      if (!this.getCurrentProduct) {
-        return;
-      }
-
-      const skus = this.getProductLinkSkusByType(type);
-
-      let notExistingProductsSkus: string[] = [];
-
-      for (const sku of skus) {
-        let productFound = false;
-
-        for (const key in this.getProductBySkuDictionary) {
-          if (this.getProductBySkuDictionary[key].parentSku === sku) {
-            productFound = true;
-
-            break;
-          }
-        }
-
-        if (productFound) {
-          continue;
-        }
-
-        notExistingProductsSkus.push(sku);
-      }
-
-      if (notExistingProductsSkus.length === 0) {
-        return;
-      }
-
-      await this.$store.dispatch('product/findProducts', {
-        query: this.getSearchQuery(notExistingProductsSkus),
-        options: {
-          prefetchGroupProducts: false
-        }
-      });
-    },
-    async loadCrossSellsProducts () {
-      await this.loadProductsList('crosssell');
-    },
-    async loadUpSellsProducts () {
-      await this.loadProductsList('upsell');
-    },
-    async loadData (): Promise<void> {
-      if (!this.getCurrentProduct) {
-        await this.$store.dispatch(
-          'product/loadProduct',
-          {
-            parentSku: (this as any).parentSku,
-            setCurrent: false
-          }
-        );
-      }
-
-      await Promise.all([
-        (this as any).loadCrossSellsProducts(),
-        (this as any).loadUpSellsProducts()
-      ]);
-    },
     goToCart (): void {
       this.$router.push(localizedRoute({ name: 'detailed-cart' }));
     },
@@ -310,7 +175,7 @@ export default Vue.extend({
       productSku: string,
       listName: 'Cross Sells' | 'Up Sells'
     ): void {
-      const product = this.getProductBySkuDictionary[productSku];
+      const product = this.productBySkuDictionary[productSku];
 
       EventBus.$emit(
         ProductEvent.PRODUCT_CARD_CLICK,
@@ -320,6 +185,27 @@ export default Vue.extend({
           categoryId: this.parentSku
         }
       )
+    },
+    async loadData (): Promise<void> {
+      await this.loadProduct();
+      await Promise.all([
+        this.loadCrossSellsProductsList(),
+        this.loadUpSellsProductsList()
+      ]);
+    },
+    async loadProduct (): Promise<void> {
+      if (
+        !this.currentProduct ||
+        this.currentProduct.parentSku !== this.parentSku
+      ) {
+        await this.$store.dispatch(
+          'product/loadProduct',
+          {
+            parentSku: this.parentSku,
+            setCurrent: false
+          }
+        );
+      }
     }
   },
   watch: {

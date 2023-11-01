@@ -47,6 +47,7 @@
               :product="activeProduct"
               :disabled="isBusy"
               :plushie-type="plushieType"
+              :show-email-step="showEmailStep"
               @next-step="nextStep"
               @input="onPetInfoStepDataInput"
             />
@@ -81,7 +82,8 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType, VueConstructor } from 'vue';
+import { PropType, Ref, computed, defineComponent, inject, ref } from '@vue/composition-api';
+import Vue from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import i18n from '@vue-storefront/i18n';
@@ -96,13 +98,13 @@ import CartItem from 'core/modules/cart/types/CartItem';
 
 import {
   ImageUploadMethod,
-  vuexTypes as budsiesTypes,
   BodypartOption,
   BodyPartValueContentType,
   PlushieWizardEvents
 } from 'src/modules/budsies';
 import ServerError from 'src/modules/shared/types/server-error';
-import { CustomerImage, InjectType, ProductEvent, getProductDefaultPrice } from 'src/modules/shared';
+import { CustomerImage, ProductEvent, getProductDefaultPrice } from 'src/modules/shared';
+import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 
 import foreversCreationWizardPersistedStateService from 'theme/helpers/plushie-creation-wizard-persisted-state.service';
 import getForeversSizeSkuBySizeAndType from 'theme/helpers/get-forevers-size-sku-by-size-and-type.function';
@@ -129,11 +131,7 @@ import SelectedAddon from '../interfaces/selected-addon.interface';
 import AddonOption from '../interfaces/addon-option.interface';
 import ProductTypeButton from '../interfaces/product-type-button.interface';
 
-interface InjectedServices {
-  window: Window
-}
-
-export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
+export default defineComponent({
   name: 'OPlushieCreationWizard',
   components: {
     SfSteps,
@@ -144,9 +142,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     MCustomizeStep,
     MFloatingPhoto
   },
-  inject: {
-    window: { from: 'WindowObject' }
-  } as unknown as InjectType<InjectedServices>,
   props: {
     artworkUploadUrl: {
       type: String,
@@ -169,6 +164,44 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       required: true
     }
   },
+  setup () {
+    const window = inject<Window>('WindowObject');
+
+    if (!window) {
+      throw new Error('Window is not provided');
+    }
+
+    const email = ref<string | undefined>(undefined);
+
+    const petInfoStepBaseData: Ref<{
+      name: string | undefined,
+      breed: string | undefined
+    }> = ref({
+      name: undefined,
+      breed: undefined
+    });
+
+    const petInfoStepData = computed<PlushieWizardPetInfoStepData>({
+      get () {
+        return {
+          name: petInfoStepBaseData.value.name,
+          breed: petInfoStepBaseData.value.breed,
+          email: email.value
+        }
+      },
+      set (value) {
+        email.value = value.email;
+        petInfoStepBaseData.value.name = value.name;
+        petInfoStepBaseData.value.breed = value.breed;
+      }
+    })
+
+    return {
+      window,
+      petInfoStepData,
+      ...usePersistedEmail(email)
+    }
+  },
   data () {
     return {
       currentStep: 0,
@@ -183,12 +216,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         uploadMethod: ImageUploadMethod.NOW,
         customerImages: []
       } as PlushieWizardImageUploadStepData,
-      // eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
-      petInfoStepData: {
-        name: undefined,
-        breed: undefined,
-        email: undefined
-      } as PlushieWizardPetInfoStepData,
       // eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
       customizeStepData: {
         bodypartsValues: {},
@@ -366,6 +393,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return this.plushieType === PlushieType.FOREVERS
         ? this.foreversProductTypeButtons
         : this.golfCoversProductTypeButtons;
+    },
+    showEmailStep (): boolean {
+      return !this.hasPrefilledEmail;
     }
   },
   methods: {
@@ -379,11 +409,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       await this.$store.dispatch(
         'product/setBundleOptions',
         { product: this.product, bundleOptions: this.$store.state.product.current_bundle_options }
-      );
-
-      this.$store.commit(
-        budsiesTypes.SN_BUDSIES + '/' + budsiesTypes.CUSTOMER_EMAIL_SET,
-        { email: this.petInfoStepData.email }
       );
 
       try {
@@ -408,6 +433,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
               upgradeOptionValues: this.getUpgradeOptionValues()
             })
           });
+
+          this.persistLastUsedCustomerEmail(this.petInfoStepData.email);
         } catch (error) {
           if (error instanceof ServerError) {
             throw error;
@@ -640,7 +667,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         this.petInfoStepData = {
           name: undefined,
           breed: undefined,
-          email: undefined
+          email: this.petInfoStepData.email
         };
         return;
       }
