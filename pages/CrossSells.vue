@@ -67,16 +67,20 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, toRefs } from '@vue/composition-api';
+import { computed, defineComponent } from '@vue/composition-api';
+import { SfButton } from '@storefront-ui/vue';
+
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
-import Product from 'core/modules/catalog/types/Product';
-import { SfButton } from '@storefront-ui/vue';
-import OProductCard from 'theme/components/organisms/o-product-card.vue';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
+import rootStore from '@vue-storefront/core/store';
+import Product from 'core/modules/catalog/types/Product';
+
 import { ProductEvent } from 'src/modules/shared';
+
 import { CROSS_SELL, UP_SELL, useRelatedProducts } from 'theme/helpers/use-related-products';
-import { useProduct } from 'theme/helpers/use-product';
+
+import OProductCard from 'theme/components/organisms/o-product-card.vue';
 
 export default defineComponent({
   name: 'CrossSells',
@@ -91,10 +95,13 @@ export default defineComponent({
     OProductCard
   },
   setup (props) {
-    const { currentProduct, loadProduct } = useProduct(
-      toRefs(props).parentSku,
-      false
-    );
+    const productBySkuDictionary = computed<Record<string, Product>>(() => {
+      return rootStore.getters['product/getProductBySkuDictionary'];
+    });
+    const currentProduct = computed(() => {
+      return productBySkuDictionary.value[props.parentSku];
+    });
+
     const {
       relatedProducts: crossSellsProducts,
       preparedRelatedProducts: preparedCrossSellsProducts,
@@ -113,12 +120,8 @@ export default defineComponent({
       preparedUpSellsProducts,
       loadCrossSellsProductsList,
       loadUpSellsProductsList,
-      loadProduct
-    }
-  },
-  computed: {
-    getProductBySkuDictionary (): Record<string, Product> {
-      return this.$store.getters['product/getProductBySkuDictionary'];
+      productBySkuDictionary,
+      currentProduct
     }
   },
   async serverPrefetch (): Promise<void> {
@@ -172,7 +175,7 @@ export default defineComponent({
       productSku: string,
       listName: 'Cross Sells' | 'Up Sells'
     ): void {
-      const product = this.getProductBySkuDictionary[productSku];
+      const product = this.productBySkuDictionary[productSku];
 
       EventBus.$emit(
         ProductEvent.PRODUCT_CARD_CLICK,
@@ -189,6 +192,20 @@ export default defineComponent({
         this.loadCrossSellsProductsList(),
         this.loadUpSellsProductsList()
       ]);
+    },
+    async loadProduct (): Promise<void> {
+      if (
+        !this.currentProduct ||
+        this.currentProduct.parentSku !== this.parentSku
+      ) {
+        await this.$store.dispatch(
+          'product/loadProduct',
+          {
+            parentSku: this.parentSku,
+            setCurrent: false
+          }
+        );
+      }
     }
   },
   watch: {
