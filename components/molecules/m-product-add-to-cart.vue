@@ -12,6 +12,7 @@
           class="sf-add-to-cart__button"
           :qty="qty"
           :product="product"
+          :additional-products="additionalProducts"
           :disabled="isAddToCartDisabled"
         />
       </template>
@@ -63,6 +64,10 @@ export default Vue.extend({
     stock: {
       type: Object,
       default: () => ({})
+    },
+    additionalProducts: {
+      type: Array,
+      default: () => ([])
     }
   },
   computed: {

@@ -89,7 +89,7 @@
     <SfButton
       class="_button"
       :disabled="disabled"
-      @click="(event) => passes(() => submitStep())"
+      @click="() => passes(() => submitStep())"
     >
       {{ $t('Continue') }}
     </SfButton>
@@ -97,20 +97,20 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue';
+import { PropType, defineComponent } from '@vue/composition-api'
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
 import { required, email, max } from 'vee-validate/dist/rules';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
 import { SfHeading, SfButton, SfInput } from '@storefront-ui/vue';
 
+import Product from 'core/modules/catalog/types/Product';
 import { PlushieWizardEvents, ProductId } from 'src/modules/budsies';
-
-import MMultiselect from '../../molecules/m-multiselect.vue';
+import { PlushieType } from 'theme/interfaces/plushie.type';
 
 import ForeversWizardPetInfoStepData from '../../interfaces/plushie-wizard-pet-info-step-data.interface';
-import Product from 'core/modules/catalog/types/Product';
-import { PlushieType } from 'theme/interfaces/plushie.type';
+
+import MMultiselect from '../../molecules/m-multiselect.vue';
 
 extend('required', {
   ...required,
@@ -124,7 +124,7 @@ extend('email', {
 
 extend('max', max);
 
-export default Vue.extend({
+export default defineComponent({
   name: 'MPetInfoStep',
   components: {
     SfHeading,
@@ -158,11 +158,10 @@ export default Vue.extend({
     plushieType: {
       type: String as PropType<PlushieType>,
       required: true
-    }
-  },
-  data () {
-    return {
-      showEmailStep: true
+    },
+    showEmailStep: {
+      type: Boolean,
+      default: true
     }
   },
   computed: {
@@ -206,13 +205,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    prefillEmail (): void {
-      const customerEmail = this.$store.getters['budsies/getPrefilledCustomerEmail'];
-      if (customerEmail) {
-        this.email = customerEmail;
-        this.showEmailStep = false;
-      }
-    },
     clearBreed (): void {
       this.breed = undefined;
     },
@@ -224,14 +216,7 @@ export default Vue.extend({
       this.$emit('next-step');
     }
   },
-  beforeMount () {
-    this.$bus.$once('budsies-store-synchronized', this.prefillEmail);
-  },
-  beforeDestroy () {
-    this.$bus.$off('budsies-store-synchronized', this.prefillEmail);
-  },
   created (): void {
-    this.prefillEmail();
     if (!this.showBreedStep) {
       this.$nextTick().then(this.clearBreed);
     }

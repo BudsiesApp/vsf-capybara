@@ -6,10 +6,6 @@ export default StoryMixin.extend({
       return undefined;
     },
     showFallback (): boolean {
-      if (!this.fallbackDescription) {
-        return false;
-      }
-
       if (this.isStoryLoading) {
         return false;
       }
