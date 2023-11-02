@@ -91,7 +91,24 @@
         <router-link to="//privacy.budsies.com/privacy-policy" target="_blank">
           {{ $t('Privacy Policy') }}
         </router-link>
+
+        <a class="truevault-polaris-privacy-notice" target="_blank" href="https://privacy.budsies.com/privacy-policy#california-privacy-notice" noreferrer noopener hidden> | California Privacy Notice</a>
       </p>
+
+      <a
+        v-show="isMounted"
+        :class="privacyChoicesClass"
+        href="https://privacy.budsies.com/opt-out"
+        noreferrer
+        noopener
+        hidden
+      >
+        <img src="https://polaris.truevaultcdn.com/static/assets/icons/optout-icon-blue.svg"
+             alt="California Consumer Privacy Act (CCPA) Opt-Out Icon"
+             style="vertical-align:middle" height="14px"
+        >
+        Your Privacy Choices
+      </a>
     </div>
   </footer>
 </template>
@@ -145,7 +162,8 @@ export default {
           name: 'tiktok',
           url: 'https://www.tiktok.com/@budsies'
         }
-      ]
+      ],
+      isMounted: false
     };
   },
   computed: {
@@ -265,7 +283,20 @@ export default {
           link: '/newsletter/'
         }
       ];
+    },
+    privacyChoicesClass () {
+      const classes = ['_copyright'];
+
+      if (this.isMounted) {
+        classes.push('truevault-polaris-optout');
+      }
+
+      return classes;
     }
+  },
+  async mounted () {
+    await this.$nextTick();
+    this.isMounted = true;
   },
   methods: {
     ...mapActions('ui', {
@@ -406,7 +437,8 @@ export default {
     flex-basis: auto;
   }
 
-  ._copyright {
+  ._copyright,
+  .truevault-polaris-privacy-notice {
     color: var(--c-footer-gray);
     font-size: var(--font-2xs);
 
