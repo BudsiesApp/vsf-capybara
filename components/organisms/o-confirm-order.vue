@@ -229,6 +229,8 @@
         {{ $t('Place the order') }}
       </SfButton>
     </div>
+
+    <a class="truevault-polaris-privacy-notice" target="_blank" href="https://privacy.budsies.com/privacy-policy#california-privacy-notice" noreferrer noopener hidden>California Privacy Notice</a>
   </div>
 </template>
 <script>
@@ -676,6 +678,13 @@ a {
     .a-promo-code__form {
       margin-top: 0;
     }
+  }
+}
+.truevault-polaris-privacy-notice {
+  color: var(--c-link);
+
+  &:hover {
+    color: var(--c-link);
   }
 }
 

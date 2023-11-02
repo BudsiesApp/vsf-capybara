@@ -43,6 +43,8 @@
     <SfButton class="sf-button--text action-button" @click.native="switchElem('login')">
       {{ `${$t('or')} ${$t('login in to your account')}` }}
     </SfButton>
+
+    <a class="truevault-polaris-privacy-notice" target="_blank" href="https://privacy.budsies.com/privacy-policy#california-privacy-notice" noreferrer noopener hidden>California Privacy Notice</a>
   </div>
 </template>
 

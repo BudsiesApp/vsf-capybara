@@ -7,6 +7,8 @@
     <SfButton class="sf-button sf-button--outline _submit-button">
       {{ $t('Notify Customer Support') }}
     </SfButton>
+
+    <a class="truevault-polaris-privacy-notice" target="_blank" href="https://privacy.budsies.com/privacy-policy#california-privacy-notice" noreferrer noopener hidden>California Privacy Notice</a>
   </form>
 </template>
 
@@ -69,6 +71,13 @@ export default Vue.extend({
 .m-notify-customer-support-form {
   ._submit-button {
     margin: auto;
+  }
+
+  .truevault-polaris-privacy-notice {
+    margin-top: var(--spacer-sm);
+    display: inline-block;
+    width: 100%;
+    text-align: center;
   }
 }
 </style>

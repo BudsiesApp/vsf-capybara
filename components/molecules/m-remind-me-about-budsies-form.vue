@@ -50,6 +50,8 @@
           {{ buttonText }}
         </SfButton>
       </div>
+
+      <a class="truevault-polaris-privacy-notice" target="_blank" href="https://privacy.budsies.com/privacy-policy#california-privacy-notice" noreferrer noopener hidden>California Privacy Notice</a>
     </validation-observer>
 
     <div class="_success-message" v-else>
@@ -182,6 +184,11 @@ export default Vue.extend({
     text-align: center;
     color: var(--c-primary);
     margin-top: var(--spacer-sm);
+  }
+
+  .truevault-polaris-privacy-notice {
+    margin-top: var(--spacer-sm);
+    display: inline-block;
   }
 }
 </style>

@@ -102,6 +102,10 @@ body {
       color: var(--c-link-hover);
     }
   }
+
+  .truevault-polaris-privacy-notice {
+    font-size: var(--font-xs);
+  }
 }
 
 html,

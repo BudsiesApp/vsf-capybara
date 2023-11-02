@@ -22,6 +22,8 @@
         <SfButton class="sf-button--full-width form__submit">
           {{ $t('Reset password') }}
         </SfButton>
+
+        <a class="truevault-polaris-privacy-notice" target="_blank" href="https://privacy.budsies.com/privacy-policy#california-privacy-notice" noreferrer noopener hidden>California Privacy Notice</a>
       </form>
     </template>
     <div v-else>
@@ -118,6 +120,13 @@ export default {
   }
   &__submit {
     margin: var(--spacer-xl) 0 0 0;
+  }
+
+  .truevault-polaris-privacy-notice {
+    margin-top: var(--spacer-sm);
+    display: inline-block;
+    width: 100%;
+    text-align: center;
   }
 }
 .action-button {

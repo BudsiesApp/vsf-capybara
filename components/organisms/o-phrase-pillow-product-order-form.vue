@@ -502,6 +502,8 @@
                     <div class="_submit-disclaimer _helper-text">
                       I have seen and approve the Live Preview of my design.
                     </div>
+
+                    <a class="truevault-polaris-privacy-notice" target="_blank" href="https://privacy.budsies.com/privacy-policy#california-privacy-notice" noreferrer noopener hidden>California Privacy Notice</a>
                   </div>
                 </template>
 

@@ -118,6 +118,8 @@
             <p class="_text -small">
               {{ $t('Rewards dollars may be applied onto existing orders within 7 days of checkout.') }}
             </p>
+
+            <a class="truevault-polaris-privacy-notice" href="https://privacy.budsies.com/privacy-policy#financial-incentive" noreferrer noopener hidden>Notice of Financial Incentive</a>
           </div>
         </div>
       </div>
@@ -305,6 +307,11 @@ $number-margin-right-desktop: var(--spacer-sm);
 
   ._section_content {
     margin-top: var(--spacer-base);
+  }
+
+  .truevault-polaris-privacy-notice {
+    margin-top: var(--spacer-sm);
+    display: inline-block;
   }
 
   @include for-desktop {

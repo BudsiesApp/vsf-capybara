@@ -32,6 +32,10 @@
         <MSpinnerButton :show-spinner="isSubmitting">
           {{ buttonText }}
         </MSpinnerButton>
+
+        <a class="truevault-polaris-privacy-notice" target="_blank" href="https://privacy.budsies.com/privacy-policy#california-privacy-notice" noreferrer noopener hidden>California Privacy Notice</a>
+
+        <a class="truevault-polaris-privacy-notice" href="https://privacy.budsies.com/privacy-policy#financial-incentive" noreferrer noopener hidden>Notice of Financial Incentive</a>
       </form>
 
       <div class="_success-message" v-else>
@@ -184,6 +188,13 @@ export default Vue.extend({
   ._success-message {
     color: var(--c-text);
     margin-bottom: calc(var(--font-xs) * 1.2);
+  }
+
+  .truevault-polaris-privacy-notice {
+    margin-top: var(--spacer-sm);
+    display: inline-block;
+    width: 100%;
+    text-align: center;
   }
 }
 </style>

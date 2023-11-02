@@ -170,6 +170,8 @@
                   Add to Cart
                 </SfButton>
               </div>
+
+              <a class="truevault-polaris-privacy-notice" target="_blank" href="https://privacy.budsies.com/privacy-policy#california-privacy-notice" noreferrer noopener hidden>California Privacy Notice</a>
             </div>
           </form>
         </validation-observer>
@@ -911,6 +913,11 @@ export default defineComponent({
 
   ._form-errors {
     margin-top: var(--spacer-xl);
+  }
+
+  .truevault-polaris-privacy-notice {
+    margin-top: var(--spacer-sm);
+    display: inline-block;
   }
 
   @media (min-width: $tablet-min) {

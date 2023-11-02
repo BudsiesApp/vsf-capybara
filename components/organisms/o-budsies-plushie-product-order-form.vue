@@ -349,6 +349,8 @@
           <a href="http://support.budsies.com/support/solutions/folders/5000249005" target="_blank">{{ $t('Refund Policy') }}</a>.
           {{ $t('I understand that Budsies happily takes care of all tears, defects, and shipping damage with either a refund or a repair.') }}
         </div>
+
+        <a class="truevault-polaris-privacy-notice" target="_blank" href="https://privacy.budsies.com/privacy-policy#california-privacy-notice" noreferrer noopener hidden>California Privacy Notice</a>
       </form>
     </validation-observer>
 
@@ -1244,6 +1246,11 @@ export default defineComponent({
     ._body-part-heading {
       @include heading-background;
     }
+  }
+
+  .truevault-polaris-privacy-notice {
+    margin-top: var(--spacer-sm);
+    display: inline-block;
   }
 
   @media (min-width: $tablet-min) {

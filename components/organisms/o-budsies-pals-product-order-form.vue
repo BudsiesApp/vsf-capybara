@@ -265,6 +265,8 @@
             {{ submitButtonText }}
           </SfButton>
         </div>
+
+        <a class="truevault-polaris-privacy-notice" target="_blank" href="https://privacy.budsies.com/privacy-policy#california-privacy-notice" noreferrer noopener hidden>California Privacy Notice</a>
       </form>
     </validation-observer>
   </div>
@@ -765,6 +767,11 @@ export default defineComponent({
 
   ._checkbox {
     --m-checkbox-align-items: flex-start;
+  }
+
+  .truevault-polaris-privacy-notice {
+    margin-top: var(--spacer-sm);
+    display: inline-block;
   }
 
   @media (min-width: $tablet-min) {

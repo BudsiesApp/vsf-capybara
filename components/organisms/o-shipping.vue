@@ -192,6 +192,8 @@
           {{ $t('Edit contact') }}
         </SfButton>
       </div>
+
+      <a class="truevault-polaris-privacy-notice" target="_blank" href="https://privacy.budsies.com/privacy-policy#california-privacy-notice" noreferrer noopener hidden>California Privacy Notice</a>
     </div>
   </div>
 </template>
