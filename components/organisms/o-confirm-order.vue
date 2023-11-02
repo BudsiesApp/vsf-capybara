@@ -336,7 +336,7 @@ export default {
       return Object.values(braintreeSupportedMethodsCodes).includes(this.paymentDetails.paymentMethod);
     },
     isPlaceOrderButtonDisabled () {
-      return !this.productsInCart.length || this.isCheckoutInProgress || this.isGiftCardProcessing;
+      return !this.productsInCart.length || this.isCheckoutInProgress || this.isGiftCardProcessing || !this.paymentDetails.paymentMethod;
     }
   },
   beforeCreate () {
