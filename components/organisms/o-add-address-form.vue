@@ -24,38 +24,91 @@
 
 <script lang="ts">
 import { ValidationObserver } from 'vee-validate';
-import Vue from 'vue';
 import { TranslateResult } from 'vue-i18n';
+import { defineComponent, reactive, ref } from '@vue/composition-api';
 import { SfButton } from '@storefront-ui/vue';
+
 import i18n from '@vue-storefront/i18n';
+
+import { usePersistedFirstName, usePersistedLastName, usePersistedPhoneNumber } from 'src/modules/persisted-customer-data';
 
 import OBaseAddressForm from './o-base-address-form.vue';
 
-export default Vue.extend({
+interface Address {
+  city: string,
+  country: string,
+  firstName: string,
+  lastName: string,
+  phoneNumber: string,
+  state: string,
+  streetAddress: string,
+  zipCode: string
+}
+
+export default defineComponent({
   name: 'OAddAddressForm',
   components: {
     SfButton,
     OBaseAddressForm,
     ValidationObserver
   },
+  setup () {
+    const firstName = ref('');
+    const lastName = ref('');
+    const phoneNumber = ref('');
+
+    const addressData = ref({
+      city: '',
+      country: '',
+      state: '',
+      streetAddress: '',
+      zipCode: ''
+    });
+
+    return {
+      firstName,
+      lastName,
+      addressData,
+      phoneNumber,
+      ...usePersistedFirstName(firstName),
+      ...usePersistedLastName(lastName),
+      ...usePersistedPhoneNumber(phoneNumber)
+    }
+  },
   data () {
     return {
-      address: {
-        city: '',
-        country: '',
-        firstName: '',
-        lastName: '',
-        phoneNumber: '',
-        state: '',
-        streetAddress: '',
-        zipCode: ''
-      },
       isSubmitting: false
     }
   },
   computed: {
     isSubmitButtonDisabled (): boolean {
       return this.isSubmitting;
+    },
+    address: {
+      get (): Address {
+        return {
+          city: this.addressData.city,
+          country: this.addressData.country,
+          state: this.addressData.state,
+          streetAddress: this.addressData.streetAddress,
+          zipCode: this.addressData.zipCode,
+          firstName: this.firstName,
+          lastName: this.lastName,
+          phoneNumber: this.phoneNumber
+        }
+      },
+      set (address: Address) {
+        this.addressData = {
+          city: address.city,
+          country: address.country,
+          state: address.state,
+          streetAddress: address.streetAddress,
+          zipCode: address.zipCode
+        }
+        this.firstName = address.firstName;
+        this.lastName = address.lastName;
+        this.phoneNumber = address.phoneNumber;
+      }
     }
   },
   methods: {
@@ -80,6 +133,11 @@ export default Vue.extend({
 
       try {
         await this.$store.dispatch('budsies/createNewAddress', { address: addressToCreate });
+
+        this.persistLastUsedCustomerFirstName(this.firstName);
+        this.persistLastUsedCustomerLastName(this.lastName);
+        this.persistLastUsedCustomerPhoneNumber(this.phoneNumber);
+
         this.$emit('address-added');
       } catch (error) {
         this.onFailure(this.$t('Unable to add new address'));

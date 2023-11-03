@@ -132,6 +132,8 @@ import { SfInput, SfButton, SfHeading, SfCheckbox } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
 import { mapActions } from 'vuex';
 
+import { LAST_USED_CUSTOMER_EMAIL, LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_EMAIL, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME } from 'src/modules/persisted-customer-data';
+
 import { createSmoothscroll } from 'theme/helpers';
 
 import APromoCode from 'theme/components/atoms/a-promo-code'
@@ -166,18 +168,19 @@ export default {
       required
     }
   },
-  created () {
-    const customerEmail = this.$store.getters['budsies/getCustomerEmail'];
-
-    if (customerEmail) {
-      this.personalDetails.emailAddress = customerEmail;
-    }
+  beforeMount () {
+    this.$bus.$on('checkout-after-load', this.fillLastUsedCustomerData)
+  },
+  beforeDestroy () {
+    this.$bus.$off('checkout-after-load', this.fillLastUsedCustomerData)
   },
   mounted () {
     createSmoothscroll(
       document.documentElement.scrollTop || document.body.scrollTop,
       0
     );
+
+    this.fillLastUsedCustomerData();
   },
   methods: {
     ...mapActions('ui', {
@@ -200,7 +203,42 @@ export default {
 
       if (isInvalid) return;
 
+      this.$store.commit(
+        SET_LAST_USED_CUSTOMER_EMAIL,
+        this.personalDetails.emailAddress
+      );
+
+      this.$store.commit(
+        SET_LAST_USED_CUSTOMER_FIRST_NAME,
+        this.personalDetails.firstName
+      );
+
+      this.$store.commit(
+        SET_LAST_USED_CUSTOMER_LAST_NAME,
+        this.personalDetails.lastName
+      );
+
       this.sendDataToCheckout();
+    },
+    fillLastUsedCustomerData () {
+      const customerEmail = this.$store
+        .getters[LAST_USED_CUSTOMER_EMAIL];
+      const customerFirstName = this.$store
+        .getters[LAST_USED_CUSTOMER_FIRST_NAME];
+      const customerLastName = this.$store
+        .getters[LAST_USED_CUSTOMER_LAST_NAME];
+
+      if (customerEmail && !this.personalDetails.emailAddress) {
+        this.personalDetails.emailAddress = customerEmail;
+      }
+
+      if (customerFirstName && !this.personalDetails.firstName) {
+        this.personalDetails.firstName = customerFirstName;
+      }
+
+      if (customerLastName && !this.personalDetails.lastName) {
+        this.personalDetails.lastName = customerLastName;
+      }
     }
   }
 };

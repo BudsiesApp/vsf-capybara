@@ -534,7 +534,8 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType, VueConstructor } from 'vue';
+import Vue from 'vue';
+import { PropType, defineComponent, inject, ref } from '@vue/composition-api';
 import {
   ValidationProvider,
   ValidationObserver,
@@ -567,7 +568,6 @@ import {
   Bodypart,
   BodypartValue,
   isAxiosError,
-  vuexTypes as budsiesTypes,
   ProductValue,
   Dictionary
 } from 'src/modules/budsies';
@@ -607,6 +607,7 @@ import BackgroundOffsetSettings from '../interfaces/background-offset-settings.i
 import ProductImage from '../interfaces/product-image.interface';
 import getProductionTimeOptions from '../../helpers/get-production-time-options';
 import { ValidationResult } from 'vee-validate/dist/types/types';
+import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 
 extend('required', {
   ...required,
@@ -628,12 +629,6 @@ configure({
 });
 
 const TARGET_IMAGE_SIZE = 2625;
-
-interface InjectedServices {
-  errorConverterService: ErrorConverterService,
-  fileProcessingRepositoryFactory: FileProcessingRepositoryFactory,
-  imageHandlerService: ImageHandlerService
-}
 
 interface SideDesignProduct extends Product {
   default_other_side_design?: number,
@@ -660,10 +655,6 @@ interface SmallBackgroundImageStyle {
   left: string
 }
 
-interface Constants {
-  customizerStepsData: Dictionary<StepsInterface>
-}
-
 const customizerStepsData: Dictionary<StepsInterface> = {
   frontDesign: { name: 'Front<br>Design', id: 'frontDesign' },
   uploadPhoto: { name: 'Upload<br>Photo', id: 'uploadPhoto' },
@@ -677,9 +668,7 @@ export interface DesignSelectedEventPayload {
   backDesign: string | undefined
 }
 
-export default (
-  Vue as VueConstructor<Vue & InjectedServices & Constants>
-).extend({
+export default defineComponent({
   name: 'OPhrasePillowProductOrderForm',
   components: {
     SfButton,
@@ -700,13 +689,6 @@ export default (
     MAccentColorSelector,
     MBlockStory
   },
-  inject: {
-    errorConverterService: { from: 'ErrorConverterService' },
-    fileProcessingRepositoryFactory: {
-      from: 'FileProcessingRepositoryFactory'
-    },
-    imageHandlerService: { from: 'ImageHandlerService' }
-  } as unknown as InjectType<InjectedServices>,
   props: {
     product: {
       type: Object as PropType<Product>,
@@ -729,6 +711,34 @@ export default (
       default: undefined
     }
   },
+  setup () {
+    const errorConverterService = inject<ErrorConverterService>('ErrorConverterService');
+    const fileProcessingRepositoryFactory = inject<FileProcessingRepositoryFactory>('FileProcessingRepositoryFactory');
+    const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
+
+    if (!errorConverterService) {
+      throw new Error('ErrorConverterService is not provided');
+    }
+
+    if (!fileProcessingRepositoryFactory) {
+      throw new Error('FileProcessingRepositoryFactory is not provided');
+    }
+
+    if (!imageHandlerService) {
+      throw new Error('ImageHandlerService is not provided');
+    }
+
+    const customerEmail = ref<string | undefined>(undefined);
+
+    return {
+      errorConverterService,
+      fileProcessingRepositoryFactory,
+      imageHandlerService,
+      customizerStepsData,
+      customerEmail,
+      ...usePersistedEmail(customerEmail)
+    }
+  },
   data () {
     let stepValidateState: Dictionary<'valid' | 'invalid'> = {
       [customizerStepsData.frontDesign.id]: 'valid'
@@ -739,7 +749,6 @@ export default (
       quantity: 1,
       accentColorPartValues: [] as AccentColorPart[],
       accentColorPartValue: undefined as AccentColorPart | undefined,
-      customerEmail: undefined as string | undefined,
       backgroundDataUri: undefined as string | undefined,
       isBackgroundImageLoaded: false,
       backgroundOffsetSettings: undefined as
@@ -756,7 +765,6 @@ export default (
       isFormDisabled: false,
       isSubmitting: false,
       submitErrors: [] as string[],
-      showEmailStep: true,
       isCustomizerPreviewBackSideFocused: false,
       croppedBackground: '',
       activeStepIndex: 1,
@@ -1016,6 +1024,9 @@ export default (
       set (value: AccentColorPart): void {
         this.accentColorPartValue = value;
       }
+    },
+    showEmailStep (): boolean {
+      return !this.hasPrefilledEmail;
     }
   },
   methods: {
@@ -1168,14 +1179,6 @@ export default (
     onBackgroundImageAssigned (): void {
       this.updateSmallBackgroundImage();
     },
-    prefillEmail (): void {
-      const customerEmail = this.$store.getters['budsies/getPrefilledCustomerEmail'];
-
-      if (customerEmail) {
-        this.customerEmail = customerEmail;
-        this.showEmailStep = false;
-      }
-    },
     async processImages (): Promise<CustomerImage[]> {
       const backgroundEditor = this.getBackgroundEditor();
       const backPreview = this.getBackPreview();
@@ -1266,11 +1269,6 @@ export default (
           bundleOptions: this.$store.state.product.current_bundle_options
         });
 
-        this.$store.commit(
-          budsiesTypes.SN_BUDSIES + '/' + budsiesTypes.CUSTOMER_EMAIL_SET,
-          { email: this.customerEmail }
-        );
-
         try {
           await this.$store.dispatch('cart/addItem', {
             productToAdd: Object.assign({}, this.product, {
@@ -1282,6 +1280,8 @@ export default (
               uploadMethod: 'upload-now'
             })
           });
+
+          this.persistLastUsedCustomerEmail(this.customerEmail);
         } catch (error) {
           if (error instanceof ServerError) {
             throw error;
@@ -1412,11 +1412,7 @@ export default (
       }
     }
   },
-  beforeMount () {
-    this.$bus.$once('budsies-store-synchronized', this.prefillEmail);
-  },
   beforeDestroy () {
-    this.$bus.$off('budsies-store-synchronized', this.prefillEmail);
     unMapMobileObserver();
   },
   created (): void {
@@ -1437,8 +1433,6 @@ export default (
     if (this.selectedBackDesign) {
       this.stepValidateState[customizerStepsData.backDesign.id] = 'valid';
     }
-
-    this.prefillEmail();
 
     if (this.isProductionOptionsAvailable) {
       this.productionTime = this.productionTimeOptions[0].id;

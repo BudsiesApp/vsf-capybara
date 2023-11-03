@@ -8,7 +8,7 @@
       />
     </div>
     <div
-      class="product__description desktop-only"
+      class="product__description"
       v-html="product.short_description"
       v-if="product.short_description"
     />

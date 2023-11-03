@@ -379,7 +379,6 @@ import { setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catal
 import * as catalogTypes from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 
 import {
-  vuexTypes as budsiesTypes,
   Bodypart,
   BodypartValue,
   ImageUploadMethod,
@@ -394,6 +393,7 @@ import { getAddonOptionsFromBundleOption } from 'theme/helpers/get-addon-options
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import getProductionTimeOptions from 'theme/helpers/get-production-time-options';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
+import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 
 import AddonOption from '../interfaces/addon-option.interface';
 import SelectedAddon from '../interfaces/selected-addon.interface';
@@ -433,14 +433,18 @@ export default defineComponent({
       throw new Error('ImageHandlerService is not defined');
     }
 
+    const email = ref<string | undefined>(undefined);
+
     return {
       imageHandlerService,
       validationObserver,
       window,
+      email,
       ...useFormValidation(
         validationObserver,
         () => setupContext.refs
-      )
+      ),
+      ...usePersistedEmail(email)
     }
   },
   components: {
@@ -514,11 +518,9 @@ export default defineComponent({
       quantity: 1,
       customerImages: [] as CustomerImage[],
       bodypartsValues: {} as unknown as Record<string, BodypartOption | BodypartOption[] | undefined>,
-      email: undefined as string | undefined,
       isSubmitting: false,
       shouldMakeAnother: false,
       showQuantityNotes: false,
-      showEmailStep: true,
       uploadMethod: ImageUploadMethod.NOW,
       selectedAddons: [] as SelectedAddon[],
       description: '',
@@ -608,6 +610,9 @@ export default defineComponent({
     },
     skinClass (): string {
       return getCurrentThemeClass();
+    },
+    showEmailStep (): boolean {
+      return !this.hasPrefilledEmail;
     }
   },
   methods: {
@@ -618,11 +623,6 @@ export default defineComponent({
       await this.$store.dispatch(
         'product/setBundleOptions',
         { product: this.product, bundleOptions: this.$store.state.product.current_bundle_options }
-      );
-
-      this.$store.commit(
-        budsiesTypes.SN_BUDSIES + '/' + budsiesTypes.CUSTOMER_EMAIL_SET,
-        { email: this.email }
       );
 
       try {
@@ -639,6 +639,8 @@ export default defineComponent({
               upgradeOptionValues: this.getUpgradeOptionValues()
             })
           });
+
+          this.persistLastUsedCustomerEmail(this.email);
         } catch (error) {
           if (error instanceof ServerError) {
             throw error;
@@ -646,8 +648,6 @@ export default defineComponent({
 
           Logger.error(error, 'budsies')();
         }
-
-        this.showEmailStep = false;
 
         if (!shouldMakeAnother) {
           this.goToCrossSells();
@@ -859,13 +859,6 @@ export default defineComponent({
       }
       ));
     },
-    prefillEmail (): void {
-      const customerEmail = this.$store.getters['budsies/getPrefilledCustomerEmail'];
-      if (customerEmail) {
-        this.email = customerEmail;
-        this.showEmailStep = false;
-      }
-    },
     resetForm (): void {
       this.quantity = this.product.qty || 1;
       this.customerImages = [];
@@ -1067,9 +1060,6 @@ export default defineComponent({
       });
     }
   },
-  async beforeMount () {
-    this.$bus.$once('budsies-store-synchronized', this.prefillEmail);
-  },
   async mounted () {
     if (this.existingCartItem) {
       this.fillPlushieDataFromCartItem(this.existingCartItem);
@@ -1080,10 +1070,6 @@ export default defineComponent({
   },
   created (): void {
     this.resetForm();
-    this.prefillEmail();
-  },
-  beforeDestroy () {
-    this.$bus.$off('budsies-store-synchronized', this.prefillEmail);
   },
   watch: {
     existingPlushieId () {
