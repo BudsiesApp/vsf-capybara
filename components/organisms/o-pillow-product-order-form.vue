@@ -319,6 +319,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import { Route } from 'vue-router';
 import { PropType, Ref, ref, defineComponent, inject } from '@vue/composition-api';
 import { mapMutations } from 'vuex';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
@@ -559,6 +560,8 @@ export default defineComponent({
     if (this.existingCartItem) {
       this.fillPlushieDataFromCartItem(this.existingCartItem);
       return;
+    } else if (this.existingPlushieId) {
+      await this.clearExistingPlushieId();
     }
 
     this.plushieId = await this.createPlushie();
@@ -604,7 +607,13 @@ export default defineComponent({
 
       this.onSuccessAndMakeAnother();
     },
-    fillPlushieDataFromCartItem (cartItem: CartItem): void {
+    async fillPlushieDataFromCartItem (cartItem: CartItem): Promise<void> {
+      const isPlushieExist = await this.checkExistingPlushie();
+
+      if (!isPlushieExist) {
+        return this.onCartItemPlushieRemoved();
+      }
+
       this.quantity = cartItem.qty || 1;
       this.plushieId = Number(cartItem.plushieId);
 
@@ -849,6 +858,12 @@ export default defineComponent({
     },
     async updateExistingCartItem (existingCartItem: CartItem): Promise<void> {
       try {
+        const isPlushieExist = await this.checkExistingPlushie();
+
+        if (!isPlushieExist) {
+          return this.onCartItemPlushieRemoved();
+        }
+
         await this.updateClientAndServerItem({
           product: Object.assign({}, existingCartItem, {
             qty: this.quantity,
@@ -876,6 +891,42 @@ export default defineComponent({
       }
 
       this.goToCart();
+    },
+    async checkExistingPlushie (): Promise<boolean> {
+      if (!this.existingPlushieId) {
+        return false;
+      }
+
+      const response = await this.$store.dispatch(
+        'budsies/fetchPlushieById',
+        { plushieId: this.existingPlushieId }
+      );
+
+      if (response.resultCode !== 200 || !response.result) {
+        return false;
+      }
+
+      return true;
+    },
+    async onCartItemPlushieRemoved (): Promise<void> {
+      await this.$store.dispatch('cart/pullServerCart');
+
+      this.resetForm();
+      this.window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      this.showRemovedCartItemNotification();
+      await this.clearExistingPlushieId();
+
+      this.plushieId = await this.createPlushie();
+    },
+    showRemovedCartItemNotification (): void {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'warning',
+        message: i18n.t('Looks like this cart item was removed'),
+        action1: { label: i18n.t('OK') }
+      });
+    },
+    clearExistingPlushieId (): Promise<Route> {
+      return this.$router.push({ query: { ...this.$route.query, existingPlushieId: undefined } });
     }
   },
   created (): void {
@@ -922,8 +973,11 @@ export default defineComponent({
       },
       immediate: true
     },
-    existingPlushieId (): void {
+    existingPlushieId (value): void {
       if (!this.existingCartItem) {
+        if (value) {
+          this.clearExistingPlushieId();
+        }
         return;
       }
 
