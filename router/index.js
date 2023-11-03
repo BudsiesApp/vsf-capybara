@@ -44,6 +44,23 @@ let routes = [
       next(to.params.targetPath);
     }
   },
+  {
+    name: 'products',
+    path: '/c/products/',
+    redirect: {
+      name: 'category',
+      params: {
+        slug: 'waggables-132'
+      }
+    }
+  },
+  {
+    name: 'products-alias-1',
+    path: '/products/',
+    redirect: {
+      name: 'products'
+    }
+  },
   { name: 'my-account', path: '/my-account/', component: MyAccount },
   { name: 'page-not-found', path: '*', component: ErrorPage },
   { name: 'error', path: '/error/', component: ErrorPage, meta: { layout: 'minimal' } },
@@ -137,16 +154,6 @@ let routes = [
         params: {
           parentSku
         }
-      }
-    }
-  },
-  {
-    name: 'products',
-    path: '/products/',
-    redirect: {
-      name: 'category',
-      params: {
-        slug: 'waggables-132'
       }
     }
   },
