@@ -418,10 +418,10 @@
 </template>
 
 <script lang="ts">
+import { PropType, computed, defineComponent, inject } from '@vue/composition-api';
 import config from 'config';
 import { ValidationProvider, extend } from 'vee-validate';
 import { email, required, min_value, regex } from 'vee-validate/dist/rules';
-import Vue, { PropType, VueConstructor } from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { SfButton, SfInput, SfRadio, SfSelect } from '@storefront-ui/vue';
 import {
@@ -440,6 +440,7 @@ import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
 import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
 import MBulkordersCalculationAnimation from './m-calculation-animation.vue';
+import { usePersistedEmail, usePersistedFirstName, usePersistedLastName, usePersistedPhoneNumber, usePersistedShippingCountry } from 'src/modules/persisted-customer-data';
 
 const Countries = require('@vue-storefront/i18n/resource/countries.json');
 
@@ -465,13 +466,9 @@ extend('regex', {
   message: 'Please, enter valid phone number'
 })
 
-interface InjectedServices {
-  imageHandlerService: ImageHandlerService
-}
-
 const phoneValidationRegex = /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/;
 
-export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
+export default defineComponent({
   name: 'MBaseForm',
   components: {
     AOrderedHeading,
@@ -519,8 +516,67 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       required: true
     }
   },
-  inject: {
-    imageHandlerService: { from: 'ImageHandlerService' }
+  setup (props, { emit }) {
+    const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
+
+    if (!imageHandlerService) {
+      throw new Error('ImageHandlerService is not provided');
+    }
+
+    const customerFirstName = computed({
+      get (): string {
+        return props.value.customerFirstName;
+      },
+      set (value: string) {
+        emit('input', { ...props.value, ...{ customerFirstName: value } });
+      }
+    });
+    const customerLastName = computed({
+      get (): string | undefined {
+        return props.value.customerLastName;
+      },
+      set (value: string | undefined) {
+        emit('input', { ...props.value, ...{ customerLastName: value } });
+      }
+    });
+    const customerEmail = computed({
+      get (): string {
+        return props.value.customerEmail;
+      },
+      set (value: string) {
+        emit('input', { ...props.value, ...{ customerEmail: value } });
+      }
+    });
+    const customerPhone = computed({
+      get (): string {
+        return props.value.customerPhone;
+      },
+      set (value: string) {
+        emit('input', { ...props.value, ...{ customerPhone: value } });
+      }
+    });
+    const country = computed({
+      get (): string {
+        return props.value.country;
+      },
+      set (value: string) {
+        emit('input', { ...props.value, ...{ country: value } });
+      }
+    });
+
+    return {
+      imageHandlerService,
+      customerLastName,
+      customerFirstName,
+      customerEmail,
+      customerPhone,
+      country,
+      ...usePersistedEmail(customerEmail),
+      ...usePersistedLastName(customerLastName),
+      ...usePersistedFirstName(customerFirstName),
+      ...usePersistedPhoneNumber(customerPhone),
+      ...usePersistedShippingCountry(country)
+    }
   },
   data () {
     return {
@@ -655,46 +711,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         this.updateValue({ deadlineDate: value })
       }
     },
-    country: {
-      get (): string {
-        return this.value.country;
-      },
-      set (value: string) {
-        this.updateValue({ country: value });
-      }
-    },
-    customerFirstName: {
-      get (): string {
-        return this.value.customerFirstName;
-      },
-      set (value: string) {
-        this.updateValue({ customerFirstName: value });
-      }
-    },
-    customerLastName: {
-      get (): string | undefined {
-        return this.value.customerLastName;
-      },
-      set (value: string | undefined) {
-        this.updateValue({ customerLastName: value });
-      }
-    },
-    customerEmail: {
-      get (): string {
-        return this.value.customerEmail;
-      },
-      set (value: string) {
-        this.updateValue({ customerEmail: value });
-      }
-    },
-    customerPhone: {
-      get (): string {
-        return this.value.customerPhone;
-      },
-      set (value: string) {
-        this.updateValue({ customerPhone: value });
-      }
-    },
     quantityButtonText (): TranslateResult {
       return this.showAdditionalQuantity
         ? this.$t('Remove')
@@ -734,6 +750,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     onCalculationAnimationFinished (): void {
       this.$emit('calculation-animation-finished');
+    },
+    persistCustomerData (): void {
+      this.persistLastUsedCustomerEmail(this.customerEmail);
+      this.persistLastUsedCustomerFirstName(this.customerFirstName);
+      this.persistLastUsedCustomerLastName(this.customerLastName);
+      this.persistLastUsedCustomerPhoneNumber(this.customerPhone);
+      this.persistLastUsedCustomerShippingCountry(this.country);
     }
   },
   beforeDestroy () {

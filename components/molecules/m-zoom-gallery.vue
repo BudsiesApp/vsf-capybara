@@ -365,6 +365,7 @@ export default Vue.extend({
 
             .cloud-zoom-big {
                 z-index: 150 !important;
+                background-color: var(--c-white);
             }
         }
     }

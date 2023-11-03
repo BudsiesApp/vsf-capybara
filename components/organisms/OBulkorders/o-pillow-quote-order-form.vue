@@ -86,7 +86,7 @@ import { defineComponent, PropType, Ref, ref } from '@vue/composition-api';
 
 import Product from 'core/modules/catalog/types/Product';
 import { BundleOption, BundleOptionsProductLink } from 'core/modules/catalog/types/BundleOption';
-import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo, vuexTypes as budsiesTypes } from 'src/modules/budsies';
+import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo } from 'src/modules/budsies';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
 
@@ -269,10 +269,7 @@ export default defineComponent({
     async submitBulkorder (): Promise<void> {
       this.isSubmitting = true;
 
-      this.$store.commit(
-        budsiesTypes.SN_BUDSIES + '/' + budsiesTypes.CUSTOMER_EMAIL_SET,
-        { email: this.bulkordersBaseFormData.customerEmail }
-      );
+      this.persistCustomerData();
 
       try {
         const bulkOrderId = await this.$store.dispatch(
@@ -326,6 +323,11 @@ export default defineComponent({
         message: message,
         action1: { label: i18n.t('OK') }
       });
+    },
+    persistCustomerData (): void {
+      const baseForm = getBaseForm(this.$refs);
+
+      baseForm.persistCustomerData();
     }
   }
 })
