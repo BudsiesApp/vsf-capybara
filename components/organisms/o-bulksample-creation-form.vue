@@ -364,6 +364,7 @@
 </template>
 
 <script lang="ts">
+import { Route } from 'vue-router';
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
 import { required, between } from 'vee-validate/dist/rules';
 import { TranslateResult } from 'vue-i18n';
@@ -436,14 +437,22 @@ export default defineComponent({
   },
   setup (_, setupContext) {
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService')
+    const window = inject<Window>('WindowObject');
     const getRefs: () => Record<string, Vue | Element | Vue[] | Element[]> = () => setupContext.refs;
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+    const artworkUpload = ref<InstanceType<typeof MArtworkUpload> | null>(null);
+
+    if (!window) {
+      throw new Error('Window is not provided');
+    }
 
     const email = ref<string | undefined>(undefined);
 
     return {
+      artworkUpload,
       imageHandlerService,
       validationObserver,
+      window,
       email,
       ...useFormValidation(
         validationObserver,
@@ -888,7 +897,13 @@ export default defineComponent({
 
       this.description = existingCartItem.plushieDescription || '';
     },
-    fillPlushieDataFromCartItem (existingCartItem: CartItem): void {
+    async fillPlushieDataFromCartItem (existingCartItem: CartItem): Promise<void> {
+      const isPlushieExist = await this.checkExistingPlushie();
+
+      if (!isPlushieExist) {
+        return this.onCartItemPlushieRemoved();
+      }
+
       this.plushieName = existingCartItem.plushieName || '';
       this.customerType = existingCartItem.customerType;
 
@@ -1012,6 +1027,8 @@ export default defineComponent({
     onCartAfterLoadedEventHandler (): void {
       if (this.existingCartItem) {
         this.fillPlushieDataFromCartItem(this.existingCartItem)
+      } else if (this.existingPlushieId) {
+        this.clearExistingPlushieId();
       }
     },
     onFailure (message: any): void {
@@ -1068,6 +1085,12 @@ export default defineComponent({
 
       try {
         try {
+          const isPlushieExist = await this.checkExistingPlushie();
+
+          if (!isPlushieExist) {
+            return this.onCartItemPlushieRemoved();
+          }
+
           const data: any = {
             plushieName: this.plushieName,
             customerImages: this.customerImages,
@@ -1111,17 +1134,67 @@ export default defineComponent({
       } finally {
         this.isSubmitting = false;
       }
+    },
+    async checkExistingPlushie (): Promise<boolean> {
+      if (!this.existingPlushieId) {
+        return false;
+      }
+
+      const response = await this.$store.dispatch(
+        'budsies/fetchPlushieById',
+        { plushieId: this.existingPlushieId }
+      );
+
+      if (response.resultCode !== 200 || !response.result) {
+        return false;
+      }
+
+      return true;
+    },
+    async onCartItemPlushieRemoved (): Promise<void> {
+      await this.$store.dispatch('cart/pullServerCart');
+
+      this.resetForm();
+      this.window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      this.showRemovedCartItemNotification();
+      await this.clearExistingPlushieId();
+
+      this.plushieId = await this.createPlushie();
+    },
+    resetForm (): void {
+      this.customerImages = [];
+      this.artworkUploadInitialItems = [];
+      this.plushieName = '';
+      this.description = '';
+      this.plushieId = undefined;
+      this.size = '';
+      this.customerType = undefined;
+      this.color = undefined;
+      this.selectedAddons = [];
+      this.pillowSize = undefined;
+      this.agreement = false;
+
+      this.artworkUpload?.clearInput();
+      this.validationObserver?.reset();
+    },
+    showRemovedCartItemNotification (): void {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'warning',
+        message: i18n.t('Looks like this cart item was removed'),
+        action1: { label: i18n.t('OK') }
+      });
+    },
+    clearExistingPlushieId (): Promise<Route> {
+      return this.$router.push({ query: { ...this.$route.query, existingPlushieId: undefined } });
     }
   },
   created (): void {
     this.fillDefaultSelectedAddon();
     this.pillowSize = this.defaultPillowSizeValue;
-
-    if (this.existingCartItem) {
-      this.fillPlushieDataFromCartItem(this.existingCartItem);
-    }
   },
   beforeMount (): void {
+    this.onCartAfterLoadedEventHandler();
+
     EventBus.$once('cart-after-loaded', this.onCartAfterLoadedEventHandler);
   },
   beforeDestroy (): void {
