@@ -271,6 +271,7 @@
 </template>
 
 <script lang="ts">
+import { Route } from 'vue-router';
 import { PropType, defineComponent, ref, Ref, inject } from '@vue/composition-api';
 import { extend, ValidationObserver, ValidationProvider } from 'vee-validate';
 import { required, email } from 'vee-validate/dist/rules';
@@ -647,21 +648,27 @@ export default defineComponent({
       this.resetForm();
       this.window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
       this.showRemovedCartItemNotification();
+      await this.clearExistingPlushieId();
 
       this.plushieId = await this.createPlushie();
     },
     showRemovedCartItemNotification (): void {
       this.$store.dispatch('notification/spawnNotification', {
-        type: 'info',
-        message: i18n.t('Looks like cart item was removed'),
+        type: 'warning',
+        message: i18n.t('Looks like this cart item was removed'),
         action1: { label: i18n.t('OK') }
       });
+    },
+    clearExistingPlushieId (): Promise<Route> {
+      return this.$router.push({ query: { ...this.$route.query, existingPlushieId: undefined } });
     }
   },
   async mounted () {
     if (this.existingCartItem) {
       this.fillPlushieDataFromCartItem(this.existingCartItem);
       return;
+    } else if (this.existingPlushieId) {
+      await this.clearExistingPlushieId();
     }
 
     this.plushieId = await this.createPlushie();
@@ -670,8 +677,11 @@ export default defineComponent({
     this.resetForm();
   },
   watch: {
-    existingPlushieId () {
+    existingPlushieId (value) {
       if (!this.existingCartItem) {
+        if (value) {
+          this.clearExistingPlushieId();
+        }
         return;
       }
 
