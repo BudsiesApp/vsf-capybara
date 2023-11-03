@@ -271,6 +271,7 @@
 </template>
 
 <script lang="ts">
+import { Route } from 'vue-router';
 import { PropType, defineComponent, ref, Ref, inject } from '@vue/composition-api';
 import { extend, ValidationObserver, ValidationProvider } from 'vee-validate';
 import { required, email } from 'vee-validate/dist/rules';
@@ -310,6 +311,7 @@ export default defineComponent({
   name: 'OBudsiesPalsProductOrderForm',
   setup (_, setupContext) {
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
+    const window = inject<Window>('WindowObject');
 
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
 
@@ -317,12 +319,16 @@ export default defineComponent({
       throw new Error('ImageHandlerService is not defined');
     }
 
+    if (!window) {
+      throw new Error('Window is not provided');
+    }
     const email = ref<string | undefined>(undefined);
 
     return {
       imageHandlerService,
       validationObserver,
       email,
+      window,
       ...useFormValidation(
         validationObserver,
         () => setupContext.refs
@@ -483,7 +489,13 @@ export default defineComponent({
         artworkUploadComponent.initFiles();
       });
     },
-    fillPlushieDataFromCartItem (existingCartItem: CartItem): void {
+    async fillPlushieDataFromCartItem (existingCartItem: CartItem): Promise<void> {
+      const isPlushieExist = await this.checkExistingPlushie();
+
+      if (!isPlushieExist) {
+        return this.onCartItemPlushieRemoved();
+      }
+
       this.description = existingCartItem.plushieDescription || '';
       this.plushieId = Number(existingCartItem.plushieId);
       this.selectedHospitalId = existingCartItem.hospitalId;
@@ -579,6 +591,12 @@ export default defineComponent({
     async updateExistingCartItem (existingCartItem: CartItem): Promise<void> {
       try {
         try {
+          const isPlushieExist = await this.checkExistingPlushie();
+
+          if (!isPlushieExist) {
+            return this.onCartItemPlushieRemoved();
+          }
+
           await this.updateClientAndServerItem({
             product: Object.assign({}, existingCartItem, {
               qty: 1,
@@ -607,12 +625,50 @@ export default defineComponent({
 
         this.onFailure('Unexpected error: ' + error);
       }
+    },
+    async checkExistingPlushie (): Promise<boolean> {
+      if (!this.existingPlushieId) {
+        return false;
+      }
+
+      const response = await this.$store.dispatch(
+        'budsies/fetchPlushieById',
+        { plushieId: this.existingPlushieId }
+      );
+
+      if (response.resultCode !== 200 || !response.result) {
+        return false;
+      }
+
+      return true;
+    },
+    async onCartItemPlushieRemoved (): Promise<void> {
+      await this.$store.dispatch('cart/pullServerCart');
+
+      this.resetForm();
+      this.window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      this.showRemovedCartItemNotification();
+      await this.clearExistingPlushieId();
+
+      this.plushieId = await this.createPlushie();
+    },
+    showRemovedCartItemNotification (): void {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'warning',
+        message: i18n.t('Looks like this cart item was removed'),
+        action1: { label: i18n.t('OK') }
+      });
+    },
+    clearExistingPlushieId (): Promise<Route> {
+      return this.$router.push({ query: { ...this.$route.query, existingPlushieId: undefined } });
     }
   },
   async mounted () {
     if (this.existingCartItem) {
       this.fillPlushieDataFromCartItem(this.existingCartItem);
       return;
+    } else if (this.existingPlushieId) {
+      await this.clearExistingPlushieId();
     }
 
     this.plushieId = await this.createPlushie();
@@ -621,8 +677,11 @@ export default defineComponent({
     this.resetForm();
   },
   watch: {
-    existingPlushieId () {
+    existingPlushieId (value) {
       if (!this.existingCartItem) {
+        if (value) {
+          this.clearExistingPlushieId();
+        }
         return;
       }
 
