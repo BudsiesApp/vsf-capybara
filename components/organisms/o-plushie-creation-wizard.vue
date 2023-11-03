@@ -582,6 +582,7 @@ export default defineComponent({
       const persistedState = await foreversCreationWizardPersistedStateService.getStateByPlushieId(Number.parseInt(this.existingPlushieId));
 
       if (!persistedState) {
+        this.$router.push({ query: { ...this.$route.query, id: undefined } });
         return;
       }
 
@@ -965,6 +966,7 @@ export default defineComponent({
       this.resetStepsData();
       this.showRemovedCartItemNotification();
       this.currentStep = 0;
+      this.$router.push({ query: { ...this.$route.query, id: undefined } });
     },
     async onPlushieRemovedBeforeAddedToCart (): Promise<void> {
       const persistedState = await foreversCreationWizardPersistedStateService.getStateByPlushieId(Number.parseInt(this.existingPlushieId));
@@ -1030,8 +1032,8 @@ export default defineComponent({
     },
     showRemovedCartItemNotification (): void {
       this.$store.dispatch('notification/spawnNotification', {
-        type: 'info',
-        message: i18n.t('Looks like cart item was removed'),
+        type: 'warning',
+        message: i18n.t('Looks like this cart item was removed'),
         action1: { label: i18n.t('OK') }
       });
     }
