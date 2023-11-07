@@ -689,11 +689,10 @@ export default defineComponent({
         return;
       }
 
-      if (this.productionTimeOptions.length) {
-        this.productionTime = this.productionTimeOptions[0];
-      }
-
       if (!productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id]) {
+        // when restoring cart item, lack of selected option mean that default production time was selected(since it became required)
+        // if default production time will have product, this assignment should be removed
+        this.productionTime = this.productionTimeOptions.find((value) => !value.optionValueId);
         return;
       }
 
