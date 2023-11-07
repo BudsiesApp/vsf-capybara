@@ -114,6 +114,7 @@ import { PlushieType } from 'theme/interfaces/plushie.type';
 import getPlushieSkuByTypes from 'theme/helpers/get-plushie-sku-by-types.function';
 import PlushieProductType from 'theme/interfaces/plushie-product-type';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
+import getProductionTimeOptions from 'theme/helpers/get-production-time-options';
 
 import MProductTypeChooseStep from './OPlushieCreationWizard/m-product-type-choose-step.vue';
 import MImageUploadStep from './OPlushieCreationWizard/m-image-upload-step.vue';
@@ -130,6 +131,7 @@ import SizeOption from '../interfaces/size-option';
 import SelectedAddon from '../interfaces/selected-addon.interface';
 import AddonOption from '../interfaces/addon-option.interface';
 import ProductTypeButton from '../interfaces/product-type-button.interface';
+import ProductionTimeOption from '../interfaces/production-time-option.interface';
 
 export default defineComponent({
   name: 'OPlushieCreationWizard',
@@ -275,6 +277,13 @@ export default defineComponent({
     },
     productionTimeBundleOption (): BundleOption | undefined {
       return this.getBundleOption('production time');
+    },
+    productionTimeOptions (): ProductionTimeOption[] {
+      if (!this.productionTimeBundleOption) {
+        return []
+      }
+
+      return getProductionTimeOptions(this.productionTimeBundleOption, this.product, this.$store);
     },
     sizeBundleOption (): BundleOption | undefined {
       return this.getBundleOption('product');
@@ -683,6 +692,9 @@ export default defineComponent({
       }
 
       if (!productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id]) {
+        // when restoring cart item, lack of selected option mean that default production time was selected(since it became required)
+        // if default production time will have product, this assignment should be removed
+        this.customizeStepData.productionTime = this.productionTimeOptions.find((value) => !value.optionValueId)?.optionValueId;
         return;
       }
 

@@ -475,13 +475,6 @@ export default defineComponent({
     updateProductionTime (productionTimeOption: ProductionTimeOption) {
       this.productionTime = productionTimeOption.optionValueId
     }
-  },
-  mounted () {
-    if (!this.productionTimeOptions.length || this.productionTime) {
-      return;
-    }
-
-    this.productionTime = this.productionTimeOptions[0].optionValueId
   }
 });
 

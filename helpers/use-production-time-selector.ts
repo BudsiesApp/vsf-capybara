@@ -31,12 +31,6 @@ export function useProductionTimeSelector (product: Product) {
 
   function resetSelectedProductionTimeOption (): void {
     selectedProductionTimeOption.value = undefined;
-
-    if (!hasProductionTimeOptions) {
-      return;
-    }
-
-    selectedProductionTimeOption.value = productionTimeOptions.value[0];
   }
 
   function fillProductionTimeFromCartItem (cartItem: CartItem): void {
@@ -51,6 +45,9 @@ export function useProductionTimeSelector (product: Product) {
       !productOption.extension_attributes
         .bundle_options[bundleOption.value.option_id]
     ) {
+      // when restoring cart item, lack of selected option mean that default production time was selected(since it became required)
+      // if default production time will have product, this assignment should be removed
+      selectedProductionTimeOption.value = productionTimeOptions.value.find((value) => !value.optionValueId);
       return;
     }
 
