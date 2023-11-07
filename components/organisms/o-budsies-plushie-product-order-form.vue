@@ -212,8 +212,13 @@
               </div>
             </validation-provider>
 
-            <div
+            <validation-provider
+              rules="required"
+              tag="div"
               class="_production-time-selector-section"
+              name="'Production time'"
+              :ref="getFieldAnchorName('Production time')"
+              v-slot="{ errors }"
               v-if="showProductionTimeOptions"
             >
               <MProductionTimeSelector
@@ -232,7 +237,11 @@
               <span class="_production-time-hint">
                 {{ $t('*We will refund the rush fee in the unlikely event we do not meet a promised delivery date.') }}
               </span>
-            </div>
+
+              <div class="_error-text">
+                {{ errors[0] }}
+              </div>
+            </validation-provider>
           </div>
         </div>
 
@@ -875,9 +884,6 @@ export default defineComponent({
       }
 
       this.productionTime = undefined;
-      if (this.productionTimeOptions.length) {
-        this.productionTime = this.productionTimeOptions[0];
-      }
 
       this.validationObserver?.reset();
     },
