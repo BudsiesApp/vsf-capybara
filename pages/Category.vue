@@ -209,7 +209,7 @@ import config from 'config';
 import { isServer } from '@vue-storefront/core/helpers';
 import i18n from '@vue-storefront/i18n';
 import { htmlDecode } from '@vue-storefront/core/filters';
-import { getSearchOptionsFromRouteParams } from '@vue-storefront/core/modules/catalog-next/helpers/categoryHelpers';
+import { getSearchOptionsFromRouteParams, getIdFromSlug } from '@vue-storefront/core/modules/catalog-next/helpers/categoryHelpers';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { getTopLevelCategories, prepareCategoryMenuItem, prepareCategoryProduct } from 'theme/helpers';
 import {
@@ -249,17 +249,22 @@ import OProductCard from 'theme/components/organisms/o-product-card';
 
 const THEME_PAGE_SIZE = 15;
 
+const loadCategory = async (store, route, forceLoad, filters) => {
+  const cachedCategory = store.getters['category-next/getCategoryFrom'](
+    route.path
+  );
+
+  return cachedCategory && !forceLoad
+    ? cachedCategory
+    : store.dispatch('category-next/loadCategory', { filters });
+};
+
 const composeInitialPageState = async (store, route, forceLoad = false) => {
   try {
     const filters = getSearchOptionsFromRouteParams(route.params);
-    const cachedCategory = store.getters['category-next/getCategoryFrom'](
-      route.path
-    );
 
-    const currentCategory =
-      cachedCategory && !forceLoad
-        ? cachedCategory
-        : await store.dispatch('category-next/loadCategory', { filters });
+    const currentCategory = await loadCategory(store, route, forceLoad, filters);
+
     await store.dispatch('category-next/loadCategoryProducts', {
       route,
       category: currentCategory,
@@ -270,6 +275,29 @@ const composeInitialPageState = async (store, route, forceLoad = false) => {
   } catch (e) {
     //
   }
+};
+
+const tryFindCategoryRouteByIdFromSlug = async (store, route) => {
+  const categoryId = getIdFromSlug(route.params.slug);
+
+  if (!categoryId) {
+    return;
+  }
+
+  const filterById = {
+    id: categoryId
+  }
+
+  const category = await loadCategory(store, route, false, filterById);
+
+  if (!category) {
+    return;
+  }
+
+  return {
+    name: 'category',
+    params: { slug: category.slug }
+  };
 };
 
 const getPageFromRoute = (route) => {
@@ -465,7 +493,32 @@ export default {
   async serverPrefetch () {
     if (this.$ssrContext) this.$ssrContext.output.cacheTags.add('category');
 
-    return this.onCategoryChangedHandler(this.$route);
+    await this.onCategoryChangedHandler(this.$route);
+
+    if (isObjectEmpty(this.$store.getters['category-next/getCurrentCategory'])) {
+      const rewrite = await this.$store.dispatch('urlRewrite/loadUrlRewrite', { requestPath: this.$route.path });
+
+      if (rewrite) {
+        return this.$ssrContext.server.response.redirect(rewrite.redirectCode, '/' + rewrite.targetPath);
+      }
+
+      const routeData = await tryFindCategoryRouteByIdFromSlug(this.$store, this.$route);
+
+      if (!routeData) {
+        return;
+      }
+
+      const resolvedRoute = this.$router.resolve(routeData).resolved;
+
+      if (!resolvedRoute) {
+        return;
+      }
+
+      this.$ssrContext.server.response.redirect(
+        301,
+        resolvedRoute.fullPath
+      );
+    }
   },
   async beforeRouteUpdate (to, from, next) {
     if (to.params.slug === from.params.slug) {
@@ -493,6 +546,28 @@ export default {
     } else {
       // Pure CSR, with no initial category state
       await composeInitialPageState(store, to);
+
+      if (isObjectEmpty(store.getters['category-next/getCurrentCategory'])) {
+        const rewrite = await store.dispatch('urlRewrite/loadUrlRewrite', { requestPath: to.path });
+
+        if (rewrite) {
+          return next(
+            {
+              name: 'url-rewrite',
+              path: to.path,
+              params: {
+                targetPath: `/${rewrite.targetPath}`
+              }
+            }
+          );
+        }
+
+        const resolvedRoute = await tryFindCategoryRouteByIdFromSlug(store, to);
+
+        if (resolvedRoute) {
+          return next(resolvedRoute);
+        }
+      }
 
       if (page !== 1) {
         await store.dispatch('category-next/fetchPageProducts', { page, pageSize: THEME_PAGE_SIZE, route: to });
