@@ -776,14 +776,16 @@ export default defineComponent({
         return;
       }
 
-      if (!productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id]) {
+      const selectedBundleOptions = productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id];
+
+      if (!selectedBundleOptions || selectedBundleOptions.option_selections.length === 0) {
         // when restoring cart item, lack of selected option mean that default production time was selected(since it became required)
         // if default production time will have product, this assignment should be removed
         this.productionTime = this.productionTimeOptions.find((value) => !value.optionValueId);
         return;
       }
 
-      const selectedOptionValueId = productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id].option_selections[0];
+      const selectedOptionValueId = selectedBundleOptions.option_selections[0];
       this.productionTime = this.productionTimeOptions.find((item) => item.optionValueId === selectedOptionValueId);
     },
     getArtworkUploadComponent (): InstanceType<typeof MArtworkUpload> | undefined {

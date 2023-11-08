@@ -456,6 +456,7 @@
                     <validation-provider
                       v-slot="{ errors, classes }"
                       name="Production time"
+                      rules="required"
                       v-if="isProductionOptionsAvailable"
                       slim
                     >
@@ -1432,10 +1433,6 @@ export default defineComponent({
 
     if (this.selectedBackDesign) {
       this.stepValidateState[customizerStepsData.backDesign.id] = 'valid';
-    }
-
-    if (this.isProductionOptionsAvailable) {
-      this.productionTime = this.productionTimeOptions[0].id;
     }
   },
   watch: {
