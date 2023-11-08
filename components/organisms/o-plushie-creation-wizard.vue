@@ -279,11 +279,15 @@ export default defineComponent({
       return this.getBundleOption('production time');
     },
     productionTimeOptions (): ProductionTimeOption[] {
-      if (!this.productionTimeBundleOption) {
+      if (!this.productionTimeBundleOption || !this.activeProduct) {
         return []
       }
 
-      return getProductionTimeOptions(this.productionTimeBundleOption, this.product, this.$store);
+      return getProductionTimeOptions(
+        this.productionTimeBundleOption,
+        this.activeProduct,
+        this.$store
+      );
     },
     sizeBundleOption (): BundleOption | undefined {
       return this.getBundleOption('product');
@@ -691,14 +695,16 @@ export default defineComponent({
         return;
       }
 
-      if (!productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id]) {
+      const selectedBundleOption = productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id];
+
+      if (!selectedBundleOption || selectedBundleOption.option_selections.length === 0) {
         // when restoring cart item, lack of selected option mean that default production time was selected(since it became required)
         // if default production time will have product, this assignment should be removed
         this.customizeStepData.productionTime = this.productionTimeOptions.find((value) => !value.optionValueId)?.optionValueId;
         return;
       }
 
-      this.customizeStepData.productionTime = productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id].option_selections[0];
+      this.customizeStepData.productionTime = selectedBundleOption.option_selections[0];
     },
     fillSizeByPreselectedParams (type: string, size: string): void {
       let sizeSku: string;
