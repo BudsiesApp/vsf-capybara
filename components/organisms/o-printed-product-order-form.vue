@@ -216,7 +216,7 @@
                 :production-time-options="productionTimeOptions"
                 :product-id="product.id"
                 :disabled="isSubmitting"
-                :invalid="errors.length"
+                :invalid="!!errors.length"
               />
 
               <div class="_error-text">

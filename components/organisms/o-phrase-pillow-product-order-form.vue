@@ -454,32 +454,23 @@
                     </validation-provider>
 
                     <validation-provider
-                      v-slot="{ errors, classes }"
-                      name="Production time"
+                      v-slot="{ errors }"
+                      name="'Production time'"
+                      rules="required"
                       v-if="isProductionOptionsAvailable"
-                      slim
+                      tag="div"
+                      class="_production-time-field"
                     >
-                      <div class="_production-time-field" :class="classes">
-                        <label class="_label">
-                          Choose your production time
-                        </label>
+                      <MProductionTimeSelector
+                        v-model="productionTime"
+                        :production-time-options="productionTimeOptions"
+                        :product-id="product.id"
+                        :disabled="isSubmitting"
+                        :invalid="!!errors.length"
+                      />
 
-                        <SfSelect
-                          v-model="productionTime"
-                          name="rush_addons"
-                          class="_rush-addons"
-                          :valid="!errors.length"
-                          :error-message="errors[0]"
-                          :should-lock-scroll-on-open="isMobile"
-                        >
-                          <SfSelectOption
-                            v-for="option in productionTimeOptions"
-                            :key="option.id"
-                            :value="option.id"
-                          >
-                            {{ option.text }}
-                          </SfSelectOption>
-                        </SfSelect>
+                      <div class="_error-text">
+                        {{ errors[0] }}
                       </div>
                     </validation-provider>
                   </div>
@@ -562,7 +553,7 @@ import {
 } from 'core/modules/catalog/types/BundleOption';
 import { Logger } from '@vue-storefront/core/lib/logger';
 
-import { InjectType, CustomerImage } from 'src/modules/shared';
+import { CustomerImage } from 'src/modules/shared';
 import {
   ErrorConverterService,
   Bodypart,
@@ -597,6 +588,7 @@ import MAccentColorSelector from '../molecules/m-accent-color-selector.vue';
 import ACustomProductQuantity from '../atoms/a-custom-product-quantity.vue';
 import MCustomizerPreview from '../molecules/m-customizer-preview.vue';
 import MBlockStory from '../molecules/m-block-story.vue';
+import MProductionTimeSelector from '../molecules/m-production-time-selector.vue';
 
 import CustomTextFieldInterface from '../interfaces/custom-text-field.interface';
 import DesignProduct from '../interfaces/design-product.interface';
@@ -687,7 +679,8 @@ export default defineComponent({
     MDesignImages,
     MSubmitAnimator,
     MAccentColorSelector,
-    MBlockStory
+    MBlockStory,
+    MProductionTimeSelector
   },
   props: {
     product: {
@@ -754,7 +747,7 @@ export default defineComponent({
       backgroundOffsetSettings: undefined as
         | BackgroundOffsetSettings
         | undefined,
-      productionTime: undefined as string | undefined,
+      productionTime: undefined as ProductionTimeOption | undefined,
       backCustomTextFields: [] as CustomTextFieldInterface[],
       frontCustomTextFields: [] as CustomTextFieldInterface[],
       frontAccentColorElementsNumber: 0,
@@ -1433,10 +1426,6 @@ export default defineComponent({
     if (this.selectedBackDesign) {
       this.stepValidateState[customizerStepsData.backDesign.id] = 'valid';
     }
-
-    if (this.isProductionOptionsAvailable) {
-      this.productionTime = this.productionTimeOptions[0].id;
-    }
   },
   watch: {
     activeStepIndex: {
@@ -1518,7 +1507,7 @@ export default defineComponent({
       }
     },
     productionTime: {
-      handler (newValue: string | undefined) {
+      handler (newValue: ProductionTimeOption | undefined) {
         if (!this.productionTimeBundleOption) {
           Logger.error(
             'productionTimeBundleOption is not defined while attempt to set it was performed',
@@ -1527,18 +1516,11 @@ export default defineComponent({
           return;
         }
 
-        let productionTime;
-        if (newValue) {
-          productionTime = this.productionTimeOptions.find(
-            (product) => product.id === this.productionTime
-          );
-        }
-
         this.setBundleOptionValue({
           optionId: this.productionTimeBundleOption.option_id,
           optionQty: 1,
-          optionSelections: productionTime?.optionValueId
-            ? [productionTime.optionValueId]
+          optionSelections: newValue?.optionValueId
+            ? [newValue.optionValueId]
             : []
         });
       },
@@ -1763,8 +1745,12 @@ export default defineComponent({
     }
 
     ._production-time-field {
-      ::v-deep .sf-select__selected {
-        justify-content: center;
+      --select-padding: 0;
+      --production-time-selector-option-font-size: var(--font-base);
+      --heading-title-font-weight: var(--font-bold);
+
+      &::v-deep .sf-heading {
+        --heading-text-align: left;
       }
     }
 
