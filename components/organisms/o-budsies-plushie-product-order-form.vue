@@ -226,6 +226,7 @@
                 :production-time-options="productionTimeOptions"
                 :product-id="product.id"
                 :disabled="isSubmitting"
+                :invalid="!!errors.length"
               >
                 <template #subtitle>
                   <p>
@@ -776,16 +777,16 @@ export default defineComponent({
         return;
       }
 
-      const selectedBundleOptions = productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id];
+      const selectedBundleOption = productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id];
 
-      if (!selectedBundleOptions || selectedBundleOptions.option_selections.length === 0) {
+      if (!selectedBundleOption || selectedBundleOption.option_selections.length === 0) {
         // when restoring cart item, lack of selected option mean that default production time was selected(since it became required)
         // if default production time will have product, this assignment should be removed
         this.productionTime = this.productionTimeOptions.find((value) => !value.optionValueId);
         return;
       }
 
-      const selectedOptionValueId = selectedBundleOptions.option_selections[0];
+      const selectedOptionValueId = selectedBundleOption.option_selections[0];
       this.productionTime = this.productionTimeOptions.find((item) => item.optionValueId === selectedOptionValueId);
     },
     getArtworkUploadComponent (): InstanceType<typeof MArtworkUpload> | undefined {
