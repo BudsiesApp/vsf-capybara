@@ -6,7 +6,6 @@
     <SfHeading
       :level="3"
       :title="$t('Choose your production time')"
-      class="_heading -required"
     />
 
     <slot name="subtitle" />
@@ -115,15 +114,6 @@ export default Vue.extend({
   margin-left: auto;
   margin-right: auto;
   text-align: center;
-
-  ._heading {
-    &.-required {
-      ::v-deep .sf-heading__title::after {
-        color: var(--c-danger-variant);
-        content: "*";
-      }
-    }
-  }
 
   ::v-deep .sf-select__selected {
     --select-option-font-size: var(--production-time-selector-option-font-size, var(--font-lg));
