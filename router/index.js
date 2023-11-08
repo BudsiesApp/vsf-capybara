@@ -50,7 +50,7 @@ let routes = [
     redirect: {
       name: 'category',
       params: {
-        slug: 'waggables-132'
+        slug: 'products'
       }
     }
   },
@@ -58,7 +58,20 @@ let routes = [
     name: 'products-alias-1',
     path: '/products/',
     redirect: {
-      name: 'products'
+      name: 'category',
+      params: {
+        slug: 'products'
+      }
+    }
+  },
+  {
+    name: 'products-alias-2',
+    path: '/c/waggables-132/',
+    redirect: {
+      name: 'category',
+      params: {
+        slug: 'products'
+      }
     }
   },
   { name: 'my-account', path: '/my-account/', component: MyAccount },
