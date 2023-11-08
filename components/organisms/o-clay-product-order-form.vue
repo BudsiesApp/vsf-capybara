@@ -213,14 +213,26 @@
               </div>
             </validation-provider>
 
-            <MProductionTimeSelector
+            <validation-provider
+              tag="div"
+              rules="required"
               class="_production-time-selector"
-              v-model="selectedProductionTimeOption"
-              :production-time-options="productionTimeOptions"
-              :product-id="product.id"
-              :disabled="isSubmitting"
+              name="'Production time'"
+              :ref="getFieldAnchorName('Production time')"
+              v-slot="{errors}"
               v-if="hasProductionTimeOptions"
-            />
+            >
+              <MProductionTimeSelector
+                v-model="selectedProductionTimeOption"
+                :production-time-options="productionTimeOptions"
+                :product-id="product.id"
+                :disabled="isSubmitting"
+              />
+
+              <div class="_error-text">
+                {{ errors[0] }}
+              </div>
+            </validation-provider>
 
             <validation-provider
               v-slot="{ errors, classes }"

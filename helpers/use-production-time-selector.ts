@@ -41,9 +41,11 @@ export function useProductionTimeSelector (product: Product) {
       return;
     }
 
+    const selectedBundleOptions = productOption.extension_attributes
+      .bundle_options[bundleOption.value.option_id];
+
     if (
-      !productOption.extension_attributes
-        .bundle_options[bundleOption.value.option_id]
+      !selectedBundleOptions || selectedBundleOptions.option_selections.length === 0
     ) {
       // when restoring cart item, lack of selected option mean that default production time was selected(since it became required)
       // if default production time will have product, this assignment should be removed
@@ -51,10 +53,7 @@ export function useProductionTimeSelector (product: Product) {
       return;
     }
 
-    const selectedOptionValueId = productOption.extension_attributes
-      .bundle_options[bundleOption.value.option_id]
-      .option_selections[0];
-
+    const selectedOptionValueId = selectedBundleOptions.option_selections[0];
     selectedProductionTimeOption.value = productionTimeOptions.value.find(
       (item) => item.optionValueId === selectedOptionValueId
     );
