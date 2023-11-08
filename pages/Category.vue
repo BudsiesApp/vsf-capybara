@@ -252,14 +252,14 @@ const THEME_PAGE_SIZE = 15;
 const composeInitialPageState = async (store, route, forceLoad = false) => {
   try {
     const filters = getSearchOptionsFromRouteParams(route.params);
-
     const cachedCategory = store.getters['category-next/getCategoryFrom'](
       route.path
     );
 
-    const currentCategory = cachedCategory && !forceLoad
-      ? cachedCategory
-      : store.dispatch('category-next/loadCategory', { filters });
+    const currentCategory =
+      cachedCategory && !forceLoad
+        ? cachedCategory
+        : await store.dispatch('category-next/loadCategory', { filters });
 
     await store.dispatch('category-next/loadCategoryProducts', {
       route,
