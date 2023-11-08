@@ -209,7 +209,7 @@ import config from 'config';
 import { isServer } from '@vue-storefront/core/helpers';
 import i18n from '@vue-storefront/i18n';
 import { htmlDecode } from '@vue-storefront/core/filters';
-import { getSearchOptionsFromRouteParams, getIdFromSlug } from '@vue-storefront/core/modules/catalog-next/helpers/categoryHelpers';
+import { getSearchOptionsFromRouteParams } from '@vue-storefront/core/modules/catalog-next/helpers/categoryHelpers';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { getTopLevelCategories, prepareCategoryMenuItem, prepareCategoryProduct } from 'theme/helpers';
 import {
@@ -249,21 +249,17 @@ import OProductCard from 'theme/components/organisms/o-product-card';
 
 const THEME_PAGE_SIZE = 15;
 
-const loadCategory = async (store, route, forceLoad, filters) => {
-  const cachedCategory = store.getters['category-next/getCategoryFrom'](
-    route.path
-  );
-
-  return cachedCategory && !forceLoad
-    ? cachedCategory
-    : store.dispatch('category-next/loadCategory', { filters });
-};
-
 const composeInitialPageState = async (store, route, forceLoad = false) => {
   try {
     const filters = getSearchOptionsFromRouteParams(route.params);
 
-    const currentCategory = await loadCategory(store, route, forceLoad, filters);
+    const cachedCategory = store.getters['category-next/getCategoryFrom'](
+      route.path
+    );
+
+    const currentCategory = cachedCategory && !forceLoad
+      ? cachedCategory
+      : store.dispatch('category-next/loadCategory', { filters });
 
     await store.dispatch('category-next/loadCategoryProducts', {
       route,
@@ -275,29 +271,6 @@ const composeInitialPageState = async (store, route, forceLoad = false) => {
   } catch (e) {
     //
   }
-};
-
-const tryFindCategoryRouteByIdFromSlug = async (store, route) => {
-  const categoryId = getIdFromSlug(route.params.slug);
-
-  if (!categoryId) {
-    return;
-  }
-
-  const filterById = {
-    id: categoryId
-  }
-
-  const category = await loadCategory(store, route, false, filterById);
-
-  if (!category) {
-    return;
-  }
-
-  return {
-    name: 'category',
-    params: { slug: category.slug }
-  };
 };
 
 const getPageFromRoute = (route) => {
@@ -501,23 +474,6 @@ export default {
       if (rewrite) {
         return this.$ssrContext.server.response.redirect(rewrite.redirectCode, '/' + rewrite.targetPath);
       }
-
-      const routeData = await tryFindCategoryRouteByIdFromSlug(this.$store, this.$route);
-
-      if (!routeData) {
-        return;
-      }
-
-      const resolvedRoute = this.$router.resolve(routeData).resolved;
-
-      if (!resolvedRoute) {
-        return;
-      }
-
-      this.$ssrContext.server.response.redirect(
-        301,
-        resolvedRoute.fullPath
-      );
     }
   },
   async beforeRouteUpdate (to, from, next) {
@@ -560,12 +516,6 @@ export default {
               }
             }
           );
-        }
-
-        const resolvedRoute = await tryFindCategoryRouteByIdFromSlug(store, to);
-
-        if (resolvedRoute) {
-          return next(resolvedRoute);
         }
       }
 
