@@ -18,6 +18,7 @@
       v-model="selectedOption"
       name="rush_addons"
       class="_rush-addons sf-select--underlined"
+      :class="{'-invalid': invalid}"
       :disabled="disabled"
       :should-lock-scroll-on-open="isMobile"
     >
@@ -34,7 +35,6 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue';
-import { ValidationProvider } from 'vee-validate';
 import {
   SfHeading,
   SfSelect
@@ -51,7 +51,6 @@ import ProductionTimeOption from '../interfaces/production-time-option.interface
 export default Vue.extend({
   name: 'MProductionTimeSelector',
   components: {
-    ValidationProvider,
     SfHeading,
     SfSelect,
     MBlockStory
@@ -70,6 +69,10 @@ export default Vue.extend({
       required: true
     },
     disabled: {
+      type: Boolean,
+      default: false
+    },
+    invalid: {
       type: Boolean,
       default: false
     }
