@@ -260,7 +260,6 @@ const composeInitialPageState = async (store, route, forceLoad = false) => {
       cachedCategory && !forceLoad
         ? cachedCategory
         : await store.dispatch('category-next/loadCategory', { filters });
-
     await store.dispatch('category-next/loadCategoryProducts', {
       route,
       category: currentCategory,
