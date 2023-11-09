@@ -249,8 +249,13 @@
           </div>
         </validation-provider>
 
-        <div
+        <validation-provider
+          tag="div"
+          rules="required"
           class="_production-time-selector-section"
+          name="'Production time'"
+          :ref="getFieldAnchorName('Production time')"
+          v-slot="{errors}"
           v-if="showProductionTimeOptions"
         >
           <MProductionTimeSelector
@@ -258,8 +263,13 @@
             :production-time-options="productionTimeOptions"
             :product-id="product.id"
             :disabled="isSubmitting"
+            :invalid="!!errors.length"
           />
-        </div>
+
+          <div class="_error-text">
+            {{ errors[0] }}
+          </div>
+        </validation-provider>
 
         <div v-show="showEmailStep">
           <SfDivider class="_step-divider" />
@@ -712,15 +722,16 @@ export default defineComponent({
         return;
       }
 
-      if (this.productionTimeOptions.length) {
-        this.productionTime = this.productionTimeOptions[0];
-      }
+      const selectedBundleOption = productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id];
 
-      if (!productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id]) {
+      if (!selectedBundleOption || selectedBundleOption.option_selections.length === 0) {
+        // when restoring cart item, lack of selected option mean that default production time was selected(since it became required)
+        // if default production time will have product, this assignment should be removed
+        this.productionTime = this.productionTimeOptions.find((value) => !value.optionValueId);
         return;
       }
 
-      const selectedOptionValueId = productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id].option_selections[0];
+      const selectedOptionValueId = selectedBundleOption.option_selections[0];
       this.productionTime = this.productionTimeOptions.find((item) => item.optionValueId === selectedOptionValueId);
     },
     fillSizeFromCartItem (cartItem: CartItem): void {
@@ -796,9 +807,6 @@ export default defineComponent({
       }
 
       this.productionTime = undefined;
-      if (this.productionTimeOptions.length) {
-        this.productionTime = this.productionTimeOptions[0];
-      }
 
       this.validationObserver?.reset();
     },
