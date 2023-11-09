@@ -27,6 +27,12 @@
         --select-option-font-size: var(--font-base);
     }
 
+    &.sf-select--underlined {
+        &.-invalid {
+            --select-border-color: var(--c-danger);
+        }
+    }
+
     @include for-desktop {
         &__options {
             overflow: auto;

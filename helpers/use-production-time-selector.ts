@@ -31,12 +31,6 @@ export function useProductionTimeSelector (product: Product) {
 
   function resetSelectedProductionTimeOption (): void {
     selectedProductionTimeOption.value = undefined;
-
-    if (!hasProductionTimeOptions) {
-      return;
-    }
-
-    selectedProductionTimeOption.value = productionTimeOptions.value[0];
   }
 
   function fillProductionTimeFromCartItem (cartItem: CartItem): void {
@@ -47,17 +41,19 @@ export function useProductionTimeSelector (product: Product) {
       return;
     }
 
+    const selectedBundleOption = productOption.extension_attributes
+      .bundle_options[bundleOption.value.option_id];
+
     if (
-      !productOption.extension_attributes
-        .bundle_options[bundleOption.value.option_id]
+      !selectedBundleOption || selectedBundleOption.option_selections.length === 0
     ) {
+      // when restoring cart item, lack of selected option mean that default production time was selected(since it became required)
+      // if default production time will have product, this assignment should be removed
+      selectedProductionTimeOption.value = productionTimeOptions.value.find((value) => !value.optionValueId);
       return;
     }
 
-    const selectedOptionValueId = productOption.extension_attributes
-      .bundle_options[bundleOption.value.option_id]
-      .option_selections[0];
-
+    const selectedOptionValueId = selectedBundleOption.option_selections[0];
     selectedProductionTimeOption.value = productionTimeOptions.value.find(
       (item) => item.optionValueId === selectedOptionValueId
     );

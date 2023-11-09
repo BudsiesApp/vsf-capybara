@@ -6,6 +6,7 @@
     <SfHeading
       :level="3"
       :title="$t('Choose your production time')"
+      class="_heading -required"
     />
 
     <slot name="subtitle" />
@@ -19,6 +20,7 @@
       v-model="selectedOption"
       name="rush_addons"
       class="_rush-addons sf-select--underlined"
+      :class="{'-invalid': invalid}"
       :disabled="disabled"
       :should-lock-scroll-on-open="isMobile"
     >
@@ -35,7 +37,6 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue';
-import { ValidationProvider } from 'vee-validate';
 import {
   SfHeading,
   SfSelect
@@ -52,7 +53,6 @@ import ProductionTimeOption from '../interfaces/production-time-option.interface
 export default Vue.extend({
   name: 'MProductionTimeSelector',
   components: {
-    ValidationProvider,
     SfHeading,
     SfSelect,
     MBlockStory
@@ -71,6 +71,10 @@ export default Vue.extend({
       required: true
     },
     disabled: {
+      type: Boolean,
+      default: false
+    },
+    invalid: {
       type: Boolean,
       default: false
     }
@@ -114,6 +118,15 @@ export default Vue.extend({
   margin-left: auto;
   margin-right: auto;
   text-align: center;
+
+  ._heading {
+    &.-required {
+      ::v-deep .sf-heading__title::after {
+        color: var(--c-danger-variant);
+        content: "*";
+      }
+    }
+  }
 
   ::v-deep .sf-select__selected {
     --select-option-font-size: var(--production-time-selector-option-font-size, var(--font-lg));
