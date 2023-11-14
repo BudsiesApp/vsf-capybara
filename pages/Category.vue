@@ -247,7 +247,7 @@ import ASortIcon from 'theme/components/atoms/a-sort-icon';
 import MCategoryDescriptionStory from 'theme/components/molecules/m-category-description-story.vue';
 import OProductCard from 'theme/components/organisms/o-product-card';
 
-const THEME_PAGE_SIZE = 10;
+const THEME_PAGE_SIZE = 15;
 
 const composeInitialPageState = async (store, route, forceLoad = false) => {
   try {
@@ -290,12 +290,9 @@ async function loadProducts (isProductsLoading) {
 }
 
 const checkForRewriteRoute = async (to) => {
-  const category = store.getters['category-next/getCurrentCategory'];
+  const category = store.getters['category-next/getCategoryByParams'](to.params);
 
-  if (
-    !isObjectEmpty(category) &&
-    to.params.slug === category.url_key
-  ) {
+  if (!isObjectEmpty(category)) {
     return;
   }
 
