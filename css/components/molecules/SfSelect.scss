@@ -29,6 +29,12 @@
         }
     }
 
+    &.sf-select--underlined {
+        &.-invalid {
+            --select-border-color: var(--c-danger);
+        }
+    }
+
     .sf-select-option {
         --select-option-font-family: var(--font-family-secondary);
     }
