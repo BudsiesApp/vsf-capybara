@@ -51,6 +51,7 @@ import OProductDetails from 'theme/components/organisms/o-product-details';
 import { filterChangedProduct } from '@vue-storefront/core/modules/catalog/events';
 import { getMediaGallery } from '@vue-storefront/core/modules/catalog/helpers';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
+import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-headers.function';
 
 import { ProductStructuredData } from 'src/modules/budsies';
 import { ProductEvent } from 'src/modules/shared';
@@ -236,25 +237,41 @@ export default {
 
       const product = this.getProductBySkuDictionary[sku];
       await this.$store.dispatch('product/setCurrent', product);
+    },
+    getCanonicalUrl () {
+      const host = this.$ssrContext
+        ? getHostFromHeaders(this.$ssrContext.server.request.headers)
+        : window.location.host;
+
+      return `https://${host}/p/${this.$route.params.parentSku}/`;
     }
   },
   metaInfo () {
     const description = this.getCurrentProduct?.meta_description || this.getCurrentProduct?.short_description;
     const categoryName = this.categoryName ? ` - ${this.categoryName}` : '';
 
+    const meta = [
+      {
+        rel: 'canonical',
+        href: this.getCanonicalUrl()
+      }
+    ]
+
+    const descriptionMeta = {
+      vmid: 'description',
+      name: 'description',
+      content: htmlDecode(description)
+    }
+
+    if (descriptionMeta) {
+      meta.push(descriptionMeta);
+    }
+
     return {
       title: htmlDecode(
         `${this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name}${categoryName}`
       ),
-      meta: description
-        ? [
-          {
-            vmid: 'description',
-            name: 'description',
-            content: htmlDecode(description)
-          }
-        ]
-        : []
+      meta
     };
   }
 };

@@ -226,18 +226,18 @@ import {
   SfAccordion,
   SfPagination
 } from '@storefront-ui/vue';
+import queryString from 'query-string';
 
-import {
-  currentStoreView
-} from '@vue-storefront/core/lib/multistore';
 import store from '@vue-storefront/core/store'
 import {
   mapMobileObserver,
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
+import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-headers.function';
 
 import { ProductEvent } from 'src/modules/shared';
+import { getUrlRewriteRouteData } from 'src/modules/url-rewrite';
 
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 import isObjectEmpty from 'theme/helpers/is-object-empty.function';
@@ -247,7 +247,7 @@ import ASortIcon from 'theme/components/atoms/a-sort-icon';
 import MCategoryDescriptionStory from 'theme/components/molecules/m-category-description-story.vue';
 import OProductCard from 'theme/components/organisms/o-product-card';
 
-const THEME_PAGE_SIZE = 15;
+const THEME_PAGE_SIZE = 10;
 
 const composeInitialPageState = async (store, route, forceLoad = false) => {
   try {
@@ -286,6 +286,27 @@ async function loadProducts (isProductsLoading) {
     await store.dispatch('category-next/loadMoreCategoryProducts');
   } finally {
     isProductsLoading.value = false;
+  }
+}
+
+const checkForRewriteRoute = async (to) => {
+  const category = store.getters['category-next/getCurrentCategory'];
+
+  if (
+    !isObjectEmpty(category) &&
+    to.params.slug === category.url_key
+  ) {
+    return;
+  }
+
+  const rewrite = await store.dispatch('urlRewrite/loadUrlRewrite', { requestPath: to.path });
+
+  if (rewrite) {
+    return getUrlRewriteRouteData(
+      to.path,
+      rewrite.targetPath,
+      queryString.stringify(to.query)
+    );
   }
 }
 
@@ -471,7 +492,16 @@ export default {
       const rewrite = await this.$store.dispatch('urlRewrite/loadUrlRewrite', { requestPath: this.$route.path });
 
       if (rewrite) {
-        return this.$ssrContext.server.response.redirect(rewrite.redirectCode, '/' + rewrite.targetPath);
+        let query = queryString.stringify(this.$route.query);
+
+        if (query) {
+          query = `?${query}`;
+        }
+
+        return this.$ssrContext.server.response.redirect(
+          rewrite.redirectCode,
+          `/${rewrite.targetPath}/${query}`
+        );
       }
     }
   },
@@ -483,6 +513,17 @@ export default {
     }
 
     await this.onCategoryChangedHandler(to);
+
+    const rewriteRouteData = await checkForRewriteRoute(to);
+
+    if (rewriteRouteData) {
+      if (rewriteRouteData.params.targetPath === from.path) {
+        await this.onCategoryChangedHandler(from);
+      }
+
+      return next(rewriteRouteData);
+    }
+
     next();
   },
   async beforeRouteEnter (to, from, next) {
@@ -502,20 +543,10 @@ export default {
       // Pure CSR, with no initial category state
       await composeInitialPageState(store, to);
 
-      if (isObjectEmpty(store.getters['category-next/getCurrentCategory'])) {
-        const rewrite = await store.dispatch('urlRewrite/loadUrlRewrite', { requestPath: to.path });
+      const rewriteRouteData = await checkForRewriteRoute(to);
 
-        if (rewrite) {
-          return next(
-            {
-              name: 'url-rewrite',
-              path: to.path,
-              params: {
-                targetPath: `/${rewrite.targetPath}`
-              }
-            }
-          );
-        }
+      if (rewriteRouteData) {
+        return next(rewriteRouteData);
       }
 
       if (page !== 1) {
@@ -628,25 +659,41 @@ export default {
           categoryId: category.id || ''
         }
       );
+    },
+    getCanonicalUrl () {
+      const {
+        url_key
+      } = this.getCurrentCategory;
+
+      const host = this.$ssrContext
+        ? getHostFromHeaders(this.$ssrContext.server.request.headers)
+        : window.location.host;
+
+      return `https://${host}/c/${url_key}/`;
     }
   },
   metaInfo () {
-    const storeView = currentStoreView();
     const {
       meta_title,
       meta_description,
-      name,
-      slug
+      name
     } = this.getCurrentCategory;
-    const meta = meta_description
-      ? [
-        {
-          vmid: 'description',
-          name: 'description',
-          content: htmlDecode(meta_description)
-        }
-      ]
-      : [];
+    const description = meta_description ? {
+      vmid: 'description',
+      name: 'description',
+      content: htmlDecode(meta_description)
+    } : undefined;
+
+    const meta = [
+      {
+        rel: 'canonical',
+        href: this.getCanonicalUrl()
+      }
+    ]
+
+    if (description) {
+      meta.push(description);
+    }
 
     return {
       title: htmlDecode(meta_title || name),
