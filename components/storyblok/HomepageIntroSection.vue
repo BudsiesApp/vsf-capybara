@@ -21,6 +21,7 @@
         <SfHeading
           :level="1"
           :subtitle="itemData.subtitle"
+          :style="headingStyles"
         >
           <template #title>
             <h1
@@ -106,6 +107,11 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
         styles['--intro-section-background-color'] = this.itemData.background_color.color;
       }
 
+      return styles;
+    },
+    headingStyles (): Record<string, string> {
+      const styles: Record<string, string> = {};
+
       if (this.itemData.text_color.color) {
         styles['--heading-title-color'] = this.itemData.text_color.color;
       }
@@ -143,6 +149,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 
 .storyblok-homepage-intro-section {
   position: relative;
+  background-color: var(--intro-section-background-color, transparent);
 
   ._intro-column {
     line-height: 0;
@@ -185,7 +192,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
   }
 
   ._image-column {
-    background-color: var(--intro-section-background-color, transparent);
     position: relative;
   }
 
