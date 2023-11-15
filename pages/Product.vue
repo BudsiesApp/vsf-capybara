@@ -238,30 +238,52 @@ export default {
       const product = this.getProductBySkuDictionary[sku];
       await this.$store.dispatch('product/setCurrent', product);
     },
-    getCanonicalUrl () {
+    getCanonicalUrl (product) {
+      if (!product) {
+        return;
+      }
+
       const host = this.$ssrContext
         ? getHostFromHeaders(this.$ssrContext.server.request.headers)
         : window.location.host;
 
-      return `https://${host}/p/${this.$route.params.parentSku}/`;
+      const params = {
+        parentSku: product.parentSku
+      };
+      let routeName = 'simple-product';
+
+      if (product.parentSku !== product.sku) {
+        params.childSku = product.sku;
+        routeName = 'product';
+      }
+
+      const resolvedRoute = this.$router.resolve({
+        name: routeName,
+        params
+      });
+
+      return `https://${host}${resolvedRoute.href}`;
     }
   },
   metaInfo () {
     const description = this.getCurrentProduct?.meta_description || this.getCurrentProduct?.short_description;
     const categoryName = this.categoryName ? ` - ${this.categoryName}` : '';
+    const canonicalUrl = this.getCanonicalUrl(this.getCurrentProduct);
 
-    const meta = [
-      {
+    const meta = [];
+
+    if (canonicalUrl) {
+      meta.push({
         rel: 'canonical',
-        href: this.getCanonicalUrl()
-      }
-    ]
+        href: canonicalUrl
+      });
+    }
 
     const descriptionMeta = {
       vmid: 'description',
       name: 'description',
       content: htmlDecode(description)
-    }
+    };
 
     if (descriptionMeta) {
       meta.push(descriptionMeta);

@@ -659,14 +659,15 @@ export default {
     },
     getCanonicalUrl () {
       const {
-        url_key
+        slug
       } = this.getCurrentCategory;
 
       const host = this.$ssrContext
         ? getHostFromHeaders(this.$ssrContext.server.request.headers)
         : window.location.host;
+      const resolvedRoute = this.$router.resolve({ name: 'category', params: { slug } });
 
-      return `https://${host}/c/${url_key}/`;
+      return `https://${host}${resolvedRoute.href}`;
     }
   },
   metaInfo () {
