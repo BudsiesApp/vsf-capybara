@@ -237,7 +237,7 @@ import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-headers.function';
 
 import { ProductEvent } from 'src/modules/shared';
-import { getUrlRewriteRouteData } from 'src/modules/url-rewrite';
+import { mappingFallbackForUrlRewrite } from 'src/modules/url-rewrite';
 
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 import isObjectEmpty from 'theme/helpers/is-object-empty.function';
@@ -289,22 +289,23 @@ async function loadProducts (isProductsLoading) {
   }
 }
 
-const checkForRewriteRoute = async (to) => {
+const checkForRewriteRoute = async (to, ssrContext) => {
   const category = store.getters['category-next/getCategoryByParams'](to.params);
 
   if (!isObjectEmpty(category)) {
     return;
   }
 
-  const rewrite = await store.dispatch('urlRewrite/loadUrlRewrite', { requestPath: to.path });
-
-  if (rewrite) {
-    return getUrlRewriteRouteData(
-      to.path,
-      rewrite.targetPath,
-      queryString.stringify(to.query)
-    );
-  }
+  return mappingFallbackForUrlRewrite(
+    {
+      dispatch: store.dispatch
+    },
+    {
+      url: to.path,
+      params: to.query,
+      ssrContext
+    }
+  )
 }
 
 export default {
@@ -485,22 +486,7 @@ export default {
 
     await this.onCategoryChangedHandler(this.$route);
 
-    if (isObjectEmpty(this.$store.getters['category-next/getCurrentCategory'])) {
-      const rewrite = await this.$store.dispatch('urlRewrite/loadUrlRewrite', { requestPath: this.$route.path });
-
-      if (rewrite) {
-        let query = queryString.stringify(this.$route.query);
-
-        if (query) {
-          query = `?${query}`;
-        }
-
-        return this.$ssrContext.server.response.redirect(
-          rewrite.redirectCode,
-          `/${rewrite.targetPath}/${query}`
-        );
-      }
-    }
+    return checkForRewriteRoute(this.$route, this.$ssrContext);
   },
   async beforeRouteUpdate (to, from, next) {
     if (to.params.slug === from.params.slug) {
