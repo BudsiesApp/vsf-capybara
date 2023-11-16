@@ -282,7 +282,7 @@ export default {
           url: {
             name: 'category',
             params: {
-              slug: 'custom-photo-pillows-80'
+              slug: 'photo-pillows-designs'
             }
           }
         },

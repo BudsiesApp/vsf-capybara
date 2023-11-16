@@ -206,7 +206,7 @@ export default {
               link: {
                 name: 'category',
                 params: {
-                  slug: 'petsies-accessories-11'
+                  slug: 'petsies-accessories'
                 }
               }
             }
