@@ -438,7 +438,7 @@ export default {
   }
 
   ._copyright,
-  .truevault-polaris-privacy-notice {
+  .truevault-polaris-privacy-notice:not([hidden]) {
     color: var(--c-footer-gray);
     font-size: var(--font-2xs);
 

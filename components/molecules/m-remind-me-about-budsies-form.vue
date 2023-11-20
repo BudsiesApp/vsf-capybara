@@ -198,7 +198,7 @@ export default defineComponent({
     margin-top: var(--spacer-sm);
   }
 
-  .truevault-polaris-privacy-notice {
+  .truevault-polaris-privacy-notice:not([hidden]) {
     margin-top: var(--spacer-sm);
     display: inline-block;
   }

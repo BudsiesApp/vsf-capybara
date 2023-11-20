@@ -73,7 +73,7 @@ export default Vue.extend({
     margin: auto;
   }
 
-  .truevault-polaris-privacy-notice {
+  .truevault-polaris-privacy-notice:not([hidden]) {
     margin-top: var(--spacer-sm);
     display: inline-block;
     width: 100%;

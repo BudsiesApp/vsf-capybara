@@ -323,7 +323,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveData>).extend({
     }
   }
 
-  .truevault-polaris-privacy-notice {
+  .truevault-polaris-privacy-notice:not([hidden]) {
     margin-top: var(--spacer-sm);
     display: inline-block;
     text-align: end;

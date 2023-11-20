@@ -680,7 +680,7 @@ a {
     }
   }
 }
-.truevault-polaris-privacy-notice {
+.truevault-polaris-privacy-notice:not([hidden]) {
   color: var(--c-link);
 
   &:hover {

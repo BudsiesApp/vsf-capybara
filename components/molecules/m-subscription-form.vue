@@ -202,7 +202,7 @@ export default defineComponent({
     margin-bottom: calc(var(--font-xs) * 1.2);
   }
 
-  .truevault-polaris-privacy-notice {
+  .truevault-polaris-privacy-notice:not([hidden]) {
     margin-top: var(--spacer-sm);
     display: inline-block;
     width: 100%;

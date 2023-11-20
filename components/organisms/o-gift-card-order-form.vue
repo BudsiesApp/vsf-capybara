@@ -558,7 +558,7 @@ $send-friend-block-max-height: 500px;
     font-weight: bold;
   }
 
-  .truevault-polaris-privacy-notice {
+  .truevault-polaris-privacy-notice:not([hidden]) {
     margin-top: var(--spacer-sm);
     display: inline-block;
   }

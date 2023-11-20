@@ -309,7 +309,7 @@ $number-margin-right-desktop: var(--spacer-sm);
     margin-top: var(--spacer-base);
   }
 
-  .truevault-polaris-privacy-notice {
+  .truevault-polaris-privacy-notice:not([hidden]) {
     margin-top: var(--spacer-sm);
     display: inline-block;
   }

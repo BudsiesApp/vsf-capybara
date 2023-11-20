@@ -255,7 +255,7 @@ export default {
     flex: 0 0 100%;
   }
 
-  .truevault-polaris-privacy-notice {
+  .truevault-polaris-privacy-notice:not([hidden]) {
     margin-top: var(--spacer-sm);
     display: inline-block;
     width: 100%;
