@@ -42,9 +42,9 @@
     </div>
     <p class="notice">
       {{ $t('At Budsies, we attach great importance to privacy issues and are committed to protecting the personal data of our users. Learn more about how we care and use your personal data in the') }}
-      <a href="//privacy.budsies.com/privacy-policy" _target="blank">{{ $t('Privacy Policy') }}</a>.
+      <a :href="$privacyPolicy.url" _target="blank">{{ $t('Privacy Policy') }}</a>.
     </p>
-    <a class="truevault-polaris-privacy-notice" target="_blank" href="https://privacy.budsies.com/privacy-policy#california-privacy-notice" noreferrer noopener hidden>California Privacy Notice</a>
+    <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden>California Privacy Notice</a>
   </div>
 </template>
 

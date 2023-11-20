@@ -88,17 +88,18 @@
 
       <p class="_copyright">
         © 2023 {{ $t('Budsies PR LLC. All Rights Reserved') }}. |
-        <router-link to="//privacy.budsies.com/privacy-policy" target="_blank">
+        <a :href="$privacyPolicy.url" target="_blank">
           {{ $t('Privacy Policy') }}
-        </router-link>
+        </a>
 
-        <a class="truevault-polaris-privacy-notice" target="_blank" href="https://privacy.budsies.com/privacy-policy#california-privacy-notice" noreferrer noopener hidden> | California Privacy Notice</a>
+        <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden> | California Privacy Notice</a>
       </p>
 
       <a
         v-show="isMounted"
         :class="privacyChoicesClass"
-        href="https://privacy.budsies.com/opt-out"
+        :href="$privacyPolicy.optOutUrl"
+        target="_blank"
         noreferrer
         noopener
         hidden

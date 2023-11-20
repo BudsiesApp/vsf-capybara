@@ -247,9 +247,9 @@
             {{ $t('Terms of Service') }},
           </router-link>
 
-          <router-link to="//privacy.budsies.com/privacy-policy" target="_blank">
+          <a href="privacy.budsies.com/privacy-policy" target="_blank">
             {{ $t('Privacy Policy') }},
-          </router-link>
+          </a>
 
           {{ $t('and') }}
           <a href="http://support.budsies.com/support/solutions/folders/5000249005" target="_blank">{{ $t('Refund Policy') }}</a>.
@@ -266,7 +266,7 @@
           </SfButton>
         </div>
 
-        <a class="truevault-polaris-privacy-notice" target="_blank" href="https://privacy.budsies.com/privacy-policy#california-privacy-notice" noreferrer noopener hidden>California Privacy Notice</a>
+        <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden>California Privacy Notice</a>
       </form>
     </validation-observer>
   </div>

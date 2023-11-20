@@ -119,7 +119,7 @@
               {{ $t('Rewards dollars may be applied onto existing orders within 7 days of checkout.') }}
             </p>
 
-            <a class="truevault-polaris-privacy-notice" href="https://privacy.budsies.com/privacy-policy#financial-incentive" noreferrer noopener hidden>Notice of Financial Incentive</a>
+            <a class="truevault-polaris-privacy-notice" :href="$privacyPolicy.financialIncentiveNoticeUrl" noreferrer noopener hidden>Notice of Financial Incentive</a>
           </div>
         </div>
       </div>

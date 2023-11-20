@@ -84,12 +84,12 @@
                     {{ $t('and') }}
                   </span>
 
-                  <router-link
+                  <a
                     target="_blank"
-                    to="//privacy.budsies.com/privacy-policy"
+                    :href="$privacyPolicy.url"
                   >
                     {{ $t('Privacy Policy') }}
-                  </router-link>
+                  </a>
                 </span>
               </template>
             </SfCheckbox>
@@ -123,7 +123,7 @@
         </SfButton>
       </div>
 
-      <a class="truevault-polaris-privacy-notice" target="_blank" href="https://privacy.budsies.com/privacy-policy#california-privacy-notice" noreferrer noopener hidden>California Privacy Notice</a>
+      <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden>California Privacy Notice</a>
     </div>
   </div>
 </template>
