@@ -561,6 +561,8 @@ $send-friend-block-max-height: 500px;
   .truevault-polaris-privacy-notice {
     margin-top: var(--spacer-sm);
     display: inline-block;
+  }
+
   ._form-field {
     margin-top: var(--spacer-xs);
 
