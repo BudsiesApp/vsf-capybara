@@ -58,7 +58,7 @@
             v-slot="{ errors }"
             slim
             rules="required"
-            name="Price Amount"
+            name="'Price Amount'"
             class="_custom-price-amount"
             v-if="showCustomPriceAmountInput"
           >
@@ -484,7 +484,7 @@ $send-friend-block-max-height: 500px;
   }
 
   ._recipient-ship {
-    margin-bottom: var(--spacer-base);
+    margin: var(--spacer-xs) 0 var(--spacer-base);
   }
 
   ._custom-message-container {
@@ -528,6 +528,13 @@ $send-friend-block-max-height: 500px;
       --product-option-font-size: var(--font-sm);
       --select-option-font-size: var(--font-sm);
     }
+
+    .sf-input {
+      .sf-input__error-message {
+        height: auto;
+        min-height: calc(var(--font-xs) * 1.2);
+      }
+    }
   }
 
   .maxHeight-enter-active,
@@ -554,6 +561,12 @@ $send-friend-block-max-height: 500px;
   .truevault-polaris-privacy-notice {
     margin-top: var(--spacer-sm);
     display: inline-block;
+  ._form-field {
+    margin-top: var(--spacer-xs);
+
+    &:first-child {
+      margin-top: 0;
+    }
   }
 
   @include for-desktop {

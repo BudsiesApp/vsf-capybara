@@ -454,32 +454,23 @@
                     </validation-provider>
 
                     <validation-provider
-                      v-slot="{ errors, classes }"
-                      name="Production time"
+                      v-slot="{ errors }"
+                      name="'Production time'"
+                      rules="required"
                       v-if="isProductionOptionsAvailable"
-                      slim
+                      tag="div"
+                      class="_production-time-field"
                     >
-                      <div class="_production-time-field" :class="classes">
-                        <label class="_label">
-                          Choose your production time
-                        </label>
+                      <MProductionTimeSelector
+                        v-model="productionTime"
+                        :production-time-options="productionTimeOptions"
+                        :product-id="product.id"
+                        :disabled="isSubmitting"
+                        :invalid="!!errors.length"
+                      />
 
-                        <SfSelect
-                          v-model="productionTime"
-                          name="rush_addons"
-                          class="_rush-addons"
-                          :valid="!errors.length"
-                          :error-message="errors[0]"
-                          :should-lock-scroll-on-open="isMobile"
-                        >
-                          <SfSelectOption
-                            v-for="option in productionTimeOptions"
-                            :key="option.id"
-                            :value="option.id"
-                          >
-                            {{ option.text }}
-                          </SfSelectOption>
-                        </SfSelect>
+                      <div class="_error-text">
+                        {{ errors[0] }}
                       </div>
                     </validation-provider>
                   </div>
@@ -536,7 +527,8 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType, VueConstructor } from 'vue';
+import Vue from 'vue';
+import { PropType, defineComponent, inject, ref } from '@vue/composition-api';
 import {
   ValidationProvider,
   ValidationObserver,
@@ -563,13 +555,12 @@ import {
 } from 'core/modules/catalog/types/BundleOption';
 import { Logger } from '@vue-storefront/core/lib/logger';
 
-import { InjectType, CustomerImage } from 'src/modules/shared';
+import { CustomerImage } from 'src/modules/shared';
 import {
   ErrorConverterService,
   Bodypart,
   BodypartValue,
   isAxiosError,
-  vuexTypes as budsiesTypes,
   ProductValue,
   Dictionary
 } from 'src/modules/budsies';
@@ -599,6 +590,7 @@ import MAccentColorSelector from '../molecules/m-accent-color-selector.vue';
 import ACustomProductQuantity from '../atoms/a-custom-product-quantity.vue';
 import MCustomizerPreview from '../molecules/m-customizer-preview.vue';
 import MBlockStory from '../molecules/m-block-story.vue';
+import MProductionTimeSelector from '../molecules/m-production-time-selector.vue';
 
 import CustomTextFieldInterface from '../interfaces/custom-text-field.interface';
 import DesignProduct from '../interfaces/design-product.interface';
@@ -609,6 +601,7 @@ import BackgroundOffsetSettings from '../interfaces/background-offset-settings.i
 import ProductImage from '../interfaces/product-image.interface';
 import getProductionTimeOptions from '../../helpers/get-production-time-options';
 import { ValidationResult } from 'vee-validate/dist/types/types';
+import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 
 extend('required', {
   ...required,
@@ -630,12 +623,6 @@ configure({
 });
 
 const TARGET_IMAGE_SIZE = 2625;
-
-interface InjectedServices {
-  errorConverterService: ErrorConverterService,
-  fileProcessingRepositoryFactory: FileProcessingRepositoryFactory,
-  imageHandlerService: ImageHandlerService
-}
 
 interface SideDesignProduct extends Product {
   default_other_side_design?: number,
@@ -662,10 +649,6 @@ interface SmallBackgroundImageStyle {
   left: string
 }
 
-interface Constants {
-  customizerStepsData: Dictionary<StepsInterface>
-}
-
 const customizerStepsData: Dictionary<StepsInterface> = {
   frontDesign: { name: 'Front<br>Design', id: 'frontDesign' },
   uploadPhoto: { name: 'Upload<br>Photo', id: 'uploadPhoto' },
@@ -679,9 +662,7 @@ export interface DesignSelectedEventPayload {
   backDesign: string | undefined
 }
 
-export default (
-  Vue as VueConstructor<Vue & InjectedServices & Constants>
-).extend({
+export default defineComponent({
   name: 'OPhrasePillowProductOrderForm',
   components: {
     SfButton,
@@ -700,15 +681,9 @@ export default (
     MDesignImages,
     MSubmitAnimator,
     MAccentColorSelector,
-    MBlockStory
+    MBlockStory,
+    MProductionTimeSelector
   },
-  inject: {
-    errorConverterService: { from: 'ErrorConverterService' },
-    fileProcessingRepositoryFactory: {
-      from: 'FileProcessingRepositoryFactory'
-    },
-    imageHandlerService: { from: 'ImageHandlerService' }
-  } as unknown as InjectType<InjectedServices>,
   props: {
     product: {
       type: Object as PropType<Product>,
@@ -731,6 +706,34 @@ export default (
       default: undefined
     }
   },
+  setup () {
+    const errorConverterService = inject<ErrorConverterService>('ErrorConverterService');
+    const fileProcessingRepositoryFactory = inject<FileProcessingRepositoryFactory>('FileProcessingRepositoryFactory');
+    const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
+
+    if (!errorConverterService) {
+      throw new Error('ErrorConverterService is not provided');
+    }
+
+    if (!fileProcessingRepositoryFactory) {
+      throw new Error('FileProcessingRepositoryFactory is not provided');
+    }
+
+    if (!imageHandlerService) {
+      throw new Error('ImageHandlerService is not provided');
+    }
+
+    const customerEmail = ref<string | undefined>(undefined);
+
+    return {
+      errorConverterService,
+      fileProcessingRepositoryFactory,
+      imageHandlerService,
+      customizerStepsData,
+      customerEmail,
+      ...usePersistedEmail(customerEmail)
+    }
+  },
   data () {
     let stepValidateState: Dictionary<'valid' | 'invalid'> = {
       [customizerStepsData.frontDesign.id]: 'valid'
@@ -741,13 +744,12 @@ export default (
       quantity: 1,
       accentColorPartValues: [] as AccentColorPart[],
       accentColorPartValue: undefined as AccentColorPart | undefined,
-      customerEmail: undefined as string | undefined,
       backgroundDataUri: undefined as string | undefined,
       isBackgroundImageLoaded: false,
       backgroundOffsetSettings: undefined as
         | BackgroundOffsetSettings
         | undefined,
-      productionTime: undefined as string | undefined,
+      productionTime: undefined as ProductionTimeOption | undefined,
       backCustomTextFields: [] as CustomTextFieldInterface[],
       frontCustomTextFields: [] as CustomTextFieldInterface[],
       frontAccentColorElementsNumber: 0,
@@ -758,7 +760,6 @@ export default (
       isFormDisabled: false,
       isSubmitting: false,
       submitErrors: [] as string[],
-      showEmailStep: true,
       isCustomizerPreviewBackSideFocused: false,
       croppedBackground: '',
       activeStepIndex: 1,
@@ -1018,6 +1019,9 @@ export default (
       set (value: AccentColorPart): void {
         this.accentColorPartValue = value;
       }
+    },
+    showEmailStep (): boolean {
+      return !this.hasPrefilledEmail;
     }
   },
   methods: {
@@ -1170,14 +1174,6 @@ export default (
     onBackgroundImageAssigned (): void {
       this.updateSmallBackgroundImage();
     },
-    prefillEmail (): void {
-      const customerEmail = this.$store.getters['budsies/getPrefilledCustomerEmail'];
-
-      if (customerEmail) {
-        this.customerEmail = customerEmail;
-        this.showEmailStep = false;
-      }
-    },
     async processImages (): Promise<CustomerImage[]> {
       const backgroundEditor = this.getBackgroundEditor();
       const backPreview = this.getBackPreview();
@@ -1268,11 +1264,6 @@ export default (
           bundleOptions: this.$store.state.product.current_bundle_options
         });
 
-        this.$store.commit(
-          budsiesTypes.SN_BUDSIES + '/' + budsiesTypes.CUSTOMER_EMAIL_SET,
-          { email: this.customerEmail }
-        );
-
         try {
           await this.$store.dispatch('cart/addItem', {
             productToAdd: Object.assign({}, this.product, {
@@ -1284,6 +1275,8 @@ export default (
               uploadMethod: 'upload-now'
             })
           });
+
+          this.persistLastUsedCustomerEmail(this.customerEmail);
         } catch (error) {
           if (error instanceof ServerError) {
             throw error;
@@ -1414,11 +1407,7 @@ export default (
       }
     }
   },
-  beforeMount () {
-    this.$bus.$once('budsies-store-synchronized', this.prefillEmail);
-  },
   beforeDestroy () {
-    this.$bus.$off('budsies-store-synchronized', this.prefillEmail);
     unMapMobileObserver();
   },
   created (): void {
@@ -1438,12 +1427,6 @@ export default (
 
     if (this.selectedBackDesign) {
       this.stepValidateState[customizerStepsData.backDesign.id] = 'valid';
-    }
-
-    this.prefillEmail();
-
-    if (this.isProductionOptionsAvailable) {
-      this.productionTime = this.productionTimeOptions[0].id;
     }
   },
   watch: {
@@ -1526,7 +1509,7 @@ export default (
       }
     },
     productionTime: {
-      handler (newValue: string | undefined) {
+      handler (newValue: ProductionTimeOption | undefined) {
         if (!this.productionTimeBundleOption) {
           Logger.error(
             'productionTimeBundleOption is not defined while attempt to set it was performed',
@@ -1535,18 +1518,11 @@ export default (
           return;
         }
 
-        let productionTime;
-        if (newValue) {
-          productionTime = this.productionTimeOptions.find(
-            (product) => product.id === this.productionTime
-          );
-        }
-
         this.setBundleOptionValue({
           optionId: this.productionTimeBundleOption.option_id,
           optionQty: 1,
-          optionSelections: productionTime?.optionValueId
-            ? [productionTime.optionValueId]
+          optionSelections: newValue?.optionValueId
+            ? [newValue.optionValueId]
             : []
         });
       },
@@ -1771,8 +1747,12 @@ export default (
     }
 
     ._production-time-field {
-      ::v-deep .sf-select__selected {
-        justify-content: center;
+      --select-padding: 0;
+      --production-time-selector-option-font-size: var(--font-base);
+      --heading-title-font-weight: var(--font-bold);
+
+      &::v-deep .sf-heading {
+        --heading-text-align: left;
       }
     }
 

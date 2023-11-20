@@ -124,7 +124,9 @@
         <div class="_final-options-content">
           <validation-provider
             v-slot="{ errors }"
-            name="Production time"
+            name="'Production time'"
+            :ref="getFieldAnchorName('Production time')"
+            rules="required"
             class="_section"
             tag="div"
             v-if="showProductionTimeOptions"
@@ -135,6 +137,7 @@
               :product-id="product.id"
               :disabled="disabled"
               @input="updateProductionTime"
+              :invalid="!!errors.length"
             />
 
             <div class="_error-text">
@@ -477,13 +480,6 @@ export default defineComponent({
     updateProductionTime (productionTimeOption: ProductionTimeOption) {
       this.productionTime = productionTimeOption.optionValueId
     }
-  },
-  mounted () {
-    if (!this.productionTimeOptions.length || this.productionTime) {
-      return;
-    }
-
-    this.productionTime = this.productionTimeOptions[0].optionValueId
   }
 });
 

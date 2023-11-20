@@ -65,8 +65,11 @@ import Vue, { VueConstructor } from 'vue';
 import DatePicker from 'vue2-datepicker';
 import { ValidationObserver, ValidationProvider, extend } from 'vee-validate';
 import { required, email } from 'vee-validate/dist/rules';
+import { defineComponent, ref } from '@vue/composition-api';
 
 import { SfButton, SfInput, SfHeading } from '@storefront-ui/vue';
+
+import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 
 import toIsoDateString from 'theme/helpers/to-iso-date-string.function';
 
@@ -80,7 +83,7 @@ extend('email', {
   message: 'Please, provide the correct email address'
 });
 
-export default Vue.extend({
+export default defineComponent({
   name: 'MRemindMeAboutBudsiesForm',
   props: {
     buttonText: {
@@ -108,9 +111,16 @@ export default Vue.extend({
     ValidationObserver,
     ValidationProvider
   },
+  setup () {
+    const email = ref<string | undefined>(undefined);
+
+    return {
+      email,
+      ...usePersistedEmail(email)
+    }
+  },
   data () {
     return {
-      email: undefined as string | undefined,
       date: undefined as Date | undefined,
       isSubmitting: false,
       isSubmitted: false,
@@ -146,6 +156,8 @@ export default Vue.extend({
       }
 
       this.isSubmitting = true;
+
+      this.persistLastUsedCustomerEmail(this.email);
 
       try {
         await this.$store.dispatch('budsies/createPlushieReminder', {

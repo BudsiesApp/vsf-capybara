@@ -214,6 +214,8 @@ import {
   KEY as AMAZON_PAY_MODULE_KEY,
   METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
 } from 'src/modules/vsf-amazon-pay/index';
+import { LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, LAST_USED_CUSTOMER_PHONE_NUMBER, LAST_USED_CUSTOMER_SHIPPING_COUNTRY, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_PHONE_NUMBER, SET_LAST_USED_CUSTOMER_SHIPPING_COUNTRY } from 'src/modules/persisted-customer-data';
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
@@ -349,16 +351,68 @@ export default {
         return;
       }
 
+      this.$store.commit(
+        SET_LAST_USED_CUSTOMER_FIRST_NAME,
+        this.shipping.firstName
+      );
+
+      this.$store.commit(
+        SET_LAST_USED_CUSTOMER_LAST_NAME,
+        this.shipping.lastName
+      );
+
+      this.$store.commit(
+        SET_LAST_USED_CUSTOMER_PHONE_NUMBER,
+        this.shipping.phoneNumber
+      );
+
+      this.$store.commit(
+        SET_LAST_USED_CUSTOMER_SHIPPING_COUNTRY,
+        this.shipping.country
+      );
+
       this.sendDataToCheckout();
       this.$store.dispatch('cart/syncTotals', { forceServerSync: true });
     },
     validateCountryRelatedFields () {
       this.$v.shipping.state.$touch();
       this.$v.shipping.phoneNumber.$touch();
+    },
+    fillLastUsedCustomerData () {
+      const customerFirstName = this.$store
+        .getters[LAST_USED_CUSTOMER_FIRST_NAME];
+      const customerLastName = this.$store
+        .getters[LAST_USED_CUSTOMER_LAST_NAME];
+      const customerPhoneNumber = this.$store
+        .getters[LAST_USED_CUSTOMER_PHONE_NUMBER];
+      const customerShippingCountry = this.$store
+        .getters[LAST_USED_CUSTOMER_SHIPPING_COUNTRY];
+
+      if (customerFirstName && !this.shipping.firstName) {
+        this.shipping.firstName = customerFirstName;
+      }
+
+      if (customerLastName && !this.shipping.lastName) {
+        this.shipping.lastName = customerLastName;
+      }
+
+      if (customerPhoneNumber && !this.shipping.phoneNumber) {
+        this.shipping.phoneNumber = customerPhoneNumber;
+      }
+
+      if (customerShippingCountry) {
+        this.shipping.country = customerShippingCountry;
+      }
     }
   },
   mounted () {
     createSmoothscroll(document.documentElement.scrollTop || document.body.scrollTop, 0);
+
+    this.fillLastUsedCustomerData();
+    EventBus.$on('user-after-loggedin', this.fillLastUsedCustomerData);
+  },
+  beforeDestroy () {
+    EventBus.$off('user-after-loggedin', this.fillLastUsedCustomerData);
   },
   watch: {
     getZipCode: {

@@ -4,19 +4,19 @@ import { Ref } from '@vue/composition-api';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { isVue } from 'src/modules/shared';
 
+export function getFieldAnchorName (field: string): string {
+  // Strip quotes
+  let fieldName = field.replace(/^['"]+|['"]+$/g, '');
+  // Strip spaces & convert to lower case
+  fieldName = fieldName.toLowerCase().replace(/ /g, '-');
+
+  return `${fieldName}-field-anchor`;
+}
+
 export function useFormValidation (
   validationObserver: Ref<InstanceType<typeof ValidationObserver> | null>,
   getFormFieldsRefs: () => Record<string, Vue | Element | Vue[] | Element[]>
 ) {
-  function getFieldAnchorName (field: string): string {
-    // Strip quotes
-    let fieldName = field.replace(/^['"]+|['"]+$/g, '');
-    // Strip spaces & convert to lower case
-    fieldName = fieldName.toLowerCase().replace(/ /g, '-');
-
-    return `${fieldName}-field-anchor`;
-  }
-
   function getNameOfFirstFieldWithError (
     errors: Record<string, string[]>
   ): string | undefined {

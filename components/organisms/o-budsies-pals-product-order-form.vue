@@ -273,6 +273,7 @@
 </template>
 
 <script lang="ts">
+import { Route } from 'vue-router';
 import { PropType, defineComponent, ref, Ref, inject } from '@vue/composition-api';
 import { extend, ValidationObserver, ValidationProvider } from 'vee-validate';
 import { required, email } from 'vee-validate/dist/rules';
@@ -281,14 +282,13 @@ import i18n from '@vue-storefront/core/i18n';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
-import * as catalogTypes from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 
 import {
-  vuexTypes as budsiesTypes,
   ImageUploadMethod,
   ProductValue,
   Hospital
 } from 'src/modules/budsies';
+import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 import Product from 'core/modules/catalog/types/Product';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage, ServerError } from 'src/modules/shared';
@@ -313,6 +313,7 @@ export default defineComponent({
   name: 'OBudsiesPalsProductOrderForm',
   setup (_, setupContext) {
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
+    const window = inject<Window>('WindowObject');
 
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
 
@@ -320,13 +321,21 @@ export default defineComponent({
       throw new Error('ImageHandlerService is not defined');
     }
 
+    if (!window) {
+      throw new Error('Window is not provided');
+    }
+    const email = ref<string | undefined>(undefined);
+
     return {
       imageHandlerService,
       validationObserver,
+      email,
+      window,
       ...useFormValidation(
         validationObserver,
         () => setupContext.refs
-      )
+      ),
+      ...usePersistedEmail(email)
     }
   },
   components: {
@@ -359,9 +368,7 @@ export default defineComponent({
   data () {
     return {
       customerImages: [] as CustomerImage[],
-      email: undefined as string | undefined,
       isSubmitting: false,
-      showEmailStep: true,
       description: '',
       initialCustomerImages: [] as CustomerImage[],
       plushieId: undefined as number | undefined,
@@ -412,6 +419,9 @@ export default defineComponent({
       return (this.existingCartItem
         ? this.$t('Update')
         : this.$t('Add to Cart')).toString();
+    },
+    showEmailStep (): boolean {
+      return !this.hasPrefilledEmail;
     }
   },
   methods: {
@@ -419,11 +429,6 @@ export default defineComponent({
       await this.$store.dispatch(
         'product/setBundleOptions',
         { product: this.product, bundleOptions: this.$store.state.product.current_bundle_options }
-      );
-
-      this.$store.commit(
-        budsiesTypes.SN_BUDSIES + '/' + budsiesTypes.CUSTOMER_EMAIL_SET,
-        { email: this.email }
       );
 
       try {
@@ -441,6 +446,8 @@ export default defineComponent({
               parentName: this.parentName
             })
           });
+
+          this.persistLastUsedCustomerEmail(this.email);
         } catch (error) {
           if (error instanceof ServerError) {
             throw error;
@@ -484,7 +491,13 @@ export default defineComponent({
         artworkUploadComponent.initFiles();
       });
     },
-    fillPlushieDataFromCartItem (existingCartItem: CartItem): void {
+    async fillPlushieDataFromCartItem (existingCartItem: CartItem): Promise<void> {
+      const isPlushieExist = await this.checkExistingPlushie();
+
+      if (!isPlushieExist) {
+        return this.onCartItemPlushieRemoved();
+      }
+
       this.description = existingCartItem.plushieDescription || '';
       this.plushieId = Number(existingCartItem.plushieId);
       this.selectedHospitalId = existingCartItem.hospitalId;
@@ -508,13 +521,6 @@ export default defineComponent({
         params: { parentSku: this.product.sku }
       }
       ));
-    },
-    prefillEmail (): void {
-      const customerEmail = this.$store.getters['budsies/getPrefilledCustomerEmail'];
-      if (customerEmail) {
-        this.email = customerEmail;
-        this.showEmailStep = false;
-      }
     },
     resetForm (): void {
       this.customerImages = [];
@@ -587,6 +593,12 @@ export default defineComponent({
     async updateExistingCartItem (existingCartItem: CartItem): Promise<void> {
       try {
         try {
+          const isPlushieExist = await this.checkExistingPlushie();
+
+          if (!isPlushieExist) {
+            return this.onCartItemPlushieRemoved();
+          }
+
           await this.updateClientAndServerItem({
             product: Object.assign({}, existingCartItem, {
               qty: 1,
@@ -615,29 +627,63 @@ export default defineComponent({
 
         this.onFailure('Unexpected error: ' + error);
       }
+    },
+    async checkExistingPlushie (): Promise<boolean> {
+      if (!this.existingPlushieId) {
+        return false;
+      }
+
+      const response = await this.$store.dispatch(
+        'budsies/fetchPlushieById',
+        { plushieId: this.existingPlushieId }
+      );
+
+      if (response.resultCode !== 200 || !response.result) {
+        return false;
+      }
+
+      return true;
+    },
+    async onCartItemPlushieRemoved (): Promise<void> {
+      await this.$store.dispatch('cart/pullServerCart');
+
+      this.resetForm();
+      this.window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      this.showRemovedCartItemNotification();
+      await this.clearExistingPlushieId();
+
+      this.plushieId = await this.createPlushie();
+    },
+    showRemovedCartItemNotification (): void {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'warning',
+        message: i18n.t('Looks like this cart item was removed'),
+        action1: { label: i18n.t('OK') }
+      });
+    },
+    clearExistingPlushieId (): Promise<Route> {
+      return this.$router.push({ query: { ...this.$route.query, existingPlushieId: undefined } });
     }
-  },
-  async beforeMount () {
-    this.$bus.$once('budsies-store-synchronized', this.prefillEmail);
   },
   async mounted () {
     if (this.existingCartItem) {
       this.fillPlushieDataFromCartItem(this.existingCartItem);
       return;
+    } else if (this.existingPlushieId) {
+      await this.clearExistingPlushieId();
     }
 
     this.plushieId = await this.createPlushie();
   },
   created (): void {
     this.resetForm();
-    this.prefillEmail();
-  },
-  beforeDestroy () {
-    this.$bus.$off('budsies-store-synchronized', this.prefillEmail);
   },
   watch: {
-    existingPlushieId () {
+    existingPlushieId (value) {
       if (!this.existingCartItem) {
+        if (value) {
+          this.clearExistingPlushieId();
+        }
         return;
       }
 

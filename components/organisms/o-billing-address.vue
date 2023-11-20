@@ -207,6 +207,8 @@ import {
 } from '@storefront-ui/vue';
 import { createSmoothscroll } from 'theme/helpers';
 import MMultiselect from 'theme/components/molecules/m-multiselect';
+import { LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, LAST_USED_CUSTOMER_PHONE_NUMBER, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_PHONE_NUMBER } from 'src/modules/persisted-customer-data';
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
 import {
   KEY as AMAZON_PAY_MODULE_KEY,
@@ -342,6 +344,12 @@ export default {
       document.documentElement.scrollTop || document.body.scrollTop,
       0
     );
+
+    this.fillLastUsedCustomerData();
+    EventBus.$on('user-after-loggedin', this.fillLastUsedCustomerData);
+  },
+  beforeDestroy () {
+    EventBus.$off('user-after-loggedin', this.fillLastUsedCustomerData);
   },
   methods: {
     async changeCountry () {
@@ -361,12 +369,47 @@ export default {
         return;
       }
 
+      this.$store.commit(
+        SET_LAST_USED_CUSTOMER_FIRST_NAME,
+        this.payment.firstName
+      );
+
+      this.$store.commit(
+        SET_LAST_USED_CUSTOMER_LAST_NAME,
+        this.payment.lastName
+      );
+
+      this.$store.commit(
+        SET_LAST_USED_CUSTOMER_PHONE_NUMBER,
+        this.payment.phoneNumber
+      );
+
       this.sendDataToCheckout();
       this.$store.dispatch('cart/syncPaymentMethods', { forceServerSync: true });
     },
     validateCountryRelatedFields () {
       this.$v.payment.state.$touch();
       this.$v.payment.phoneNumber.$touch();
+    },
+    fillLastUsedCustomerData () {
+      const customerFirstName = this.$store
+        .getters[LAST_USED_CUSTOMER_FIRST_NAME];
+      const customerLastName = this.$store
+        .getters[LAST_USED_CUSTOMER_LAST_NAME];
+      const customerPhoneNumber = this.$store
+        .getters[LAST_USED_CUSTOMER_PHONE_NUMBER];
+
+      if (customerFirstName && !this.payment.firstName) {
+        this.payment.firstName = customerFirstName;
+      }
+
+      if (customerLastName && !this.payment.lastName) {
+        this.payment.lastName = customerLastName;
+      }
+
+      if (customerPhoneNumber && !this.payment.phoneNumber) {
+        this.payment.phoneNumber = customerPhoneNumber;
+      }
     }
   },
   watch: {

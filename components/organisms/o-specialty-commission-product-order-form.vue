@@ -186,8 +186,13 @@
               </div>
             </validation-provider>
 
-            <div
+            <validation-provider
+              rules="required"
+              tag="div"
               class="_production-time-selector-section"
+              name="'Production time'"
+              :ref="getFieldAnchorName('Production time')"
+              v-slot="{ errors }"
               v-if="showProductionTimeOptions"
             >
               <MProductionTimeSelector
@@ -195,6 +200,7 @@
                 :production-time-options="productionTimeOptions"
                 :product-id="product.id"
                 :disabled="isSubmitting"
+                :invalid="!!errors.length"
               >
                 <template #subtitle>
                   <p>
@@ -206,7 +212,11 @@
               <span class="_production-time-hint">
                 {{ $t('*We will refund the rush fee in the unlikely event we do not meet a promised delivery date.') }}
               </span>
-            </div>
+
+              <div class="_error-text">
+                {{ errors[0] }}
+              </div>
+            </validation-provider>
           </div>
         </div>
 
@@ -339,6 +349,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import { Route } from 'vue-router';
 import { PropType, defineComponent, ref, Ref, inject } from '@vue/composition-api';
 import { extend, ValidationObserver, ValidationProvider } from 'vee-validate';
 import { required, email } from 'vee-validate/dist/rules';
@@ -353,13 +364,13 @@ import { setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catal
 import * as catalogTypes from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 
 import {
-  vuexTypes as budsiesTypes,
   Bodypart,
   BodypartValue,
   ImageUploadMethod,
   ProductValue,
   BodypartOption
 } from 'src/modules/budsies';
+import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 import { BundleOption } from 'core/modules/catalog/types/BundleOption';
 import Product from 'core/modules/catalog/types/Product';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
@@ -406,14 +417,18 @@ export default defineComponent({
       throw new Error('ImageHandlerService is not defined');
     }
 
+    const email = ref<string | undefined>(undefined);
+
     return {
       imageHandlerService,
       validationObserver,
       window,
+      email,
       ...useFormValidation(
         validationObserver,
         () => setupContext.refs
-      )
+      ),
+      ...usePersistedEmail(email)
     }
   },
   components: {
@@ -451,11 +466,9 @@ export default defineComponent({
       quantity: 1,
       customerImages: [] as CustomerImage[],
       bodypartsValues: {} as unknown as Record<string, BodypartOption | BodypartOption[] | undefined>,
-      email: undefined as string | undefined,
       isSubmitting: false,
       shouldMakeAnother: false,
       showQuantityNotes: false,
-      showEmailStep: true,
       selectedAddons: [] as SelectedAddon[],
       description: '',
       initialCustomerImages: [] as CustomerImage[],
@@ -535,6 +548,9 @@ export default defineComponent({
     },
     showProductionTimeOptions (): boolean {
       return this.productionTimeOptions.length > 0;
+    },
+    showEmailStep (): boolean {
+      return !this.hasPrefilledEmail;
     }
   },
   methods: {
@@ -545,11 +561,6 @@ export default defineComponent({
       await this.$store.dispatch(
         'product/setBundleOptions',
         { product: this.product, bundleOptions: this.$store.state.product.current_bundle_options }
-      );
-
-      this.$store.commit(
-        budsiesTypes.SN_BUDSIES + '/' + budsiesTypes.CUSTOMER_EMAIL_SET,
-        { email: this.email }
       );
 
       try {
@@ -566,6 +577,8 @@ export default defineComponent({
               upgradeOptionValues: this.getUpgradeOptionValues()
             })
           });
+
+          this.persistLastUsedCustomerEmail(this.email);
         } catch (error) {
           if (error instanceof ServerError) {
             throw error;
@@ -573,8 +586,6 @@ export default defineComponent({
 
           Logger.error(error, 'budsies')();
         }
-
-        this.showEmailStep = false;
 
         if (!shouldMakeAnother) {
           this.goToCrossSells();
@@ -666,7 +677,13 @@ export default defineComponent({
         artworkUploadComponent.initFiles();
       });
     },
-    fillPlushieDataFromCartItem (existingCartItem: CartItem): void {
+    async fillPlushieDataFromCartItem (existingCartItem: CartItem): Promise<void> {
+      const isPlushieExist = await this.checkExistingPlushie();
+
+      if (!isPlushieExist) {
+        return this.onCartItemPlushieRemoved();
+      }
+
       this.description = existingCartItem.plushieDescription || '';
       this.quantity = existingCartItem.qty || 1;
       this.plushieId = Number(existingCartItem.plushieId);
@@ -684,15 +701,15 @@ export default defineComponent({
         return;
       }
 
-      if (this.productionTimeOptions.length) {
-        this.productionTime = this.productionTimeOptions[0];
-      }
-
-      if (!productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id]) {
+      const selectedBundleOption = productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id];
+      if (!selectedBundleOption || selectedBundleOption.option_selections.length === 0) {
+        // when restoring cart item, lack of selected option mean that default production time was selected(since it became required)
+        // if default production time will have product, this assignment should be removed
+        this.productionTime = this.productionTimeOptions.find((value) => !value.optionValueId);
         return;
       }
 
-      const selectedOptionValueId = productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id].option_selections[0];
+      const selectedOptionValueId = selectedBundleOption.option_selections[0];
       this.productionTime = this.productionTimeOptions.find((item) => item.optionValueId === selectedOptionValueId);
     },
     getArtworkUploadComponent (): InstanceType<typeof MArtworkUpload> | undefined {
@@ -777,13 +794,6 @@ export default defineComponent({
       }
       ));
     },
-    prefillEmail (): void {
-      const customerEmail = this.$store.getters['budsies/getPrefilledCustomerEmail'];
-      if (customerEmail) {
-        this.email = customerEmail;
-        this.showEmailStep = false;
-      }
-    },
     resetForm (): void {
       this.quantity = this.product.qty || 1;
       this.customerImages = [];
@@ -799,9 +809,6 @@ export default defineComponent({
       }
 
       this.productionTime = undefined;
-      if (this.productionTimeOptions.length) {
-        this.productionTime = this.productionTimeOptions[0];
-      }
 
       this.validationObserver?.reset();
     },
@@ -884,6 +891,12 @@ export default defineComponent({
 
       try {
         try {
+          const isPlushieExist = await this.checkExistingPlushie();
+
+          if (!isPlushieExist) {
+            return this.onCartItemPlushieRemoved();
+          }
+
           await this.updateClientAndServerItem({
             product: Object.assign({}, existingCartItem, {
               qty: this.quantity,
@@ -923,29 +936,63 @@ export default defineComponent({
 
         this.onFailure('Unexpected error: ' + error);
       }
+    },
+    async checkExistingPlushie (): Promise<boolean> {
+      if (!this.existingPlushieId) {
+        return false;
+      }
+
+      const response = await this.$store.dispatch(
+        'budsies/fetchPlushieById',
+        { plushieId: this.existingPlushieId }
+      );
+
+      if (response.resultCode !== 200 || !response.result) {
+        return false;
+      }
+
+      return true;
+    },
+    async onCartItemPlushieRemoved (): Promise<void> {
+      await this.$store.dispatch('cart/pullServerCart');
+
+      this.resetForm();
+      this.window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      this.showRemovedCartItemNotification();
+      await this.clearExistingPlushieId();
+
+      this.plushieId = await this.createPlushie();
+    },
+    showRemovedCartItemNotification (): void {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'warning',
+        message: i18n.t('Looks like this cart item was removed'),
+        action1: { label: i18n.t('OK') }
+      });
+    },
+    clearExistingPlushieId (): Promise<Route> {
+      return this.$router.push({ query: { ...this.$route.query, existingPlushieId: undefined } });
     }
-  },
-  async beforeMount () {
-    this.$bus.$once('budsies-store-synchronized', this.prefillEmail);
   },
   async mounted () {
     if (this.existingCartItem) {
       this.fillPlushieDataFromCartItem(this.existingCartItem);
       return;
+    } else if (this.existingPlushieId) {
+      await this.clearExistingPlushieId();
     }
 
     this.plushieId = await this.createPlushie();
   },
   created (): void {
     this.resetForm();
-    this.prefillEmail();
-  },
-  beforeDestroy () {
-    this.$bus.$off('budsies-store-synchronized', this.prefillEmail);
   },
   watch: {
-    existingPlushieId () {
+    existingPlushieId (value) {
       if (!this.existingCartItem) {
+        if (value) {
+          this.clearExistingPlushieId();
+        }
         return;
       }
 
@@ -953,8 +1000,8 @@ export default defineComponent({
     },
     async 'product.sku' () {
       if (!this.existingCartItem || this.existingCartItem.sku !== this.product.sku) {
-        if (this.existingCartItem) {
-          await this.$router.replace({ query: undefined });
+        if (this.existingCartItem || this.existingPlushieId) {
+          await this.clearExistingPlushieId();
         }
 
         this.resetForm();

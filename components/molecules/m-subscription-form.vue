@@ -48,10 +48,13 @@
 <script lang="ts">
 import { extend, ValidationProvider, ValidationObserver } from 'vee-validate';
 import { email, required } from 'vee-validate/dist/rules';
-import Vue, { PropType } from 'vue';
+import { PropType, defineComponent, ref } from '@vue/composition-api';
 
 import { SfInput } from '@storefront-ui/vue';
 import Task from '@vue-storefront/core/lib/sync/types/Task';
+import i18n from '@vue-storefront/i18n';
+
+import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 
 import MSpinnerButton from 'theme/components/molecules/m-spinner-button.vue';
 
@@ -62,7 +65,7 @@ extend('required', {
 
 extend('email', email);
 
-export default Vue.extend({
+export default defineComponent({
   name: 'MSubscriptionForm',
   components: {
     SfInput,
@@ -77,14 +80,14 @@ export default Vue.extend({
     },
     buttonText: {
       type: String,
-      default: function (): string {
-        return this.$t('Join').toString()
+      default: () => {
+        return i18n.t('Join').toString()
       }
     },
     successMessage: {
       type: String,
-      default: function (): string {
-        return this.$t('Thank you for your subscription!').toString();
+      default: () => {
+        return i18n.t('Thank you for your subscription!').toString();
       }
     },
     subscribeAction: {
@@ -92,9 +95,16 @@ export default Vue.extend({
       required: true
     }
   },
+  setup () {
+    const email = ref<string | undefined>(undefined);
+
+    return {
+      email,
+      ...usePersistedEmail(email)
+    }
+  },
   data () {
     return {
-      email: '',
       isSuccessSubscribed: false,
       isSubmitting: false
     };
@@ -109,11 +119,13 @@ export default Vue.extend({
   },
   methods: {
     async onSubmitForm (): Promise<void> {
-      if (this.isSubmitting) {
+      if (this.isSubmitting || !this.email) {
         return;
       }
 
       this.isSubmitting = true;
+
+      this.persistLastUsedCustomerEmail(this.email);
 
       try {
         const response = await this.subscribeAction(this.email);
