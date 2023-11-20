@@ -32,13 +32,13 @@
         <MSpinnerButton :show-spinner="isSubmitting">
           {{ buttonText }}
         </MSpinnerButton>
-
-        <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden>California Privacy Notice</a>
-
-        <a class="truevault-polaris-privacy-notice" :href="$privacyPolicy.financialIncentiveNoticeUrl" noreferrer noopener hidden>Notice of Financial Incentive</a>
       </form>
 
-      <div class="_success-message" v-else>
+      <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden>California Privacy Notice</a>
+
+      <a class="truevault-polaris-privacy-notice" :href="$privacyPolicy.financialIncentiveNoticeUrl" noreferrer noopener hidden>Notice of Financial Incentive</a>
+
+      <div class="_success-message" v-if="!displayForm">
         {{ successMessage }}
       </div>
     </validation-observer>
@@ -203,10 +203,13 @@ export default defineComponent({
   }
 
   .truevault-polaris-privacy-notice:not([hidden]) {
-    margin-top: var(--spacer-sm);
+    margin-top: var(--spacer-xs);
+    margin-left: var(--spacer-sm);
     display: inline-block;
-    width: 100%;
-    text-align: center;
+
+    &:first-of-type {
+      margin-left: 0;
+    }
   }
 }
 </style>
