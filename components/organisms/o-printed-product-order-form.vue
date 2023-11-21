@@ -269,7 +269,7 @@
               </div>
             </div>
 
-            <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden>California Privacy Notice</a>
+            <california-privacy-notice-link />
           </form>
         </validation-observer>
       </div>
@@ -1416,11 +1416,6 @@ export default defineComponent({
             color: var(--c-danger-variant);
         }
     }
-
-  .truevault-polaris-privacy-notice:not([hidden]) {
-    margin-top: var(--spacer-sm);
-    display: inline-block;
-  }
 
   @media (min-width: $tablet-min) {
     ._info {

@@ -210,7 +210,7 @@
         {{ $t('Add to Cart') }}
       </SfButton>
 
-      <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden>California Privacy Notice</a>
+      <california-privacy-notice-link />
     </div>
   </validation-observer>
 </template>
@@ -556,11 +556,6 @@ $send-friend-block-max-height: 500px;
 
   label {
     font-weight: bold;
-  }
-
-  .truevault-polaris-privacy-notice:not([hidden]) {
-    margin-top: var(--spacer-sm);
-    display: inline-block;
   }
 
   ._form-field {

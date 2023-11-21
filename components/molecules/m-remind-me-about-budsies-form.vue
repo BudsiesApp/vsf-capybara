@@ -51,7 +51,7 @@
         </SfButton>
       </div>
 
-      <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden>California Privacy Notice</a>
+      <california-privacy-notice-link />
     </validation-observer>
 
     <div class="_success-message" v-else>
@@ -196,11 +196,6 @@ export default defineComponent({
     text-align: center;
     color: var(--c-primary);
     margin-top: var(--spacer-sm);
-  }
-
-  .truevault-polaris-privacy-notice:not([hidden]) {
-    margin-top: var(--spacer-sm);
-    display: inline-block;
   }
 }
 </style>

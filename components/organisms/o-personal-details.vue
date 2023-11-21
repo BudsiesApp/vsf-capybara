@@ -84,12 +84,7 @@
                     {{ $t('and') }}
                   </span>
 
-                  <a
-                    target="_blank"
-                    :href="$privacyPolicy.url"
-                  >
-                    {{ $t('Privacy Policy') }}
-                  </a>
+                  <privacy-policy-link />
                 </span>
               </template>
             </SfCheckbox>
@@ -123,7 +118,7 @@
         </SfButton>
       </div>
 
-      <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden>California Privacy Notice</a>
+      <california-privacy-notice-link />
     </div>
   </div>
 </template>
@@ -255,11 +250,11 @@ export default {
     flex: 0 0 100%;
   }
 
-  .truevault-polaris-privacy-notice:not([hidden]) {
-    margin-top: var(--spacer-sm);
-    display: inline-block;
+  .california-privacy-notice-link {
     width: 100%;
-    text-align: start;
+
+    --privacy-notice-link-text-align: start;
+    --privacy-notice-link-margin: 0;
   }
 }
 

@@ -44,7 +44,7 @@
       {{ `${$t('or')} ${$t('login in to your account')}` }}
     </SfButton>
 
-    <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden>California Privacy Notice</a>
+    <california-privacy-notice-link />
   </div>
 </template>
 
@@ -174,6 +174,10 @@ export default {
   &__submit {
     margin: var(--spacer-xl) 0 0 0;
   }
+}
+.california-privacy-notice-link {
+  --privacy-notice-link-display: inline;
+  --privacy-notice-link-margin: 0;
 }
 .action-button {
   margin: var(--spacer-xl) 0;

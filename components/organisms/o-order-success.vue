@@ -119,7 +119,7 @@
               {{ $t('Rewards dollars may be applied onto existing orders within 7 days of checkout.') }}
             </p>
 
-            <a class="truevault-polaris-privacy-notice" :href="$privacyPolicy.financialIncentiveNoticeUrl" noreferrer noopener hidden>Notice of Financial Incentive</a>
+            <notice-of-financial-incentive-link />
           </div>
         </div>
       </div>
@@ -309,9 +309,9 @@ $number-margin-right-desktop: var(--spacer-sm);
     margin-top: var(--spacer-base);
   }
 
-  .truevault-polaris-privacy-notice:not([hidden]) {
-    margin-top: var(--spacer-sm);
-    display: inline-block;
+  .notice-of-financial-incentive-link {
+    --financial-incentive-link-margin: var(--spacer-sm) 0 0;
+    --financial-incentive-link-display: inline-block;
   }
 
   @include for-desktop {

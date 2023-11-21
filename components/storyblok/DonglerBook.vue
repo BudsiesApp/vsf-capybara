@@ -50,7 +50,7 @@
         {{ $t('We\'ll send you a digital copy of the coloring book via email for you to download when ready!') }}
       </div>
 
-      <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden>California Privacy Notice</a>
+      <california-privacy-notice-link />
     </form>
 
     <div class="_success-message" v-show="isSubmitted">
@@ -194,10 +194,8 @@ export default Blok.extend({
     }
   }
 
-  .truevault-polaris-privacy-notice:not([hidden]) {
-    margin-top: var(--spacer-sm);
-    display: inline-block;
-    width: 100%;
+  .california-privacy-notice-link {
+    --privacy-notice-link-width: 100%;
   }
 
   @include for-desktop {

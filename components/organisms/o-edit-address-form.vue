@@ -19,7 +19,7 @@
         </SfButton>
       </div>
 
-      <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden>California Privacy Notice</a>
+      <california-privacy-notice-link />
     </validation-observer>
   </div>
 </template>
@@ -121,11 +121,9 @@ export default Vue.extend({
     justify-content: space-between;
   }
 
-  .truevault-polaris-privacy-notice:not([hidden]) {
-    margin-top: var(--spacer-sm);
-    display: inline-block;
-    width: 100%;
-    text-align: end;
+  .california-privacy-notice-link {
+    --privacy-notice-link-width: 100%;
+    --privacy-notice-link-text-align: end;
   }
 }
 </style>

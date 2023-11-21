@@ -185,7 +185,7 @@
       </div>
     </div>
 
-    <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden>California Privacy Notice</a>
+    <california-privacy-notice-link />
     <!-- This dummy container below is needed because src\modules\payment-cash-on-delivery\index.ts
          tries to inject here a component with payment description -->
     <div v-show="false" id="checkout-order-review-additional-container" />
@@ -494,5 +494,9 @@ export default {
       display: flex;
     }
   }
+}
+
+.california-privacy-notice-link {
+  --privacy-notice-link-display: inline;
 }
 </style>

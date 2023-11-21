@@ -88,28 +88,12 @@
 
       <p class="_copyright">
         © 2023 {{ $t('Budsies PR LLC. All Rights Reserved') }}. |
-        <a :href="$privacyPolicy.url" target="_blank">
-          {{ $t('Privacy Policy') }}
-        </a>
+        <privacy-policy-link />
 
-        <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden> | California Privacy Notice</a>
+        <california-privacy-notice-link text="| California Privacy Notice" />
       </p>
 
-      <a
-        v-show="isMounted"
-        :class="privacyChoicesClass"
-        :href="$privacyPolicy.optOutUrl"
-        target="_blank"
-        noreferrer
-        noopener
-        hidden
-      >
-        <img src="https://polaris.truevaultcdn.com/static/assets/icons/optout-icon-blue.svg"
-             alt="California Consumer Privacy Act (CCPA) Opt-Out Icon"
-             style="vertical-align:middle" height="14px"
-        >
-        Your Privacy Choices
-      </a>
+      <opt-out-link />
     </div>
   </footer>
 </template>
@@ -163,8 +147,7 @@ export default {
           name: 'tiktok',
           url: 'https://www.tiktok.com/@budsies'
         }
-      ],
-      isMounted: false
+      ]
     };
   },
   computed: {
@@ -284,20 +267,7 @@ export default {
           link: '/newsletter/'
         }
       ];
-    },
-    privacyChoicesClass () {
-      const classes = ['_copyright'];
-
-      if (this.isMounted) {
-        classes.push('truevault-polaris-optout');
-      }
-
-      return classes;
     }
-  },
-  async mounted () {
-    await this.$nextTick();
-    this.isMounted = true;
   },
   methods: {
     ...mapActions('ui', {
@@ -439,7 +409,16 @@ export default {
   }
 
   ._copyright,
-  .truevault-polaris-privacy-notice:not([hidden]) {
+  .opt-out-link,
+  .california-privacy-notice-link {
+    --privacy-notice-link-font-size: var(--font-2xs);
+    --privacy-notice-link-color: var(--c-footer-gray);
+    --privacy-notice-link-margin: 0;
+    --privacy-notice-display: inline;
+
+    --opt-out-link-font-size: var(--font-2xs);
+    --opt-out-link-color: var(--c-footer-gray);
+
     color: var(--c-footer-gray);
     font-size: var(--font-2xs);
 

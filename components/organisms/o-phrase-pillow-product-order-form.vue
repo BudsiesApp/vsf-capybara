@@ -494,7 +494,7 @@
                       I have seen and approve the Live Preview of my design.
                     </div>
 
-                    <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden>California Privacy Notice</a>
+                    <california-privacy-notice-link />
                   </div>
                 </template>
 
@@ -2010,6 +2010,10 @@ export default defineComponent({
 
   ._form-errors {
     margin-top: var(--spacer-sm);
+  }
+
+  .california-privacy-notice-link {
+    --privacy-notice-link-display: inline;
   }
 
   @include for-desktop {

@@ -221,7 +221,7 @@
           story-slug="order_submit_agreement_petsies"
         />
 
-        <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden>California Privacy Notice</a>
+        <california-privacy-notice-link />
       </div>
     </div>
 

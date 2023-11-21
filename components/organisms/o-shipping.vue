@@ -193,7 +193,7 @@
         </SfButton>
       </div>
 
-      <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden>California Privacy Notice</a>
+      <california-privacy-notice-link />
     </div>
   </div>
 </template>
@@ -545,5 +545,9 @@ export default {
       max-width: 240px;
     }
   }
+}
+
+.california-privacy-notice-link {
+  --privacy-notice-link-display: inline;
 }
 </style>

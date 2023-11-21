@@ -34,9 +34,9 @@
         </MSpinnerButton>
       </form>
 
-      <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden>California Privacy Notice</a>
+      <california-privacy-notice-link />
 
-      <a class="truevault-polaris-privacy-notice" :href="$privacyPolicy.financialIncentiveNoticeUrl" noreferrer noopener hidden>Notice of Financial Incentive</a>
+      <notice-of-financial-incentive-link />
 
       <div class="_success-message" v-if="!displayForm">
         {{ successMessage }}
@@ -202,14 +202,8 @@ export default defineComponent({
     margin-bottom: calc(var(--font-xs) * 1.2);
   }
 
-  .truevault-polaris-privacy-notice:not([hidden]) {
-    margin-top: var(--spacer-xs);
-    margin-left: var(--spacer-sm);
-    display: inline-block;
-
-    &:first-of-type {
-      margin-left: 0;
-    }
+  .california-privacy-notice-link {
+    --privacy-notice-link-margin: var(--spacer-xs) var(--spacer-sm) 0 0;
   }
 }
 </style>

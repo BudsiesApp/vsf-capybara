@@ -230,7 +230,7 @@
       </SfButton>
     </div>
 
-    <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden>California Privacy Notice</a>
+    <california-privacy-notice-link />
   </div>
 </template>
 <script>
@@ -680,12 +680,8 @@ a {
     }
   }
 }
-.truevault-polaris-privacy-notice:not([hidden]) {
-  color: var(--c-link);
-
-  &:hover {
-    color: var(--c-link);
-  }
+.california-privacy-notice-link {
+  --privacy-notice-link-display: inline;
 }
 
 @include for-desktop {

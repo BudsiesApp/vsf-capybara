@@ -8,7 +8,7 @@
       {{ $t('Notify Customer Support') }}
     </SfButton>
 
-    <a class="truevault-polaris-privacy-notice" target="_blank" :href="$privacyPolicy.californiaPrivacyNoticeUrl" noreferrer noopener hidden>California Privacy Notice</a>
+    <california-privacy-notice-link />
   </form>
 </template>
 
@@ -73,11 +73,9 @@ export default Vue.extend({
     margin: auto;
   }
 
-  .truevault-polaris-privacy-notice:not([hidden]) {
-    margin-top: var(--spacer-sm);
-    display: inline-block;
-    width: 100%;
-    text-align: center;
+  .california-privacy-notice-link {
+    --privacy-notice-link-width: 100%;
+    --privacy-notice-link-text-align: center;
   }
 }
 </style>
