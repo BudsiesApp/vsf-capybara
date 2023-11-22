@@ -262,6 +262,7 @@ import { ProductId } from 'src/modules/budsies';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
 import { AFFIRM_BEFORE_PLACE_ORDER, AFFIRM_MODAL_CLOSED, AFFIRM_CHECKOUT_ERROR } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';
 import { getCartItemPrice } from 'src/modules/shared';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import OCartItemsTable from 'theme/components/organisms/o-cart-items-table';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
@@ -271,6 +272,7 @@ export default {
   name: 'OConfirmOrder',
   components: {
     APromoCode,
+    CaliforniaPrivacyNoticeLink,
     MPriceSummary,
     OCartItemsTable,
     OGiftCardPayment,

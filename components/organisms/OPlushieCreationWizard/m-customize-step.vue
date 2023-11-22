@@ -248,6 +248,7 @@ import Product from 'core/modules/catalog/types/Product';
 import { BundleOption } from 'core/modules/catalog/types/BundleOption';
 
 import { Bodypart, BodypartOption } from 'src/modules/budsies';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import MAddonsSelector from '../../molecules/m-addons-selector.vue';
 import ACustomProductQuantity from '../../atoms/a-custom-product-quantity.vue';
@@ -300,6 +301,7 @@ export default defineComponent({
   },
   components: {
     ACustomProductQuantity,
+    CaliforniaPrivacyNoticeLink,
     SfHeading,
     SfButton,
     SfModal,

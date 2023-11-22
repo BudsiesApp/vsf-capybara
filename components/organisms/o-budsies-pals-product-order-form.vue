@@ -287,6 +287,7 @@ import {
   Hospital
 } from 'src/modules/budsies';
 import { usePersistedEmail } from 'src/modules/persisted-customer-data';
+import { CaliforniaPrivacyNoticeLink, PrivacyPolicyLink } from 'src/modules/true-vault';
 import Product from 'core/modules/catalog/types/Product';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage, ServerError } from 'src/modules/shared';
@@ -337,6 +338,8 @@ export default defineComponent({
     }
   },
   components: {
+    CaliforniaPrivacyNoticeLink,
+    PrivacyPolicyLink,
     SfInput,
     SfSelect,
     ValidationObserver,

@@ -76,12 +76,14 @@ import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
 import { DonglerBookService } from 'src/modules/dongler-book';
 import { LAST_USED_CUSTOMER_EMAIL, SET_LAST_USED_CUSTOMER_EMAIL } from 'src/modules/persisted-customer-data';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import DonglerBookData from './interfaces/dongler-book-data.interface';
 
 export default Blok.extend({
   name: 'StoryblokDonglerBook',
   components: {
+    CaliforniaPrivacyNoticeLink,
     SfHeading,
     SfInput,
     SfButton

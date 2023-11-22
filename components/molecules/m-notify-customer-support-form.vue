@@ -16,9 +16,12 @@
 import Vue, { PropType } from 'vue'
 import { SfInput, SfButton } from '@storefront-ui/vue';
 
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
+
 export default Vue.extend({
   name: 'MNotifyCustomerSupportForm',
   components: {
+    CaliforniaPrivacyNoticeLink,
     SfInput,
     SfButton
   },

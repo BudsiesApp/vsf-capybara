@@ -122,6 +122,8 @@ import { mapState } from 'vuex';
 import { SfButton, SfInput, SfSelect } from '@storefront-ui/vue';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
+
 extend('required', {
   ...required,
   message: 'The {_field_} field is required'
@@ -181,6 +183,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveData>).extend({
     }
   },
   components: {
+    CaliforniaPrivacyNoticeLink,
     SfButton,
     SfInput,
     SfSelect,

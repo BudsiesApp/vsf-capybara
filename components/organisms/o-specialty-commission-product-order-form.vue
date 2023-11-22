@@ -369,6 +369,7 @@ import {
   BodypartOption
 } from 'src/modules/budsies';
 import { usePersistedEmail } from 'src/modules/persisted-customer-data';
+import { CaliforniaPrivacyNoticeLink, PrivacyPolicyLink } from 'src/modules/true-vault';
 import { BundleOption } from 'core/modules/catalog/types/BundleOption';
 import Product from 'core/modules/catalog/types/Product';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
@@ -430,6 +431,8 @@ export default defineComponent({
     }
   },
   components: {
+    CaliforniaPrivacyNoticeLink,
+    PrivacyPolicyLink,
     SfInput,
     MBodypartOptionConfigurator,
     ValidationObserver,

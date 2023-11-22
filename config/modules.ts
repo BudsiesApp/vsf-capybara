@@ -30,7 +30,6 @@ import { RaffleModule } from 'src/modules/raffle'
 import { InspirationMachineModule } from 'src/modules/inspiration-machine'
 import { MailchimpModule } from 'src/modules/mailchimp'
 import { PersistedCustomerDataModule } from 'src/modules/persisted-customer-data'
-import { TrueVaultModule } from 'src/modules/true-vault'
 
 import registerStoryblokComponents from 'theme/components/storyblok'
 
@@ -85,7 +84,6 @@ export function registerClientModules () {
   registerModule(InspirationMachineModule)
   registerModule(MailchimpModule)
   registerModule(PersistedCustomerDataModule)
-  registerModule(TrueVaultModule)
 }
 
 // Deprecated API, will be removed in 2.0

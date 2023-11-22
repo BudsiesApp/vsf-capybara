@@ -353,7 +353,6 @@ import Product from 'core/modules/catalog/types/Product';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage, getProductDefaultPrice } from 'src/modules/shared';
 import {
-  vuexTypes as budsiesTypes,
   Bodypart,
   ImageUploadMethod,
   BodyPartValueContentType,
@@ -361,6 +360,7 @@ import {
   BodypartOption
 } from 'src/modules/budsies';
 import ServerError from 'src/modules/shared/types/server-error';
+import { CaliforniaPrivacyNoticeLink, PrivacyPolicyLink } from 'src/modules/true-vault';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import { getSelectedBundleOptions } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions';
 import { setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
@@ -420,6 +420,8 @@ export default defineComponent({
     }
   },
   components: {
+    CaliforniaPrivacyNoticeLink,
+    PrivacyPolicyLink,
     MBodypartOptionConfigurator,
     ValidationObserver,
     ValidationProvider,

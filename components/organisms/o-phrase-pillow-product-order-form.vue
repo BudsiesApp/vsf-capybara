@@ -564,6 +564,7 @@ import {
   ProductValue,
   Dictionary
 } from 'src/modules/budsies';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import {
   FileProcessingRepositoryFactory,
@@ -665,6 +666,7 @@ export interface DesignSelectedEventPayload {
 export default defineComponent({
   name: 'OPhrasePillowProductOrderForm',
   components: {
+    CaliforniaPrivacyNoticeLink,
     SfButton,
     SfInput,
     SfHeading,

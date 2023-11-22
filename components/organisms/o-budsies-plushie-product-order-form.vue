@@ -405,6 +405,7 @@ import { useFormValidation } from 'theme/helpers/use-form-validation';
 import getProductionTimeOptions from 'theme/helpers/get-production-time-options';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 import { usePersistedEmail } from 'src/modules/persisted-customer-data';
+import { CaliforniaPrivacyNoticeLink, PrivacyPolicyLink } from 'src/modules/true-vault';
 
 import AddonOption from '../interfaces/addon-option.interface';
 import SelectedAddon from '../interfaces/selected-addon.interface';
@@ -459,6 +460,8 @@ export default defineComponent({
     }
   },
   components: {
+    CaliforniaPrivacyNoticeLink,
+    PrivacyPolicyLink,
     SfInput,
     MBodypartOptionConfigurator,
     ValidationObserver,

@@ -214,6 +214,7 @@ import {
   KEY as AMAZON_PAY_MODULE_KEY,
   METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
 } from 'src/modules/vsf-amazon-pay/index';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
@@ -222,6 +223,7 @@ const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3}
 export default {
   name: 'OBillingAddress',
   components: {
+    CaliforniaPrivacyNoticeLink,
     SfInput,
     SfButton,
     SfHeading,

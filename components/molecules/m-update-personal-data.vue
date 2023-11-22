@@ -55,9 +55,13 @@ import { SfInput, SfButton } from '@storefront-ui/vue';
 import { required, minLength, email } from 'vuelidate/lib/validators';
 import { unicodeAlpha } from '@vue-storefront/core/helpers/validators';
 
+import { CaliforniaPrivacyNoticeLink, PrivacyPolicyLink } from 'src/modules/true-vault';
+
 export default {
   name: 'MUpdatePersonalData',
   components: {
+    CaliforniaPrivacyNoticeLink,
+    PrivacyPolicyLink,
     SfInput,
     SfButton
   },
