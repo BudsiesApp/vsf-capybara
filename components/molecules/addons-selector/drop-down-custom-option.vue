@@ -80,7 +80,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .addons-selector-drop-down-custom-option {
   ._field {
     --select-border-color: var(--c-white);
