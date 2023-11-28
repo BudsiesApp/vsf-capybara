@@ -1,7 +1,6 @@
 <template>
   <div
     class="addons-selector-drop-down-custom-option"
-    @click.prevent
   >
     <SfSelect
       class="_field sf-select--underlined"

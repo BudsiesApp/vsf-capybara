@@ -76,6 +76,7 @@
                       :addon-option-value-id="addon.optionValueId"
                       :errors="errors"
                       @input="onCustomOptionInput"
+                      @click.native.prevent
                     />
                   </validation-provider>
                 </div>
