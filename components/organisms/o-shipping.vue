@@ -129,7 +129,7 @@
 
       <SfInput
         v-model.trim="shipping.phoneNumber"
-        :required="isPhoneNumberRequired"
+        :required="true"
         :valid="!$v.shipping.phoneNumber.$error"
         :error-message="
           !$v.shipping.phoneNumber || !$v.shipping.phoneNumber.required
@@ -261,7 +261,7 @@ export default {
         unicodeAlpha
       },
       phoneNumber: {
-        required: requiredIf(function () { return this.isPhoneNumberRequired }),
+        required,
         phoneValidator
       }
     }
@@ -275,9 +275,6 @@ export default {
   computed: {
     isAddressFormDisabled () {
       return this.shipToMyAddress;
-    },
-    isPhoneNumberRequired () {
-      return this.shipping.country && this.shipping.country !== 'US';
     },
     isSelectedCountryHasStates () {
       if (!this.shipping.country || !this.states) {
