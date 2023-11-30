@@ -21,7 +21,7 @@
         :label="$t('First name')"
         :valid="!$v.firstName.$error"
         :error-message="
-          !$v.email.required
+          !$v.firstName.required
             ? $t('Field is required.')
             : $t('Field is not valid')
         "
@@ -34,7 +34,7 @@
         :label="$t('Last name')"
         :valid="!$v.lastName.$error"
         :error-message="
-          !$v.email.required
+          !$v.lastName.required
             ? $t('Field is required.')
             : $t('Field is not valid')
         "
