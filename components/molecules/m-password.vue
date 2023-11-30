@@ -72,6 +72,10 @@ export default Vue.extend({
         repeatPassword: string
       }>,
       required: true
+    },
+    scrollToErrorOnValidation: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
@@ -108,7 +112,23 @@ export default Vue.extend({
         repeatPasswordValidator.validate()
       ]);
 
-      return passwordValidationResult.valid && repeatPasswordValidationResult.valid;
+      const result = passwordValidationResult.valid && repeatPasswordValidationResult.valid;
+
+      if (!this.scrollToErrorOnValidation) {
+        return result;
+      }
+
+      const scrollOptions: ScrollIntoViewOptions = { behavior: 'smooth', block: 'center' };
+
+      if (!repeatPasswordValidationResult.valid) {
+        repeatPasswordValidator.$el.scrollIntoView(scrollOptions);
+      }
+
+      if (!passwordValidationResult.valid) {
+        passwordValidator.$el.scrollIntoView(scrollOptions)
+      }
+
+      return result;
     }
   }
 });

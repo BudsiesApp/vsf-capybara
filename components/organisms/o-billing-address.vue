@@ -30,6 +30,7 @@
         <SfInput
           v-model.trim="payment.firstName"
           class="form__element form__element--half"
+          :class="{'vuelidate--invalid': $v.payment.firstName.$error}"
           name="first-name"
           autocomplete="given-name"
           :label="$t('First name')"
@@ -46,6 +47,7 @@
         <SfInput
           v-model.trim="payment.lastName"
           class="form__element form__element--half"
+          :class="{'vuelidate--invalid': $v.payment.lastName.$error}"
           name="last-name"
           autocomplete="family-name"
           :label="$t('Last name')"
@@ -58,6 +60,7 @@
         <SfInput
           v-model.trim="payment.streetAddress"
           class="form__element"
+          :class="{'vuelidate--invalid': $v.payment.streetAddress.$error}"
           name="street-address"
           autocomplete="street-address"
           :label="$t('Address')"
@@ -75,6 +78,7 @@
           form__element--half
           form__select
         "
+          :class="{'vuelidate--invalid': $v.payment.country.$error}"
           name="country-name"
           autocomplete="country-name"
           :label="$t('Country')"
@@ -108,6 +112,7 @@
           form__element--half
           form__select
         "
+          :class="{'vuelidate--invalid': $v.payment.state.$error}"
           :label="$t('State / Province')"
           :required="true"
           id-field="code"
@@ -121,6 +126,7 @@
         <SfInput
           v-model.trim="payment.city"
           class="form__element form__element--half"
+          :class="{'vuelidate--invalid': $v.payment.city.$error}"
           name="city"
           autocomplete="address-level2"
           :label="$t('City')"
@@ -133,6 +139,7 @@
         <SfInput
           v-model.trim="payment.zipCode"
           class="form__element form__element--half"
+          :class="{'vuelidate--invalid': $v.payment.zipCode.$error}"
           name="zipCode"
           autocomplete="postal-code"
           :label="$t('Zip-code')"
@@ -156,6 +163,7 @@
               : $t('Please, enter valid phone number')
           "
           class="form__element"
+          :class="{'vuelidate--invalid': $v.payment.phoneNumber.$error}"
           name="phone"
           autocomplete="tel"
           :label="$t('Phone number')"
@@ -212,6 +220,7 @@ import {
   KEY as AMAZON_PAY_MODULE_KEY,
   METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
 } from 'src/modules/vsf-amazon-pay/index';
+import { vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
@@ -360,10 +369,12 @@ export default {
         this.$store.dispatch('cart/syncPaymentMethods', { forceServerSync: true })
       ]);
     },
-    onGoReviewButtonClicked () {
+    async onGoReviewButtonClicked () {
       this.$v.$touch();
 
       if (this.$v.$invalid) {
+        await this.$nextTick();
+        vuelidateScrollToFirstError();
         return;
       }
 

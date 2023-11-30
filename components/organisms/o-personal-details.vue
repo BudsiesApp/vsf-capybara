@@ -18,6 +18,7 @@
       <SfInput
         v-model.trim="personalDetails.firstName"
         class="form__element form__element--half"
+        :class="{'vuelidate--invalid': $v.personalDetails.firstName.$error}"
         name="first-name"
         :label="$t('First name')"
         :required="true"
@@ -28,6 +29,7 @@
       <SfInput
         v-model.trim="personalDetails.lastName"
         class="form__element form__element--half form__element--half-even"
+        :class="{'vuelidate--invalid': $v.personalDetails.lastName.$error}"
         name="last-name"
         :label="$t('Last name')"
         :required="true"
@@ -38,6 +40,7 @@
       <SfInput
         v-model.trim="personalDetails.emailAddress"
         class="form__element"
+        :class="{'vuelidate--invalid': $v.personalDetails.emailAddress.$error}"
         name="email-address"
         :label="$t('Email address')"
         :required="true"
@@ -59,7 +62,11 @@
           />
         </div>
         <template v-if="createAccount">
-          <m-password ref="password" v-model="passwordData" />
+          <m-password
+            ref="password"
+            v-model="passwordData"
+            :scroll-to-error-on-validation="true"
+          />
 
           <div class="form__element form__group">
             <SfCheckbox
@@ -135,6 +142,7 @@ import { mapActions } from 'vuex';
 import { LAST_USED_CUSTOMER_EMAIL, LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_EMAIL, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME } from 'src/modules/persisted-customer-data';
 
 import { createSmoothscroll } from 'theme/helpers';
+import { vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
 
 import APromoCode from 'theme/components/atoms/a-promo-code'
 import MPassword from 'theme/components/molecules/m-password'
@@ -201,7 +209,11 @@ export default {
         isInvalid = this.$v.personalDetails.$invalid;
       }
 
-      if (isInvalid) return;
+      if (isInvalid) {
+        await this.$nextTick();
+        vuelidateScrollToFirstError();
+        return;
+      }
 
       this.$store.commit(
         SET_LAST_USED_CUSTOMER_EMAIL,
