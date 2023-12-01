@@ -17,8 +17,8 @@
       <SfSelectOption
         class="_option"
         v-for="optionValue in options"
-        :key="optionValue.title"
-        :value="optionValue.title.toLowerCase()"
+        :key="optionValue.sku"
+        :value="optionValue.sku"
       >
         {{ optionValue.title }}
       </SfSelectOption>
@@ -71,7 +71,7 @@ export default defineComponent({
   methods: {
     onCustomOptionChange (value: string): void {
       this.$emit('input', {
-        value: value.toLowerCase(),
+        value,
         option: this.option,
         addonOptionValueId: this.addonOptionValueId
       });

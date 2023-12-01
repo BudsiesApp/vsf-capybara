@@ -71,7 +71,7 @@
                   >
                     <component
                       :is="getComponentForCustomOption(option)"
-                      :value="getValueForCustomOption(option.product_sku, addon.optionValueId)"
+                      :value="getValueForCustomOption(option.sku, addon.optionValueId)"
                       :option="option"
                       :addon-option-value-id="addon.optionValueId"
                       :errors="errors"
@@ -299,7 +299,7 @@ export default Vue.extend({
         addonOptionValueId,
         optionsValues: {
           ...optionValues,
-          [option.product_sku]: value
+          [option.sku]: value
         }
       }
 
