@@ -4,7 +4,8 @@
     class="m-zoom-gallery"
     :class="{
       '-horizontal': isHorizontalThumbnails,
-      '-slider-disabled': !shouldInitThumbnailsSlider
+      '-slider-disabled': !shouldInitThumbnailsSlider,
+      '-show-arrows': showArrows
     }"
   >
     <div
@@ -13,9 +14,9 @@
       <component
         :is="shouldInitThumbnailsSlider ? 'VueSlickCarousel' : 'div'"
         class="_carousel"
-        :arrows="false"
+        :arrows="showArrows"
         :vertical="!isHorizontalThumbnails"
-        :slides-to-show="5"
+        :slides-to-show="slidesToShow"
         :slides-to-scroll="1"
         :focus-on-select="true"
       >
@@ -103,7 +104,8 @@ export default Vue.extend({
       fCurrentIndex: undefined as number | undefined,
       fShouldInitThumbnailsSlider: false,
       fWindowResizeHandler: undefined as () => void | undefined,
-      fIsClodZoomInitialized: false
+      fIsClodZoomInitialized: false,
+      slidesToShow: 5
     }
   },
   computed: {
@@ -143,6 +145,9 @@ export default Vue.extend({
     },
     shouldInitThumbnailsSlider: function (): boolean {
       return this.fShouldInitThumbnailsSlider;
+    },
+    showArrows (): boolean {
+      return this.images.length > this.slidesToShow;
     }
   },
   mounted () {
@@ -287,6 +292,10 @@ export default Vue.extend({
     flex-direction: row;
     justify-content: space-between;
 
+    &.-show-arrows {
+      padding: 0 var(--spacer-base);
+    }
+
     ._thumbnails {
         width: 15.5%;
 
@@ -306,7 +315,8 @@ export default Vue.extend({
             width: 100%;
         }
 
-        ::v-deep .slick-list {
+        ::v-deep {
+          .slick-list {
             .slick-track {
                 height: auto !important;
             }
@@ -326,6 +336,20 @@ export default Vue.extend({
                 }
               }
             }
+          }
+
+          .slick-prev:before,
+          .slick-next:before {
+            color: var(--c-text)
+          }
+
+          .slick-prev {
+            left: -22px;
+          }
+
+          .slick-next {
+            right: -22px;
+          }
         }
     }
 
