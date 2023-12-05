@@ -18,7 +18,7 @@
       <SfInput
         v-model.trim="personalDetails.firstName"
         class="form__element form__element--half"
-        :class="{'vuelidate--invalid': $v.personalDetails.firstName.$error}"
+        :class="{[vuelidateErrorClassName]: $v.personalDetails.firstName.$error}"
         name="first-name"
         :label="$t('First name')"
         :required="true"
@@ -29,7 +29,7 @@
       <SfInput
         v-model.trim="personalDetails.lastName"
         class="form__element form__element--half form__element--half-even"
-        :class="{'vuelidate--invalid': $v.personalDetails.lastName.$error}"
+        :class="{[vuelidateErrorClassName]: $v.personalDetails.lastName.$error}"
         name="last-name"
         :label="$t('Last name')"
         :required="true"
@@ -40,7 +40,7 @@
       <SfInput
         v-model.trim="personalDetails.emailAddress"
         class="form__element"
-        :class="{'vuelidate--invalid': $v.personalDetails.emailAddress.$error}"
+        :class="{[vuelidateErrorClassName]: $v.personalDetails.emailAddress.$error}"
         name="email-address"
         :label="$t('Email address')"
         :required="true"
@@ -65,7 +65,7 @@
           <m-password
             ref="password"
             v-model="passwordData"
-            :scroll-to-error-on-validation="true"
+            :error-class-name="vuelidateErrorClassName"
           />
 
           <div class="form__element form__group">
@@ -176,6 +176,11 @@ export default {
       required
     }
   },
+  data () {
+    return {
+      vuelidateErrorClassName: 'personal-details_vuelidate--invalid'
+    }
+  },
   beforeMount () {
     this.$bus.$on('checkout-after-load', this.fillLastUsedCustomerData)
   },
@@ -211,7 +216,7 @@ export default {
 
       if (isInvalid) {
         await this.$nextTick();
-        vuelidateScrollToFirstError();
+        vuelidateScrollToFirstError(this.vuelidateErrorClassName);
         return;
       }
 

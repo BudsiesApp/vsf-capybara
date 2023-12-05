@@ -17,7 +17,7 @@
       <SfInput
         v-model.trim="shipping.firstName"
         class="form__element form__element--half"
-        :class="{'vuelidate--invalid': $v.shipping.firstName.$error}"
+        :class="{[vuelidateErrorClassName]: $v.shipping.firstName.$error}"
         name="first-name"
         autocomplete="given-name"
         :label="$t('First name')"
@@ -34,7 +34,7 @@
       <SfInput
         v-model.trim="shipping.lastName"
         class="form__element form__element--half"
-        :class="{'vuelidate--invalid': $v.shipping.lastName.$error}"
+        :class="{[vuelidateErrorClassName]: $v.shipping.lastName.$error}"
         name="last-name"
         autocomplete="family-name"
         :label="$t('Last name')"
@@ -47,7 +47,7 @@
       <SfInput
         v-model.trim="shipping.streetAddress"
         class="form__element"
-        :class="{'vuelidate--invalid': $v.shipping.streetAddress.$error}"
+        :class="{[vuelidateErrorClassName]: $v.shipping.streetAddress.$error}"
         name="street-address"
         autocomplete="street-address"
         :label="$t('Address')"
@@ -61,7 +61,7 @@
       <MMultiselect
         v-model="shipping.country"
         class="form__element form__element--half form__select"
-        :class="{'vuelidate--invalid': $v.shipping.country.$error}"
+        :class="{[vuelidateErrorClassName]: $v.shipping.country.$error}"
         name="country-name"
         autocomplete="country-name"
         :label="$t('Country')"
@@ -89,7 +89,7 @@
         v-else
         v-model.trim="shipping.state"
         class="form__element form__element--half form__select"
-        :class="{'vuelidate--invalid': $v.shipping.state.$error}"
+        :class="{[vuelidateErrorClassName]: $v.shipping.state.$error}"
         name="address-level1"
         autocomplete="address-level1"
         :label="$t('State / Province')"
@@ -105,7 +105,7 @@
       <SfInput
         v-model.trim="shipping.city"
         class="form__element form__element--half"
-        :class="{'vuelidate--invalid': $v.shipping.city.$error}"
+        :class="{[vuelidateErrorClassName]: $v.shipping.city.$error}"
         name="city"
         autocomplete="address-level2"
         :label="$t('City')"
@@ -119,7 +119,7 @@
       <SfInput
         v-model.trim="shipping.zipCode"
         class="form__element form__element--half"
-        :class="{'vuelidate--invalid': $v.shipping.zipCode.$error}"
+        :class="{[vuelidateErrorClassName]: $v.shipping.zipCode.$error}"
         name="zipCode"
         autocomplete="postal-code"
         :label="$t('Zip-code')"
@@ -144,7 +144,7 @@
             : $t('Please, enter valid phone number')
         "
         class="form__element"
-        :class="{'vuelidate--invalid': $v.shipping.phoneNumber.$error}"
+        :class="{[vuelidateErrorClassName]: $v.shipping.phoneNumber.$error}"
         name="phone"
         autocomplete="tel"
         :label="$t('Phone number')"
@@ -278,7 +278,8 @@ export default {
   data: () => {
     return {
       states: States,
-      fZipCodeChanged: false
+      fZipCodeChanged: false,
+      vuelidateErrorClassName: 'shipping-address_vuelidate--invalid'
     };
   },
   computed: {
@@ -356,7 +357,7 @@ export default {
 
       if (this.$v.$invalid) {
         await this.$nextTick();
-        vuelidateScrollToFirstError();
+        vuelidateScrollToFirstError(this.vuelidateErrorClassName);
         return;
       }
 

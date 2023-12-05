@@ -30,7 +30,7 @@
         <SfInput
           v-model.trim="payment.firstName"
           class="form__element form__element--half"
-          :class="{'vuelidate--invalid': $v.payment.firstName.$error}"
+          :class="{[vuelidateErrorClassName]: $v.payment.firstName.$error}"
           name="first-name"
           autocomplete="given-name"
           :label="$t('First name')"
@@ -47,7 +47,7 @@
         <SfInput
           v-model.trim="payment.lastName"
           class="form__element form__element--half"
-          :class="{'vuelidate--invalid': $v.payment.lastName.$error}"
+          :class="{[vuelidateErrorClassName]: $v.payment.lastName.$error}"
           name="last-name"
           autocomplete="family-name"
           :label="$t('Last name')"
@@ -60,7 +60,7 @@
         <SfInput
           v-model.trim="payment.streetAddress"
           class="form__element"
-          :class="{'vuelidate--invalid': $v.payment.streetAddress.$error}"
+          :class="{[vuelidateErrorClassName]: $v.payment.streetAddress.$error}"
           name="street-address"
           autocomplete="street-address"
           :label="$t('Address')"
@@ -78,7 +78,7 @@
           form__element--half
           form__select
         "
-          :class="{'vuelidate--invalid': $v.payment.country.$error}"
+          :class="{[vuelidateErrorClassName]: $v.payment.country.$error}"
           name="country-name"
           autocomplete="country-name"
           :label="$t('Country')"
@@ -112,7 +112,7 @@
           form__element--half
           form__select
         "
-          :class="{'vuelidate--invalid': $v.payment.state.$error}"
+          :class="{[vuelidateErrorClassName]: $v.payment.state.$error}"
           :label="$t('State / Province')"
           :required="true"
           id-field="code"
@@ -126,7 +126,7 @@
         <SfInput
           v-model.trim="payment.city"
           class="form__element form__element--half"
-          :class="{'vuelidate--invalid': $v.payment.city.$error}"
+          :class="{[vuelidateErrorClassName]: $v.payment.city.$error}"
           name="city"
           autocomplete="address-level2"
           :label="$t('City')"
@@ -139,7 +139,7 @@
         <SfInput
           v-model.trim="payment.zipCode"
           class="form__element form__element--half"
-          :class="{'vuelidate--invalid': $v.payment.zipCode.$error}"
+          :class="{[vuelidateErrorClassName]: $v.payment.zipCode.$error}"
           name="zipCode"
           autocomplete="postal-code"
           :label="$t('Zip-code')"
@@ -163,7 +163,7 @@
               : $t('Please, enter valid phone number')
           "
           class="form__element"
-          :class="{'vuelidate--invalid': $v.payment.phoneNumber.$error}"
+          :class="{[vuelidateErrorClassName]: $v.payment.phoneNumber.$error}"
           name="phone"
           autocomplete="tel"
           :label="$t('Phone number')"
@@ -285,7 +285,8 @@ export default {
   },
   data: () => {
     return {
-      states: States
+      states: States,
+      vuelidateErrorClassName: 'billing-address_vuelidate--invalid'
     };
   },
   computed: {
@@ -374,7 +375,7 @@ export default {
 
       if (this.$v.$invalid) {
         await this.$nextTick();
-        vuelidateScrollToFirstError();
+        vuelidateScrollToFirstError(this.vuelidateErrorClassName);
         return;
       }
 

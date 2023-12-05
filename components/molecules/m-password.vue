@@ -11,6 +11,7 @@
         v-model="password"
         type="password"
         class="_input sf-input--required"
+        :class="errorClassName && errors.length ? errorClassName : ''"
         name="password"
         :has-show-password="true"
         :label="$t('Password')"
@@ -29,6 +30,7 @@
         v-model="repeatPassword"
         type="password"
         class="_input sf-input--required"
+        :class="errorClassName && errors.length ? errorClassName : ''"
         name="password-confirm"
         :has-show-password="true"
         :label="$t('Repeat password')"
@@ -73,9 +75,9 @@ export default Vue.extend({
       }>,
       required: true
     },
-    scrollToErrorOnValidation: {
-      type: Boolean,
-      default: false
+    errorClassName: {
+      type: String,
+      default: undefined
     }
   },
   computed: {
@@ -112,23 +114,7 @@ export default Vue.extend({
         repeatPasswordValidator.validate()
       ]);
 
-      const result = passwordValidationResult.valid && repeatPasswordValidationResult.valid;
-
-      if (!this.scrollToErrorOnValidation) {
-        return result;
-      }
-
-      const scrollOptions: ScrollIntoViewOptions = { behavior: 'smooth', block: 'center' };
-
-      if (!repeatPasswordValidationResult.valid) {
-        repeatPasswordValidator.$el.scrollIntoView(scrollOptions);
-      }
-
-      if (!passwordValidationResult.valid) {
-        passwordValidator.$el.scrollIntoView(scrollOptions)
-      }
-
-      return result;
+      return passwordValidationResult.valid && repeatPasswordValidationResult.valid;
     }
   }
 });
