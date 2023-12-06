@@ -222,7 +222,7 @@ import {
 } from 'src/modules/vsf-amazon-pay/index';
 import { LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, LAST_USED_CUSTOMER_PHONE_NUMBER, LAST_USED_CUSTOMER_SHIPPING_COUNTRY, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_PHONE_NUMBER, SET_LAST_USED_CUSTOMER_SHIPPING_COUNTRY } from 'src/modules/persisted-customer-data';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
-import { vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
+import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
@@ -279,7 +279,7 @@ export default {
     return {
       states: States,
       fZipCodeChanged: false,
-      vuelidateErrorClassName: 'shipping-address_vuelidate--invalid'
+      vuelidateErrorClassName
     };
   },
   computed: {
@@ -357,7 +357,7 @@ export default {
 
       if (this.$v.$invalid) {
         await this.$nextTick();
-        vuelidateScrollToFirstError(this.vuelidateErrorClassName);
+        vuelidateScrollToFirstError(this.$el);
         return;
       }
 

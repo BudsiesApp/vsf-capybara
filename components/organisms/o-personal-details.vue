@@ -142,7 +142,7 @@ import { mapActions } from 'vuex';
 import { LAST_USED_CUSTOMER_EMAIL, LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_EMAIL, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME } from 'src/modules/persisted-customer-data';
 
 import { createSmoothscroll } from 'theme/helpers';
-import { vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
+import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
 
 import APromoCode from 'theme/components/atoms/a-promo-code'
 import MPassword from 'theme/components/molecules/m-password'
@@ -178,7 +178,7 @@ export default {
   },
   data () {
     return {
-      vuelidateErrorClassName: 'personal-details_vuelidate--invalid'
+      vuelidateErrorClassName
     }
   },
   beforeMount () {
@@ -216,7 +216,7 @@ export default {
 
       if (isInvalid) {
         await this.$nextTick();
-        vuelidateScrollToFirstError(this.vuelidateErrorClassName);
+        vuelidateScrollToFirstError(this.$el);
         return;
       }
 

@@ -220,7 +220,7 @@ import {
   KEY as AMAZON_PAY_MODULE_KEY,
   METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
 } from 'src/modules/vsf-amazon-pay/index';
-import { vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
+import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
@@ -286,7 +286,7 @@ export default {
   data: () => {
     return {
       states: States,
-      vuelidateErrorClassName: 'billing-address_vuelidate--invalid'
+      vuelidateErrorClassName
     };
   },
   computed: {
@@ -375,7 +375,7 @@ export default {
 
       if (this.$v.$invalid) {
         await this.$nextTick();
-        vuelidateScrollToFirstError(this.vuelidateErrorClassName);
+        vuelidateScrollToFirstError(this.$el);
         return;
       }
 
