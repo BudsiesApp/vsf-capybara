@@ -93,8 +93,9 @@ import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import * as catalogTypes from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { SfHeading, SfSteps } from '@storefront-ui/vue';
 import Product from 'core/modules/catalog/types/Product';
-import { BundleOption } from 'core/modules/catalog/types/BundleOption';
+import { BundleOption, BundleOptionsProductLink } from 'core/modules/catalog/types/BundleOption';
 import CartItem from 'core/modules/cart/types/CartItem';
+import { getDefaultProductLinkForRequiredBundleOptionsDictionary } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions';
 
 import {
   ImageUploadMethod,
@@ -255,6 +256,13 @@ export default defineComponent({
       }
 
       return this.imageUploadStepData.customerImages;
+    },
+    defaultBundleOptionsProductLink (): Record<string, BundleOptionsProductLink> {
+      if (!this.activeProduct) {
+        return {};
+      }
+
+      return getDefaultProductLinkForRequiredBundleOptionsDictionary(this.activeProduct);
     },
     isBusy (): boolean {
       return this.isSubmitting ||
@@ -726,6 +734,7 @@ export default defineComponent({
     },
     fillSizeByPreselectedParamAndCurrentProduct (): void {
       if (!this.preselectedSize || !this.product) {
+        this.fillDefaultSize();
         return;
       }
 
@@ -733,6 +742,21 @@ export default defineComponent({
         getForeversTypeByBundleSku(this.product.sku),
         this.preselectedSize
       );
+    },
+    fillDefaultSize (): void {
+      this.customizeStepData.size = undefined;
+
+      if (!this.sizeBundleOption) {
+        return;
+      }
+
+      const defaultProductLink = this.defaultBundleOptionsProductLink[this.sizeBundleOption.option_id];
+
+      if (!defaultProductLink) {
+        return;
+      }
+
+      this.customizeStepData.size = this.sizes.find((size) => size.optionValueId === defaultProductLink.id.toString());
     },
     fillSizeOption (cartItem: CartItem): void {
       const productOption = cartItem.product_option;

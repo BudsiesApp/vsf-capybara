@@ -389,13 +389,12 @@ import {
   SfHeading,
   SfSelect
 } from '@storefront-ui/vue';
-import { BundleOption } from 'core/modules/catalog/types/BundleOption';
+import { BundleOption, BundleOptionsProductLink } from 'core/modules/catalog/types/BundleOption';
 import Product from 'core/modules/catalog/types/Product';
 
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage, getProductDefaultPrice } from 'src/modules/shared';
 import {
-  vuexTypes as budsiesTypes,
   Bodypart,
   ImageUploadMethod,
   BodyPartValueContentType,
@@ -404,7 +403,7 @@ import {
 } from 'src/modules/budsies';
 import ServerError from 'src/modules/shared/types/server-error';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
-import { getSelectedBundleOptions } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions';
+import { getDefaultProductLinkForRequiredBundleOptionsDictionary, getSelectedBundleOptions } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions';
 import { setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 
 import ACustomProductQuantity from '../atoms/a-custom-product-quantity.vue';
@@ -528,6 +527,9 @@ export default defineComponent({
     },
     bodyparts (): Bodypart[] {
       return this.$store.getters['budsies/getProductBodyparts'](this.product.id);
+    },
+    defaultBundleOptionsProductLink (): Record<string, BundleOptionsProductLink> {
+      return getDefaultProductLinkForRequiredBundleOptionsDictionary(this.product);
     },
     productionTimeBundleOption (): BundleOption | undefined {
       if (!this.product?.bundle_options) {
@@ -751,6 +753,21 @@ export default defineComponent({
 
       this.size = selectedSize;
     },
+    fillDefaultSizeOption (): void {
+      this.size = undefined;
+
+      if (!this.sizeBundleOption) {
+        return;
+      }
+
+      const defaultProductLink = this.defaultBundleOptionsProductLink[this.sizeBundleOption.option_id];
+
+      if (!defaultProductLink) {
+        return;
+      }
+
+      this.size = this.sizes.find((size) => defaultProductLink.product && size.id === String(defaultProductLink.product.id));
+    },
     getArtworkUploadComponent (): InstanceType<typeof MArtworkUpload> | undefined {
       return this.$refs['artwork-upload'] as InstanceType<typeof MArtworkUpload> | undefined;
     },
@@ -793,7 +810,7 @@ export default defineComponent({
       this.quantity = this.product.qty || 1;
       this.customerImage = undefined;
       this.uploadMethod = ImageUploadMethod.NOW;
-      this.size = undefined;
+      this.fillDefaultSizeOption();
       this.name = undefined;
       this.plushieId = undefined;
 

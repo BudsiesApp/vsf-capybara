@@ -281,7 +281,7 @@ import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-obser
 
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
-import { getSelectedBundleOptions } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions';
+import { getDefaultProductLinkForRequiredBundleOptionsDictionary, getSelectedBundleOptions } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions';
 import { PRODUCT_SET_BUNDLE_OPTION } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { BundleOption, BundleOptionsProductLink } from '@vue-storefront/core/modules/catalog/types/BundleOption';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -291,7 +291,7 @@ import { getProductGallery as getGalleryByProduct, setBundleProductOptionsAsync 
 
 import { ProductValue, Dictionary, ExtraPhotoAddon } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
-import { CustomerImage, getProductDefaultPrice, InjectType, ServerError } from 'src/modules/shared';
+import { CustomerImage, getProductDefaultPrice, ServerError } from 'src/modules/shared';
 import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 
@@ -502,6 +502,9 @@ export default defineComponent({
             `Can't resolve Backend product id for Magento '${this.product.id}' product ID`
           );
       }
+    },
+    defaultBundleOptionsProductLink (): Record<string, BundleOptionsProductLink> {
+      return getDefaultProductLinkForRequiredBundleOptionsDictionary(this.product);
     },
     defaultDesignProduct (): Product | undefined {
       if (!this.designBundleOption) {
@@ -842,7 +845,7 @@ export default defineComponent({
       return;
     }
 
-    this.fillDefaultSelectedSizeOption();
+    this.fillDefaultSelectedBundleOptions();
   },
   methods: {
     ...mapMutations('product', {
@@ -911,17 +914,70 @@ export default defineComponent({
       this.additionalArtworks = customerAdditionalArtworksImages;
       this.initialAdditionalArtworks = [...customerAdditionalArtworksImages];
     },
-    fillDefaultSelectedSizeOption (): void {
-      const defaultSizeProductLink = this.sizeBundleOption?.product_links[0];
-
-      if (!defaultSizeProductLink) {
+    fillDefaultSelectedBundleOptions (): void {
+      this.fillDefaultDesign();
+      this.fillDefaultSelectedSizeOption();
+      this.fillDefaultVariant();
+      this.fillDefaultStyle();
+    },
+    fillDefaultDesign (): void {
+      if (!this.designBundleOption || this.selectedDesign) {
         return;
       }
 
-      this.selectedSizeOption = defaultSizeProductLink.id.toString();
+      const defaultProductLink = this.defaultBundleOptionsProductLink[this.designBundleOption.option_id];
+
+      if (!defaultProductLink) {
+        return;
+      }
+
+      this.onDesignSelect(defaultProductLink.sku);
+    },
+    fillDefaultSelectedSizeOption (): void {
+      if (!this.sizeBundleOption) {
+        return;
+      }
+
+      const defaultProductLink = this.defaultBundleOptionsProductLink[this.sizeBundleOption.option_id];
+
+      if (!defaultProductLink) {
+        return;
+      }
+
+      this.selectedSizeOption = defaultProductLink.id.toString();
     },
     fillDefaultStyle (): void {
       this.selectedStyle = undefined;
+
+      if (!this.variantsBundleOption) {
+        return;
+      }
+
+      const defaultProductLink = this.defaultBundleOptionsProductLink[this.variantsBundleOption.option_id];
+
+      if (!defaultProductLink) {
+        return;
+      }
+
+      const styleCode = defaultProductLink.sku.split('_')[1];
+
+      this.selectedStyle = styleCode
+    },
+
+    fillDefaultVariant (): void {
+      this.selectedVariantOption = undefined;
+
+      if (!this.variantsBundleOption) {
+        return;
+      }
+
+      const defaultProductLink = this.defaultBundleOptionsProductLink[this.variantsBundleOption.option_id];
+
+      if (!defaultProductLink) {
+        return;
+      }
+
+      this.selectedVariantOption = defaultProductLink.id.toString();
     },
     fillEmptyCustomerImage (): void {
       this.customerImage = undefined;
@@ -1101,7 +1157,7 @@ export default defineComponent({
       this.showVariantSelectorComponent = false;
       this.showSizeSelectorComponent = false;
 
-      this.setDefaultVariant();
+      this.setDefaultVariantForSelectedStyle();
       this.setDefaultSize();
 
       this.$nextTick()
@@ -1133,14 +1189,12 @@ export default defineComponent({
       }
     },
     resetData (): void {
-      this.fillDefaultSelectedSizeOption();
+      this.fillDefaultSelectedBundleOptions();
       this.fillEmptyCustomerImage();
       this.fillEmptyAdditionalArtworks();
       this.fillEmptyExtraFacesDataAddon();
-      this.fillDefaultStyle();
-      this.onDesignSelect(undefined);
     },
-    setDefaultVariant (): void {
+    setDefaultVariantForSelectedStyle (): void {
       if (!this.variantOptions.length) {
         return;
       }

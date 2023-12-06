@@ -290,7 +290,7 @@ import i18n from '@vue-storefront/i18n';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import * as types from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
-import { getSelectedBundleOptions } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions';
+import { getDefaultProductLinkForRequiredBundleOptionsDictionary, getSelectedBundleOptions } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions';
 import {
   mapMobileObserver,
   unMapMobileObserver
@@ -298,7 +298,7 @@ import {
 
 import { SfButton, SfSelect } from '@storefront-ui/vue';
 import Product from 'core/modules/catalog/types/Product';
-import { BundleOption } from 'core/modules/catalog/types/BundleOption';
+import { BundleOption, BundleOptionsProductLink } from 'core/modules/catalog/types/BundleOption';
 import { getProductGallery as getGalleryByProduct, setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 import CartItem from 'core/modules/cart/types/CartItem';
 
@@ -606,6 +606,9 @@ export default defineComponent({
             `Can't resolve Backend product ID for Magento '${this.product.id}' product ID`
           );
       }
+    },
+    defaultBundleOptionsProductLink (): Record<string, BundleOptionsProductLink> {
+      return getDefaultProductLinkForRequiredBundleOptionsDictionary(this.product);
     },
     galleryImages (): ZoomGalleryImage[] {
       const productImages = this.productImages.find(
@@ -981,12 +984,18 @@ export default defineComponent({
       this.artworkInitialItems = [{ ...this.customerImage }]
     },
     fillDefaultSize (): void {
-      if (!this.sizesOptions.length) {
+      if (!this.sizeBundleOption) {
         this.fillEmptySize();
         return;
       }
 
-      this.selectedSize = this.sizesOptions[0];
+      const defaultProductLink = this.defaultBundleOptionsProductLink[this.sizeBundleOption.option_id];
+
+      if (!defaultProductLink) {
+        return;
+      }
+
+      this.selectedSize = this.sizesOptions.find((size) => size.optionValueId === defaultProductLink.id.toString());
     },
     fillEmptyAdditionalArtworks (): void {
       this.initialAdditionalArtworks = [];
@@ -1119,6 +1128,24 @@ export default defineComponent({
       } finally {
         this.isSubmitting = false;
       }
+    },
+    fillDefaultStyle (): void {
+      if (this.hasOnlyOneAvailableStyle) {
+        this.selectStyle(this.availableStyles[0].value);
+        return;
+      }
+
+      if (!this.styleBundleOption || this.selectedStyle) {
+        return;
+      }
+
+      const defaultProductLink = this.defaultBundleOptionsProductLink[this.styleBundleOption.option_id];
+
+      if (!defaultProductLink || !defaultProductLink.product) {
+        return;
+      }
+
+      this.selectStyle(defaultProductLink.product.sku)
     }
   },
   created (): void {
@@ -1129,6 +1156,8 @@ export default defineComponent({
     if (this.existingCartItem) {
       this.fillProductDataFromExistingCartItem(this.existingCartItem);
     }
+
+    // this.fillDefaultStyle();
 
     if (this.selectedSize) {
       return;
@@ -1175,8 +1204,8 @@ export default defineComponent({
         this.fillEmptyBodypartsValues();
         this.fillDefaultSize();
 
-        if (!this.selectedStyle && this.hasOnlyOneAvailableStyle) {
-          this.selectStyle(this.availableStyles[0].value);
+        if (!this.selectedStyle) {
+          this.fillDefaultStyle();
         }
 
         const extraFacesComponent = this.getExtraFaces();
@@ -1201,8 +1230,8 @@ export default defineComponent({
           return;
         }
 
-        if (!val && this.hasOnlyOneAvailableStyle) {
-          this.selectStyle(this.availableStyles[0].value);
+        if (!val) {
+          this.fillDefaultStyle();
           return;
         }
 

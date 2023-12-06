@@ -201,7 +201,7 @@ import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-obser
 
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
-import { getSelectedBundleOptions } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions';
+import { getDefaultProductLinkForRequiredBundleOptionsDictionary, getSelectedBundleOptions } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions';
 import { PRODUCT_SET_BUNDLE_OPTION } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { BundleOption, BundleOptionsProductLink } from '@vue-storefront/core/modules/catalog/types/BundleOption';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -320,6 +320,9 @@ export default defineComponent({
             `Can't resolve Backend product id for Magento '${this.product.id}' product ID`
           );
       }
+    },
+    defaultBundleOptionsProductLink (): Record<string, BundleOptionsProductLink> {
+      return getDefaultProductLinkForRequiredBundleOptionsDictionary(this.product);
     },
     defaultDesignProduct (): Product | undefined {
       if (!this.designBundleOption) {
@@ -526,7 +529,7 @@ export default defineComponent({
       return;
     }
 
-    this.fillDefaultSelectedSizeOption();
+    this.fillDefaultSelectedBundleOptions();
   },
   methods: {
     ...mapMutations('product', {
@@ -581,14 +584,35 @@ export default defineComponent({
 
       artworkUpload.clearInput();
     },
-    fillDefaultSelectedSizeOption (): void {
-      const defaultSizeProductLink = this.sizeBundleOption?.product_links[0];
-
-      if (!defaultSizeProductLink) {
+    fillDefaultSelectedBundleOptions (): void {
+      this.fillDefaultDesign();
+      this.fillDefaultSelectedSizeOption();
+    },
+    fillDefaultDesign (): void {
+      if (!this.designBundleOption || this.selectedDesign) {
         return;
       }
 
-      this.selectedSizeOption = defaultSizeProductLink.id.toString();
+      const defaultProductLink = this.defaultBundleOptionsProductLink[this.designBundleOption.option_id];
+
+      if (!defaultProductLink) {
+        return;
+      }
+
+      this.onDesignSelect(defaultProductLink.sku);
+    },
+    fillDefaultSelectedSizeOption (): void {
+      if (!this.sizeBundleOption) {
+        return;
+      }
+
+      const defaultProductLink = this.defaultBundleOptionsProductLink[this.sizeBundleOption.option_id];
+
+      if (!defaultProductLink) {
+        return;
+      }
+
+      this.selectedSizeOption = defaultProductLink.id.toString();
     },
     fillEmptyCustomerImage (): void {
       this.customerImage = undefined;
@@ -719,9 +743,9 @@ export default defineComponent({
       }
     },
     resetData (): void {
-      this.fillDefaultSelectedSizeOption();
       this.fillEmptyCustomerImage();
       this.onDesignSelect(undefined);
+      this.fillDefaultSelectedBundleOptions();
     },
     setDesignProcessingLevel (): void {
       if (!this.designProcessingLevelBundleOption) {

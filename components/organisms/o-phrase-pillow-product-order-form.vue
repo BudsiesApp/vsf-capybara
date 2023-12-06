@@ -575,6 +575,7 @@ import {
   mapMobileObserver,
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
+import { getDefaultProductLinkForRequiredBundleOptionsDictionary } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions';
 
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
@@ -1020,6 +1021,9 @@ export default defineComponent({
     },
     showEmailStep (): boolean {
       return !this.hasPrefilledEmail;
+    },
+    defaultBundleOptionsProductLink (): Record<string, BundleOptionsProductLink> {
+      return getDefaultProductLinkForRequiredBundleOptionsDictionary(this.product);
     }
   },
   methods: {
@@ -1403,6 +1407,32 @@ export default defineComponent({
           validationResult.valid ? 'valid' : 'invalid'
         );
       }
+    },
+    getDefaultFrontDesign (): string | undefined {
+      if (this.frontDesign || !this.frontDesignBundleOption) {
+        return;
+      }
+
+      const defaultProductLink = this.defaultBundleOptionsProductLink[this.frontDesignBundleOption.option_id];
+
+      if (!defaultProductLink || !defaultProductLink.product) {
+        return;
+      }
+
+      return defaultProductLink.product.sku;
+    },
+    getDefaultBackDesign (): string | undefined {
+      if (this.backDesign || !this.backDesignBundleOption) {
+        return;
+      }
+
+      const defaultProductLink = this.defaultBundleOptionsProductLink[this.backDesignBundleOption.option_id];
+
+      if (!defaultProductLink || !defaultProductLink.product) {
+        return;
+      }
+
+      return defaultProductLink.product.sku
     }
   },
   beforeDestroy () {
@@ -1415,13 +1445,14 @@ export default defineComponent({
       this.imageUploadUrl
     );
 
-    if (!this.frontDesign && this.frontDesignProducts.length) {
-      this.onFrontDesignSelect(this.frontDesignProducts[0].sku);
-    }
-
     this.accentColorPartValues = this.getAccentColorPartValues(
       this.bodyparts[0]
     );
+
+    const defaultBackDesign = this.getDefaultBackDesign();
+    const defaultFrontDesign = this.getDefaultFrontDesign();
+
+    this.emitDesignSelectedEvent({ frontDesign: defaultFrontDesign || this.frontDesign, backDesign: defaultBackDesign || this.backDesign });
 
     if (this.selectedBackDesign) {
       this.stepValidateState[customizerStepsData.backDesign.id] = 'valid';
