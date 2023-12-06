@@ -378,6 +378,7 @@ import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import i18n from '@vue-storefront/i18n';
 import { defineComponent, inject, PropType, Ref, ref } from '@vue/composition-api';
+import { getDefaultProductLinkForRequiredBundleOptionsDictionary } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions';
 
 import { Bodypart, BodypartOption, BodypartValue, ProductId, ProductValue, vuexTypes as budsiesTypes, ImageUploadMethod, Dictionary } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
@@ -637,7 +638,17 @@ export default defineComponent({
       return this.showAddonsStep ? this.addonsStepNumber + 1 : this.nameStepNumber + 1;
     },
     defaultPillowSizeValue (): string | undefined {
-      return this.pillowSizeOptions[0]?.value.toString();
+      if (!this.productBundleOption) {
+        return;
+      }
+
+      const defaultProductLink = getDefaultProductLinkForRequiredBundleOptionsDictionary(this.product)[this.productBundleOption.option_id];
+
+      if (!defaultProductLink) {
+        return;
+      }
+
+      return defaultProductLink.id.toString();
     },
     defaultSelectedAddon (): SelectedAddon | undefined {
       const defaultAddonOption = this.addons.find((addon) => addon.sku === sneakPeakAddonSku);
