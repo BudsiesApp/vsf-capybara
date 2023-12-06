@@ -46,12 +46,13 @@
 import Vue, { PropType } from 'vue';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 
-import { BundleOption } from 'core/modules/catalog/types/BundleOption';
+import { BundleOption, BundleOptionsProductLink } from 'core/modules/catalog/types/BundleOption';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import * as catalogTypes from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import i18n from '@vue-storefront/i18n';
 import { getProductDefaultPrice, ServerError } from 'src/modules/shared';
+import { getDefaultProductLinkForRequiredBundleOptionsDictionary } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions';
 
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
 
@@ -99,8 +100,17 @@ export default Vue.extend({
         ? price.special
         : price.regular;
     },
+    defaultBundleOptionsProductLink (): Record<string, BundleOptionsProductLink> {
+      return getDefaultProductLinkForRequiredBundleOptionsDictionary(this.product);
+    },
     defaultOption (): CreativityKitFormOption | undefined {
       if (!this.productBundleOption) {
+        return;
+      }
+
+      const defaultProductLink = this.defaultBundleOptionsProductLink[this.productBundleOption.option_id];
+
+      if (!defaultProductLink) {
         return;
       }
 
@@ -111,7 +121,7 @@ export default Vue.extend({
         name: this.$t('Creativity Kit').toString(),
         valueText: this.$t('(no Budsie)').toString(),
         bundleOptionId: this.productBundleOption.option_id,
-        optionValueId: this.productBundleOption.product_links[0].id.toString()
+        optionValueId: defaultProductLink.id.toString()
       }
     },
     options (): CreativityKitFormOption[] {
