@@ -51,6 +51,7 @@ import OProductDetails from 'theme/components/organisms/o-product-details';
 import { filterChangedProduct } from '@vue-storefront/core/modules/catalog/events';
 import { getMediaGallery } from '@vue-storefront/core/modules/catalog/helpers';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
+import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-headers.function';
 
 import { ProductStructuredData } from 'src/modules/budsies';
 import { ProductEvent } from 'src/modules/shared';
@@ -236,25 +237,63 @@ export default {
 
       const product = this.getProductBySkuDictionary[sku];
       await this.$store.dispatch('product/setCurrent', product);
+    },
+    getCanonicalUrl (product) {
+      if (!product) {
+        return;
+      }
+
+      const host = this.$ssrContext
+        ? getHostFromHeaders(this.$ssrContext.server.request.headers)
+        : window.location.host;
+
+      const params = {
+        parentSku: product.parentSku
+      };
+      let routeName = 'simple-product';
+
+      if (product.parentSku !== product.sku) {
+        params.childSku = product.sku;
+        routeName = 'product';
+      }
+
+      const resolvedRoute = this.$router.resolve({
+        name: routeName,
+        params
+      });
+
+      return `https://${host}${resolvedRoute.href}`;
     }
   },
   metaInfo () {
     const description = this.getCurrentProduct?.meta_description || this.getCurrentProduct?.short_description;
     const categoryName = this.categoryName ? ` - ${this.categoryName}` : '';
+    const canonicalUrl = this.getCanonicalUrl(this.getCurrentProduct);
+
+    const meta = [];
+
+    if (canonicalUrl) {
+      meta.push({
+        rel: 'canonical',
+        href: canonicalUrl
+      });
+    }
+
+    const descriptionMeta = {
+      vmid: 'description',
+      name: 'description',
+      content: htmlDecode(description)
+    };
+
+    if (descriptionMeta) {
+      meta.push(descriptionMeta);
+    }
 
     return {
       title: htmlDecode(
         `${this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name}${categoryName}`
       ),
-      meta: description
-        ? [
-          {
-            vmid: 'description',
-            name: 'description',
-            content: htmlDecode(description)
-          }
-        ]
-        : []
+      meta
     };
   }
 };
