@@ -11,6 +11,7 @@
         v-model="password"
         type="password"
         class="_input sf-input--required"
+        :class="errorClassName && errors.length ? errorClassName : ''"
         name="password"
         :has-show-password="true"
         :label="$t('Password')"
@@ -29,6 +30,7 @@
         v-model="repeatPassword"
         type="password"
         class="_input sf-input--required"
+        :class="errorClassName && errors.length ? errorClassName : ''"
         name="password-confirm"
         :has-show-password="true"
         :label="$t('Repeat password')"
@@ -72,6 +74,10 @@ export default Vue.extend({
         repeatPassword: string
       }>,
       required: true
+    },
+    errorClassName: {
+      type: String,
+      default: undefined
     }
   },
   computed: {
