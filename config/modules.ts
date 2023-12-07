@@ -20,8 +20,7 @@ import { PromotionPlatformModule } from 'src/modules/promotion-platform'
 import { AmazonPay } from 'src/modules/vsf-amazon-pay'
 import { PaymentBackendMethodsModule } from 'src/modules/payment-backend-methods'
 import { PaymentAffirm } from 'src/modules/payment-affirm';
-import { UrlRewriteModule } from 'src/modules/url-rewrite';
-import { mappingFallbackForUrlRewrite } from 'src/modules/url-rewrite/mappingFallback';
+import { UrlRewriteModule, mappingFallbackForUrlRewrite } from 'src/modules/url-rewrite';
 import { BackendSettings } from 'src/modules/backend-settings';
 import { ErrorLoggingModule } from 'src/modules/error-logging';
 import { PageLoadingIndicatorModule } from 'src/modules/page-loading-indicator';
