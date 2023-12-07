@@ -44,17 +44,47 @@ let routes = [
       next(to.params.targetPath);
     }
   },
+  {
+    name: 'products',
+    path: '/c/products/',
+    redirect: {
+      name: 'category',
+      params: {
+        slug: 'products'
+      }
+    }
+  },
+  {
+    name: 'products-alias-1',
+    path: '/products/',
+    redirect: {
+      name: 'category',
+      params: {
+        slug: 'products'
+      }
+    }
+  },
+  {
+    name: 'products-alias-2',
+    path: '/c/waggables-132/',
+    redirect: {
+      name: 'category',
+      params: {
+        slug: 'products'
+      }
+    }
+  },
   { name: 'my-account', path: '/my-account/', component: MyAccount },
   { name: 'page-not-found', path: '*', component: ErrorPage },
   { name: 'error', path: '/error/', component: ErrorPage, meta: { layout: 'minimal' } },
-  { name: 'virtual-product', path: '/p/:parentSku/:slug/', component: Product },
-  { name: 'bundle-product', path: '/p/:parentSku/:slug/', component: Product },
-  { name: 'simple-product', path: '/p/:parentSku/:slug/', component: Product },
-  { name: 'downloadable-product', path: '/p/:parentSku/:slug/', component: Product },
-  { name: 'grouped-product', path: '/p/:parentSku/:slug/', component: Product },
-  { name: 'configurable-product', path: '/p/:parentSku/:slug/:childSku/', component: Product },
-  { name: 'plushToyAccessory-product', path: '/p/:parentSku/:slug/', component: Product },
-  { name: 'product', path: '/p/:parentSku/:slug/:childSku/', component: Product },
+  { name: 'virtual-product', path: '/p/:parentSku/', component: Product },
+  { name: 'bundle-product', path: '/p/:parentSku/', component: Product },
+  { name: 'simple-product', path: '/p/:parentSku/', component: Product },
+  { name: 'downloadable-product', path: '/p/:parentSku/', component: Product },
+  { name: 'grouped-product', path: '/p/:parentSku/', component: Product },
+  { name: 'configurable-product', path: '/p/:parentSku/:childSku/', component: Product },
+  { name: 'plushToyAccessory-product', path: '/p/:parentSku/', component: Product },
+  { name: 'product', path: '/p/:parentSku/:childSku/', component: Product },
   { name: 'category', path: '/c/:slug/', component: Category },
   { name: 'cross-sells', path: '/cross-sells/p/:parentSku/', component: CrossSells, props: true },
   {
@@ -137,16 +167,6 @@ let routes = [
         params: {
           parentSku
         }
-      }
-    }
-  },
-  {
-    name: 'products',
-    path: '/products/', // TODO check path
-    redirect: {
-      name: 'category',
-      params: {
-        slug: 'waggables-132'
       }
     }
   },

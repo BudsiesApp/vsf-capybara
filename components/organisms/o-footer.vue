@@ -148,7 +148,7 @@ export default {
         services: {
           name: this.$t('Products'),
           children: [
-            { name: this.$t('Waggables'), link: '/products/' },
+            { name: this.$t('Waggables'), link: { name: 'products' } },
             { name: this.$t('Gift Cards'), link: { name: 'gift-cards' } }
           ]
         },
