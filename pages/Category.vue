@@ -226,18 +226,18 @@ import {
   SfAccordion,
   SfPagination
 } from '@storefront-ui/vue';
+import queryString from 'query-string';
 
-import {
-  currentStoreView
-} from '@vue-storefront/core/lib/multistore';
 import store from '@vue-storefront/core/store'
 import {
   mapMobileObserver,
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
+import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-headers.function';
 
 import { ProductEvent } from 'src/modules/shared';
+import { mappingFallbackForUrlRewrite } from 'src/modules/url-rewrite';
 
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 import isObjectEmpty from 'theme/helpers/is-object-empty.function';
@@ -287,6 +287,25 @@ async function loadProducts (isProductsLoading) {
   } finally {
     isProductsLoading.value = false;
   }
+}
+
+const checkForRewriteRoute = async (to, ssrContext) => {
+  const category = store.getters['category-next/getCategoryByParams'](to.params);
+
+  if (!isObjectEmpty(category)) {
+    return;
+  }
+
+  return mappingFallbackForUrlRewrite(
+    {
+      dispatch: store.dispatch
+    },
+    {
+      url: to.path,
+      params: to.query,
+      ssrContext
+    }
+  )
 }
 
 export default {
@@ -465,7 +484,9 @@ export default {
   async serverPrefetch () {
     if (this.$ssrContext) this.$ssrContext.output.cacheTags.add('category');
 
-    return this.onCategoryChangedHandler(this.$route);
+    await this.onCategoryChangedHandler(this.$route);
+
+    return checkForRewriteRoute(this.$route, this.$ssrContext);
   },
   async beforeRouteUpdate (to, from, next) {
     if (to.params.slug === from.params.slug) {
@@ -475,6 +496,17 @@ export default {
     }
 
     await this.onCategoryChangedHandler(to);
+
+    const rewriteRouteData = await checkForRewriteRoute(to);
+
+    if (rewriteRouteData) {
+      if (rewriteRouteData.params.targetPath === from.path) {
+        await this.onCategoryChangedHandler(from);
+      }
+
+      return next(rewriteRouteData);
+    }
+
     next();
   },
   async beforeRouteEnter (to, from, next) {
@@ -493,6 +525,12 @@ export default {
     } else {
       // Pure CSR, with no initial category state
       await composeInitialPageState(store, to);
+
+      const rewriteRouteData = await checkForRewriteRoute(to);
+
+      if (rewriteRouteData) {
+        return next(rewriteRouteData);
+      }
 
       if (page !== 1) {
         await store.dispatch('category-next/fetchPageProducts', { page, pageSize: THEME_PAGE_SIZE, route: to });
@@ -604,25 +642,42 @@ export default {
           categoryId: category.id || ''
         }
       );
+    },
+    getCanonicalUrl () {
+      const {
+        slug
+      } = this.getCurrentCategory;
+
+      const host = this.$ssrContext
+        ? getHostFromHeaders(this.$ssrContext.server.request.headers)
+        : window.location.host;
+      const resolvedRoute = this.$router.resolve({ name: 'category', params: { slug } });
+
+      return `https://${host}${resolvedRoute.href}`;
     }
   },
   metaInfo () {
-    const storeView = currentStoreView();
     const {
       meta_title,
       meta_description,
-      name,
-      slug
+      name
     } = this.getCurrentCategory;
-    const meta = meta_description
-      ? [
-        {
-          vmid: 'description',
-          name: 'description',
-          content: htmlDecode(meta_description)
-        }
-      ]
-      : [];
+    const description = meta_description ? {
+      vmid: 'description',
+      name: 'description',
+      content: htmlDecode(meta_description)
+    } : undefined;
+
+    const meta = [
+      {
+        rel: 'canonical',
+        href: this.getCanonicalUrl()
+      }
+    ]
+
+    if (description) {
+      meta.push(description);
+    }
 
     return {
       title: htmlDecode(meta_title || name),

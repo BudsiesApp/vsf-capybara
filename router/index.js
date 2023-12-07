@@ -97,6 +97,15 @@ let routes = [
   { name: 'plushToyAccessory-product', path: '/p/:parentSku/', component: Product },
   { name: 'petsiesStarProduct-product', path: '/p/:parentSku/', component: Product },
   { name: 'product', path: '/p/:parentSku/:childSku/', component: Product },
+  { name: 'virtual-product', path: '/p/:parentSku/', component: Product },
+  { name: 'bundle-product', path: '/p/:parentSku/', component: Product },
+  { name: 'simple-product', path: '/p/:parentSku/', component: Product },
+  { name: 'downloadable-product', path: '/p/:parentSku/', component: Product },
+  { name: 'grouped-product', path: '/p/:parentSku/', component: Product },
+  { name: 'configurable-product', path: '/p/:parentSku/:childSku/', component: Product },
+  { name: 'plushToyAccessory-product', path: '/p/:parentSku/', component: Product },
+  { name: 'petsiesStarProduct-product', path: '/p/:parentSku/', component: Product },
+  { name: 'product', path: '/p/:parentSku/:childSku/', component: Product },
   { name: 'category', path: '/c/:slug/', component: Category },
   {
     name: 'forevers-create',
@@ -368,7 +377,7 @@ let routes = [
     redirect: {
       name: 'category',
       params: {
-        slug: 'designs'
+        slug: 'photo-pillows-designs'
       }
     }
   },
@@ -378,7 +387,7 @@ let routes = [
     redirect: {
       name: 'category',
       params: {
-        slug: 'designs'
+        slug: 'photo-pillows-designs'
       }
     }
   },
@@ -445,7 +454,7 @@ let routes = [
     redirect: {
       name: 'category',
       params: {
-        slug: 'cut-out-design'
+        slug: 'blankets-cut-out-design'
       }
     }
   },
@@ -455,7 +464,7 @@ let routes = [
     redirect: {
       name: 'category',
       params: {
-        slug: 'renaissance-design'
+        slug: 'blankets-renaissance-design'
       }
     }
   },
