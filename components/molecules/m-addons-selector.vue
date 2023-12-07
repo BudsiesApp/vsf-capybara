@@ -65,26 +65,18 @@
                   <validation-provider
                     v-slot="{errors}"
                     tag="div"
+                    :ref="getFieldAnchorName(option.title)"
                     :name="`'${option.title}'`"
                     :rules="getValidationRuleForCustomOption(option)"
                   >
-                    <SfInput
-                      class="_custom-option-field"
-                      :value="getValueForCustomOption(option.product_sku, addon.optionValueId)"
-                      :label="option.title"
-                      :name="option.title"
-                      :error-message="errors[0]"
-                      :valid="!errors.length"
-                      :ref="getFieldAnchorName(option.title)"
-                      @input="onCustomOptionInput($event, option, addon.optionValueId)"
+                    <component
+                      :is="getComponentForCustomOption(option)"
+                      :value="getValueForCustomOption(option.sku, addon.optionValueId)"
+                      :option="option"
+                      :addon-option-value-id="addon.optionValueId"
+                      :errors="errors"
+                      @input="onCustomOptionInput"
                     />
-
-                    <div
-                      class="_characters-count"
-                      :class="{'-limit-reached': isLengthLimitReachedForCustomOption(option, addon.optionValueId)}"
-                    >
-                      {{ getCharactersCountForCustomOption(option, addon.optionValueId) }}
-                    </div>
                   </validation-provider>
                 </div>
               </div>
@@ -98,7 +90,6 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue';
-import { SfInput } from '@storefront-ui/vue';
 import urlParser from 'js-video-url-parser';
 import { ValidationProvider, extend } from 'vee-validate';
 import { required, max } from 'vee-validate/dist/rules';
@@ -111,6 +102,9 @@ import AddonOption from '../interfaces/addon-option.interface';
 import SelectedAddon from '../interfaces/selected-addon.interface';
 
 import MCheckbox from './m-checkbox.vue';
+import AddonsSelectorDropDownCustomOption from './addons-selector/drop-down-custom-option.vue'
+import AddonsSelectorFieldCustomOption from './addons-selector/field-custom-option.vue'
+import { CustomOptionType } from 'theme/interfaces/custom-option.type';
 
 extend('required', {
   ...required,
@@ -127,8 +121,9 @@ let instanceId = 0;
 export default Vue.extend({
   name: 'MAddonsSelector',
   components: {
+    AddonsSelectorDropDownCustomOption,
+    AddonsSelectorFieldCustomOption,
     MCheckbox,
-    SfInput,
     StreamingVideo,
     ValidationProvider
   },
@@ -170,17 +165,15 @@ export default Vue.extend({
     }
   },
   methods: {
-    getCharactersCountForCustomOption (
-      option: CustomOption,
-      addonOptionValueId: number
-    ): string {
-      const optionValue = this.getValueForCustomOption(
-        option.product_sku,
-        addonOptionValueId
-      );
-      const valueLength = optionValue.length;
-
-      return `${valueLength}/${option.max_characters}`;
+    getComponentForCustomOption (option: CustomOption) {
+      switch (option.type) {
+        case CustomOptionType.FIELD:
+          return AddonsSelectorFieldCustomOption;
+        case CustomOptionType.DROP_DOWN:
+          return AddonsSelectorDropDownCustomOption;
+        default:
+          throw new Error('Unsupported custom option type: ' + option.type);
+      }
     },
     getCustomOptionsForAddon (addon: AddonOption): CustomOption[] {
       return addon.customOptions || [];
@@ -212,11 +205,12 @@ export default Vue.extend({
       return result;
     },
     getValidationRuleForCustomOption (option: CustomOption): string {
-      let rules = '';
-
-      if (option.is_require) {
-        rules = 'required';
-      }
+      // All custom option should be required.
+      // But if option mark as required in Magento,
+      // API don't return related addon in `cart/update` request's response.
+      // To make it work, option should be marked as not required in Magento.
+      // So we can't check `option.is_required` to apply `required` rule.
+      let rules = 'required';
 
       if (option.max_characters) {
         const maxLengthRule = `max:${option.max_characters}`;
@@ -262,18 +256,6 @@ export default Vue.extend({
 
       return info.provider;
     },
-    isLengthLimitReachedForCustomOption (
-      option: CustomOption,
-      addonOptionValueId: number
-    ): boolean {
-      const optionValue = this.getValueForCustomOption(
-        option.product_sku,
-        addonOptionValueId
-      );
-      const valueLength = optionValue.length;
-
-      return valueLength >= option.max_characters;
-    },
     onSelectedValuesChange (selectedValues: number[]): void {
       const updatedValue: SelectedAddon[] = [];
 
@@ -293,14 +275,16 @@ export default Vue.extend({
       this.$emit('input', updatedValue);
     },
     onCustomOptionInput (
-      value: string,
-      option: CustomOption,
-      addonOptionValueId: number
-    ) {
-      if (value.length > option.max_characters) {
-        return;
+      {
+        value,
+        option,
+        addonOptionValueId
+      }: {
+        value: string,
+        option: CustomOption,
+        addonOptionValueId: number
       }
-
+    ) {
       const selectedAddonIndex = this.value.findIndex((selectedAddon) => selectedAddon.addonOptionValueId === addonOptionValueId);
 
       if (selectedAddonIndex === -1) {
@@ -315,7 +299,7 @@ export default Vue.extend({
         addonOptionValueId,
         optionsValues: {
           ...optionValues,
-          [option.product_sku]: value
+          [option.sku]: value
         }
       }
 
@@ -439,31 +423,6 @@ export default Vue.extend({
     }
   }
 
-  ._characters-count {
-    font-size: var(--font-sm);
-    margin-top: var(--spacer-2xs);
-
-    &.-limit-reached {
-      font-weight: 400;
-    }
-  }
-
-  ._custom-option-field {
-    --input-border-color: var(--c-white);
-
-    margin-top: var(--spacer-sm);
-
-    ::v-deep {
-      input {
-        position: relative;
-        opacity: 1;
-        left: 0;
-        width: 100%;
-        height: 100%;
-      }
-    }
-  }
-
   &.-disabled {
     ._item {
       --checkbox-cursor: default;
@@ -471,6 +430,10 @@ export default Vue.extend({
       opacity: 0.7;
       cursor: default;
     }
+  }
+
+  ._addon-option-item {
+    margin-top: var(--spacer-sm);
   }
 
   &.-skin-budsies {
