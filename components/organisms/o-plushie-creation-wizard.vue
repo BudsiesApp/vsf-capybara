@@ -66,6 +66,7 @@
               :disabled="isBusy"
               :show-size-selector="showSizeSelector"
               @next-step="nextStep"
+              v-if="activeProduct && plushieId"
             />
           </SfStep>
         </SfSteps>
@@ -113,6 +114,7 @@ import { PlushieType } from 'theme/interfaces/plushie.type';
 import getPlushieSkuByTypes from 'theme/helpers/get-plushie-sku-by-types.function';
 import PlushieProductType from 'theme/interfaces/plushie-product-type';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
+import getProductionTimeOptions from 'theme/helpers/get-production-time-options';
 
 import MProductTypeChooseStep from './OPlushieCreationWizard/m-product-type-choose-step.vue';
 import MImageUploadStep from './OPlushieCreationWizard/m-image-upload-step.vue';
@@ -129,6 +131,7 @@ import SizeOption from '../interfaces/size-option';
 import SelectedAddon from '../interfaces/selected-addon.interface';
 import AddonOption from '../interfaces/addon-option.interface';
 import ProductTypeButton from '../interfaces/product-type-button.interface';
+import ProductionTimeOption from '../interfaces/production-time-option.interface';
 
 export default defineComponent({
   name: 'OPlushieCreationWizard',
@@ -275,6 +278,17 @@ export default defineComponent({
     productionTimeBundleOption (): BundleOption | undefined {
       return this.getBundleOption('production time');
     },
+    productionTimeOptions (): ProductionTimeOption[] {
+      if (!this.productionTimeBundleOption || !this.activeProduct) {
+        return []
+      }
+
+      return getProductionTimeOptions(
+        this.productionTimeBundleOption,
+        this.activeProduct,
+        this.$store
+      );
+    },
     sizeBundleOption (): BundleOption | undefined {
       return this.getBundleOption('product');
     },
@@ -412,6 +426,12 @@ export default defineComponent({
 
       try {
         try {
+          const isPlushieExist = await this.checkExistingPlushie();
+
+          if (!isPlushieExist) {
+            return this.onPlushieRemovedBeforeAddedToCart();
+          }
+
           await this.$store.dispatch('cart/addItem', {
             productToAdd: Object.assign({}, this.product, {
               qty: this.customizeStepData.quantity,
@@ -555,6 +575,12 @@ export default defineComponent({
       });
     },
     async fillPlushieDataFromCartItem (existingCartItem: CartItem): Promise<void> {
+      const isPlushieExist = await this.checkExistingPlushie();
+
+      if (!isPlushieExist) {
+        return this.onCartItemPlushieRemoved();
+      }
+
       this.currentStep = 1;
 
       this.fillImageUploadStepDataFromCartItem(existingCartItem);
@@ -569,7 +595,45 @@ export default defineComponent({
       const persistedState = await foreversCreationWizardPersistedStateService.getStateByPlushieId(Number.parseInt(this.existingPlushieId));
 
       if (!persistedState) {
+        this.$router.push({ query: { ...this.$route.query, id: undefined } });
         return;
+      }
+
+      const isPlushieExist = await this.checkExistingPlushie();
+
+      if (!isPlushieExist && persistedState.productTypeData?.productSku) {
+        const product = await this.$store.dispatch('product/loadProduct', {
+          parentSku: persistedState.productTypeData.productSku,
+          childSku: null
+        });
+
+        const plushieCreationTask = await this.$store.dispatch(
+          'budsies/createNewPlushie',
+          { productId: product.id }
+        );
+
+        const plushieId = plushieCreationTask.result;
+
+        await foreversCreationWizardPersistedStateService.removeStateByPlushieId(persistedState.productTypeData.plushieId);
+
+        persistedState.productTypeData.plushieId = plushieId;
+        persistedState.imageUploadStepData = undefined;
+        persistedState.currentStepIndex = 1;
+
+        const saveStepDataPromises = [
+          foreversCreationWizardPersistedStateService.saveCurrentStepIndex(plushieId, persistedState.currentStepIndex),
+          foreversCreationWizardPersistedStateService.saveProductTypeStepData(plushieId, persistedState.productTypeData.productSku)
+        ];
+
+        if (persistedState.petInfoStepData) {
+          saveStepDataPromises.push(
+            foreversCreationWizardPersistedStateService.savePetInfoStepData(plushieId, persistedState.petInfoStepData)
+          );
+        }
+
+        await Promise.all(saveStepDataPromises);
+
+        this.$router.push({ query: { ...this.$route.query, id: plushieId.toString(10) } });
       }
 
       await this.fillProductTypeStepDataFromPersistedState(persistedState);
@@ -631,11 +695,16 @@ export default defineComponent({
         return;
       }
 
-      if (!productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id]) {
+      const selectedBundleOption = productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id];
+
+      if (!selectedBundleOption || selectedBundleOption.option_selections.length === 0) {
+        // when restoring cart item, lack of selected option mean that default production time was selected(since it became required)
+        // if default production time will have product, this assignment should be removed
+        this.customizeStepData.productionTime = this.productionTimeOptions.find((value) => !value.optionValueId)?.optionValueId;
         return;
       }
 
-      this.customizeStepData.productionTime = productOption.extension_attributes.bundle_options[this.productionTimeBundleOption.option_id].option_selections[0];
+      this.customizeStepData.productionTime = selectedBundleOption.option_selections[0];
     },
     fillSizeByPreselectedParams (type: string, size: string): void {
       let sizeSku: string;
@@ -855,6 +924,12 @@ export default defineComponent({
 
       try {
         try {
+          const isPlushieExist = await this.checkExistingPlushie();
+
+          if (!isPlushieExist) {
+            return this.onCartItemPlushieRemoved();
+          }
+
           await this.updateClientAndServerItem({
             product: Object.assign({}, this.existingCartItem, {
               qty: this.customizeStepData.quantity,
@@ -887,6 +962,98 @@ export default defineComponent({
       } finally {
         this.isSubmitting = false;
       }
+    },
+    async checkExistingPlushie (): Promise<boolean> {
+      if (!this.existingPlushieId) {
+        return false;
+      }
+
+      const response = await this.$store.dispatch(
+        'budsies/fetchPlushieById',
+        { plushieId: this.existingPlushieId }
+      );
+
+      if (response.resultCode !== 200 || !response.result) {
+        return false;
+      }
+
+      return true;
+    },
+    async onCartItemPlushieRemoved (): Promise<void> {
+      await this.$store.dispatch('cart/pullServerCart');
+      this.resetStepsData();
+      this.showRemovedCartItemNotification();
+      this.currentStep = 0;
+      this.$router.push({ query: { ...this.$route.query, id: undefined } });
+    },
+    async onPlushieRemovedBeforeAddedToCart (): Promise<void> {
+      const persistedState = await foreversCreationWizardPersistedStateService.getStateByPlushieId(Number.parseInt(this.existingPlushieId));
+
+      const plushieCreationTask = await this.$store.dispatch(
+        'budsies/createNewPlushie',
+        { productId: this.productTypeStepData.product }
+      );
+
+      const plushieId = plushieCreationTask.result;
+
+      if (persistedState && this.productTypeStepData.product) {
+        await foreversCreationWizardPersistedStateService.removeStateByPlushieId(
+          Number.parseInt(this.existingPlushieId)
+        );
+
+        const saveStepDataPromises = [
+          foreversCreationWizardPersistedStateService.saveCurrentStepIndex(plushieId, persistedState.currentStepIndex || 1),
+          foreversCreationWizardPersistedStateService.saveProductTypeStepData(plushieId, this.productTypeStepData.product.sku)
+        ];
+
+        if (persistedState.petInfoStepData) {
+          saveStepDataPromises.push(
+            foreversCreationWizardPersistedStateService.savePetInfoStepData(plushieId, persistedState.petInfoStepData)
+          );
+        }
+
+        await Promise.all(saveStepDataPromises);
+      }
+
+      this.$router.push({ query: { ...this.$route.query, id: plushieId.toString(10) } });
+
+      this.resetImageUploadStepData();
+      this.currentStep = 1;
+    },
+    resetImageUploadStepData (): void {
+      this.imageUploadStepData = {
+        uploadMethod: ImageUploadMethod.NOW,
+        customerImages: []
+      };
+    },
+    resetStepsData (): void {
+      this.productTypeStepData = {
+        plushieId: undefined,
+        product: undefined
+      };
+      this.resetImageUploadStepData();
+      this.petInfoStepData = {
+        name: undefined,
+        breed: undefined,
+        email: undefined
+      };
+      this.customizeStepData = {
+        bodypartsValues: {},
+        addons: [],
+        description: undefined,
+        productionTime: undefined,
+        size: undefined,
+        quantity: 1
+      };
+
+      this.$router.push({ query: { ...this.$route.query, id: undefined } });
+    },
+    showRemovedCartItemNotification (): void {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'warning',
+        message: i18n.t('Looks like this cart item was removed'),
+        action1: { label: i18n.t('OK') }
+      });
     }
   },
   async created (): Promise<void> {

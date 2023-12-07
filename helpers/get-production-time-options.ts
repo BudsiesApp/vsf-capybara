@@ -42,7 +42,7 @@ export default function getProductionTimeOptions (
       text: addon.text,
       isDomestic: addon.isDomestic,
       optionId: bundleOption.option_id,
-      optionValueId: addonOption
+      optionValueId: addonOption || 0
     })
   }
 
