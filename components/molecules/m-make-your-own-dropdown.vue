@@ -85,7 +85,12 @@ export default Vue.extend({
         },
         {
           label: 'Photo Pillows',
-          url: '/photo-pillows/'
+          url: {
+            name: 'category',
+            params: {
+              slug: 'photo-pillows-designs'
+            }
+          }
         },
         {
           label: this.$t('Shirts'),
@@ -141,7 +146,12 @@ export default Vue.extend({
         },
         {
           label: 'Accessories',
-          url: '/accessories/'
+          url: {
+            name: 'category',
+            params: {
+              slug: 'accessories-for-custom-products'
+            }
+          }
         },
         {
           label: 'Gift Boxes',
