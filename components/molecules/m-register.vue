@@ -20,7 +20,11 @@
         name="first-name"
         :label="$t('First name')"
         :valid="!$v.firstName.$error"
-        :error-message="$t('Field is required.')"
+        :error-message="
+          !$v.firstName.required
+            ? $t('Field is required.')
+            : $t('Field is not valid')
+        "
         class="form__element"
       />
 
@@ -29,7 +33,11 @@
         name="last-name"
         :label="$t('Last name')"
         :valid="!$v.lastName.$error"
-        :error-message="$t('Field is required.')"
+        :error-message="
+          !$v.lastName.required
+            ? $t('Field is required.')
+            : $t('Field is not valid')
+        "
         class="form__element"
       />
 
@@ -76,7 +84,8 @@ export default {
         repeatPassword: ''
       },
       firstName: '',
-      lastName: ''
+      lastName: '',
+      serverErrorFields: []
     };
   },
   methods: {
@@ -89,6 +98,7 @@ export default {
       this.openModal({ name: ModalList.Auth, payload: to })
     },
     async register () {
+      this.serverErrorFields = [];
       this.$v.$touch();
       const isPasswordValid = await this.$refs.password.getIsPasswordValid();
 
@@ -114,7 +124,7 @@ export default {
         .then(result => {
           this.$bus.$emit('notification-progress-stop');
           if (result.code !== 200) {
-            this.onFailure(result);
+            this.processError(result)
           } else {
             this.$store.dispatch('user/login', {
               username: this.email,
@@ -125,10 +135,7 @@ export default {
           }
         })
         .catch(err => {
-          this.onFailure({
-            result:
-              'Unexpected authorization error. Check your Network conection.'
-          });
+          this.onFailure('Unexpected authorization error. Check your Network conection.');
           this.$bus.$emit('notification-progress-stop');
           Logger.error(err, 'user')();
         });
@@ -140,24 +147,63 @@ export default {
         action1: { label: i18n.t('OK') }
       });
     },
-    onFailure (result) {
+    onFailure (message) {
       this.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
-        message: i18n.t(result.result),
+        message: i18n.t(message),
         action1: { label: i18n.t('OK') }
       });
+    },
+    processError (result) {
+      if (typeof result.result === 'string') {
+        this.onFailure(result.result);
+        return;
+      }
+
+      if (result.code !== 400 || !Array.isArray(result.result) || !result.result.length) {
+        this.onFailure('Something went wrong');
+        return;
+      }
+
+      this.processBadRequestErrors(result.result);
+    },
+    processBadRequestErrors (errorsList) {
+      for (const error of errorsList) {
+        if (!error.dataPath) {
+          continue;
+        }
+
+        const dataPath = error.dataPath.split('.');
+        const fieldName = dataPath[dataPath.length - 1];
+
+        if (!fieldName) {
+          continue;
+        }
+
+        this.serverErrorFields.push(fieldName);
+      }
+
+      this.$v.$touch();
+    },
+    serverErrorsValidator (fieldName) {
+      return !this.serverErrorFields.find((field) => fieldName === field);
     }
   },
-  validations: {
-    email: {
-      required,
-      email
-    },
-    firstName: {
-      required
-    },
-    lastName: {
-      required
+  validations () {
+    return {
+      email: {
+        required,
+        email,
+        serverErrors: () => this.serverErrorsValidator('email')
+      },
+      firstName: {
+        required,
+        serverErrors: () => this.serverErrorsValidator('firstname')
+      },
+      lastName: {
+        required,
+        serverErrors: () => this.serverErrorsValidator('lastname')
+      }
     }
   }
 }

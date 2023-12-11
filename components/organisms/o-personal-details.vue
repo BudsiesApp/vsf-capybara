@@ -18,6 +18,7 @@
       <SfInput
         v-model.trim="personalDetails.firstName"
         class="form__element form__element--half"
+        :class="{[vuelidateErrorClassName]: $v.personalDetails.firstName.$error}"
         name="first-name"
         :label="$t('First name')"
         :required="true"
@@ -28,6 +29,7 @@
       <SfInput
         v-model.trim="personalDetails.lastName"
         class="form__element form__element--half form__element--half-even"
+        :class="{[vuelidateErrorClassName]: $v.personalDetails.lastName.$error}"
         name="last-name"
         :label="$t('Last name')"
         :required="true"
@@ -38,6 +40,7 @@
       <SfInput
         v-model.trim="personalDetails.emailAddress"
         class="form__element"
+        :class="{[vuelidateErrorClassName]: $v.personalDetails.emailAddress.$error}"
         name="email-address"
         :label="$t('Email address')"
         :required="true"
@@ -59,7 +62,11 @@
           />
         </div>
         <template v-if="createAccount">
-          <m-password ref="password" v-model="passwordData" />
+          <m-password
+            ref="password"
+            v-model="passwordData"
+            :error-class-name="vuelidateErrorClassName"
+          />
 
           <div class="form__element form__group">
             <SfCheckbox
@@ -133,6 +140,7 @@ import { LAST_USED_CUSTOMER_EMAIL, LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUST
 import { CaliforniaPrivacyNoticeLink, PrivacyPolicyLink } from 'src/modules/true-vault';
 
 import { createSmoothscroll } from 'theme/helpers';
+import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
 
 import APromoCode from 'theme/components/atoms/a-promo-code'
 import MPassword from 'theme/components/molecules/m-password'
@@ -168,6 +176,11 @@ export default {
       required
     }
   },
+  data () {
+    return {
+      vuelidateErrorClassName
+    }
+  },
   beforeMount () {
     this.$bus.$on('checkout-after-load', this.fillLastUsedCustomerData)
   },
@@ -201,7 +214,11 @@ export default {
         isInvalid = this.$v.personalDetails.$invalid;
       }
 
-      if (isInvalid) return;
+      if (isInvalid) {
+        await this.$nextTick();
+        vuelidateScrollToFirstError(this.$el);
+        return;
+      }
 
       this.$store.commit(
         SET_LAST_USED_CUSTOMER_EMAIL,

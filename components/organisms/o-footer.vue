@@ -187,7 +187,12 @@ export default {
         },
         {
           name: this.$t('Photo Pillows'),
-          link: '/photo-pillows/'
+          link: {
+            name: 'category',
+            params: {
+              slug: 'photo-pillows-designs'
+            }
+          }
         },
         {
           name: this.$t('Custom Socks'),
@@ -233,7 +238,12 @@ export default {
         },
         {
           name: this.$t('Accessories'),
-          link: '/accessories/'
+          link: {
+            name: 'category',
+            params: {
+              slug: 'accessories-for-custom-products'
+            }
+          }
         },
         {
           name: this.$t('Gallery'),

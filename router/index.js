@@ -88,15 +88,24 @@ let routes = [
   { name: 'my-account', path: '/my-account/', component: MyAccount },
   { name: 'page-not-found', path: '*', component: ErrorPage },
   { name: 'error', path: '/error/', component: ErrorPage, meta: { layout: 'minimal' } },
-  { name: 'virtual-product', path: '/p/:parentSku/:slug/', component: Product },
-  { name: 'bundle-product', path: '/p/:parentSku/:slug/', component: Product },
-  { name: 'simple-product', path: '/p/:parentSku/:slug/', component: Product },
-  { name: 'downloadable-product', path: '/p/:parentSku/:slug/', component: Product },
-  { name: 'grouped-product', path: '/p/:parentSku/:slug/', component: Product },
-  { name: 'configurable-product', path: '/p/:parentSku/:slug/:childSku/', component: Product },
-  { name: 'plushToyAccessory-product', path: '/p/:parentSku/:slug/', component: Product },
-  { name: 'petsiesStarProduct-product', path: '/p/:parentSku/:slug/', component: Product },
-  { name: 'product', path: '/p/:parentSku/:slug/:childSku/', component: Product },
+  { name: 'virtual-product', path: '/p/:parentSku/', component: Product },
+  { name: 'bundle-product', path: '/p/:parentSku/', component: Product },
+  { name: 'simple-product', path: '/p/:parentSku/', component: Product },
+  { name: 'downloadable-product', path: '/p/:parentSku/', component: Product },
+  { name: 'grouped-product', path: '/p/:parentSku/', component: Product },
+  { name: 'configurable-product', path: '/p/:parentSku/:childSku/', component: Product },
+  { name: 'plushToyAccessory-product', path: '/p/:parentSku/', component: Product },
+  { name: 'petsiesStarProduct-product', path: '/p/:parentSku/', component: Product },
+  { name: 'product', path: '/p/:parentSku/:childSku/', component: Product },
+  { name: 'virtual-product', path: '/p/:parentSku/', component: Product },
+  { name: 'bundle-product', path: '/p/:parentSku/', component: Product },
+  { name: 'simple-product', path: '/p/:parentSku/', component: Product },
+  { name: 'downloadable-product', path: '/p/:parentSku/', component: Product },
+  { name: 'grouped-product', path: '/p/:parentSku/', component: Product },
+  { name: 'configurable-product', path: '/p/:parentSku/:childSku/', component: Product },
+  { name: 'plushToyAccessory-product', path: '/p/:parentSku/', component: Product },
+  { name: 'petsiesStarProduct-product', path: '/p/:parentSku/', component: Product },
+  { name: 'product', path: '/p/:parentSku/:childSku/', component: Product },
   { name: 'category', path: '/c/:slug/', component: Category },
   {
     name: 'forevers-create',
@@ -368,7 +377,7 @@ let routes = [
     redirect: {
       name: 'category',
       params: {
-        slug: 'custom-photo-pillows-80'
+        slug: 'photo-pillows-designs'
       }
     }
   },
@@ -378,7 +387,7 @@ let routes = [
     redirect: {
       name: 'category',
       params: {
-        slug: 'custom-photo-pillows-80'
+        slug: 'photo-pillows-designs'
       }
     }
   },
@@ -388,7 +397,7 @@ let routes = [
     redirect: {
       name: 'category',
       params: {
-        slug: 'accessories-for-custom-products-9'
+        slug: 'accessories-for-custom-products'
       }
     }
   },
@@ -445,7 +454,7 @@ let routes = [
     redirect: {
       name: 'category',
       params: {
-        slug: 'cut-out-design-114'
+        slug: 'blankets-cut-out-design'
       }
     }
   },
@@ -455,7 +464,7 @@ let routes = [
     redirect: {
       name: 'category',
       params: {
-        slug: 'renaissance-design-115'
+        slug: 'blankets-renaissance-design'
       }
     }
   },
