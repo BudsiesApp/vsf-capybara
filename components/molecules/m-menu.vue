@@ -169,7 +169,7 @@ export default Vue.extend({
           url: {
             name: 'category',
             params: {
-              slug: 'custom-photo-pillows-80'
+              slug: 'photo-pillows-designs'
             }
           }
         },
@@ -240,7 +240,7 @@ export default Vue.extend({
           url: {
             name: 'category',
             params: {
-              slug: 'petsies-accessories-11'
+              slug: 'petsies-accessories'
             }
           }
         },
