@@ -20,6 +20,10 @@
         :slides-to-scroll="1"
         :focus-on-select="true"
       >
+        <template #prevArrow="{currentSlide}">
+          <button v-show="currentSlide != 0" />
+        </template>
+
         <div
           v-for="(image, index) in images"
           :key="JSON.stringify(image.thumb)"
@@ -104,7 +108,7 @@ export default Vue.extend({
       fCurrentIndex: undefined as number | undefined,
       fShouldInitThumbnailsSlider: false,
       fWindowResizeHandler: undefined as () => void | undefined,
-      fIsClodZoomInitialized: false,
+      fIsCloudZoomInitialized: false,
       slidesToShow: 5
     }
   },
@@ -292,10 +296,6 @@ export default Vue.extend({
     flex-direction: row;
     justify-content: space-between;
 
-    &.-show-arrows {
-      padding: 0 var(--spacer-base);
-    }
-
     ._thumbnails {
         width: 15.5%;
 
@@ -338,9 +338,15 @@ export default Vue.extend({
             }
           }
 
-          .slick-prev:before,
-          .slick-next:before {
-            color: var(--c-text)
+          .slick-prev,
+          .slick-next {
+            height: 100%;
+            background: rgba(245, 245,245, 0.7);
+            z-index: 2;
+
+            &:before {
+              color: var(--c-text)
+            }
           }
 
           .slick-prev {
@@ -351,6 +357,14 @@ export default Vue.extend({
             right: -22px;
           }
         }
+    }
+
+    &.-show-arrows {
+      &.-horizontal ._thumbnails {
+        margin: 0.5em auto 0;
+        width: calc(100% - 40px);
+        padding-top: 16.59%;
+      }
     }
 
     ._stage {
