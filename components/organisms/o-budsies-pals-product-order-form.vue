@@ -247,9 +247,7 @@
             {{ $t('Terms of Service') }},
           </router-link>
 
-          <router-link to="/privacy-policy/" target="_blank">
-            {{ $t('Privacy Policy') }},
-          </router-link>
+          <privacy-policy-link />
 
           {{ $t('and') }}
           <a href="http://support.budsies.com/support/solutions/folders/5000249005" target="_blank">{{ $t('Refund Policy') }}</a>.
@@ -265,6 +263,8 @@
             {{ submitButtonText }}
           </SfButton>
         </div>
+
+        <california-privacy-notice-link />
       </form>
     </validation-observer>
   </div>
@@ -287,6 +287,7 @@ import {
   Hospital
 } from 'src/modules/budsies';
 import { usePersistedEmail } from 'src/modules/persisted-customer-data';
+import { CaliforniaPrivacyNoticeLink, PrivacyPolicyLink } from 'src/modules/true-vault';
 import Product from 'core/modules/catalog/types/Product';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage, ServerError } from 'src/modules/shared';
@@ -337,6 +338,8 @@ export default defineComponent({
     }
   },
   components: {
+    CaliforniaPrivacyNoticeLink,
+    PrivacyPolicyLink,
     SfInput,
     SfSelect,
     ValidationObserver,

@@ -88,10 +88,12 @@
 
       <p class="_copyright">
         © 2023 {{ $t('Budsies PR LLC. All Rights Reserved') }}. |
-        <router-link to="/privacy-policy/">
-          {{ $t('Privacy Policy') }}
-        </router-link>
+        <privacy-policy-link />
+
+        <california-privacy-notice-link text="| California Privacy Notice" />
       </p>
+
+      <opt-out-link />
     </div>
   </footer>
 </template>
@@ -105,10 +107,14 @@ import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import get from 'lodash-es/get';
 
 import { BaseImage } from 'src/modules/budsies';
+import { CaliforniaPrivacyNoticeLink, OptOutLink, PrivacyPolicyLink } from 'src/modules/true-vault';
 
 export default {
   name: 'OFooter',
   components: {
+    CaliforniaPrivacyNoticeLink,
+    OptOutLink,
+    PrivacyPolicyLink,
     SfButton,
     SfFooter,
     SfList,
@@ -416,7 +422,17 @@ export default {
     flex-basis: auto;
   }
 
-  ._copyright {
+  ._copyright,
+  .opt-out-link,
+  .california-privacy-notice-link {
+    --privacy-notice-link-font-size: var(--font-2xs);
+    --privacy-notice-link-color: var(--c-footer-gray);
+    --privacy-notice-link-margin: 0;
+    --privacy-notice-display: inline;
+
+    --opt-out-link-font-size: var(--font-2xs);
+    --opt-out-link-color: var(--c-footer-gray);
+
     color: var(--c-footer-gray);
     font-size: var(--font-2xs);
 

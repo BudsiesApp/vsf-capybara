@@ -268,6 +268,8 @@
                 </div>
               </div>
             </div>
+
+            <california-privacy-notice-link />
           </form>
         </validation-observer>
       </div>
@@ -307,7 +309,8 @@ import CartItem from 'core/modules/cart/types/CartItem';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { Bodypart, BodypartOption, Dictionary, ExtraPhotoAddon, ProductValue } from 'src/modules/budsies';
 import ServerError from 'src/modules/shared/types/server-error';
-import { CustomerImage, getProductDefaultPrice, InjectType } from 'src/modules/shared';
+import { CustomerImage, getProductDefaultPrice } from 'src/modules/shared';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import { useBundleOption } from 'theme/helpers/use-bundle-options';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
@@ -415,6 +418,7 @@ export default defineComponent({
     }
   },
   components: {
+    CaliforniaPrivacyNoticeLink,
     ValidationObserver,
     ValidationProvider,
     ACustomPrice,

@@ -350,14 +350,14 @@
             {{ $t('Terms of Service') }},
           </router-link>
 
-          <router-link to="/privacy-policy/" target="_blank">
-            {{ $t('Privacy Policy') }},
-          </router-link>
+          <privacy-policy-link />
 
           {{ $t('and') }}
           <a href="http://support.budsies.com/support/solutions/folders/5000249005" target="_blank">{{ $t('Refund Policy') }}</a>.
           {{ $t('I understand that Budsies happily takes care of all tears, defects, and shipping damage with either a refund or a repair.') }}
         </div>
+
+        <california-privacy-notice-link />
       </form>
     </validation-observer>
 
@@ -427,6 +427,7 @@ import { useFormValidation } from 'theme/helpers/use-form-validation';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 import { useProductionTimeSelector } from 'theme/helpers/use-production-time-selector';
 import { usePersistedEmail } from 'src/modules/persisted-customer-data';
+import { CaliforniaPrivacyNoticeLink, PrivacyPolicyLink } from 'src/modules/true-vault';
 
 import AddonOption from '../interfaces/addon-option.interface';
 import SelectedAddon from '../interfaces/selected-addon.interface';
@@ -495,6 +496,8 @@ export default defineComponent({
     }
   },
   components: {
+    CaliforniaPrivacyNoticeLink,
+    PrivacyPolicyLink,
     SfInput,
     MBodypartOptionConfigurator,
     ValidationObserver,

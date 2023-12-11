@@ -209,6 +209,8 @@
       >
         {{ $t('Add to Cart') }}
       </SfButton>
+
+      <california-privacy-notice-link />
     </div>
   </validation-observer>
 </template>
@@ -226,6 +228,7 @@ import { SfCheckbox, SfButton, SfInput, SfSelect } from '@storefront-ui/vue';
 
 import GiftCardOrderFormData from 'theme/components/interfaces/gift-card-order-form-data.interface';
 import GiftCardTemplate from 'src/modules/gift-card/types/GiftCardTemplate.interface';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
 
@@ -244,6 +247,7 @@ extend('email', {
 export default Vue.extend({
   name: 'OGiftCardOrderForm',
   components: {
+    CaliforniaPrivacyNoticeLink,
     ACustomProductQuantity,
     SfButton,
     SfCheckbox,

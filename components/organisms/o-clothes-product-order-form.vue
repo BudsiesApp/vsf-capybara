@@ -257,6 +257,8 @@
                   {{ $t('Add to Cart') }}
                 </SfButton>
               </div>
+
+              <california-privacy-notice-link />
             </div>
           </form>
         </validation-observer>
@@ -293,7 +295,8 @@ import { getProductGallery as getGalleryByProduct, setBundleProductOptionsAsync 
 
 import { ProductValue, Dictionary, ExtraPhotoAddon } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
-import { CustomerImage, getProductDefaultPrice, InjectType, ServerError } from 'src/modules/shared';
+import { CustomerImage, getProductDefaultPrice, ServerError } from 'src/modules/shared';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 
@@ -363,6 +366,7 @@ export default defineComponent({
     }
   },
   components: {
+    CaliforniaPrivacyNoticeLink,
     SfButton,
     SfHeading,
     SfSelect,

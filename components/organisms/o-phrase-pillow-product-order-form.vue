@@ -493,6 +493,8 @@
                     <div class="_submit-disclaimer _helper-text">
                       I have seen and approve the Live Preview of my design.
                     </div>
+
+                    <california-privacy-notice-link />
                   </div>
                 </template>
 
@@ -562,6 +564,7 @@ import {
   ProductValue,
   Dictionary
 } from 'src/modules/budsies';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import {
   FileProcessingRepositoryFactory,
@@ -663,6 +666,7 @@ export interface DesignSelectedEventPayload {
 export default defineComponent({
   name: 'OPhrasePillowProductOrderForm',
   components: {
+    CaliforniaPrivacyNoticeLink,
     SfButton,
     SfInput,
     SfHeading,
@@ -2008,6 +2012,10 @@ export default defineComponent({
 
   ._form-errors {
     margin-top: var(--spacer-sm);
+  }
+
+  .california-privacy-notice-link {
+    --privacy-notice-link-display: inline;
   }
 
   @include for-desktop {
