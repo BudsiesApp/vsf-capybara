@@ -24,6 +24,8 @@
     &.sf-select--underlined {
         &.-invalid {
             --select-border-color: var(--c-danger);
+            --select-error-message-color: var(--c-danger-variant);
+            --input-error-message-font-weight: var(--font-light);
         }
     }
 

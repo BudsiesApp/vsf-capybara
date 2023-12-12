@@ -40,8 +40,6 @@ export default {
       sizes: '16x16'
     },
     { rel: 'manifest', href: '/assets/manifest.json' },
-    { rel: 'preconnect', href: 'https://fonts.googleapis.com/', crossorigin: 'anonymous' },
-    { rel: 'preconnect', href: 'https://fonts.gstatic.com/', crossorigin: 'anonymous' },
     { rel: 'preconnect', href: 'https://cdn.jsdelivr.net/', crossorigin: 'anonymous' }
   ],
   script: [
