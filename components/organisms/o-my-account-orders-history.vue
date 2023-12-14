@@ -54,13 +54,26 @@
                 >
                   {{ $t('VIEW') }}
                 </SfButton>
+
+                <SfButton
+                  class="sf-button--text color-secondary"
+                  :disabled="isReorderInProgress"
+                  @click.native.stop="reorder(row.order_id.value)"
+                >
+                  {{ $t('REORDER') }}
+                </SfButton>
               </SfTableData>
             </SfTableRow>
           </SfTable>
         </template>
 
         <template v-else>
-          <OMyAccountOrderDetails :order="activeOrder" @close="setActiveOrderById(null)" />
+          <OMyAccountOrderDetails
+            :order="activeOrder"
+            :is-reorder-in-progress="isReorderInProgress"
+            @close="setActiveOrderById(null)"
+            @reorder-button-clicked="reorder"
+          />
         </template>
       </SfTab>
     </SfTabs>
@@ -99,7 +112,8 @@ export default {
         { title: this.$t('Amount'), class: ColumnClass.AMOUNT },
         { title: this.$t('Status'), class: ColumnClass.STATUS }
       ],
-      activeOrder: null
+      activeOrder: null,
+      isReorderInProgress: false
     };
   },
   computed: {
@@ -147,6 +161,26 @@ export default {
     },
     onStartShoppingButtonClick () {
       this.$router.push('/');
+    },
+    async reorder (orderIncrementId) {
+      if (this.isReorderInProgress) {
+        return;
+      }
+
+      this.isReorderInProgress = true;
+
+      const order = this.ordersHistory.find((item) => item.increment_id === orderIncrementId);
+
+      try {
+        if (!this.$store.getters['cart/getCartToken']) {
+          await this.$store.dispatch('cart/connect', {});
+        }
+
+        await this.$store.dispatch('budsies/reorder', { orderId: order.id });
+        await this.$store.dispatch('cart/pullServerCart', true);
+      } finally {
+        this.isReorderInProgress = false;
+      }
     }
   }
 }
