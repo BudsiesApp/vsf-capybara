@@ -343,10 +343,11 @@ export default Vue.extend({
             height: 100%;
             background: rgba(245, 245,245, 0.7);
             z-index: 2;
-            width: 26px;
+            width: 35px;
 
             &:before {
-              color: var(--c-text)
+              color: var(--c-text);
+              font-size: 25px;
             }
           }
 
