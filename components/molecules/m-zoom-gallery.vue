@@ -343,6 +343,7 @@ export default Vue.extend({
             height: 100%;
             background: rgba(245, 245,245, 0.7);
             z-index: 2;
+            width: 26px;
 
             &:before {
               color: var(--c-text)
@@ -350,21 +351,15 @@ export default Vue.extend({
           }
 
           .slick-prev {
-            left: -22px;
+            left: 0;
+            padding: 0 2px 0 4px;
           }
 
           .slick-next {
-            right: -22px;
+            right: 0;
+            padding: 0 4px 0 2px;
           }
         }
-    }
-
-    &.-show-arrows {
-      &.-horizontal ._thumbnails {
-        margin: 0.5em auto 0;
-        width: calc(100% - 40px);
-        padding-top: 16.59%;
-      }
     }
 
     ._stage {
