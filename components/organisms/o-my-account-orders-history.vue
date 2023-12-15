@@ -55,13 +55,14 @@
                   {{ $t('VIEW') }}
                 </SfButton>
 
-                <SfButton
-                  class="sf-button--text color-secondary"
-                  :disabled="isReorderInProgress"
+                <m-spinner-button
+                  button-class="sf-button--text color-secondary"
+                  :show-spinner="isReorderInProgressFor(row.order_id.value)"
+                  :disabled="isReorderButtonDisabled"
                   @click.native.stop="reorder(row.order_id.value)"
                 >
                   {{ $t('REORDER') }}
-                </SfButton>
+                </m-spinner-button>
               </SfTableData>
             </SfTableRow>
           </SfTable>
@@ -70,7 +71,7 @@
         <template v-else>
           <OMyAccountOrderDetails
             :order="activeOrder"
-            :is-reorder-in-progress="isReorderInProgress"
+            :is-reorder-in-progress="isReorderInProgressFor(row.order_id.value)"
             @close="setActiveOrderById(null)"
             @reorder-button-clicked="reorder"
           />
@@ -85,6 +86,8 @@ import UserOrder from '@vue-storefront/core/modules/order/components/UserOrdersH
 import OMyAccountOrderDetails from 'theme/components/organisms/o-my-account-order-details';
 import { SfTabs, SfTable, SfButton } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals';
+
+import MSpinnerButton from '../molecules/m-spinner-button.vue';
 
 const ColumnClass = {
   ORDER_ID: '_order-id',
@@ -101,6 +104,7 @@ export default {
     SfTabs,
     SfTable,
     SfButton,
+    MSpinnerButton,
     OMyAccountOrderDetails
   },
   data () {
@@ -113,7 +117,7 @@ export default {
         { title: this.$t('Status'), class: ColumnClass.STATUS }
       ],
       activeOrder: null,
-      isReorderInProgress: false
+      reorderingOrderIncrementId: undefined
     };
   },
   computed: {
@@ -139,13 +143,16 @@ export default {
             columnClass: ColumnClass.AMOUNT
           },
           'status': {
-            value: this.$options.filters.capitalize(item.status),
+            value: this.$options.filters.capitalize(item.status_label),
             columnClass: ColumnClass.STATUS
           }
         })
       });
 
       return rows;
+    },
+    isReorderButtonDisabled () {
+      return !!this.reorderingOrderIncrementId;
     }
   },
   methods: {
@@ -163,11 +170,11 @@ export default {
       this.$router.push('/');
     },
     async reorder (orderIncrementId) {
-      if (this.isReorderInProgress) {
+      if (this.reorderingOrderIncrementId) {
         return;
       }
 
-      this.isReorderInProgress = true;
+      this.reorderingOrderIncrementId = orderIncrementId;
 
       const order = this.ordersHistory.find((item) => item.increment_id === orderIncrementId);
 
@@ -178,9 +185,13 @@ export default {
 
         await this.$store.dispatch('budsies/reorder', { orderId: order.id });
         await this.$store.dispatch('cart/pullServerCart', true);
+        this.$router.push({ name: 'detailed-cart' });
       } finally {
-        this.isReorderInProgress = false;
+        this.reorderingOrderIncrementId = undefined;
       }
+    },
+    isReorderInProgressFor (orderIncrementId) {
+      return this.reorderingOrderIncrementId && this.reorderingOrderIncrementId === orderIncrementId;
     }
   }
 }
