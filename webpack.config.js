@@ -59,11 +59,49 @@ module.exports = function (config, { isClient }) {
             name: 'sfui',
             priority: 2
           },
+          filepond: {
+            test: /filepond/,
+            name: 'filepond',
+            priority: 2
+          },
+          slickCarousel: {
+            test: /vue-slick-carousel/,
+            name: 'vue-slick-carousel',
+            priority: 2
+          },
+          vue2Datepicker: {
+            test: /vue2-datepicker/,
+            name: 'vue2-datepicker',
+            priority: 2
+          },
+          jquery: {
+            test: /jquery/,
+            name: 'jquery',
+            priority: 2
+          },
+          vueMultiselect: {
+            test: /vue-multiselect/,
+            name: 'vue-multiselect',
+            priority: 2
+          },
+          croppie: {
+            test: /croppie/,
+            name: 'croppie',
+            priority: 2
+          },
+          braintreeWeb: {
+            test: /braintree-web/,
+            name: 'braintree-web',
+            chunks: 'initial',
+            enforce: true,
+            priority: 2
+          },
           vendorInitial: {
             // create 'vendor' group from initial packages from node_modules except Storefront UI
             test: /node_modules/,
             name: 'vendor-initial',
             chunks: 'initial',
+            enforce: true,
             priority: 1
           },
           vendorAsync: {
