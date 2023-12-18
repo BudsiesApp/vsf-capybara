@@ -71,7 +71,7 @@
         <template v-else>
           <OMyAccountOrderDetails
             :order="activeOrder"
-            :is-reorder-in-progress="isReorderInProgressFor(row.order_id.value)"
+            :is-reorder-in-progress="isReorderInProgressFor(activeOrder.increment_id)"
             @close="setActiveOrderById(null)"
             @reorder-button-clicked="reorder"
           />
