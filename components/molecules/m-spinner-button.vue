@@ -2,7 +2,7 @@
   <div class="m-spinner-button">
     <SfButton
       :class="buttonClass"
-      :disabled="showSpinner"
+      :disabled="isDisabled"
       @click="$emit('click')"
     >
       <ALoadingSpinner v-show="showSpinner" />
@@ -28,11 +28,20 @@ export default Vue.extend({
     showSpinner: {
       type: Boolean,
       default: false
+    },
+    disabled: {
+      type: Boolean,
+      default: false
     }
   },
   components: {
     ALoadingSpinner,
     SfButton
+  },
+  computed: {
+    isDisabled (): boolean {
+      return this.showSpinner || this.disabled;
+    }
   }
 });
 </script>
@@ -54,6 +63,16 @@ export default Vue.extend({
       --button-border-radius: 50%;
 
       display: var(--spinner-button-display, flex);
+    }
+
+    &.sf-button--text {
+      display: var(--spinner-button-display, flex);
+      justify-content: flex-end;
+      align-items: center;
+
+      .a-loading-spinner {
+        --loader-spinner-stroke: var(--c-primary);
+      }
     }
   }
 }
