@@ -184,17 +184,17 @@ export default {
           await this.$store.dispatch('cart/connect', {});
         }
 
-        const { result, resultCode } = await this.$store.dispatch('budsies/reorder', { orderId: order.id });
+        const { resultCode } = await this.$store.dispatch('budsies/reorder', { orderId: order.id });
 
         if (resultCode !== 200) {
-          this.processError(result)
+          this.onFailure();
           return;
         }
 
         await this.$store.dispatch('cart/pullServerCart', true);
         this.$router.push({ name: 'detailed-cart' });
       } catch (error) {
-        this.onFailure(this.$t('Something went wrong'));
+        this.onFailure();
       } finally {
         this.reorderingOrderIncrementId = undefined;
       }
@@ -202,25 +202,12 @@ export default {
     isReorderInProgressFor (orderIncrementId) {
       return this.reorderingOrderIncrementId && this.reorderingOrderIncrementId === orderIncrementId;
     },
-    onFailure (message) {
+    onFailure () {
       this.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
-        message: message,
+        message: i18n.t('Something went wrong'),
         action1: { label: i18n.t('OK') }
       });
-    },
-    processError (result) {
-      if (typeof result === 'string') {
-        this.onFailure(result);
-        return;
-      }
-
-      if (!result || !result.errorMessage) {
-        this.onFailure(this.$t('Something went wrong'));
-        return;
-      }
-
-      this.onFailure(result.errorMessage);
     }
   }
 }
