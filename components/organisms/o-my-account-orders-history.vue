@@ -82,6 +82,7 @@
 </template>
 
 <script>
+import i18n from '@vue-storefront/i18n';
 import UserOrder from '@vue-storefront/core/modules/order/components/UserOrdersHistory';
 import OMyAccountOrderDetails from 'theme/components/organisms/o-my-account-order-details';
 import { SfTabs, SfTable, SfButton } from '@storefront-ui/vue';
@@ -183,15 +184,43 @@ export default {
           await this.$store.dispatch('cart/connect', {});
         }
 
-        await this.$store.dispatch('budsies/reorder', { orderId: order.id });
+        const { result, resultCode } = await this.$store.dispatch('budsies/reorder', { orderId: order.id });
+
+        if (resultCode !== 200) {
+          this.processError(result)
+          return;
+        }
+
         await this.$store.dispatch('cart/pullServerCart', true);
         this.$router.push({ name: 'detailed-cart' });
+      } catch (error) {
+        this.onFailure(this.$t('Something went wrong'));
       } finally {
         this.reorderingOrderIncrementId = undefined;
       }
     },
     isReorderInProgressFor (orderIncrementId) {
       return this.reorderingOrderIncrementId && this.reorderingOrderIncrementId === orderIncrementId;
+    },
+    onFailure (message) {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'danger',
+        message: message,
+        action1: { label: i18n.t('OK') }
+      });
+    },
+    processError (result) {
+      if (typeof result === 'string') {
+        this.onFailure(result);
+        return;
+      }
+
+      if (!result || !result.errorMessage) {
+        this.onFailure(this.$t('Something went wrong'));
+        return;
+      }
+
+      this.onFailure(result.errorMessage);
     }
   }
 }

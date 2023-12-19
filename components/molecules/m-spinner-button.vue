@@ -67,7 +67,7 @@ export default Vue.extend({
 
     &.sf-button--text {
       display: var(--spinner-button-display, flex);
-      justify-content: center;
+      justify-content: flex-end;
       align-items: center;
 
       .a-loading-spinner {
