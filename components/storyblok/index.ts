@@ -8,7 +8,7 @@ export default function registerComponents () {
   add('image', () => import(/* webpackChunkName: "vsf-storyblok-common-components" */ './Image.vue'))
   add('driver', () => import(/* webpackChunkName: "vsf-storyblok-common-components" */ './Driver.vue'))
   add('homepage_intro_section', () => import('./HomepageIntroSection.vue'))
-  add('slider', () => import(/* webpackChunkName: "vsf-storyblok-common-components" */ './Slider.vue'))
+  add('slider', () => import('./Slider.vue'))
   add('video', () => import(/* webpackChunkName: "vsf-storyblok-common-components" */ './Video.vue'))
   add('promotion_image_banner', () => import(/* webpackChunkName: "vsf-storyblok-common-components" */ './PromoCampaignBanner.vue'))
   add('textarea', () => import(/* webpackChunkName: "vsf-storyblok-common-components" */ './Textarea.vue'))
