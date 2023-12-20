@@ -338,27 +338,55 @@ export default Vue.extend({
             }
           }
 
-          .slick-prev,
-          .slick-next {
-            height: 100%;
-            background: rgba(245, 245,245, 0.7);
-            z-index: 2;
-            width: 35px;
+          .slick-slider {
+            .slick-prev,
+            .slick-next {
+              height: 100%;
+              width: 35px;
+              background: rgba(245, 245,245, 0.7);
+              z-index: 2;
 
-            &:before {
-              color: var(--c-text);
-              font-size: 25px;
+              &:before {
+                color: var(--c-text);
+                font-size: 25px;
+                display: inline-block;
+              }
             }
-          }
 
-          .slick-prev {
-            left: 0;
-            padding: 0 2px 0 4px;
-          }
+            .slick-prev {
+              left: 0;
+              padding: 0 2px 0 4px;
+            }
 
-          .slick-next {
-            right: 0;
-            padding: 0 4px 0 2px;
+            .slick-next {
+              right: 0;
+              padding: 0 4px 0 2px;
+            }
+
+            &.slick-vertical {
+              .slick-prev,
+              .slick-next {
+                height: 35px;
+                width: 100%;
+                transform: none;
+
+                &::before {
+                  transform: rotate(90deg);
+                }
+              }
+
+              .slick-prev {
+                top: 0;
+                bottom: auto;
+                padding: 4px 0 2px;
+              }
+
+              .slick-next {
+                bottom: 0;
+                top: auto;
+                padding: 2px 0 4px;
+              }
+            }
           }
         }
     }
