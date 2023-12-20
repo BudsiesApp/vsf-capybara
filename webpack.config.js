@@ -92,7 +92,7 @@ module.exports = function (config, { isClient }) {
           braintreeWeb: {
             test: /braintree-web/,
             name: 'braintree-web',
-            chunks: 'initial',
+            chunks: 'async',
             enforce: true,
             priority: 2
           },
