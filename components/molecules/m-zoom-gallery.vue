@@ -4,7 +4,8 @@
     class="m-zoom-gallery"
     :class="{
       '-horizontal': isHorizontalThumbnails,
-      '-slider-disabled': !shouldInitThumbnailsSlider
+      '-slider-disabled': !shouldInitThumbnailsSlider,
+      '-show-arrows': showArrows
     }"
   >
     <div
@@ -13,12 +14,16 @@
       <component
         :is="shouldInitThumbnailsSlider ? 'VueSlickCarousel' : 'div'"
         class="_carousel"
-        :arrows="false"
+        :arrows="showArrows"
         :vertical="!isHorizontalThumbnails"
-        :slides-to-show="5"
+        :slides-to-show="slidesToShow"
         :slides-to-scroll="1"
         :focus-on-select="true"
       >
+        <template #prevArrow="{currentSlide}">
+          <button v-show="currentSlide != 0" />
+        </template>
+
         <div
           v-for="(image, index) in images"
           :key="JSON.stringify(image.thumb)"
@@ -103,7 +108,8 @@ export default Vue.extend({
       fCurrentIndex: undefined as number | undefined,
       fShouldInitThumbnailsSlider: false,
       fWindowResizeHandler: undefined as () => void | undefined,
-      fIsClodZoomInitialized: false
+      fIsCloudZoomInitialized: false,
+      slidesToShow: 5
     }
   },
   computed: {
@@ -143,6 +149,9 @@ export default Vue.extend({
     },
     shouldInitThumbnailsSlider: function (): boolean {
       return this.fShouldInitThumbnailsSlider;
+    },
+    showArrows (): boolean {
+      return this.images.length > this.slidesToShow;
     }
   },
   mounted () {
@@ -306,7 +315,8 @@ export default Vue.extend({
             width: 100%;
         }
 
-        ::v-deep .slick-list {
+        ::v-deep {
+          .slick-list {
             .slick-track {
                 height: auto !important;
             }
@@ -326,6 +336,58 @@ export default Vue.extend({
                 }
               }
             }
+          }
+
+          .slick-slider {
+            .slick-prev,
+            .slick-next {
+              height: 100%;
+              width: 35px;
+              background: rgba(245, 245,245, 0.7);
+              z-index: 2;
+
+              &:before {
+                color: var(--c-text);
+                font-size: 25px;
+                display: inline-block;
+              }
+            }
+
+            .slick-prev {
+              left: 0;
+              padding: 0 2px 0 4px;
+            }
+
+            .slick-next {
+              right: 0;
+              padding: 0 4px 0 2px;
+            }
+
+            &.slick-vertical {
+              .slick-prev,
+              .slick-next {
+                height: 35px;
+                width: 100%;
+                transform: none;
+
+                &::before {
+                  transform: rotate(90deg);
+                }
+              }
+
+              .slick-prev {
+                top: 0;
+                bottom: auto;
+                padding: 4px 0 2px;
+              }
+
+              .slick-next {
+                bottom: 0;
+                top: auto;
+                padding: 2px 0 4px;
+              }
+            }
+          }
         }
     }
 
