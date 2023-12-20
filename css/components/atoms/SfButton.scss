@@ -71,6 +71,14 @@
             &:hover, &:focus {
                 --button-color: var(--c-link-hover);
             }
+
+            &[disabled] {
+                --button-color: var(--c-text-muted);
+
+                &:hover, &:focus {
+                    --button-color: var(--c-text-muted);
+                }
+            }
         }
 
         &:disabled {
