@@ -59,6 +59,14 @@
           :value="order.grand_total | price"
           class="sf-property--full-width property-total"
         />
+
+        <SfButton
+          class="_reorder"
+          :disabled="isReorderInProgress"
+          @click="$emit('reorder-button-clicked', order.increment_id)"
+        >
+          {{ $t('REORDER') }}
+        </SfButton>
       </div>
     </div>
 
@@ -129,6 +137,7 @@ import { getThumbnailPath } from '@vue-storefront/core/helpers'
 import {
   SfArrow,
   SfBadge,
+  SfButton,
   SfHeading,
   SfProperty
 } from '@storefront-ui/vue';
@@ -141,6 +150,7 @@ export default {
     OOrderContent,
     SfArrow,
     SfBadge,
+    SfButton,
     SfHeading,
     SfProperty
   },
@@ -149,6 +159,10 @@ export default {
       type: Object,
       required: true,
       default: () => {}
+    },
+    isReorderInProgress: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
@@ -208,11 +222,11 @@ export default {
   }
 
   ._back {
-    margin-right: var(--spacer-lg);
+    margin-right: var(--spacer-base);
   }
 
   ._status {
-    margin-left: var(--spacer-lg);
+    margin-left: var(--spacer-base);
   }
 
   ._products {
@@ -235,6 +249,11 @@ export default {
     div {
       width: 10rem;
     }
+  }
+
+  ._reorder {
+    margin-top: var(--spacer-base);
+    width: 100%;
   }
 
   .o-order-content {
@@ -293,6 +312,14 @@ export default {
       flex-direction: row;
       flex-wrap: wrap;
       justify-content: flex-start;
+    }
+
+    ._back {
+      margin-right: var(--spacer-lg);
+    }
+
+    ._status {
+      margin-left: var(--spacer-lg);
     }
 
     ._section {
