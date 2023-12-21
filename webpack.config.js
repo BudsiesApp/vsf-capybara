@@ -96,14 +96,6 @@ module.exports = function (config, { isClient }) {
             enforce: true,
             priority: 2
           },
-          vendorInitial: {
-            // create 'vendor' group from initial packages from node_modules except Storefront UI
-            test: /node_modules/,
-            name: 'vendor-initial',
-            chunks: 'initial',
-            enforce: true,
-            priority: 1
-          },
           vendorAsync: {
             // create 'vendor' group from async packages from node_modules except Storefront UI
             test: /node_modules/,
