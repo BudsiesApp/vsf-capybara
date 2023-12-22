@@ -50,66 +50,7 @@ module.exports = function (config, { isClient }) {
   const clientConfig = isClient ? {
     optimization: {
       splitChunks: {
-        chunks: 'all',
-        cacheGroups: {
-          // cache groups are handled basing on priority - given module will belong to the cache group with a higher priority
-          sfui: {
-            // create 'sfui' group from Storefront UI only
-            test: /@storefront-ui|@glidejs/,
-            name: 'sfui',
-            priority: 2
-          },
-          filepond: {
-            test: /filepond/,
-            name: 'filepond',
-            priority: 2
-          },
-          slickCarousel: {
-            test: /vue-slick-carousel/,
-            name: 'vue-slick-carousel',
-            priority: 2
-          },
-          vue2Datepicker: {
-            test: /vue2-datepicker/,
-            name: 'vue2-datepicker',
-            priority: 2
-          },
-          jquery: {
-            test: /jquery/,
-            name: 'jquery',
-            priority: 2
-          },
-          vueMultiselect: {
-            test: /vue-multiselect/,
-            name: 'vue-multiselect',
-            priority: 2
-          },
-          croppie: {
-            test: /croppie/,
-            name: 'croppie',
-            priority: 2
-          },
-          braintreeWeb: {
-            test: /braintree-web/,
-            name: 'braintree-web',
-            chunks: 'async',
-            enforce: true,
-            priority: 2
-          },
-          vendorAsync: {
-            // create 'vendor' group from async packages from node_modules except Storefront UI
-            test: /node_modules/,
-            name: 'vendor-async',
-            chunks: 'async',
-            priority: 1
-          },
-          searchAdapter: {
-            // create one 'vsf-search-adapter' group
-            test: /vsf-search-adapter/,
-            name: 'vsf-search-adapter',
-            priority: 1
-          }
-        }
+        chunks: 'all'
       }
     }
   } : {}
