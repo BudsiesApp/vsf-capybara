@@ -15,10 +15,8 @@ import { forStoryblok } from 'src/modules/vsf-storyblok-module/mappingFallback'
 import { extendStore } from '@vue-storefront/core/helpers'
 import { StorefrontModule, registerModule } from '@vue-storefront/core/lib/modules'
 import { BudsiesModule } from 'src/modules/budsies'
-import { Braintree } from 'src/modules/payment-braintree'
 import { PromotionPlatformModule } from 'src/modules/promotion-platform'
 import { GiftCardModule } from 'src/modules/gift-card'
-import { AmazonPay } from 'src/modules/vsf-amazon-pay'
 import { PaymentBackendMethodsModule } from 'src/modules/payment-backend-methods'
 import { PaymentAffirm } from 'src/modules/payment-affirm';
 import { UrlRewriteModule, mappingFallbackForUrlRewrite } from 'src/modules/url-rewrite';
@@ -71,7 +69,6 @@ export function registerClientModules () {
   registerModule(extendUrlModule)
   registerModule(BudsiesModule)
   registerModule(GoogleTagManagerModule)
-  registerModule(Braintree)
   registerModule(PromotionPlatformModule)
   registerModule(GiftCardModule)
   registerModule(PaymentBackendMethodsModule)
