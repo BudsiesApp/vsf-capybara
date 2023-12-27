@@ -13,7 +13,7 @@
         <OTopNavigation />
         <OHeader class="_main-header" />
       </div>
-      <OMicrocart />
+
       <div class="content">
         <slot />
       </div>
@@ -33,7 +33,6 @@
 <script>
 import { mapActions } from 'vuex';
 import OHeader from 'theme/components/organisms/o-header';
-import OMicrocart from 'theme/components/organisms/o-microcart';
 import OFooter from 'theme/components/organisms/o-footer';
 import OModal from 'theme/components/organisms/o-modal';
 import OTopNavigation from 'theme/components/organisms/o-top-navigation';
@@ -54,7 +53,6 @@ export default {
   components: {
     PromotionPlatformBanner,
     OHeader,
-    OMicrocart,
     OFooter,
     MLoader,
     ONotification,
