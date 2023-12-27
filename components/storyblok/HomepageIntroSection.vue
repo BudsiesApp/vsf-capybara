@@ -12,6 +12,7 @@
         :alt="itemData.title"
         :title="itemData.title"
         class="_image"
+        :lazy="false"
         v-if="itemData.image.filename"
       />
     </div>

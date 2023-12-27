@@ -46,7 +46,9 @@ import { htmlDecode } from '@vue-storefront/core/filters';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
+import { registerModule } from '@vue-storefront/core/lib/modules'
 
+import { Braintree } from 'src/modules/payment-braintree';
 import { CartEvents } from 'src/modules/shared';
 
 import OBillingAddress from 'theme/components/organisms/o-billing-address';
@@ -139,6 +141,7 @@ export default {
     }
   },
   beforeMount () {
+    registerModule(Braintree)
     this.$bus.$on('order-after-placed', this.onOrderAfterPlacedHandler);
     EventBus.$on(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
     EventBus.$emit(CartEvents.BEGIN_CHECKOUT);
