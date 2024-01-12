@@ -6,16 +6,9 @@
 
         padding: var(--button-padding, calc(var(--spacer-sm) - var(--button-border-width, 0)) calc(var(--spacer-sm) * 2));
 
-        &:hover, &:focus {
+        &:hover, &:focus, &:active {
             --button-background: var(--c-light);
-        }
-
-        &:hover {
             --button-color: var(--c-white);
-        }
-
-        &:active {
-            --button-background: var(--c-secondary-variant);
         }
 
         &.sf-button--text {
