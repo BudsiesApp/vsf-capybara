@@ -4,6 +4,8 @@
         --c-secondary: var(--c-light-variant);
         --button-border-width: 2px;
 
+        padding: var(--button-padding, calc(var(--spacer-sm) - var(--button-border-width, 0)) calc(var(--spacer-sm) * 2));
+
         &:hover, &:focus {
             --button-background: var(--c-light);
         }
@@ -42,5 +44,9 @@
 
     @media (max-width: $mobile-max) {
         padding: var(--button-padding, var(--spacer-sm) calc(var(--spacer-sm) * 1.5));
+
+        &.color-secondary {
+            padding: var(--button-padding, calc(var(--spacer-sm) - var(--button-border-width, 0)) calc(var(--spacer-sm) * 1.5));
+        }
     }
 }
