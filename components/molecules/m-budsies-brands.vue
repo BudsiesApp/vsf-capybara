@@ -84,7 +84,7 @@ export default Vue.extend({
 
   ._slogan {
     text-align: center;
-    color: var(--c-light-variant);
+    color: var(--brands-slogan-color, var(--c-light-variant));
     font-family: var(--font-family-secondary);
     font-size: var(--font-xl);
     margin: var(--spacer-xl) 0 var(--spacer-sm);
