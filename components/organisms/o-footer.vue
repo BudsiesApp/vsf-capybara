@@ -43,15 +43,7 @@
         </SfList>
       </SfFooterColumn>
 
-      <div class="o-footer__slogan">
-        {{ $t('Proud member of the Budsies family of huggable brands.') }}
-      </div>
-
-      <div class="_brand-section">
-        <a class="_brand-item -selfies" target="_blank" :href="selfiesLink" />
-        <a class="_brand-item -budsies" target="_blank" :href="budsiesLink" />
-        <a class="_brand-item -petsies" target="_blank" :href="petsiesLink" />
-      </div>
+      <MBudsiesBrands />
 
       <div class="_copyright">
         {{ $t('Copyright {year}. Budsies PR LLC. All Rights Reserved.', {year: new Date().getFullYear()}) }}
@@ -62,22 +54,21 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import MNewsletterSubscription from 'theme/components/molecules/m-newsletter-subscription.vue';
-import { SfFooter, SfList, SfMenuItem, SfInput, SfButton } from '@storefront-ui/vue';
+import { SfFooter, SfList, SfMenuItem } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
 import config from 'config';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import get from 'lodash-es/get';
 
+import MBudsiesBrands from '../molecules/m-budsies-brands';
+
 export default {
   name: 'OFooter',
   components: {
-    MNewsletterSubscription,
+    MBudsiesBrands,
     SfFooter,
     SfList,
-    SfMenuItem,
-    SfInput,
-    SfButton
+    SfMenuItem
   },
   props: {
     subscribeEmail: {
@@ -136,15 +127,6 @@ export default {
           ]
         }
       };
-    },
-    selfiesLink () {
-      return `https://${config.budsies.budsiesStoreDomain}/selfies-services/`;
-    },
-    budsiesLink () {
-      return `https://${config.budsies.budsiesStoreDomain}/`;
-    },
-    petsiesLink () {
-      return `https://${config.budsies.petsiesStoreDomain}/`;
     }
   },
   methods: {
@@ -180,19 +162,6 @@ export default {
     margin: -55px auto 0;
     height: 112px;
     width: 100px;
-  }
-
-  &__slogan {
-    text-align: center;
-    color: var(--c-light-variant);
-    font-family: var(--font-family-secondary);
-    font-size: var(--font-xl);
-    margin: var(--spacer-xl) 0 var(--spacer-sm);
-    width: 100%;
-  }
-
-  .m-newsletter-subscription {
-    margin-top: var(--spacer-xs);
   }
 
   ::v-deep .sf-menu-item {
@@ -235,38 +204,8 @@ export default {
     }
   }
 
-  ._brand-section {
-    display: flex;
-    flex-wrap: nowrap;
-    flex-direction: row;
-    justify-content: center;
-    margin-bottom: var(--spacer-base);
-    width: 100%;
-
-    ._brand-item {
-      align-self: center;
-      flex: 0 0 calc(25% - 1px);
-      height: 60px;
-      width: 28%;
-      background-size: 50%;
-      background-position: center;
-      background-repeat: no-repeat;
-
-      &.-budsies {
-        background-image: url(/assets/footer/budsies-logo.png);
-      }
-
-      &.-petsies {
-        background-image: url(/assets/footer/petsies-logo.png);
-      }
-
-      &.-selfies {
-        background-image: url(/assets/footer/selfies-logo.png);
-      }
-    }
-  }
-
   ._copyright {
+    margin-top: var(--spacer-base);
     font-size: var(--font-xs);
     text-align: center;
     width: 100%;
