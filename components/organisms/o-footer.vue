@@ -79,6 +79,8 @@
           </a>
         </SfButton>
       </div>
+
+      <MBudsiesBrands />
     </SfFooter>
 
     <div class="_foot">
@@ -109,12 +111,15 @@ import get from 'lodash-es/get';
 import { BaseImage } from 'src/modules/budsies';
 import { CaliforniaPrivacyNoticeLink, OptOutLink, PrivacyPolicyLink } from 'src/modules/true-vault';
 
+import MBudsiesBrands from '../molecules/m-budsies-brands';
+
 export default {
   name: 'OFooter',
   components: {
     CaliforniaPrivacyNoticeLink,
     OptOutLink,
     PrivacyPolicyLink,
+    MBudsiesBrands,
     SfButton,
     SfFooter,
     SfList,
