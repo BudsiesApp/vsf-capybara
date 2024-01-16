@@ -92,18 +92,15 @@ export default Vue.extend({
   }
 
   ._brand-section {
-    display: flex;
-    flex-wrap: nowrap;
-    flex-direction: row;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacer-sm);
     width: 100%;
 
     ._brand-item {
-      align-self: center;
-      flex: 0 0 calc(25% - 1px);
       height: 60px;
-      width: 28%;
-      background-size: 65%;
+      width: 100%;
+      background-size: 50%;
       background-position: center;
       background-repeat: no-repeat;
 
@@ -129,11 +126,9 @@ export default Vue.extend({
     }
   }
 
-  @include for-desktop {
+  @media(min-width: $tablet-min) {
     ._brand-section {
-      ._brand-item {
-        background-size: 50%;
-      }
+      grid-template-columns: repeat(4, 1fr);
     }
   }
 }
