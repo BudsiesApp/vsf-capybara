@@ -127,6 +127,8 @@ $forms-color-placeholder: #a09999;
     --c-button-border-active: var(--_c-light-secondary);
     --c-button-background-disabled: #ea86b4;
 
+    --brands-slogan-color: var(--c-text);
+
     @include assign-color-variants(--c-primary, --_c-blue-primary);
     --c-primary-variant: var(--_c-blue-primary-darken);
     @include assign-color-variants(--c-secondary, --_c-blue-secondary);
