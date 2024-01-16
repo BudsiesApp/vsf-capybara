@@ -50,6 +50,8 @@
         />
       </div>
 
+      <MBudsiesBrands />
+
       <div class="_additional-information">
         <router-link to="//support.mypetsies.com/support/home" target="_blank" exact>
           <SfMenuItem
@@ -84,15 +86,16 @@ import config from 'config';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import get from 'lodash-es/get';
 
+import MBudsiesBrands from '../molecules/m-budsies-brands.vue';
+
 export default {
   name: 'OFooter',
   components: {
+    MBudsiesBrands,
     MNewsletterSubscription,
     SfFooter,
     SfList,
-    SfMenuItem,
-    SfInput,
-    SfButton
+    SfMenuItem
   },
   props: {
     subscribeEmail: {
