@@ -1,7 +1,7 @@
 <template>
   <div class="m-budsies-brands">
     <div class="_slogan">
-      {{ $t('Proud member of the Budsies family of huggable brands.') }}
+      {{ $t('Explore Our Other Huggable Brands') }}
     </div>
 
     <div class="_brand-section">
@@ -24,7 +24,6 @@ import config from 'config';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 
 enum BrandCode {
-  SELFIES = 'selfies',
   BUDSIES = 'budsies',
   PETSIES = 'petsies',
   BULKORDERS = 'bulkorders',
@@ -42,7 +41,6 @@ export default Vue.extend({
   computed: {
     brandLinks (): Record<BrandCode, string> {
       return {
-        [BrandCode.SELFIES]: `https://${config.budsies.budsiesStoreDomain}/selfies-services/`,
         [BrandCode.BUDSIES]: `https://${config.budsies.budsiesStoreDomain}/`,
         [BrandCode.PETSIES]: `https://${config.budsies.petsiesStoreDomain}/`,
         [BrandCode.BULKORDERS]: `https://${config.budsies.bulkordersStoreDomain}/`,
@@ -72,8 +70,6 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-@import "~@storefront-ui/shared/styles/helpers/breakpoints";
-
 .m-budsies-brands {
   display: flex;
   flex-direction: column;
@@ -92,14 +88,15 @@ export default Vue.extend({
   }
 
   ._brand-section {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacer-sm);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     width: 100%;
 
     ._brand-item {
       height: 60px;
-      width: 100%;
+      min-width: 200px;
+      flex-basis: 27%;
       background-size: 50%;
       background-position: center;
       background-repeat: no-repeat;
@@ -112,10 +109,6 @@ export default Vue.extend({
         background-image: url(/assets/footer/petsies-logo.png);
       }
 
-      &.-selfies {
-        background-image: url(/assets/footer/selfies-logo.png);
-      }
-
       &.-waggables {
         background-image: url(/assets/footer/waggables-logo.png);
       }
@@ -123,12 +116,6 @@ export default Vue.extend({
       &.-bulkorders {
         background-image: url(/assets/footer/bulkorders-logo.png);
       }
-    }
-  }
-
-  @media(min-width: $tablet-min) {
-    ._brand-section {
-      grid-template-columns: repeat(4, 1fr);
     }
   }
 }
