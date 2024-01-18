@@ -64,6 +64,8 @@
         />
       </div>
 
+      <MBudsiesBrands />
+
       <div class="_contact-us">
         <div class="_title">
           {{ $t('Have Questions?') }}
@@ -79,8 +81,6 @@
           </a>
         </SfButton>
       </div>
-
-      <MBudsiesBrands />
     </SfFooter>
 
     <div class="_foot">
