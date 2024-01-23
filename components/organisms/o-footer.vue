@@ -47,6 +47,8 @@
         />
       </div>
 
+      <MBudsiesBrands />
+
       <div class="_additional-information">
         <router-link to="//support.waggables.com/" target="_blank" exact>
           <SfMenuItem
@@ -75,21 +77,22 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import MNewsletterSubscription from 'theme/components/molecules/m-newsletter-subscription.vue';
-import { SfFooter, SfList, SfMenuItem, SfInput, SfButton } from '@storefront-ui/vue';
+import { SfFooter, SfList, SfMenuItem } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
 import config from 'config';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import get from 'lodash-es/get';
 
+import MBudsiesBrands from '../molecules/m-budsies-brands';
+
 export default {
   name: 'OFooter',
   components: {
+    MBudsiesBrands,
     MNewsletterSubscription,
     SfFooter,
     SfList,
-    SfMenuItem,
-    SfInput,
-    SfButton
+    SfMenuItem
   },
   props: {
     subscribeEmail: {
