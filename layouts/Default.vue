@@ -4,22 +4,42 @@
     :class="{ 'storyblok-preview-mode': isStoryblokPreviewMode }"
   >
     <MLoader />
-    <OMobileMenu />
+
+    <LazyHydrate
+      never
+      :trigger-hydration="shouldHydrateMobileMenu"
+    >
+      <OMobileMenu />
+    </LazyHydrate>
+
     <div id="viewport">
       <div class="_floating-elements">
         <PromotionPlatformBanner />
         <OTopNavigation />
-        <OHeader class="_main-header" />
+
+        <LazyHydrate
+          never
+          :trigger-hydration="shouldHydrateMainHeader"
+        >
+          <OHeader class="_main-header" />
+        </LazyHydrate>
       </div>
 
       <div class="content">
         <slot />
       </div>
-      <OFooter
-        class="default-layout_footer"
-        :class="{ '-show-for-medium-up': hideFooterOnMobile }"
-      />
-      <OModal />
+
+      <LazyHydrate when-visible>
+        <OFooter
+          class="default-layout_footer"
+          :class="{ '-show-for-medium-up': hideFooterOnMobile }"
+        />
+      </LazyHydrate>
+
+      <LazyHydrate never :trigger-hydration="shouldHydrateModals">
+        <OModal />
+      </LazyHydrate>
+
       <ONotification />
       <MCookieNotification details-link="/privacy-policy" />
       <MOfflineBadge />
@@ -29,7 +49,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import OHeader from 'theme/components/organisms/o-header';
 import OFooter from 'theme/components/organisms/o-footer';
 import OModal from 'theme/components/organisms/o-modal';
@@ -44,6 +64,8 @@ import Head from 'theme/head';
 import config from 'config';
 import { ModalList } from 'theme/store/ui/modals';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
+import { mapMobileObserver, unMapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
+import LazyHydrate from 'vue-lazy-hydration';
 
 import PromotionPlatformBanner from 'src/modules/promotion-platform/components/Banner.vue';
 
@@ -58,14 +80,20 @@ export default {
     MOfflineBadge,
     OTopNavigation,
     OModal,
-    OMobileMenu
+    OMobileMenu,
+    LazyHydrate
   },
   data () {
     return {
-      quicklink: null
+      quicklink: null,
+      shouldHydrateMainHeader: false,
+      shouldHydrateMobileMenu: false,
+      shouldHydrateModals: false
     };
   },
   computed: {
+    ...mapGetters('ui', ['activeModals']),
+    ...mapMobileObserver(),
     quicklinkEnabled () {
       return (
         typeof config.quicklink !== 'undefined' && config.quicklink.enabled
@@ -89,15 +117,24 @@ export default {
     });
 
     this.$bus.$on('offline-order-confirmation', this.onOrderConfirmation);
+
+    if (!this.isMobile) {
+      this.shouldHydrateMainHeader = true;
+    }
   },
-  mounted () {
+  async mounted () {
     if (!isServer && this.quicklinkEnabled) {
       this.quicklink = require('quicklink');
       this.quicklink.listen();
     }
     this.$store.dispatch('ui/checkWebpSupport');
+
+    await this.$nextTick();
+
+    this.shouldHydrateMobileMenu = true;
   },
   beforeDestroy () {
+    unMapMobileObserver();
     this.$bus.$off('offline-order-confirmation', this.onOrderConfirmation);
   },
   methods: {
@@ -106,6 +143,13 @@ export default {
     }),
     onOrderConfirmation (payload) {
       this.openModal({ name: ModalList.OrderConfirmation, payload });
+    }
+  },
+  watch: {
+    activeModals (value) {
+      if (value && !!value.length) {
+        this.shouldHydrateModals = true;
+      }
     }
   },
   metaInfo: Head
