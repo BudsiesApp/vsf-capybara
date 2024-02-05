@@ -2,8 +2,8 @@
   <router-link
     :to="localizedRoute('/')"
     :title="$t('Home Page')"
+    :style="style"
     class="a-logo"
-    :style="{'--aspect-ratio': aspectRatio}"
   >
     <BaseImage
       :src="logoSrc"
@@ -33,6 +33,9 @@ export default {
     aspectRatio () {
       return this.isSmall ? 4.34 : 2.22;
     },
+    style () {
+      return { '--aspect-ratio': this.aspectRatio.toString() }
+    },
     defaultTitle () {
       return get(currentStoreView(), 'seo.defaultTitle', config.seo.defaultTitle);
     },
@@ -49,5 +52,9 @@ export default {
   display: inline-flex;
   flex: 1;
   max-width: calc(var(--image-height) * var(--aspect-ratio, 2.22));
+
+  .base-image {
+    --image-placeholder-background-color: transparent;
+  }
 }
 </style>
