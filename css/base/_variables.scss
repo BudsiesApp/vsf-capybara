@@ -4,14 +4,13 @@
 $line-height-base: 1.34;
 
 $font-size-base: 16px;
-$font-size-base-mobile: 15px;
 
 $font-family-base: "Titillium Web", sans-serif;
 $font-family-secondary: "Gotham-Rounded-Medium";
 
 // override storefront-ui variables
 :root {
-    --font-size-base: #{$font-size-base-mobile};
+    --font-size-base: #{$font-size-base};
     // font-family
     --font-family-primary: #{$font-family-base};
     --font-family-secondary: #{$font-family-secondary};
@@ -92,7 +91,6 @@ $font-family-secondary: "Gotham-Rounded-Medium";
     --c-danger-variant: var(--_c-red-primary);
 
     @media (min-width: $tablet-min) {
-      --font-size-base: #{$font-size-base};
       --button-font-size: var(--font-base);
     }
 
