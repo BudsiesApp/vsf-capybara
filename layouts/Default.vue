@@ -18,8 +18,7 @@
         <OTopNavigation />
 
         <LazyHydrate
-          never
-          :trigger-hydration="shouldHydrateMainHeader"
+          when-visible
         >
           <OHeader class="_main-header" />
         </LazyHydrate>
@@ -86,14 +85,12 @@ export default {
   data () {
     return {
       quicklink: null,
-      shouldHydrateMainHeader: false,
       shouldHydrateMobileMenu: false,
       shouldHydrateModals: false
     };
   },
   computed: {
     ...mapGetters('ui', ['activeModals']),
-    ...mapMobileObserver(),
     quicklinkEnabled () {
       return (
         typeof config.quicklink !== 'undefined' && config.quicklink.enabled
@@ -117,10 +114,6 @@ export default {
     });
 
     this.$bus.$on('offline-order-confirmation', this.onOrderConfirmation);
-
-    if (!this.isMobile) {
-      this.shouldHydrateMainHeader = true;
-    }
   },
   async mounted () {
     if (!isServer && this.quicklinkEnabled) {
@@ -134,7 +127,6 @@ export default {
     this.shouldHydrateMobileMenu = true;
   },
   beforeDestroy () {
-    unMapMobileObserver();
     this.$bus.$off('offline-order-confirmation', this.onOrderConfirmation);
   },
   methods: {
@@ -181,7 +173,6 @@ export default {
 
     ._main-header {
       flex-grow: 1;
-      display: flex;
       flex-direction: column;
       overflow: hidden;
     }
