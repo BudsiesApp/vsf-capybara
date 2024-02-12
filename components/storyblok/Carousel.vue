@@ -7,10 +7,10 @@
 
     <o-carousel
       :autoplay="itemData.autoplay"
-      :per-view="perView"
-      :per-view-mobile="perViewMobile"
-      :gap="gap"
-      :peek="peek"
+      :autoplay-delay="autoplayDelay"
+      :slides-per-view="slidesPerView"
+      :slides-per-view-mobile="slidesPerViewMobile"
+      :space-between="spaceBetween"
       :show-counter="itemData.showCounter"
       :items="carouselItems"
     >
@@ -41,6 +41,9 @@ export default Blok.extend({
     itemData (): CarouselData {
       return this.item as CarouselData;
     },
+    autoplayDelay (): number | undefined {
+      return this.itemData.autoplayDelay ? Number(this.itemData.autoplayDelay) * 1000 : undefined;
+    },
     carouselItems (): OCarouselItem[] {
       return this.itemData.items.map((item) => {
         return {
@@ -49,17 +52,14 @@ export default Blok.extend({
         }
       });
     },
-    gap (): number | undefined {
-      return this.itemData.gap ? Number(this.itemData.gap) : undefined;
+    spaceBetween (): number | undefined {
+      return this.itemData.spaceBetween ? Number(this.itemData.spaceBetween) : undefined;
     },
-    peek (): number | undefined {
-      return this.itemData.peek ? Number(this.itemData.peek) : undefined;
+    slidesPerView (): number {
+      return Number(this.itemData.slidesPerView);
     },
-    perView (): number {
-      return Number(this.itemData.perView);
-    },
-    perViewMobile (): number | undefined {
-      return this.itemData.perView ? Number(this.itemData.perView) : undefined;
+    slidesPerViewMobile (): number | undefined {
+      return this.itemData.slidesPerViewMobile ? Number(this.itemData.slidesPerViewMobile) : undefined;
     }
   }
 })

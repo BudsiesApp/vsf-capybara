@@ -4,8 +4,8 @@ export interface CarouselData extends ItemData {
   items: any[],
   autoplay: boolean,
   showCounter: boolean,
-  perView: number,
-  perViewMobile?: number,
-  gap?: number,
-  peek?: number
+  slidesPerView: number,
+  slidesPerViewMobile?: number,
+  spaceBetween?: number,
+  autoplayDelay?: number
 }

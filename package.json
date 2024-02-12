@@ -36,6 +36,7 @@
     "lodash.debounce": "^4.0.8",
     "lodash.throttle": "^4.1.1",
     "quicklink": "^2.0.0-alpha",
+    "swiper": "^11.0.6",
     "storefront-query-builder": "https://github.com/vuestorefront/storefront-query-builder.git",
     "supports-webp": "^2.0.1",
     "uuid": "^8.0.0",
