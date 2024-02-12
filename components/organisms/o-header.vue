@@ -138,6 +138,8 @@ export default {
   --header-navigation-item-margin: 0;
   --header-navigation-item-padding: var(--spacer-lg) var(--spacer-xs);
   --header-navigation-item-color: var(--c-dark);
+
+  display: none;
   box-sizing: border-box;
 
   ._header {
@@ -210,6 +212,7 @@ export default {
 
   @include for-desktop {
     --header-box-shadow: 0px -2px 10px rgba(var(--c-dark-base), 0.15);
+    display: flex;
 
     .sf-header {
       display: block;
