@@ -111,7 +111,10 @@ export default Vue.extend({
     } {
       return {
         [BreakpointValue.MEDIUM]: {
-          slidesPerView: this.slidesPerView
+          slidesPerView: Math.min(
+            this.slidesPerView,
+            this.maxSlidesPerView
+          )
         }
       }
     },
@@ -135,7 +138,8 @@ export default Vue.extend({
       }
     },
     defaultSlidesPerView (): number {
-      return this.slidesPerViewMobile ? this.slidesPerViewMobile : this.slidesPerView;
+      let defaultSlidesPerView = this.slidesPerViewMobile ? this.slidesPerViewMobile : this.slidesPerView;
+      return Math.min(defaultSlidesPerView, this.maxSlidesPerView);
     },
     style (): Record<string, string> {
       const style: Record<string, string> = {};
@@ -154,6 +158,9 @@ export default Vue.extend({
     },
     counterText (): string {
       return `${this.currentSlideIndex + 1} / ${this.items.length}`;
+    },
+    maxSlidesPerView (): number {
+      return this.items.length;
     }
   },
   mounted (): void {
@@ -187,11 +194,12 @@ export default Vue.extend({
         return;
       }
 
-      this.swiper.off('afterInit');
+      this.swiper.off('init');
       this.swiper.off('realIndexChange');
       this.swiper.destroy();
+      this.swiper = undefined;
     },
-    updateSwiper (options?: SwiperOptions) {
+    updateSwiper (options?: SwiperOptions): void {
       if (!this.swiper) {
         return
       }
@@ -201,32 +209,47 @@ export default Vue.extend({
       }
 
       this.swiper.update();
+    },
+    async reInitSwiper (): Promise<void> {
+      if (this.swiper) {
+        this.destroySwiper();
+      }
+
+      // Need wait for Vue updated elements.
+      // Otherwise it may lead to incorrect slides order.
+      await this.$nextTick();
+
+      this.initSwiper();
     }
   },
   watch: {
-    autoplay () {
+    autoplay (val) {
       this.updateSwiper({ autoplay: this.autoplayOptions })
+
+      if (!this.swiper) {
+        return;
+      }
+
+      if (val) {
+        this.swiper.autoplay.start();
+      } else {
+        this.swiper.autoplay.stop();
+      }
     },
     autoplayDelay () {
       this.updateSwiper({ autoplay: this.autoplayOptions })
     },
     slidesPerView () {
-      this.updateSwiper({
-        breakpoints: this.breakpoints,
-        slidesPerView: this.defaultSlidesPerView
-      });
+      this.reInitSwiper();
     },
     slidesPerViewMobile () {
-      this.updateSwiper({
-        breakpoints: this.breakpoints,
-        slidesPerView: this.defaultSlidesPerView
-      });
+      this.reInitSwiper();
     },
     spaceBetween (val) {
       this.updateSwiper({ spaceBetween: val })
     },
     'items.length' () {
-      this.updateSwiper()
+      this.reInitSwiper();
     },
     isMobile () {
       this.updateSwiper();
