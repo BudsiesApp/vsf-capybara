@@ -12,6 +12,7 @@
           ref="gallery"
           class="_gallery"
           :images="galleryImages"
+          :lazy-load-stage-image="false"
         />
       </div>
 

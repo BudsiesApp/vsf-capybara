@@ -3,6 +3,7 @@
     <div class="product-gallery">
       <MZoomGallery
         :images="gallery"
+        :lazy-load-stage-image="false"
       />
       <MSocialSharing
         class="sharing-button"

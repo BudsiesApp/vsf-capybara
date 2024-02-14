@@ -8,7 +8,11 @@
           class="_product-name-mobile sf-heading--left"
         />
 
-        <m-zoom-gallery class="_gallery" :images="galleryImages" />
+        <m-zoom-gallery
+          class="_gallery"
+          :images="galleryImages"
+          :lazy-load-stage-image="false"
+        />
       </div>
 
       <div class="_form-container">

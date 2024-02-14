@@ -4,5 +4,6 @@ import { ThumbnailsPosition } from './thumbnails-position.value';
 
 export default interface SliderData extends ItemData {
   slider_items: SliderItem[],
-  thumbnails_position: ThumbnailsPosition
+  thumbnails_position: ThumbnailsPosition,
+  delay_image_load: boolean
 }
