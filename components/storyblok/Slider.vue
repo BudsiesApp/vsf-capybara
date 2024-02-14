@@ -8,6 +8,7 @@
     <MZoomGallery
       :images="slides"
       :horizontal-thumbnails="isHorizontalThumbnails"
+      :lazy-load-stage-image="itemData.delay_image_load"
     />
   </div>
 </template>

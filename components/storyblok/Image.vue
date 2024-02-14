@@ -14,6 +14,7 @@
 
     <BaseImage
       class="_image"
+      :lazy="itemData.delay_image_load"
       :srcsets="imageSources"
       :alt="itemData.alt_tag"
       :title="itemData.title_tag"
