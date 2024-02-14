@@ -115,6 +115,7 @@ import getPlushieSkuByTypes from 'theme/helpers/get-plushie-sku-by-types.functio
 import PlushieProductType from 'theme/interfaces/plushie-product-type';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 import getProductionTimeOptions from 'theme/helpers/get-production-time-options';
+import { filterAddonBasedOnSizeOption } from 'theme/helpers/filter-addons-based-on-size-option.function';
 
 import MProductTypeChooseStep from './OPlushieCreationWizard/m-product-type-choose-step.vue';
 import MImageUploadStep from './OPlushieCreationWizard/m-image-upload-step.vue';
@@ -238,7 +239,13 @@ export default defineComponent({
         return []
       }
 
-      return getAddonOptionsFromBundleOption(this.addonsBundleOption);
+      return getAddonOptionsFromBundleOption(this.addonsBundleOption)
+        .filter((addonOption) => {
+          return filterAddonBasedOnSizeOption(
+            addonOption,
+            this.customizeStepData.size
+          )
+        });
     },
     canGoBack (): boolean {
       return !this.isSubmitting && (this.currentStep !== 1 || !this.existingCartItem);
@@ -321,7 +328,8 @@ export default defineComponent({
           image: productLink.product.image,
           optionId: this.sizeBundleOption.option_id,
           optionValueId: productLink.id.toString(),
-          group: 'default'
+          group: 'default',
+          disabledUpgrades: productLink.product.disabled_upgrades || []
         });
       }
 
@@ -762,9 +770,9 @@ export default defineComponent({
     },
     fillCustomizeStepDataFromCartItem (cartItem: CartItem): void {
       this.fillBodypartsValues(cartItem);
+      this.fillSizeOption(cartItem);
       this.fillAddons(cartItem);
       this.fillProductionTime(cartItem);
-      this.fillSizeOption(cartItem);
       this.customizeStepData.description = cartItem.plushieDescription;
       this.customizeStepData.quantity = cartItem.qty;
     },
