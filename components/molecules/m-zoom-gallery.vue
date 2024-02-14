@@ -101,7 +101,7 @@ export default Vue.extend({
     },
     horizontalThumbnails: {
       type: Boolean,
-      default: false
+      default: true
     },
     lazyLoadStageImage: {
       type: Boolean,
