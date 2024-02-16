@@ -8,6 +8,6 @@ export function filterAddonBasedOnSizeOption (
   if (!sizeOption) {
     return true;
   }
-  debugger;
+
   return !sizeOption.disabledUpgrades.includes(addonOption.id);
 }
