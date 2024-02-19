@@ -71,7 +71,7 @@ export default Blok.extend({
       return getHeaderId(this.headingSize, [{ type: 'text', text: this.itemData.title }]);
     },
     containerAttributes (): Record<Partial<'link' | 'isNewWindow' | string>, LinkField | boolean> {
-      if (!this.itemData.link_url?.id) {
+      if (!this.hasLink || !this.itemData.link_url) {
         return {}
       }
 
@@ -81,7 +81,20 @@ export default Blok.extend({
       }
     },
     containerComponent (): string {
-      return this.itemData.link_url?.id ? 'sb-router-link' : 'div';
+      return this.hasLink ? 'sb-router-link' : 'div';
+    },
+    hasLink (): boolean {
+      const linkUrl = this.itemData.link_url;
+
+      if (!linkUrl) {
+        return false;
+      }
+
+      if (!linkUrl.url && !linkUrl.cached_url) {
+        return false;
+      }
+
+      return true;
     }
   }
 });
