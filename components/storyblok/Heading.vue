@@ -28,9 +28,7 @@
 <script lang="ts">
 import { SfHeading } from '@storefront-ui/vue';
 
-import { Blok } from 'src/modules/vsf-storyblok-module/components';
-import getHeaderId from 'src/modules/vsf-storyblok-module/helpers/get-header-id';
-import { LinkField } from 'src/modules/vsf-storyblok-module';
+import { LinkField, Blok, getHeaderId } from 'src/modules/vsf-storyblok-module';
 
 import HeadingData from './interfaces/heading-data.interface';
 
