@@ -6,7 +6,11 @@
   >
     <editor-block-icons :item="itemData" />
 
-    <div class="_container">
+    <component
+      class="_container"
+      :is="containerComponent"
+      v-bind="containerAttributes"
+    >
       <div class="_intro" v-if="isCustomStyled && itemData.intro_text">
         {{ itemData.intro_text }}
       </div>
@@ -17,14 +21,17 @@
         :level="headingSize"
         :title="itemData.title"
       />
-    </div>
+    </component>
   </div>
 </template>
 
 <script lang="ts">
 import { SfHeading } from '@storefront-ui/vue';
+
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
 import getHeaderId from 'src/modules/vsf-storyblok-module/helpers/get-header-id';
+import { LinkField } from 'src/modules/vsf-storyblok-module';
+
 import HeadingData from './interfaces/heading-data.interface';
 
 export default Blok.extend({
@@ -64,6 +71,19 @@ export default Blok.extend({
     },
     headingId (): string {
       return getHeaderId(this.headingSize, [{ type: 'text', text: this.itemData.title }]);
+    },
+    containerAttributes (): Record<Partial<'link' | 'isNewWindow' | string>, LinkField | boolean> {
+      if (!this.itemData.link_url?.id) {
+        return {}
+      }
+
+      return {
+        link: this.itemData.link_url,
+        isNewWindow: this.itemData.link_url.target === '_blank'
+      }
+    },
+    containerComponent (): string {
+      return this.itemData.link_url?.id ? 'sb-router-link' : 'div';
     }
   }
 });
