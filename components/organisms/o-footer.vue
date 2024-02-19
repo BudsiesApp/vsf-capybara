@@ -435,8 +435,6 @@ export default {
 
     .social-column {
       flex-basis: 100%;
-      display: flex;
-      justify-content: space-between;
 
       ::v-deep {
         .sf-footer-column__title {
