@@ -421,7 +421,7 @@
 import { PropType, computed, defineComponent, inject } from '@vue/composition-api';
 import config from 'config';
 import { ValidationProvider, extend } from 'vee-validate';
-import { email, required, min_value, regex } from 'vee-validate/dist/rules';
+import { email, required, max, min_value, regex } from 'vee-validate/dist/rules';
 import { TranslateResult } from 'vue-i18n';
 import { SfButton, SfInput, SfRadio, SfSelect } from '@storefront-ui/vue';
 import {
@@ -464,9 +464,18 @@ extend('email', email);
 extend('regex', {
   ...regex,
   message: 'Please, enter valid phone number'
-})
+});
+
+extend(
+  'max',
+  {
+    ...max,
+    message: 'Maximum length is {length} symbols'
+  }
+);
 
 const phoneValidationRegex = /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/;
+const phoneNumberMaxLength = 30;
 
 export default defineComponent({
   name: 'MBaseForm',
@@ -590,7 +599,10 @@ export default defineComponent({
     phoneValidationRules (): any {
       return {
         required: true,
-        regex: phoneValidationRegex
+        regex: phoneValidationRegex,
+        max: {
+          length: phoneNumberMaxLength
+        }
       }
     },
     agreement: {
