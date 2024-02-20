@@ -1,6 +1,6 @@
 declare module 'vue-lazy-hydration/src/utils/hydration-blocker' {
-  import Vue, { ComponentOptions } from 'vue';
-  import { AsyncComponentPromise } from 'vue/types/options';
+  import Vue from 'vue';
+  import { AsyncComponentPromise, ThisTypedComponentOptionsWithRecordProps } from 'vue/types/options';
   import { ExtendedVue } from 'vue/types/vue';
 
   interface HydrationBlockerData {
@@ -22,8 +22,8 @@ declare module 'vue-lazy-hydration/src/utils/hydration-blocker' {
 
   type MakeHydrationBlockerFunction = (
     component: Vue | (() => AsyncComponentPromise<Vue>),
-    options: ComponentOptions<HydrationBlockerComponent>
-  ) => ExtendedVue<Vue & HydrationBlockerComponent, any, any, any, any>;
+    options: ThisTypedComponentOptionsWithRecordProps<Vue & HydrationBlockerComponent, HydrationBlockerData, HydrationBlockerMethods, any, any>
+  ) => ExtendedVue<Vue & HydrationBlockerComponent, HydrationBlockerData, HydrationBlockerMethods, any, any>;
 
   const makeHydrationBlocker: MakeHydrationBlockerFunction;
 
