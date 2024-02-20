@@ -9,8 +9,9 @@
         v-for="linkGroup in links"
         :key="linkGroup.name"
         :title="linkGroup.name"
+        :class="linkGroup.class"
       >
-        <SfList>
+        <SfList class="_column-list">
           <SfListItem v-for="link in linkGroup.children" :key="link.name">
             <router-link
               :to="localizedRoute(link.link)"
@@ -25,8 +26,16 @@
         </SfList>
       </SfFooterColumn>
 
-      <SfFooterColumn title="Get more @Petsies cuteness" class="social-column">
-        <MNewsletterSubscription />
+      <SfFooterColumn
+        :title="newsletterSubscriptionColumnTitle"
+        class="social-column"
+      >
+        <div class="_subscription-form">
+          <div class="_subscription-form-title sf-footer-column__title">
+            {{ newsletterSubscriptionColumnTitle }}
+          </div>
+          <MNewsletterSubscription />
+        </div>
         <div class="social-icon desktop-only">
           <a
             :href="item.url"
@@ -213,7 +222,8 @@ export default {
                 }
               }
             }
-          ]
+          ],
+          class: '_services-column'
         },
         account: {
           name: this.$t('Account'),
@@ -245,6 +255,9 @@ export default {
           ]
         }
       };
+    },
+    newsletterSubscriptionColumnTitle () {
+      return this.$t('Get more @Petsies cuteness')
     }
   },
   methods: {
@@ -379,6 +392,12 @@ export default {
     width: 100%;
   }
 
+  ._subscription-form {
+    ._subscription-form-title {
+      display: none;
+    }
+  }
+
   ._legal-information {
     color: var(--c-light-variant);
     font-size: var(--font-xs);
@@ -399,7 +418,57 @@ export default {
       padding: 0;
     }
 
+    .sf-list__item {
+      --list-item-margin: var(--spacer-2xs) var(--spacer-base) var(--spacer-2xs) 0;
+    }
+
+    ._services-column {
+      --_footer-column-width: auto;
+    }
+
+    ._column-list {
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+      max-height: 270px;
+    }
+
+    .social-column {
+      flex-basis: 100%;
+
+      ::v-deep {
+        .sf-footer-column__title {
+          display: none;
+        }
+
+        .sf-footer-column__content {
+          display: flex;
+          flex-direction: row-reverse;
+          align-items: flex-end;
+          justify-content: space-between;
+          width: 100%;
+
+          ._subscription-form {
+            flex-basis: 30%;
+          }
+
+          &::after {
+            content: '';
+            flex-basis: 30%;
+          }
+        }
+      }
+    }
+
+    ._subscription-form {
+      ._subscription-form-title {
+        display: flex;
+      }
+    }
+
     .social-icon {
+      padding: var(--spacer-sm) 0 var(--spacer-base);
+
       &__link {
         background-image: url(../../assets/footer-socials.png);
         height: 42px;
