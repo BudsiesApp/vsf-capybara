@@ -60,6 +60,7 @@
             :alt="stageImage.alt"
             :title="stageImage.title"
             :aspect-ratio="1.0"
+            :lazy="lazyLoadStageImage"
           />
         </div>
       </div>
@@ -100,7 +101,11 @@ export default Vue.extend({
     },
     horizontalThumbnails: {
       type: Boolean,
-      default: false
+      default: true
+    },
+    lazyLoadStageImage: {
+      type: Boolean,
+      default: true
     }
   },
   data () {
