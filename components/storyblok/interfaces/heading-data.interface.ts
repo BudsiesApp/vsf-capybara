@@ -5,6 +5,5 @@ export default interface HeadingData extends ItemData {
   heading_type: string,
   is_custom_styled?: boolean,
   intro_text: string,
-  is_link?: boolean,
   link_url?: LinkField
 }

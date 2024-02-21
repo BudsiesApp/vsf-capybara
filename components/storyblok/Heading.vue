@@ -8,6 +8,7 @@
 
     <component
       class="_container"
+      :class="{'-link': isLink}"
       :is="containerComponent"
       v-bind="containerAttributes"
     >
@@ -84,7 +85,7 @@ export default Blok.extend({
       return this.isLink ? 'sb-router-link' : 'div';
     },
     isLink (): boolean {
-      return !!(this.itemData.is_link && this.itemData.link_url);
+      return !!(this.itemData.link_url?.cached_url || this.itemData.link_url?.url);
     }
   }
 });
@@ -158,6 +159,16 @@ $intro-left-margin: 1em;
 
     &.-aligned-right {
       text-align: right;
+    }
+  }
+
+  ._container {
+    &.-link {
+      ::v-deep {
+        .sf-heading__title {
+          color: inherit;
+        }
+      }
     }
   }
 
