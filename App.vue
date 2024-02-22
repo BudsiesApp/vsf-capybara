@@ -18,6 +18,7 @@ import { FileProcessingRepositoryFactory, ImageHandlerService, itemFactory } fro
 import { ErrorConverterService } from 'src/modules/budsies'
 import { isServer } from '@vue-storefront/core/helpers'
 import { syncCartWhenLocalStorageChange } from '@vue-storefront/core/modules/cart/helpers'
+import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
 
 const windowObject = isServer ? {} : window;
 const errorConverterService = new ErrorConverterService();
@@ -55,6 +56,10 @@ export default {
   },
   methods: {
     onUserLeavingWebsite () {
+      if (isStoryblokPreview()) {
+        return;
+      }
+
       this.$store.dispatch('ui/openModal', { name: ModalList.WebsiteLeaving })
     }
   }
