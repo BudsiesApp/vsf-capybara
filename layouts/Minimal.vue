@@ -11,6 +11,7 @@
 <script>
 import OHeaderMinimal from 'theme/components/organisms/o-header-minimal';
 import OFooter from 'theme/components/organisms/o-footer';
+import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
 
 export default {
   components: {
@@ -19,7 +20,7 @@ export default {
   },
   computed: {
     isStoryblokPreviewMode () {
-      return this.$route.query.hasOwnProperty('_storyblok')
+      return isStoryblokPreview();
     }
   }
 }

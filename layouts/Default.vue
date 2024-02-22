@@ -63,8 +63,8 @@ import Head from 'theme/head';
 import config from 'config';
 import { ModalList } from 'theme/store/ui/modals';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
-import { mapMobileObserver, unMapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 import LazyHydrate from 'vue-lazy-hydration';
+import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
 
 import PromotionPlatformBanner from 'src/modules/promotion-platform/components/Banner.vue';
 
@@ -97,7 +97,7 @@ export default {
       );
     },
     isStoryblokPreviewMode () {
-      return this.$route.query.hasOwnProperty('_storyblok');
+      return isStoryblokPreview();
     },
     hideFooterOnMobile () {
       return this.$route.name === 'phrase-pillow-customize';
