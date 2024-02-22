@@ -20,6 +20,7 @@ import { isServer } from '@vue-storefront/core/helpers'
 import { syncCartWhenLocalStorageChange } from '@vue-storefront/core/modules/cart/helpers'
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { USER_LEAVING_WEBSITE } from 'src/modules/promotion-platform';
+import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
 
 const windowObject = isServer ? {} : window;
 const errorConverterService = new ErrorConverterService();
@@ -59,6 +60,10 @@ export default {
   },
   methods: {
     onUserLeavingWebsite () {
+      if (isStoryblokPreview()) {
+        return;
+      }
+
       this.$store.dispatch('ui/openModal', { name: ModalList.WebsiteLeaving })
     }
   }
