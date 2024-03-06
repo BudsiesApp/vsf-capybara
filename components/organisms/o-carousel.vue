@@ -68,7 +68,7 @@ export default Vue.extend({
     },
     slidesPerView: {
       type: Number,
-      default: 6
+      default: 4
     },
     slidesPerViewMobile: {
       type: Number,
