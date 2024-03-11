@@ -1,10 +1,9 @@
 <template>
   <SfTab
-    class="storyblok-tab layout-regular-component"
     :title="itemData.title"
     ref="tab"
   >
-    <template>
+    <div class="storyblok-tab layout-regular-component">
       <editor-block-icons :item="itemData" />
 
       <sb-render
@@ -14,7 +13,7 @@
         class="box _item"
         :item="_item"
       />
-    </template>
+    </div>
   </SfTab>
 </template>
 
@@ -50,7 +49,7 @@ export default Blok.extend({
   },
   methods: {
     getTab (): InstanceType<typeof SfTab> {
-      return this.$refs.tab;
+      return this.$refs.tab as InstanceType<typeof SfTab>;
     },
     onTabToggle (): void {
       this.$parent.$emit('toggle', (this as any)._uid);
@@ -59,3 +58,14 @@ export default Blok.extend({
 })
 
 </script>
+
+<style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+
+.storyblok-tab {
+  @include storyblok-sub-elements-layout;
+  @include display-property-handling;
+
+}
+</style>
