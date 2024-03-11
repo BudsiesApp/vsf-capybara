@@ -3,7 +3,11 @@
     :title="itemData.title"
     ref="tab"
   >
-    <div class="storyblok-tab layout-regular-component">
+    <div
+      class="storyblok-tab layout-regular-component"
+      :class="cssClasses"
+      :style="styles"
+    >
       <editor-block-icons :item="itemData" />
 
       <sb-render
