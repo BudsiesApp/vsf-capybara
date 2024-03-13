@@ -1,0 +1,22 @@
+@import '../../base/variables';
+
+.sf-tabs {
+  .sf-tabs__content__tab {
+    padding: var(--tabs-content-tab-padding, 0);
+  }
+
+  .sf-tabs__content {
+    --tabs-content-font-line-height: #{$line-height-base};
+    --tabs-content-font-family: var(--font-family-secondary);
+    --tabs-content-font-weight: var(--font-normal);
+    --tabs-content-font-size: var(--font-size-base);
+  }
+
+  .sf-tabs__title {
+    padding: var(--tabs-title-padding, var(--spacer-sm) var(--spacer-sm) var(--spacer-sm) 0);
+  }
+
+  @include for-desktop {
+    --tabs-content-tab-padding: 1.3rem 0;
+  }
+}
