@@ -36,7 +36,7 @@
               :bottom-story-slug="imageUploadStepBottomStorySlug"
               @input="onImageUploadStepDataInput"
               @next-step="nextStep"
-              v-if="plushieId"
+              v-if="plushieId && activeProduct"
             />
           </SfStep>
 
@@ -50,6 +50,7 @@
               :show-email-step="showEmailStep"
               @next-step="nextStep"
               @input="onPetInfoStepDataInput"
+              v-if="plushieId && activeProduct"
             />
           </SfStep>
 
@@ -66,7 +67,7 @@
               :disabled="isBusy"
               :show-size-selector="showSizeSelector"
               @next-step="nextStep"
-              v-if="activeProduct && plushieId"
+              v-if="plushieId && activeProduct"
             />
           </SfStep>
         </SfSteps>
@@ -838,11 +839,11 @@ export default defineComponent({
         this.$store.dispatch('budsies/loadProductRushAddons', { productId: id })
       ]);
     },
-    onAddToCartHandler (): void {
+    onAddToCartHandler (): Promise<void> {
       if (this.existingCartItem) {
-        this.updateExistingCartItem();
+        return this.updateExistingCartItem();
       } else {
-        this.addToCart();
+        return this.addToCart();
       }
     },
     async onChangeStep (nextStep: number) {
