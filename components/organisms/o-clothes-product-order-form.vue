@@ -293,6 +293,7 @@ import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helper
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import { getProductGallery as getGalleryByProduct, setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 
+import { ProductPrice, getFinalPrice, getTotalPriceForProductPrices } from 'src/modules/shared/helpers/price';
 import { ProductValue, Dictionary, ExtraPhotoAddon } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage, getProductDefaultPrice, InjectType, ServerError } from 'src/modules/shared';
@@ -641,7 +642,7 @@ export default defineComponent({
 
       return this.availableDesignsProductDictionary[this.selectedDesign];
     },
-    selectedDesignProductPrice (): { regular: number, special: number } {
+    selectedDesignProductPrice (): ProductPrice {
       if (!this.selectedDesignProduct) {
         return getProductDefaultPrice(this.defaultDesignProduct, {}, false);
       }
@@ -733,25 +734,19 @@ export default defineComponent({
 
       return options;
     },
-    specialPrice (): number {
+    specialPrice (): number | null {
       return this.totalPrice.special;
     },
-    totalPrice (): {regular: number, special: number} {
+    totalPrice (): ProductPrice {
       const extraFacesPrice = getProductDefaultPrice(this.selectedExtraFaceProduct, {}, false);
+      const totalPrice = getTotalPriceForProductPrices([this.selectedDesignProductPrice, extraFacesPrice, this.simpleProductPrice]);
 
-      return {
-        regular: this.selectedDesignProductPrice.regular +
-          this.simpleProductPrice.regular +
-          extraFacesPrice.regular,
-        special: this.selectedDesignProductPrice.special +
-          this.simpleProductPrice.special +
-          extraFacesPrice.special
-      }
+      return totalPrice;
     },
     customerImageId (): string | undefined {
       return this.customerImage?.id;
     },
-    simpleProductPrice (): {regular: number, special: number} {
+    simpleProductPrice (): ProductPrice {
       switch (this.backendProductId) {
         case ProductValue.PAJAMAS:
           const variantPrice = getProductDefaultPrice(this.selectedVariantProduct, {}, false);
@@ -1041,13 +1036,11 @@ export default defineComponent({
         throw new Error('Product is undefined for product link');
       }
 
-      const finalDesignPrice = this.selectedDesignProductPrice.special
-        ? this.selectedDesignProductPrice.special
-        : this.selectedDesignProductPrice.regular;
       const variantPrice = getProductDefaultPrice(productLink.product, {}, false);
-      const finalVariantPrice = variantPrice.special ? variantPrice.special : variantPrice.regular;
+      const totalPrice = getTotalPriceForProductPrices([this.selectedDesignProductPrice, variantPrice]);
+      const finalPrice = getFinalPrice(totalPrice);
 
-      return `${productLink.product.name} $${finalDesignPrice + finalVariantPrice}`
+      return `${productLink.product.name} $${finalPrice}`;
     },
     getProductsByBundleOption (bundleOption: BundleOption | undefined): Dictionary<Product> {
       const products: Dictionary<Product> = {};

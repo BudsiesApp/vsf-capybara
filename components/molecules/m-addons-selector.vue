@@ -28,10 +28,15 @@
               {{ addon.name }}
             </div>
 
-            <div class="_price" v-if="addon.price">
+            <div class="_price" v-if="addon.regularPrice">
               <strong>
-                + {{ addon.price | price() }}
+                +
               </strong>
+
+              <SfPrice
+                :regular="formatPrice(addon.regularPrice)"
+                :special="formatPrice(addon.specialPrice)"
+              />
             </div>
 
             <div class="_content">
@@ -93,6 +98,7 @@ import Vue, { PropType } from 'vue';
 import urlParser from 'js-video-url-parser';
 import { ValidationProvider, extend } from 'vee-validate';
 import { required, max } from 'vee-validate/dist/rules';
+import { SfPrice } from '@storefront-ui/vue';
 
 import { CustomOption } from 'core/modules/catalog/types/CustomOption';
 import { StreamingVideo } from 'src/modules/shared';
@@ -105,6 +111,7 @@ import MCheckbox from './m-checkbox.vue';
 import AddonsSelectorDropDownCustomOption from './addons-selector/drop-down-custom-option.vue'
 import AddonsSelectorFieldCustomOption from './addons-selector/field-custom-option.vue'
 import { CustomOptionType } from 'theme/interfaces/custom-option.type';
+import { formatPrice } from 'src/modules/shared/helpers/price';
 
 extend('required', {
   ...required,
@@ -125,7 +132,8 @@ export default Vue.extend({
     AddonsSelectorFieldCustomOption,
     MCheckbox,
     StreamingVideo,
-    ValidationProvider
+    ValidationProvider,
+    SfPrice
   },
   props: {
     addons: {
@@ -321,6 +329,9 @@ export default Vue.extend({
 
       event.preventDefault();
       Vue.set(this.showVideoFlags, addon.id, true);
+    },
+    formatPrice (price: number | null): void {
+      return formatPrice(price);
     }
   },
   created (): void {
@@ -383,9 +394,23 @@ export default Vue.extend({
     }
 
     ._price {
-      color: var(--_c-light-primary);
+      color: var(--c-accent);
       font-size: var(--font-base);
       margin-top: 1em;
+
+      --price-regular-color: var(--c-accent);
+      --price-regular-font-weight: var(--font-bold);
+      --price-regular-font-size: var(--font-base);
+
+      --price-special-font-weight: var(--font-bold);
+      --price-special-font-size: var(--font-base);
+
+      --price-old-font-size: var(--font-base);
+
+      .sf-price {
+        display: inline-flex;
+      }
+
     }
 
     ._media {

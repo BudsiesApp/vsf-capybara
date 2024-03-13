@@ -132,6 +132,7 @@ import SelectedAddon from '../interfaces/selected-addon.interface';
 import AddonOption from '../interfaces/addon-option.interface';
 import ProductTypeButton from '../interfaces/product-type-button.interface';
 import ProductionTimeOption from '../interfaces/production-time-option.interface';
+import { getFinalPrice } from 'src/modules/shared/helpers/price';
 
 export default defineComponent({
   name: 'OPlushieCreationWizard',
@@ -312,7 +313,7 @@ export default defineComponent({
         availableSizes.push({
           id: String(productLink.product.id),
           label: productLink.product.name,
-          finalPrice: price.special ? price.special : price.regular,
+          finalPrice: getFinalPrice(price),
           specialPrice: price.special,
           regularPrice: price.regular,
           value: productLink.product.sku,

@@ -8,6 +8,7 @@ import { getProductDefaultPrice } from 'src/modules/shared';
 import SizeOption from 'theme/components/interfaces/size-option';
 
 import { useBundleOption } from './use-bundle-options';
+import { getFinalPrice } from 'src/modules/shared/helpers/price';
 
 export function useSizeSelector (
   product: Product,
@@ -34,7 +35,7 @@ export function useSizeSelector (
       availableSizes.push({
         id: String(productLink.product.id),
         label: productLink.product.name,
-        finalPrice: price.special ? price.special : price.regular,
+        finalPrice: getFinalPrice(price),
         specialPrice: price.special,
         regularPrice: price.regular,
         value: productLink.product.sku,
