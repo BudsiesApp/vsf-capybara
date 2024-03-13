@@ -263,6 +263,7 @@ import SizeOption from 'theme/components/interfaces/size-option';
 import SelectedAddon from 'theme/components/interfaces/selected-addon.interface';
 import { getAddonOptionsFromBundleOption } from 'theme/helpers/get-addon-options-from-bundle-option.function';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { filterAddonBasedOnSizeOption } from 'theme/helpers/filter-addons-based-on-size-option.function';
 
 extend('required', {
   ...required,
@@ -442,7 +443,13 @@ export default defineComponent({
         return []
       }
 
-      return getAddonOptionsFromBundleOption(this.addonsBundleOption);
+      return getAddonOptionsFromBundleOption(this.addonsBundleOption)
+        .filter((addonOption) => {
+          return filterAddonBasedOnSizeOption(
+            addonOption,
+            this.size
+          )
+        });
     },
     productionTimeOptions (): ProductionTimeOption[] {
       if (!this.productionTimeBundleOption) {
