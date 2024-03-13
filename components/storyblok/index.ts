@@ -21,6 +21,8 @@ export default function registerComponents () {
   add('parallax', () => import(/* webpackChunkName: "vsf-storyblok" */ './Parallax.vue'))
   add('mailing_list_subscribe_form', () => import(/* webpackChunkName: "vsf-storyblok" */ './MailingListSubscribeForm.vue'))
   add('remind_me_about_budsies', () => import('./RemindMeAboutBudsies.vue'))
+  add('tabs', () => import(/* webpackChunkName: "vsf-storyblok" */ './Tabs.vue'))
+  add('tab', () => import(/* webpackChunkName: "vsf-storyblok" */ './Tab.vue'))
   add('carousel', () => import(/* webpackChunkName: "vsf-storyblok" */ './Carousel.vue'))
 
   // add('product', () => import('./Product.vue'))
