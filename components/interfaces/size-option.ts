@@ -6,5 +6,5 @@ export default interface SizeOption extends BodypartOption {
   finalPrice: number,
   regularPrice: number,
   specialPrice: number,
-  disabledUpgrades: number[]
+  disabledUpgrades: string[]
 }

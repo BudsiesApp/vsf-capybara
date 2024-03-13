@@ -9,5 +9,5 @@ export function filterAddonBasedOnSizeOption (
     return true;
   }
 
-  return !sizeOption.disabledUpgrades.includes(addonOption.id);
+  return !sizeOption.disabledUpgrades.includes(addonOption.id.toString());
 }
