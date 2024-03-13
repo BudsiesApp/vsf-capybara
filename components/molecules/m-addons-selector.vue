@@ -157,6 +157,9 @@ export default Vue.extend({
     };
   },
   computed: {
+    addonsIds (): string {
+      return this.addons.map((value) => value.id).join('_');
+    },
     skinClass (): string {
       return getCurrentThemeClass();
     },
@@ -327,6 +330,25 @@ export default Vue.extend({
     this.instanceId = instanceId.toString();
 
     instanceId += 1;
+  },
+  watch: {
+    addonsIds: {
+      handler () {
+        const selectedValues: number[] = [];
+
+        this.value.forEach((item) => {
+          if (!this.addons.find(
+            (addon) => item.addonOptionValueId === addon.optionValueId)
+          ) {
+            return;
+          }
+
+          selectedValues.push(item.addonOptionValueId);
+        });
+
+        this.onSelectedValuesChange(selectedValues);
+      }
+    }
   }
 })
 </script>

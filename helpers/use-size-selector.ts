@@ -43,7 +43,8 @@ export function useSizeSelector (
         image: productLink.product.image,
         optionId: bundleOption.value.option_id,
         optionValueId: productLink.id.toString(),
-        group: 'default'
+        group: 'default',
+        disabledUpgrades: productLink.product.disabled_upgrades || []
       });
     }
 
