@@ -45,6 +45,8 @@ function getAddonOptionFromProduct (product: Product): AddonOption {
     name: product.name,
     description: product.short_description || '',
     price: getFinalPrice(price),
+    specialPrice: price.special,
+    regularPrice: price.regular,
     images: getProductGallery(product).map((item: any) => item.src),
     optionId: product.id as number,
     optionValueId: product.id as number

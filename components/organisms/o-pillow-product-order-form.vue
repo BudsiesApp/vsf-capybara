@@ -420,6 +420,7 @@ import MProductionTimeSelector from 'theme/components/molecules/m-production-tim
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 import { usePersistedEmail } from 'src/modules/persisted-customer-data';
+import { getFinalPrice } from 'src/modules/shared/helpers/price';
 
 extend('required', {
   ...required,
@@ -566,7 +567,7 @@ export default defineComponent({
         availableSizes.push({
           id: String(productLink.product.id),
           label: productLink.product.name,
-          finalPrice: price.special ? price.special : price.regular,
+          finalPrice: getFinalPrice(price),
           specialPrice: price.special,
           regularPrice: price.regular,
           value: productLink.product.sku,
