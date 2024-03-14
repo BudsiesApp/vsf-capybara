@@ -395,6 +395,7 @@ import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
 import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
 import MBodypartOptionConfigurator from 'theme/components/molecules/m-bodypart-option-configurator.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
+import { getFinalPrice } from 'src/modules/shared/helpers/price';
 
 extend('required', {
   ...required,
@@ -505,7 +506,9 @@ export default defineComponent({
           sku: productLink.product.sku,
           name: productLink.product.name,
           description: productLink.product.short_description || '',
-          price: price.special ? price.special : price.regular,
+          price: getFinalPrice(price),
+          specialPrice: price.special,
+          regularPrice: price.regular,
           images: images,
           optionId: this.addonsBundleOption.option_id,
           optionValueId: ((typeof productLink.id === 'number') ? productLink.id : Number.parseInt(productLink.id, 10) as number),

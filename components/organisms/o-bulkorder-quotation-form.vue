@@ -179,6 +179,7 @@ import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
 import AddonOption from '../interfaces/addon-option.interface';
 import SelectedAddon from '../interfaces/selected-addon.interface';
 import { TranslateResult } from 'vue-i18n';
+import { getFinalPrice } from 'src/modules/shared/helpers/price';
 
 export default (Vue as VueConstructor<Vue>).extend({
   props: {
@@ -344,7 +345,9 @@ export default (Vue as VueConstructor<Vue>).extend({
           sku: productLink.product.sku,
           name: productLink.product.name,
           description: productLink.product.short_description || '',
-          price: price.special ? price.special : price.regular,
+          price: getFinalPrice(price),
+          specialPrice: price.special,
+          regularPrice: price.regular,
           images: images,
           optionId: this.addonsBundleOption.option_id,
           optionValueId: ((typeof productLink.id === 'number') ? productLink.id : Number.parseInt(productLink.id, 10) as number),
