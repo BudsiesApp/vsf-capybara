@@ -14,9 +14,9 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import Vue, { PropType } from 'vue';
 import { SfPrice } from '@storefront-ui/vue';
-import { price as priceFormatter } from '@vue-storefront/core/filters';
+import { formatPrice } from 'src/modules/shared/helpers/price';
 
 export default Vue.extend({
   name: 'ACustomPrice',
@@ -29,29 +29,28 @@ export default Vue.extend({
       required: true
     },
     specialPrice: {
-      type: Number,
+      type: Number as PropType<number | null>,
       default: 0
     }
   },
   computed: {
     formattedRegularPrice (): string {
-      return this.formatPrice(this.regular);
+      return formatPrice(this.regular);
     },
     formattedSpecialPrice (): string {
-      return this.formatPrice(this.specialPrice);
+      return formatPrice(this.specialPrice);
     },
     saveAmount (): number {
+      if (this.specialPrice === null) {
+        return 0;
+      }
+
       return this.regular - this.specialPrice;
     },
     savePercent (): number {
       return Math.round(
-        ((this.regular - this.specialPrice) / this.regular) * 100
+        (this.saveAmount / this.regular) * 100
       );
-    }
-  },
-  methods: {
-    formatPrice (value: number): string {
-      return value ? priceFormatter(value) : ''
     }
   }
 })

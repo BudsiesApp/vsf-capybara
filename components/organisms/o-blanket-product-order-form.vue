@@ -226,6 +226,7 @@ import MDesignSelector from '../molecules/m-design-selector.vue';
 import MProductDescriptionStory from '../molecules/m-product-description-story.vue';
 import MZoomGallery from '../molecules/m-zoom-gallery.vue';
 import MFormErrors from '../molecules/m-form-errors.vue';
+import { getFinalPrice, getTotalPriceForProductPrices } from 'src/modules/shared/helpers/price';
 
 extend('required', {
   ...required,
@@ -453,7 +454,7 @@ export default defineComponent({
 
       return this.availableDesignsProductDictionary[this.selectedDesign];
     },
-    selectedDesignProductPrice (): { regular: number | string, special: number | string } {
+    selectedDesignProductPrice (): { regular: number, special: number | null } {
       if (!this.selectedDesignProduct) {
         return getProductDefaultPrice(this.defaultDesignProduct, {}, false);
       }
@@ -507,16 +508,12 @@ export default defineComponent({
 
       return sizeOptions;
     },
-    specialPrice (): number {
+    specialPrice (): number | null {
       return this.totalPrice.special;
     },
-    totalPrice (): {regular: number, special: number} {
+    totalPrice (): {regular: number, special: number | null } {
       const sizePrice = getProductDefaultPrice(this.selectedSizeProduct, {}, false);
-
-      return {
-        regular: this.selectedDesignProductPrice.regular + sizePrice.regular,
-        special: this.selectedDesignProductPrice.special + sizePrice.special
-      }
+      return getTotalPriceForProductPrices([sizePrice, this.selectedDesignProductPrice]);
     },
     customerImageId (): string | undefined {
       return this.customerImage?.id;
@@ -642,11 +639,11 @@ export default defineComponent({
         throw new Error('Product is undefined for product link');
       }
 
-      const finalDesignPrice = this.selectedDesignProductPrice.special ? this.selectedDesignProductPrice.special : this.selectedDesignProductPrice.regular;
       const sizePrice = getProductDefaultPrice(productLink.product, {}, false);
-      const finalSizePrice = sizePrice.special ? sizePrice.special : sizePrice.regular;
+      const totalPrice = getTotalPriceForProductPrices([sizePrice, this.selectedDesignProductPrice])
+      const finalPrice = getFinalPrice(totalPrice);
 
-      return `${productLink.product.name} $${finalDesignPrice + finalSizePrice}`
+      return `${productLink.product.name} $${finalPrice}`
     },
     getProductsByBundleOption (bundleOption: BundleOption | undefined): Dictionary<Product> {
       const products: Dictionary<Product> = {};

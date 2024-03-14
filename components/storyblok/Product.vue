@@ -24,7 +24,7 @@
         {{ name | htmlDecode }}
       </p>
 
-      <span class="">{{ price | price(currentStoreView) }}</span>
+      <span class="">{{ formattedPrice }}</span>
     </router-link>
   </div>
 </template>
@@ -42,6 +42,7 @@ import { getProductDefaultPrice } from 'src/modules/shared';
 
 import ProductData from './interfaces/product-data.interface';
 import getProductImagePlaceholder from '@vue-storefront/core/modules/cart/helpers/getProductImagePlaceholder';
+import { formatPrice, getFinalPrice } from 'src/modules/shared/helpers/price';
 
 export default Blok.extend({
   name: 'StoryblokProductBlock',
@@ -61,14 +62,21 @@ export default Blok.extend({
     currentStoreView (): () => StoreView {
       return currentStoreView;
     },
-    price (): number | string {
+    price (): number | undefined {
       if (!this.product) {
-        return ''
+        return undefined;
       }
 
       const price = getProductDefaultPrice(this.product, {}, false);
 
-      return price.special ? price.special : price.regular;
+      return getFinalPrice(price);
+    },
+    formattedPrice (): string {
+      if (!this.price) {
+        return '';
+      }
+
+      return formatPrice(this.price);
     },
     name (): string {
       if (!this.product) {
