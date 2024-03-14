@@ -24,7 +24,7 @@
           <SfHeading
             class="_step-subtitle -required"
             :level="3"
-            :title="$t('Upload a Digital Photo of Your Child Holding His/Her Artwork')"
+            :title="$t('Upload a Picture of Your Child\'s Artwork or Photo')"
             :ref="getFieldAnchorName('Artwork')"
           />
 
@@ -71,7 +71,7 @@
           <SfHeading
             class="_step-subtitle -required"
             :level="3"
-            :title="$t('Describe Your Child\'s Budsies')"
+            :title="$t('Describe Your Child\'s Artwork or Photo')"
             :ref="getFieldAnchorName('Description')"
           />
 
