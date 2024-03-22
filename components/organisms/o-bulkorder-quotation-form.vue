@@ -82,7 +82,13 @@
       </div>
     </div>
 
-    <div class="_order-bulk-sample-action" v-if="!isQuoteSelectionDisabled">
+    <validation-observer
+      tag="div"
+      class="_order-bulk-sample-action"
+      ref="validationObserver"
+      v-slot="{ errors: formErrors }"
+      v-if="!isQuoteSelectionDisabled"
+    >
       <SfHeading
         :title="orderBulkSampleTitle"
         :level="2"
@@ -98,9 +104,17 @@
 
       <m-addons-selector
         v-model="selectedAddons"
+        ref="addons-selector"
         :wide-image="true"
         :addons="addons"
         :disabled="isDisabled"
+        :get-field-anchor-name="getFieldAnchorName"
+      />
+
+      <m-form-errors
+        class="_form-errors"
+        :form-errors="formErrors"
+        @item-click="goToFieldByName"
       />
 
       <div class="_submit-button-container">
@@ -108,7 +122,7 @@
           {{ orderBulkSampleButtonTitle }}
         </SfButton>
       </div>
-    </div>
+    </validation-observer>
 
     <div class="_send-message-to-manager" v-if="!isQuoteSelectionDisabled">
       <SfHeading
@@ -164,24 +178,42 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType, VueConstructor } from 'vue'
+import { PropType, Ref, defineComponent, ref } from '@vue/composition-api';
 import { SfButton, SfHeading, SfRadio } from '@storefront-ui/vue'
 import { getProductGallery as getGalleryByProduct } from '@vue-storefront/core/modules/catalog/helpers';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { BundleOption } from '@vue-storefront/core/modules/catalog/types/BundleOption';
 import { required } from 'vuelidate/lib/validators';
+import { ValidationObserver } from 'vee-validate';
+import { TranslateResult } from 'vue-i18n';
 
 import { getProductDefaultPrice } from 'src/modules/shared';
 import { components } from 'src/modules/vsf-storyblok-module/components';
 import { ItemData } from 'src/modules/vsf-storyblok-module';
+import { getFinalPrice } from 'src/modules/shared/helpers/price';
 import { BulkorderQuote, BulkOrderInfo, BulkOrderStatus, BulkorderQuoteProductId } from 'src/modules/budsies';
+import { useFormValidation } from 'theme/helpers/use-form-validation';
 import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
+import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
+
 import AddonOption from '../interfaces/addon-option.interface';
 import SelectedAddon from '../interfaces/selected-addon.interface';
-import { TranslateResult } from 'vue-i18n';
-import { getFinalPrice } from 'src/modules/shared/helpers/price';
 
-export default (Vue as VueConstructor<Vue>).extend({
+function getAllFormRefs (
+  refs: Record<string, Vue | Element | Vue[] | Element[]>
+): Record<string, Vue | Element | Vue[] | Element[]> {
+  const addonsSelector = refs['addons-selector'] as InstanceType<typeof MAddonsSelector> | undefined;
+
+  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = { ...refs };
+
+  if (addonsSelector) {
+    refsDictionary = { ...refsDictionary, ...addonsSelector.$refs };
+  }
+
+  return refsDictionary;
+}
+
+export default defineComponent({
   props: {
     bulkorderInfo: {
       type: Object as PropType<BulkOrderInfo>,
@@ -190,6 +222,17 @@ export default (Vue as VueConstructor<Vue>).extend({
     sampleProduct: {
       type: Object as PropType<Product>,
       required: true
+    }
+  },
+  setup (_, setupContext) {
+    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+
+    return {
+      validationObserver,
+      ...useFormValidation(
+        validationObserver,
+        () => getAllFormRefs(setupContext.refs)
+      )
     }
   },
   data () {
@@ -208,7 +251,9 @@ export default (Vue as VueConstructor<Vue>).extend({
     SfButton,
     SfHeading,
     SfRadio,
-    Blok: components.block
+    Blok: components.block,
+    ValidationObserver,
+    MFormErrors
   },
   computed: {
     quotes (): BulkorderQuote[] | undefined {
@@ -351,7 +396,8 @@ export default (Vue as VueConstructor<Vue>).extend({
           images: images,
           optionId: this.addonsBundleOption.option_id,
           optionValueId: ((typeof productLink.id === 'number') ? productLink.id : Number.parseInt(productLink.id, 10) as number),
-          videoUrl: (productLink.product as any).video_url
+          videoUrl: (productLink.product as any).video_url,
+          customOptions: productLink.product?.custom_options
         });
       }
 
@@ -441,6 +487,12 @@ export default (Vue as VueConstructor<Vue>).extend({
     },
     async submitQuote (): Promise<void> {
       if (this.isSubmitting || !this.quoteId) {
+        return;
+      }
+
+      const isFormValid = await this.validateAndGoToFirstError();
+
+      if (!isFormValid) {
         return;
       }
 
@@ -597,6 +649,10 @@ $promt-color: #8eba4c;
       justify-content: center;
       margin-top: var(--spacer-lg);
     }
+
+    ._form-errors {
+      margin-top: var(--spacer-lg);
+    }
   }
 
   ._send-message-to-manager {
@@ -679,7 +735,8 @@ $promt-color: #8eba4c;
     ._order-bulk-sample-action {
       margin-top: var(--spacer-2xl);
 
-      ._submit-button-container {
+      ._submit-button-container,
+      ._form-errors {
         margin-top: var(--spacer-xl);
       }
     }
