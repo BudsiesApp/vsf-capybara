@@ -973,6 +973,7 @@ export default defineComponent({
       return selectedOption.toString();
     },
     getPillowSizeTitle (sizeProductLink: BundleOptionsProductLink): TranslateResult {
+      // TODO respect new size `sku`.
       switch (sizeProductLink.sku) {
         case 'simplePillowBulkSample_small':
           return this.$t('12" small');
