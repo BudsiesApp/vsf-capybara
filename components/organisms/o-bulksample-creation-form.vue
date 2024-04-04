@@ -60,14 +60,7 @@
         </div>
 
         <span class="_artwork-hint">
-          {{
-            $t(
-              'Please upload more than one image - a front, side and back view will help our designers make the best {productName} sample',
-              {
-                productName: productNameByType
-              }
-            )
-          }}
+          {{ artworkHint }}
         </span>
       </validation-provider>
 
@@ -533,6 +526,18 @@ export default defineComponent({
         'Upgrade Your Bulk {productName} Sample (optional)',
         { productName: this.productNameByType }
       )
+    },
+    artworkHint (): string {
+      if (this.type === BulksampleProduct.PILLOW) {
+        return this.$t('Please upload a single image to be printed on both sides of the pillow. We do not edit your photo, it will be printed as submitted').toString()
+      }
+
+      return this.$t(
+        'Please upload more than one image - a front, side and back view will help our designers make the best {productName} sample',
+        {
+          productName: this.productNameByType
+        }
+      ).toString();
     },
     backendProductId (): string | undefined {
       if (!this.product) {
