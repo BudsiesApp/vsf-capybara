@@ -132,5 +132,9 @@ export default {
   .sf-checkbox__checkmark {
     flex-shrink: 0;
   }
+
+  .sf-checkbox__container {
+    align-items: var(--m-checkbox-align-items, center);
+  }
 }
 </style>

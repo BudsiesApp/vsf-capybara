@@ -1,4 +1,6 @@
 .sf-select {
+    --select-error-message-color: var(--c-danger-variant);
+    --input-error-message-font-weight: var(--font-light);
     --input-error-message-font-family: var(--font-family-primary);
 
     &__overlay {
