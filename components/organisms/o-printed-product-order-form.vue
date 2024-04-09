@@ -683,18 +683,26 @@ export default defineComponent({
 
       return style.price + sizePrice;
     },
-    specialPrice (): number {
+    specialPrice (): number | null {
       const style = this.availableStyles.find(
         (item) => item.value === this.selectedStyle
       );
 
-      const sizePrice = this.selectedSize?.specialPrice || 0;
+      const sizePrice = this.selectedSize?.finalPrice || 0;
+      const stylePrice = (typeof style?.specialPrice === 'number' ? style?.specialPrice : style?.price) || 0;
+      const bundlePrice = (typeof this.bundleProductPrice.special === 'number' ? this.bundleProductPrice.special : this.bundleProductPrice.regular) || 0;
 
-      if (!style || !style.specialPrice) {
-        return this.bundleProductPrice.special + sizePrice;
+      let specialPrice = stylePrice + sizePrice;
+      let regularPrice = (style?.price || 0) + (this.selectedSize?.regularPrice || 0);
+
+      if (!style) {
+        specialPrice += bundlePrice;
+        regularPrice += (this.bundleProductPrice.regular || 0);
       }
 
-      return style.specialPrice + sizePrice;
+      console.log(specialPrice, regularPrice);
+
+      return specialPrice < regularPrice ? specialPrice : null;
     },
     hasStyleSelections (): boolean {
       return !(
