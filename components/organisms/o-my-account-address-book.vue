@@ -187,6 +187,7 @@ export default {
         streetAddress: '',
         city: '',
         state: '',
+        regionId: null,
         zipCode: '',
         country: '',
         phoneNumber: '',
@@ -209,7 +210,7 @@ export default {
       return this.addresses.find((address) => address.id === this.currentUser.default_shipping);
     },
     addresses () {
-      return this.$store.state.user.current.addresses
+      return this.currentUser?.addresses || [];
     },
     additionalAddresses () {
       return this.addresses.filter(
@@ -238,6 +239,7 @@ export default {
         zipCode: address.postcode,
         city: address.city,
         state: address.region.region,
+        regionId: address.region.region_id,
         country: address.country_id,
         phoneNumber: address.telephone,
         defaultBilling: address.default_billing,
@@ -251,7 +253,8 @@ export default {
         lastName: '',
         streetAddress: '',
         city: '',
-        state: '',
+        state: null,
+        regionId: null,
         zipCode: '',
         country: '',
         phoneNumber: '',

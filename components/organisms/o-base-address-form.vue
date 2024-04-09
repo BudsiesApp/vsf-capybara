@@ -94,13 +94,13 @@
       v-if="isSelectedCountryHasStates && canShowStateSelector"
     >
       <MMultiselect
-        v-model="state"
+        v-model="regionId"
         class="form__element form__element--half form__select"
         name="address-level1"
         autocomplete="address-level1"
         :label="$t('State / Province')"
         :required="true"
-        id-field="code"
+        id-field="id"
         label-field="name"
         :options="statesForSelectedCountry"
         :valid="!errors.length"
@@ -170,8 +170,10 @@
 <script lang="ts">
 import { extend, ValidationProvider } from 'vee-validate';
 import { min, regex, required } from 'vee-validate/dist/rules';
-import Vue from 'vue';
+import Vue, { PropType } from 'vue';
 import { SfInput } from '@storefront-ui/vue';
+
+import { BaseAddressFormValue } from 'theme/components/interfaces/base-address-form-value.interface';
 
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
 
@@ -194,7 +196,7 @@ export default Vue.extend({
   name: 'OBaseAddressForm',
   props: {
     value: {
-      type: Object,
+      type: Object as PropType<BaseAddressFormValue>,
       required: true
     },
     isFormFieldsDisabled: {
@@ -275,11 +277,19 @@ export default Vue.extend({
         this.updateValueField({ phoneNumber: value });
       }
     },
+    regionId: {
+      get (): number | null {
+        return this.value.regionId
+      },
+      set (value: number | null) {
+        this.updateValueField({ regionId: value });
+      }
+    },
     state: {
-      get (): string {
+      get (): string | null {
         return this.value.state;
       },
-      set (value: string) {
+      set (value: string | null) {
         this.updateValueField({ state: value });
       }
     },
@@ -336,7 +346,7 @@ export default Vue.extend({
         phoneValidator.validate();
       }
     },
-    updateValueField (field: Record<string, string>): void {
+    updateValueField (field: Record<string, string | number | null>): void {
       this.$emit('input', { ...this.value, ...field });
     }
   },
@@ -346,12 +356,24 @@ export default Vue.extend({
         this.fCanShowStateSelector = false;
 
         if (after && before) {
-          this.state = '';
+          this.state = null;
+          this.regionId = null;
         }
 
         this.$nextTick(() => {
           this.fCanShowStateSelector = true;
         })
+      },
+      immediate: true
+    },
+    isSelectedCountryHasStates: {
+      handler (val) {
+        if (val) {
+          this.state = null;
+          return;
+        }
+
+        (this.regionId as any) = null;
       },
       immediate: true
     },

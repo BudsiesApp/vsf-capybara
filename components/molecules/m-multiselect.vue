@@ -91,7 +91,11 @@ export default Vue.extend({
     this.instanceId = instanceId.toString();
     instanceId += 1;
 
-    if (!this.allowFreeText || !this.value) {
+    if (
+      !this.allowFreeText ||
+      !this.value ||
+      typeof this.value === 'number'
+    ) {
       return;
     }
 
@@ -119,7 +123,7 @@ export default Vue.extend({
       default: undefined
     },
     value: {
-      type: String as PropType<string | undefined>,
+      type: [String, Number] as PropType<string | number | undefined>,
       default: undefined
     },
     options: {
