@@ -1,7 +1,117 @@
 <template>
   <div id="portrait-product">
-    <product-structured-data />
+    <product-structured-data
+      v-if="getCurrentProduct"
+      :product="getCurrentProduct"
+    />
 
-    <o-portrait-product-order-form />
+    <o-portrait-product-order-form
+      v-if="getCurrentProduct"
+      :artwork-upload-url="artworkUploadUrl"
+      :product="getCurrentProduct"
+      :existing-cart-item="existingCartItem"
+    />
   </div>
 </template>
+
+<script lang="ts">
+import Vue, { PropType } from 'vue';
+import config from 'config';
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
+import { htmlDecode } from '@vue-storefront/core/filters';
+import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
+import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
+
+import CartItem from 'core/modules/cart/types/CartItem';
+import Product from 'core/modules/catalog/types/Product';
+
+import { ProductStructuredData } from 'src/modules/budsies';
+import { ProductEvent } from 'src/modules/shared';
+
+import OPortraitProductOrderForm from 'theme/components/organisms/o-portrait-product-order-form.vue';
+
+export default Vue.extend({
+  name: 'PortraitProduct',
+  components: {
+    OPortraitProductOrderForm,
+    ProductStructuredData
+  },
+  props: {
+    sku: {
+      type: String,
+      required: true
+    },
+    existingPlushieId: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    }
+  },
+  computed: {
+    getCurrentProduct (): Product | null {
+      const product = this.$store.getters['product/getCurrentProduct'];
+      if (!product?.sku || product.sku !== this.sku) {
+        return null;
+      }
+
+      return product;
+    },
+    artworkUploadUrl (): string {
+      return config.images.fileuploaderUploadUrl;
+    },
+    cartItems (): CartItem[] {
+      return this.$store.getters['cart/getCartItems'];
+    },
+    existingCartItem (): CartItem | undefined {
+      if (!this.existingPlushieId) {
+        return;
+      }
+
+      return this.cartItems.find((item) => item.plushieId && item.plushieId === this.existingPlushieId);
+    }
+  },
+  async serverPrefetch (): Promise<void> {
+    if (this.$ssrContext) this.$ssrContext.output.cacheTags.add('product')
+
+    await (this as any).loadData();
+  },
+  async mounted (): Promise<void> {
+    if (!this.getCurrentProduct) {
+      await this.loadData();
+    }
+
+    EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, this.getCurrentProduct);
+  },
+  beforeRouteLeave (to, from, next): void {
+    this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
+    next();
+  },
+  methods: {
+    async loadData (): Promise<void> {
+      const product = await this.$store.dispatch('product/loadProduct', {
+        parentSku: this.sku,
+        setCurrent: true
+      });
+
+      catalogHooksExecutors.productPageVisited(product);
+    }
+  },
+  metaInfo () {
+    const description = this.getCurrentProduct?.meta_description || this.getCurrentProduct?.short_description;
+
+    return {
+      title: htmlDecode(
+        (this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name || this.$t('Portrait')).toString()
+      ),
+      meta: description
+        ? [
+          {
+            vmid: 'description',
+            name: 'description',
+            content: htmlDecode(description)
+          }
+        ]
+        : []
+    };
+  }
+})
+</script>
