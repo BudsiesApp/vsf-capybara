@@ -233,6 +233,7 @@ const clothesProductSkus = [
 ];
 
 const customPillowSku = 'customPillow_bundle';
+const customPetPortraitsSku = 'customPetPortraits_bundle';
 
 const editableProductsSkus = [
   ...foreversProductsSkus,
@@ -241,7 +242,8 @@ const editableProductsSkus = [
   ...clayPlushieProductSkus,
   ...golfHeadCoversProductsSkus,
   ...clothesProductSkus,
-  customPillowSku
+  customPillowSku,
+  customPetPortraitsSku
 ];
 
 export default {
@@ -349,6 +351,12 @@ export default {
           url: {
             name: 'felted-ornaments-creation-page'
           }
+        },
+        {
+          label: 'Pet Portraits',
+          url: {
+            name: 'pet-portraits-creation-page'
+          }
         }
       ],
       isMounted: false,
@@ -412,7 +420,14 @@ export default {
       return this.truncate(product.plushieDescription, 150, 50);
     },
     editHandler (product) {
-      if (product.sku === customPillowSku) {
+      if (product.sku === customPetPortraitsSku) {
+        this.$router.push({
+          name: 'pet-portraits-creation-page',
+          query: {
+            existingPlushieId: product.plushieId
+          }
+        })
+      } else if (product.sku === customPillowSku) {
         this.$router.push({
           name: 'pillow-product',
           query: {

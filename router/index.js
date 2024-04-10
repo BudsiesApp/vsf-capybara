@@ -34,6 +34,8 @@ const ClothesProduct = () =>
   import(/* webpackChunkName: "vsf-clothes-product" */ 'theme/pages/ClothesProduct');
 const PasswordReset = () =>
   import(/* webpackChunkName: "vsf-password-reset" */ 'theme/pages/PasswordReset');
+const PortraitProduct = () =>
+  import(/* webpackChunkName: "vsf-portrait-product" */ 'theme/pages/PortraitProduct.vue');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -486,6 +488,15 @@ let routes = [
     props: (route) => ({
       id: route.query.id,
       token: route.query.token
+    })
+  },
+  {
+    name: 'pet-portraits-creation-page',
+    path: '/pet-portraits/create/',
+    component: PortraitProduct,
+    props: (route) => ({
+      sku: 'customPetPortraits_bundle',
+      existingPlushieId: route.query.existingPlushieId
     })
   }
 ];
