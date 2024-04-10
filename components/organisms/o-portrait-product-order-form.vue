@@ -18,7 +18,7 @@
       <div class="_form-container">
         <SfHeading :title="product.name" :level="1" class="sf-heading--left _product-name-desktop" />
 
-        <div class="_short-description" v-html="shortDescription" />
+        <div class="_short-description" v-html="product.short_description" />
 
         <a-custom-price
           class="_price"
@@ -35,21 +35,23 @@
             <div class="_step">
               <div
                 class="_step-title"
-                :ref="getFieldAnchorName('Style Option')"
+                :ref="getFieldAnchorName('Style')"
               >
                 {{ $t('Select style') }}
               </div>
 
               <validation-provider
                 v-slot="{errors}"
-                name="'Style Option'"
+                name="'Style'"
                 tag="div"
+                rules="required"
                 class="_step-content"
               >
                 <SfSelect
                   v-model="selectedStyleOptionId"
-                  name="style_option"
+                  name="Style"
                   class="sf-select--underlined"
+                  :required="true"
                   :size="10"
                   :disabled="isDisabled"
                   :should-lock-scroll-on-open="isMobile"
@@ -70,21 +72,24 @@
             <div class="_step" v-show="showSizeSelectorStep">
               <div
                 class="_step-title"
-                :ref="getFieldAnchorName('Size Option')"
+                :ref="getFieldAnchorName('Size')"
               >
                 {{ $t('Select size') }}
               </div>
 
               <validation-provider
                 v-slot="{errors}"
-                name="'Size Option'"
+                name="'Size'"
+                rules="required"
                 tag="div"
                 class="_step-content"
               >
                 <SfSelect
+                  v-if="showSizeOptionsSelect"
                   v-model="selectedSizeOptionId"
-                  name="style_option"
+                  name="Size"
                   class="sf-select--underlined"
+                  :required="true"
                   :size="10"
                   :disabled="isDisabled"
                   :should-lock-scroll-on-open="isMobile"
@@ -118,7 +123,7 @@
               >
                 <input
                   type="hidden"
-                  :value="customerImageId"
+                  :value="customerImage ? customerImage.id : undefined"
                   required
                 >
 
@@ -171,7 +176,7 @@
                 <SfButton
                   class="_add-to-cart color-primary"
                   type="submit"
-                  :disabled="isSubmitButtonDisabled"
+                  :disabled="isDisabled"
                 >
                   {{ $t('Add to Cart') }}
                 </SfButton>
@@ -192,10 +197,11 @@
 </template>
 
 <script lang="ts">
-import { ValidationObserver, ValidationProvider } from 'vee-validate';
+import { extend, ValidationObserver, ValidationProvider } from 'vee-validate';
+import { required } from 'vee-validate/dist/rules';
 import { SfButton, SfHeading, SfSelect } from '@storefront-ui/vue';
 import { mapMobileObserver, unMapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
-import { computed, ComputedRef, defineComponent, PropType, ref, Ref, watch } from '@vue/composition-api'
+import { computed, ComputedRef, defineComponent, nextTick, PropType, ref, Ref, watch } from '@vue/composition-api'
 
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
@@ -206,7 +212,7 @@ import { BundleOption, BundleOptionsProductLink } from 'core/modules/catalog/typ
 import Product from 'core/modules/catalog/types/Product';
 import { PriceHelper, ServerError } from 'src/modules/shared';
 
-import { getLowestPriceForBundleOption } from 'theme/helpers/get-lowest-price-for-bundle-option.function';
+import { getLowestPriceForBundleOptionProductLinks } from 'theme/helpers/get-lowest-price-for-bundle-option.function';
 import { useArtworkUpload } from 'theme/helpers/use-artwork-upload';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useProductGallery } from 'theme/helpers/use-product-gallery';
@@ -219,13 +225,19 @@ import MProductDescriptionStory from 'theme/components/molecules/m-product-descr
 import MZoomGallery from 'theme/components/molecules/m-zoom-gallery.vue';
 import { useBundleOption } from 'theme/helpers/use-bundle-options';
 
+extend('required', {
+  ...required,
+  message: 'The {_field_} field is required'
+});
+
 interface SelectOptionItem {
-  value: number,
+  value: number | string,
   label: string
 }
 
 const STYLE_BUNDLE_OPTION_TITLE = 'variant';
 const SIZE_BUNDLE_OPTION_TITLE = 'size';
+const PORTRAITS_WITHOUT_FRAME_STYLE_SKU = 'portraits_without_frame';
 
 function useStyleBundleOption (
   product: Product,
@@ -251,12 +263,21 @@ function useStyleBundleOption (
       return [];
     }
 
-    return styleBundleOption.value.product_links.map((productLink) => {
+    const placeholder = {
+      value: '',
+      label: i18n.t('Select Style').toString()
+    };
+
+    const options: SelectOptionItem[] = styleBundleOption.value.product_links.map((productLink) => {
       return {
         value: Number(productLink.id),
         label: productLink.product?.name || ''
       }
     });
+
+    options.unshift(placeholder);
+
+    return options;
   });
 
   const selectedStyleProduct = computed<Product | undefined>(() => {
@@ -323,7 +344,10 @@ function useSizeBundleOption (
     bundleOption: sizeBundleOption,
     setBundleOptionValue
   } = useBundleOption(product, SIZE_BUNDLE_OPTION_TITLE);
+
   const selectedSizeOptionId = ref<number | undefined>();
+  const showSizeOptionsSelect = ref<boolean>(true);
+
   const sizeOptions = computed<SelectOptionItem[]>(() => {
     if (!sizeBundleOption.value) {
       return [];
@@ -331,11 +355,20 @@ function useSizeBundleOption (
 
     const options: SelectOptionItem[] = [];
 
+    const placeholder = {
+      value: '',
+      label: i18n.t('Select size').toString()
+    };
+
     sizeBundleOption.value.product_links.forEach((productLink) => {
-      if (
-        !selectedStyleOption.value ||
-        !productLink.sku.startsWith(selectedStyleOption.value.sku)
-      ) {
+      if (!selectedStyleOption.value) {
+        return;
+      }
+
+      const isWithoutFrameStyleSelected = selectedStyleOption.value.sku.startsWith(PORTRAITS_WITHOUT_FRAME_STYLE_SKU);
+      const isSizeWithoutFrame = productLink.sku.startsWith(PORTRAITS_WITHOUT_FRAME_STYLE_SKU);
+
+      if (isWithoutFrameStyleSelected !== isSizeWithoutFrame) {
         return;
       }
 
@@ -345,11 +378,19 @@ function useSizeBundleOption (
       })
     });
 
+    if (!options.length) {
+      return options;
+    }
+
+    options.unshift(placeholder);
+
     return options;
   });
+
   const showSizeSelectorStep = computed<boolean>(() => {
     return !!sizeOptions.value.length;
   });
+
   const selectedSizeProduct = computed<Product | undefined>(() => {
     if (!selectedSizeOptionId.value || !sizeBundleOption.value) {
       return;
@@ -360,6 +401,15 @@ function useSizeBundleOption (
     );
 
     return selectedProductLink?.product;
+  });
+
+  watch(selectedStyleOption, async () => {
+    showSizeOptionsSelect.value = false;
+    selectedSizeOptionId.value = undefined;
+
+    await nextTick();
+
+    showSizeOptionsSelect.value = true;
   });
 
   watch(selectedSizeOptionId, (value, oldValue) => {
@@ -403,6 +453,7 @@ function useSizeBundleOption (
   return {
     selectedSizeOptionId,
     selectedSizeProduct,
+    showSizeOptionsSelect,
     showSizeSelectorStep,
     sizeBundleOption,
     sizeOptions
@@ -416,26 +467,43 @@ function useProductPrice (
   selectedSizeProduct: ComputedRef<Product | undefined>
 ) {
   const stylePrice = computed<PriceHelper.ProductPrice>(() => {
-    if (selectedStyleProduct) {
-      return PriceHelper.getProductDefaultPrice(selectedStyleProduct, {}, false)
+    if (selectedStyleProduct.value) {
+      return PriceHelper.getProductDefaultPrice(selectedStyleProduct.value, {}, false)
     }
 
     if (!styleBundleOption.value) {
       throw new Error('styleBundleOption is not defined');
     }
 
-    return getLowestPriceForBundleOption(styleBundleOption.value);
+    return getLowestPriceForBundleOptionProductLinks(
+      styleBundleOption.value.product_links
+    );
   });
   const sizePrice = computed<PriceHelper.ProductPrice>(() => {
-    if (selectedSizeProduct) {
-      return PriceHelper.getProductDefaultPrice(selectedSizeProduct, {}, false);
+    if (selectedSizeProduct.value) {
+      return PriceHelper.getProductDefaultPrice(selectedSizeProduct.value, {}, false);
     }
 
     if (!sizeBundleOption.value) {
       throw new Error('sizeBundleOption is not defined');
     }
 
-    return getLowestPriceForBundleOption(sizeBundleOption.value);
+    if (!selectedStyleProduct.value) {
+      return getLowestPriceForBundleOptionProductLinks(
+        sizeBundleOption.value.product_links
+      );
+    }
+
+    const isWithoutFrameStyleSelected = selectedStyleProduct.value.sku.startsWith(PORTRAITS_WITHOUT_FRAME_STYLE_SKU);
+
+    return getLowestPriceForBundleOptionProductLinks(
+      sizeBundleOption.value.product_links.filter(
+        (productLink) => {
+          const isSizeWithoutFrame = productLink.sku.startsWith(PORTRAITS_WITHOUT_FRAME_STYLE_SKU);
+          return isSizeWithoutFrame === isWithoutFrameStyleSelected;
+        }
+      )
+    );
   });
   const totalPrice = computed<PriceHelper.ProductPrice>(() => {
     return PriceHelper.getTotalPriceForProductPrices([stylePrice.value, sizePrice.value])
@@ -476,8 +544,11 @@ export default defineComponent({
     }
   },
   setup ({ product, existingCartItem }, setupContext) {
-    const isSubmitting = ref<boolean>(false);
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+
+    const isSubmitting = ref<boolean>(false);
+    const quantity = ref<number>(1);
+
     const {
       selectedStyleOption,
       selectedStyleOptionId,
@@ -489,6 +560,7 @@ export default defineComponent({
     const {
       selectedSizeOptionId,
       selectedSizeProduct,
+      showSizeOptionsSelect,
       showSizeSelectorStep,
       sizeBundleOption,
       sizeOptions
@@ -509,10 +581,12 @@ export default defineComponent({
       styleOptions,
       selectedStyleOptionId,
       selectedSizeOptionId,
+      showSizeOptionsSelect,
       showSizeSelectorStep,
       sizeBundleOption,
       sizeOptions,
       validationObserver,
+      quantity,
       ...artworkUploadFields,
       ...useFormValidation(
         validationObserver,
@@ -657,3 +731,103 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+
+.o-portrait-product-order-form {
+  --select-selected-padding: 0 var(--spacer-lg) var(--spacer-xs) var(--spacer-2xs);
+
+  ._info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  ._price {
+    margin-top: var(--spacer-base);
+  }
+
+  ._zoom-gallery-container,
+  ._form-container {
+    flex-grow: 1;
+    width: 100%;
+  }
+
+  ._product-name-desktop {
+    display: none;
+  }
+
+  ._product-name-mobile {
+    margin-top: var(--spacer-lg);
+  }
+
+  ._gallery {
+    margin-top: var(--spacer-xs);
+  }
+
+  ._step {
+    margin-top: var(--spacer-base);
+  }
+
+  ._step-title {
+    font-size: var(--font-base);
+    font-weight: 800;
+    text-align: left;
+  }
+
+  ._step-content {
+    margin-top: var(--spacer-sm);
+  }
+
+  .m-form-errors {
+    margin-top: var(--spacer-base);
+  }
+
+  .m-artwork-upload {
+    margin-top: var(--spacer-sm);
+  }
+
+  ._quantity-field,
+  ._actions {
+    margin-top: var(--spacer-base);
+  }
+
+  ._add-to-cart {
+    width: 100%;
+  }
+
+  ._error-text {
+    font-size: 0.8em;
+    margin-top: var(--spacer-xs);
+    color: var(--c-danger-variant);
+  }
+
+  @media (min-width: $tablet-min) {
+    ._info {
+      flex-direction: row;
+      justify-content: space-between;
+    }
+
+    ._zoom-gallery-container,
+    ._form-container {
+      max-width: 48.5%;
+    }
+
+    ._product-name-desktop {
+      display: block;
+    }
+
+    ._product-name-mobile {
+      display: none;
+    }
+
+    ._gallery {
+      margin-top: 0;
+    }
+
+    ._add-to-cart {
+      width: auto;
+    }
+  }
+}
+</style>

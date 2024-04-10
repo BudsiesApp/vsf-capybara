@@ -115,3 +115,22 @@ export default Vue.extend({
   }
 })
 </script>
+
+<style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+
+#portrait-product {
+  box-sizing: border-box;
+  padding: 0 var(--spacer-sm);
+
+  @media (min-width: $tablet-min) {
+    max-width: 1272px;
+    width: 100%;
+    margin: 0 auto;
+
+    .o-portrait-product-order-form {
+      margin-top: var(--spacer-lg);
+    }
+  }
+}
+</style>
