@@ -51,7 +51,7 @@ import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import * as catalogTypes from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import i18n from '@vue-storefront/i18n';
-import { getProductDefaultPrice, ServerError } from 'src/modules/shared';
+import { getProductDefaultPrice, PriceHelper, ServerError } from 'src/modules/shared';
 
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
 
@@ -93,11 +93,9 @@ export default Vue.extend({
     }
   },
   computed: {
-    baseProductPrice (): number {
+    baseProductFinalPrice (): number {
       const price = getProductDefaultPrice(this.product, {}, false);
-      return price.special && price.special < price.regular
-        ? price.special
-        : price.regular;
+      return PriceHelper.getFinalPrice(price)
     },
     defaultOption (): CreativityKitFormOption | undefined {
       if (!this.productBundleOption) {
@@ -106,7 +104,7 @@ export default Vue.extend({
 
       return {
         image: '/assets/images/creativityKit/kit.jpg',
-        price: this.baseProductPrice,
+        price: this.baseProductFinalPrice,
         isDefault: false,
         name: this.$t('Creativity Kit').toString(),
         valueText: this.$t('(no Budsie)').toString(),
@@ -131,9 +129,7 @@ export default Vue.extend({
         }
 
         const price = getProductDefaultPrice(productLink.product, {}, false);
-        const finalPrice = price.special && price.special < price.regular
-          ? price.special
-          : price.regular;
+        const finalPrice = PriceHelper.getFinalPrice(price);
 
         let image = productLink.product.image;
         let name = productLink.product.name;
@@ -155,7 +151,7 @@ export default Vue.extend({
 
         options.push({
           image,
-          price: finalPrice + this.baseProductPrice,
+          price: finalPrice + this.baseProductFinalPrice,
           isDefault,
           name,
           valueText,
@@ -173,7 +169,7 @@ export default Vue.extend({
       return this.getBundleOptionByTitle(voucherBundleOptionTitle);
     },
     voucherValue (): number {
-      return Math.round(this.baseProductPrice + this.budsieProductPrice);
+      return Math.round(this.baseProductFinalPrice + this.budsieProductPrice);
     },
     superizedVoucherValue (): number {
       return Math.round(this.voucherValue + this.superizedAddonPrice);
