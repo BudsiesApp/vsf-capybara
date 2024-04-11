@@ -294,7 +294,7 @@ function useStyleBundleOption (
     }
 
     if (!styleBundleOption.value) {
-      Logger.error('styleBundleOption is not defined while attempt to set variant was performed', 'budsies')();
+      Logger.error('styleBundleOption is not defined while attempt to set style was performed', 'budsies')();
       return;
     }
 
@@ -418,7 +418,7 @@ function useSizeBundleOption (
     }
 
     if (!sizeBundleOption.value) {
-      Logger.error('sizeBundleOption is not defined while attempt to set variant was performed', 'budsies')();
+      Logger.error('sizeBundleOption is not defined while attempt to set size was performed', 'budsies')();
       return;
     }
 
