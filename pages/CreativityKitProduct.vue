@@ -205,7 +205,7 @@ import { htmlDecode } from '@vue-storefront/core/filters';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import Product from 'core/modules/catalog/types/Product';
-import { getProductDefaultPrice, ProductEvent } from 'src/modules/shared';
+import { getProductDefaultPrice, PriceHelper, ProductEvent } from 'src/modules/shared';
 
 import { ProductStructuredData } from 'src/modules/budsies';
 
@@ -262,9 +262,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         {},
         false
       );
-      const finalPrice = price.special && price.special < price.regular
-        ? price.special
-        : price.regular;
+      const finalPrice = PriceHelper.getFinalPrice(price);
 
       return finalPrice + budsieShippingPrice;
     },
@@ -275,9 +273,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         false
       );
 
-      return price.special && price.special < price.regular
-        ? price.special
-        : price.regular;
+      return PriceHelper.getFinalPrice(price);
     },
     sharingData (): {
       sharingUrl: string,
