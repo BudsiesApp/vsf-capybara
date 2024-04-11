@@ -27,8 +27,8 @@
 
         <a-custom-price
           class="_price"
-          :regular="price"
-          :special-price="specialPrice"
+          :regular="totalPrice.regular"
+          :special-price="totalPrice.special"
         />
 
         <validation-observer
@@ -306,7 +306,7 @@ import CartItem from 'core/modules/cart/types/CartItem';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { Bodypart, BodypartOption, Dictionary, ExtraPhotoAddon, ProductValue } from 'src/modules/budsies';
 import ServerError from 'src/modules/shared/types/server-error';
-import { CustomerImage, getProductDefaultPrice, InjectType } from 'src/modules/shared';
+import { CustomerImage, getProductDefaultPrice, PriceHelper } from 'src/modules/shared';
 
 import { useBundleOption } from 'theme/helpers/use-bundle-options';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
@@ -623,7 +623,7 @@ export default defineComponent({
 
       return productImages['images'];
     },
-    bundleProductPrice (): {regular: any, special: any} {
+    bundleProductPrice (): PriceHelper.ProductPrice {
       return getProductDefaultPrice(this.product, this.getCurrentCustomOptions, false);
     },
     productImages (): GalleryProductImages[] {
@@ -665,30 +665,38 @@ export default defineComponent({
 
       return result;
     },
-    price (): number {
-      const style = this.availableStyles.find(
-        (item) => item.value === this.selectedStyle
-      );
-      const sizePrice = this.selectedSize?.regularPrice || 0;
-
-      if (!style || !style.price) {
-        return this.bundleProductPrice.regular + sizePrice;
+    sizePrice (): PriceHelper.ProductPrice {
+      if (!this.selectedSize) {
+        return {
+          regular: 0,
+          special: null
+        }
       }
 
-      return style.price + sizePrice;
+      return {
+        regular: this.selectedSize.regularPrice,
+        special: this.selectedSize.specialPrice
+      }
     },
-    specialPrice (): number {
+    stylePrice (): PriceHelper.ProductPrice {
       const style = this.availableStyles.find(
         (item) => item.value === this.selectedStyle
       );
 
-      const sizePrice = this.selectedSize?.specialPrice || 0;
-
-      if (!style || !style.specialPrice) {
-        return this.bundleProductPrice.special + sizePrice;
+      if (!style) {
+        return this.bundleProductPrice
       }
 
-      return style.specialPrice + sizePrice;
+      return {
+        regular: style.price,
+        special: style.specialPrice
+      }
+    },
+    totalPrice (): PriceHelper.ProductPrice {
+      return PriceHelper.getTotalPriceForProductPrices([
+        this.stylePrice,
+        this.sizePrice
+      ]);
     },
     hasStyleSelections (): boolean {
       return !(
