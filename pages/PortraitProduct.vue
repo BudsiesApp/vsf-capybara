@@ -100,7 +100,7 @@ export default Vue.extend({
 
     return {
       title: htmlDecode(
-        (this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name || this.$t('Portrait')).toString()
+        (this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name || this.$t('Portraits')).toString()
       ),
       meta: description
         ? [
