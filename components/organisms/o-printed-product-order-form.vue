@@ -27,8 +27,8 @@
 
         <a-custom-price
           class="_price"
-          :regular="price"
-          :special-price="specialPrice"
+          :regular="totalPrice.regular"
+          :special-price="totalPrice.special"
         />
 
         <validation-observer
@@ -310,7 +310,7 @@ import CartItem from 'core/modules/cart/types/CartItem';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { Bodypart, BodypartOption, Dictionary, ExtraPhotoAddon, ProductValue } from 'src/modules/budsies';
 import ServerError from 'src/modules/shared/types/server-error';
-import { CustomerImage, getProductDefaultPrice } from 'src/modules/shared';
+import { CustomerImage, getProductDefaultPrice, PriceHelper } from 'src/modules/shared';
 import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import { useBundleOption } from 'theme/helpers/use-bundle-options';
@@ -629,7 +629,7 @@ export default defineComponent({
 
       return productImages['images'];
     },
-    bundleProductPrice (): {regular: any, special: any} {
+    bundleProductPrice (): PriceHelper.ProductPrice {
       return getProductDefaultPrice(this.product, this.getCurrentCustomOptions, false);
     },
     productImages (): GalleryProductImages[] {
@@ -671,38 +671,38 @@ export default defineComponent({
 
       return result;
     },
-    price (): number {
-      const style = this.availableStyles.find(
-        (item) => item.value === this.selectedStyle
-      );
-      const sizePrice = this.selectedSize?.regularPrice || 0;
-
-      if (!style || !style.price) {
-        return this.bundleProductPrice.regular + sizePrice;
+    sizePrice (): PriceHelper.ProductPrice {
+      if (!this.selectedSize) {
+        return {
+          regular: 0,
+          special: null
+        }
       }
 
-      return style.price + sizePrice;
+      return {
+        regular: this.selectedSize.regularPrice,
+        special: this.selectedSize.specialPrice
+      }
     },
-    specialPrice (): number | null {
+    stylePrice (): PriceHelper.ProductPrice {
       const style = this.availableStyles.find(
         (item) => item.value === this.selectedStyle
       );
-
-      const sizePrice = this.selectedSize?.finalPrice || 0;
-      const stylePrice = (typeof style?.specialPrice === 'number' ? style?.specialPrice : style?.price) || 0;
-      const bundlePrice = (typeof this.bundleProductPrice.special === 'number' ? this.bundleProductPrice.special : this.bundleProductPrice.regular) || 0;
-
-      let specialPrice = stylePrice + sizePrice;
-      let regularPrice = (style?.price || 0) + (this.selectedSize?.regularPrice || 0);
 
       if (!style) {
-        specialPrice += bundlePrice;
-        regularPrice += (this.bundleProductPrice.regular || 0);
+        return this.bundleProductPrice
       }
 
-      console.log(specialPrice, regularPrice);
-
-      return specialPrice < regularPrice ? specialPrice : null;
+      return {
+        regular: style.price,
+        special: style.specialPrice
+      }
+    },
+    totalPrice (): PriceHelper.ProductPrice {
+      return PriceHelper.getTotalPriceForProductPrices([
+        this.stylePrice,
+        this.sizePrice
+      ]);
     },
     hasStyleSelections (): boolean {
       return !(
