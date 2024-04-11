@@ -1,4 +1,4 @@
-import { Ref, computed, inject, ref } from '@vue/composition-api';
+import { Ref, computed, inject, ref, set } from '@vue/composition-api';
 
 import CartItem from 'core/modules/cart/types/CartItem';
 import Product from 'core/modules/catalog/types/Product';
@@ -55,7 +55,7 @@ export function useArtworkUpload (product: Product, existingCartItem: CartItem |
   }
 
   function onArtworkUploadBusyStatusChanged (key: string, isBusy: boolean): void {
-    artworkUploaderBusyState.value[key] = isBusy;
+    set(artworkUploaderBusyState.value, key, isBusy);
   }
 
   fillExistingCartItemData();

@@ -53,7 +53,7 @@
                   class="sf-select--underlined"
                   :required="true"
                   :size="10"
-                  :disabled="isDisabled"
+                  :disabled="isSubmitting"
                   :should-lock-scroll-on-open="isMobile"
                   :error-message="errors[0]"
                   :valid="!errors.length"
@@ -91,7 +91,7 @@
                   class="sf-select--underlined"
                   :required="true"
                   :size="10"
-                  :disabled="isDisabled"
+                  :disabled="isSubmitting"
                   :should-lock-scroll-on-open="isMobile"
                   :error-message="errors[0]"
                   :valid="!errors.length"
@@ -131,7 +131,7 @@
                   ref="artwork-upload"
                   :product-id="backendProductId"
                   :upload-url="artworkUploadUrl"
-                  :disabled="isDisabled"
+                  :disabled="isSubmitting"
                   :initial-items="artworkUploadInitialItems"
                   @file-added="onArtworkAdd"
                   @file-removed="onArtworkRemove"
@@ -176,7 +176,7 @@
                 <SfButton
                   class="_add-to-cart color-primary"
                   type="submit"
-                  :disabled="isDisabled"
+                  :disabled="isSubmitButtonDisabled"
                 >
                   {{ $t('Add to Cart') }}
                 </SfButton>
@@ -571,12 +571,12 @@ export default defineComponent({
       existingCartItem
     );
 
-    const isDisabled = computed<boolean>(() => {
+    const isSubmitButtonDisabled = computed<boolean>(() => {
       return isSubmitting.value || artworkUploadFields.isSomeUploaderBusy.value;
     })
 
     return {
-      isDisabled,
+      isSubmitButtonDisabled,
       isSubmitting,
       styleOptions,
       selectedStyleOptionId,
@@ -595,7 +595,7 @@ export default defineComponent({
       ...useProductGallery(
         product,
         styleBundleOption,
-        selectedStyleOption.value?.sku
+        selectedStyleOption
       ),
       ...useProductPrice(
         styleBundleOption,
@@ -736,8 +736,6 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .o-portrait-product-order-form {
-  --select-selected-padding: 0 var(--spacer-lg) var(--spacer-xs) var(--spacer-2xs);
-
   ._info {
     display: flex;
     flex-direction: column;
@@ -775,10 +773,6 @@ export default defineComponent({
     text-align: left;
   }
 
-  ._step-content {
-    margin-top: var(--spacer-sm);
-  }
-
   .m-form-errors {
     margin-top: var(--spacer-base);
   }
@@ -800,6 +794,10 @@ export default defineComponent({
     font-size: 0.8em;
     margin-top: var(--spacer-xs);
     color: var(--c-danger-variant);
+  }
+
+  .sf-select {
+    --select-padding: 0;
   }
 
   @media (min-width: $tablet-min) {

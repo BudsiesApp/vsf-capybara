@@ -1,7 +1,7 @@
-import { ComputedRef, computed } from '@vue/composition-api';
+import { ComputedRef, Ref, computed } from '@vue/composition-api';
 
 import { getProductGallery } from '@vue-storefront/core/modules/catalog/helpers';
-import { BundleOption } from 'core/modules/catalog/types/BundleOption';
+import { BundleOption, BundleOptionsProductLink } from 'core/modules/catalog/types/BundleOption';
 import Product from 'core/modules/catalog/types/Product';
 
 import GalleryProductImages from 'theme/components/interfaces/gallery-product-images.interface';
@@ -15,7 +15,11 @@ function getZoomGalleryImage (imageObject: any): ZoomGalleryImage {
   }
 }
 
-export function useProductGallery (product: Product, styleBundleOption: ComputedRef<BundleOption | undefined> | undefined, selectedStyleSku: string | undefined) {
+export function useProductGallery (
+  product: Product,
+  styleBundleOption: ComputedRef<BundleOption | undefined> | undefined,
+  selectedStyleProductLink: ComputedRef<BundleOptionsProductLink | undefined> | undefined
+) {
   const productImages = computed<GalleryProductImages[]>(() => {
     const mainProductImages = getProductGallery(product)
       .map(getZoomGalleryImage)
@@ -51,22 +55,22 @@ export function useProductGallery (product: Product, styleBundleOption: Computed
   const galleryImages = computed<ZoomGalleryImage[]>(() => {
     const defaultGalleryProductImages = productImages.value[0];
     const defaultImages = defaultGalleryProductImages
-      ? defaultGalleryProductImages['images']
+      ? defaultGalleryProductImages.images
       : [];
 
-    if (!selectedStyleSku) {
+    if (!selectedStyleProductLink) {
       return defaultImages;
     }
 
     const selectedStyleGalleryProductImages = productImages.value.find(
-      (item) => item.sku === selectedStyleSku
-    )
+      (item) => selectedStyleProductLink.value && (item.sku === selectedStyleProductLink.value.sku)
+    );
 
-    if (!selectedStyleGalleryProductImages) {
+    if (!selectedStyleGalleryProductImages || !selectedStyleGalleryProductImages.images.length) {
       return defaultImages;
     }
 
-    return selectedStyleGalleryProductImages['images'];
+    return selectedStyleGalleryProductImages.images;
   });
 
   return {
