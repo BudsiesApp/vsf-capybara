@@ -157,13 +157,13 @@ export default Vue.extend({
           url: {
             name: 'felted-ornaments-creation-page'
           }
-        },
-        {
-          label: this.$t('Pet Portraits'),
-          url: {
-            name: 'pet-portraits-creation-page'
-          }
         }
+        // {
+        //   label: this.$t('Pet Portraits'),
+        //   url: {
+        //     name: 'pet-portraits-creation-page'
+        //   }
+        // }
       ],
       householdItems: [
         {
