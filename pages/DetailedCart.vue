@@ -393,9 +393,9 @@ export default {
           url: '/purchase-gift-card/'
         }
         // {
-        //   label: 'Pet Portraits',
+        //   label: 'Photo Portraits',
         //   url: {
-        //     name: 'pet-portraits-creation-page'
+        //     name: 'photo-portraits-creation-page'
         //   }
         // }
       ],
@@ -465,7 +465,7 @@ export default {
     editHandler (product) {
       if (product.sku === customPhotoPortraitsSku) {
         this.$router.push({
-          name: 'pet-portraits-creation-page',
+          name: 'photo-portraits-creation-page',
           query: {
             existingPlushieId: product.plushieId
           }

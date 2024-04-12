@@ -805,8 +805,8 @@ let routes = [
     }
   },
   {
-    name: 'pet-portraits-creation-page',
-    path: '/pet-portraits/create/',
+    name: 'photo-portraits-creation-page',
+    path: '/photo-portraits/create/',
     component: PortraitProduct,
     props: (route) => ({
       sku: 'customPhotoPortraits_bundle',
