@@ -158,12 +158,6 @@ export default Vue.extend({
             name: 'felted-ornaments-creation-page'
           }
         }
-        // {
-        //   label: this.$t('Pet Portraits'),
-        //   url: {
-        //     name: 'photo-portraits-creation-page'
-        //   }
-        // }
       ],
       householdItems: [
         {
@@ -191,6 +185,12 @@ export default Vue.extend({
             name: 'renaissance-blankets'
           }
         }
+        // {
+        //   label: this.$t('Pet Portraits'),
+        //   url: {
+        //     name: 'photo-portraits-creation-page'
+        //   }
+        // }
       ],
       accessoriesItems: [
         {
