@@ -132,7 +132,7 @@ export default Vue.extend({
         // {
         //   label: this.$t('Pet Portraits'),
         //   url: {
-        //     name: 'pet-portraits-creation-page'
+        //     name: 'photo-portraits-creation-page'
         //   }
         // },
         {
