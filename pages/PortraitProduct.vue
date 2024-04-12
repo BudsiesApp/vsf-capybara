@@ -7,6 +7,7 @@
 
     <o-portrait-product-order-form
       v-if="getCurrentProduct"
+      :artwork-upload-step-title="artworkUploadStepTitle"
       :artwork-upload-url="artworkUploadUrl"
       :product="getCurrentProduct"
       :existing-cart-item="existingCartItem"
@@ -47,6 +48,9 @@ export default Vue.extend({
     }
   },
   computed: {
+    artworkUploadStepTitle (): string {
+      return this.$t('Upload your pet\'s photo').toString();
+    },
     getCurrentProduct (): Product | null {
       const product = this.$store.getters['product/getCurrentProduct'];
       if (!product?.sku || product.sku !== this.sku) {
@@ -100,7 +104,7 @@ export default Vue.extend({
 
     return {
       title: htmlDecode(
-        (this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name || this.$t('Portraits')).toString()
+        (this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name || this.$t('Photo Portraits')).toString()
       ),
       meta: description
         ? [

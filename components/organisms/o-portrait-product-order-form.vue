@@ -110,14 +110,14 @@
             <div class="_step">
               <div
                 class="_step-title"
-                :ref="getFieldAnchorName('Pet\'s photo')"
+                :ref="getFieldAnchorName('Photo')"
               >
-                {{ $t('Upload your pet\'s photo') }}
+                {{ artworkUploadStepTitle }}
               </div>
 
               <validation-provider
                 v-slot="{ errors }"
-                name="'Pet's photo'"
+                name="'Photo'"
                 tag="div"
                 class="_step-content"
               >
@@ -530,6 +530,10 @@ export default defineComponent({
     ValidationProvider
   },
   props: {
+    artworkUploadStepTitle: {
+      type: String,
+      required: true
+    },
     artworkUploadUrl: {
       type: String,
       required: true

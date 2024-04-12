@@ -233,7 +233,7 @@ const clothesProductSkus = [
 ];
 
 const customPillowSku = 'customPillow_bundle';
-const customPetPortraitsSku = 'customPetPortraits_bundle';
+const customPhotoPortraitsSku = 'customPhotoPortraits_bundle';
 
 const editableProductsSkus = [
   ...foreversProductsSkus,
@@ -243,7 +243,7 @@ const editableProductsSkus = [
   ...golfHeadCoversProductsSkus,
   ...clothesProductSkus,
   customPillowSku,
-  customPetPortraitsSku
+  customPhotoPortraitsSku
 ];
 
 export default {
@@ -420,7 +420,7 @@ export default {
       return this.truncate(product.plushieDescription, 150, 50);
     },
     editHandler (product) {
-      if (product.sku === customPetPortraitsSku) {
+      if (product.sku === customPhotoPortraitsSku) {
         this.$router.push({
           name: 'pet-portraits-creation-page',
           query: {

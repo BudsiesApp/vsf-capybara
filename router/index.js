@@ -246,6 +246,9 @@ let routes = [
         case '645':
           parentSku = 'customHawaiianShirts_bundle';
           break;
+        case '721':
+          parentSku = 'customPhotoPortraits_bundle';
+          break;
       }
 
       if (!parentSku) {
@@ -495,7 +498,7 @@ let routes = [
     path: '/pet-portraits/create/',
     component: PortraitProduct,
     props: (route) => ({
-      sku: 'customPetPortraits_bundle',
+      sku: 'customPhotoPortraits_bundle',
       existingPlushieId: route.query.existingPlushieId
     })
   }
