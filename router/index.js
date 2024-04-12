@@ -48,6 +48,8 @@ const BudsiesPalsProduct = () =>
   import(/* webpackChunkName: "vsf-budsies-pals-product" */ 'theme/pages/BudsiesPalsProduct');
 const PasswordReset = () =>
   import(/* webpackChunkName: "vsf-password-reset" */ 'theme/pages/PasswordReset');
+const PortraitProduct = () =>
+  import(/* webpackChunkName: "vsf-portrait-product" */ 'theme/pages/PortraitProduct.vue');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -309,6 +311,9 @@ let routes = [
           break;
         case '645':
           parentSku = 'customHawaiianShirts_bundle';
+          break;
+        case '721':
+          parentSku = 'customPhotoPortraits_bundle';
           break;
       }
 
@@ -798,6 +803,15 @@ let routes = [
     redirect: {
       name: 'nft-budsies-create'
     }
+  },
+  {
+    name: 'pet-portraits-creation-page',
+    path: '/pet-portraits/create/',
+    component: PortraitProduct,
+    props: (route) => ({
+      sku: 'customPhotoPortraits_bundle',
+      existingPlushieId: route.query.existingPlushieId
+    })
   }
 ];
 

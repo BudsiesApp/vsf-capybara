@@ -241,6 +241,7 @@ const clothesProductSkus = [
 ];
 
 const customPillowSku = 'customPillow_bundle';
+const customPhotoPortraitsSku = 'customPhotoPortraits_bundle';
 
 const budsiesPlushieProductSkus = [
   'CustomBudsie1_bundle',
@@ -270,7 +271,8 @@ const editableProductsSkus = [
   budsiesPalsSku,
   buddyPillowSku,
   nftBudsieSku,
-  customPillowSku
+  customPillowSku,
+  customPhotoPortraitsSku
 ];
 
 export default {
@@ -390,6 +392,12 @@ export default {
           label: this.$t('Gift Cards'),
           url: '/purchase-gift-card/'
         }
+        // {
+        //   label: 'Pet Portraits',
+        //   url: {
+        //     name: 'pet-portraits-creation-page'
+        //   }
+        // }
       ],
       isMounted: false,
       syncQuantityDebounced: undefined
@@ -455,7 +463,14 @@ export default {
       return this.truncate(product.plushieDescription, 150, 50);
     },
     editHandler (product) {
-      if (product.sku === customPillowSku) {
+      if (product.sku === customPhotoPortraitsSku) {
+        this.$router.push({
+          name: 'pet-portraits-creation-page',
+          query: {
+            existingPlushieId: product.plushieId
+          }
+        })
+      } else if (product.sku === customPillowSku) {
         this.$router.push({
           name: 'pillow-product',
           query: {
