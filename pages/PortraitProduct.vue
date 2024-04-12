@@ -49,7 +49,7 @@ export default Vue.extend({
   },
   computed: {
     artworkUploadStepTitle (): string {
-      return this.$t('Upload your pet\'s photo').toString();
+      return this.$t('Upload photo').toString();
     },
     getCurrentProduct (): Product | null {
       const product = this.$store.getters['product/getCurrentProduct'];
