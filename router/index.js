@@ -779,6 +779,15 @@ let routes = [
     })
   },
   {
+    name: 'photo-portraits-creation-page',
+    path: '/photo-portraits/create/',
+    component: PortraitProduct,
+    props: (route) => ({
+      sku: 'customPhotoPortraits_bundle',
+      existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
     name: 'nft-budsies-create',
     path: '/nft-budsies/create/',
     component: BudsiesPlushieProduct,
@@ -803,15 +812,6 @@ let routes = [
     redirect: {
       name: 'nft-budsies-create'
     }
-  },
-  {
-    name: 'photo-portraits-creation-page',
-    path: '/photo-portraits/create/',
-    component: PortraitProduct,
-    props: (route) => ({
-      sku: 'customPhotoPortraits_bundle',
-      existingPlushieId: route.query.existingPlushieId
-    })
   }
 ];
 

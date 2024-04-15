@@ -154,12 +154,6 @@ export default Vue.extend({
           label: this.$t('Specialty Commissions'),
           url: '/commissions/'
         }
-        // {
-        //   label: this.$t('Photo Portraits'),
-        //   url: {
-        //     name: 'photo-portraits-creation-page'
-        //   }
-        // }
       ],
       householdItems: [
         {
@@ -182,6 +176,12 @@ export default Vue.extend({
           label: this.$t('Bobbleheads & Figurines'),
           url: '/bobblehead-figurines/'
         }
+        // {
+        //   label: this.$t('Photo Portraits'),
+        //   url: {
+        //     name: 'photo-portraits-creation-page'
+        //   }
+        // }
       ],
       accessoriesItems: [
         {

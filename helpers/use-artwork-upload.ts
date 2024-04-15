@@ -12,7 +12,7 @@ export function useArtworkUpload (product: Product, existingCartItem: CartItem |
   const backendProductId = computed<string>(() => {
     switch (product.id) {
       case 721:
-        return ProductValue.PET_PORTRAITS
+        return ProductValue.PHOTO_PORTRAITS
       default:
         throw new Error(
           `Can't resolve Backend product id for Magento '${product.id}' product ID`

@@ -241,7 +241,6 @@ const clothesProductSkus = [
 ];
 
 const customPillowSku = 'customPillow_bundle';
-const customPhotoPortraitsSku = 'customPhotoPortraits_bundle';
 
 const budsiesPlushieProductSkus = [
   'CustomBudsie1_bundle',
@@ -257,6 +256,7 @@ const specialtyCommissionSku = 'specialtyCommission_bundle';
 const budsiesPalsSku = 'customPals_bundle';
 const buddyPillowSku = 'customBuddyPillow_bundle';
 const nftBudsieSku = 'budsieNft_bundle';
+const customPhotoPortraitsSku = 'customPhotoPortraits_bundle';
 
 const editableProductsSkus = [
   ...foreversProductsSkus,
@@ -373,6 +373,12 @@ export default {
         //     name: 'golf-shirts-creation'
         //   }
         // },
+        // {
+        //   label: 'Photo Portraits',
+        //   url: {
+        //     name: 'photo-portraits-creation-page'
+        //   }
+        // },
         {
           label: 'Accessories',
           url: {
@@ -392,12 +398,6 @@ export default {
           label: this.$t('Gift Cards'),
           url: '/purchase-gift-card/'
         }
-        // {
-        //   label: 'Photo Portraits',
-        //   url: {
-        //     name: 'photo-portraits-creation-page'
-        //   }
-        // }
       ],
       isMounted: false,
       syncQuantityDebounced: undefined
