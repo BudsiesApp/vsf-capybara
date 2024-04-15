@@ -154,6 +154,9 @@ let routes = [
         case '645':
           parentSku = 'customHawaiianShirts_bundle';
           break;
+        case '721':
+          parentSku = 'customPhotoPortraits_bundle';
+          break;
       }
 
       if (!parentSku) {
