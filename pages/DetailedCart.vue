@@ -374,7 +374,7 @@ export default {
         //   }
         // },
         // {
-        //   label: 'Pet Portraits',
+        //   label: 'Photo Portraits',
         //   url: {
         //     name: 'photo-portraits-creation-page'
         //   }

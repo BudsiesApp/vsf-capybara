@@ -177,7 +177,7 @@ export default Vue.extend({
           url: '/bobblehead-figurines/'
         }
         // {
-        //   label: this.$t('Pet Portraits'),
+        //   label: this.$t('Photo Portraits'),
         //   url: {
         //     name: 'photo-portraits-creation-page'
         //   }
