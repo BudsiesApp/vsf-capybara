@@ -159,6 +159,12 @@ export default Vue.extend({
             name: 'giftbox'
           }
         },
+        // {
+        //   label: this.$t('Pet Portraits'),
+        //   url: {
+        //     name: 'photo-portraits-creation-page'
+        //   }
+        // },
         {
           label: this.$t('Gift Cards'),
           url: '/purchase-gift-card/'

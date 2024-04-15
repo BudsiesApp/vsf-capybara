@@ -48,6 +48,8 @@ const BudsiesPalsProduct = () =>
   import(/* webpackChunkName: "vsf-budsies-pals-product" */ 'theme/pages/BudsiesPalsProduct');
 const PasswordReset = () =>
   import(/* webpackChunkName: "vsf-password-reset" */ 'theme/pages/PasswordReset');
+const PortraitProduct = () =>
+  import(/* webpackChunkName: "vsf-portrait-product" */ 'theme/pages/PortraitProduct.vue');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -309,6 +311,9 @@ let routes = [
           break;
         case '645':
           parentSku = 'customHawaiianShirts_bundle';
+          break;
+        case '721':
+          parentSku = 'customPhotoPortraits_bundle';
           break;
       }
 
@@ -771,6 +776,15 @@ let routes = [
     props: (route) => ({
       id: route.query.id,
       token: route.query.token
+    })
+  },
+  {
+    name: 'photo-portraits-creation-page',
+    path: '/photo-portraits/create/',
+    component: PortraitProduct,
+    props: (route) => ({
+      sku: 'customPhotoPortraits_bundle',
+      existingPlushieId: route.query.existingPlushieId
     })
   },
   {

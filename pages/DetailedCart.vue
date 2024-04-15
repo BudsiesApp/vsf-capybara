@@ -256,6 +256,7 @@ const specialtyCommissionSku = 'specialtyCommission_bundle';
 const budsiesPalsSku = 'customPals_bundle';
 const buddyPillowSku = 'customBuddyPillow_bundle';
 const nftBudsieSku = 'budsieNft_bundle';
+const customPhotoPortraitsSku = 'customPhotoPortraits_bundle';
 
 const editableProductsSkus = [
   ...foreversProductsSkus,
@@ -270,7 +271,8 @@ const editableProductsSkus = [
   budsiesPalsSku,
   buddyPillowSku,
   nftBudsieSku,
-  customPillowSku
+  customPillowSku,
+  customPhotoPortraitsSku
 ];
 
 export default {
@@ -371,6 +373,12 @@ export default {
         //     name: 'golf-shirts-creation'
         //   }
         // },
+        // {
+        //   label: 'Pet Portraits',
+        //   url: {
+        //     name: 'photo-portraits-creation-page'
+        //   }
+        // },
         {
           label: 'Accessories',
           url: {
@@ -455,7 +463,14 @@ export default {
       return this.truncate(product.plushieDescription, 150, 50);
     },
     editHandler (product) {
-      if (product.sku === customPillowSku) {
+      if (product.sku === customPhotoPortraitsSku) {
+        this.$router.push({
+          name: 'photo-portraits-creation-page',
+          query: {
+            existingPlushieId: product.plushieId
+          }
+        })
+      } else if (product.sku === customPillowSku) {
         this.$router.push({
           name: 'pillow-product',
           query: {

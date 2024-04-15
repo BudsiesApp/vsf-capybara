@@ -176,6 +176,12 @@ export default Vue.extend({
           label: this.$t('Bobbleheads & Figurines'),
           url: '/bobblehead-figurines/'
         }
+        // {
+        //   label: this.$t('Pet Portraits'),
+        //   url: {
+        //     name: 'photo-portraits-creation-page'
+        //   }
+        // }
       ],
       accessoriesItems: [
         {
