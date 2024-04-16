@@ -385,7 +385,7 @@ export default {
       this.$store.dispatch('cart/syncTotals', { forceServerSync: true });
     },
     validateCountryRelatedFields () {
-      this.$v.shipping.state.$touch();
+      this.$v.shipping.region_id.$touch();
       this.$v.shipping.phoneNumber.$touch();
     },
     fillLastUsedCustomerData () {

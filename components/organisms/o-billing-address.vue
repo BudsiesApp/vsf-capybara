@@ -398,7 +398,7 @@ export default {
       this.$store.dispatch('cart/syncPaymentMethods', { forceServerSync: true });
     },
     validateCountryRelatedFields () {
-      this.$v.payment.state.$touch();
+      this.$v.payment.region_id.$touch();
       this.$v.payment.phoneNumber.$touch();
     },
     fillLastUsedCustomerData () {
