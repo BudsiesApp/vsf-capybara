@@ -185,6 +185,12 @@ export default Vue.extend({
             name: 'renaissance-blankets'
           }
         }
+        // {
+        //   label: this.$t('Pet Portraits'),
+        //   url: {
+        //     name: 'photo-portraits-creation-page'
+        //   }
+        // }
       ],
       accessoriesItems: [
         {
