@@ -74,7 +74,7 @@ export default Vue.extend({
       return this.cartItems.find((item) => item.plushieId && item.plushieId === this.existingPlushieId);
     },
     nameStepTitle (): string {
-      return this.$t('Your pet\'s name').toString();
+      return this.$t('Name').toString();
     }
   },
   async serverPrefetch (): Promise<void> {
