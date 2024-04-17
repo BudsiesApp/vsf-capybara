@@ -351,13 +351,13 @@ export default {
           url: {
             name: 'felted-ornaments-creation-page'
           }
+        },
+        {
+          label: 'Pet Portraits',
+          url: {
+            name: 'photo-portraits-creation-page'
+          }
         }
-        // {
-        //   label: 'Pet Portraits',
-        //   url: {
-        //     name: 'photo-portraits-creation-page'
-        //   }
-        // }
       ],
       isMounted: false,
       syncQuantityDebounced: undefined
