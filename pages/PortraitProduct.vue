@@ -9,8 +9,9 @@
       v-if="getCurrentProduct"
       :artwork-upload-step-title="artworkUploadStepTitle"
       :artwork-upload-url="artworkUploadUrl"
-      :product="getCurrentProduct"
       :existing-cart-item="existingCartItem"
+      :name-step-title="nameStepTitle"
+      :product="getCurrentProduct"
     />
   </div>
 </template>
@@ -71,6 +72,9 @@ export default Vue.extend({
       }
 
       return this.cartItems.find((item) => item.plushieId && item.plushieId === this.existingPlushieId);
+    },
+    nameStepTitle (): string {
+      return this.$t('Your pet\'s name').toString();
     }
   },
   async serverPrefetch (): Promise<void> {

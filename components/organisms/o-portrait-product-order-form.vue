@@ -144,6 +144,28 @@
               </validation-provider>
             </div>
 
+            <div class="_step">
+              <div class="_step-title" :ref="getFieldAnchorName('Name')">
+                {{ nameStepTitle }}
+              </div>
+
+              <validation-provider
+                v-slot="{errors}"
+                tag="div"
+                class="_step-content"
+                rules="required|max:128"
+                :name="$t('Name')"
+              >
+                <SfInput
+                  v-model="plushieName"
+                  :placeholder="$t('Name')"
+                  :disabled="isSubmitting"
+                  :valid="!errors.length"
+                  :error-message="errors[0]"
+                />
+              </validation-provider>
+            </div>
+
             <div
               class="_step"
               :ref="getFieldAnchorName('Quantity')"
@@ -198,8 +220,8 @@
 
 <script lang="ts">
 import { extend, ValidationObserver, ValidationProvider } from 'vee-validate';
-import { required } from 'vee-validate/dist/rules';
-import { SfButton, SfHeading, SfSelect } from '@storefront-ui/vue';
+import { required, max } from 'vee-validate/dist/rules';
+import { SfButton, SfHeading, SfInput, SfSelect } from '@storefront-ui/vue';
 import { mapMobileObserver, unMapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 import { computed, ComputedRef, defineComponent, nextTick, PropType, ref, Ref, watch } from '@vue/composition-api'
 
@@ -229,6 +251,8 @@ extend('required', {
   ...required,
   message: 'The {_field_} field is required'
 });
+
+extend('max', max);
 
 interface SelectOptionItem {
   value: number | string,
@@ -514,6 +538,26 @@ function useProductPrice (
   }
 }
 
+function usePlushieNameInput (existingCartItem: CartItem | undefined) {
+  const plushieName = ref<string | undefined>();
+
+  function fillExistingCartItemData (): void {
+    plushieName.value = undefined;
+
+    if (!existingCartItem) {
+      return;
+    }
+
+    plushieName.value = existingCartItem.plushieName;
+  }
+
+  fillExistingCartItemData();
+
+  return {
+    plushieName
+  }
+}
+
 export default defineComponent({
   name: 'OPortraitProductOrderForm',
   components: {
@@ -524,6 +568,7 @@ export default defineComponent({
     MProductDescriptionStory,
     MZoomGallery,
     SfButton,
+    SfInput,
     SfHeading,
     SfSelect,
     ValidationObserver,
@@ -538,13 +583,17 @@ export default defineComponent({
       type: String,
       required: true
     },
-    product: {
-      type: Object as PropType<Product>,
-      required: true
-    },
     existingCartItem: {
       type: Object as PropType<CartItem | undefined>,
       default: undefined
+    },
+    nameStepTitle: {
+      type: String,
+      required: true
+    },
+    product: {
+      type: Object as PropType<Product>,
+      required: true
     }
   },
   setup ({ product, existingCartItem }, setupContext) {
@@ -601,6 +650,7 @@ export default defineComponent({
         styleBundleOption,
         selectedStyleOption
       ),
+      ...usePlushieNameInput(existingCartItem),
       ...useProductPrice(
         styleBundleOption,
         selectedStyleProduct,
@@ -634,7 +684,8 @@ export default defineComponent({
             productToAdd: Object.assign({}, this.product, {
               qty: this.quantity,
               customerImages: [this.customerImage],
-              uploadMethod: 'upload-now'
+              uploadMethod: 'upload-now',
+              plushieName: this.plushieName
             })
           });
         } catch (err) {
@@ -711,7 +762,8 @@ export default defineComponent({
               qty: this.quantity,
               customerImages: [this.customerImage],
               product_option: setBundleProductOptionsAsync(null, { product: this.existingCartItem, bundleOptions: this.$store.state.product.current_bundle_options }),
-              uploadMethod: 'upload-now'
+              uploadMethod: 'upload-now',
+              plushieName: this.plushieName
             }),
             forceUpdateServerItem: true
           });
@@ -798,6 +850,7 @@ export default defineComponent({
     font-size: 0.8em;
     margin-top: var(--spacer-xs);
     color: var(--c-danger-variant);
+    height: calc(var(--font-xs)* 1.2);
   }
 
   .sf-select {
