@@ -850,6 +850,7 @@ export default defineComponent({
     font-size: 0.8em;
     margin-top: var(--spacer-xs);
     color: var(--c-danger-variant);
+    height: calc(var(--font-xs)* 1.2);
   }
 
   .sf-select {
