@@ -154,7 +154,7 @@
                 tag="div"
                 class="_step-content"
                 rules="required|max:128"
-                :name="$t('Name')"
+                :name="`'${$t('Name')}''`"
               >
                 <SfInput
                   v-model="plushieName"
@@ -847,7 +847,7 @@ export default defineComponent({
   }
 
   ._error-text {
-    font-size: 0.8em;
+    font-size: var(--font-xs);
     margin-top: var(--spacer-xs);
     color: var(--c-danger-variant);
     height: calc(var(--font-xs)* 1.2);
