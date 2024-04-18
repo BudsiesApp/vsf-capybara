@@ -89,7 +89,7 @@
       </div>
 
       <p class="_copyright">
-        © 2023 {{ $t('Budsies PR LLC. All Rights Reserved') }}. |
+        ©{{ new Date().getFullYear() }} {{ $t('Budsies PR LLC. All Rights Reserved') }}. |
         <privacy-policy-link />
 
         <california-privacy-notice-link text="| California Privacy Notice" />
