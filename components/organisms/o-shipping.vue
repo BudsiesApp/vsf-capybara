@@ -87,17 +87,17 @@
 
       <MMultiselect
         v-else
-        v-model.trim="shipping.state"
+        v-model="shipping.region_id"
         class="form__element form__element--half form__select"
-        :class="{[vuelidateErrorClassName]: $v.shipping.state.$error}"
+        :class="{[vuelidateErrorClassName]: $v.shipping.region_id.$error}"
         name="address-level1"
         autocomplete="address-level1"
         :label="$t('State / Province')"
         :required="true"
-        id-field="code"
+        id-field="id"
         label-field="name"
         :options="getStatesForSelectedCountry"
-        :valid="!$v.shipping.state.$error"
+        :valid="!$v.shipping.region_id.$error"
         :error-message="$t('Field is required')"
         :disabled="isFormFieldsDisabled"
       />
@@ -253,7 +253,7 @@ export default {
       country: {
         required
       },
-      state: {
+      region_id: {
         required: requiredIf(function () { return this.isSelectedCountryHasStates })
       },
       streetAddress: {
@@ -382,7 +382,7 @@ export default {
       this.$store.dispatch('cart/syncTotals', { forceServerSync: true });
     },
     validateCountryRelatedFields () {
-      this.$v.shipping.state.$touch();
+      this.$v.shipping.region_id.$touch();
       this.$v.shipping.phoneNumber.$touch();
     },
     fillLastUsedCustomerData () {
@@ -427,6 +427,16 @@ export default {
         this.fZipCodeChanged = true;
       },
       immediate: true
+    },
+    isSelectedCountryHasStates: {
+      handler (val) {
+        if (val) {
+          this.shipping.state = '';
+          return;
+        }
+
+        this.shipping.region_id = null;
+      }
     }
   }
 };

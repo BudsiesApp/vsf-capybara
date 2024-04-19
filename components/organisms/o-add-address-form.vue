@@ -25,25 +25,21 @@
 <script lang="ts">
 import { ValidationObserver } from 'vee-validate';
 import { TranslateResult } from 'vue-i18n';
-import { defineComponent, reactive, ref } from '@vue/composition-api';
+import { defineComponent, ref } from '@vue/composition-api';
 import { SfButton } from '@storefront-ui/vue';
 
 import i18n from '@vue-storefront/i18n';
 
 import { usePersistedFirstName, usePersistedLastName, usePersistedPhoneNumber } from 'src/modules/persisted-customer-data';
 
+import { BaseAddressFormValue } from 'theme/components/interfaces/base-address-form-value.interface';
+
 import OBaseAddressForm from './o-base-address-form.vue';
 
-interface Address {
-  city: string,
-  country: string,
-  firstName: string,
-  lastName: string,
-  phoneNumber: string,
-  state: string,
-  streetAddress: string,
-  zipCode: string
-}
+type AddressData = Pick<
+BaseAddressFormValue,
+'city' | 'country' | 'state' | 'streetAddress' | 'zipCode' | 'regionId'
+>
 
 export default defineComponent({
   name: 'OAddAddressForm',
@@ -57,12 +53,13 @@ export default defineComponent({
     const lastName = ref('');
     const phoneNumber = ref('');
 
-    const addressData = ref({
+    const addressData = ref<AddressData>({
       city: '',
       country: '',
-      state: '',
+      state: null,
       streetAddress: '',
-      zipCode: ''
+      zipCode: '',
+      regionId: null
     });
 
     return {
@@ -85,7 +82,7 @@ export default defineComponent({
       return this.isSubmitting;
     },
     address: {
-      get (): Address {
+      get (): BaseAddressFormValue {
         return {
           city: this.addressData.city,
           country: this.addressData.country,
@@ -94,16 +91,18 @@ export default defineComponent({
           zipCode: this.addressData.zipCode,
           firstName: this.firstName,
           lastName: this.lastName,
-          phoneNumber: this.phoneNumber
+          phoneNumber: this.phoneNumber,
+          regionId: this.addressData.regionId
         }
       },
-      set (address: Address) {
+      set (address: BaseAddressFormValue) {
         this.addressData = {
           city: address.city,
           country: address.country,
           state: address.state,
           streetAddress: address.streetAddress,
-          zipCode: address.zipCode
+          zipCode: address.zipCode,
+          regionId: address.regionId
         }
         this.firstName = address.firstName;
         this.lastName = address.lastName;
@@ -124,7 +123,7 @@ export default defineComponent({
         lastname: this.address.lastName,
         street: [this.address.streetAddress],
         city: this.address.city,
-        region: { region: this.address.state },
+        region: { region: this.address.state, region_id: this.address.regionId },
         postcode: this.address.zipCode,
         country_id: this.address.country,
         telephone: this.address.phoneNumber,
