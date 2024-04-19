@@ -104,7 +104,7 @@
 
         <MMultiselect
           v-else
-          v-model.trim="payment.state"
+          v-model="payment.region_id"
           name="address-level1"
           autocomplete="address-level1"
           class="
@@ -112,13 +112,13 @@
           form__element--half
           form__select
         "
-          :class="{[vuelidateErrorClassName]: $v.payment.state.$error}"
+          :class="{[vuelidateErrorClassName]: $v.payment.region_id.$error}"
           :label="$t('State / Province')"
           :required="true"
-          id-field="code"
+          id-field="id"
           label-field="name"
           :options="getStatesForSelectedCountry"
-          :valid="!$v.payment.state.$error"
+          :valid="!$v.payment.region_id.$error"
           :error-message="$t('Field is required')"
           :disabled="isFormFieldsDisabled"
         />
@@ -254,7 +254,7 @@ export default {
       country: {
         required
       },
-      state: {
+      region_id: {
         required: requiredIf(function () {
           return this.isSelectedCountryHasStates;
         })
@@ -402,7 +402,7 @@ export default {
       this.$store.dispatch('cart/syncPaymentMethods', { forceServerSync: true });
     },
     validateCountryRelatedFields () {
-      this.$v.payment.state.$touch();
+      this.$v.payment.region_id.$touch();
       this.$v.payment.phoneNumber.$touch();
     },
     fillLastUsedCustomerData () {
@@ -430,6 +430,16 @@ export default {
     getPaymentCountry (after, before) {
       if (after && before !== after) {
         this.changeCountry();
+      }
+    },
+    isSelectedCountryHasStates: {
+      handler (val) {
+        if (val) {
+          this.payment.state = '';
+          return;
+        }
+
+        this.payment.region_id = null;
       }
     }
   }
