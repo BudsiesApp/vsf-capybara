@@ -431,8 +431,7 @@ export default {
       display: flex;
       flex-direction: column;
       flex-wrap: wrap;
-      // max-height: 300px;
-      max-height: 270px;
+      max-height: 300px;
     }
 
     .social-column {
