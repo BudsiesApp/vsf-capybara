@@ -21,7 +21,7 @@
           when-visible
         >
           <OHeader
-            :navigation-columns="headerItems"
+            :navigation-items="headerItems"
             class="_main-header"
           />
         </LazyHydrate>

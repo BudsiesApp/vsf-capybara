@@ -2,54 +2,38 @@
   <div class="o-header">
     <SfOverlay
       class="overlay"
-      :visible="isHoveredMenu || isSearchPanelVisible"
+      :visible="showOverlay"
       @click="$store.commit('ui/setSearchpanel', false)"
     />
     <SfHeader
       :active-icon="activeIcon"
       class="_header"
-      :class="[
-        {
-          'sf-header--has-mobile-search': isSearchPanelVisible,
-        }
-      ]"
     >
       <template #logo>
         <ALogo />
       </template>
+
       <template #navigation>
         <SfHeaderNavigationItem
-          @mouseover="onMainMenuMouseOver"
-          @mouseleave="isHoveredMenu = false"
+          v-for="navigationItem in navigationItems"
+          :key="navigationItem.title"
+          @mouseover="onNavigationItemMouseOver(navigationItem)"
+          @mouseleave="menuHoveredFor = undefined"
         >
-          <div class="o-header__submenu">
-            Products
-          </div>
-          <MMenu
-            :visible="isHoveredMenu && !isSearchPanelVisible"
-            @transitionend.native="onMainMenuTransitionEnd"
-            @close="onMainMenuClose"
-          />
-        </SfHeaderNavigationItem>
-        <SfHeaderNavigationItem>
-          <router-link
-            :to="{ name: 'gift-cards' }"
-          >
-            Gift Cards
-          </router-link>
-        </SfHeaderNavigationItem>
-        <SfHeaderNavigationItem>
-          <router-link
-            to="/reviews/"
-          >
-            Reviews
-          </router-link>
-        </SfHeaderNavigationItem>
-        <SfHeaderNavigationItem>
-          <router-link
-            to="/pricing/"
-          >
-            Pricing
+          <template v-if="navigationItem.items.length">
+            <div class="o-header__submenu">
+              {{ navigationItem.title }}
+            </div>
+            <MMenu
+              :menu-items="navigationItem.items"
+              :visible="isMenuShowFor(navigationItem)"
+              @transitionend.native="onMainMenuTransitionEnd"
+              @close="onMainMenuClose"
+            />
+          </template>
+
+          <router-link :to="navigationItem.url" v-else>
+            {{ navigationItem.title }}
           </router-link>
         </SfHeaderNavigationItem>
 
@@ -68,17 +52,27 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue, { PropType } from 'vue';
+import { mapGetters } from 'vuex';
 import { SfHeader, SfOverlay } from '@storefront-ui/vue';
-import ALogo from 'theme/components/atoms/a-logo';
-import AAccountIcon from 'theme/components/atoms/a-account-icon';
-import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
-import { mapState, mapGetters } from 'vuex';
-import MMenu from 'theme/components/molecules/m-menu';
+
+import { NavigationItem } from 'src/modules/vsf-storyblok-module';
+
+import ALogo from 'theme/components/atoms/a-logo.vue';
+import AAccountIcon from 'theme/components/atoms/a-account-icon.vue';
+import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
+import MMenu from 'theme/components/molecules/m-menu.vue';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
-export default {
+export default Vue.extend({
   name: 'OHeader',
+  props: {
+    navigationItems: {
+      type: Array as PropType<NavigationItem[]>,
+      required: true
+    }
+  },
   components: {
     SfHeader,
     ALogo,
@@ -90,37 +84,43 @@ export default {
   },
   data () {
     return {
-      isHoveredMenu: false,
+      menuHoveredFor: undefined as NavigationItem | undefined,
       isMouseOverLocked: false
     }
   },
   computed: {
-    ...mapState({
-      isSearchPanelVisible: state => state.ui.searchpanel
-    }),
     ...mapGetters('user', ['isLoggedIn']),
-    activeIcon () {
+    isLoggedIn (): boolean {
+      return this.$store.getters['user/isLoggedIn'];
+    },
+    activeIcon (): string {
       return this.isLoggedIn ? 'account' : '';
+    },
+    showOverlay (): boolean {
+      return !!this.menuHoveredFor;
     }
   },
   methods: {
-    onMainMenuClose () {
-      this.isHoveredMenu = false;
+    isMenuShowFor (item: NavigationItem): boolean {
+      return this.menuHoveredFor === item;
+    },
+    onMainMenuClose (): void {
+      this.menuHoveredFor = undefined;
       this.isMouseOverLocked = true;
     },
-    onMainMenuMouseOver () {
-      if (this.isMouseOverLocked) {
+    async onMainMenuTransitionEnd (): Promise<void> {
+      await this.$nextTick();
+      this.isMouseOverLocked = false;
+    },
+    onNavigationItemMouseOver (item: NavigationItem): void {
+      if (this.isMouseOverLocked || !item.items.length) {
         return;
       }
 
-      this.isHoveredMenu = true;
-    },
-    async onMainMenuTransitionEnd () {
-      await this.$nextTick();
-      this.isMouseOverLocked = false;
+      this.menuHoveredFor = item;
     }
   }
-};
+});
 </script>
 
 <style lang="scss" scoped>

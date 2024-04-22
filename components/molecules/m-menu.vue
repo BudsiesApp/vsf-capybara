@@ -22,14 +22,14 @@
         <SfList>
           <SfListItem
             v-for="item in menuColumn.items"
-            :key="item.link_text"
+            :key="item.title"
           >
-            <sb-router-link
-              :to="item.link_url"
+            <router-link
+              :to="item.url"
               @click.native="$emit('close')"
             >
-              <SfMenuItem :label="item.link_text" icon="" />
-            </sb-router-link>
+              <SfMenuItem :label="item.title" icon="" />
+            </router-link>
           </SfListItem>
         </SfList>
       </SfMegaMenuColumn>
@@ -39,7 +39,7 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 import { SfIcon, SfMegaMenu, SfList, SfMenuItem } from '@storefront-ui/vue';
-import { NavigationColumnData } from 'src/modules/vsf-storyblok-module';
+import { NavigationColumn } from 'src/modules/vsf-storyblok-module';
 
 export default Vue.extend({
   components: {
@@ -58,7 +58,7 @@ export default Vue.extend({
       default: ''
     },
     menuItems: {
-      type: Array as PropType<NavigationColumnData[]>,
+      type: Array as PropType<NavigationColumn[]>,
       required: true
     }
   },

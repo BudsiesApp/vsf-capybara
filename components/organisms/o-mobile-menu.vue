@@ -22,13 +22,13 @@ import { mapState } from 'vuex'
 import { disableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
 
 import MMenu from '../molecules/m-menu.vue';
-import { NavigationColumnData } from 'src/modules/vsf-storyblok-module';
+import { NavigationColumn } from 'src/modules/vsf-storyblok-module';
 
 export default Vue.extend({
   name: 'OMobileMenu',
   props: {
     menuItems: {
-      type: Array as PropType<NavigationColumnData[]>,
+      type: Array as PropType<NavigationColumn[]>,
       required: true
     }
   },
