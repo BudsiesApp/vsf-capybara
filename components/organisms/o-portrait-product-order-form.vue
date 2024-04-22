@@ -505,7 +505,8 @@ function useProductPrice (
   styleBundleOption: ComputedRef<BundleOption | undefined>,
   selectedStyleProduct: ComputedRef<Product | undefined>,
   sizeBundleOption: ComputedRef<BundleOption | undefined>,
-  selectedSizeProduct: ComputedRef<Product | undefined>
+  selectedSizeProduct: ComputedRef<Product | undefined>,
+  selectedExtraFacesAddonProduct: ComputedRef<Product | undefined>
 ) {
   const stylePrice = computed<PriceHelper.ProductPrice>(() => {
     if (selectedStyleProduct.value) {
@@ -546,8 +547,16 @@ function useProductPrice (
       )
     );
   });
+  const extraFacesAddonPrice = computed<PriceHelper.ProductPrice>(() => {
+    return PriceHelper.getProductDefaultPrice(selectedExtraFacesAddonProduct.value, {}, false);
+  });
+
   const totalPrice = computed<PriceHelper.ProductPrice>(() => {
-    return PriceHelper.getTotalPriceForProductPrices([stylePrice.value, sizePrice.value])
+    return PriceHelper.getTotalPriceForProductPrices([
+      stylePrice.value,
+      sizePrice.value,
+      extraFacesAddonPrice.value
+    ])
   });
 
   return {
@@ -659,6 +668,12 @@ export default defineComponent({
       backendProductId
     } = useBackendProductId(product);
 
+    const extraFacesAddonsFields = useExtraFacesAddons(
+      product,
+      setupContext.root.$store,
+      existingCartItem
+    );
+
     const isSubmitButtonDisabled = computed<boolean>(() => {
       return isSubmitting.value || artworkUploadFields.isSomeUploaderBusy.value;
     })
@@ -677,11 +692,7 @@ export default defineComponent({
       validationObserver,
       quantity,
       ...artworkUploadFields,
-      ...useExtraFacesAddons(
-        product,
-        setupContext.root.$store,
-        existingCartItem
-      ),
+      ...extraFacesAddonsFields,
       ...useFormValidation(
         validationObserver,
         () => getAllFormRefs(setupContext.refs)
@@ -696,7 +707,8 @@ export default defineComponent({
         styleBundleOption,
         selectedStyleProduct,
         sizeBundleOption,
-        selectedSizeProduct
+        selectedSizeProduct,
+        extraFacesAddonsFields.selectedExtraFacesAddonProduct
       )
     }
   },

@@ -24,8 +24,8 @@ export function useArtworkUpload (existingCartItem: CartItem | undefined) {
       return;
     }
 
-    (artworkUploadInitialItems as any).value = existingCartItem.customerImages || [];
-    customerImage.value = existingCartItem.customerImages[0]
+    customerImage.value = existingCartItem.customerImages[0];
+    (artworkUploadInitialItems as any).value = customerImage.value ? [customerImage.value] : [];
   }
 
   function onArtworkAdd (item: Item): void {

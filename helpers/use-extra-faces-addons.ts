@@ -19,7 +19,7 @@ export function useExtraFacesAddons (product: Product, store: Store<RootState>, 
   const {
     bundleOption: extraFacesBundleOption,
     setBundleOptionValue
-  } = useBundleOption(product, 'extra faces');
+  } = useBundleOption(product, 'extra photos');
   const selectedExtraFacesAddon = ref<ExtraPhotoAddonOption | undefined>();
   const initialAddonItemId = ref<string | undefined>();
 
@@ -67,6 +67,18 @@ export function useExtraFacesAddons (product: Product, store: Store<RootState>, 
     }
 
     return result;
+  });
+
+  const selectedExtraFacesAddonProduct = computed<Product | undefined>(() => {
+    if (!selectedExtraFacesAddon.value || !extraFacesBundleOption.value) {
+      return;
+    }
+
+    const productLink = extraFacesBundleOption.value.product_links.find(
+      (productLink) => productLink.id.toString() === selectedExtraFacesAddon.value.optionValueId.toString()
+    );
+
+    return productLink?.product;
   });
 
   const hasExtraPhotoAddonOptions = computed<boolean>(() => {
@@ -149,6 +161,7 @@ export function useExtraFacesAddons (product: Product, store: Store<RootState>, 
     hasExtraPhotoAddonOptions,
     initialAddonItemId,
     initialExtraPhotosArtworks,
-    onExtraFacesConfiguratorDataInput
+    onExtraFacesConfiguratorDataInput,
+    selectedExtraFacesAddonProduct
   }
 }
