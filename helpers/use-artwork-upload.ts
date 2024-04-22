@@ -1,24 +1,13 @@
-import { Ref, computed, inject, ref, set } from '@vue/composition-api';
+import { computed, inject, ref, set } from '@vue/composition-api';
 
 import CartItem from 'core/modules/cart/types/CartItem';
-import Product from 'core/modules/catalog/types/Product';
 
-import { Dictionary, ProductValue } from 'src/modules/budsies';
+import { Dictionary } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage } from 'src/modules/shared';
 
-export function useArtworkUpload (product: Product, existingCartItem: CartItem | undefined) {
+export function useArtworkUpload (existingCartItem: CartItem | undefined) {
   const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
-  const backendProductId = computed<string>(() => {
-    switch (product.id) {
-      case 721:
-        return ProductValue.PHOTO_PORTRAITS
-      default:
-        throw new Error(
-          `Can't resolve Backend product id for Magento '${product.id}' product ID`
-        );
-    }
-  });
   const customerImage = ref<CustomerImage | undefined>();
   const artworkUploaderBusyState = ref<Dictionary<boolean>>({});
   const artworkUploadInitialItems = ref<CustomerImage[]>([]);
@@ -62,7 +51,6 @@ export function useArtworkUpload (product: Product, existingCartItem: CartItem |
 
   return {
     artworkUploadInitialItems,
-    backendProductId,
     customerImage,
     imageHandlerService,
     isSomeUploaderBusy,

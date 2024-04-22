@@ -6,7 +6,7 @@
     />
 
     <o-portrait-product-order-form
-      v-if="getCurrentProduct"
+      v-if="getCurrentProduct && isDataLoaded"
       :artwork-upload-step-title="artworkUploadStepTitle"
       :artwork-upload-url="artworkUploadUrl"
       :existing-cart-item="existingCartItem"
@@ -48,6 +48,11 @@ export default Vue.extend({
       default: undefined
     }
   },
+  data () {
+    return {
+      isDataLoaded: false
+    };
+  },
   computed: {
     artworkUploadStepTitle (): string {
       return this.$t('Upload your pet\'s photo').toString();
@@ -82,11 +87,12 @@ export default Vue.extend({
 
     await (this as any).loadData();
   },
-  async mounted (): Promise<void> {
+  async beforeMount (): Promise<void> {
     if (!this.getCurrentProduct) {
       await this.loadData();
     }
 
+    this.isDataLoaded = true;
     EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, this.getCurrentProduct);
   },
   beforeRouteLeave (to, from, next): void {
@@ -95,10 +101,16 @@ export default Vue.extend({
   },
   methods: {
     async loadData (): Promise<void> {
+      this.isDataLoaded = false;
+
       const product = await this.$store.dispatch('product/loadProduct', {
         parentSku: this.sku,
         setCurrent: true
       });
+
+      await this.$store.dispatch('budsies/loadExtraPhotosAddons', { productId: product.id });
+
+      this.isDataLoaded = true;
 
       catalogHooksExecutors.productPageVisited(product);
     }

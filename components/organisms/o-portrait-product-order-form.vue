@@ -166,6 +166,20 @@
               </validation-provider>
             </div>
 
+            <m-extra-faces
+              ref="extra-faces"
+              :available-options="extraPhotoAddonOptions"
+              :backend-product-id="backendProductId"
+              :disabled="isSubmitting"
+              :upload-url="artworkUploadUrl"
+              :initial-variant="initialAddonItemId"
+              :initial-artworks="initialExtraPhotosArtworks"
+              :get-field-anchor-name="getFieldAnchorName"
+              v-if="hasExtraPhotoAddonOptions"
+              @input="onExtraFacesConfiguratorDataInput"
+              @is-busy-changed="onArtworkUploadBusyStatusChanged('extra-faces', $event)"
+            />
+
             <div
               class="_step"
               :ref="getFieldAnchorName('Quantity')"
@@ -232,20 +246,23 @@ import i18n from '@vue-storefront/i18n';
 import CartItem from 'core/modules/cart/types/CartItem';
 import { BundleOption, BundleOptionsProductLink } from 'core/modules/catalog/types/BundleOption';
 import Product from 'core/modules/catalog/types/Product';
-import { PriceHelper, ServerError } from 'src/modules/shared';
+import { CustomerImage, PriceHelper, ServerError } from 'src/modules/shared';
 
 import { getLowestPriceForBundleOptionProductLinks } from 'theme/helpers/get-lowest-price-for-bundle-option.function';
 import { useArtworkUpload } from 'theme/helpers/use-artwork-upload';
+import { useBackendProductId } from 'theme/helpers/use-backend-product-id';
+import { useBundleOption } from 'theme/helpers/use-bundle-options';
+import { useExtraFacesAddons } from 'theme/helpers/use-extra-faces-addons';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useProductGallery } from 'theme/helpers/use-product-gallery';
 
 import ACustomPrice from 'theme/components/atoms/a-custom-price.vue';
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
 import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
+import MExtraFaces from '../molecules/m-extra-faces.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
 import MZoomGallery from 'theme/components/molecules/m-zoom-gallery.vue';
-import { useBundleOption } from 'theme/helpers/use-bundle-options';
 
 extend('required', {
   ...required,
@@ -558,12 +575,27 @@ function usePlushieNameInput (existingCartItem: CartItem | undefined) {
   }
 }
 
+function getAllFormRefs (
+  refs: Record<string, Vue | Element | Vue[] | Element[]>
+): Record<string, Vue | Element | Vue[] | Element[]> {
+  const extraFaces = refs['extra-faces'] as InstanceType<typeof MExtraFaces> | undefined;
+
+  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = { ...refs };
+
+  if (extraFaces) {
+    refsDictionary = { ...refsDictionary, ...extraFaces.$refs };
+  }
+
+  return refsDictionary;
+}
+
 export default defineComponent({
   name: 'OPortraitProductOrderForm',
   components: {
     ACustomPrice,
     ACustomProductQuantity,
     MArtworkUpload,
+    MExtraFaces,
     MFormErrors,
     MProductDescriptionStory,
     MZoomGallery,
@@ -620,15 +652,19 @@ export default defineComponent({
     } = useSizeBundleOption(product, selectedStyleOption, existingCartItem)
 
     const artworkUploadFields = useArtworkUpload(
-      product,
       existingCartItem
     );
+
+    const {
+      backendProductId
+    } = useBackendProductId(product);
 
     const isSubmitButtonDisabled = computed<boolean>(() => {
       return isSubmitting.value || artworkUploadFields.isSomeUploaderBusy.value;
     })
 
     return {
+      backendProductId,
       isSubmitButtonDisabled,
       isSubmitting,
       styleOptions,
@@ -641,9 +677,14 @@ export default defineComponent({
       validationObserver,
       quantity,
       ...artworkUploadFields,
+      ...useExtraFacesAddons(
+        product,
+        setupContext.root.$store,
+        existingCartItem
+      ),
       ...useFormValidation(
         validationObserver,
-        () => setupContext.refs
+        () => getAllFormRefs(setupContext.refs)
       ),
       ...useProductGallery(
         product,
@@ -678,12 +719,23 @@ export default defineComponent({
         { product: this.product, bundleOptions: this.$store.state.product.current_bundle_options }
       );
 
+      const additionalArtworks: CustomerImage[] = this.extraPhotosArtworks.map((item) => {
+        if (!this.imageHandlerService) {
+          throw new Error('Image Handler Service is not defined');
+        }
+
+        return {
+          id: item.id,
+          url: this.imageHandlerService.getOriginalImageUrl(item.url)
+        }
+      });
+
       try {
         try {
           await this.$store.dispatch('cart/addItem', {
             productToAdd: Object.assign({}, this.product, {
               qty: this.quantity,
-              customerImages: [this.customerImage],
+              customerImages: [this.customerImage, ...additionalArtworks],
               uploadMethod: 'upload-now',
               plushieName: this.plushieName
             })
@@ -755,12 +807,29 @@ export default defineComponent({
 
       this.isSubmitting = true;
 
+      const additionalArtworks: CustomerImage[] = this.extraPhotosArtworks.map(item => {
+        let url = item.url;
+
+        if (!this.initialExtraPhotosArtworks.find((image) => image.id === item.id)) {
+          if (!this.imageHandlerService) {
+            throw new Error('Image Handler Service is not defined');
+          }
+
+          url = this.imageHandlerService.getOriginalImageUrl(item.url);
+        }
+
+        return {
+          id: item.id,
+          url
+        }
+      });
+
       try {
         try {
           await this.updateClientAndServerItem({
             product: Object.assign({}, this.existingCartItem, {
               qty: this.quantity,
-              customerImages: [this.customerImage],
+              customerImages: [this.customerImage, ...additionalArtworks],
               product_option: setBundleProductOptionsAsync(null, { product: this.existingCartItem, bundleOptions: this.$store.state.product.current_bundle_options }),
               uploadMethod: 'upload-now',
               plushieName: this.plushieName
