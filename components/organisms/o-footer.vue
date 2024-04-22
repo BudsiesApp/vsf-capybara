@@ -6,15 +6,18 @@
     </div>
     <SfFooter :column="6" :multiple="true">
       <SfFooterColumn
-        v-for="linkGroup in links"
-        :key="linkGroup.name"
-        :title="linkGroup.name"
-        :class="linkGroup.class"
+        v-for="navigationColumn in navigationColumns"
+        :key="navigationColumn.title"
+        :title="navigationColumn.title"
+        :class="navigationColumn.classes"
       >
         <SfList class="_column-list">
-          <SfListItem v-for="link in linkGroup.children" :key="link.name">
+          <SfListItem
+            v-for="navigationItem in navigationColumn.items"
+            :key="navigationItem.title"
+          >
             <router-link
-              :to="localizedRoute(link.link)"
+              :to="navigationItem.url"
               :target="link.target"
               :event="link.event ? link.event : 'click'"
               @click.native="onLinkClick(link)"
@@ -38,8 +41,8 @@
         </div>
         <div class="social-icon desktop-only">
           <a
-            :href="item.url"
             v-for="item in social"
+            :href="item.url"
             :key="item.name + ';' + item.url"
             class="social-icon__link"
             :class="'-' + item.name"
@@ -50,8 +53,8 @@
 
       <div class="social-icon mobile-only">
         <a
-          :href="item.url"
           v-for="item in social"
+          :href="item.url"
           :key="item.name + ';' + item.url"
           class="social-icon__link"
           :class="'-' + item.name"
@@ -86,18 +89,20 @@
   </footer>
 </template>
 
-<script>
-import { mapActions, mapGetters } from 'vuex';
+<script lang="ts">
+import Vue, { PropType } from 'vue'
+import { mapGetters } from 'vuex';
 import MNewsletterSubscription from 'theme/components/molecules/m-newsletter-subscription.vue';
-import { SfFooter, SfList, SfMenuItem, SfInput, SfButton } from '@storefront-ui/vue';
+import { SfFooter, SfList, SfMenuItem } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
 import config from 'config';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import get from 'lodash-es/get';
 
 import MBudsiesBrands from '../molecules/m-budsies-brands.vue';
+import { NavigationColumn } from 'src/modules/vsf-storyblok-module';
 
-export default {
+export default Vue.extend({
   name: 'OFooter',
   components: {
     MBudsiesBrands,
@@ -107,6 +112,10 @@ export default {
     SfMenuItem
   },
   props: {
+    navigationColumns: {
+      type: Array as PropType<NavigationColumn[]>,
+      required: true
+    },
     subscribeEmail: {
       type: String,
       default: ''
@@ -140,23 +149,20 @@ export default {
   },
   computed: {
     ...mapGetters('user', ['isLoggedIn']),
-    multistoreEnabled () {
+    multistoreEnabled (): boolean {
       return get(config, 'storeViews.multistore', false);
     },
-    currentLanguage () {
+    currentLanguage (): string {
       const { i18n = config.i18n } = currentStoreView();
       return `${i18n.defaultCountry} / ${i18n.defaultLanguage} / ${i18n.currencyCode}`;
     },
-    newsletterSubscriptionColumnTitle () {
-      return this.$t('Get more @Petsies cuteness')
+    newsletterSubscriptionColumnTitle (): string {
+      return this.$t('Get more @Petsies cuteness').toString();
     }
   },
   methods: {
-    ...mapActions('ui', {
-      openModal: 'openModal'
-    }),
     showLanguageSwitcher () {
-      this.openModal({ name: ModalList.LanguageSwitcher })
+      this.$store.dispatch('ui/openModal', { name: ModalList.LanguageSwitcher })
     },
     onLinkClick (link) {
       if (!link.clickHandler) {
@@ -166,7 +172,7 @@ export default {
       link.clickHandler();
     }
   }
-};
+});
 </script>
 
 <style lang="scss" scoped>
