@@ -12,18 +12,24 @@
 import OHeaderMinimal from 'theme/components/organisms/o-header-minimal';
 import OFooter from 'theme/components/organisms/o-footer';
 import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
+import { defineComponent } from '@vue/composition-api';
 
-export default {
+export default defineComponent({
   components: {
     OHeaderMinimal,
     OFooter
+  },
+  setup () {
+    return {
+      ...useStoryblokPageLayout()
+    }
   },
   computed: {
     isStoryblokPreviewMode () {
       return isStoryblokPreview();
     }
   }
-}
+})
 </script>
 
 <style lang="scss">
