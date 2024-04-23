@@ -182,7 +182,10 @@ export default Vue.extend({
         this.currentSlideIndex = swiper.realIndex;
       };
 
-      this.swiper = new Swiper('.swiper', this.swiperOptions);
+      this.swiper = new Swiper(
+        this.getCarouselRoot(),
+        this.swiperOptions
+      );
 
       this.swiper.on('init', onInit);
       this.swiper.on('realIndexChange', onRealIndexChange)
