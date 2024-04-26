@@ -45,7 +45,7 @@
         {{ $t(stepTitle) }}
       </div>
       <div class="_step-subtitle">
-        How many additional faces do you want to add to the same design?
+        How many additional pets do you want to add to the same design?
       </div>
     </div>
 
