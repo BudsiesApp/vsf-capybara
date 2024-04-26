@@ -108,6 +108,28 @@
             </div>
 
             <div class="_step">
+              <div class="_step-title" :ref="getFieldAnchorName('Name')">
+                {{ nameStepTitle }}
+              </div>
+
+              <validation-provider
+                v-slot="{errors}"
+                tag="div"
+                class="_step-content"
+                rules="required|max:128"
+                :name="`'${$t('Name')}''`"
+              >
+                <SfInput
+                  v-model="plushieName"
+                  :placeholder="$t('Name')"
+                  :disabled="isSubmitting"
+                  :valid="!errors.length"
+                  :error-message="errors[0]"
+                />
+              </validation-provider>
+            </div>
+
+            <div class="_step">
               <div
                 class="_step-title"
                 :ref="getFieldAnchorName('Photo')"
@@ -141,28 +163,6 @@
                 <div class="_error-text">
                   {{ errors[0] }}
                 </div>
-              </validation-provider>
-            </div>
-
-            <div class="_step">
-              <div class="_step-title" :ref="getFieldAnchorName('Name')">
-                {{ nameStepTitle }}
-              </div>
-
-              <validation-provider
-                v-slot="{errors}"
-                tag="div"
-                class="_step-content"
-                rules="required|max:128"
-                :name="`'${$t('Name')}''`"
-              >
-                <SfInput
-                  v-model="plushieName"
-                  :placeholder="$t('Name')"
-                  :disabled="isSubmitting"
-                  :valid="!errors.length"
-                  :error-message="errors[0]"
-                />
               </validation-provider>
             </div>
 
