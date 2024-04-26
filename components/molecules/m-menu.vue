@@ -17,19 +17,20 @@
         :title="menuColumn.title"
         :key="menuColumn.title"
         :class="menuColumn.classes"
+        class="_menu_column"
         v-for="menuColumn in menuItems"
       >
         <SfList>
           <SfListItem
             v-for="item in menuColumn.items"
-            :key="item.title"
+            :key="item.link_text"
           >
-            <router-link
-              :to="item.url"
+            <navigation-item
+              :item="item"
               @click.native="$emit('close')"
             >
-              <SfMenuItem :label="item.title" icon="" />
-            </router-link>
+              <SfMenuItem :label="item.link_text" icon="" />
+            </navigation-item>
           </SfListItem>
         </SfList>
       </SfMegaMenuColumn>
@@ -39,10 +40,14 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 import { SfIcon, SfMegaMenu, SfList, SfMenuItem } from '@storefront-ui/vue';
+
 import { NavigationColumn } from 'src/modules/vsf-storyblok-module';
+
+import NavigationItem from '../storyblok/NavigationItem.vue';
 
 export default Vue.extend({
   components: {
+    NavigationItem,
     SfIcon,
     SfMegaMenu,
     SfList,
@@ -78,6 +83,8 @@ export default Vue.extend({
 </script>
 <style lang="scss">
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+
 .m-menu {
   padding: 0;
   position: absolute;
@@ -119,6 +126,10 @@ export default Vue.extend({
     right: var(--spacer-sm);
     top: var(--spacer-base);
     z-index: 3;
+  }
+
+  ._menu_column {
+    @include display-property-handling;
   }
 
   @include for-desktop {

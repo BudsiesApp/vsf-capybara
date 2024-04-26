@@ -66,6 +66,20 @@ export default {
 
       this.$store.dispatch('ui/openModal', { name: ModalList.WebsiteLeaving })
     }
+  },
+  watch: {
+    $route: {
+      async handler (value) {
+        if (!value.query.accessDenied) {
+          return;
+        }
+
+        await this.$nextTick();
+        this.$store.dispatch('ui/openModal', { name: ModalList.Auth, payload: 'login' });
+        this.$router.push({ query: { accessDenied: undefined } });
+      },
+      immediate: true
+    }
   }
 };
 </script>

@@ -73,7 +73,14 @@ let routes = [
       }
     })
   },
-  { name: 'my-account', path: '/my-account/', component: MyAccount },
+  {
+    name: 'my-account',
+    path: '/my-account/',
+    component: MyAccount,
+    meta: {
+      auth: true
+    }
+  },
   { name: 'page-not-found', path: '*', component: ErrorPage },
   { name: 'error', path: '/error/', component: ErrorPage, meta: { layout: 'minimal' } },
   { name: 'virtual-product', path: '/p/:parentSku/', component: Product },

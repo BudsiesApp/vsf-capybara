@@ -16,14 +16,15 @@
       <template #navigation>
         <SfHeaderNavigationItem
           v-for="navigationItem in navigationItems"
-          :key="navigationItem.title"
+          :key="navigationItem.link_text"
           @mouseover="onNavigationItemMouseOver(navigationItem)"
           @mouseleave="menuHoveredFor = undefined"
         >
           <template v-if="navigationItem.items.length">
             <div class="o-header__submenu">
-              {{ navigationItem.title }}
+              {{ navigationItem.link_text }}
             </div>
+
             <MMenu
               :menu-items="navigationItem.items"
               :visible="isMenuShowFor(navigationItem)"
@@ -32,9 +33,11 @@
             />
           </template>
 
-          <router-link :to="navigationItem.url" v-else>
-            {{ navigationItem.title }}
-          </router-link>
+          <navigation-item :item="navigationItem" v-else>
+            <span class="_menu_item">
+              {{ navigationItem.link_text }}
+            </span>
+          </navigation-item>
         </SfHeaderNavigationItem>
 
         <MCtaButton />
@@ -57,19 +60,20 @@ import Vue, { PropType } from 'vue';
 import { mapGetters } from 'vuex';
 import { SfHeader, SfOverlay } from '@storefront-ui/vue';
 
-import { NavigationItem } from 'src/modules/vsf-storyblok-module';
+import { NavigationItem as NavigationItemInterface } from 'src/modules/vsf-storyblok-module';
 
 import ALogo from 'theme/components/atoms/a-logo.vue';
 import AAccountIcon from 'theme/components/atoms/a-account-icon.vue';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
 import MMenu from 'theme/components/molecules/m-menu.vue';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
+import NavigationItem from 'theme/components/storyblok/NavigationItem.vue';
 
 export default Vue.extend({
   name: 'OHeader',
   props: {
     navigationItems: {
-      type: Array as PropType<NavigationItem[]>,
+      type: Array as PropType<NavigationItemInterface[]>,
       required: true
     }
   },
@@ -80,11 +84,12 @@ export default Vue.extend({
     ADetailedCartIcon,
     MMenu,
     SfOverlay,
-    MCtaButton
+    MCtaButton,
+    NavigationItem
   },
   data () {
     return {
-      menuHoveredFor: undefined as NavigationItem | undefined,
+      menuHoveredFor: undefined as NavigationItemInterface | undefined,
       isMouseOverLocked: false
     }
   },
@@ -101,7 +106,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    isMenuShowFor (item: NavigationItem): boolean {
+    isMenuShowFor (item: NavigationItemInterface): boolean {
       return this.menuHoveredFor === item;
     },
     onMainMenuClose (): void {
@@ -112,7 +117,7 @@ export default Vue.extend({
       await this.$nextTick();
       this.isMouseOverLocked = false;
     },
-    onNavigationItemMouseOver (item: NavigationItem): void {
+    onNavigationItemMouseOver (item: NavigationItemInterface): void {
       if (this.isMouseOverLocked || !item.items.length) {
         return;
       }
@@ -185,6 +190,10 @@ export default Vue.extend({
         width: 100%;
       }
     }
+  }
+
+  ._menu_item {
+    color: var(--header-navigation-item-color);
   }
 
   .m-cta-button {

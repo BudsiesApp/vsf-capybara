@@ -10,21 +10,22 @@
         :key="navigationColumn.title"
         :title="navigationColumn.title"
         :class="navigationColumn.classes"
+        class="_column"
       >
         <SfList class="_column-list">
           <SfListItem
             v-for="navigationItem in navigationColumn.items"
-            :key="navigationItem.title"
+            :key="navigationItem.link_text"
           >
-            <router-link
-              :to="navigationItem.url"
-              :target="link.target"
-              :event="link.event ? link.event : 'click'"
-              @click.native="onLinkClick(link)"
-              exact
+            <navigation-item
+              :item="navigationItem"
             >
-              <SfMenuItem class="sf-footer__menu-item" :label="link.name" icon="" />
-            </router-link>
+              <SfMenuItem
+                class="sf-footer__menu-item"
+                :label="navigationItem.link_text"
+                icon=""
+              />
+            </navigation-item>
           </SfListItem>
         </SfList>
       </SfFooterColumn>
@@ -98,9 +99,10 @@ import { ModalList } from 'theme/store/ui/modals'
 import config from 'config';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import get from 'lodash-es/get';
+import { NavigationColumn } from 'src/modules/vsf-storyblok-module';
 
 import MBudsiesBrands from '../molecules/m-budsies-brands.vue';
-import { NavigationColumn } from 'src/modules/vsf-storyblok-module';
+import NavigationItem from '../storyblok/NavigationItem.vue';
 
 export default Vue.extend({
   name: 'OFooter',
@@ -109,7 +111,8 @@ export default Vue.extend({
     MNewsletterSubscription,
     SfFooter,
     SfList,
-    SfMenuItem
+    SfMenuItem,
+    NavigationItem
   },
   props: {
     navigationColumns: {
@@ -319,7 +322,7 @@ export default Vue.extend({
       --list-item-margin: var(--spacer-2xs) var(--spacer-base) var(--spacer-2xs) 0;
     }
 
-    ._services-column {
+    ._column {
       --_footer-column-width: auto;
     }
 
@@ -327,8 +330,7 @@ export default Vue.extend({
       display: flex;
       flex-direction: column;
       flex-wrap: wrap;
-      // max-height: 300px;
-      max-height: 270px;
+      max-height: 300px;
     }
 
     .social-column {
