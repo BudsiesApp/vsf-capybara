@@ -24,14 +24,14 @@ export default defineComponent({
       required: true
     }
   },
-  setup ({ item }, context) {
+  setup (props, context) {
     const isNewWindow = computed<boolean>(() => {
-      return item.link_url.target === '_blank'
+      return props.item.link_url.target === '_blank'
     });
     const classes = computed<string[]>(() => {
       const items: string[] = [];
 
-      const link = getUrlFromLink(item.link_url);
+      const link = getUrlFromLink(props.item.link_url);
       const router = context.root.$router;
       const currentRoute = context.root.$route;
       const resolvedRoute = router.resolve(link);
