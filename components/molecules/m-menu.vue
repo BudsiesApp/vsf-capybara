@@ -130,6 +130,8 @@ export default Vue.extend({
 
   ._menu_column {
     @include display-property-handling;
+
+    position: relative;
   }
 
   @include for-desktop {

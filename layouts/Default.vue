@@ -71,7 +71,7 @@ import LazyHydrate from 'vue-lazy-hydration';
 import { isStoryblokPreview, useStoryblokPageLayout } from 'src/modules/vsf-storyblok-module';
 
 import PromotionPlatformBanner from 'src/modules/promotion-platform/components/Banner.vue';
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent, toRefs } from '@vue/composition-api';
 
 export default defineComponent({
   components: {
@@ -88,14 +88,16 @@ export default defineComponent({
     LazyHydrate
   },
   props: {
-    previewPageLayoutStory: {
+    previewPageLayoutStoryContent: {
       type: Object,
       default: undefined
     }
   },
-  setup ({ previewPageLayoutStory }, context) {
+  setup (props, context) {
+    const { previewPageLayoutStoryContent } = toRefs(props);
+
     return {
-      ...useStoryblokPageLayout(context.root.$store, previewPageLayoutStory)
+      ...useStoryblokPageLayout(context.root.$store, previewPageLayoutStoryContent)
     }
   },
   data () {

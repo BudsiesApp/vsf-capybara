@@ -12,7 +12,7 @@
 import OHeaderMinimal from 'theme/components/organisms/o-header-minimal';
 import OFooter from 'theme/components/organisms/o-footer';
 import { isStoryblokPreview, useStoryblokPageLayout } from 'src/modules/vsf-storyblok-module';
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent, toRefs } from '@vue/composition-api';
 
 export default defineComponent({
   components: {
@@ -20,14 +20,16 @@ export default defineComponent({
     OFooter
   },
   props: {
-    previewPageLayoutStory: {
+    previewPageLayoutStoryContent: {
       type: Object,
       default: undefined
     }
   },
-  setup ({ previewPageLayoutStory }, context) {
+  setup (props, context) {
+    const { previewPageLayoutStoryContent } = toRefs(props);
+
     return {
-      ...useStoryblokPageLayout(context.root.$store, previewPageLayoutStory)
+      ...useStoryblokPageLayout(context.root.$store, previewPageLayoutStoryContent)
     }
   },
   computed: {
