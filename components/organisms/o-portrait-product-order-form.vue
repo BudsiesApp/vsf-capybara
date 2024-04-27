@@ -112,9 +112,7 @@
                 {{ nameStepTitle }}
               </div>
 
-              <p class="_step-hint" v-if="nameStepHint">
-                {{ nameStepHint }}
-              </p>
+              <p class="_step-hint" v-if="nameStepHint" v-html="nameStepHint" />
 
               <validation-provider
                 v-slot="{errors}"
@@ -920,7 +918,6 @@ export default defineComponent({
 
   ._step-hint {
     font-size: var(--font-sm);
-    font-weight: var(--font-bold);
     margin: var(--spacer-sm) 0 0;
   }
 
