@@ -121,7 +121,7 @@
                 tag="div"
                 class="_step-content"
                 rules="required|max:128"
-                :name="`'${$t('Name')}''`"
+                :name="`'${$t('Name')}'`"
               >
                 <SfInput
                   v-model="plushieName"
