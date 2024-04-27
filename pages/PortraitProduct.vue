@@ -10,6 +10,7 @@
       :artwork-upload-step-title="artworkUploadStepTitle"
       :artwork-upload-url="artworkUploadUrl"
       :existing-cart-item="existingCartItem"
+      :name-step-hint="nameStepHint"
       :name-step-title="nameStepTitle"
       :product="getCurrentProduct"
     />
@@ -77,6 +78,10 @@ export default Vue.extend({
       }
 
       return this.cartItems.find((item) => item.plushieId && item.plushieId === this.existingPlushieId);
+    },
+    nameStepHint (): string {
+      return this.$t('Please Note: Write exactly what you\'d like printed above the pet\'s photo here. It\'s printed as written. If you have multiple pets, you can separate each pet\'s name with a comma or “&”. Next, select “Add more pets” below and upload each pet\'s photo separately in the order you wrote their names. Pets will be positioned from left to right in the order below, 1, 2, 3, etc.')
+        .toString()
     },
     nameStepTitle (): string {
       return this.$t('Your Pet\'s Name').toString();

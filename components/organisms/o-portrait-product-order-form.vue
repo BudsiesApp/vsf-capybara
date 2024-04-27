@@ -149,6 +149,10 @@
                 {{ nameStepTitle }}
               </div>
 
+              <p class="_step-hint" v-if="nameStepHint">
+                {{ nameStepHint }}
+              </p>
+
               <validation-provider
                 v-slot="{errors}"
                 tag="div"
@@ -628,6 +632,10 @@ export default defineComponent({
       type: Object as PropType<CartItem | undefined>,
       default: undefined
     },
+    nameStepHint: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
     nameStepTitle: {
       type: String,
       required: true
@@ -908,6 +916,12 @@ export default defineComponent({
     font-size: var(--font-base);
     font-weight: 800;
     text-align: left;
+  }
+
+  ._step-hint {
+    font-size: var(--font-sm);
+    font-weight: var(--font-bold);
+    margin: var(--spacer-sm) 0 0;
   }
 
   .m-form-errors {
