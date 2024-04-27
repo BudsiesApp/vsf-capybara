@@ -11,6 +11,7 @@
         :title="navigationColumn.title"
         :class="navigationColumn.classes"
         class="_column"
+        :style="{'--max-rows-count': navigationColumn.maxRows}"
       >
         <SfList class="_column-list">
           <SfListItem
@@ -327,10 +328,12 @@ export default Vue.extend({
     }
 
     ._column-list {
+      --row-height: 31px;
+
       display: flex;
       flex-direction: column;
       flex-wrap: wrap;
-      max-height: 300px;
+      max-height: calc(var(--max-rows-count, 9) * var(--row-height));
     }
 
     .social-column {
