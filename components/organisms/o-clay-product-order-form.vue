@@ -141,7 +141,7 @@
             <validation-provider
               v-slot="{ errors }"
               rules="required"
-              :name="`'${$t('Description')}''`"
+              :name="`'${$t('Description')}'`"
             >
               <textarea
                 name="description"

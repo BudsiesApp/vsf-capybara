@@ -108,6 +108,30 @@
             </div>
 
             <div class="_step">
+              <div class="_step-title" :ref="getFieldAnchorName('Name')">
+                {{ nameStepTitle }}
+              </div>
+
+              <p class="_step-hint" v-if="nameStepHint" v-html="nameStepHint" />
+
+              <validation-provider
+                v-slot="{errors}"
+                tag="div"
+                class="_step-content"
+                rules="required|max:128"
+                :name="`'${$t('Name')}'`"
+              >
+                <SfInput
+                  v-model="plushieName"
+                  :placeholder="$t('Name')"
+                  :disabled="isSubmitting"
+                  :valid="!errors.length"
+                  :error-message="errors[0]"
+                />
+              </validation-provider>
+            </div>
+
+            <div class="_step">
               <div
                 class="_step-title"
                 :ref="getFieldAnchorName('Photo')"
@@ -144,27 +168,19 @@
               </validation-provider>
             </div>
 
-            <div class="_step">
-              <div class="_step-title" :ref="getFieldAnchorName('Name')">
-                {{ nameStepTitle }}
-              </div>
-
-              <validation-provider
-                v-slot="{errors}"
-                tag="div"
-                class="_step-content"
-                rules="required|max:128"
-                :name="`'${$t('Name')}''`"
-              >
-                <SfInput
-                  v-model="plushieName"
-                  :placeholder="$t('Name')"
-                  :disabled="isSubmitting"
-                  :valid="!errors.length"
-                  :error-message="errors[0]"
-                />
-              </validation-provider>
-            </div>
+            <m-extra-faces
+              ref="extra-faces"
+              :available-options="extraPhotoAddonOptions"
+              :backend-product-id="backendProductId"
+              :disabled="isSubmitting"
+              :upload-url="artworkUploadUrl"
+              :initial-variant="initialAddonItemId"
+              :initial-artworks="initialExtraPhotosArtworks"
+              :get-field-anchor-name="getFieldAnchorName"
+              v-if="hasExtraPhotoAddonOptions"
+              @input="onExtraFacesConfiguratorDataInput"
+              @is-busy-changed="onArtworkUploadBusyStatusChanged('extra-faces', $event)"
+            />
 
             <div
               class="_step"
@@ -232,20 +248,23 @@ import i18n from '@vue-storefront/i18n';
 import CartItem from 'core/modules/cart/types/CartItem';
 import { BundleOption, BundleOptionsProductLink } from 'core/modules/catalog/types/BundleOption';
 import Product from 'core/modules/catalog/types/Product';
-import { PriceHelper, ServerError } from 'src/modules/shared';
+import { CustomerImage, PriceHelper, ServerError } from 'src/modules/shared';
 
 import { getLowestPriceForBundleOptionProductLinks } from 'theme/helpers/get-lowest-price-for-bundle-option.function';
 import { useArtworkUpload } from 'theme/helpers/use-artwork-upload';
+import { useBackendProductId } from 'theme/helpers/use-backend-product-id';
+import { useBundleOption } from 'theme/helpers/use-bundle-options';
+import { useExtraFacesAddons } from 'theme/helpers/use-extra-faces-addons';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useProductGallery } from 'theme/helpers/use-product-gallery';
 
 import ACustomPrice from 'theme/components/atoms/a-custom-price.vue';
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
 import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
+import MExtraFaces from '../molecules/m-extra-faces.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
 import MZoomGallery from 'theme/components/molecules/m-zoom-gallery.vue';
-import { useBundleOption } from 'theme/helpers/use-bundle-options';
 
 extend('required', {
   ...required,
@@ -488,7 +507,8 @@ function useProductPrice (
   styleBundleOption: ComputedRef<BundleOption | undefined>,
   selectedStyleProduct: ComputedRef<Product | undefined>,
   sizeBundleOption: ComputedRef<BundleOption | undefined>,
-  selectedSizeProduct: ComputedRef<Product | undefined>
+  selectedSizeProduct: ComputedRef<Product | undefined>,
+  selectedExtraFacesAddonProduct: ComputedRef<Product | undefined>
 ) {
   const stylePrice = computed<PriceHelper.ProductPrice>(() => {
     if (selectedStyleProduct.value) {
@@ -529,8 +549,16 @@ function useProductPrice (
       )
     );
   });
+  const extraFacesAddonPrice = computed<PriceHelper.ProductPrice>(() => {
+    return PriceHelper.getProductDefaultPrice(selectedExtraFacesAddonProduct.value, {}, false);
+  });
+
   const totalPrice = computed<PriceHelper.ProductPrice>(() => {
-    return PriceHelper.getTotalPriceForProductPrices([stylePrice.value, sizePrice.value])
+    return PriceHelper.getTotalPriceForProductPrices([
+      stylePrice.value,
+      sizePrice.value,
+      extraFacesAddonPrice.value
+    ])
   });
 
   return {
@@ -558,12 +586,27 @@ function usePlushieNameInput (existingCartItem: CartItem | undefined) {
   }
 }
 
+function getAllFormRefs (
+  refs: Record<string, Vue | Element | Vue[] | Element[]>
+): Record<string, Vue | Element | Vue[] | Element[]> {
+  const extraFaces = refs['extra-faces'] as InstanceType<typeof MExtraFaces> | undefined;
+
+  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = { ...refs };
+
+  if (extraFaces) {
+    refsDictionary = { ...refsDictionary, ...extraFaces.$refs };
+  }
+
+  return refsDictionary;
+}
+
 export default defineComponent({
   name: 'OPortraitProductOrderForm',
   components: {
     ACustomPrice,
     ACustomProductQuantity,
     MArtworkUpload,
+    MExtraFaces,
     MFormErrors,
     MProductDescriptionStory,
     MZoomGallery,
@@ -585,6 +628,10 @@ export default defineComponent({
     },
     existingCartItem: {
       type: Object as PropType<CartItem | undefined>,
+      default: undefined
+    },
+    nameStepHint: {
+      type: String as PropType<string | undefined>,
       default: undefined
     },
     nameStepTitle: {
@@ -620,7 +667,16 @@ export default defineComponent({
     } = useSizeBundleOption(product, selectedStyleOption, existingCartItem)
 
     const artworkUploadFields = useArtworkUpload(
+      existingCartItem
+    );
+
+    const {
+      backendProductId
+    } = useBackendProductId(product);
+
+    const extraFacesAddonsFields = useExtraFacesAddons(
       product,
+      setupContext.root.$store,
       existingCartItem
     );
 
@@ -629,6 +685,7 @@ export default defineComponent({
     })
 
     return {
+      backendProductId,
       isSubmitButtonDisabled,
       isSubmitting,
       styleOptions,
@@ -641,9 +698,10 @@ export default defineComponent({
       validationObserver,
       quantity,
       ...artworkUploadFields,
+      ...extraFacesAddonsFields,
       ...useFormValidation(
         validationObserver,
-        () => setupContext.refs
+        () => getAllFormRefs(setupContext.refs)
       ),
       ...useProductGallery(
         product,
@@ -655,7 +713,8 @@ export default defineComponent({
         styleBundleOption,
         selectedStyleProduct,
         sizeBundleOption,
-        selectedSizeProduct
+        selectedSizeProduct,
+        extraFacesAddonsFields.selectedExtraFacesAddonProduct
       )
     }
   },
@@ -678,12 +737,23 @@ export default defineComponent({
         { product: this.product, bundleOptions: this.$store.state.product.current_bundle_options }
       );
 
+      const additionalArtworks: CustomerImage[] = this.extraPhotosArtworks.map((item) => {
+        if (!this.imageHandlerService) {
+          throw new Error('Image Handler Service is not defined');
+        }
+
+        return {
+          id: item.id,
+          url: this.imageHandlerService.getOriginalImageUrl(item.url)
+        }
+      });
+
       try {
         try {
           await this.$store.dispatch('cart/addItem', {
             productToAdd: Object.assign({}, this.product, {
               qty: this.quantity,
-              customerImages: [this.customerImage],
+              customerImages: [this.customerImage, ...additionalArtworks],
               uploadMethod: 'upload-now',
               plushieName: this.plushieName
             })
@@ -755,12 +825,29 @@ export default defineComponent({
 
       this.isSubmitting = true;
 
+      const additionalArtworks: CustomerImage[] = this.extraPhotosArtworks.map(item => {
+        let url = item.url;
+
+        if (!this.initialExtraPhotosArtworks.find((image) => image.id === item.id)) {
+          if (!this.imageHandlerService) {
+            throw new Error('Image Handler Service is not defined');
+          }
+
+          url = this.imageHandlerService.getOriginalImageUrl(item.url);
+        }
+
+        return {
+          id: item.id,
+          url
+        }
+      });
+
       try {
         try {
           await this.updateClientAndServerItem({
             product: Object.assign({}, this.existingCartItem, {
               qty: this.quantity,
-              customerImages: [this.customerImage],
+              customerImages: [this.customerImage, ...additionalArtworks],
               product_option: setBundleProductOptionsAsync(null, { product: this.existingCartItem, bundleOptions: this.$store.state.product.current_bundle_options }),
               uploadMethod: 'upload-now',
               plushieName: this.plushieName
@@ -827,6 +914,11 @@ export default defineComponent({
     font-size: var(--font-base);
     font-weight: 800;
     text-align: left;
+  }
+
+  ._step-hint {
+    font-size: var(--font-sm);
+    margin: var(--spacer-sm) 0 0;
   }
 
   .m-form-errors {

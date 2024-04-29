@@ -6,10 +6,11 @@
     />
 
     <o-portrait-product-order-form
-      v-if="getCurrentProduct"
+      v-if="getCurrentProduct && isDataLoaded"
       :artwork-upload-step-title="artworkUploadStepTitle"
       :artwork-upload-url="artworkUploadUrl"
       :existing-cart-item="existingCartItem"
+      :name-step-hint="nameStepHint"
       :name-step-title="nameStepTitle"
       :product="getCurrentProduct"
     />
@@ -48,6 +49,11 @@ export default Vue.extend({
       default: undefined
     }
   },
+  data () {
+    return {
+      isDataLoaded: false
+    };
+  },
   computed: {
     artworkUploadStepTitle (): string {
       return this.$t('Upload your pet\'s photo').toString();
@@ -73,8 +79,12 @@ export default Vue.extend({
 
       return this.cartItems.find((item) => item.plushieId && item.plushieId === this.existingPlushieId);
     },
+    nameStepHint (): string {
+      return this.$t('<strong>Please note:</strong> Write exactly what you\'d like printed above the pet\'s photo here. It\'s printed as written. If you have multiple pets, you can separate each pet\'s name with a comma or "&". Next, select "Add more pets" below and upload each pet\'s photo separately in the order you wrote their names. Pets will be positioned from left to right in the order below, 1, 2, 3, etc.')
+        .toString()
+    },
     nameStepTitle (): string {
-      return this.$t('Your Pet\'s Name').toString();
+      return this.$t('Your pet\'s name').toString();
     }
   },
   async serverPrefetch (): Promise<void> {
@@ -82,11 +92,12 @@ export default Vue.extend({
 
     await (this as any).loadData();
   },
-  async mounted (): Promise<void> {
+  async beforeMount (): Promise<void> {
     if (!this.getCurrentProduct) {
       await this.loadData();
     }
 
+    this.isDataLoaded = true;
     EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, this.getCurrentProduct);
   },
   beforeRouteLeave (to, from, next): void {
@@ -95,10 +106,16 @@ export default Vue.extend({
   },
   methods: {
     async loadData (): Promise<void> {
+      this.isDataLoaded = false;
+
       const product = await this.$store.dispatch('product/loadProduct', {
         parentSku: this.sku,
         setCurrent: true
       });
+
+      await this.$store.dispatch('budsies/loadExtraPhotosAddons', { productId: product.id });
+
+      this.isDataLoaded = true;
 
       catalogHooksExecutors.productPageVisited(product);
     }
