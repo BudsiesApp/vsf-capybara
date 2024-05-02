@@ -3,7 +3,7 @@
     <div class="_content">
       <p class="_address">
         <span class="_client-name">{{ address.firstname }} {{ address.lastname }}</span><br>
-        {{ address.street.join(' ') }}<br>
+        {{ street }}<br>
         {{ address.postcode }}
         {{ address.city }},<br>{{ getCountryById(address.country_id) }}
       </p>
@@ -30,6 +30,15 @@ export default Vue.extend({
     address: {
       type: Object,
       required: true
+    }
+  },
+  computed: {
+    street (): string {
+      if (!this.address.street) {
+        return ''
+      }
+
+      return this.address.street.join(' ');
     }
   },
   methods: {

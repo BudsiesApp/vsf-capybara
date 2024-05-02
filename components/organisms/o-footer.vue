@@ -32,13 +32,9 @@
           </SfListItem>
 
           <SfListItem>
-            <a href="tel:855-758-7443">
-              <SfMenuItem class="sf-footer__menu-item" label="855-758-7443" icon="" />
-            </a>
-          </SfListItem>
-
-          <SfListItem>
-            <SfMenuItem class="sf-footer__menu-item" label="M-F, 9-4 EST" icon="" />
+            <router-link to="/contact/">
+              <SfMenuItem class="sf-footer__menu-item" :label="$t('Request A Call')" icon="" />
+            </router-link>
           </SfListItem>
         </SfList>
       </SfFooterColumn>
