@@ -1,4 +1,4 @@
-import { computed, ref, Ref, toRef, watch } from '@vue/composition-api';
+import { computed, ref, Ref, watch } from '@vue/composition-api';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
