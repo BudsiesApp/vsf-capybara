@@ -1,4 +1,4 @@
-import { computed, ref, Ref, watch } from '@vue/composition-api';
+import { computed, ref, Ref, toRef, watch } from '@vue/composition-api';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -12,8 +12,8 @@ import getProductionTimeOptions from './get-production-time-options';
 
 const bundleOptionTitle = 'production time';
 
-export function useProductionTimeSelector (product: Product) {
-  const { bundleOption, setBundleOptionValue } = useBundleOption(product, bundleOptionTitle);
+export function useProductionTimeSelector (product: Ref<Product>) {
+  const { bundleOption, setBundleOptionValue } = useBundleOption(product, ref(bundleOptionTitle));
 
   const selectedProductionTimeOption = ref<ProductionTimeOption | undefined>();
 
@@ -22,7 +22,11 @@ export function useProductionTimeSelector (product: Product) {
       return [];
     }
 
-    return getProductionTimeOptions(bundleOption.value, product, rootStore)
+    return getProductionTimeOptions(
+      bundleOption.value,
+      product.value,
+      rootStore
+    )
   });
 
   const hasProductionTimeOptions = computed<boolean>(() => {

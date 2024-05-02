@@ -239,7 +239,7 @@ import { extend, ValidationObserver, ValidationProvider } from 'vee-validate';
 import { required, max } from 'vee-validate/dist/rules';
 import { SfButton, SfHeading, SfInput, SfSelect } from '@storefront-ui/vue';
 import { mapMobileObserver, unMapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
-import { computed, ComputedRef, defineComponent, nextTick, PropType, ref, Ref, watch } from '@vue/composition-api'
+import { computed, ComputedRef, defineComponent, nextTick, PropType, ref, Ref, toRefs, unref, watch } from '@vue/composition-api'
 
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
@@ -283,8 +283,8 @@ const SIZE_BUNDLE_OPTION_TITLE = 'size';
 const PORTRAITS_WITHOUT_FRAME_STYLE_SKU = 'portraits_without_frame';
 
 function useStyleBundleOption (
-  product: Product,
-  existingCartItem: CartItem | undefined
+  product: Ref<Product>,
+  existingCartItem: Ref<CartItem | undefined>
 ) {
   const {
     bundleOption: styleBundleOption,
@@ -349,12 +349,12 @@ function useStyleBundleOption (
   });
 
   function fillExistingCartItemData (): void {
-    if (!existingCartItem || !styleBundleOption.value) {
+    if (!existingCartItem.value || !styleBundleOption.value) {
       selectedStyleOptionId.value = undefined;
       return;
     }
 
-    const selectedBundleOptions = getSelectedBundleOptions(existingCartItem);
+    const selectedBundleOptions = getSelectedBundleOptions(existingCartItem.value);
     const selectedStyleOptions = selectedBundleOptions.find(
       (option) => option.option_id === styleBundleOption.value?.option_id
     );
@@ -379,9 +379,9 @@ function useStyleBundleOption (
 }
 
 function useSizeBundleOption (
-  product: Product,
+  product: Ref<Product>,
   selectedStyleOption: ComputedRef<BundleOptionsProductLink | undefined>,
-  existingCartItem: CartItem | undefined
+  existingCartItem: Ref<CartItem | undefined>
 ) {
   const {
     bundleOption: sizeBundleOption,
@@ -473,12 +473,12 @@ function useSizeBundleOption (
   });
 
   function fillExistingCartItemData (): void {
-    if (!existingCartItem || !sizeBundleOption.value) {
+    if (!existingCartItem.value || !sizeBundleOption.value) {
       selectedSizeOptionId.value = undefined;
       return;
     }
 
-    const selectedBundleOptions = getSelectedBundleOptions(existingCartItem);
+    const selectedBundleOptions = getSelectedBundleOptions(existingCartItem.value);
     const selectedSizeOptions = selectedBundleOptions.find(
       (option) => option.option_id === sizeBundleOption.value?.option_id
     );
@@ -566,17 +566,19 @@ function useProductPrice (
   }
 }
 
-function usePlushieNameInput (existingCartItem: CartItem | undefined) {
+function usePlushieNameInput (
+  existingCartItem: Ref<CartItem | undefined>
+) {
   const plushieName = ref<string | undefined>();
 
   function fillExistingCartItemData (): void {
     plushieName.value = undefined;
 
-    if (!existingCartItem) {
+    if (!existingCartItem.value) {
       return;
     }
 
-    plushieName.value = existingCartItem.plushieName;
+    plushieName.value = existingCartItem.value.plushieName;
   }
 
   fillExistingCartItemData();
@@ -643,7 +645,8 @@ export default defineComponent({
       required: true
     }
   },
-  setup ({ product, existingCartItem }, setupContext) {
+  setup (props, setupContext) {
+    const { product, existingCartItem } = toRefs(props);
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
 
     const isSubmitting = ref<boolean>(false);

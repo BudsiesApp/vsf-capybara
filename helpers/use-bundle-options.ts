@@ -1,4 +1,4 @@
-import { computed } from '@vue/composition-api';
+import { computed, Ref, unref } from '@vue/composition-api';
 
 import { PRODUCT_SET_BUNDLE_OPTION } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import rootStore from '@vue-storefront/core/store';
@@ -6,9 +6,15 @@ import rootStore from '@vue-storefront/core/store';
 import { BundleOption } from 'core/modules/catalog/types/BundleOption';
 import Product from 'core/modules/catalog/types/Product';
 
-export function useBundleOption (product: Product, title: string) {
+export function useBundleOption (
+  product: Ref<Product>,
+  title: Ref<string> | string
+) {
   const bundleOption = computed<BundleOption | undefined>(() => {
-    return product.bundle_options?.find((option) => option.title.toLowerCase() === title.toLowerCase());
+    // TODO: need to update TS version to make it work fine without specify type
+    return product.value.bundle_options?.find(
+      (option) => option.title.toLowerCase() === (unref(title) as string).toLowerCase()
+    );
   });
 
   function setBundleOptionValue (

@@ -1,12 +1,12 @@
-import { computed } from '@vue/composition-api';
+import { computed, Ref } from '@vue/composition-api';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
 import { ProductId, ProductValue } from 'src/modules/budsies';
 
-export function useBackendProductId (product: Product) {
+export function useBackendProductId (product: Ref<Product>) {
   const backendProductId = computed<ProductValue>(() => {
-    switch (product.id) {
+    switch (product.value.id) {
       case ProductId.CUSTOM_PILLOW:
       case ProductId.BUDDY_PILLOW:
         return ProductValue.PILLOW;
@@ -52,7 +52,7 @@ export function useBackendProductId (product: Product) {
         return ProductValue.PHOTO_PORTRAITS;
       default:
         throw new Error(
-          `Can't resolve Backend product ID for Magento '${product.id}' product ID`
+          `Can't resolve Backend product ID for Magento '${product.value.id}' product ID`
         );
     }
   });

@@ -1,4 +1,4 @@
-import { computed, inject, ref, set } from '@vue/composition-api';
+import { computed, inject, Ref, ref, set, unref } from '@vue/composition-api';
 
 import CartItem from 'core/modules/cart/types/CartItem';
 
@@ -6,25 +6,27 @@ import { Dictionary } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage } from 'src/modules/shared';
 
-export function useArtworkUpload (existingCartItem: CartItem | undefined) {
+export function useArtworkUpload (existingCartItem: Ref<CartItem | undefined>) {
   const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
   const customerImage = ref<CustomerImage | undefined>();
   const artworkUploaderBusyState = ref<Dictionary<boolean>>({});
   const artworkUploadInitialItems = ref<CustomerImage[]>([]);
-
   const isSomeUploaderBusy = computed<boolean>(() => {
     return !!Object.values(artworkUploaderBusyState.value)
       .find((isBusy) => isBusy);
   });
 
   function fillExistingCartItemData (): void {
-    if (!existingCartItem || !existingCartItem.customerImages?.length) {
+    // TODO: need to update TS version to make it work fine without specify type
+    const cartItem = unref(existingCartItem) as CartItem | undefined;
+
+    if (!cartItem || !cartItem.customerImages?.length) {
       (artworkUploadInitialItems as any).value = [];
       customerImage.value = undefined;
       return;
     }
 
-    customerImage.value = existingCartItem.customerImages[0];
+    customerImage.value = cartItem.customerImages[0];
     (artworkUploadInitialItems as any).value = customerImage.value ? [customerImage.value] : [];
   }
 
