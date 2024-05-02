@@ -13,7 +13,7 @@ import getProductionTimeOptions from './get-production-time-options';
 const bundleOptionTitle = 'production time';
 
 export function useProductionTimeSelector (product: Ref<Product>) {
-  const { bundleOption, setBundleOptionValue } = useBundleOption(product, ref(bundleOptionTitle));
+  const { bundleOption, setBundleOptionValue } = useBundleOption(product, bundleOptionTitle);
 
   const selectedProductionTimeOption = ref<ProductionTimeOption | undefined>();
 
