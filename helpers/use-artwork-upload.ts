@@ -1,4 +1,4 @@
-import { computed, inject, Ref, ref, set, unref } from '@vue/composition-api';
+import { computed, inject, Ref, ref, set } from '@vue/composition-api';
 
 import CartItem from 'core/modules/cart/types/CartItem';
 
@@ -17,8 +17,7 @@ export function useArtworkUpload (existingCartItem: Ref<CartItem | undefined>) {
   });
 
   function fillExistingCartItemData (): void {
-    // TODO: need to update TS version to make it work fine without specify type
-    const cartItem = unref(existingCartItem) as CartItem | undefined;
+    const cartItem = existingCartItem.value;
 
     if (!cartItem || !cartItem.customerImages?.length) {
       (artworkUploadInitialItems as any).value = [];
