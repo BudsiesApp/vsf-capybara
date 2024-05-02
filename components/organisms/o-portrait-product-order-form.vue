@@ -446,7 +446,15 @@ function useSizeBundleOption (
     return selectedProductLink?.product;
   });
 
-  watch(selectedStyleOption, async () => {
+  watch(selectedStyleOption, async (
+    // TODO: need to update TS version to make it work fine without specify type
+    value: BundleOptionsProductLink | undefined,
+    oldValue: BundleOptionsProductLink | undefined
+  ) => {
+    if (value?.id === oldValue?.id) {
+      return;
+    }
+
     showSizeOptionsSelect.value = false;
     selectedSizeOptionId.value = undefined;
 
