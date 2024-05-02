@@ -93,17 +93,13 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue'
-import { mapGetters } from 'vuex';
-import MNewsletterSubscription from 'theme/components/molecules/m-newsletter-subscription.vue';
 import { SfFooter, SfList, SfMenuItem } from '@storefront-ui/vue';
-import { ModalList } from 'theme/store/ui/modals'
-import config from 'config';
-import { currentStoreView } from '@vue-storefront/core/lib/multistore';
-import get from 'lodash-es/get';
+
 import { NavigationColumn } from 'src/modules/vsf-storyblok-module';
 
-import MBudsiesBrands from '../molecules/m-budsies-brands.vue';
-import NavigationItem from '../storyblok/NavigationItem.vue';
+import MBudsiesBrands from 'theme/components/molecules/m-budsies-brands.vue';
+import MNewsletterSubscription from 'theme/components/molecules/m-newsletter-subscription.vue';
+import NavigationItem from 'theme/components/storyblok/NavigationItem.vue';
 
 export default Vue.extend({
   name: 'OFooter',
@@ -152,28 +148,8 @@ export default Vue.extend({
     };
   },
   computed: {
-    ...mapGetters('user', ['isLoggedIn']),
-    multistoreEnabled (): boolean {
-      return get(config, 'storeViews.multistore', false);
-    },
-    currentLanguage (): string {
-      const { i18n = config.i18n } = currentStoreView();
-      return `${i18n.defaultCountry} / ${i18n.defaultLanguage} / ${i18n.currencyCode}`;
-    },
     newsletterSubscriptionColumnTitle (): string {
       return this.$t('Get more @Petsies cuteness').toString();
-    }
-  },
-  methods: {
-    showLanguageSwitcher () {
-      this.$store.dispatch('ui/openModal', { name: ModalList.LanguageSwitcher })
-    },
-    onLinkClick (link) {
-      if (!link.clickHandler) {
-        return;
-      }
-
-      link.clickHandler();
     }
   }
 });
