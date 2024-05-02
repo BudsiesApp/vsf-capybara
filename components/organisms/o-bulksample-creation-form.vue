@@ -973,8 +973,10 @@ export default defineComponent({
       return selectedOption.toString();
     },
     getPillowSizeTitle (sizeProductLink: BundleOptionsProductLink): TranslateResult {
-      // TODO respect new size `sku`.
+      // TODO: check new sku is equal with new one on Magento side
       switch (sizeProductLink.sku) {
+        case 'simplePillowBulkSample_xsmall':
+          return this.$t('8" extra small');
         case 'simplePillowBulkSample_small':
           return this.$t('12" small');
         case 'simplePillowBulkSample_medium':
