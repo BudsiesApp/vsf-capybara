@@ -1,4 +1,4 @@
-import { computed, ref, watch } from '@vue/composition-api';
+import { computed, Ref, ref, watch } from '@vue/composition-api';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
 import Product from 'core/modules/catalog/types/Product';
@@ -11,8 +11,8 @@ import { useBundleOption } from './use-bundle-options';
 import { getFinalPrice } from 'src/modules/shared/helpers/price';
 
 export function useSizeSelector (
-  product: Product,
-  bundleOptionTitle: string
+  product: Ref<Product>,
+  bundleOptionTitle: Ref<string> | string
 ) {
   const {
     bundleOption,

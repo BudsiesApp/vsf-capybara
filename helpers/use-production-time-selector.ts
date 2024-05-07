@@ -12,7 +12,7 @@ import getProductionTimeOptions from './get-production-time-options';
 
 const bundleOptionTitle = 'production time';
 
-export function useProductionTimeSelector (product: Product) {
+export function useProductionTimeSelector (product: Ref<Product>) {
   const { bundleOption, setBundleOptionValue } = useBundleOption(product, bundleOptionTitle);
 
   const selectedProductionTimeOption = ref<ProductionTimeOption | undefined>();
@@ -22,7 +22,11 @@ export function useProductionTimeSelector (product: Product) {
       return [];
     }
 
-    return getProductionTimeOptions(bundleOption.value, product, rootStore)
+    return getProductionTimeOptions(
+      bundleOption.value,
+      product.value,
+      rootStore
+    )
   });
 
   const hasProductionTimeOptions = computed<boolean>(() => {
