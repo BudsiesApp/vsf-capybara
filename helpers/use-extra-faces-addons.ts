@@ -1,5 +1,5 @@
 import { Store } from 'vuex';
-import { computed, ref, watch } from '@vue/composition-api';
+import { computed, Ref, ref, watch } from '@vue/composition-api';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { getSelectedBundleOptions } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions';
@@ -15,7 +15,11 @@ import ExtraFacesConfiguratorData from 'theme/components/interfaces/extra-faces-
 
 import { useBundleOption } from './use-bundle-options';
 
-export function useExtraFacesAddons (product: Product, store: Store<RootState>, existingCartItem: CartItem | undefined) {
+export function useExtraFacesAddons (
+  product: Ref<Product>,
+  store: Store<RootState>,
+  existingCartItem: Ref<CartItem | undefined>
+) {
   const {
     bundleOption: extraFacesBundleOption,
     setBundleOptionValue
@@ -31,7 +35,7 @@ export function useExtraFacesAddons (product: Product, store: Store<RootState>, 
       return [];
     }
 
-    const extraPhotoAddons: ExtraPhotoAddon[] = store.getters['budsies/getPrintedProductAddons'](product.id);
+    const extraPhotoAddons: ExtraPhotoAddon[] = store.getters['budsies/getPrintedProductAddons'](product.value.id);
 
     if (!extraPhotoAddons.length) {
       return [];
@@ -75,7 +79,7 @@ export function useExtraFacesAddons (product: Product, store: Store<RootState>, 
     }
 
     const productLink = extraFacesBundleOption.value.product_links.find(
-      (productLink) => productLink.id.toString() === selectedExtraFacesAddon.value.optionValueId.toString()
+      (productLink) => productLink.id.toString() === selectedExtraFacesAddon.value?.optionValueId.toString()
     );
 
     return productLink?.product;
@@ -91,14 +95,16 @@ export function useExtraFacesAddons (product: Product, store: Store<RootState>, 
   }
 
   function fillExtraFacesArtworks (): void {
+    const cartItem = existingCartItem.value;
+
     (extraPhotosArtworks as any).value = [];
     (initialExtraPhotosArtworks as any).value = [];
 
-    if (!existingCartItem?.customerImages || existingCartItem.customerImages.length <= 1) {
+    if (!cartItem?.customerImages || cartItem.customerImages.length <= 1) {
       return;
     }
 
-    const customerImages = [...existingCartItem.customerImages]
+    const customerImages = [...cartItem.customerImages]
     customerImages.splice(0, 1);
 
     (extraPhotosArtworks as any).value = customerImages;
@@ -106,14 +112,16 @@ export function useExtraFacesAddons (product: Product, store: Store<RootState>, 
   }
 
   function fillExtraFacesAddon (): void {
+    const cartItem = existingCartItem.value;
+
     selectedExtraFacesAddon.value = undefined;
     initialAddonItemId.value = undefined;
 
-    if (!existingCartItem || !extraFacesBundleOption.value) {
+    if (!cartItem || !extraFacesBundleOption.value) {
       return;
     }
 
-    const selectedBundleOptions = getSelectedBundleOptions(existingCartItem);
+    const selectedBundleOptions = getSelectedBundleOptions(cartItem);
 
     if (!selectedBundleOptions.length || !extraPhotoAddonOptions.value.length) {
       return;
