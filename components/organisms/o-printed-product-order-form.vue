@@ -286,7 +286,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { defineComponent, ref, Ref, inject, PropType } from '@vue/composition-api';
+import { defineComponent, ref, Ref, inject, PropType, toRefs } from '@vue/composition-api';
 import { mapGetters, mapMutations } from 'vuex';
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
 import { required } from 'vee-validate/dist/rules';
@@ -389,14 +389,18 @@ function getAllFormRefs (
 
 export default defineComponent({
   name: 'OPrintedProductOrderForm',
-  setup ({ product, styleBundleOptionTitle }, setupContext) {
+  setup (props, setupContext) {
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+    const { product, styleBundleOptionTitle } = toRefs(props);
 
     if (!imageHandlerService) {
       throw new Error('ImageHandlerService is not defined');
     }
-    const { bundleOption: styleBundleOption } = useBundleOption(product, styleBundleOptionTitle);
+    const { bundleOption: styleBundleOption } = useBundleOption(
+      product,
+      styleBundleOptionTitle
+    );
 
     const {
       bundleOption: sizeBundleOption,

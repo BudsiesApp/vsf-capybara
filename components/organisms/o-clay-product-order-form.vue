@@ -398,7 +398,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { Route } from 'vue-router';
-import { PropType, defineComponent, ref, Ref, inject } from '@vue/composition-api';
+import { PropType, defineComponent, ref, toRefs, Ref, inject } from '@vue/composition-api';
 import { extend, ValidationObserver, ValidationProvider } from 'vee-validate';
 import { required, email } from 'vee-validate/dist/rules';
 import { TranslateResult } from 'vue-i18n';
@@ -466,7 +466,7 @@ function getAllFormRefs (
 
 export default defineComponent({
   name: 'OClayProductOrderForm',
-  setup ({ product }, setupContext) {
+  setup (props, setupContext) {
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
     const window = inject<Window>('WindowObject');
 
@@ -491,7 +491,7 @@ export default defineComponent({
         validationObserver,
         () => getAllFormRefs(setupContext.refs)
       ),
-      ...useProductionTimeSelector(product),
+      ...useProductionTimeSelector(toRefs(props).product),
       ...usePersistedEmail(email)
     }
   },
