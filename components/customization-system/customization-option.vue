@@ -32,7 +32,9 @@ import { required } from 'vee-validate/dist/rules';
 
 import { Customization, CustomizationStateItem, useCustomizationOptionValidation, useCustomizationOptionWidget } from 'src/modules/customization-system';
 
+import CardsListWidget from './cards-list-widget.vue';
 import CheckboxWidget from './checkbox-widget.vue';
+import TextInputWidget from './text-input-widget.vue';
 
 extend('required', {
   ...required,
@@ -42,7 +44,9 @@ extend('required', {
 export default defineComponent({
   name: 'CustomizationOption',
   components: {
+    CardsListWidget,
     CheckboxWidget,
+    TextInputWidget,
     ValidationProvider
   },
   props: {

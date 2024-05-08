@@ -67,6 +67,10 @@
         </m-checkbox>
       </li>
     </ul>
+
+    <div class="_error-message">
+      {{ error }}
+    </div>
   </div>
 </template>
 
@@ -76,8 +80,13 @@ import { computed, defineComponent, PropType } from '@vue/composition-api'
 import { OptionValue } from 'src/modules/customization-system'
 import { PriceHelper } from 'src/modules/shared'
 
+import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
+
 export default defineComponent({
   name: 'CardsListWidget',
+  components: {
+    MCheckbox
+  },
   props: {
     error: {
       type: String,
@@ -136,3 +145,22 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/typography";
+
+.cards-list-widget {
+  ._error-message {
+    color: var(--input-error-message-color, var(--c-danger));
+    height: calc(var(--font-xs) * 1.2);
+
+    @include font(
+      --input-error-message-font,
+      var(--font-medium),
+      var(--font-xs),
+      1.2,
+      var(--font-family-secondary)
+    );
+  }
+}
+</style>
