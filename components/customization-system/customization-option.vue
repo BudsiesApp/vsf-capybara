@@ -34,6 +34,7 @@ import { Customization, CustomizationStateItem, useCustomizationOptionValidation
 
 import CardsListWidget from './cards-list-widget.vue';
 import CheckboxWidget from './checkbox-widget.vue';
+import DropdownWidget from './dropdown-widget.vue';
 import TextInputWidget from './text-input-widget.vue';
 
 extend('required', {
@@ -46,6 +47,7 @@ export default defineComponent({
   components: {
     CardsListWidget,
     CheckboxWidget,
+    DropdownWidget,
     TextInputWidget,
     ValidationProvider
   },
