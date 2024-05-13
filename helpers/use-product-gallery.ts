@@ -16,17 +16,17 @@ function getZoomGalleryImage (imageObject: any): ZoomGalleryImage {
 }
 
 export function useProductGallery (
-  product: Product,
+  product: Ref<Product>,
   styleBundleOption: ComputedRef<BundleOption | undefined> | undefined,
   selectedStyleProductLink: ComputedRef<BundleOptionsProductLink | undefined> | undefined
 ) {
   const productImages = computed<GalleryProductImages[]>(() => {
-    const mainProductImages = getProductGallery(product)
+    const mainProductImages = getProductGallery(product.value)
       .map(getZoomGalleryImage)
 
     let result: GalleryProductImages[] = [
       {
-        sku: product.sku,
+        sku: product.value.sku,
         images: mainProductImages
       }
     ]
