@@ -18,6 +18,7 @@
         :is-disabled="isDisabled"
         :error="errors[0]"
         :is="widgetComponent"
+        :max-values-count="maxValuesCount"
         :values="optionValues"
         v-model="selectedOption"
       />
@@ -74,6 +75,9 @@ export default defineComponent({
     const customizationLabel = computed<string>(() => {
       return customization.value.title || customization.value.name;
     });
+    const maxValuesCount = computed<number | undefined>(() => {
+      return customization.value.optionData?.maxValuesCount;
+    });
 
     return {
       ...useCustomizationOptionValidation(customization),
@@ -83,7 +87,8 @@ export default defineComponent({
         selectedOptionValuesIds,
         context
       ),
-      customizationLabel
+      customizationLabel,
+      maxValuesCount
     }
   }
 })
