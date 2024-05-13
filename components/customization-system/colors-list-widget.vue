@@ -85,8 +85,6 @@ export default defineComponent({
   setup (props, context) {
     const { maxValuesCount, shape, value } = toRefs(props);
 
-    // TODO: move to separate composable
-
     const isRound = computed<boolean>(() => {
       return shape.value === 'round';
     });
