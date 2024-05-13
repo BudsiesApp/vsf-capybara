@@ -1,6 +1,6 @@
 <template>
   <div
-    class="thumbnails-list-widget"
+    class="colors-list-widget"
     :class="{ '-disabled': isDisabled }"
   >
     <ul class="_options-list">
@@ -23,21 +23,19 @@
           >
         </label>
 
-        <div class="_image-wrapper">
-          <BaseImage
-            class="_image"
-            :src="option.previewUrl"
-            :aspect-ratio="1"
-          />
-        </div>
+        <div class="_color" />
 
         <div class="_content-wrapper">
           <div class="_name">
             {{ option.name }}
           </div>
 
-          <div class="_price" v-if="option.price && option.price > 0">
+          <div
+            class="_price"
+            v-if="option.price && option.price > 0"
+          >
             <span>+</span>
+
             {{ option.price | currency("$", 0) }}
           </div>
         </div>
@@ -53,14 +51,10 @@
 <script lang="ts">
 import { computed, defineComponent, PropType, toRefs } from '@vue/composition-api';
 
-import { BaseImage } from 'src/modules/budsies';
 import { OptionValue, useListWidget } from 'src/modules/customization-system';
 
 export default defineComponent({
-  name: 'ThumbnailsListWidget',
-  components: {
-    BaseImage
-  },
+  name: 'ColorsListWidget',
   props: {
     error: {
       type: String,
@@ -91,13 +85,15 @@ export default defineComponent({
   setup (props, context) {
     const { maxValuesCount, shape, value } = toRefs(props);
 
+    // TODO: move to separate composable
+
     const isRound = computed<boolean>(() => {
       return shape.value === 'round';
     });
 
     return {
-      isRound,
-      ...useListWidget(value, maxValuesCount, context)
+      ...useListWidget(value, maxValuesCount, context),
+      isRound
     }
   }
 })
@@ -106,11 +102,14 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/typography";
 
-.thumbnails-list-widget {
+// TODO: add variable
+$color-selector-selected-border-color: #51a7f9;
+
+.colors-list-widget {
   ._options-list {
     display: grid;
     justify-content: space-around;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
     padding: 0;
   }
 
@@ -122,38 +121,23 @@ export default defineComponent({
     display: block;
     padding: var(--spacer-sm);
 
+    ._color{
+      border: 4px solid transparent;
+      width: 100%;
+      height: 0;
+      position: relative;
+      padding-top: 100%;
+    }
+
     &.-selected {
-      background: var(--c-primary);
+      ._color {
+        border-color: $color-selector-selected-border-color;
+      }
+    }
 
-      &.-round {
-        background: transparent;
-
-        ._image-wrapper {
-          &::before {
-            background: rgba(52, 184, 147, 0.7);
-            border-radius: 100%;
-            content: "";
-            height: 100%;
-            left: 0;
-            position: absolute;
-            top: 0;
-            width: 100%;
-            z-index: 1;
-          }
-
-          &::after {
-            background: url('/assets/images/sprite/ico-tick-green.png') no-repeat center #fff;
-            border: 2px solid #38b677;
-            border-radius: 100%;
-            content: "";
-            position: absolute;
-            height: 24px;
-            width: 24px;
-            right: 0;
-            top: 0;
-            z-index: 2;
-          }
-        }
+    &.-round {
+      ._color {
+        border-radius: 50%;
       }
     }
   }
@@ -210,12 +194,6 @@ export default defineComponent({
     ._options-list {
       justify-content: flex-start;
       padding: 0;
-    }
-  }
-
-  @include for-desktop {
-    ._options-list {
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     }
   }
 }
