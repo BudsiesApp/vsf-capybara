@@ -3,6 +3,7 @@
     <m-checkbox
       class="checkbox-widget"
       :disabled="isDisabled"
+      :label="label"
       :valid="isValid"
       v-model="isSelected"
     />
@@ -34,6 +35,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    label: {
+      type: String,
+      required: true
+    },
     value: {
       type: [String, Array] as PropType<string | string[] | undefined>,
       default: undefined
@@ -49,7 +54,7 @@ export default defineComponent({
         return !!props.value
       },
       set: (selected) => {
-        emit('input', selected ? props.values[0] : undefined);
+        emit('input', selected ? props.values[0].id : undefined);
       }
     });
     const isValid = computed<boolean>(() => {
@@ -71,6 +76,7 @@ export default defineComponent({
   ._error-message {
     color: var(--input-error-message-color, var(--c-danger));
     height: calc(var(--font-xs) * 1.2);
+    margin-top: var(--spacer-xs);
 
     @include font(
       --input-error-message-font,

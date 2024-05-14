@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="colors-list-widget"
-    :class="{ '-disabled': isDisabled }"
-  >
+  <div class="colors-list-widget" :class="{ '-disabled': isDisabled }">
     <ul class="_options-list">
       <li
         v-for="option in values"
@@ -10,9 +7,25 @@
         class="_option"
         :class="{
           '-round': isRound,
-          '-is-selected': isSelected(option)
+          '-selected': isSelected(option),
         }"
       >
+        <div class="_color-wrapper">
+          <div class="_color" :style="{ 'background-color': option.color }" />
+        </div>
+
+        <div class="_content-wrapper">
+          <div class="_name">
+            {{ option.name }}
+          </div>
+
+          <div class="_price" v-if="option.price && option.price > 0">
+            <span>+</span>
+
+            {{ option.price | currency("$", 0) }}
+          </div>
+        </div>
+
         <label class="_option-label">
           <input
             class="_input"
@@ -22,23 +35,6 @@
             v-model="selectedOption"
           >
         </label>
-
-        <div class="_color" />
-
-        <div class="_content-wrapper">
-          <div class="_name">
-            {{ option.name }}
-          </div>
-
-          <div
-            class="_price"
-            v-if="option.price && option.price > 0"
-          >
-            <span>+</span>
-
-            {{ option.price | currency("$", 0) }}
-          </div>
-        </div>
       </li>
     </ul>
 
@@ -74,7 +70,7 @@ export default defineComponent({
     },
     values: {
       type: Array as PropType<OptionValue[]>,
-      default: () => ([])
+      default: () => []
     },
     shape: {
       // TODO: move to the separate type
@@ -92,12 +88,13 @@ export default defineComponent({
     return {
       ...useListWidget(value, maxValuesCount, context),
       isRound
-    }
+    };
   }
-})
+});
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "~@storefront-ui/shared/styles/helpers/typography";
 
 // TODO: add variable
@@ -119,24 +116,33 @@ $color-selector-selected-border-color: #51a7f9;
     display: block;
     padding: var(--spacer-sm);
 
-    ._color{
+    ._color-wrapper {
+      position: relative;
+      left: -4px;
       border: 4px solid transparent;
       width: 100%;
       height: 0;
-      position: relative;
       padding-top: 100%;
+      overflow: hidden;
     }
 
     &.-selected {
-      ._color {
+      ._color-wrapper {
         border-color: $color-selector-selected-border-color;
       }
     }
 
     &.-round {
-      ._color {
+      ._color-wrapper {
         border-radius: 50%;
       }
+    }
+
+    ._color {
+      width: 100%;
+      padding-top: 100%;
+      top: 0;
+      position: absolute;
     }
   }
 
@@ -178,6 +184,7 @@ $color-selector-selected-border-color: #51a7f9;
   ._error-message {
     color: var(--input-error-message-color, var(--c-danger));
     height: calc(var(--font-xs) * 1.2);
+    margin-top: var(--spacer-xs);
 
     @include font(
       --input-error-message-font,

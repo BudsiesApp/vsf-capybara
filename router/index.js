@@ -36,6 +36,8 @@ const PasswordReset = () =>
   import(/* webpackChunkName: "vsf-password-reset" */ 'theme/pages/PasswordReset');
 const PortraitProduct = () =>
   import(/* webpackChunkName: "vsf-portrait-product" */ 'theme/pages/PortraitProduct.vue');
+const CustomizationSystemWidgetsTestPage = () =>
+  import(/* webpackChunkName: "vsf-widgets-test" */ 'theme/pages/CustomizationSystemWidgetsTest');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -501,6 +503,11 @@ let routes = [
       sku: 'customPhotoPortraits_bundle',
       existingPlushieId: route.query.existingPlushieId
     })
+  },
+  {
+    name: 'CustomizationSystemWidgetsTestPage',
+    path: '/widgets-test/',
+    component: CustomizationSystemWidgetsTestPage
   }
 ];
 

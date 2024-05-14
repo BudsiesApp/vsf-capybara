@@ -1,14 +1,12 @@
 <template>
   <div class="cards-list-widget">
-    <ul>
-      <li
-        v-for="optionValue in values"
-        :key="optionValue.id"
-      >
+    <ul class="_list">
+      <li class="_item" v-for="optionValue in values" :key="optionValue.id">
         <m-checkbox
           class="_checkbox"
           :disabled="isDisabled"
           :valid="isValid"
+          :value="optionValue.id"
           v-model="selectedValue"
         >
           <template #label>
@@ -18,13 +16,11 @@
               </div>
 
               <div class="_price" v-if="getOptionValuePrice(optionValue)">
-                <strong>
-                  +
-                </strong>
+                <strong> + </strong>
 
                 <SfPrice
-                  :regular="getOptionValuePrice(optionValue).regularPrice"
-                  :special="getOptionValuePrice(optionValue).specialPrice"
+                  :regular="formatPrice(getOptionValuePrice(optionValue).regular)"
+                  :special="formatPrice(getOptionValuePrice(optionValue).special)"
                 />
               </div>
 
@@ -32,7 +28,6 @@
                 <div class="_media">
                   <div
                     class="_image-container"
-                    :class="{'-wide-image': wideImage}"
                   >
                     <img
                       v-if="getItemImage(optionValue)"
@@ -76,6 +71,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { SfPrice } from '@storefront-ui/vue';
 
 import { OptionValue } from 'src/modules/customization-system';
 import { PriceHelper } from 'src/modules/shared';
@@ -85,7 +81,8 @@ import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
 export default defineComponent({
   name: 'CardsListWidget',
   components: {
-    MCheckbox
+    MCheckbox,
+    SfPrice
   },
   props: {
     error: {
@@ -106,15 +103,24 @@ export default defineComponent({
     }
   },
   setup (props, { emit, root }) {
-    function getOptionValuePrice (optionValue: OptionValue): PriceHelper.ProductPrice | undefined {
+    function getOptionValuePrice (
+      optionValue: OptionValue
+    ): PriceHelper.ProductPrice | undefined {
+      const defaultOptionValuePrice = optionValue.price
+        ? {
+          regular: optionValue.price,
+          special: null
+        }
+        : undefined
+
       if (!optionValue.sku) {
-        return;
+        return defaultOptionValuePrice;
       }
 
-      const product = root.$store.getters['product/getProductBySkuDictionary'];
+      const product = root.$store.getters['product/getProductBySkuDictionary'](optionValue.sku);
 
       if (!product) {
-        return;
+        return defaultOptionValuePrice;
       }
 
       return PriceHelper.getCartItemPrice(product, {}, false);
@@ -129,30 +135,128 @@ export default defineComponent({
     });
     const selectedValue = computed<string | string[] | undefined>({
       get: () => {
-        return props.value
+        return props.value;
       },
       set: (newValue) => {
-        emit('input', newValue)
+        emit('input', newValue);
       }
-    })
+    });
 
     return {
-      isValid,
+      formatPrice: PriceHelper.formatPrice,
       getOptionValuePrice,
       getItemImage,
+      isValid,
       selectedValue
-    }
+    };
   }
-})
+});
 </script>
 
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/typography";
 
 .cards-list-widget {
+  ._list {
+    padding: 0;
+    list-style: none;
+  }
+
+  ._item {
+    cursor: pointer;
+    margin: 0 calc(var(--spacer-sm) * -1);
+  }
+
+  ._checkbox {
+    padding: var(--spacer-sm);
+    transition: background-color 0.15s cubic-bezier(0.65, 0.05, 0.35, 1);
+
+    &.sf-checkbox--is-active {
+      background-color: var(--c-secondary);
+    }
+
+    ::v-deep .sf-checkbox__container {
+      align-items: flex-start;
+    }
+  }
+
+  ._wrapper {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    margin-left: var(--spacer-sm);
+    text-align: left;
+  }
+
+  ._content {
+    margin-top: var(--spacer-sm);
+  }
+
+  ._title {
+    font-weight: var(--font-semibold);
+    margin-top: calc(var(--checkbox-size, 1.5rem) / 10);
+  }
+
+  ._price {
+    color: var(--c-accent);
+    font-size: var(--font-base);
+    margin-top: 1em;
+
+    --price-regular-color: var(--c-accent);
+    --price-regular-font-weight: var(--font-bold);
+    --price-regular-font-size: var(--font-base);
+
+    --price-special-font-weight: var(--font-bold);
+    --price-special-font-size: var(--font-base);
+
+    --price-old-font-size: var(--font-base);
+
+    .sf-price {
+      display: inline-flex;
+    }
+  }
+
+  ._media {
+    float: right;
+    width: 40%;
+    padding: 0 0 var(--spacer-sm) var(--spacer-sm);
+
+    ._image-container {
+      position: relative;
+    }
+
+    ._image {
+      width: 100%;
+    }
+
+    ._image-hover {
+      display: none;
+      position: absolute;
+      width: 100%;
+      z-index: 2;
+      top: 0;
+      left: 0;
+    }
+
+    &:hover {
+      ._image-hover {
+        display: block;
+      }
+    }
+  }
+
+  ._description {
+    font-size: var(--font-sm);
+
+    > :first-child {
+      margin-top: 0;
+    }
+  }
+
   ._error-message {
     color: var(--input-error-message-color, var(--c-danger));
     height: calc(var(--font-xs) * 1.2);
+    margin-top: var(--spacer-xs);
 
     @include font(
       --input-error-message-font,

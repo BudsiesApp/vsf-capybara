@@ -1,9 +1,9 @@
 <template>
   <div class="customization-option">
     <label
-      for=""
       class="_option-label"
       :ref="validationRef"
+      v-if="showLabel"
     >
       {{ customizationLabel }}
     </label>
@@ -15,13 +15,16 @@
       :name="customization.name"
     >
       <component
+        class="_widget"
         :bundle-option-id="customization.bundleOptionId"
-        :is-disabled="isDisabled"
         :error="errors[0]"
+        :is-disabled="isDisabled"
         :is="widgetComponent"
+        :label="customizationLabel"
         :max-values-count="maxValuesCount"
         :product-id="productId"
         :values="optionValues"
+        :shape="customization.optionData && customization.optionData.widgetConfig && customization.optionData.widgetConfig.shape"
         v-model="selectedOption"
       />
     </validation-provider>
@@ -33,10 +36,11 @@ import { computed, defineComponent, PropType, toRefs } from '@vue/composition-ap
 import { extend, ValidationProvider } from 'vee-validate';
 import { required } from 'vee-validate/dist/rules';
 
-import { Customization, CustomizationStateItem, useCustomizationOptionValidation, useCustomizationOptionWidget } from 'src/modules/customization-system';
+import { Customization, CustomizationStateItem, useCustomizationOptionValidation, useCustomizationOptionWidget, WidgetType } from 'src/modules/customization-system';
 
 import CardsListWidget from './cards-list-widget.vue';
 import CheckboxWidget from './checkbox-widget.vue';
+import ColorsListWidget from './colors-list-widget.vue';
 import DropdownWidget from './dropdown-widget.vue';
 import ProductionTimeSelector from './production-time-selector.vue';
 import TextInputWidget from './text-input-widget.vue';
@@ -51,6 +55,7 @@ export default defineComponent({
   components: {
     CardsListWidget,
     CheckboxWidget,
+    ColorsListWidget,
     DropdownWidget,
     ProductionTimeSelector,
     TextInputWidget,
@@ -86,6 +91,9 @@ export default defineComponent({
     const maxValuesCount = computed<number | undefined>(() => {
       return customization.value.optionData?.maxValuesCount;
     });
+    const showLabel = computed<boolean>(() => {
+      return customization.value.optionData?.displayWidget !== WidgetType.CHECKBOX;
+    });
 
     return {
       ...useCustomizationOptionValidation(customization),
@@ -96,8 +104,23 @@ export default defineComponent({
         context
       ),
       customizationLabel,
-      maxValuesCount
-    }
+      maxValuesCount,
+      showLabel
+    };
   }
-})
+});
 </script>
+
+<style lang="scss" scoped>
+.customization-option {
+  ._option-label {
+    font-size: var(--customization-option-label-size, var(--font-base));
+    font-weight: var(--customization-option-label-weight, var(--font-bold));
+    text-align: var(--customization-option-label-align, left);
+  }
+
+  ._widget {
+    margin: var(--customization-option-widget-margin, var(--spacer-sm) 0 0 0);
+  }
+}
+</style>
