@@ -15,10 +15,12 @@
       :name="customization.name"
     >
       <component
+        :bundle-option-id="customization.bundleOptionId"
         :is-disabled="isDisabled"
         :error="errors[0]"
         :is="widgetComponent"
         :max-values-count="maxValuesCount"
+        :product-id="productId"
         :values="optionValues"
         v-model="selectedOption"
       />
@@ -36,6 +38,7 @@ import { Customization, CustomizationStateItem, useCustomizationOptionValidation
 import CardsListWidget from './cards-list-widget.vue';
 import CheckboxWidget from './checkbox-widget.vue';
 import DropdownWidget from './dropdown-widget.vue';
+import ProductionTimeSelector from './production-time-selector.vue';
 import TextInputWidget from './text-input-widget.vue';
 
 extend('required', {
@@ -49,6 +52,7 @@ export default defineComponent({
     CardsListWidget,
     CheckboxWidget,
     DropdownWidget,
+    ProductionTimeSelector,
     TextInputWidget,
     ValidationProvider
   },
@@ -60,6 +64,10 @@ export default defineComponent({
     isDisabled: {
       type: Boolean,
       default: false
+    },
+    productId: {
+      type: Number,
+      required: true
     },
     selectedOptionValuesIds: {
       type: Array as PropType<string[]>,
