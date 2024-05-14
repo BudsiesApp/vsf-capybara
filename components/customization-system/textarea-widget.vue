@@ -1,11 +1,16 @@
 <template>
-  <sf-input
-    class="text-input-widget"
-    :disabled="isDisabled"
-    :valid="isValid"
-    :error-message="error"
-    v-model="valueModel"
-  />
+  <div class="textarea-widget">
+    <textarea
+      class="_textarea"
+      :disabled="isDisabled"
+      rows="4"
+      v-model="valueModel"
+    />
+
+    <div class="_error-message">
+      {{ error }}
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -13,7 +18,7 @@ import { SfInput } from '@storefront-ui/vue';
 import { computed, defineComponent, PropType } from '@vue/composition-api';
 
 export default defineComponent({
-  name: 'TextInputWidget',
+  name: 'TextAreaWidget',
   components: {
     SfInput
   },
@@ -51,3 +56,31 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/typography";
+
+.textarea-widget {
+  ._textarea {
+    box-sizing: border-box;
+    border: 1px solid var(--c-light);
+    width: 100%;
+    padding: var(--spacer-sm);
+    font-family: var(--font-family-primary);
+    resize: vertical;
+  }
+
+  ._error-message {
+    color: var(--input-error-message-color, var(--c-danger));
+    height: calc(var(--font-xs) * 1.2);
+
+    @include font(
+      --input-error-message-font,
+      var(--font-medium),
+      var(--font-xs),
+      1.2,
+      var(--font-family-secondary)
+    );
+  }
+}
+</style>
