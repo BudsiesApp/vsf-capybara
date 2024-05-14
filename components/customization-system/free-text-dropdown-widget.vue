@@ -1,10 +1,15 @@
 <template>
-  <div class="textarea-widget">
-    <textarea
-      class="_textarea"
+  <div class="free-text-dropdown-widget">
+    <MMultiselect
+      v-model.trim="selectedOption"
+      :allow-free-text="true"
       :disabled="isDisabled"
-      rows="4"
-      v-model="valueModel"
+      :error-message="error"
+      id-field="id"
+      :hide-dropdown-arrow="true"
+      :options="values"
+      :required="false"
+      :valid="isValid"
     />
 
     <div class="_error-message">
@@ -14,13 +19,18 @@
 </template>
 
 <script lang="ts">
-import { SfInput } from '@storefront-ui/vue';
+import { SfSelect } from '@storefront-ui/vue';
 import { computed, defineComponent, PropType } from '@vue/composition-api';
 
+import { OptionValue } from 'src/modules/customization-system';
+
+import MMultiselectVue from '../molecules/m-multiselect.vue';
+
 export default defineComponent({
-  name: 'TextareaWidget',
+  name: 'DropdownWidget',
   components: {
-    SfInput
+    MMultiselectVue,
+    SfSelect
   },
   props: {
     error: {
@@ -32,26 +42,30 @@ export default defineComponent({
       default: false
     },
     value: {
-      type: [String, Array] as PropType<string | undefined>,
+      type: String as PropType<string | undefined>,
       default: undefined
+    },
+    values: {
+      type: Array as PropType<OptionValue[]>,
+      default: () => []
     }
   },
   setup (props, { emit }) {
-    const valueModel = computed<string | undefined>({
+    const selectedOption = computed<string | undefined>({
       get: () => {
-        return props.value
+        return props.value;
       },
-      set: (newValue: string | undefined) => {
-        emit('input', newValue)
+      set: (newValue) => {
+        emit('input', newValue);
       }
     });
     const isValid = computed<boolean>(() => {
-      return !props.error;
-    })
+      return !props.error
+    });
 
     return {
       isValid,
-      valueModel
+      selectedOption
     }
   }
 })
@@ -60,16 +74,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/typography";
 
-.textarea-widget {
-  ._textarea {
-    box-sizing: border-box;
-    border: 1px solid var(--c-light);
-    width: 100%;
-    padding: var(--spacer-sm);
-    font-family: var(--font-family-primary);
-    resize: vertical;
-  }
-
+.free-text-dropdown-widget {
   ._error-message {
     color: var(--input-error-message-color, var(--c-danger));
     height: calc(var(--font-xs) * 1.2);
