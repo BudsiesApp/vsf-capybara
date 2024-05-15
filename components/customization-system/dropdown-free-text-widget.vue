@@ -1,20 +1,17 @@
 <template>
-  <div class="free-text-dropdown-widget">
+  <div class="dropdown-free-text-widget">
     <MMultiselect
       v-model.trim="selectedOption"
       :allow-free-text="true"
       :disabled="isDisabled"
       :error-message="error"
       id-field="id"
+      label-field="name"
       :hide-dropdown-arrow="true"
       :options="values"
       :required="false"
       :valid="isValid"
     />
-
-    <div class="_error-message">
-      {{ error }}
-    </div>
   </div>
 </template>
 
@@ -24,12 +21,12 @@ import { computed, defineComponent, PropType } from '@vue/composition-api';
 
 import { OptionValue } from 'src/modules/customization-system';
 
-import MMultiselectVue from '../molecules/m-multiselect.vue';
+import MMultiselect from '../molecules/m-multiselect.vue';
 
 export default defineComponent({
-  name: 'DropdownWidget',
+  name: 'DropdownFreeTextWidget',
   components: {
-    MMultiselectVue,
+    MMultiselect,
     SfSelect
   },
   props: {
@@ -74,19 +71,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/typography";
 
-.free-text-dropdown-widget {
-  ._error-message {
-    color: var(--input-error-message-color, var(--c-danger));
-    height: calc(var(--font-xs) * 1.2);
-    margin-top: var(--spacer-xs);
-
-    @include font(
-      --input-error-message-font,
-      var(--font-medium),
-      var(--font-xs),
-      1.2,
-      var(--font-family-secondary)
-    );
-  }
+.dropdown-free-text-widget {
 }
 </style>

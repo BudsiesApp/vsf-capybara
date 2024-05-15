@@ -196,6 +196,218 @@ export default defineComponent({
               name: 'Third Item',
               description: `Third Item description`,
               color: 'green',
+              price: 15,
+              sn: 2,
+              galleryImages: [],
+              isEnabled: true,
+              isDefault: false
+            }
+          ]
+        }
+      },
+      {
+        id: 'drop_down_widget',
+        name: 'Dropdown Widget',
+        type: CustomizationType.OPTION,
+        sn: 0,
+        isEnabled: true,
+        availabilityRules: {
+          forActivatedOptionValueIds: []
+        },
+        optionData: {
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam dictum urna id erat molestie vehicula. Etiam sodales est non dui porttitor, fringilla faucibus libero volutpat. Praesent et nulla a enim.',
+          maxValuesCount: 0,
+          hasGalleryImages: false,
+          isRequired: true,
+          type: OptionType.GENERIC,
+          displayWidget: WidgetType.DROPDOWN,
+          values: [
+            {
+              id: 'item_1',
+              name: 'First Dropdown Item',
+              description: `First Item description`,
+              sn: 0,
+              galleryImages: [],
+              isEnabled: true,
+              isDefault: false
+            },
+            {
+              id: 'item_2',
+              name: 'Second Dropdown Item',
+              description: `Second Item description`,
+              sn: 1,
+              galleryImages: [],
+              isEnabled: true,
+              isDefault: false
+            },
+            {
+              id: 'item_3',
+              name: 'Third Dropdown Item',
+              description: `Third Item description`,
+              sn: 2,
+              galleryImages: [],
+              isEnabled: true,
+              isDefault: false
+            }
+          ]
+        }
+      },
+      {
+        id: 'free_text_dropdown_widget',
+        name: 'Free Text Dropdown Widget',
+        type: CustomizationType.OPTION,
+        sn: 0,
+        isEnabled: true,
+        availabilityRules: {
+          forActivatedOptionValueIds: []
+        },
+        optionData: {
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam dictum urna id erat molestie vehicula. Etiam sodales est non dui porttitor, fringilla faucibus libero volutpat. Praesent et nulla a enim.',
+          maxValuesCount: 0,
+          hasGalleryImages: false,
+          isRequired: true,
+          type: OptionType.GENERIC,
+          displayWidget: WidgetType.DROPDOWN_FREE_TEXT,
+          values: [
+            {
+              id: 'item_1',
+              name: 'First Dropdown Item',
+              description: `First Item description`,
+              sn: 0,
+              galleryImages: [],
+              isEnabled: true,
+              isDefault: false
+            },
+            {
+              id: 'item_2',
+              name: 'Second Dropdown Item',
+              description: `Second Item description`,
+              sn: 1,
+              galleryImages: [],
+              isEnabled: true,
+              isDefault: false
+            },
+            {
+              id: 'item_3',
+              name: 'Third Dropdown Item',
+              description: `Third Item description`,
+              sn: 2,
+              galleryImages: [],
+              isEnabled: true,
+              isDefault: false
+            }
+          ]
+        }
+      },
+      {
+        id: 'image_upload_widget',
+        name: 'Image Upload Widget',
+        type: CustomizationType.OPTION,
+        sn: 0,
+        isEnabled: true,
+        availabilityRules: {
+          forActivatedOptionValueIds: []
+        },
+        optionData: {
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam dictum urna id erat molestie vehicula. Etiam sodales est non dui porttitor, fringilla faucibus libero volutpat. Praesent et nulla a enim.',
+          maxValuesCount: 0,
+          hasGalleryImages: false,
+          isRequired: true,
+          type: OptionType.GENERIC,
+          displayWidget: WidgetType.IMAGE_UPLOAD,
+          values: []
+        }
+      },
+      {
+        id: 'text_input_widget',
+        name: 'Text Input Widget',
+        type: CustomizationType.OPTION,
+        sn: 0,
+        isEnabled: true,
+        availabilityRules: {
+          forActivatedOptionValueIds: []
+        },
+        optionData: {
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam dictum urna id erat molestie vehicula. Etiam sodales est non dui porttitor, fringilla faucibus libero volutpat. Praesent et nulla a enim.',
+          maxValuesCount: 0,
+          hasGalleryImages: false,
+          isRequired: true,
+          type: OptionType.GENERIC,
+          displayWidget: WidgetType.TEXT_INPUT,
+          values: []
+        }
+      },
+      {
+        id: 'text_area_widget',
+        name: 'Text Area Widget',
+        type: CustomizationType.OPTION,
+        sn: 0,
+        isEnabled: true,
+        availabilityRules: {
+          forActivatedOptionValueIds: []
+        },
+        optionData: {
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam dictum urna id erat molestie vehicula. Etiam sodales est non dui porttitor, fringilla faucibus libero volutpat. Praesent et nulla a enim.',
+          maxValuesCount: 0,
+          hasGalleryImages: false,
+          isRequired: true,
+          type: OptionType.GENERIC,
+          displayWidget: WidgetType.TEXT_AREA,
+          values: []
+        }
+      },
+      {
+        id: 'thumbnails_list_widget',
+        name: 'Thumbnails List Widget',
+        type: CustomizationType.OPTION,
+        sn: 0,
+        isEnabled: true,
+        availabilityRules: {
+          forActivatedOptionValueIds: []
+        },
+        optionData: {
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam dictum urna id erat molestie vehicula. Etiam sodales est non dui porttitor, fringilla faucibus libero volutpat. Praesent et nulla a enim.',
+          maxValuesCount: 0,
+          hasGalleryImages: false,
+          isRequired: true,
+          type: OptionType.GENERIC,
+          displayWidget: WidgetType.THUMBNAILS_LIST,
+          widgetConfig: {
+            shape: 'square'
+          },
+          values: [
+            {
+              id: 'item_1',
+              name: 'First Item',
+              description: `First Item description`,
+              sn: 0,
+              previewUrl: 'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/b/d/e/6f2ea7eb65d706ae2300385142ec8.jpg',
+              galleryImages: [],
+              isEnabled: true,
+              isDefault: false
+            },
+            {
+              id: 'item_2',
+              name: 'Second Item',
+              description: `Second Item description`,
+              previewUrl: 'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/a/9/2/befa695317fa7476b0ae045ffca37.jpg',
+              sn: 1,
+              galleryImages: [],
+              isEnabled: true,
+              isDefault: false
+            },
+            {
+              id: 'item_3',
+              name: 'Third Item',
+              description: `Third Item description`,
+              previewUrl: 'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/2/9/3/b1686c1f54c9da02af0b5af739b4d.jpg',
+              price: 15,
               sn: 2,
               galleryImages: [],
               isEnabled: true,

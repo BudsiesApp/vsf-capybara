@@ -7,6 +7,8 @@
       :allow-multiple="allowMultiple"
       :initial-items="initialItems"
       :max-files="maxFiles"
+      @file-added="onFileAdded"
+      @file-removed="onFileRemoved"
     />
 
     <div class="_error-message">
@@ -19,9 +21,8 @@
 import config from 'config';
 import { computed, defineComponent, inject, PropType, toRefs } from '@vue/composition-api'
 
-import Product from '@vue-storefront/core/modules/catalog/types/Product'
 import { OptionValue } from 'src/modules/customization-system'
-import { ImageHandlerService } from 'src/modules/file-storage';
+import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage } from 'src/modules/shared';
 import { useBackendProductId } from 'theme/helpers/use-backend-product-id'
 
@@ -70,8 +71,8 @@ export default defineComponent({
       type: Number as PropType<number | undefined>,
       default: undefined
     },
-    product: {
-      type: Object as PropType<Product>,
+    productId: {
+      type: Number,
       required: true
     },
     value: {
@@ -83,8 +84,8 @@ export default defineComponent({
       default: () => ([])
     }
   },
-  setup (props) {
-    const { maxValuesCount, product } = toRefs(props);
+  setup (props, { emit }) {
+    const { maxValuesCount, productId, value } = toRefs(props);
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
 
     if (!imageHandlerService) {
@@ -96,15 +97,46 @@ export default defineComponent({
       return !maxValuesCount.value || maxValuesCount.value > 1;
     });
     const maxFiles = computed<number | null>(() => {
-      return maxValuesCount.value === undefined ? null : maxValuesCount.value;
+      return maxValuesCount.value || null;
     });
 
+    function onFileAdded (item: Item): void {
+      if (!allowMultiple.value) {
+        emit('input', item.id);
+        return;
+      }
+
+      if (!value.value) {
+        return emit('input', [item.id]);
+      }
+
+      if (!Array.isArray(value.value)) {
+        return emit('input', [value.value, item.id]);
+      }
+
+      emit('input', [...value.value, item.id]);
+    }
+
+    function onFileRemoved (storageItemId: string) {
+      if (!allowMultiple.value) {
+        return emit('input', undefined);
+      }
+
+      if (!Array.isArray(value.value)) {
+        return emit('input', []);
+      }
+
+      emit('input', value.value.filter((item) => item !== storageItemId));
+    }
+
     return {
-      ...useBackendProductId(product),
+      ...useBackendProductId(productId),
       allowMultiple,
       artworkUploadUrl: config.images.fileuploaderUploadUrl as string,
       initialItems,
-      maxFiles
+      maxFiles,
+      onFileAdded,
+      onFileRemoved
     }
   }
 })

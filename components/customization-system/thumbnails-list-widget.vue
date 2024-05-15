@@ -10,19 +10,9 @@
         class="_option"
         :class="{
           '-round': isRound,
-          '-is-selected': isSelected(option)
+          '-selected': isSelected(option)
         }"
       >
-        <label class="_option-label">
-          <input
-            class="_input"
-            :disabled="isDisabled"
-            :type="inputType"
-            :value="option.id"
-            v-model="selectedOption"
-          >
-        </label>
-
         <div class="_image-wrapper">
           <BaseImage
             class="_image"
@@ -38,9 +28,20 @@
 
           <div class="_price" v-if="option.price && option.price > 0">
             <span>+</span>
+
             {{ option.price | currency("$", 0) }}
           </div>
         </div>
+
+        <label class="_option-label">
+          <input
+            class="_input"
+            :disabled="isDisabled"
+            :type="inputType"
+            :value="option.id"
+            v-model="selectedOption"
+          >
+        </label>
       </li>
     </ul>
 
@@ -104,18 +105,24 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "~@storefront-ui/shared/styles/helpers/typography";
+
+$max-item-width: 145px;
 
 .thumbnails-list-widget {
   ._options-list {
     display: grid;
-    justify-content: space-around;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax($max-item-width, 1fr));
     padding: 0;
   }
 
+  ._image-wrapper {
+    position: relative;
+    display: flex;
+  }
+
   ._option {
-    cursor: pointer;
     position: relative;
     flex-shrink: 0;
     flex-grow: 0;
@@ -167,10 +174,12 @@ export default defineComponent({
 
   ._option-label {
     position: absolute;
+    cursor: pointer;
     width: 100%;
     height: 100%;
     top: 0;
     left: 0;
+    z-index: 2;
   }
 
   ._name,
@@ -209,14 +218,13 @@ export default defineComponent({
 
   @media (min-width: $tablet-min) {
     ._options-list {
-      justify-content: flex-start;
       padding: 0;
     }
   }
 
   @include for-desktop {
     ._options-list {
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax($max-item-width, 1fr));
     }
   }
 }

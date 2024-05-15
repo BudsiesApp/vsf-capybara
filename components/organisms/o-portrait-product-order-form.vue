@@ -655,6 +655,15 @@ export default defineComponent({
   },
   setup (props, setupContext) {
     const { product, existingCartItem } = toRefs(props);
+
+    const productId = computed<string | number>(() => {
+      if (!product.value.id) {
+        throw new Error('Product id is missing');
+      }
+
+      return product.value.id;
+    });
+
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
 
     const isSubmitting = ref<boolean>(false);
@@ -683,7 +692,7 @@ export default defineComponent({
 
     const {
       backendProductId
-    } = useBackendProductId(product);
+    } = useBackendProductId(productId);
 
     const extraFacesAddonsFields = useExtraFacesAddons(
       product,

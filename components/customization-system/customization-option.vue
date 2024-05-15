@@ -33,8 +33,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType, toRefs } from '@vue/composition-api';
-import { extend, ValidationProvider } from 'vee-validate';
-import { required } from 'vee-validate/dist/rules';
+import { ValidationProvider } from 'vee-validate';
 
 import { Customization, CustomizationStateItem, useCustomizationOptionValidation, useCustomizationOptionWidget, WidgetType } from 'src/modules/customization-system';
 
@@ -42,13 +41,12 @@ import CardsListWidget from './cards-list-widget.vue';
 import CheckboxWidget from './checkbox-widget.vue';
 import ColorsListWidget from './colors-list-widget.vue';
 import DropdownWidget from './dropdown-widget.vue';
+import DropdownFreeTextWidget from './dropdown-free-text-widget.vue';
+import ImageUploadWidget from './image-upload-widget.vue';
 import ProductionTimeSelector from './production-time-selector.vue';
+import TextAreaWidget from './textarea-widget.vue';
 import TextInputWidget from './text-input-widget.vue';
-
-extend('required', {
-  ...required,
-  message: 'The {_field_} field is required'
-});
+import ThumbnailsListWidget from './thumbnails-list-widget.vue';
 
 export default defineComponent({
   name: 'CustomizationOption',
@@ -57,8 +55,12 @@ export default defineComponent({
     CheckboxWidget,
     ColorsListWidget,
     DropdownWidget,
+    DropdownFreeTextWidget,
+    ImageUploadWidget,
     ProductionTimeSelector,
+    TextAreaWidget,
     TextInputWidget,
+    ThumbnailsListWidget,
     ValidationProvider
   },
   props: {

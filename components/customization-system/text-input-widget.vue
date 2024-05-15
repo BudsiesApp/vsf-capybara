@@ -4,7 +4,7 @@
     :disabled="isDisabled"
     :valid="isValid"
     :error-message="error"
-    v-model="valueModel"
+    v-model.trim="valueModel"
   />
 </template>
 

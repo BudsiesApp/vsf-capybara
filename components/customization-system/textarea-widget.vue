@@ -4,7 +4,7 @@
       class="_textarea"
       :disabled="isDisabled"
       rows="4"
-      v-model="valueModel"
+      v-model.trim="valueModel"
     />
 
     <div class="_error-message">
@@ -68,6 +68,11 @@ export default defineComponent({
     padding: var(--spacer-sm);
     font-family: var(--font-family-primary);
     resize: vertical;
+    outline: none;
+
+    &:focus {
+      border-color: var(--c-primary);
+    }
   }
 
   ._error-message {
