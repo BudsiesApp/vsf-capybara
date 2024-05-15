@@ -19,10 +19,10 @@
 
 <script lang="ts">
 import { SfSelect } from '@storefront-ui/vue';
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { computed, defineComponent, PropType, toRefs } from '@vue/composition-api';
 import { mapMobileObserver, unMapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
-import { OptionValue } from 'src/modules/customization-system';
+import { OptionValue, useDefaultValue } from 'src/modules/customization-system';
 
 import { getProductionTimeOptionsFromCustomization } from '../../helpers/get-production-time-options-from-customization.function';
 import ProductionTimeOption from '../interfaces/production-time-option.interface';
@@ -59,6 +59,7 @@ export default defineComponent({
     }
   },
   setup (props, { emit, root }) {
+    const { values } = toRefs(props);
     const selectedOption = computed<string | undefined>({
       get: () => {
         return props.value;
@@ -78,6 +79,8 @@ export default defineComponent({
         root.$store
       );
     });
+
+    useDefaultValue(selectedOption, values);
 
     return {
       isValid,

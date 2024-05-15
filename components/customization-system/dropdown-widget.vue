@@ -8,7 +8,7 @@
     v-model="selectedOption"
   >
     <sf-select-option
-      v-for="optionValue in values"
+      v-for="optionValue in sortedValues"
       :key="optionValue.id"
       :value="optionValue.id"
     >
@@ -19,11 +19,11 @@
 
 <script lang="ts">
 import { SfSelect } from '@storefront-ui/vue';
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { computed, defineComponent, PropType, toRefs } from '@vue/composition-api';
 
 import { mapMobileObserver, unMapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
-import { OptionValue } from 'src/modules/customization-system';
+import { OptionValue, useDefaultValue, useValuesSort } from 'src/modules/customization-system';
 
 export default defineComponent({
   name: 'DropdownWidget',
@@ -49,6 +49,7 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
+    const { values } = toRefs(props);
     const selectedOption = computed<string | undefined>({
       get: () => {
         return props.value;
@@ -61,9 +62,12 @@ export default defineComponent({
       return !props.error
     });
 
+    useDefaultValue(selectedOption, values);
+
     return {
       isValid,
-      selectedOption
+      selectedOption,
+      ...useValuesSort(values)
     }
   },
   computed: {

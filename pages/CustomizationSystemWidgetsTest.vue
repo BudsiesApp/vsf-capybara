@@ -422,7 +422,7 @@ export default defineComponent({
               sn: 2,
               galleryImages: [],
               isEnabled: true,
-              isDefault: false
+              isDefault: true
             },
             {
               id: 'item_4',

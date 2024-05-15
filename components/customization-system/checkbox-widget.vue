@@ -15,9 +15,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { computed, defineComponent, PropType, toRef } from '@vue/composition-api';
 
-import { OptionValue } from 'src/modules/customization-system'
+import { OptionValue, useDefaultValue } from 'src/modules/customization-system'
 
 import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
 

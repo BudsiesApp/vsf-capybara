@@ -2,7 +2,7 @@
   <div class="base-list-widget" :class="{ '-disabled': isDisabled }">
     <ul class="_options-list" :class="{ '-flex': isFlexLayout }">
       <li
-        v-for="option in values"
+        v-for="option in sortedValues"
         :key="option.id"
         class="_option"
         :class="{
@@ -56,7 +56,7 @@ import {
 } from '@vue/composition-api';
 
 import { BaseImage } from 'src/modules/budsies';
-import { OptionValue, useListWidget } from 'src/modules/customization-system';
+import { OptionValue, useDefaultValue, useListWidget, useValuesSort } from 'src/modules/customization-system';
 
 export default defineComponent({
   name: 'BaseListWidget',
@@ -96,7 +96,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const { layout, maxValuesCount, shape, value } = toRefs(props);
+    const { layout, maxValuesCount, shape, value, values } = toRefs(props);
 
     const isRound = computed<boolean>(() => {
       return shape.value === 'round';
@@ -105,10 +105,15 @@ export default defineComponent({
       return layout.value === 'flex';
     });
 
+    const listWidgetFields = useListWidget(value, maxValuesCount, context);
+
+    useDefaultValue(listWidgetFields.selectedOption, values);
+
     return {
       isFlexLayout,
       isRound,
-      ...useListWidget(value, maxValuesCount, context)
+      ...listWidgetFields,
+      ...useValuesSort(values)
     };
   }
 });

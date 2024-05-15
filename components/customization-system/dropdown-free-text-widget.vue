@@ -8,7 +8,7 @@
       id-field="id"
       label-field="name"
       :hide-dropdown-arrow="true"
-      :options="values"
+      :options="sortedValues"
       :required="false"
       :valid="isValid"
     />
@@ -17,9 +17,9 @@
 
 <script lang="ts">
 import { SfSelect } from '@storefront-ui/vue';
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { computed, defineComponent, PropType, toRef, toRefs } from '@vue/composition-api';
 
-import { OptionValue } from 'src/modules/customization-system';
+import { OptionValue, useDefaultValue, useValuesSort } from 'src/modules/customization-system';
 
 import MMultiselect from '../molecules/m-multiselect.vue';
 
@@ -48,6 +48,7 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
+    const { values } = toRefs(props);
     const selectedOption = computed<string | undefined>({
       get: () => {
         return props.value;
@@ -60,17 +61,13 @@ export default defineComponent({
       return !props.error
     });
 
+    useDefaultValue(selectedOption, values);
+
     return {
       isValid,
-      selectedOption
+      selectedOption,
+      ...useValuesSort(values)
     }
   }
 })
 </script>
-
-<style lang="scss" scoped>
-@import "~@storefront-ui/shared/styles/helpers/typography";
-
-.dropdown-free-text-widget {
-}
-</style>
