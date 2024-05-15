@@ -28,12 +28,21 @@
           </label>
         </li>
 
-        <label v-if="customization.optionData.widgetConfig">
+        <label v-if="customization.optionData.widgetConfig && customization.optionData.widgetConfig.shape">
           Shape:
 
           <select v-model="customization.optionData.widgetConfig.shape">
             <option value="round">Round</option>
             <option value="square">Square</option>
+          </select>
+        </label>
+
+        <label v-if="customization.optionData.widgetConfig && customization.optionData.widgetConfig.layout">
+          Layout:
+
+          <select v-model="customization.optionData.widgetConfig.layout">
+            <option value="grid">Grid</option>
+            <option value="flex">Flex</option>
           </select>
         </label>
 
@@ -168,7 +177,8 @@ export default defineComponent({
           type: OptionType.GENERIC,
           displayWidget: WidgetType.COLORS_LIST,
           widgetConfig: {
-            shape: 'square'
+            shape: 'square',
+            layout: 'grid'
           },
           values: [
             {
@@ -379,7 +389,8 @@ export default defineComponent({
           type: OptionType.GENERIC,
           displayWidget: WidgetType.THUMBNAILS_LIST,
           widgetConfig: {
-            shape: 'square'
+            shape: 'square',
+            layout: 'grid'
           },
           values: [
             {
@@ -409,6 +420,17 @@ export default defineComponent({
               previewUrl: 'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/2/9/3/b1686c1f54c9da02af0b5af739b4d.jpg',
               price: 15,
               sn: 2,
+              galleryImages: [],
+              isEnabled: true,
+              isDefault: false
+            },
+            {
+              id: 'item_4',
+              name: 'Fourth Item',
+              description: `Fourth Item description`,
+              previewUrl: 'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/e/0/5/c1e80b85d4f76e116a17c7b22b124.png',
+              price: 15,
+              sn: 3,
               galleryImages: [],
               isEnabled: true,
               isDefault: false

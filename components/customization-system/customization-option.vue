@@ -25,6 +25,7 @@
         :product-id="productId"
         :values="optionValues"
         :shape="customization.optionData && customization.optionData.widgetConfig && customization.optionData.widgetConfig.shape"
+        :layout="customization.optionData && customization.optionData.widgetConfig && customization.optionData.widgetConfig.layout"
         v-model="selectedOption"
       />
     </validation-provider>
