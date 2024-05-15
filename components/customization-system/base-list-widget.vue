@@ -123,17 +123,18 @@ export default defineComponent({
     display: grid;
     grid-template-columns: repeat(
       auto-fill,
-      minmax(var(--base-list-widget-item-max-width), 1fr)
+      minmax(var(--base-list-widget-item-absolute-width), 1fr)
     );
     padding: 0;
 
     &.-flex {
       display: flex;
       justify-content: center;
+      flex-wrap: wrap;
 
       ._option {
-        width: var(--base-list-widget-item-width);
-        max-width: var(--base-list-widget-item-max-width);
+        width: var(--base-list-widget-item-relative-width);
+        max-width: var(--base-list-widget-item-absolute-width);
       }
     }
   }
@@ -152,7 +153,7 @@ export default defineComponent({
     box-sizing: border-box;
 
     &.-selected {
-      background: var(--c-primary);
+      background: var(--base-list-widget-selected-option-background, var(--c-primary));
 
       &.-round {
         background: transparent;
@@ -225,12 +226,12 @@ export default defineComponent({
     ._options-list {
       grid-template-columns: repeat(
         auto-fill,
-        minmax(var(--base-list-widget-item-max-width), 1fr)
+        minmax(var(--base-list-widget-item-absolute-width), 1fr)
       );
 
       &.-flex {
         ._option {
-          width: var(--base-list-widget-item-max-width);
+          width: var(--base-list-widget-item-absolute-width);
         }
       }
     }

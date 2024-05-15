@@ -93,8 +93,8 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/typography";
 
 .thumbnails-list-widget {
-  --base-list-widget-item-max-width: 145px;
-  --base-list-widget-item-width: 33.33%;
+  --base-list-widget-item-absolute-width: 145px;
+  --base-list-widget-item-relative-width: 33.33%;
 
   ._image-wrapper {
     position: relative;
