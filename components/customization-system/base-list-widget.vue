@@ -60,7 +60,15 @@ import {
 import { SfPrice } from '@storefront-ui/vue';
 
 import { BaseImage } from 'src/modules/budsies';
-import { OptionValue, useDefaultValue, useListWidget, useOptionValuesPrice, useValuesSort, WidgetConfigLayout, WidgetConfigShape } from 'src/modules/customization-system';
+import {
+  OptionValue,
+  useDefaultValue,
+  useListWidget,
+  useOptionValuesPrice,
+  useValuesSort,
+  WidgetConfigLayout,
+  WidgetConfigShape
+} from 'src/modules/customization-system';
 
 export default defineComponent({
   name: 'BaseListWidget',
@@ -162,7 +170,10 @@ export default defineComponent({
     box-sizing: border-box;
 
     &.-selected {
-      background: var(--base-list-widget-selected-option-background, var(--c-primary));
+      background: var(
+        --base-list-widget-selected-option-background,
+        var(--c-primary)
+      );
 
       &.-round {
         background: transparent;

@@ -19,11 +19,23 @@
 
 <script lang="ts">
 import { SfSelect } from '@storefront-ui/vue';
-import { computed, defineComponent, PropType, toRefs } from '@vue/composition-api';
+import {
+  computed,
+  defineComponent,
+  PropType,
+  toRefs
+} from '@vue/composition-api';
 
-import { mapMobileObserver, unMapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
+import {
+  mapMobileObserver,
+  unMapMobileObserver
+} from '@storefront-ui/vue/src/utilities/mobile-observer';
 
-import { OptionValue, useDefaultValue, useValuesSort } from 'src/modules/customization-system';
+import {
+  OptionValue,
+  useDefaultValue,
+  useValuesSort
+} from 'src/modules/customization-system';
 
 export default defineComponent({
   name: 'DropdownWidget',
@@ -63,7 +75,7 @@ export default defineComponent({
       }
     });
     const isValid = computed<boolean>(() => {
-      return !props.error
+      return !props.error;
     });
 
     useDefaultValue(selectedOption, values);
@@ -84,14 +96,14 @@ export default defineComponent({
           galleryImages: []
         },
         ...sortedValues.value
-      ]
-    })
+      ];
+    });
 
     return {
       isValid,
       selectedOption,
       sortedValuesWithPlaceholder
-    }
+    };
   },
   computed: {
     ...mapMobileObserver()
@@ -99,7 +111,7 @@ export default defineComponent({
   beforeDestroy (): void {
     unMapMobileObserver();
   }
-})
+});
 </script>
 
 <style lang="scss" scoped>

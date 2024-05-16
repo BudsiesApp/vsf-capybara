@@ -16,14 +16,14 @@
 </template>
 
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-  PropType
-} from '@vue/composition-api';
+import { computed, defineComponent, PropType } from '@vue/composition-api';
 
 import { BaseImage } from 'src/modules/budsies';
-import { OptionValue, WidgetConfigLayout, WidgetConfigShape } from 'src/modules/customization-system';
+import {
+  OptionValue,
+  WidgetConfigLayout,
+  WidgetConfigShape
+} from 'src/modules/customization-system';
 
 import BaseListWidget from './base-list-widget.vue';
 

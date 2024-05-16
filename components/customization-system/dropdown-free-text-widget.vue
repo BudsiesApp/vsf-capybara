@@ -18,9 +18,18 @@
 
 <script lang="ts">
 import { SfSelect } from '@storefront-ui/vue';
-import { computed, defineComponent, PropType, toRef, toRefs } from '@vue/composition-api';
+import {
+  computed,
+  defineComponent,
+  PropType,
+  toRefs
+} from '@vue/composition-api';
 
-import { OptionValue, useDefaultValue, useValuesSort } from 'src/modules/customization-system';
+import {
+  OptionValue,
+  useDefaultValue,
+  useValuesSort
+} from 'src/modules/customization-system';
 
 import MMultiselect from '../molecules/m-multiselect.vue';
 
@@ -63,7 +72,7 @@ export default defineComponent({
       }
     });
     const isValid = computed<boolean>(() => {
-      return !props.error
+      return !props.error;
     });
 
     useDefaultValue(selectedOption, values);
@@ -72,9 +81,9 @@ export default defineComponent({
       isValid,
       selectedOption,
       ...useValuesSort(values)
-    }
+    };
   }
-})
+});
 </script>
 
 <style lang="scss" scoped>

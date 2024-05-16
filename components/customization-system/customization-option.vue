@@ -30,19 +30,27 @@
       />
     </validation-provider>
 
-    <div
-      class="_option-hint"
-      v-if="optionHint"
-      v-html="optionHint"
-    />
+    <div class="_option-hint" v-if="optionHint" v-html="optionHint" />
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, toRefs } from '@vue/composition-api';
+import {
+  computed,
+  defineComponent,
+  PropType,
+  toRefs
+} from '@vue/composition-api';
 import { ValidationProvider } from 'vee-validate';
 
-import { Customization, CustomizationStateItem, OptionValue, useCustomizationOptionValidation, useCustomizationOptionWidget, WidgetType } from 'src/modules/customization-system';
+import {
+  Customization,
+  CustomizationStateItem,
+  OptionValue,
+  useCustomizationOptionValidation,
+  useCustomizationOptionWidget,
+  WidgetType
+} from 'src/modules/customization-system';
 
 import CardsListWidget from './cards-list-widget.vue';
 import CheckboxWidget from './checkbox-widget.vue';
@@ -81,7 +89,7 @@ export default defineComponent({
     },
     optionValues: {
       type: Array as PropType<OptionValue[]>,
-      default: () => ([])
+      default: () => []
     },
     productId: {
       type: Number,
@@ -105,7 +113,9 @@ export default defineComponent({
       return customization.value.optionData?.hint;
     });
     const showLabel = computed<boolean>(() => {
-      return customization.value.optionData?.displayWidget !== WidgetType.CHECKBOX;
+      return (
+        customization.value.optionData?.displayWidget !== WidgetType.CHECKBOX
+      );
     });
 
     return {
@@ -137,7 +147,10 @@ export default defineComponent({
   ._option-description {
     font-size: var(--customization-option-description-size, var(--font-sm));
     text-align: var(--customization-option-description-align, left);
-    margin: var(--customization-option-description-margin, var(--spacer-xs) 0 0);
+    margin: var(
+      --customization-option-description-margin,
+      var(--spacer-xs) 0 0
+    );
   }
 
   ._option-hint {

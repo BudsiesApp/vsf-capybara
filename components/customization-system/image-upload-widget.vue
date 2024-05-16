@@ -50,11 +50,11 @@
 
 <script lang="ts">
 import config from 'config';
-import { defineComponent, PropType, ref, toRefs } from '@vue/composition-api'
+import { defineComponent, PropType, ref, toRefs } from '@vue/composition-api';
 
-import { useBackendProductId } from 'theme/helpers/use-backend-product-id'
+import { useBackendProductId } from 'theme/helpers/use-backend-product-id';
 
-import MArtworkUpload from '../molecules/m-artwork-upload.vue'
+import MArtworkUpload from '../molecules/m-artwork-upload.vue';
 import { useFilesUpload } from 'src/modules/customization-system';
 
 export default defineComponent({
@@ -97,9 +97,9 @@ export default defineComponent({
       ...useFilesUpload(value, maxValuesCount, context),
       artworkUploadUrl: config.images.fileuploaderUploadUrl as string,
       isUploadNow
-    }
+    };
   }
-})
+});
 </script>
 
 <style lang="scss" scoped>

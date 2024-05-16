@@ -39,20 +39,20 @@ export default defineComponent({
   setup (props, { emit }) {
     const valueModel = computed<string | undefined>({
       get: () => {
-        return props.value
+        return props.value;
       },
       set: (newValue: string | undefined) => {
-        emit('input', newValue)
+        emit('input', newValue);
       }
     });
     const isValid = computed<boolean>(() => {
       return !props.error;
-    })
+    });
 
     return {
       isValid,
       valueModel
-    }
+    };
   }
-})
+});
 </script>

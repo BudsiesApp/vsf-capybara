@@ -15,9 +15,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, toRef } from '@vue/composition-api';
+import { computed, defineComponent, PropType } from '@vue/composition-api';
 
-import { OptionValue, useDefaultValue } from 'src/modules/customization-system'
+import { OptionValue } from 'src/modules/customization-system';
 
 import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
 
@@ -51,7 +51,7 @@ export default defineComponent({
   setup (props, { emit }) {
     const isSelected = computed<boolean>({
       get: () => {
-        return !!props.value
+        return !!props.value;
       },
       set: (selected) => {
         emit('input', selected ? props.values[0].id : undefined);
@@ -64,7 +64,7 @@ export default defineComponent({
     return {
       isSelected,
       isValid
-    }
+    };
   }
 });
 </script>

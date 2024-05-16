@@ -19,8 +19,16 @@
 
 <script lang="ts">
 import { SfSelect } from '@storefront-ui/vue';
-import { computed, defineComponent, PropType, toRefs } from '@vue/composition-api';
-import { mapMobileObserver, unMapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
+import {
+  computed,
+  defineComponent,
+  PropType,
+  toRefs
+} from '@vue/composition-api';
+import {
+  mapMobileObserver,
+  unMapMobileObserver
+} from '@storefront-ui/vue/src/utilities/mobile-observer';
 
 import { OptionValue, useDefaultValue } from 'src/modules/customization-system';
 
@@ -69,7 +77,7 @@ export default defineComponent({
       }
     });
     const isValid = computed<boolean>(() => {
-      return !props.error
+      return !props.error;
     });
     const productionTimeOptions = computed<ProductionTimeOption[]>(() => {
       return getProductionTimeOptionsFromCustomization(
@@ -86,7 +94,7 @@ export default defineComponent({
       isValid,
       productionTimeOptions,
       selectedOption
-    }
+    };
   },
   computed: {
     ...mapMobileObserver()
@@ -94,5 +102,5 @@ export default defineComponent({
   beforeDestroy (): void {
     unMapMobileObserver();
   }
-})
+});
 </script>

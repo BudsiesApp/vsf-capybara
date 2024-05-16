@@ -19,7 +19,10 @@
                 {{ optionValue.name }}
               </div>
 
-              <div class="_price" v-if="optionValuePriceDictionary[optionValue.id]">
+              <div
+                class="_price"
+                v-if="optionValuePriceDictionary[optionValue.id]"
+              >
                 <strong> + </strong>
 
                 <SfPrice
@@ -30,9 +33,7 @@
 
               <div class="_content">
                 <div class="_media">
-                  <div
-                    class="_image-container"
-                  >
+                  <div class="_image-container">
                     <base-image
                       class="_image"
                       v-if="getItemImage(optionValue)"
@@ -61,11 +62,22 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, toRefs } from '@vue/composition-api';
+import {
+  computed,
+  defineComponent,
+  PropType,
+  toRefs
+} from '@vue/composition-api';
 import { SfPrice } from '@storefront-ui/vue';
 
 import { BaseImage } from 'src/modules/budsies';
-import { OptionValue, useDefaultValue, useListWidget, useOptionValuesPrice, useValuesSort } from 'src/modules/customization-system';
+import {
+  OptionValue,
+  useDefaultValue,
+  useListWidget,
+  useOptionValuesPrice,
+  useValuesSort
+} from 'src/modules/customization-system';
 
 import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
 
