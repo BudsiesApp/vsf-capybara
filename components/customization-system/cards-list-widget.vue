@@ -1,13 +1,17 @@
 <template>
   <div class="cards-list-widget">
     <ul class="_list">
-      <li class="_item" v-for="optionValue in values" :key="optionValue.id">
+      <li
+        class="_item"
+        v-for="optionValue in sortedValues"
+        :key="optionValue.id"
+      >
         <m-checkbox
           class="_checkbox"
           :disabled="isDisabled"
           :valid="isValid"
           :value="optionValue.id"
-          v-model="selectedValue"
+          v-model="selectedOption"
         >
           <template #label>
             <div class="_wrapper">
@@ -15,12 +19,12 @@
                 {{ optionValue.name }}
               </div>
 
-              <div class="_price" v-if="getOptionValuePrice(optionValue)">
+              <div class="_price" v-if="optionValuePriceDictionary[optionValue.id]">
                 <strong> + </strong>
 
                 <SfPrice
-                  :regular="formatPrice(getOptionValuePrice(optionValue).regular)"
-                  :special="formatPrice(getOptionValuePrice(optionValue).special)"
+                  :regular="formatPrice(optionValuePriceDictionary[optionValue.id].regular)"
+                  :special="formatPrice(optionValuePriceDictionary[optionValue.id].special)"
                 />
               </div>
 
@@ -29,26 +33,13 @@
                   <div
                     class="_image-container"
                   >
-                    <img
-                      v-if="getItemImage(optionValue)"
-                      :src="getItemImage(optionValue)"
+                    <base-image
                       class="_image"
-                    >
-
-                    <!-- <img
-                     v-if="getItemHoverImage(addon)"
-                      :src="getItemHoverImage(addon)"
-                       class="_image-hover"
-                       > -->
+                      v-if="getItemImage(optionValue)"
+                      :aspect-ratio="1"
+                      :src="getItemImage(optionValue)"
+                    />
                   </div>
-
-                  <!-- <StreamingVideo
-                    :video-id="getVideoId(addon)"
-                    :provider="getVideoProvider(addon)"
-                    :auto-play="true"
-                    :display-controls="false"
-                    v-if="shouldShowVideo(addon.id) && getVideoId(addon) && getVideoProvider(addon)"
-                  /> -->
                 </div>
 
                 <div
@@ -70,17 +61,18 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { computed, defineComponent, PropType, toRefs } from '@vue/composition-api';
 import { SfPrice } from '@storefront-ui/vue';
 
-import { OptionValue } from 'src/modules/customization-system';
-import { PriceHelper } from 'src/modules/shared';
+import { BaseImage } from 'src/modules/budsies';
+import { OptionValue, useDefaultValue, useListWidget, useOptionValuesPrice, useValuesSort } from 'src/modules/customization-system';
 
 import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
 
 export default defineComponent({
   name: 'CardsListWidget',
   components: {
+    BaseImage,
     MCheckbox,
     SfPrice
   },
@@ -93,6 +85,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    maxValuesCount: {
+      type: Number as PropType<number | undefined>,
+      default: undefined
+    },
     value: {
       type: [String, Array] as PropType<string | string[] | undefined>,
       default: undefined
@@ -102,29 +98,8 @@ export default defineComponent({
       default: () => []
     }
   },
-  setup (props, { emit, root }) {
-    function getOptionValuePrice (
-      optionValue: OptionValue
-    ): PriceHelper.ProductPrice | undefined {
-      const defaultOptionValuePrice = optionValue.price
-        ? {
-          regular: optionValue.price,
-          special: null
-        }
-        : undefined
-
-      if (!optionValue.sku) {
-        return defaultOptionValuePrice;
-      }
-
-      const product = root.$store.getters['product/getProductBySkuDictionary'](optionValue.sku);
-
-      if (!product) {
-        return defaultOptionValuePrice;
-      }
-
-      return PriceHelper.getCartItemPrice(product, {}, false);
-    }
+  setup (props, context) {
+    const { maxValuesCount, value, values } = toRefs(props);
 
     function getItemImage (optionValue: OptionValue): string | undefined {
       return optionValue.previewUrl;
@@ -133,21 +108,16 @@ export default defineComponent({
     const isValid = computed<boolean>(() => {
       return !props.error;
     });
-    const selectedValue = computed<string | string[] | undefined>({
-      get: () => {
-        return props.value;
-      },
-      set: (newValue) => {
-        emit('input', newValue);
-      }
-    });
+
+    const listWidgetFields = useListWidget(value, maxValuesCount, context);
+    useDefaultValue(listWidgetFields.selectedOption, values);
 
     return {
-      formatPrice: PriceHelper.formatPrice,
-      getOptionValuePrice,
       getItemImage,
       isValid,
-      selectedValue
+      ...listWidgetFields,
+      ...useOptionValuesPrice(values, context),
+      ...useValuesSort(values)
     };
   }
 });
@@ -223,25 +193,11 @@ export default defineComponent({
 
     ._image-container {
       position: relative;
+      display: flex;
     }
 
     ._image {
       width: 100%;
-    }
-
-    ._image-hover {
-      display: none;
-      position: absolute;
-      width: 100%;
-      z-index: 2;
-      top: 0;
-      left: 0;
-    }
-
-    &:hover {
-      ._image-hover {
-        display: block;
-      }
     }
   }
 

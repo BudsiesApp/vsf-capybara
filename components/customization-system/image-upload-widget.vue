@@ -78,10 +78,6 @@ export default defineComponent({
     value: {
       type: [String, Array] as PropType<string | string[] | undefined>,
       default: undefined
-    },
-    values: {
-      type: Array as PropType<OptionValue[]>,
-      default: () => ([])
     }
   },
   setup (props, { emit }) {

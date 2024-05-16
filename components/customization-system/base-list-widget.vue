@@ -22,10 +22,13 @@
             {{ option.name }}
           </div>
 
-          <div class="_price" v-if="option.price && option.price > 0">
+          <div class="_price" v-if="optionValuePriceDictionary[option.id]">
             <span>+</span>
 
-            {{ option.price | currency("$", 0) }}
+            <SfPrice
+              :regular="formatPrice(optionValuePriceDictionary[option.id].regular)"
+              :special="formatPrice(optionValuePriceDictionary[option.id].special)"
+            />
           </div>
         </div>
 
@@ -54,14 +57,16 @@ import {
   PropType,
   toRefs
 } from '@vue/composition-api';
+import { SfPrice } from '@storefront-ui/vue';
 
 import { BaseImage } from 'src/modules/budsies';
-import { OptionValue, useDefaultValue, useListWidget, useValuesSort } from 'src/modules/customization-system';
+import { OptionValue, useDefaultValue, useListWidget, useOptionValuesPrice, useValuesSort } from 'src/modules/customization-system';
 
 export default defineComponent({
   name: 'BaseListWidget',
   components: {
-    BaseImage
+    BaseImage,
+    SfPrice
   },
   props: {
     error: {
@@ -113,6 +118,7 @@ export default defineComponent({
       isFlexLayout,
       isRound,
       ...listWidgetFields,
+      ...useOptionValuesPrice(values, context),
       ...useValuesSort(values)
     };
   }
@@ -199,7 +205,18 @@ export default defineComponent({
   }
 
   ._price {
+    --price-regular-font-size: var(--font-sm);
+    --price-special-font-size: var(--font-sm);
+    --price-old-font-size: var(--font-sm);
+
+    --price-regular-font-weight: var(--font-normal);
+    --price-special-font-weight: var(--font-normal);
+
     margin-top: var(--spacer-2xs);
+  }
+
+  .sf-price {
+    display: inline-flex;
   }
 
   &.-disabled {
