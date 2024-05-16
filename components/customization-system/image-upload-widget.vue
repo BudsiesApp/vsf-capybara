@@ -1,15 +1,46 @@
 <template>
   <div class="image-upload-widget">
-    <m-artwork-upload
-      :disabled="isDisabled"
-      :product-id="backendProductId"
-      :upload-url="artworkUploadUrl"
-      :allow-multiple="allowMultiple"
-      :initial-items="initialItems"
-      :max-files="maxFiles"
-      @file-added="onFileAdded"
-      @file-removed="onFileRemoved"
-    />
+    <div class="_upload-now" v-show="isUploadNow">
+      <p v-if="allowUploadLater">
+        {{ $t('Don\'t have your photos? You can finalize your order and') }} <a
+          class="_popup-link"
+          href="javascript:void(0)"
+          @click.stop.prevent="isUploadNow = false"
+        >{{ $t('send them to us later.') }}</a>
+      </p>
+
+      <m-artwork-upload
+        :disabled="isDisabled"
+        :product-id="backendProductId"
+        :upload-url="artworkUploadUrl"
+        :allow-multiple="allowMultiple"
+        :initial-items="initialItems"
+        :max-files="maxFiles"
+        @file-added="onFileAdded"
+        @file-removed="onFileRemoved"
+      />
+    </div>
+
+    <div
+      class="_upload-email"
+      v-show="!isUploadNow"
+      v-if="allowUploadLater"
+    >
+      <p>
+        {{ $t('Want to upload photos now? Please use') }} <a
+          class="_popup-link"
+          href="javascript:void(0)"
+          @click.stop.prevent="isUploadNow = true"
+        >{{ $t('our uploader.') }}</a>
+      </p>
+
+      <p>
+        {{ $t('When you\'re ready, please email a photo of the design to:') }} <br> <a
+          class="_popup-link"
+          href="mailto:photos@mypetsies.com"
+        >photos@mypetsies.com</a>
+      </p>
+    </div>
 
     <div class="_error-message">
       {{ error }}
@@ -19,35 +50,12 @@
 
 <script lang="ts">
 import config from 'config';
-import { computed, defineComponent, inject, PropType, toRefs } from '@vue/composition-api'
+import { defineComponent, PropType, ref, toRefs } from '@vue/composition-api'
 
-import { ImageHandlerService, Item } from 'src/modules/file-storage';
-import { CustomerImage } from 'src/modules/shared';
 import { useBackendProductId } from 'theme/helpers/use-backend-product-id'
 
 import MArtworkUpload from '../molecules/m-artwork-upload.vue'
-
-function getCustomerImageByStorageItemId (
-  storageItemId: string,
-  imageHandlerService: ImageHandlerService
-): CustomerImage {
-  return {
-    id: storageItemId,
-    url: imageHandlerService.getOriginalImageUrl(storageItemId)
-  };
-}
-
-function getInitialItems (value: string | string[] | undefined, imageHandlerService: ImageHandlerService): CustomerImage[] {
-  if (!value) {
-    return [];
-  }
-
-  if (typeof value === 'string') {
-    return [getCustomerImageByStorageItemId(value, imageHandlerService)]
-  }
-
-  return value.map((item) => getCustomerImageByStorageItemId(item, imageHandlerService));
-}
+import { useFilesUpload } from 'src/modules/customization-system';
 
 export default defineComponent({
   components: {
@@ -79,59 +87,16 @@ export default defineComponent({
       default: undefined
     }
   },
-  setup (props, { emit }) {
+  setup (props, context) {
     const { maxValuesCount, productId, value } = toRefs(props);
-    const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
 
-    if (!imageHandlerService) {
-      throw new Error('ImageHandlerService is not defined');
-    }
-
-    const initialItems: CustomerImage[] = getInitialItems(props.value, imageHandlerService);
-    const allowMultiple = computed<boolean>(() => {
-      return !maxValuesCount.value || maxValuesCount.value > 1;
-    });
-    const maxFiles = computed<number | null>(() => {
-      return maxValuesCount.value || null;
-    });
-
-    function onFileAdded (item: Item): void {
-      if (!allowMultiple.value) {
-        emit('input', item.id);
-        return;
-      }
-
-      if (!value.value) {
-        return emit('input', [item.id]);
-      }
-
-      if (!Array.isArray(value.value)) {
-        return emit('input', [value.value, item.id]);
-      }
-
-      emit('input', [...value.value, item.id]);
-    }
-
-    function onFileRemoved (storageItemId: string) {
-      if (!allowMultiple.value) {
-        return emit('input', undefined);
-      }
-
-      if (!Array.isArray(value.value)) {
-        return emit('input', []);
-      }
-
-      emit('input', value.value.filter((item) => item !== storageItemId));
-    }
+    const isUploadNow = ref<boolean>(true);
 
     return {
       ...useBackendProductId(productId),
-      allowMultiple,
+      ...useFilesUpload(value, maxValuesCount, context),
       artworkUploadUrl: config.images.fileuploaderUploadUrl as string,
-      initialItems,
-      maxFiles,
-      onFileAdded,
-      onFileRemoved
+      isUploadNow
     }
   }
 })

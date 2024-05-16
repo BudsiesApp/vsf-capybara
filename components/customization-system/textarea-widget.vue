@@ -3,6 +3,7 @@
     <textarea
       class="_textarea"
       :disabled="isDisabled"
+      :placeholder="placeholder"
       rows="4"
       v-model.trim="valueModel"
     />
@@ -30,6 +31,10 @@ export default defineComponent({
     isDisabled: {
       type: Boolean,
       default: false
+    },
+    placeholder: {
+      type: String as PropType<string | undefined>,
+      default: undefined
     },
     value: {
       type: [String, Array] as PropType<string | undefined>,

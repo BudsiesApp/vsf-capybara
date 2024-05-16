@@ -2,8 +2,9 @@
   <sf-input
     class="text-input-widget"
     :disabled="isDisabled"
-    :valid="isValid"
     :error-message="error"
+    :placeholder="placeholder"
+    :valid="isValid"
     v-model.trim="valueModel"
   />
 </template>
@@ -25,6 +26,10 @@ export default defineComponent({
     isDisabled: {
       type: Boolean,
       default: false
+    },
+    placeholder: {
+      type: String as PropType<string | undefined>,
+      default: undefined
     },
     value: {
       type: [String, Array] as PropType<string | undefined>,

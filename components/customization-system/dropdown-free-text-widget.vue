@@ -9,6 +9,7 @@
       label-field="name"
       :hide-dropdown-arrow="true"
       :options="sortedValues"
+      :placeholder="placeholder"
       :required="false"
       :valid="isValid"
     />
@@ -37,6 +38,10 @@ export default defineComponent({
     isDisabled: {
       type: Boolean,
       default: false
+    },
+    placeholder: {
+      type: String as PropType<string | undefined>,
+      default: undefined
     },
     value: {
       type: String as PropType<string | undefined>,

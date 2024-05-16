@@ -8,7 +8,7 @@
     v-model="selectedOption"
   >
     <sf-select-option
-      v-for="optionValue in sortedValues"
+      v-for="optionValue in sortedValuesWithPlaceholder"
       :key="optionValue.id"
       :value="optionValue.id"
     >
@@ -39,6 +39,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    placeholder: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
     value: {
       type: String as PropType<string | undefined>,
       default: undefined
@@ -49,7 +53,7 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
-    const { values } = toRefs(props);
+    const { placeholder, values } = toRefs(props);
     const selectedOption = computed<string | undefined>({
       get: () => {
         return props.value;
@@ -63,11 +67,30 @@ export default defineComponent({
     });
 
     useDefaultValue(selectedOption, values);
+    const { sortedValues } = useValuesSort(values);
+
+    const sortedValuesWithPlaceholder = computed<OptionValue[]>(() => {
+      if (!placeholder.value) {
+        return sortedValues.value;
+      }
+
+      return [
+        {
+          id: '',
+          name: placeholder.value,
+          isEnabled: true,
+          isDefault: false,
+          sn: -1,
+          galleryImages: []
+        },
+        ...sortedValues.value
+      ]
+    })
 
     return {
       isValid,
       selectedOption,
-      ...useValuesSort(values)
+      sortedValuesWithPlaceholder
     }
   },
   computed: {
