@@ -62,6 +62,7 @@ export default defineComponent({
 
 .textarea-widget {
   ._textarea {
+    display: flex;
     box-sizing: border-box;
     border: 1px solid var(--c-light);
     width: 100%;

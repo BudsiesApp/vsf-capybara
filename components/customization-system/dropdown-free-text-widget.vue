@@ -71,3 +71,9 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss" scoped>
+.dropdown-free-text-widget {
+  --multiselect-margin: 0;
+}
+</style>

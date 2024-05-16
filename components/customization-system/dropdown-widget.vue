@@ -78,3 +78,9 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss" scoped>
+.dropdown-widget {
+  --select-padding: 0;
+}
+</style>

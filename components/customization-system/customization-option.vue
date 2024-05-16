@@ -5,8 +5,14 @@
       :ref="validationRef"
       v-if="showLabel"
     >
-      {{ customizationLabel }}
+      {{ optionLabel }}
     </label>
+
+    <div
+      class="_option-description"
+      v-if="optionDescription"
+      v-html="optionDescription"
+    />
 
     <validation-provider
       slim
@@ -20,7 +26,7 @@
         :error="errors[0]"
         :is-disabled="isDisabled"
         :is="widgetComponent"
-        :label="customizationLabel"
+        :label="optionLabel"
         :max-values-count="maxValuesCount"
         :product-id="productId"
         :values="optionValues"
@@ -29,6 +35,12 @@
         v-model="selectedOption"
       />
     </validation-provider>
+
+    <div
+      class="_option-hint"
+      v-if="optionHint"
+      v-html="optionHint"
+    />
   </div>
 </template>
 
@@ -88,8 +100,14 @@ export default defineComponent({
   },
   setup (props, context) {
     const { customization, selectedOptionValuesIds, value } = toRefs(props);
-    const customizationLabel = computed<string>(() => {
+    const optionLabel = computed<string>(() => {
       return customization.value.title || customization.value.name;
+    });
+    const optionDescription = computed<string | undefined>(() => {
+      return customization.value.optionData?.description;
+    });
+    const optionHint = computed<string | undefined>(() => {
+      return customization.value.optionData?.hint;
     });
     const maxValuesCount = computed<number | undefined>(() => {
       return customization.value.optionData?.maxValuesCount;
@@ -106,7 +124,9 @@ export default defineComponent({
         selectedOptionValuesIds,
         context
       ),
-      customizationLabel,
+      optionDescription,
+      optionHint,
+      optionLabel,
       maxValuesCount,
       showLabel
     };
@@ -122,8 +142,20 @@ export default defineComponent({
     text-align: var(--customization-option-label-align, left);
   }
 
+  ._option-description {
+    font-size: var(--customization-option-description-size, var(--font-sm));
+    text-align: var(--customization-option-description-align, left);
+    margin: var(--customization-option-description-margin, var(--spacer-xs) 0 0);
+  }
+
+  ._option-hint {
+    font-size: var(--customization-option-hint-size, var(--font-sm));
+    text-align: var(--customization-option-hint-align, left);
+    margin: var(--customization-option-hint-margin, var(--spacer-xs) 0 0);
+  }
+
   ._widget {
-    margin: var(--customization-option-widget-margin, var(--spacer-sm) 0 0 0);
+    margin: var(--customization-option-widget-margin, var(--spacer-sm) 0 0);
   }
 }
 </style>

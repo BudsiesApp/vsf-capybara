@@ -109,6 +109,7 @@ export default defineComponent({
         optionData: {
           description:
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam dictum urna id erat molestie vehicula. Etiam sodales est non dui porttitor, fringilla faucibus libero volutpat. Praesent et nulla a enim.',
+          hint: 'Some hint',
           maxValuesCount: 0,
           hasGalleryImages: false,
           isRequired: true,
@@ -141,6 +142,7 @@ export default defineComponent({
         optionData: {
           description:
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam dictum urna id erat molestie vehicula. Etiam sodales est non dui porttitor, fringilla faucibus libero volutpat. Praesent et nulla a enim.',
+          hint: 'Some hint',
           maxValuesCount: 0,
           hasGalleryImages: false,
           isRequired: true,
@@ -171,6 +173,7 @@ export default defineComponent({
         optionData: {
           description:
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam dictum urna id erat molestie vehicula. Etiam sodales est non dui porttitor, fringilla faucibus libero volutpat. Praesent et nulla a enim.',
+          hint: 'Some hint',
           maxValuesCount: 0,
           hasGalleryImages: false,
           isRequired: true,
@@ -227,6 +230,7 @@ export default defineComponent({
         optionData: {
           description:
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam dictum urna id erat molestie vehicula. Etiam sodales est non dui porttitor, fringilla faucibus libero volutpat. Praesent et nulla a enim.',
+          hint: 'Some hint',
           maxValuesCount: 0,
           hasGalleryImages: false,
           isRequired: true,
@@ -275,6 +279,7 @@ export default defineComponent({
         optionData: {
           description:
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam dictum urna id erat molestie vehicula. Etiam sodales est non dui porttitor, fringilla faucibus libero volutpat. Praesent et nulla a enim.',
+          hint: 'Optional. Leave blank if unsure<br>(or make up your own :)',
           maxValuesCount: 0,
           hasGalleryImages: false,
           isRequired: true,
@@ -323,6 +328,7 @@ export default defineComponent({
         optionData: {
           description:
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam dictum urna id erat molestie vehicula. Etiam sodales est non dui porttitor, fringilla faucibus libero volutpat. Praesent et nulla a enim.',
+          hint: 'Some hint',
           maxValuesCount: 0,
           hasGalleryImages: false,
           isRequired: true,
@@ -343,6 +349,7 @@ export default defineComponent({
         optionData: {
           description:
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam dictum urna id erat molestie vehicula. Etiam sodales est non dui porttitor, fringilla faucibus libero volutpat. Praesent et nulla a enim.',
+          hint: 'Some hint',
           maxValuesCount: 0,
           hasGalleryImages: false,
           isRequired: true,
@@ -363,6 +370,7 @@ export default defineComponent({
         optionData: {
           description:
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam dictum urna id erat molestie vehicula. Etiam sodales est non dui porttitor, fringilla faucibus libero volutpat. Praesent et nulla a enim.',
+          hint: 'Some hint',
           maxValuesCount: 0,
           hasGalleryImages: false,
           isRequired: true,
@@ -383,6 +391,7 @@ export default defineComponent({
         optionData: {
           description:
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam dictum urna id erat molestie vehicula. Etiam sodales est non dui porttitor, fringilla faucibus libero volutpat. Praesent et nulla a enim.',
+          hint: 'Some hint',
           maxValuesCount: 0,
           hasGalleryImages: false,
           isRequired: true,

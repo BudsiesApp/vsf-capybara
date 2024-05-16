@@ -515,7 +515,7 @@ export default Vue.extend({
   }
 
   @include for-desktop {
-    margin: 0 0 var(--spacer-sm) 0;
+    margin: var(--multiselect-margin, 0 0 var(--spacer-sm) 0);
   }
 
   @media (prefers-color-scheme: dark) {
