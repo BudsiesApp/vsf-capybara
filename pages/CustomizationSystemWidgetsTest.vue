@@ -259,6 +259,9 @@ export default defineComponent({
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.DROPDOWN,
+          widgetConfig: {
+            placeholder: 'Select Item'
+          },
           values: [
             {
               id: 'item_1',
@@ -308,6 +311,9 @@ export default defineComponent({
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.DROPDOWN_FREE_TEXT,
+          widgetConfig: {
+            placeholder: 'Select Dropdown Item'
+          },
           values: [
             {
               id: 'item_1',
@@ -378,6 +384,9 @@ export default defineComponent({
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.TEXT_INPUT,
+          widgetConfig: {
+            placeholder: 'Enter your pet\'s name'
+          },
           values: []
         }
       },
@@ -399,6 +408,9 @@ export default defineComponent({
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.TEXT_AREA,
+          widgetConfig: {
+            placeholder: 'Describe your pet\'s'
+          },
           values: []
         }
       },
