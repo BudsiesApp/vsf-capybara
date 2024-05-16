@@ -1,13 +1,7 @@
 <template>
   <base-list-widget
     class="thumbnails-list-widget"
-    :error="error"
-    :is-disabled="isDisabled"
-    :layout="layout"
-    :max-values-count="maxValuesCount"
-    :value="value"
-    :values="values"
-    :shape="shape"
+    v-bind="$props"
     v-model="selectedOption"
   >
     <template #image="{ option, selected, round }">

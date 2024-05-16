@@ -22,16 +22,10 @@
     >
       <component
         class="_widget"
-        :bundle-option-id="customization.bundleOptionId"
         :error="errors[0]"
         :is-disabled="isDisabled"
-        :is="widgetComponent"
-        :label="optionLabel"
-        :max-values-count="maxValuesCount"
-        :product-id="productId"
-        :values="optionValues"
-        :shape="customization.optionData && customization.optionData.widgetConfig && customization.optionData.widgetConfig.shape"
-        :layout="customization.optionData && customization.optionData.widgetConfig && customization.optionData.widgetConfig.layout"
+        :is="widget.component"
+        v-bind="widget.props"
         v-model="selectedOption"
       />
     </validation-provider>
@@ -48,7 +42,7 @@
 import { computed, defineComponent, PropType, toRefs } from '@vue/composition-api';
 import { ValidationProvider } from 'vee-validate';
 
-import { Customization, CustomizationStateItem, useCustomizationOptionValidation, useCustomizationOptionWidget, WidgetType } from 'src/modules/customization-system';
+import { Customization, CustomizationStateItem, OptionValue, useCustomizationOptionValidation, useCustomizationOptionWidget, WidgetType } from 'src/modules/customization-system';
 
 import CardsListWidget from './cards-list-widget.vue';
 import CheckboxWidget from './checkbox-widget.vue';
@@ -85,13 +79,13 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    optionValues: {
+      type: Array as PropType<OptionValue[]>,
+      default: () => ([])
+    },
     productId: {
       type: Number,
       required: true
-    },
-    selectedOptionValuesIds: {
-      type: Array as PropType<string[]>,
-      default: () => ({})
     },
     value: {
       type: Object as PropType<CustomizationStateItem | undefined>,
@@ -99,7 +93,8 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const { customization, selectedOptionValuesIds, value } = toRefs(props);
+    const { customization, optionValues, productId, value } = toRefs(props);
+
     const optionLabel = computed<string>(() => {
       return customization.value.title || customization.value.name;
     });
@@ -108,9 +103,6 @@ export default defineComponent({
     });
     const optionHint = computed<string | undefined>(() => {
       return customization.value.optionData?.hint;
-    });
-    const maxValuesCount = computed<number | undefined>(() => {
-      return customization.value.optionData?.maxValuesCount;
     });
     const showLabel = computed<boolean>(() => {
       return customization.value.optionData?.displayWidget !== WidgetType.CHECKBOX;
@@ -121,13 +113,13 @@ export default defineComponent({
       ...useCustomizationOptionWidget(
         value,
         customization,
-        selectedOptionValuesIds,
+        optionValues,
+        productId,
         context
       ),
       optionDescription,
       optionHint,
       optionLabel,
-      maxValuesCount,
       showLabel
     };
   }

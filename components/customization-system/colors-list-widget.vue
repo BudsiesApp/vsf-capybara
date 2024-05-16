@@ -1,13 +1,7 @@
 <template>
   <base-list-widget
     class="colors-list-widget"
-    :error="error"
-    :is-disabled="isDisabled"
-    :layout="layout"
-    :max-values-count="maxValuesCount"
-    :value="value"
-    :values="values"
-    :shape="shape"
+    v-bind="$props"
     v-model="selectedOption"
   >
     <template #image="{ option, selected, round }">
@@ -51,6 +45,11 @@ export default defineComponent({
       type: Number as PropType<number | undefined>,
       default: undefined
     },
+    shape: {
+      // TODO: move to the separate type
+      type: String as PropType<'round' | 'square'>,
+      default: 'square'
+    },
     value: {
       type: [String, Array] as PropType<string | string[] | undefined>,
       default: undefined
@@ -58,11 +57,6 @@ export default defineComponent({
     values: {
       type: Array as PropType<OptionValue[]>,
       default: () => []
-    },
-    shape: {
-      // TODO: move to the separate type
-      type: String as PropType<'round' | 'square'>,
-      default: 'square'
     }
   },
   setup (props, { emit }) {

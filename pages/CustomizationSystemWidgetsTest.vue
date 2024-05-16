@@ -9,7 +9,7 @@
       v-for="customization in customizations"
       :key="customization.id"
     >
-      <div class="_settings" v-show="showSettings">
+      <div class="_settings-container" v-show="showSettings">
         <div class="_customization_option_item">
           Customization settings
 
@@ -90,9 +90,10 @@
         class="_option"
         :customization="customization"
         :is-disabled="false"
+        :option-values="customization.optionData.values"
         :product-id="73"
-        :selected-option-values-ids="[]"
         v-model="customizationState[customization.id]"
+        v-if="customization.optionData"
       />
     </div>
   </div>
@@ -481,6 +482,21 @@ export default defineComponent({
       showSettings.value = !showSettings.value;
     }
 
+    // TODO: move to the form component
+    // const optionValues = computed<OptionValue[]>(() => {
+    //   return customization.value.optionData?.values.filter((value) => {
+    //     const forActivatedOptionValueIds = value.availabilityRules?.forActivatedOptionValueIds;
+
+    //     if (!forActivatedOptionValueIds || !forActivatedOptionValueIds.length) {
+    //       return true;
+    //     }
+
+    //     return forActivatedOptionValueIds.every((id) => {
+    //       return selectedOptionValuesIds.value.includes(id);
+    //     })
+    //   }) || [];
+    // });
+
     return {
       customizations,
       customizationState,
@@ -498,7 +514,7 @@ export default defineComponent({
   box-sizing: border-box;
   padding: 0 1rem;
 
-  ._settings,
+  ._settings-container,
   ._option {
     flex: 1;
   }
@@ -507,8 +523,9 @@ export default defineComponent({
     margin-top: var(--spacer-base);
   }
 
-  ._customization_option_item {
+  ._settings-container {
     margin-right: var(--spacer-xl);
+    padding-right: var(--spacer-base);
     border-right: 1px solid #ddd;
   }
 
