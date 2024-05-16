@@ -1,63 +1,90 @@
 <template>
   <div id="customization-system-widgets-test">
+    <button @click="toggleSettings" type="button" class="_settings-toggle-button">
+      Toggle settings visibility
+    </button>
+
     <div
-      class="_customization_option_item"
+      class="_customization-container"
       v-for="customization in customizations"
       :key="customization.id"
     >
-      Customization settings
+      <div class="_settings" v-show="showSettings">
+        <div class="_customization_option_item">
+          Customization settings
 
-      <ul class="_settings">
-        <li>
-          <label>
-            Is required:
-            <input
-              type="checkbox"
-              v-model="customization.optionData.isRequired"
-            >
-          </label>
-        </li>
-
-        <li>
-          <label>
-            Max values count:
-            <input
-              type="number"
-              v-model.number="customization.optionData.maxValuesCount"
-            >
-          </label>
-        </li>
-
-        <label v-if="customization.optionData.widgetConfig && customization.optionData.widgetConfig.shape">
-          Shape:
-
-          <select v-model="customization.optionData.widgetConfig.shape">
-            <option value="round">Round</option>
-            <option value="square">Square</option>
-          </select>
-        </label>
-
-        <label v-if="customization.optionData.widgetConfig && customization.optionData.widgetConfig.layout">
-          Layout:
-
-          <select v-model="customization.optionData.widgetConfig.layout">
-            <option value="grid">Grid</option>
-            <option value="flex">Flex</option>
-          </select>
-        </label>
-
-        <li>
-          Values:
-          <ul>
-            <li v-for="value in customization.optionData.values" :key="value.id">
+          <ul class="_settings">
+            <li>
               <label>
-                Is default:
-                <input type="checkbox" v-model="value.isDefault">
+                Is required:
+                <input
+                  type="checkbox"
+                  v-model="customization.optionData.isRequired"
+                >
               </label>
             </li>
+
+            <li>
+              <label>
+                Max values count:
+                <input
+                  type="number"
+                  v-model.number="customization.optionData.maxValuesCount"
+                >
+              </label>
+            </li>
+
+            <label
+              v-if="
+                customization.optionData.widgetConfig &&
+                  customization.optionData.widgetConfig.shape
+              "
+            >
+              Shape:
+
+              <select v-model="customization.optionData.widgetConfig.shape">
+                <option value="round">Round</option>
+                <option value="square">Square</option>
+              </select>
+            </label>
+
+            <label
+              v-if="
+                customization.optionData.widgetConfig &&
+                  customization.optionData.widgetConfig.layout
+              "
+            >
+              Layout:
+
+              <select v-model="customization.optionData.widgetConfig.layout">
+                <option value="grid">Grid</option>
+                <option value="flex">Flex</option>
+              </select>
+            </label>
+
+            <li>
+              Values:
+              <ul>
+                <li
+                  v-for="value in customization.optionData.values"
+                  :key="value.id"
+                >
+                  <label>
+                    Is default:
+                    <input type="checkbox" v-model="value.isDefault">
+                  </label>
+                </li>
+              </ul>
+            </li>
           </ul>
-        </li>
-      </ul>
+
+          <div class="_customization_state">
+            <strong> Customization State Item:</strong>
+            <br>
+            {{ customizationState[customization.id] }}
+          </div>
+        </div>
+      </div>
 
       <customization-option
         class="_option"
@@ -67,11 +94,6 @@
         :selected-option-values-ids="[]"
         v-model="customizationState[customization.id]"
       />
-
-      <div class="_customization_state">
-        Customization State Item:
-        {{ customizationState[customization.id] }}
-      </div>
     </div>
   </div>
 </template>
@@ -407,7 +429,8 @@ export default defineComponent({
               name: 'First Item',
               description: `First Item description`,
               sn: 0,
-              previewUrl: 'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/b/d/e/6f2ea7eb65d706ae2300385142ec8.jpg',
+              previewUrl:
+                'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/b/d/e/6f2ea7eb65d706ae2300385142ec8.jpg',
               galleryImages: [],
               isEnabled: true,
               isDefault: false
@@ -416,7 +439,8 @@ export default defineComponent({
               id: 'item_2',
               name: 'Second Item',
               description: `Second Item description`,
-              previewUrl: 'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/a/9/2/befa695317fa7476b0ae045ffca37.jpg',
+              previewUrl:
+                'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/a/9/2/befa695317fa7476b0ae045ffca37.jpg',
               sn: 1,
               galleryImages: [],
               isEnabled: true,
@@ -426,7 +450,8 @@ export default defineComponent({
               id: 'item_3',
               name: 'Third Item',
               description: `Third Item description`,
-              previewUrl: 'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/2/9/3/b1686c1f54c9da02af0b5af739b4d.jpg',
+              previewUrl:
+                'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/2/9/3/b1686c1f54c9da02af0b5af739b4d.jpg',
               price: 15,
               sn: 2,
               galleryImages: [],
@@ -437,7 +462,8 @@ export default defineComponent({
               id: 'item_4',
               name: 'Fourth Item',
               description: `Fourth Item description`,
-              previewUrl: 'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/e/0/5/c1e80b85d4f76e116a17c7b22b124.png',
+              previewUrl:
+                'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/e/0/5/c1e80b85d4f76e116a17c7b22b124.png',
               price: 15,
               sn: 3,
               galleryImages: [],
@@ -449,9 +475,17 @@ export default defineComponent({
       }
     ]);
 
+    const showSettings = ref<boolean>(true);
+
+    function toggleSettings (): void {
+      showSettings.value = !showSettings.value;
+    }
+
     return {
       customizations,
-      customizationState
+      customizationState,
+      showSettings,
+      toggleSettings
     };
   }
 });
@@ -464,22 +498,34 @@ export default defineComponent({
   box-sizing: border-box;
   padding: 0 1rem;
 
-  ._customization_option_item {
-    margin-top: var(--spacer-lg);
-    padding-bottom: var(--spacer-lg);
-    border-bottom: 1px solid #ddd;
-  }
-
-  ._settings {
-  }
-
-  ._customization_state,
+  ._settings,
   ._option {
+    flex: 1;
+  }
+
+  ._customization_state {
     margin-top: var(--spacer-base);
   }
 
+  ._customization_option_item {
+    margin-right: var(--spacer-xl);
+    border-right: 1px solid #ddd;
+  }
+
+  ._customization-container {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-top: var(--spacer-lg);
+    padding-bottom: var(--spacer-lg);
+  }
+
+  ._settings-toggle-button {
+    position: sticky;
+    top: 100px;
+  }
+
   @media (min-width: $tablet-min) {
-    max-width: 640px;
+    max-width: 1024px;
     width: 100%;
     margin: 0 auto;
   }
