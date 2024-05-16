@@ -21,7 +21,6 @@
 import config from 'config';
 import { computed, defineComponent, inject, PropType, toRefs } from '@vue/composition-api'
 
-import { OptionValue } from 'src/modules/customization-system'
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage } from 'src/modules/shared';
 import { useBackendProductId } from 'theme/helpers/use-backend-product-id'
@@ -143,12 +142,12 @@ export default defineComponent({
 
 .image-upload-widget {
   ._error-message {
-    color: var(--input-error-message-color, var(--c-danger));
+    color: var(--widget-error-message-color, var(--c-danger-variant));
     height: calc(var(--font-xs) * 1.2);
     margin-top: var(--spacer-xs);
 
     @include font(
-      --input-error-message-font,
+      --widget-error-message-font,
       var(--font-medium),
       var(--font-xs),
       1.2,

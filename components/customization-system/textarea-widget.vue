@@ -77,12 +77,12 @@ export default defineComponent({
   }
 
   ._error-message {
-    color: var(--input-error-message-color, var(--c-danger));
+    color: var(--widget-error-message-color, var(--c-danger-variant));
     height: calc(var(--font-xs) * 1.2);
     margin-top: var(--spacer-xs);
 
     @include font(
-      --input-error-message-font,
+      --widget-error-message-font,
       var(--font-medium),
       var(--font-xs),
       1.2,

@@ -60,7 +60,7 @@ import {
 import { SfPrice } from '@storefront-ui/vue';
 
 import { BaseImage } from 'src/modules/budsies';
-import { OptionValue, useDefaultValue, useListWidget, useOptionValuesPrice, useValuesSort } from 'src/modules/customization-system';
+import { OptionValue, useDefaultValue, useListWidget, useOptionValuesPrice, useValuesSort, WidgetConfigLayout, WidgetConfigShape } from 'src/modules/customization-system';
 
 export default defineComponent({
   name: 'BaseListWidget',
@@ -78,8 +78,7 @@ export default defineComponent({
       default: false
     },
     layout: {
-      // TODO: move to the separate type
-      type: String as PropType<'flex' | 'grid'>,
+      type: String as PropType<WidgetConfigLayout>,
       default: 'grid'
     },
     maxValuesCount: {
@@ -95,8 +94,7 @@ export default defineComponent({
       default: () => []
     },
     shape: {
-      // TODO: move to the separate type
-      type: String as PropType<'round' | 'square'>,
+      type: String as PropType<WidgetConfigShape>,
       default: 'square'
     }
   },
@@ -225,12 +223,12 @@ export default defineComponent({
   }
 
   ._error-message {
-    color: var(--input-error-message-color, var(--c-danger));
+    color: var(--widget-error-message-color, var(--c-danger-variant));
     height: calc(var(--font-xs) * 1.2);
     margin-top: var(--spacer-xs);
 
     @include font(
-      --input-error-message-font,
+      --widget-error-message-font,
       var(--font-medium),
       var(--font-xs),
       1.2,

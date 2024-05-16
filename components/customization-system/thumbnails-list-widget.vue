@@ -23,7 +23,7 @@ import {
 } from '@vue/composition-api';
 
 import { BaseImage } from 'src/modules/budsies';
-import { OptionValue } from 'src/modules/customization-system';
+import { OptionValue, WidgetConfigLayout, WidgetConfigShape } from 'src/modules/customization-system';
 
 import BaseListWidget from './base-list-widget.vue';
 
@@ -43,8 +43,7 @@ export default defineComponent({
       default: false
     },
     layout: {
-      // TODO: move to the separate type
-      type: String as PropType<'flex' | 'grid'>,
+      type: String as PropType<WidgetConfigLayout>,
       default: 'grid'
     },
     maxValuesCount: {
@@ -60,8 +59,7 @@ export default defineComponent({
       default: () => []
     },
     shape: {
-      // TODO: move to the separate type
-      type: String as PropType<'round' | 'square'>,
+      type: String as PropType<WidgetConfigShape>,
       default: 'square'
     }
   },
