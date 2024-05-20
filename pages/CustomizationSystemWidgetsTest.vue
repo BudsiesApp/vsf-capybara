@@ -494,21 +494,6 @@ export default defineComponent({
       showSettings.value = !showSettings.value;
     }
 
-    // TODO: move to the form component
-    // const optionValues = computed<OptionValue[]>(() => {
-    //   return customization.value.optionData?.values.filter((value) => {
-    //     const forActivatedOptionValueIds = value.availabilityRules?.forActivatedOptionValueIds;
-
-    //     if (!forActivatedOptionValueIds || !forActivatedOptionValueIds.length) {
-    //       return true;
-    //     }
-
-    //     return forActivatedOptionValueIds.every((id) => {
-    //       return selectedOptionValuesIds.value.includes(id);
-    //     })
-    //   }) || [];
-    // });
-
     return {
       customizations,
       customizationState,

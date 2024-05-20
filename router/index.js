@@ -38,6 +38,8 @@ const PortraitProduct = () =>
   import(/* webpackChunkName: "vsf-portrait-product" */ 'theme/pages/PortraitProduct.vue');
 const CustomizationSystemWidgetsTestPage = () =>
   import(/* webpackChunkName: "vsf-widgets-test" */ 'theme/pages/CustomizationSystemWidgetsTest');
+const CustomizableProduct = () =>
+  import(/* webpackChunkName: "vsf-customizable-product" */ 'theme/pages/CustomizableProduct');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -270,10 +272,10 @@ let routes = [
   {
     name: 'printed-socks-creation-page',
     path: '/plushie/index/printedSocks/',
-    component: PrintedProduct,
+    component: CustomizableProduct,
     props: route => ({
-      sku: 'customPrintedSocks_bundle',
-      productDesign: route.query.product_design
+      sku: 'customPrintedSocks_bundle'
+      // productDesign: route.query.product_design
     })
   },
   {
@@ -459,11 +461,11 @@ let routes = [
   {
     name: 'pajamas-creation',
     path: '/pajamas/index/create/',
-    component: ClothesProduct,
+    component: CustomizableProduct,
     props: (route) => ({
-      sku: 'customPajamas_bundle',
-      productDesign: route.query.product_design,
-      existingPlushieId: route.query.existingPlushieId
+      sku: 'customPajamas_bundle'
+      // productDesign: route.query.product_design,
+      // existingPlushieId: route.query.existingPlushieId
     })
   },
   {

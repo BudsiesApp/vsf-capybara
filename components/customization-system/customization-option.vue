@@ -1,8 +1,10 @@
 <template>
-  <div class="customization-option">
+  <div
+    class="customization-option"
+    :ref="validationRef"
+  >
     <label
       class="_option-label"
-      :ref="validationRef"
       v-if="showLabel"
     >
       {{ optionLabel }}
@@ -18,7 +20,7 @@
       slim
       v-slot="{ errors }"
       :rules="validationRules"
-      :name="customization.name"
+      :name="optionLabel"
     >
       <component
         class="_widget"
