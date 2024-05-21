@@ -43,7 +43,8 @@ export function useAddToCart (
       await root.$store.dispatch('cart/addItem', {
         productToAdd: Object.assign({}, product.value, {
           qty: quantity.value,
-          customizationState: Object.values(customizationState.value)
+          customizationState: Object.values(customizationState.value),
+          uploadMethod: 'upload-now'
         })
       });
     } catch (err) {

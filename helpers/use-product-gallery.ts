@@ -1,76 +1,75 @@
 import { ComputedRef, Ref, computed } from '@vue/composition-api';
 
 import { getProductGallery } from '@vue-storefront/core/modules/catalog/helpers';
-import { BundleOption, BundleOptionsProductLink } from 'core/modules/catalog/types/BundleOption';
 import Product from 'core/modules/catalog/types/Product';
+import { Customization } from 'src/modules/customization-system';
 
-import GalleryProductImages from 'theme/components/interfaces/gallery-product-images.interface';
 import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
 
 function getZoomGalleryImage (imageObject: any): ZoomGalleryImage {
   return {
-    stage: imageObject.src,
-    thumb: imageObject.src,
-    big: imageObject.src
+    stage: imageObject.imageUrl || imageObject.src,
+    thumb: imageObject.imageUrl || imageObject.src,
+    big: imageObject.imageUrl || imageObject.src
   }
 }
 
 export function useProductGallery (
   product: Ref<Product>,
-  styleBundleOption: ComputedRef<BundleOption | undefined> | undefined,
-  selectedStyleProductLink: ComputedRef<BundleOptionsProductLink | undefined> | undefined
+  customizations: Ref<Customization[]>,
+  selectedOptionValuesIds: ComputedRef<string[]>
 ) {
-  const productImages = computed<GalleryProductImages[]>(() => {
-    const mainProductImages = getProductGallery(product.value)
+  const mainProductImages = computed<ZoomGalleryImage[]>(() => {
+    return getProductGallery(product.value)
       .map(getZoomGalleryImage)
+  });
+  const optionValueImages = computed<Record<string, ZoomGalleryImage[]>>(() => {
+    const result: Record<string, ZoomGalleryImage[]> = {};
 
-    let result: GalleryProductImages[] = [
-      {
-        sku: product.value.sku,
-        images: mainProductImages
-      }
-    ]
-
-    if (!styleBundleOption || !styleBundleOption.value) {
-      return result;
-    }
-
-    for (const productLink of styleBundleOption.value.product_links) {
-      if (!productLink.product) {
+    for (const customization of customizations.value) {
+      if (!customization.optionData?.values || !customization.optionData?.hasGalleryImages) {
         continue;
       }
 
-      const styleProductImages = getProductGallery(productLink.product)
-        .map(getZoomGalleryImage)
+      for (const value of customization.optionData.values) {
+        if (!value.galleryImages?.length) {
+          continue;
+        }
 
-      result.push({
-        sku: productLink.product.sku,
-        images: styleProductImages
-      })
+        debugger;
+        result[value.id] = value.galleryImages.map(getZoomGalleryImage);
+      }
     }
 
     return result;
   });
 
   const galleryImages = computed<ZoomGalleryImage[]>(() => {
-    const defaultGalleryProductImages = productImages.value[0];
-    const defaultImages = defaultGalleryProductImages
-      ? defaultGalleryProductImages.images
-      : [];
-
-    if (!selectedStyleProductLink) {
-      return defaultImages;
+    if (!selectedOptionValuesIds.value.length) {
+      return mainProductImages.value;
     }
 
-    const selectedStyleGalleryProductImages = productImages.value.find(
-      (item) => selectedStyleProductLink.value && (item.sku === selectedStyleProductLink.value.sku)
-    );
+    const selectedOptionValuesImages: ZoomGalleryImage[] = [];
 
-    if (!selectedStyleGalleryProductImages || !selectedStyleGalleryProductImages.images.length) {
-      return defaultImages;
+    if (!selectedOptionValuesIds.value.length) {
+      return mainProductImages.value;
     }
 
-    return selectedStyleGalleryProductImages.images;
+    for (const selectedOptionValueId of selectedOptionValuesIds.value) {
+      const selectedOptionValueProductImages = optionValueImages.value[selectedOptionValueId];
+
+      if (!selectedOptionValueProductImages) {
+        continue;
+      }
+
+      selectedOptionValuesImages.push(...selectedOptionValueProductImages);
+    }
+
+    if (!selectedOptionValuesImages.length) {
+      return mainProductImages.value;
+    }
+
+    return selectedOptionValuesImages;
   });
 
   return {

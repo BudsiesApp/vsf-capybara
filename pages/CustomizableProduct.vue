@@ -7,6 +7,7 @@
 
     <form-with-images-gallery
       :product="getCurrentProduct"
+      :existing-cart-item="existingCartItem"
       v-if="showForm"
     />
   </div>
@@ -15,6 +16,7 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 
+import CartItem from 'core/modules/cart/types/CartItem';
 import Product from 'core/modules/catalog/types/Product';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { htmlDecode } from '@vue-storefront/core/filters';
@@ -44,11 +46,20 @@ export default Vue.extend({
   },
   data () {
     return {
-      plushieId: undefined as number | undefined,
       isDataLoaded: false
     };
   },
   computed: {
+    cartItems (): CartItem[] {
+      return this.$store.getters['cart/getCartItems'];
+    },
+    existingCartItem (): CartItem | undefined {
+      if (!this.existingPlushieId) {
+        return;
+      }
+
+      return this.cartItems.find((item) => item.plushieId && item.plushieId === this.existingPlushieId);
+    },
     getCurrentProduct (): Product | null {
       const product = this.$store.getters['product/getCurrentProduct'];
       if (!product?.sku || product.sku !== this.sku) {

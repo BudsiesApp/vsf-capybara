@@ -240,8 +240,11 @@ export default defineComponent({
     });
 
     return {
-      // TODO: update for customization system support
-      ...useProductGallery(product, undefined, undefined),
+      ...useProductGallery(
+        product,
+        productCustomizations,
+        selectedOptionValuesIds
+      ),
       ...useCustomizationsPrice(
         productCustomizations,
         customizationState,

@@ -451,7 +451,7 @@ let routes = [
   {
     name: 'clothes-product',
     path: '/clothes/p/:sku/',
-    component: ClothesProduct,
+    component: CustomizableProduct,
     props: (route) => ({
       sku: route.params.sku,
       productDesign: route.query.product_design,
@@ -463,9 +463,9 @@ let routes = [
     path: '/pajamas/index/create/',
     component: CustomizableProduct,
     props: (route) => ({
-      sku: 'customPajamas_bundle'
+      sku: 'customPajamas_bundle',
       // productDesign: route.query.product_design,
-      // existingPlushieId: route.query.existingPlushieId
+      existingPlushieId: route.query.existingPlushieId
     })
   },
   {
