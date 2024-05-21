@@ -143,7 +143,7 @@ export default defineComponent({
               id: 'test',
               name: 'Weighted Stuffed Animals',
               description: `A stainless steel pellet-filled insert, hand-sewn into the body of the plush. 2lbs for 16" and 24", 0.5 lb for 10". `,
-              previewUrl: `https://api.petsies.storefront.st.budsies.com/img/1350/1674/resize/catalog/product/w/e/weighted_plushies.jpg`,
+              thumbnailUrl: `https://api.petsies.storefront.st.budsies.com/img/1350/1674/resize/catalog/product/w/e/weighted_plushies.jpg`,
               price: 20,
               sn: 0,
               galleryImages: [],
@@ -442,7 +442,7 @@ export default defineComponent({
               name: 'First Item',
               description: `First Item description`,
               sn: 0,
-              previewUrl:
+              thumbnailUrl:
                 'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/b/d/e/6f2ea7eb65d706ae2300385142ec8.jpg',
               galleryImages: [],
               isEnabled: true,
@@ -452,7 +452,7 @@ export default defineComponent({
               id: 'item_2',
               name: 'Second Item',
               description: `Second Item description`,
-              previewUrl:
+              thumbnailUrl:
                 'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/a/9/2/befa695317fa7476b0ae045ffca37.jpg',
               sn: 1,
               galleryImages: [],
@@ -463,7 +463,7 @@ export default defineComponent({
               id: 'item_3',
               name: 'Third Item',
               description: `Third Item description`,
-              previewUrl:
+              thumbnailUrl:
                 'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/2/9/3/b1686c1f54c9da02af0b5af739b4d.jpg',
               price: 15,
               sn: 2,
@@ -475,7 +475,7 @@ export default defineComponent({
               id: 'item_4',
               name: 'Fourth Item',
               description: `Fourth Item description`,
-              previewUrl:
+              thumbnailUrl:
                 'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/e/0/5/c1e80b85d4f76e116a17c7b22b124.png',
               price: 15,
               sn: 3,

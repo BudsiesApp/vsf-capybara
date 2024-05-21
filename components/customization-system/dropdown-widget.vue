@@ -37,6 +37,8 @@ import {
   useValuesSort
 } from 'src/modules/customization-system';
 
+const defaultPlaceholder = 'Select Option';
+
 export default defineComponent({
   name: 'DropdownWidget',
   components: {
@@ -82,14 +84,10 @@ export default defineComponent({
     const { sortedValues } = useValuesSort(values);
 
     const sortedValuesWithPlaceholder = computed<OptionValue[]>(() => {
-      if (!placeholder.value) {
-        return sortedValues.value;
-      }
-
       return [
         {
           id: '',
-          name: placeholder.value,
+          name: placeholder.value || defaultPlaceholder,
           isEnabled: true,
           isDefault: false,
           sn: -1,

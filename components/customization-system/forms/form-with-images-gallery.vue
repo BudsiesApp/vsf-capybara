@@ -119,9 +119,9 @@ import {
   Customization,
   getCustomizationsFromProduct,
   useAvailableCustomizations,
+  useCustomizationsPrice,
   useCustomizationState
 } from 'src/modules/customization-system';
-import { PriceHelper } from 'src/modules/shared';
 import i18n from '@vue-storefront/core/i18n';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -136,17 +136,6 @@ import CustomizationOption from 'theme/components/customization-system/customiza
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
 import MZoomGallery from 'theme/components/molecules/m-zoom-gallery.vue';
-
-// TODO: respect selected customizations
-function useProductPrice (product: Ref<Product>) {
-  const totalPrice = computed<PriceHelper.ProductPrice>(() => {
-    return PriceHelper.getProductDefaultPrice(product.value, {}, false);
-  });
-
-  return {
-    totalPrice
-  };
-}
 
 function getAllFormRefs (
   refs: Record<string, Vue | Element | Vue[] | Element[]>
@@ -198,8 +187,15 @@ export default defineComponent({
       return getCustomizationsFromProduct(product.value);
     });
 
-    const { customizationState, selectedOptionValuesIds, onCustomizationOptionInput } = useCustomizationState(existingCartItem);
-    const { availableCustomizations, customizationAvailableOptionValues } = useAvailableCustomizations(productCustomizations, customizationState, selectedOptionValuesIds);
+    const {
+      customizationState,
+      selectedOptionValuesIds,
+      onCustomizationOptionInput
+    } = useCustomizationState(existingCartItem);
+    const {
+      availableCustomizations,
+      customizationAvailableOptionValues
+    } = useAvailableCustomizations(productCustomizations, customizationState, selectedOptionValuesIds);
 
     const formValidation = useFormValidation(
       validationObserver, () =>
@@ -207,7 +203,16 @@ export default defineComponent({
     );
 
     const quantity = ref<number>(1);
-    const { addToCartHandler, isSubmitting } = useAddToCart(product, quantity, customizationState, existingCartItem, context);
+    const {
+      addToCartHandler,
+      isSubmitting
+    } = useAddToCart(
+      product,
+      quantity,
+      customizationState,
+      existingCartItem,
+      context
+    );
     async function onFormSubmit (): Promise<void> {
       const isValid = await formValidation.validateAndGoToFirstError();
 
@@ -237,7 +242,11 @@ export default defineComponent({
     return {
       // TODO: update for customization system support
       ...useProductGallery(product, undefined, undefined),
-      ...useProductPrice(product),
+      ...useCustomizationsPrice(
+        productCustomizations,
+        customizationState,
+        context
+      ),
       ...formValidation,
       availableCustomizations,
       customizationAvailableOptionValues,

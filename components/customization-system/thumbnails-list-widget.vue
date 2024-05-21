@@ -9,7 +9,7 @@
         class="_image-wrapper"
         :class="{ '-selected': selected, '-round': round }"
       >
-        <BaseImage class="_image" :src="option.previewUrl" :aspect-ratio="1" />
+        <BaseImage class="_image" :src="option.thumbnailUrl" :aspect-ratio="1" />
       </div>
     </template>
   </base-list-widget>
