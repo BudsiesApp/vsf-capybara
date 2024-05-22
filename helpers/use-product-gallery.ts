@@ -36,7 +36,9 @@ export function useProductGallery (
           continue;
         }
 
-        result[value.id] = value.galleryImages.map(getZoomGalleryImage)
+        result[value.id] = value.galleryImages
+          .sort((a, b) => a.sn > b.sn ? 1 : -1)
+          .map(getZoomGalleryImage)
         // TODO: temporary. should always be image src
           .filter(({ stage }) => !!stage);
       }
