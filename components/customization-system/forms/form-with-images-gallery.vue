@@ -141,11 +141,13 @@ function getAllFormRefs (
   refs: Record<string, Vue | Element | Vue[] | Element[]>
 ): Record<string, Vue | Element | Vue[] | Element[]> {
   let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = {};
+  const customizationOptions = refs['customizationOption'] as InstanceType<typeof CustomizationOption>[];
 
-  (refs['customizationOption'] as InstanceType<typeof CustomizationOption>[]).forEach((element) => {
-    // TODO: refactor
-    refsDictionary = { ...refsDictionary, ...element.$refs };
-  });
+  for (const customizationOption of customizationOptions) {
+    for (const key in customizationOption.$refs) {
+      refsDictionary[key] = customizationOption.$refs[key];
+    }
+  }
 
   return refsDictionary;
 }
@@ -195,7 +197,7 @@ export default defineComponent({
     const {
       availableCustomizations,
       customizationAvailableOptionValues
-    } = useAvailableCustomizations(productCustomizations, customizationState, selectedOptionValuesIds);
+    } = useAvailableCustomizations(productCustomizations, selectedOptionValuesIds);
 
     const formValidation = useFormValidation(
       validationObserver, () =>

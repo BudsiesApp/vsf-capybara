@@ -36,8 +36,9 @@ export function useProductGallery (
           continue;
         }
 
-        debugger;
-        result[value.id] = value.galleryImages.map(getZoomGalleryImage);
+        result[value.id] = value.galleryImages.map(getZoomGalleryImage)
+        // TODO: temporary. should always be image src
+          .filter(({ stage }) => !!stage);
       }
     }
 

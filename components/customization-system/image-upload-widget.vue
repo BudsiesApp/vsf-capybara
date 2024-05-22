@@ -10,6 +10,7 @@
       </p>
 
       <m-artwork-upload
+        ref="artworkUpload"
         :disabled="isDisabled"
         :product-id="backendProductId"
         :upload-url="artworkUploadUrl"
@@ -50,7 +51,7 @@
 
 <script lang="ts">
 import config from 'config';
-import { defineComponent, PropType, ref, toRefs } from '@vue/composition-api';
+import { defineComponent, nextTick, PropType, ref, toRefs, watch } from '@vue/composition-api';
 
 import { useBackendProductId } from 'theme/helpers/use-backend-product-id';
 
@@ -91,10 +92,22 @@ export default defineComponent({
     const { maxValuesCount, productId, value } = toRefs(props);
 
     const isUploadNow = ref<boolean>(true);
+    const artworkUpload = ref<InstanceType<typeof MArtworkUpload> | null>(null)
+    const filesUploadFields = useFilesUpload(value, maxValuesCount, context);
+
+    watch(filesUploadFields.initialItems, async (newValue) => {
+      if (!newValue.length || !artworkUpload.value) {
+        return;
+      }
+
+      await nextTick()
+      artworkUpload.value.initFiles();
+    });
 
     return {
+      ...filesUploadFields,
       ...useBackendProductId(productId),
-      ...useFilesUpload(value, maxValuesCount, context),
+      artworkUpload,
       artworkUploadUrl: config.images.fileuploaderUploadUrl as string,
       isUploadNow
     };

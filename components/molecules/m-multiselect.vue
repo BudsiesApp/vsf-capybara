@@ -374,9 +374,9 @@ export default Vue.extend({
       border-radius: 0;
       border: none;
       @include border(--input-border, 0 0 1px 0, solid, var(--c-light));
-      min-height: 49px;
+      min-height: var(--multiselect-tags-min-height, 49px);
       padding-left: 0;
-      padding-top: var(--spacer-sm);
+      padding-top: var(--multiselect-tags-padding-top, var(--spacer-sm));
       background: none;
     }
 

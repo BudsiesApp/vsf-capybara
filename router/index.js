@@ -274,8 +274,9 @@ let routes = [
     path: '/plushie/index/printedSocks/',
     component: CustomizableProduct,
     props: route => ({
-      sku: 'customPrintedSocks_bundle'
-      // productDesign: route.query.product_design
+      sku: 'customPrintedSocks_bundle',
+      // productDesign: route.query.product_design,
+      existingPlushieId: route.query.existingPlushieId
     })
   },
   {
