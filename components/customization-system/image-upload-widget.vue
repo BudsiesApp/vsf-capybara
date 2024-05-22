@@ -53,10 +53,11 @@
 import config from 'config';
 import { defineComponent, nextTick, PropType, ref, toRefs, watch } from '@vue/composition-api';
 
+import { FileUploadValue, useFilesUpload } from 'src/modules/customization-system';
+
 import { useBackendProductId } from 'theme/helpers/use-backend-product-id';
 
 import MArtworkUpload from '../molecules/m-artwork-upload.vue';
-import { useFilesUpload } from 'src/modules/customization-system';
 
 export default defineComponent({
   components: {
@@ -84,7 +85,7 @@ export default defineComponent({
       required: true
     },
     value: {
-      type: [String, Array] as PropType<string | string[] | undefined>,
+      type: [String, Array] as PropType<FileUploadValue | FileUploadValue[] | undefined>,
       default: undefined
     }
   },
@@ -96,12 +97,14 @@ export default defineComponent({
     const filesUploadFields = useFilesUpload(value, maxValuesCount, context);
 
     watch(filesUploadFields.initialItems, async (newValue) => {
-      if (!newValue.length || !artworkUpload.value) {
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      if (!newValue.length || !(artworkUpload as any).value) {
         return;
       }
 
-      await nextTick()
-      artworkUpload.value.initFiles();
+      await nextTick();
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      (artworkUpload as any).value.initFiles();
     });
 
     return {
