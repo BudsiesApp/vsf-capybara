@@ -85,7 +85,7 @@ export default defineComponent({
       required: true
     },
     value: {
-      type: [String, Array] as PropType<FileUploadValue | FileUploadValue[] | undefined>,
+      type: [Object, Array] as PropType<FileUploadValue | FileUploadValue[] | undefined>,
       default: undefined
     }
   },
