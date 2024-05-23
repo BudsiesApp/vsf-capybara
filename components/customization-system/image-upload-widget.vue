@@ -1,48 +1,17 @@
 <template>
   <div class="image-upload-widget">
-    <div class="_upload-now" v-show="isUploadNow">
-      <p v-if="allowUploadLater">
-        {{ $t('Don\'t have your photos? You can finalize your order and') }} <a
-          class="_popup-link"
-          href="javascript:void(0)"
-          @click.stop.prevent="isUploadNow = false"
-        >{{ $t('send them to us later.') }}</a>
-      </p>
-
-      <m-artwork-upload
-        ref="artworkUpload"
-        :disabled="isDisabled"
-        :product-id="backendProductId"
-        :upload-url="artworkUploadUrl"
-        :allow-multiple="allowMultiple"
-        :initial-items="initialItems"
-        :max-files="maxFiles"
-        @file-added="onFileAdded"
-        @file-removed="onFileRemoved"
-        @is-busy-changed="$emit('widget-busy-changed', $event)"
-      />
-    </div>
-
-    <div
-      class="_upload-email"
-      v-show="!isUploadNow"
-      v-if="allowUploadLater"
-    >
-      <p>
-        {{ $t('Want to upload photos now? Please use') }} <a
-          class="_popup-link"
-          href="javascript:void(0)"
-          @click.stop.prevent="isUploadNow = true"
-        >{{ $t('our uploader.') }}</a>
-      </p>
-
-      <p>
-        {{ $t('When you\'re ready, please email a photo of the design to:') }} <br> <a
-          class="_popup-link"
-          href="mailto:photos@mypetsies.com"
-        >photos@mypetsies.com</a>
-      </p>
-    </div>
+    <m-artwork-upload
+      ref="artworkUpload"
+      :disabled="isDisabled"
+      :product-id="backendProductId"
+      :upload-url="artworkUploadUrl"
+      :allow-multiple="allowMultiple"
+      :initial-items="initialItems"
+      :max-files="maxFiles"
+      @file-added="onFileAdded"
+      @file-removed="onFileRemoved"
+      @is-busy-changed="$emit('widget-busy-changed', $event)"
+    />
 
     <div class="_error-message">
       {{ error }}
@@ -65,10 +34,6 @@ export default defineComponent({
     MArtworkUpload
   },
   props: {
-    allowUploadLater: {
-      type: Boolean,
-      default: false
-    },
     error: {
       type: String,
       default: undefined
@@ -93,7 +58,6 @@ export default defineComponent({
   setup (props, context) {
     const { maxValuesCount, productId, value } = toRefs(props);
 
-    const isUploadNow = ref<boolean>(true);
     const artworkUpload = ref<InstanceType<typeof MArtworkUpload> | null>(null)
     const filesUploadFields = useFilesUpload(value, maxValuesCount, context);
 
@@ -112,8 +76,7 @@ export default defineComponent({
       ...filesUploadFields,
       ...useBackendProductId(productId),
       artworkUpload,
-      artworkUploadUrl: config.images.fileuploaderUploadUrl as string,
-      isUploadNow
+      artworkUploadUrl: config.images.fileuploaderUploadUrl as string
     };
   }
 });
