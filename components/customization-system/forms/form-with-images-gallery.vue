@@ -38,7 +38,7 @@
         >
           <form @submit.prevent="onFormSubmit">
             <customization-option
-              v-for="customization in availableCustomizations"
+              v-for="customization in availableOptionCustomizations"
               class="_customization-option"
               ref="customizationOption"
               :key="customization.id"
@@ -48,6 +48,7 @@
               :product-id="product.id"
               :value="customizationState[customization.id]"
               @input="onCustomizationOptionInput"
+              @customization-option-busy-state-changed="onCustomizationOptionBusyChanged"
             />
 
             <div
@@ -83,7 +84,7 @@
                 <SfButton
                   class="_add-to-cart color-primary"
                   type="submit"
-                  :disabled="isDisabled"
+                  :disabled="isSubmitButtonDisabled"
                 >
                   {{ $t("Add to Cart") }}
                 </SfButton>
@@ -119,6 +120,7 @@ import {
   Customization,
   getCustomizationsFromProduct,
   useAvailableCustomizations,
+  useCustomizationsBusyState,
   useCustomizationsPrice,
   useCustomizationState
 } from 'src/modules/customization-system';
@@ -196,8 +198,13 @@ export default defineComponent({
     } = useCustomizationState(existingCartItem);
     const {
       availableCustomizations,
+      availableOptionCustomizations,
       customizationAvailableOptionValues
     } = useAvailableCustomizations(productCustomizations, selectedOptionValuesIds);
+    const {
+      isSomeCustomizationOptionBusy,
+      onCustomizationOptionBusyChanged
+    } = useCustomizationsBusyState()
 
     const formValidation = useFormValidation(
       validationObserver, () =>
@@ -240,6 +247,9 @@ export default defineComponent({
     const isDisabled = computed<boolean>(() => {
       return isSubmitting.value;
     });
+    const isSubmitButtonDisabled = computed<boolean>(() => {
+      return isSomeCustomizationOptionBusy.value || isDisabled.value;
+    });
 
     return {
       ...useProductGallery(
@@ -254,9 +264,12 @@ export default defineComponent({
       ),
       ...formValidation,
       availableCustomizations,
+      availableOptionCustomizations,
       customizationAvailableOptionValues,
       customizationState,
       isDisabled,
+      isSubmitButtonDisabled,
+      onCustomizationOptionBusyChanged,
       onCustomizationOptionInput,
       onFormSubmit,
       shortDescription,
@@ -308,7 +321,8 @@ export default defineComponent({
   ._actions-container,
   ._customization-option,
   ._form-errors,
-  ._quantity-field {
+  ._quantity-field,
+  ._price {
     margin-top: var(--spacer-base);
   }
 

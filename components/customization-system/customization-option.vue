@@ -29,6 +29,7 @@
         :is="widget.component"
         v-bind="widget.props"
         v-model="selectedOption"
+        @widget-busy-changed="onWidgetBusyChanged"
       />
     </validation-provider>
 
@@ -51,6 +52,7 @@ import {
   OptionValue,
   useCustomizationOptionValidation,
   useCustomizationOptionWidget,
+  useWidgetBusyState,
   WidgetType
 } from 'src/modules/customization-system';
 
@@ -64,6 +66,8 @@ import ProductionTimeSelector from './production-time-selector.vue';
 import TextAreaWidget from './textarea-widget.vue';
 import TextInputWidget from './text-input-widget.vue';
 import ThumbnailsListWidget from './thumbnails-list-widget.vue';
+
+const customizationWidgetBusyStateChangedEventName = 'customization-option-busy-state-changed';
 
 export default defineComponent({
   name: 'CustomizationOption',
@@ -127,6 +131,11 @@ export default defineComponent({
         customization,
         optionValues,
         productId,
+        context
+      ),
+      ...useWidgetBusyState(
+        customization,
+        customizationWidgetBusyStateChangedEventName,
         context
       ),
       optionDescription,

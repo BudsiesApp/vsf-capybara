@@ -19,6 +19,7 @@
         :max-files="maxFiles"
         @file-added="onFileAdded"
         @file-removed="onFileRemoved"
+        @is-busy-changed="$emit('widget-busy-changed', $event)"
       />
     </div>
 
