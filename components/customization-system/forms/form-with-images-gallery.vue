@@ -118,11 +118,13 @@ import { ValidationObserver, ValidationProvider } from 'vee-validate';
 
 import {
   Customization,
+  CustomizationOptionValue,
   getCustomizationsFromProduct,
   useAvailableCustomizations,
   useCustomizationsBusyState,
   useCustomizationsPrice,
-  useCustomizationState
+  useCustomizationState,
+  useOptionValueActions
 } from 'src/modules/customization-system';
 import i18n from '@vue-storefront/core/i18n';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
@@ -190,35 +192,53 @@ export default defineComponent({
     const productCustomizations = computed<Customization[]>(() => {
       return getCustomizationsFromProduct(product.value);
     });
+    const productCustomization = computed<Record<string, Customization>>(() => {
+      const dictionary: Record<string, Customization> = {};
+
+      for (const customization of productCustomizations.value) {
+        dictionary[customization.id] = customization;
+      }
+
+      return dictionary;
+    });
 
     const {
+      addCustomizationOptionValue,
       customizationOptionValue,
       customizationState,
+      removeCustomizationOptionValue,
       selectedOptionValuesIds,
-      onCustomizationOptionInput
+      updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
     const {
       availableCustomizations,
       availableOptionCustomizations,
       customizationAvailableOptionValues
     } = useAvailableCustomizations(productCustomizations, selectedOptionValuesIds);
-    // const {
-    //   executeActionsByCustomizationIdAndOptionValueId
-    // } = useOptionValueActions(productCustomizations, customizationAvailableOptionValues);
+    const {
+      executeActionsByCustomizationIdAndCustomizationOptionValue
+    } = useOptionValueActions(
+      productCustomizations,
+      productCustomization,
+      customizationAvailableOptionValues,
+      updateCustomizationOptionValue,
+      removeCustomizationOptionValue,
+      addCustomizationOptionValue
+    );
     const {
       isSomeCustomizationOptionBusy,
       onCustomizationOptionBusyChanged
     } = useCustomizationsBusyState()
 
-    // function onCustomizationOptionInput (
-    //   payload: {
-    //     customizationId: string,
-    //     items: CustomizationStateItem[]
-    //   }
-    // ) {
-    //   updateCustomizationStateItem(payload);
-    //   // executeActionsByCustomizationIdAndOptionValueId(item.)
-    // }
+    function onCustomizationOptionInput (
+      payload: {
+        customizationId: string,
+        value: CustomizationOptionValue
+      }
+    ) {
+      updateCustomizationOptionValue(payload);
+      executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
+    }
 
     const formValidation = useFormValidation(
       validationObserver, () =>
