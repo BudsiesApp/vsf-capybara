@@ -46,7 +46,7 @@
               :is-disabled="isDisabled"
               :option-values="customizationAvailableOptionValues[customization.id]"
               :product-id="product.id"
-              :value="customizationState[customization.id]"
+              :value="customizationOptionValue[customization.id]"
               @input="onCustomizationOptionInput"
               @customization-option-busy-state-changed="onCustomizationOptionBusyChanged"
             />
@@ -192,6 +192,7 @@ export default defineComponent({
     });
 
     const {
+      customizationOptionValue,
       customizationState,
       selectedOptionValuesIds,
       onCustomizationOptionInput
@@ -201,10 +202,23 @@ export default defineComponent({
       availableOptionCustomizations,
       customizationAvailableOptionValues
     } = useAvailableCustomizations(productCustomizations, selectedOptionValuesIds);
+    // const {
+    //   executeActionsByCustomizationIdAndOptionValueId
+    // } = useOptionValueActions(productCustomizations, customizationAvailableOptionValues);
     const {
       isSomeCustomizationOptionBusy,
       onCustomizationOptionBusyChanged
     } = useCustomizationsBusyState()
+
+    // function onCustomizationOptionInput (
+    //   payload: {
+    //     customizationId: string,
+    //     items: CustomizationStateItem[]
+    //   }
+    // ) {
+    //   updateCustomizationStateItem(payload);
+    //   // executeActionsByCustomizationIdAndOptionValueId(item.)
+    // }
 
     const formValidation = useFormValidation(
       validationObserver, () =>
@@ -259,14 +273,14 @@ export default defineComponent({
       ),
       ...useCustomizationsPrice(
         productCustomizations,
-        customizationState,
+        customizationOptionValue,
         context
       ),
       ...formValidation,
       availableCustomizations,
       availableOptionCustomizations,
       customizationAvailableOptionValues,
-      customizationState,
+      customizationOptionValue,
       isDisabled,
       isSubmitButtonDisabled,
       onCustomizationOptionBusyChanged,

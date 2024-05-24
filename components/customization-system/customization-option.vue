@@ -48,7 +48,7 @@ import { ValidationProvider } from 'vee-validate';
 
 import {
   Customization,
-  CustomizationStateItem,
+  CustomizationOptionValue,
   OptionValue,
   useCustomizationOptionValidation,
   useCustomizationOptionWidget,
@@ -102,7 +102,7 @@ export default defineComponent({
       required: true
     },
     value: {
-      type: Object as PropType<CustomizationStateItem | undefined>,
+      type: [Object, String, Array] as PropType<CustomizationOptionValue>,
       default: undefined
     }
   },

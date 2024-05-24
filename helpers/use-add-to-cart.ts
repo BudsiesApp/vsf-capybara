@@ -10,7 +10,7 @@ import { ServerError } from 'src/modules/shared';
 export function useAddToCart (
   product: Ref<Product>,
   quantity: Ref<number>,
-  customizationState: Ref<Record<string, CustomizationStateItem>>,
+  customizationStateItems: Ref<CustomizationStateItem[]>,
   existingCartItem: Ref<CartItem | undefined>,
   { root }: SetupContext
 ) {
@@ -43,7 +43,7 @@ export function useAddToCart (
       await root.$store.dispatch('cart/addItem', {
         productToAdd: Object.assign({}, product.value, {
           qty: quantity.value,
-          customizationState: Object.values(customizationState.value)
+          customizationState: customizationStateItems.value
         })
       });
     } catch (err) {
@@ -81,7 +81,7 @@ export function useAddToCart (
         product: Object.assign({}, existingCartItem.value, {
           qty: quantity.value,
           product_option: productOption,
-          customizationState: Object.values(customizationState.value)
+          customizationState: customizationStateItems.value
         }),
         forceUpdateServerItem: true
       });
