@@ -2,6 +2,7 @@
   <div
     class="customization-option"
     :ref="validationRef"
+    v-show="showCustomization"
   >
     <label
       class="_option-label"
@@ -123,6 +124,9 @@ export default defineComponent({
         customization.value.optionData?.displayWidget !== WidgetType.CHECKBOX
       );
     });
+    const showCustomization = computed<boolean>(() => {
+      return !(customization.value.optionData?.isRequired && optionValues.value.length === 1);
+    });
 
     return {
       ...useCustomizationOptionValidation(customization),
@@ -141,6 +145,7 @@ export default defineComponent({
       optionDescription,
       optionHint,
       optionLabel,
+      showCustomization,
       showLabel
     };
   }
