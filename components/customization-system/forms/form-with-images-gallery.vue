@@ -44,11 +44,15 @@
               :key="customization.id"
               :customization="customization"
               :is-disabled="isDisabled"
-              :option-values="customizationAvailableOptionValues[customization.id]"
+              :option-values="
+                customizationAvailableOptionValues[customization.id]
+              "
               :product-id="product.id"
               :value="customizationOptionValue[customization.id]"
               @input="onCustomizationOptionInput"
-              @customization-option-busy-state-changed="onCustomizationOptionBusyChanged"
+              @customization-option-busy-state-changed="
+                onCustomizationOptionBusyChanged
+              "
             />
 
             <div
@@ -97,7 +101,7 @@
 
     <m-product-description-story
       class="_description-story"
-      :product-sku="product.sku"
+      :product-sku="descriptionProductSku"
       :backup-product-sku="product.parentSku"
       :title="$t('Product Details').toString()"
     />
@@ -121,6 +125,7 @@ import {
   CustomizationOptionValue,
   getCustomizationsFromProduct,
   useAvailableCustomizations,
+  useCustomizationProductDescription,
   useCustomizationsBusyState,
   useCustomizationsPrice,
   useCustomizationState,
@@ -145,7 +150,9 @@ function getAllFormRefs (
   refs: Record<string, Vue | Element | Vue[] | Element[]>
 ): Record<string, Vue | Element | Vue[] | Element[]> {
   let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = {};
-  const customizationOptions = refs['customizationOption'] as InstanceType<typeof CustomizationOption>[];
+  const customizationOptions = refs['customizationOption'] as InstanceType<
+    typeof CustomizationOption
+  >[];
 
   for (const customizationOption of customizationOptions) {
     for (const key in customizationOption.$refs) {
@@ -214,7 +221,10 @@ export default defineComponent({
       availableCustomizations,
       availableOptionCustomizations,
       customizationAvailableOptionValues
-    } = useAvailableCustomizations(productCustomizations, selectedOptionValuesIds);
+    } = useAvailableCustomizations(
+      productCustomizations,
+      selectedOptionValuesIds
+    );
     const {
       executeActionsByCustomizationIdAndCustomizationOptionValue
     } = useOptionValueActions(
@@ -228,7 +238,7 @@ export default defineComponent({
     const {
       isSomeCustomizationOptionBusy,
       onCustomizationOptionBusyChanged
-    } = useCustomizationsBusyState()
+    } = useCustomizationsBusyState();
 
     function onCustomizationOptionInput (
       payload: {
@@ -240,16 +250,12 @@ export default defineComponent({
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
 
-    const formValidation = useFormValidation(
-      validationObserver, () =>
-        getAllFormRefs(context.refs)
+    const formValidation = useFormValidation(validationObserver, () =>
+      getAllFormRefs(context.refs)
     );
 
     const quantity = ref<number>(1);
-    const {
-      addToCartHandler,
-      isSubmitting
-    } = useAddToCart(
+    const { addToCartHandler, isSubmitting } = useAddToCart(
       product,
       quantity,
       customizationState,
@@ -274,7 +280,7 @@ export default defineComponent({
           type: 'danger',
           message: 'Error: ' + error,
           action1: { label: i18n.t('OK') }
-        })
+        });
       }
     }
 
@@ -290,6 +296,11 @@ export default defineComponent({
         product,
         productCustomizations,
         selectedOptionValuesIds
+      ),
+      ...useCustomizationProductDescription(
+        product,
+        productCustomizations,
+        customizationOptionValue
       ),
       ...useCustomizationsPrice(
         productCustomizations,
