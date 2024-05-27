@@ -56,23 +56,34 @@ export default defineComponent({
       return props.values[1].id;
     });
 
+    const selectedOption = computed<string | string[] | undefined>({
+      get: () => {
+        return props.value;
+      },
+      set: (value) => {
+        emit(
+          'input',
+          value || valueIdForUnselectedState.value
+        );
+      }
+    })
+
     const isSelected = computed<boolean>({
       get: () => {
         if (!props.value) {
           return false;
         }
 
-        const value = Array.isArray(props.value) ? props.value[0] : props.value;
+        const value = Array.isArray(props.value)
+          ? props.value[0]
+          : props.value;
 
         return !!value && value === valueIdForSelectedState.value;
       },
       set: (selected) => {
-        emit(
-          'input',
-          selected
-            ? valueIdForSelectedState.value
-            : valueIdForUnselectedState.value
-        );
+        selectedOption.value = selected
+          ? valueIdForSelectedState.value
+          : valueIdForUnselectedState.value
       }
     });
     const isValid = computed<boolean>(() => {
@@ -80,7 +91,7 @@ export default defineComponent({
     });
 
     useDefaultValue(
-      toRef(props, 'value'),
+      selectedOption,
       toRef(props, 'values')
     );
 
