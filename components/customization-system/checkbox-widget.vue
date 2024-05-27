@@ -53,7 +53,7 @@ export default defineComponent({
       return props.values[0].id;
     });
     const valueIdForUnselectedState = computed<string>(() => {
-      return props.values[1].id;
+      return props.values[1]?.id || '';
     });
 
     const selectedOption = computed<string | string[] | undefined>({
