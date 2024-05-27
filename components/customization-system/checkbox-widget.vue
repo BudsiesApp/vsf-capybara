@@ -15,9 +15,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { computed, defineComponent, PropType, toRef } from '@vue/composition-api';
 
-import { OptionValue } from 'src/modules/customization-system';
+import { OptionValue, useDefaultValue } from 'src/modules/customization-system';
 
 import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
 
@@ -49,17 +49,40 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
+    const valueIdForSelectedState = computed<string>(() => {
+      return props.values[0].id;
+    });
+    const valueIdForUnselectedState = computed<string>(() => {
+      return props.values[1].id;
+    });
+
     const isSelected = computed<boolean>({
       get: () => {
-        return !!props.value;
+        if (!props.value) {
+          return false;
+        }
+
+        const value = Array.isArray(props.value) ? props.value[0] : props.value;
+
+        return !!value && value === valueIdForSelectedState.value;
       },
       set: (selected) => {
-        emit('input', selected ? props.values[0].id : undefined);
+        emit(
+          'input',
+          selected
+            ? valueIdForSelectedState.value
+            : valueIdForUnselectedState.value
+        );
       }
     });
     const isValid = computed<boolean>(() => {
       return !props.error;
     });
+
+    useDefaultValue(
+      toRef(props, 'value'),
+      toRef(props, 'values')
+    );
 
     return {
       isSelected,
