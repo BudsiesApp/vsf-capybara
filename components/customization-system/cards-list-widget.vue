@@ -139,6 +139,8 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/typography";
 
 .cards-list-widget {
+  width: 100%;
+
   ._list {
     padding: 0;
     list-style: none;
@@ -146,7 +148,6 @@ export default defineComponent({
 
   ._item {
     cursor: pointer;
-    margin: 0 calc(var(--spacer-sm) * -1);
   }
 
   ._checkbox {

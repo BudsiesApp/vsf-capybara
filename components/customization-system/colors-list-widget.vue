@@ -87,6 +87,8 @@ export default defineComponent({
   --base-list-widget-item-relative-width: 25.01%;
   --base-list-widget-selected-option-background: transparent;
 
+  width: 100%;
+
   ._color-wrapper {
     position: relative;
     left: -4px;

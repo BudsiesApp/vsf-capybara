@@ -88,6 +88,8 @@ export default defineComponent({
   --base-list-widget-item-absolute-width: 145px;
   --base-list-widget-item-relative-width: 33.33%;
 
+  width: 100%;
+
   ._image-wrapper {
     position: relative;
     display: flex;

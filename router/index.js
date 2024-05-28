@@ -414,7 +414,7 @@ let routes = [
   {
     name: 'figurines-creation',
     path: '/petsies-figurines/create/',
-    component: ClayProduct,
+    component: CustomizableProduct,
     props: (route) => ({
       sku: 'petsiesFigurines_bundle',
       existingPlushieId: route.query.existingPlushieId
@@ -435,10 +435,11 @@ let routes = [
   {
     name: 'bobbleheads-creation',
     path: '/petsies-bobbleheads/create/',
-    component: ClayProduct,
+    component: CustomizableProduct,
     props: (route) => ({
       sku: 'petsiesBobbleheads_bundle',
-      existingPlushieId: route.query.existingPlushieId
+      existingPlushieId: route.query.existingPlushieId,
+      layout: 'vertical'
     })
   },
   {

@@ -136,6 +136,8 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/typography";
 
 .base-list-widget {
+  width: 100%;
+
   ._options-list {
     display: grid;
     grid-template-columns: repeat(

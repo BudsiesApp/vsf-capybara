@@ -7,6 +7,7 @@ import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { CustomizationStateItem } from 'src/modules/customization-system';
 import { ServerError } from 'src/modules/shared';
 
+// TODO: probably need to pass email field also
 export function useAddToCart (
   product: Ref<Product>,
   quantity: Ref<number>,

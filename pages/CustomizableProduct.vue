@@ -5,7 +5,8 @@
       :product="currentProduct"
     />
 
-    <form-with-images-gallery
+    <component
+      :is="formComponent"
       :product="currentProduct"
       :existing-cart-item="existingCartItem"
       v-if="showForm"
@@ -24,13 +25,17 @@ import { ProductStructuredData } from 'src/modules/budsies';
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 import { useProductPage } from 'theme/helpers/use-product-page';
 
-import FormWithImagesGallery from 'theme/components/customization-system/forms/form-with-images-gallery.vue';
+enum LayoutType {
+  WITH_IMAGES_GALLERY = 'with-images-gallery',
+  VERTICAL = 'vertical'
+}
 
 export default defineComponent({
   name: 'CustomizableProduct',
   components: {
-    FormWithImagesGallery,
-    ProductStructuredData
+    FormWithImagesGallery: () => import(/* webpackChunkName: "vsf-images-gallery-form" */ 'theme/components/customization-system/forms/form-with-images-gallery.vue'),
+    ProductStructuredData,
+    VerticalStepsForm: () => import(/* webpackChunkName: "vsf-vertical-form" */ 'theme/components/customization-system/forms/vertical-steps-form.vue')
   },
   props: {
     sku: {
@@ -40,6 +45,10 @@ export default defineComponent({
     existingPlushieId: {
       type: String as PropType<string | undefined>,
       default: undefined
+    },
+    layout: {
+      type: String as PropType<LayoutType>,
+      default: () => LayoutType.WITH_IMAGES_GALLERY
     }
   },
   setup (props, context) {
@@ -50,10 +59,19 @@ export default defineComponent({
     const showForm = computed<boolean>(() => {
       return isDataLoaded.value && !!currentProduct.value;
     });
+    const formComponent = computed<string>(() => {
+      switch (props.layout) {
+        case LayoutType.WITH_IMAGES_GALLERY:
+          return 'form-with-images-gallery';
+        case LayoutType.VERTICAL:
+          return 'vertical-steps-form';
+      }
+    });
 
     return {
       ...useExistingCartItem(existingPlushieId, context),
       currentProduct,
+      formComponent,
       showForm
     }
   },

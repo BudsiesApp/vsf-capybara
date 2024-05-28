@@ -91,5 +91,8 @@ export default defineComponent({
   --multiselect-margin: 0;
   --multiselect-tags-padding-top: var(--spacer-xs);
   --multiselect-tags-min-height: auto;
+
+  width: 100%;
+  max-width: 610px;
 }
 </style>

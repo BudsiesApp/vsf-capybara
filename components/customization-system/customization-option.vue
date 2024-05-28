@@ -154,6 +154,10 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .customization-option {
+  display: flex;
+  flex-direction: column;
+  align-items: var(--customization-option-align-items, flex-start);
+
   ._option-label {
     font-size: var(--customization-option-label-size, var(--font-base));
     font-weight: var(--customization-option-label-weight, var(--font-bold));

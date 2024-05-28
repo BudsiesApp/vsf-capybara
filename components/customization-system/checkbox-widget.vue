@@ -1,7 +1,7 @@
 <template>
   <div class="checkbox-widget">
     <m-checkbox
-      class="checkbox-widget"
+      class="_checkbox"
       :disabled="isDisabled"
       :label="label"
       :valid="isValid"
@@ -107,6 +107,10 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/typography";
 
 .checkbox-widget {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+
   ._error-message {
     color: var(--widget-error-message-color, var(--c-danger-variant));
     height: calc(var(--font-xs) * 1.2);

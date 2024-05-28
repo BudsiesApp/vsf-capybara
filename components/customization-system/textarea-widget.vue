@@ -66,6 +66,8 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/typography";
 
 .textarea-widget {
+  width: 100%;
+
   ._textarea {
     display: flex;
     box-sizing: border-box;
