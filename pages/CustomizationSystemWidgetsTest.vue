@@ -81,7 +81,7 @@
           <div class="_customization_state">
             <strong> Customization State Item:</strong>
             <br>
-            {{ customizationState[customization.id] }}
+            {{ customizationOptionValue[customization.id] }}
           </div>
         </div>
       </div>
@@ -92,7 +92,8 @@
         :is-disabled="false"
         :option-values="customization.optionData.values"
         :product-id="73"
-        v-model="customizationState[customization.id]"
+        :value="customizationOptionValue[customization.id]"
+        @input="updateCustomizationOptionValue"
         v-if="customization.optionData"
       />
     </div>
@@ -101,11 +102,10 @@
 
 <script lang="ts">
 import { defineComponent, ref } from '@vue/composition-api';
-import { Dictionary } from 'src/modules/budsies';
 import {
   Customization,
-  CustomizationStateItem,
   OptionType,
+  useCustomizationState,
   WidgetType
 } from 'src/modules/customization-system';
 import { CustomizationType } from 'src/modules/customization-system/types/customization-type';
@@ -118,7 +118,6 @@ export default defineComponent({
     CustomizationOption
   },
   setup () {
-    const customizationState = ref<Dictionary<CustomizationStateItem>>({});
     const customizations = ref<Customization[]>([
       {
         id: 'cards_list_widget',
@@ -135,6 +134,7 @@ export default defineComponent({
           hint: 'Some hint',
           maxValuesCount: 0,
           hasGalleryImages: false,
+          hasDetailedDescription: false,
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.CARDS_LIST,
@@ -143,12 +143,23 @@ export default defineComponent({
               id: 'test',
               name: 'Weighted Stuffed Animals',
               description: `A stainless steel pellet-filled insert, hand-sewn into the body of the plush. 2lbs for 16" and 24", 0.5 lb for 10". `,
-              previewUrl: `https://api.petsies.storefront.st.budsies.com/img/1350/1674/resize/catalog/product/w/e/weighted_plushies.jpg`,
+              thumbnailUrl: `https://api.petsies.storefront.st.budsies.com/img/1350/1674/resize/catalog/product/w/e/weighted_plushies.jpg`,
               price: 20,
               sn: 0,
               galleryImages: [],
               isEnabled: true,
               isDefault: false
+            },
+            {
+              id: 'test_2',
+              name: 'Weighted Stuffed Animals',
+              description: `A stainless steel pellet-filled insert, hand-sewn into the body of the plush. 2lbs for 16" and 24", 0.5 lb for 10". `,
+              thumbnailUrl: `https://api.petsies.storefront.st.budsies.com/img/1350/1674/resize/catalog/product/w/e/weighted_plushies.jpg`,
+              price: 10,
+              sn: 0,
+              galleryImages: [],
+              isEnabled: true,
+              isDefault: true
             }
           ]
         }
@@ -168,15 +179,25 @@ export default defineComponent({
           hint: 'Some hint',
           maxValuesCount: 0,
           hasGalleryImages: false,
+          hasDetailedDescription: false,
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.CHECKBOX,
           values: [
             {
-              id: 'checkbox checked',
+              id: 'yes',
               name: 'My pet has different eye color',
               description: `Some test description`,
               sn: 0,
+              galleryImages: [],
+              isEnabled: true,
+              isDefault: true
+            },
+            {
+              id: 'no',
+              name: 'My pet has different eye color',
+              description: `Some test description`,
+              sn: 1,
               galleryImages: [],
               isEnabled: true,
               isDefault: false
@@ -199,6 +220,7 @@ export default defineComponent({
           hint: 'Some hint',
           maxValuesCount: 0,
           hasGalleryImages: false,
+          hasDetailedDescription: false,
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.COLORS_LIST,
@@ -256,6 +278,7 @@ export default defineComponent({
           hint: 'Some hint',
           maxValuesCount: 0,
           hasGalleryImages: false,
+          hasDetailedDescription: false,
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.DROPDOWN,
@@ -308,6 +331,7 @@ export default defineComponent({
           hint: 'Optional. Leave blank if unsure<br>(or make up your own :)',
           maxValuesCount: 0,
           hasGalleryImages: false,
+          hasDetailedDescription: false,
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.DROPDOWN_FREE_TEXT,
@@ -360,6 +384,7 @@ export default defineComponent({
           hint: 'Some hint',
           maxValuesCount: 0,
           hasGalleryImages: false,
+          hasDetailedDescription: false,
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.IMAGE_UPLOAD,
@@ -381,6 +406,7 @@ export default defineComponent({
           hint: 'Some hint',
           maxValuesCount: 0,
           hasGalleryImages: false,
+          hasDetailedDescription: false,
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.TEXT_INPUT,
@@ -405,6 +431,7 @@ export default defineComponent({
           hint: 'Some hint',
           maxValuesCount: 0,
           hasGalleryImages: false,
+          hasDetailedDescription: false,
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.TEXT_AREA,
@@ -429,6 +456,7 @@ export default defineComponent({
           hint: 'Some hint',
           maxValuesCount: 0,
           hasGalleryImages: false,
+          hasDetailedDescription: false,
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.THUMBNAILS_LIST,
@@ -442,7 +470,7 @@ export default defineComponent({
               name: 'First Item',
               description: `First Item description`,
               sn: 0,
-              previewUrl:
+              thumbnailUrl:
                 'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/b/d/e/6f2ea7eb65d706ae2300385142ec8.jpg',
               galleryImages: [],
               isEnabled: true,
@@ -452,7 +480,7 @@ export default defineComponent({
               id: 'item_2',
               name: 'Second Item',
               description: `Second Item description`,
-              previewUrl:
+              thumbnailUrl:
                 'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/a/9/2/befa695317fa7476b0ae045ffca37.jpg',
               sn: 1,
               galleryImages: [],
@@ -463,7 +491,7 @@ export default defineComponent({
               id: 'item_3',
               name: 'Third Item',
               description: `Third Item description`,
-              previewUrl:
+              thumbnailUrl:
                 'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/2/9/3/b1686c1f54c9da02af0b5af739b4d.jpg',
               price: 15,
               sn: 2,
@@ -475,7 +503,7 @@ export default defineComponent({
               id: 'item_4',
               name: 'Fourth Item',
               description: `Fourth Item description`,
-              previewUrl:
+              thumbnailUrl:
                 'https://api.petsies.storefront.st.budsies.com/img/290/290/resize/body_part/orig/e/0/5/c1e80b85d4f76e116a17c7b22b124.png',
               price: 15,
               sn: 3,
@@ -494,26 +522,11 @@ export default defineComponent({
       showSettings.value = !showSettings.value;
     }
 
-    // TODO: move to the form component
-    // const optionValues = computed<OptionValue[]>(() => {
-    //   return customization.value.optionData?.values.filter((value) => {
-    //     const forActivatedOptionValueIds = value.availabilityRules?.forActivatedOptionValueIds;
-
-    //     if (!forActivatedOptionValueIds || !forActivatedOptionValueIds.length) {
-    //       return true;
-    //     }
-
-    //     return forActivatedOptionValueIds.every((id) => {
-    //       return selectedOptionValuesIds.value.includes(id);
-    //     })
-    //   }) || [];
-    // });
-
     return {
       customizations,
-      customizationState,
       showSettings,
-      toggleSettings
+      toggleSettings,
+      ...useCustomizationState(ref())
     };
   }
 });

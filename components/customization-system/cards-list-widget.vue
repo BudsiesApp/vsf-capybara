@@ -114,7 +114,7 @@ export default defineComponent({
     const { maxValuesCount, value, values } = toRefs(props);
 
     function getItemImage (optionValue: OptionValue): string | undefined {
-      return optionValue.previewUrl;
+      return optionValue.thumbnailUrl;
     }
 
     const isValid = computed<boolean>(() => {

@@ -6,6 +6,7 @@
     :should-lock-scroll-on-open="isMobile"
     :valid="isValid"
     v-model="selectedOption"
+    v-if="showSelect"
   >
     <sf-select-option
       v-for="optionValue in sortedValuesWithPlaceholder"
@@ -22,8 +23,11 @@ import { SfSelect } from '@storefront-ui/vue';
 import {
   computed,
   defineComponent,
+  nextTick,
   PropType,
-  toRefs
+  ref,
+  toRefs,
+  watch
 } from '@vue/composition-api';
 
 import {
@@ -36,6 +40,8 @@ import {
   useDefaultValue,
   useValuesSort
 } from 'src/modules/customization-system';
+
+const defaultPlaceholder = 'Select Option';
 
 export default defineComponent({
   name: 'DropdownWidget',
@@ -82,14 +88,10 @@ export default defineComponent({
     const { sortedValues } = useValuesSort(values);
 
     const sortedValuesWithPlaceholder = computed<OptionValue[]>(() => {
-      if (!placeholder.value) {
-        return sortedValues.value;
-      }
-
       return [
         {
           id: '',
-          name: placeholder.value,
+          name: placeholder.value || defaultPlaceholder,
           isEnabled: true,
           isDefault: false,
           sn: -1,
@@ -99,9 +101,17 @@ export default defineComponent({
       ];
     });
 
+    const showSelect = ref<boolean>(true);
+    watch(values, async () => {
+      showSelect.value = false;
+      await nextTick();
+      showSelect.value = true;
+    });
+
     return {
       isValid,
       selectedOption,
+      showSelect,
       sortedValuesWithPlaceholder
     };
   },
@@ -116,6 +126,16 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .dropdown-widget {
-  --select-padding: 0;
+  &.sf-select {
+    --select-padding: 0;
+    --select-selected-padding: var(
+      --dropdown-select-padding,
+      var(--spacer-xs) var(--spacer-lg) var(--spacer-xs) var(--spacer-2xs)
+    );
+    --select-height: var(
+      --dropdown-select-height,
+      auto
+    );
+  }
 }
 </style>

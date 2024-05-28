@@ -723,11 +723,11 @@ export default defineComponent({
         validationObserver,
         () => getAllFormRefs(setupContext.refs)
       ),
-      ...useProductGallery(
-        product,
-        styleBundleOption,
-        selectedStyleOption
-      ),
+      // ...useProductGallery(
+      //   product,
+      //   styleBundleOption,
+      //   selectedStyleOption
+      // ),
       ...usePlushieNameInput(existingCartItem),
       ...useProductPrice(
         styleBundleOption,

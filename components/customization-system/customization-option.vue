@@ -1,8 +1,11 @@
 <template>
-  <div class="customization-option">
+  <div
+    class="customization-option"
+    :ref="validationRef"
+    v-show="showCustomization"
+  >
     <label
       class="_option-label"
-      :ref="validationRef"
       v-if="showLabel"
     >
       {{ optionLabel }}
@@ -18,7 +21,7 @@
       slim
       v-slot="{ errors }"
       :rules="validationRules"
-      :name="customization.name"
+      :name="optionLabel"
     >
       <component
         class="_widget"
@@ -27,6 +30,7 @@
         :is="widget.component"
         v-bind="widget.props"
         v-model="selectedOption"
+        @widget-busy-changed="onWidgetBusyChanged"
       />
     </validation-provider>
 
@@ -45,10 +49,11 @@ import { ValidationProvider } from 'vee-validate';
 
 import {
   Customization,
-  CustomizationStateItem,
+  CustomizationOptionValue,
   OptionValue,
   useCustomizationOptionValidation,
   useCustomizationOptionWidget,
+  useWidgetBusyState,
   WidgetType
 } from 'src/modules/customization-system';
 
@@ -62,6 +67,8 @@ import ProductionTimeSelector from './production-time-selector.vue';
 import TextAreaWidget from './textarea-widget.vue';
 import TextInputWidget from './text-input-widget.vue';
 import ThumbnailsListWidget from './thumbnails-list-widget.vue';
+
+const customizationWidgetBusyStateChangedEventName = 'customization-option-busy-state-changed';
 
 export default defineComponent({
   name: 'CustomizationOption',
@@ -96,7 +103,7 @@ export default defineComponent({
       required: true
     },
     value: {
-      type: Object as PropType<CustomizationStateItem | undefined>,
+      type: [Object, String, Array] as PropType<CustomizationOptionValue>,
       default: undefined
     }
   },
@@ -117,6 +124,9 @@ export default defineComponent({
         customization.value.optionData?.displayWidget !== WidgetType.CHECKBOX
       );
     });
+    const showCustomization = computed<boolean>(() => {
+      return !(customization.value.optionData?.isRequired && optionValues.value.length === 1);
+    });
 
     return {
       ...useCustomizationOptionValidation(customization),
@@ -127,9 +137,15 @@ export default defineComponent({
         productId,
         context
       ),
+      ...useWidgetBusyState(
+        customization,
+        customizationWidgetBusyStateChangedEventName,
+        context
+      ),
       optionDescription,
       optionHint,
       optionLabel,
+      showCustomization,
       showLabel
     };
   }

@@ -89,5 +89,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .dropdown-free-text-widget {
   --multiselect-margin: 0;
+  --multiselect-tags-padding-top: var(--spacer-xs);
+  --multiselect-tags-min-height: auto;
 }
 </style>
