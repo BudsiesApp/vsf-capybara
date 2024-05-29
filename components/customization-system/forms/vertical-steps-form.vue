@@ -393,12 +393,10 @@ export default defineComponent({
       return `${product.value.name} Order Form`;
     });
     const topStorySlug = computed<string | undefined>(() => {
-      // TODO: check
-      return undefined;
+      return `${product.value.sku}_creation_page_top`;
     });
     const bottomStorySlug = computed<string | undefined>(() => {
-      // TODO: check
-      return undefined;
+      return `${product.value.sku}_creation_page_bottom`;
     });
     const submitButtonText = computed<string>(() => {
       return (
