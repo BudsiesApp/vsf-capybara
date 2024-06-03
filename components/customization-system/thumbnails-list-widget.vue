@@ -21,8 +21,8 @@ import { computed, defineComponent, PropType } from '@vue/composition-api';
 import { BaseImage } from 'src/modules/budsies';
 import {
   OptionValue,
-  WidgetConfigLayout,
-  WidgetConfigShape
+  WidgetOptionAlignment,
+  WidgetOptionShape
 } from 'src/modules/customization-system';
 
 import BaseListWidget from './base-list-widget.vue';
@@ -42,9 +42,9 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    layout: {
-      type: String as PropType<WidgetConfigLayout>,
-      default: 'grid'
+    alignment: {
+      type: String as PropType<WidgetOptionAlignment>,
+      default: 'left'
     },
     maxValuesCount: {
       type: Number as PropType<number | undefined>,
@@ -59,7 +59,7 @@ export default defineComponent({
       default: () => []
     },
     shape: {
-      type: String as PropType<WidgetConfigShape>,
+      type: String as PropType<WidgetOptionShape>,
       default: 'square'
     }
   },

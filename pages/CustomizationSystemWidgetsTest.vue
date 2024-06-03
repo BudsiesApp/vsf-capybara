@@ -36,13 +36,13 @@
 
             <label
               v-if="
-                customization.optionData.widgetConfig &&
-                  customization.optionData.widgetConfig.shape
+                customization.optionData.displayWidgetOptions &&
+                  customization.optionData.displayWidgetOptions.shape
               "
             >
               Shape:
 
-              <select v-model="customization.optionData.widgetConfig.shape">
+              <select v-model="customization.optionData.displayWidgetOptions.shape">
                 <option value="round">Round</option>
                 <option value="square">Square</option>
               </select>
@@ -50,15 +50,15 @@
 
             <label
               v-if="
-                customization.optionData.widgetConfig &&
-                  customization.optionData.widgetConfig.layout
+                customization.optionData.displayWidgetOptions &&
+                  customization.optionData.displayWidgetOptions.alignment
               "
             >
               Layout:
 
-              <select v-model="customization.optionData.widgetConfig.layout">
-                <option value="grid">Grid</option>
-                <option value="flex">Flex</option>
+              <select v-model="customization.optionData.displayWidgetOptions.alignment">
+                <option value="left">Left</option>
+                <option value="center">Center</option>
               </select>
             </label>
 
@@ -224,9 +224,9 @@ export default defineComponent({
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.COLORS_LIST,
-          widgetConfig: {
+          displayWidgetOptions: {
             shape: 'square',
-            layout: 'grid'
+            alignment: 'left'
           },
           values: [
             {
@@ -282,7 +282,7 @@ export default defineComponent({
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.DROPDOWN,
-          widgetConfig: {
+          displayWidgetOptions: {
             placeholder: 'Select Item'
           },
           values: [
@@ -335,7 +335,7 @@ export default defineComponent({
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.DROPDOWN_FREE_TEXT,
-          widgetConfig: {
+          displayWidgetOptions: {
             placeholder: 'Select Dropdown Item'
           },
           values: [
@@ -410,7 +410,7 @@ export default defineComponent({
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.TEXT_INPUT,
-          widgetConfig: {
+          displayWidgetOptions: {
             placeholder: 'Enter your pet\'s name'
           },
           values: []
@@ -435,7 +435,7 @@ export default defineComponent({
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.TEXT_AREA,
-          widgetConfig: {
+          displayWidgetOptions: {
             placeholder: 'Describe your pet\'s'
           },
           values: []
@@ -460,9 +460,9 @@ export default defineComponent({
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.THUMBNAILS_LIST,
-          widgetConfig: {
+          displayWidgetOptions: {
             shape: 'square',
-            layout: 'grid'
+            alignment: 'left'
           },
           values: [
             {

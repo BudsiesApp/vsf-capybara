@@ -188,7 +188,6 @@ import { ValidationObserver, ValidationProvider } from 'vee-validate';
 import {
   Customization,
   CustomizationOptionValue,
-  getCustomizationsFromProduct,
   useAvailableCustomizations,
   useCustomizationsBusyState,
   useCustomizationsGroups,
@@ -267,7 +266,7 @@ export default defineComponent({
     const persistedEmail = usePersistedEmail(email);
 
     const productCustomizations = computed<Customization[]>(() => {
-      return getCustomizationsFromProduct(product.value);
+      return product.value.customizations || [];
     });
     const productCustomization = computed<Record<string, Customization>>(() => {
       const dictionary: Record<string, Customization> = {};

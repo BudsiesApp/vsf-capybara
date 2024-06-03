@@ -120,6 +120,10 @@ export default defineComponent({
       return customization.value.optionData?.hint;
     });
     const showLabel = computed<boolean>(() => {
+      if (customization.value.optionData?.displayWidgetOptions?.hideTitle) {
+        return false;
+      }
+
       return (
         customization.value.optionData?.displayWidget !== WidgetType.CHECKBOX
       );

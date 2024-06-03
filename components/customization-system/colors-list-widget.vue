@@ -20,8 +20,8 @@ import { computed, defineComponent, PropType } from '@vue/composition-api';
 
 import {
   OptionValue,
-  WidgetConfigLayout,
-  WidgetConfigShape
+  WidgetOptionAlignment,
+  WidgetOptionShape
 } from 'src/modules/customization-system';
 
 import BaseListWidget from './base-list-widget.vue';
@@ -40,17 +40,13 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    layout: {
-      type: String as PropType<WidgetConfigLayout>,
-      default: 'grid'
+    alignment: {
+      type: String as PropType<WidgetOptionAlignment>,
+      default: 'left'
     },
     maxValuesCount: {
       type: Number as PropType<number | undefined>,
       default: undefined
-    },
-    shape: {
-      type: String as PropType<WidgetConfigShape>,
-      default: 'square'
     },
     value: {
       type: [String, Array] as PropType<string | string[] | undefined>,
@@ -59,6 +55,10 @@ export default defineComponent({
     values: {
       type: Array as PropType<OptionValue[]>,
       default: () => []
+    },
+    shape: {
+      type: String as PropType<WidgetOptionShape>,
+      default: 'square'
     }
   },
   setup (props, { emit }) {

@@ -123,7 +123,6 @@ import { ValidationObserver, ValidationProvider } from 'vee-validate';
 import {
   Customization,
   CustomizationOptionValue,
-  getCustomizationsFromProduct,
   useAvailableCustomizations,
   useCustomizationProductDescription,
   useCustomizationsBusyState,
@@ -197,7 +196,7 @@ export default defineComponent({
       return product.value.short_description;
     });
     const productCustomizations = computed<Customization[]>(() => {
-      return getCustomizationsFromProduct(product.value);
+      return product.value.customizations || [];
     });
     const productCustomization = computed<Record<string, Customization>>(() => {
       const dictionary: Record<string, Customization> = {};
