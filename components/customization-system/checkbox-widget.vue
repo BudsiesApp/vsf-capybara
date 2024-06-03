@@ -35,6 +35,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    isRequired: {
+      type: Boolean,
+      default: false
+    },
     label: {
       type: String,
       required: true
@@ -92,7 +96,8 @@ export default defineComponent({
 
     useDefaultValue(
       selectedOption,
-      toRef(props, 'values')
+      toRef(props, 'values'),
+      toRef(props, 'isRequired')
     );
 
     return {

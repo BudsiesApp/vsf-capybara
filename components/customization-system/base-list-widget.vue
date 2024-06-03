@@ -77,6 +77,10 @@ export default defineComponent({
     SfPrice
   },
   props: {
+    alignment: {
+      type: String as PropType<WidgetOptionAlignment>,
+      default: 'left'
+    },
     error: {
       type: String,
       default: undefined
@@ -85,9 +89,9 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    alignment: {
-      type: String as PropType<WidgetOptionAlignment>,
-      default: 'left'
+    isRequired: {
+      type: Boolean,
+      default: false
     },
     maxValuesCount: {
       type: Number as PropType<number | undefined>,
@@ -107,7 +111,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const { alignment, maxValuesCount, shape, value, values } = toRefs(props);
+    const { isRequired, maxValuesCount, shape, value, values } = toRefs(props);
 
     const isRound = computed<boolean>(() => {
       return shape.value === 'round';
@@ -115,10 +119,9 @@ export default defineComponent({
 
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
 
-    useDefaultValue(listWidgetFields.selectedOption, values);
+    useDefaultValue(listWidgetFields.selectedOption, values, isRequired);
 
     return {
-      alignment,
       isRound,
       ...listWidgetFields,
       ...useOptionValuesPrice(values, context),

@@ -97,6 +97,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    isRequired: {
+      type: Boolean,
+      default: false
+    },
     maxValuesCount: {
       type: Number as PropType<number | undefined>,
       default: undefined
@@ -111,7 +115,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const { maxValuesCount, value, values } = toRefs(props);
+    const { isRequired, maxValuesCount, value, values } = toRefs(props);
 
     function getItemImage (optionValue: OptionValue): string | undefined {
       return optionValue.thumbnailUrl;
@@ -122,7 +126,7 @@ export default defineComponent({
     });
 
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
-    useDefaultValue(listWidgetFields.selectedOption, values);
+    useDefaultValue(listWidgetFields.selectedOption, values, isRequired);
 
     return {
       getItemImage,

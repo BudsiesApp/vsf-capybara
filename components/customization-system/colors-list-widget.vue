@@ -32,6 +32,10 @@ export default defineComponent({
     BaseListWidget
   },
   props: {
+    alignment: {
+      type: String as PropType<WidgetOptionAlignment>,
+      default: 'left'
+    },
     error: {
       type: String,
       default: undefined
@@ -39,10 +43,6 @@ export default defineComponent({
     isDisabled: {
       type: Boolean,
       default: false
-    },
-    alignment: {
-      type: String as PropType<WidgetOptionAlignment>,
-      default: 'left'
     },
     maxValuesCount: {
       type: Number as PropType<number | undefined>,

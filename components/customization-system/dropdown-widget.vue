@@ -57,6 +57,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    isRequired: {
+      type: Boolean,
+      default: false
+    },
     placeholder: {
       type: String as PropType<string | undefined>,
       default: undefined
@@ -71,7 +75,7 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
-    const { placeholder, values } = toRefs(props);
+    const { isRequired, placeholder, values } = toRefs(props);
     const selectedOption = computed<string | undefined>({
       get: () => {
         return props.value;
@@ -84,7 +88,7 @@ export default defineComponent({
       return !props.error;
     });
 
-    useDefaultValue(selectedOption, values);
+    useDefaultValue(selectedOption, values, isRequired);
     const { sortedValues } = useValuesSort(values);
 
     const sortedValuesWithPlaceholder = computed<OptionValue[]>(() => {
