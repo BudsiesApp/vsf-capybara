@@ -153,6 +153,20 @@
           >
             {{ $t("Save & Make Another") }}
           </SfButton>
+
+          <div class="_agreement">
+            {{ $t('I agree to') }}
+            <router-link to="/terms-of-service/" target="_blank">
+              {{ $t('Terms of Service') }},
+            </router-link>
+
+            <router-link to="/privacy-policy/" target="_blank">
+              {{ $t('Privacy Policy') }}
+            </router-link>,
+            {{ $t('and') }} <a href="http://support.mypetsies.com/support/solutions/folders/13000003991" target="_blank">{{ $t('Refund Policy') }}</a>.
+            {{ $t('I understand that Petsies happily takes care of all tears, defects, and shipping damage with either a refund or a repair.') }}
+            {{ $t('I also understand that my custom Petsies order is backed by the Petsies Guarantee.') }}
+          </div>
         </div>
 
         <MBlockStory :story-slug="bottomStorySlug" v-if="bottomStorySlug" />
@@ -331,6 +345,7 @@ export default defineComponent({
 
     async function onSuccessAndMakeAnother (): Promise<void> {
       resetCustomizationState();
+      quantity.value = 1;
 
       if (validationObserver.value) {
         validationObserver.value.reset();
@@ -538,6 +553,13 @@ export default defineComponent({
 
   ._form-errors {
     margin-top: var(--spacer-xl);
+  }
+
+  ._agreement {
+    margin: var(--spacer-xl) auto 0;
+    font-size: var(--font-xs);
+    text-align: left;
+    max-width: 45rem;
   }
 
   @media (min-width: $tablet-min) {
