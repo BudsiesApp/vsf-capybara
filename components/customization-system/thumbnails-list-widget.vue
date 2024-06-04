@@ -21,8 +21,8 @@ import { computed, defineComponent, PropType } from '@vue/composition-api';
 import { BaseImage } from 'src/modules/budsies';
 import {
   OptionValue,
-  WidgetConfigLayout,
-  WidgetConfigShape
+  WidgetOptionAlignment,
+  WidgetOptionShape
 } from 'src/modules/customization-system';
 
 import BaseListWidget from './base-list-widget.vue';
@@ -34,6 +34,10 @@ export default defineComponent({
     BaseListWidget
   },
   props: {
+    alignment: {
+      type: String as PropType<WidgetOptionAlignment>,
+      default: 'left'
+    },
     error: {
       type: String,
       default: undefined
@@ -41,10 +45,6 @@ export default defineComponent({
     isDisabled: {
       type: Boolean,
       default: false
-    },
-    layout: {
-      type: String as PropType<WidgetConfigLayout>,
-      default: 'grid'
     },
     maxValuesCount: {
       type: Number as PropType<number | undefined>,
@@ -59,7 +59,7 @@ export default defineComponent({
       default: () => []
     },
     shape: {
-      type: String as PropType<WidgetConfigShape>,
+      type: String as PropType<WidgetOptionShape>,
       default: 'square'
     }
   },
@@ -87,6 +87,8 @@ export default defineComponent({
 .thumbnails-list-widget {
   --base-list-widget-item-absolute-width: 145px;
   --base-list-widget-item-relative-width: 33.33%;
+
+  width: 100%;
 
   ._image-wrapper {
     position: relative;

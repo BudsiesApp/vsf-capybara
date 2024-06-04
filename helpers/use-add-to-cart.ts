@@ -12,7 +12,8 @@ export function useAddToCart (
   quantity: Ref<number>,
   customizationStateItems: Ref<CustomizationStateItem[]>,
   existingCartItem: Ref<CartItem | undefined>,
-  { root }: SetupContext
+  { root }: SetupContext,
+  email?: Ref<string | undefined>
 ) {
   const isSubmitting = ref<boolean>(false);
 
@@ -39,12 +40,18 @@ export function useAddToCart (
       }
     );
 
+    const productToAddData: Partial<CartItem> = {
+      qty: quantity.value,
+      customizationState: customizationStateItems.value
+    };
+
+    if (email?.value) {
+      productToAddData.email = email.value;
+    }
+
     try {
       await root.$store.dispatch('cart/addItem', {
-        productToAdd: Object.assign({}, product.value, {
-          qty: quantity.value,
-          customizationState: customizationStateItems.value
-        })
+        productToAdd: Object.assign({}, product.value, productToAddData)
       });
     } catch (err) {
       if (err instanceof ServerError) {
@@ -76,13 +83,19 @@ export function useAddToCart (
       }
     );
 
+    const cartItemForUpdate: Partial<CartItem> = {
+      qty: quantity.value,
+      product_option: productOption,
+      customizationState: customizationStateItems.value
+    };
+
+    if (email?.value) {
+      cartItemForUpdate.email = email.value;
+    }
+
     try {
       await updateClientAndServerItem({
-        product: Object.assign({}, existingCartItem.value, {
-          qty: quantity.value,
-          product_option: productOption,
-          customizationState: customizationStateItems.value
-        }),
+        product: Object.assign({}, existingCartItem.value, cartItemForUpdate),
         forceUpdateServerItem: true
       });
     } catch (err) {

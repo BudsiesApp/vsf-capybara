@@ -6,8 +6,6 @@ const Product = () =>
   import(/* webpackChunkName: "vsf-product" */ 'theme/pages/Product');
 const PlushieProduct = () =>
   import(/* webpackChunkName: "vsf-forevers-product" */ 'theme/pages/PlushieProduct');
-const PillowProduct = () =>
-  import(/* webpackChunkName: "vsf-pillow-product" */ 'theme/pages/PillowProduct');
 const PhrasePillowProduct = () =>
   import(/* webpackChunkName: "vsf-phrase-pillow-product" */ 'theme/pages/PhrasePillowProduct');
 const Category = () =>
@@ -24,8 +22,6 @@ const CrossSells = () =>
   import(/* webpackChunkName: "vsf-cross-sells" */ 'theme/pages/CrossSells');
 const GiftCards = () =>
   import(/* webpackChunkName: "vsf-gift-cards" */ 'theme/pages/GiftCards');
-const ClayProduct = () =>
-  import(/* webpackChunkName: "vsf-plushie-product" */ 'theme/pages/ClayProduct');
 const PasswordReset = () =>
   import(/* webpackChunkName: "vsf-password-reset" */ 'theme/pages/PasswordReset');
 const CustomizationSystemWidgetsTestPage = () =>
@@ -159,9 +155,11 @@ let routes = [
   {
     name: 'pillow-product',
     path: '/pillows/create/',
-    component: PillowProduct,
+    component: CustomizableProduct,
     props: (route) => ({
-      existingPlushieId: route.query.existingPlushieId
+      sku: 'customPillow_bundle',
+      existingPlushieId: route.query.existingPlushieId,
+      layout: 'vertical'
     })
   },
   {
@@ -414,10 +412,11 @@ let routes = [
   {
     name: 'figurines-creation',
     path: '/petsies-figurines/create/',
-    component: ClayProduct,
+    component: CustomizableProduct,
     props: (route) => ({
       sku: 'petsiesFigurines_bundle',
-      existingPlushieId: route.query.existingPlushieId
+      existingPlushieId: route.query.existingPlushieId,
+      layout: 'vertical'
     })
   },
   {
@@ -435,10 +434,11 @@ let routes = [
   {
     name: 'bobbleheads-creation',
     path: '/petsies-bobbleheads/create/',
-    component: ClayProduct,
+    component: CustomizableProduct,
     props: (route) => ({
       sku: 'petsiesBobbleheads_bundle',
-      existingPlushieId: route.query.existingPlushieId
+      existingPlushieId: route.query.existingPlushieId,
+      layout: 'vertical'
     })
   },
   {

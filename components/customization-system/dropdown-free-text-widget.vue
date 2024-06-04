@@ -48,6 +48,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    isRequired: {
+      type: Boolean,
+      default: false
+    },
     placeholder: {
       type: String as PropType<string | undefined>,
       default: undefined
@@ -62,7 +66,7 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
-    const { values } = toRefs(props);
+    const { isRequired, values } = toRefs(props);
     const selectedOption = computed<string | undefined>({
       get: () => {
         return props.value;
@@ -75,7 +79,7 @@ export default defineComponent({
       return !props.error;
     });
 
-    useDefaultValue(selectedOption, values);
+    useDefaultValue(selectedOption, values, isRequired);
 
     return {
       isValid,
@@ -91,5 +95,8 @@ export default defineComponent({
   --multiselect-margin: 0;
   --multiselect-tags-padding-top: var(--spacer-xs);
   --multiselect-tags-min-height: auto;
+
+  width: 100%;
+  max-width: 610px;
 }
 </style>

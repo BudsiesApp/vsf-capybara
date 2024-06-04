@@ -86,6 +86,9 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/typography";
 
 .image-upload-widget {
+  width: 100%;
+  max-width: 610px;
+
   ._error-message {
     color: var(--widget-error-message-color, var(--c-danger-variant));
     height: calc(var(--font-xs) * 1.2);

@@ -1,12 +1,14 @@
 <template>
-  <sf-input
-    class="text-input-widget"
-    :disabled="isDisabled"
-    :error-message="error"
-    :placeholder="placeholder"
-    :valid="isValid"
-    v-model.trim="valueModel"
-  />
+  <div class="text-input-widget">
+    <sf-input
+      class="_input"
+      :disabled="isDisabled"
+      :error-message="error"
+      :placeholder="placeholder"
+      :valid="isValid"
+      v-model.trim="valueModel"
+    />
+  </div>
 </template>
 
 <script lang="ts">
@@ -56,3 +58,14 @@ export default defineComponent({
   }
 });
 </script>
+
+<style lang="scss" scoped>
+.text-input-widget {
+  width: 100%;
+  max-width: 610px;
+
+  ._input {
+    --input-padding: 0 0 var(--spacer-xs) 0;
+  }
+}
+</style>

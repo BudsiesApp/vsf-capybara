@@ -53,6 +53,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    isRequired: {
+      type: Boolean,
+      default: false
+    },
     productId: {
       type: Number,
       required: true
@@ -67,7 +71,7 @@ export default defineComponent({
     }
   },
   setup (props, { emit, root }) {
-    const { values } = toRefs(props);
+    const { isRequired, values } = toRefs(props);
     const selectedOption = computed<string | undefined>({
       get: () => {
         return props.value;
@@ -88,7 +92,7 @@ export default defineComponent({
       );
     });
 
-    useDefaultValue(selectedOption, values);
+    useDefaultValue(selectedOption, values, isRequired);
 
     return {
       isValid,

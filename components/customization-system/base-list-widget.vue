@@ -1,6 +1,6 @@
 <template>
   <div class="base-list-widget" :class="{ '-disabled': isDisabled }">
-    <ul class="_options-list" :class="{ '-flex': isFlexLayout }">
+    <ul class="_options-list" :class="`-alignment-${alignment}`">
       <li
         v-for="option in sortedValues"
         :key="option.id"
@@ -22,12 +22,19 @@
             {{ option.name }}
           </div>
 
-          <div class="_price" v-if="optionValuePriceDictionary[option.id]">
+          <div class="_price" v-if="isDefaultOptionValue(option) && defaultOptionValuePrice">
+            <SfPrice
+              :regular="formatPrice(defaultOptionValuePrice.regular)"
+              :special="formatPrice(defaultOptionValuePrice.special)"
+            />
+          </div>
+
+          <div class="_price" v-else-if="optionValuePriceDeltaDictionary[option.id]">
             <span>+</span>
 
             <SfPrice
-              :regular="formatPrice(optionValuePriceDictionary[option.id].regular)"
-              :special="formatPrice(optionValuePriceDictionary[option.id].special)"
+              :regular="formatPrice(optionValuePriceDeltaDictionary[option.id].regular)"
+              :special="formatPrice(optionValuePriceDeltaDictionary[option.id].special)"
             />
           </div>
         </div>
@@ -66,8 +73,8 @@ import {
   useListWidget,
   useOptionValuesPrice,
   useValuesSort,
-  WidgetConfigLayout,
-  WidgetConfigShape
+  WidgetOptionAlignment,
+  WidgetOptionShape
 } from 'src/modules/customization-system';
 
 export default defineComponent({
@@ -77,6 +84,10 @@ export default defineComponent({
     SfPrice
   },
   props: {
+    alignment: {
+      type: String as PropType<WidgetOptionAlignment>,
+      default: 'left'
+    },
     error: {
       type: String,
       default: undefined
@@ -85,9 +96,9 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    layout: {
-      type: String as PropType<WidgetConfigLayout>,
-      default: 'grid'
+    isRequired: {
+      type: Boolean,
+      default: false
     },
     maxValuesCount: {
       type: Number as PropType<number | undefined>,
@@ -102,26 +113,22 @@ export default defineComponent({
       default: () => []
     },
     shape: {
-      type: String as PropType<WidgetConfigShape>,
+      type: String as PropType<WidgetOptionShape>,
       default: 'square'
     }
   },
   setup (props, context) {
-    const { layout, maxValuesCount, shape, value, values } = toRefs(props);
+    const { isRequired, maxValuesCount, shape, value, values } = toRefs(props);
 
     const isRound = computed<boolean>(() => {
       return shape.value === 'round';
     });
-    const isFlexLayout = computed<boolean>(() => {
-      return layout.value === 'flex';
-    });
 
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
 
-    useDefaultValue(listWidgetFields.selectedOption, values);
+    useDefaultValue(listWidgetFields.selectedOption, values, isRequired);
 
     return {
-      isFlexLayout,
       isRound,
       ...listWidgetFields,
       ...useOptionValuesPrice(values, context),
@@ -136,6 +143,8 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/typography";
 
 .base-list-widget {
+  width: 100%;
+
   ._options-list {
     display: grid;
     grid-template-columns: repeat(
@@ -144,7 +153,7 @@ export default defineComponent({
     );
     padding: 0;
 
-    &.-flex {
+    &.-alignment-center {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
@@ -260,7 +269,7 @@ export default defineComponent({
         minmax(var(--base-list-widget-item-absolute-width), 1fr)
       );
 
-      &.-flex {
+      &.-alignment-center {
         ._option {
           width: var(--base-list-widget-item-absolute-width);
         }
