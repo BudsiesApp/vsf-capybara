@@ -215,6 +215,7 @@ import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
+import { useCustomerEmail } from 'theme/helpers/use-customer-email';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
 
@@ -276,7 +277,7 @@ export default defineComponent({
       typeof ValidationObserver
     > | null> = ref(null);
 
-    const email = ref<string | undefined>(undefined);
+    const { email } = useCustomerEmail(existingCartItem);
     const persistedEmail = usePersistedEmail(email);
 
     const productCustomizations = computed<Customization[]>(() => {
@@ -338,7 +339,8 @@ export default defineComponent({
       quantity,
       customizationState,
       existingCartItem,
-      context
+      context,
+      email
     );
 
     const shouldMakeAnother = ref<boolean>(false);
