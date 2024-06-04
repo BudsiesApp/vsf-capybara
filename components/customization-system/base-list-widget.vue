@@ -22,12 +22,19 @@
             {{ option.name }}
           </div>
 
-          <div class="_price" v-if="optionValuePriceDictionary[option.id]">
+          <div class="_price" v-if="isDefaultOptionValue(option) && defaultOptionValuePrice">
+            <SfPrice
+              :regular="formatPrice(defaultOptionValuePrice.regular)"
+              :special="formatPrice(defaultOptionValuePrice.special)"
+            />
+          </div>
+
+          <div class="_price" v-else-if="optionValuePriceDeltaDictionary[option.id]">
             <span>+</span>
 
             <SfPrice
-              :regular="formatPrice(optionValuePriceDictionary[option.id].regular)"
-              :special="formatPrice(optionValuePriceDictionary[option.id].special)"
+              :regular="formatPrice(optionValuePriceDeltaDictionary[option.id].regular)"
+              :special="formatPrice(optionValuePriceDeltaDictionary[option.id].special)"
             />
           </div>
         </div>
