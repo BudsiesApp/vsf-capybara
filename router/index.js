@@ -82,9 +82,10 @@ let routes = [
     name: 'forevers-create',
     path: '/forevers/create/',
     component: PlushieProduct,
-    props: {
-      plushieType: PlushieType.FOREVERS
-    }
+    props: (route) => ({
+      plushieType: PlushieType.FOREVERS,
+      existingPlushieId: route.query.plushieId
+    })
   },
   {
     name: 'forevers-create-alias-1',

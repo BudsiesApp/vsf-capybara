@@ -1,72 +1,85 @@
 <template>
   <div id="plushie-product">
-    <o-plushie-creation-wizard
+    <creation-wizard-form
       :plushie-type="plushieType"
-      :artwork-upload-url="artworkUploadUrl"
-      :existing-plushie-id="existingPlushieId"
-      :preselected-product-type="preselectedProductType"
-      :preselected-size="preselectedSize"
+      :existing-cart-item="existingCartItem"
     />
   </div>
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue';
-import config from 'config';
+import {
+  computed,
+  defineComponent,
+  PropType,
+  toRefs
+} from '@vue/composition-api';
+
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
-
 import Product from 'core/modules/catalog/types/Product';
 
-import OPlushieCreationWizard from 'theme/components/organisms/o-plushie-creation-wizard.vue';
 import { PlushieType } from 'theme/interfaces/plushie.type';
+import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 
-export default Vue.extend({
+import CreationWizardForm from 'theme/components/customization-system/forms/creation-wizard-form.vue';
+
+export default defineComponent({
   name: 'PlushieProduct',
   components: {
-    OPlushieCreationWizard
+    CreationWizardForm
   },
   props: {
     plushieType: {
       type: String as PropType<PlushieType>,
       required: true
+    },
+    existingPlushieId: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
+    preselectedProductSize: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
+    preselectedProductType: {
+      type: String as PropType<string | undefined>,
+      default: undefined
     }
   },
-  computed: {
-    getCurrentProduct (): Product | null {
-      return this.$store.getters['product/getCurrentProduct'];
-    },
-    artworkUploadUrl (): string {
-      return config.images.fileuploaderUploadUrl;
-    },
-    existingPlushieId (): string {
-      return String(this.$route.query?.id);
-    },
-    preselectedProductType (): string | undefined {
-      return this.$route.query?.product as string | undefined;
-    },
-    preselectedSize (): string | undefined {
-      return this.$route.query?.size as string | undefined;
-    }
+  setup (props, context) {
+    const { existingPlushieId, plushieType } = toRefs(props);
+
+    const currentProduct = computed<Product | undefined>(
+      () => context.root.$store.getters[`product/getCurrentProduct`]
+    );
+    return {
+      ...useExistingCartItem(existingPlushieId, context),
+      currentProduct
+    };
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
     next();
   },
   metaInfo () {
-    const defaultProductName = this.plushieType === PlushieType.FOREVERS
-      ? 'Forevers'
-      : 'Golf Head Covers';
-    const productName = this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name || defaultProductName;
+    const defaultProductName =
+      this.plushieType === PlushieType.FOREVERS
+        ? 'Forevers'
+        : 'Golf Head Covers';
+    const productName =
+      this.currentProduct?.meta_title ||
+      this.currentProduct?.name ||
+      defaultProductName;
 
     return {
       title: htmlDecode(productName),
-      meta: this.getCurrentProduct?.meta_description
+      meta: this.currentProduct?.meta_description
         ? [
           {
             vmid: 'description',
             name: 'description',
-            content: htmlDecode(this.getCurrentProduct?.meta_description)
+            content: htmlDecode(this.currentProduct?.meta_description)
           }
         ]
         : []
@@ -90,5 +103,4 @@ export default Vue.extend({
     width: 100%;
   }
 }
-
 </style>
