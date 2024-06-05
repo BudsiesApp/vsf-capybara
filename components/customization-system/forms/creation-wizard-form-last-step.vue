@@ -1,0 +1,207 @@
+<template>
+  <validation-observer
+    v-slot="{errors: formErrors}"
+    class="creation-wizard-form-last-step"
+    ref="validationObserver"
+    tag="div"
+  >
+    <SfHeading
+      :level="2"
+      :title="$t('Customize your {productType}', {productType})"
+    />
+
+    <customization-option
+      v-for="customization in availableCustomizations"
+      class="_customization-option"
+      ref="customizationOption"
+      :key="customization.id"
+      :customization="customization"
+      :is-disabled="isDisabled"
+      :option-values="
+        customizationAvailableOptionValues[customization.id]
+      "
+      :product-id="product.id"
+      :value="customizationAvailableOptionValues[customization.id]"
+      @input="$emit('input', $event)"
+      @customization-option-busy-state-changed="
+        onCustomizationOptionBusyChanged
+      "
+    />
+
+    <validation-provider
+      v-slot="{ errors }"
+      rules="required"
+      :name="$t('Quantity')"
+      slim
+    >
+      <div class="_section">
+        <SfHeading
+          class="-required"
+          :level="3"
+          :title="$t(
+            'How many {productType} of this exact same design?',
+            {productType}
+          )"
+          :ref="getFieldAnchorName('quantity')"
+        />
+
+        <ACustomProductQuantity
+          v-model="quantity"
+          :disabled="isDisabled"
+          class="_qty-container"
+          ref="quantity-field-anchor"
+        />
+
+        <div class="_error-text">
+          {{ errors[0] }}
+        </div>
+
+        <a
+          class="_popup-link"
+          href="javascript:void(0)"
+          @click="showQuantityNotes = false"
+        >{{ $t('Quantity & Shipping Discounts') }}</a>
+      </div>
+    </validation-provider>
+
+    <m-form-errors
+      class="_form-errors"
+      :form-errors="formErrors"
+      @item-click="goToFieldByName"
+    />
+
+    <div class="_actions _section">
+      <SfButton
+        class="_add-to-cart color-primary"
+        type="submit"
+        :disabled="isDisabled"
+        @click="onAddToCartClick"
+      >
+        {{ $t('Add to Cart') }}
+      </SfButton>
+
+      <MBlockStory
+        story-slug="order_submit_agreement_petsies"
+      />
+    </div>
+
+    <SfModal :visible="showQuantityNotes" @close="showQuantityNotes = false">
+      <div class="_popup-content">
+        <MBlockStory :story-slug="quantityAndShippingDiscountsStorySlug" />
+      </div>
+    </SfModal>
+  </validation-observer>
+</template>
+
+<script lang="ts">
+import {
+  defineComponent,
+  PropType,
+  ref,
+  Ref
+} from '@vue/composition-api';
+import {
+  SfButton,
+  SfHeading,
+  SfInput,
+  SfModal
+} from '@storefront-ui/vue';
+import { ValidationObserver, ValidationProvider } from 'vee-validate';
+
+import {
+  Customization,
+  OptionValue
+} from 'src/modules/customization-system';
+import Product from '@vue-storefront/core/modules/catalog/types/Product';
+
+import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
+
+import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
+import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
+import MBlockStory from 'theme/components/molecules/m-block-story.vue';
+import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
+
+function getAllFormRefs (
+  refs: Record<string, Vue | Element | Vue[] | Element[]>
+): Record<string, Vue | Element | Vue[] | Element[]> {
+  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = {};
+  const customizationOptions = refs['customizationOption'] as InstanceType<
+    typeof CustomizationOption
+  >[];
+
+  for (const customizationOption of customizationOptions) {
+    for (const key in customizationOption.$refs) {
+      refsDictionary[key] = customizationOption.$refs[key];
+    }
+  }
+
+  return refsDictionary;
+}
+
+export default defineComponent({
+  name: 'CreationWizardFormLastStep',
+  props: {
+    addToCartAction: {
+      type: Function as PropType<() => Promise<void>>,
+      required: true
+    },
+    availableCustomizations: {
+      type: Array as PropType<Customization[]>,
+      default: () => []
+    },
+    customizationAvailableOptionValues: {
+      type: Object as PropType<Record<string, OptionValue[]>>,
+      default: () => ({})
+    },
+    isDisabled: {
+      type: Boolean,
+      default: false
+    },
+    product: {
+      type: Object as PropType<Product>,
+      required: true
+    },
+    productType: {
+      type: String,
+      required: true
+    }
+  },
+  components: {
+    ACustomProductQuantity,
+    CustomizationOption,
+    MBlockStory,
+    MFormErrors,
+    SfButton,
+    SfHeading,
+    SfInput,
+    SfModal,
+    ValidationObserver,
+    ValidationProvider
+  },
+  setup (props, context) {
+    const validationObserver: Ref<InstanceType<
+      typeof ValidationObserver
+    > | null> = ref(null);
+
+    const formValidation = useFormValidation(validationObserver, () =>
+      getAllFormRefs(context.refs)
+    );
+
+    async function onAddToCartClick () {
+      const isValid = await formValidation.validateAndGoToFirstError();
+
+      if (!isValid) {
+        return
+      }
+
+      await props.addToCartAction();
+    }
+    return {
+      ...useQuantityAndShippingDiscounts(),
+      ...formValidation,
+      onAddToCartClick
+    }
+  }
+});
+</script>
