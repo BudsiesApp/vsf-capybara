@@ -224,7 +224,6 @@ import CustomizationOption from 'theme/components/customization-system/customiza
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
-import MZoomGallery from 'theme/components/molecules/m-zoom-gallery.vue';
 
 function getAllFormRefs (
   refs: Record<string, Vue | Element | Vue[] | Element[]>
@@ -261,7 +260,6 @@ export default defineComponent({
     MBlockStory,
     MFormErrors,
     MProductDescriptionStory,
-    MZoomGallery,
     SfButton,
     SfDivider,
     SfHeading,

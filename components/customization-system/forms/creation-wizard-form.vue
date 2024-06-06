@@ -15,11 +15,21 @@
 
           <template v-if="currentProduct">
             <sf-step
-              v-for="customizationGroup in customizationRootGroups"
+              v-for="customizationGroup in customizationCommonRootGroups"
               :key="customizationGroup.id"
               :name="customizationGroup.name"
+              :use-v-show="true"
             >
-              <validation-observer v-slot="{errors: formErrors, passes}" ref="validationObserver">
+              <validation-observer
+                v-slot="{ errors: formErrors, passes }"
+                ref="validationObserver"
+              >
+                <SfHeading
+                  class="_step-title -required "
+                  :level="2"
+                  :title="customizationGroup.title || customizationGroup.name"
+                />
+
                 <customization-option
                   v-for="customization in customizationRootGroupCustomizations[
                     customizationGroup.id
@@ -46,13 +56,15 @@
                   @item-click="goToFieldByName"
                 />
 
-                <SfButton
-                  class="_button"
-                  :disabled="isDisabled"
-                  @click="(event) => passes(() => nextStep())"
-                >
-                  {{ $t('Continue') }}
-                </SfButton>
+                <div class="_step-actions-container">
+                  <SfButton
+                    class="_button"
+                    :disabled="isDisabled"
+                    @click="(event) => passes(() => nextStep())"
+                  >
+                    {{ $t("Continue") }}
+                  </SfButton>
+                </div>
               </validation-observer>
             </sf-step>
 
@@ -66,13 +78,23 @@
                 :customization-available-option-values="
                   customizationAvailableOptionValues
                 "
+                :customization-option-value="customizationOptionValue"
                 :product="currentProduct"
                 @input="onCustomizationOptionInput"
+                :add-to-cart-action="onFormSubmit"
+                :product-type="plushieType"
+                :quantity.sync="quantity"
               />
             </sf-step>
           </template>
         </sf-steps>
       </div>
+
+      <!-- <MFloatingPhoto
+        v-if="showFloatingPhoto"
+        :image-url="floatingPhotoImageUrl"
+        :pet-name="floatingPhotoText"
+      /> -->
     </div>
   </div>
 </template>
@@ -103,21 +125,22 @@ import {
 } from 'src/modules/customization-system';
 import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 
+import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
+import getPlushieSkuByTypes from 'theme/helpers/get-plushie-sku-by-types.function';
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useCustomerEmail } from 'theme/helpers/use-customer-email';
+import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
+import { PlushieType } from 'theme/interfaces/plushie.type';
+import PlushieProductType from 'theme/interfaces/plushie-product-type';
 
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
-import CreationWizardFormStep from 'theme/components/customization-system/forms/creation-wizard-form-step.vue';
+import CreationWizardFormLastStep from 'theme/components/customization-system/forms/creation-wizard-form-last-step.vue';
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
+import MFloatingPhoto from 'theme/components/organisms/OPlushieCreationWizard/m-floating-photo.vue';
 import MProductTypeChooseStep from 'theme/components/organisms/OPlushieCreationWizard/m-product-type-choose-step.vue';
-import getPlushieSkuByTypes from 'theme/helpers/get-plushie-sku-by-types.function';
-import { PlushieType } from 'theme/interfaces/plushie.type';
-import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
-import PlushieProductType from 'theme/interfaces/plushie-product-type';
-import { useFormValidation } from 'theme/helpers/use-form-validation';
 
 function getAllFormRefs (
   refs: Record<string, Vue | Element | Vue[] | Element[]>
@@ -150,9 +173,10 @@ export default defineComponent({
   },
   components: {
     ACustomProductQuantity,
-    CreationWizardFormStep,
+    CreationWizardFormLastStep,
     CustomizationOption,
     MBlockStory,
+    MFloatingPhoto,
     MFormErrors,
     MProductTypeChooseStep,
     SfButton,
@@ -311,7 +335,7 @@ export default defineComponent({
           type: PlushieProductType.OTHER,
           imageSrc: '/assets/plushies/other-icon1_1.png'
         }
-      ]
+      ];
     });
     const golfCoversProductTypeButtons = computed<ProductTypeButton[]>(() => {
       return [
@@ -330,7 +354,7 @@ export default defineComponent({
           type: PlushieProductType.OTHER,
           imageSrc: '/assets/plushies/other-icon1_1.png'
         }
-      ]
+      ];
     });
     const productTypeButtonsList = computed<ProductTypeButton[]>(() => {
       return plushieType.value === PlushieType.FOREVERS
@@ -338,14 +362,27 @@ export default defineComponent({
         : golfCoversProductTypeButtons.value;
     });
 
-    const customizationGroups = useCustomizationsGroups(availableCustomizations, productCustomization);
+    const customizationGroups = useCustomizationsGroups(
+      availableCustomizations,
+      productCustomization
+    );
 
+    const customizationCommonRootGroups = computed<Customization[]>(() => {
+      const groups = customizationGroups.customizationRootGroups.value;
+      return groups.slice(0, groups.length - 1);
+    });
     const lastCustomizationGroup = computed<Customization>(() => {
-      return customizationGroups.customizationRootGroups.value[customizationGroups.customizationRootGroups.value.length - 1];
+      return customizationGroups.customizationRootGroups.value[
+        customizationGroups.customizationRootGroups.value.length - 1
+      ];
     });
     const mainTitleText = computed<string>(() => {
-      // TODO: update
-      return 'test';
+      const title =
+        plushieType.value === PlushieType.FOREVERS
+          ? i18n.t('Create Your Custom Forevers Plush')
+          : i18n.t('Create Your Custom Golf Head Covers');
+
+      return title.toString();
     });
     const currentStep = ref<number>(0);
     async function nextStep (): Promise<void> {
@@ -359,12 +396,14 @@ export default defineComponent({
       ...customizationGroups,
       ...formValidation,
       ...persistedEmail,
+      // ...useFloatingPhoto(),
       ...useQuantityAndShippingDiscounts(),
       availableCustomizations,
       availableOptionCustomizations,
       currentProduct,
       currentStep,
       customizationAvailableOptionValues,
+      customizationCommonRootGroups,
       customizationOptionValue,
       email,
       isDisabled,
@@ -385,3 +424,84 @@ export default defineComponent({
   }
 });
 </script>
+
+<style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+
+.creation-wizard-form {
+  --steps-content-padding: var(--spacer-base) var(--spacer-sm) 0;
+  $floating-photo-width: 14%;
+
+  text-align: center;
+
+  ._content {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    margin-top: var(--spacer-base);
+  }
+
+  ._steps-container {
+    display: flex;
+    justify-content: center;
+    flex-grow: 1;
+  }
+
+  ._steps {
+    flex-grow: 1;
+  }
+
+  .sf-step {
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .m-floating-photo {
+    position: absolute;
+    top: 0;
+    display: none;
+    width: $floating-photo-width;
+    right: 0;
+    height: 100%;
+  }
+
+  ._customization-option {
+    --customization-option-align-items: center;
+
+    --customization-option-label-align: center;
+
+    --customization-option-description-align: center;
+
+    margin-top: var(--spacer-base);
+  }
+
+  ._form-errors {
+    margin-top: var(--spacer-xl);
+  }
+
+  ._step-actions-container {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--spacer-base);
+  }
+
+  @include for-desktop {
+    .m-floating-photo {
+      display: block;
+    }
+
+    ._steps-container {
+      max-width: calc(100% - #{$floating-photo-width} * 2 - 50px);
+    }
+
+    ._steps {
+      max-width: 77.5rem;
+    }
+
+    .sf-modal {
+      --modal-top: 50%;
+    }
+  }
+}
+</style>

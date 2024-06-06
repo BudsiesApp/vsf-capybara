@@ -1,13 +1,13 @@
 <template>
   <validation-observer
-    v-slot="{errors: formErrors}"
+    v-slot="{ errors: formErrors }"
     class="creation-wizard-form-last-step"
     ref="validationObserver"
     tag="div"
   >
     <SfHeading
       :level="2"
-      :title="$t('Customize your {productType}', {productType})"
+      :title="$t('Customize your {productType}', { productType })"
     />
 
     <customization-option
@@ -17,14 +17,12 @@
       :key="customization.id"
       :customization="customization"
       :is-disabled="isDisabled"
-      :option-values="
-        customizationAvailableOptionValues[customization.id]
-      "
+      :option-values="customizationAvailableOptionValues[customization.id]"
       :product-id="product.id"
-      :value="customizationAvailableOptionValues[customization.id]"
+      :value="customizationOptionValue[customization.id]"
       @input="$emit('input', $event)"
       @customization-option-busy-state-changed="
-        onCustomizationOptionBusyChanged
+        $emit('customization-option-busy-state-changed', $event)
       "
     />
 
@@ -38,18 +36,20 @@
         <SfHeading
           class="-required"
           :level="3"
-          :title="$t(
-            'How many {productType} of this exact same design?',
-            {productType}
-          )"
+          :title="
+            $t('How many {productType} of this exact same design?', {
+              productType,
+            })
+          "
           :ref="getFieldAnchorName('quantity')"
         />
 
         <ACustomProductQuantity
-          v-model="quantity"
+          :value="quantity"
           :disabled="isDisabled"
           class="_qty-container"
           ref="quantity-field-anchor"
+          @input="$emit('update:quantity', $event)"
         />
 
         <div class="_error-text">
@@ -60,7 +60,7 @@
           class="_popup-link"
           href="javascript:void(0)"
           @click="showQuantityNotes = false"
-        >{{ $t('Quantity & Shipping Discounts') }}</a>
+        >{{ $t("Quantity & Shipping Discounts") }}</a>
       </div>
     </validation-provider>
 
@@ -70,19 +70,17 @@
       @item-click="goToFieldByName"
     />
 
-    <div class="_actions _section">
+    <div class="_actions">
       <SfButton
         class="_add-to-cart color-primary"
         type="submit"
         :disabled="isDisabled"
         @click="onAddToCartClick"
       >
-        {{ $t('Add to Cart') }}
+        {{ $t("Add to Cart") }}
       </SfButton>
 
-      <MBlockStory
-        story-slug="order_submit_agreement_petsies"
-      />
+      <MBlockStory story-slug="order_submit_agreement_petsies" />
     </div>
 
     <SfModal :visible="showQuantityNotes" @close="showQuantityNotes = false">
@@ -94,22 +92,13 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  PropType,
-  ref,
-  Ref
-} from '@vue/composition-api';
-import {
-  SfButton,
-  SfHeading,
-  SfInput,
-  SfModal
-} from '@storefront-ui/vue';
+import { defineComponent, PropType, ref, Ref } from '@vue/composition-api';
+import { SfButton, SfHeading, SfInput, SfModal } from '@storefront-ui/vue';
 import { ValidationObserver, ValidationProvider } from 'vee-validate';
 
 import {
   Customization,
+  CustomizationOptionValue,
   OptionValue
 } from 'src/modules/customization-system';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -154,6 +143,10 @@ export default defineComponent({
       type: Object as PropType<Record<string, OptionValue[]>>,
       default: () => ({})
     },
+    customizationOptionValue: {
+      type: Object as PropType<Record<string, CustomizationOptionValue>>,
+      default: () => ({})
+    },
     isDisabled: {
       type: Boolean,
       default: false
@@ -164,6 +157,10 @@ export default defineComponent({
     },
     productType: {
       type: String,
+      required: true
+    },
+    quantity: {
+      type: Number,
       required: true
     }
   },
@@ -192,7 +189,7 @@ export default defineComponent({
       const isValid = await formValidation.validateAndGoToFirstError();
 
       if (!isValid) {
-        return
+        return;
       }
 
       await props.addToCartAction();
@@ -201,7 +198,48 @@ export default defineComponent({
       ...useQuantityAndShippingDiscounts(),
       ...formValidation,
       onAddToCartClick
-    }
+    };
   }
 });
 </script>
+
+<style lang="scss" scoped>
+.creation-wizard-form-last-step {
+  ._customization-option {
+    --customization-option-align-items: center;
+
+    --customization-option-label-align: center;
+    --customization-option-label-size: var(--h3-font-size);
+    --customization-option-label-weight: var(--font-medium);
+    --customization-option-description-align: center;
+
+    margin-top: var(--spacer-lg);
+  }
+
+  ._section {
+    margin-top: var(--spacer-lg);
+  }
+
+  ._form-errors {
+    margin-top: var(--spacer-xl);
+  }
+
+._error-text {
+    color: var(--c-danger-variant);
+    font-size: var(--font-xs);
+    margin-top: var(--spacer-xs);
+    height: calc(var(--font-xs) * 1.2);
+  }
+
+  ._actions {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    margin-top: var(--spacer-xl);
+  }
+
+  ._qty-container {
+    margin-top: var(--spacer-sm);
+  }
+}
+</style>
