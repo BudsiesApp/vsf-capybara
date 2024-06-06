@@ -15,32 +15,32 @@
         >
           <template #label>
             <div class="_wrapper">
-              <div class="_title" v-if="optionValue.name">
-                {{ optionValue.name }}
+              <div class="_media" v-if="getItemImage(optionValue)">
+                <div class="_image-container">
+                  <base-image
+                    class="_image"
+                    v-if="getItemImage(optionValue)"
+                    :aspect-ratio="1"
+                    :src="getItemImage(optionValue)"
+                  />
+                </div>
               </div>
 
-              <div
-                class="_price"
-                v-if="optionValuePriceDictionary[optionValue.id]"
-              >
-                <strong> + </strong>
+              <div class="_info">
+                <div class="_title" v-if="optionValue.name">
+                  {{ optionValue.name }}
+                </div>
 
-                <SfPrice
-                  :regular="formatPrice(optionValuePriceDictionary[optionValue.id].regular)"
-                  :special="formatPrice(optionValuePriceDictionary[optionValue.id].special)"
-                />
-              </div>
+                <div
+                  class="_price"
+                  v-if="optionValuePriceDictionary[optionValue.id]"
+                >
+                  <strong> + </strong>
 
-              <div class="_content">
-                <div class="_media">
-                  <div class="_image-container">
-                    <base-image
-                      class="_image"
-                      v-if="getItemImage(optionValue)"
-                      :aspect-ratio="1"
-                      :src="getItemImage(optionValue)"
-                    />
-                  </div>
+                  <SfPrice
+                    :regular="formatPrice(optionValuePriceDictionary[optionValue.id].regular)"
+                    :special="formatPrice(optionValuePriceDictionary[optionValue.id].special)"
+                  />
                 </div>
 
                 <div
@@ -140,6 +140,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "~@storefront-ui/shared/styles/helpers/typography";
 
 .cards-list-widget {
@@ -168,17 +169,9 @@ export default defineComponent({
   }
 
   ._wrapper {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
     margin-left: var(--spacer-sm);
     text-align: left;
   }
-
-  ._content {
-    margin-top: var(--spacer-sm);
-  }
-
   ._title {
     font-weight: var(--font-semibold);
     margin-top: calc(var(--checkbox-size, 1.5rem) / 10);
@@ -204,9 +197,9 @@ export default defineComponent({
   }
 
   ._media {
-    float: right;
+    // float: right;
     width: 40%;
-    padding: 0 0 var(--spacer-sm) var(--spacer-sm);
+    padding: 0 var(--spacer-sm) var(--spacer-sm) 0;
 
     ._image-container {
       position: relative;
@@ -220,6 +213,7 @@ export default defineComponent({
 
   ._description {
     font-size: var(--font-sm);
+    margin-top: var(--spacer-sm);
 
     > :first-child {
       margin-top: 0;
@@ -238,6 +232,20 @@ export default defineComponent({
       1.2,
       var(--font-family-secondary)
     );
+  }
+
+  @include for-desktop {
+    ._wrapper {
+      display: flex;
+      flex-direction: row;
+      flex-grow: 1;
+    }
+
+    ._media {
+      width: 25%;
+      flex-shrink: 0;
+      flex-grow: 1;
+    }
   }
 }
 </style>
