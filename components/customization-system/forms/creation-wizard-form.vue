@@ -4,7 +4,12 @@
 
     <div class="_content">
       <div class="_steps-container">
-        <sf-steps :active="currentStep" class="_steps">
+        <sf-steps
+          :active="currentStep"
+          :can-go-back="canGoBack"
+          @change="onStepChanged"
+          class="_steps"
+        >
           <sf-step name="Type">
             <m-product-type-choose-step
               :disabled="isDisabled"
@@ -25,7 +30,7 @@
                 ref="validationObserver"
               >
                 <SfHeading
-                  class="_step-title -required "
+                  class="_step-title -required"
                   :level="2"
                   :title="customizationGroup.title || customizationGroup.name"
                 />
@@ -90,11 +95,11 @@
         </sf-steps>
       </div>
 
-      <!-- <MFloatingPhoto
-        v-if="showFloatingPhoto"
-        :image-url="floatingPhotoImageUrl"
+      <MFloatingPhoto
+        v-if="!!floatingPhotoUrl && isLastStep"
+        :image-url="floatingPhotoUrl"
         :pet-name="floatingPhotoText"
-      /> -->
+      />
     </div>
   </div>
 </template>
@@ -141,6 +146,7 @@ import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MFloatingPhoto from 'theme/components/organisms/OPlushieCreationWizard/m-floating-photo.vue';
 import MProductTypeChooseStep from 'theme/components/organisms/OPlushieCreationWizard/m-product-type-choose-step.vue';
+import { useFloatingPhoto } from 'theme/helpers/use-floating-photo';
 
 function getAllFormRefs (
   refs: Record<string, Vue | Element | Vue[] | Element[]>
@@ -193,6 +199,7 @@ export default defineComponent({
       const productSku: string = getPlushieSkuByTypes(type, plushieType.value);
 
       if (currentProduct.value?.sku === productSku) {
+        nextStep();
         return;
       }
 
@@ -249,7 +256,9 @@ export default defineComponent({
       customizationAvailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
-      selectedOptionValuesIds
+      selectedOptionValuesIds,
+      customizationOptionValue,
+      updateCustomizationOptionValue
     );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
@@ -388,6 +397,23 @@ export default defineComponent({
     async function nextStep (): Promise<void> {
       currentStep.value += 1;
     }
+    function scrollToTop (): void {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }
+    function onStepChanged (nextStep: number): void {
+      if (nextStep >= currentStep.value) {
+        return;
+      }
+
+      currentStep.value = nextStep;
+      scrollToTop();
+    }
+    const canGoBack = computed<boolean>(() => {
+      return !isSubmitting.value && (currentStep.value !== 1 || !existingCartItem.value);
+    });
+    const isLastStep = computed<boolean>(() => {
+      return currentStep.value === customizationGroups.customizationRootGroups.value.length;
+    });
 
     const formValidation = useFormValidation(validationObserver, () =>
       getAllFormRefs(context.refs)
@@ -396,10 +422,11 @@ export default defineComponent({
       ...customizationGroups,
       ...formValidation,
       ...persistedEmail,
-      // ...useFloatingPhoto(),
+      ...useFloatingPhoto(customizationState, availableCustomizations),
       ...useQuantityAndShippingDiscounts(),
       availableCustomizations,
       availableOptionCustomizations,
+      canGoBack,
       currentProduct,
       currentStep,
       customizationAvailableOptionValues,
@@ -407,6 +434,7 @@ export default defineComponent({
       customizationOptionValue,
       email,
       isDisabled,
+      isLastStep,
       isSubmitButtonDisabled,
       lastCustomizationGroup,
       mainTitleText,
@@ -416,6 +444,7 @@ export default defineComponent({
       onFormSubmit,
       pageTitle,
       productTypeButtonsList,
+      onStepChanged,
       setProductType,
       submitButtonText,
       quantity,
