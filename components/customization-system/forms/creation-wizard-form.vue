@@ -75,6 +75,7 @@
 
             <sf-step :name="lastCustomizationGroup.name">
               <creation-wizard-form-last-step
+                :add-to-cart-action="onFormSubmit"
                 :available-customizations="
                   customizationRootGroupCustomizations[
                     lastCustomizationGroup.id
@@ -84,11 +85,12 @@
                   customizationAvailableOptionValues
                 "
                 :customization-option-value="customizationOptionValue"
+                :is-disabled="isDisabled"
                 :product="currentProduct"
-                @input="onCustomizationOptionInput"
-                :add-to-cart-action="onFormSubmit"
                 :product-type="plushieType"
+                :submit-button-text="submitButtonText"
                 :quantity.sync="quantity"
+                @input="onCustomizationOptionInput"
               />
             </sf-step>
           </template>
@@ -116,6 +118,7 @@ import {
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfHeading, SfSteps } from '@storefront-ui/vue';
 
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import CartItem from 'core/modules/cart/types/CartItem';
 import Product from 'core/modules/catalog/types/Product';
 import i18n from '@vue-storefront/core/i18n';
@@ -147,6 +150,8 @@ import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MFloatingPhoto from 'theme/components/organisms/OPlushieCreationWizard/m-floating-photo.vue';
 import MProductTypeChooseStep from 'theme/components/organisms/OPlushieCreationWizard/m-product-type-choose-step.vue';
 import { useFloatingPhoto } from 'theme/helpers/use-floating-photo';
+import { ProductEvent } from 'src/modules/shared';
+import { PlushieWizardEvents } from 'src/modules/budsies';
 
 function getAllFormRefs (
   refs: Record<string, Vue | Element | Vue[] | Element[]>
@@ -195,6 +200,17 @@ export default defineComponent({
     const currentProduct = computed<Product | undefined>(() => {
       return context.root.$store.getters['product/getCurrentProduct'];
     });
+
+    // TODO: refactor
+    if (existingCartItem.value) {
+      context.root.$store.dispatch('product/loadProduct', {
+        parentSku: existingCartItem.value.sku,
+        childSku: null
+      }).then(() => {
+        nextStep();
+      });
+    }
+
     async function setProductType (type: string): Promise<void> {
       const productSku: string = getPlushieSkuByTypes(type, plushieType.value);
 
@@ -207,18 +223,19 @@ export default defineComponent({
         parentSku: productSku,
         childSku: null
       });
-      // EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, product);
+
+      EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, currentProduct);
 
       resetCustomizationState();
       nextStep();
 
-      // EventBus.$emit(
-      //   PlushieWizardEvents.PLUSHIE_WIZARD_TYPE_CHANGE,
-      //   {
-      //     productType: type,
-      //     plushieType: this.plushieType
-      //   }
-      // );
+      EventBus.$emit(
+        PlushieWizardEvents.PLUSHIE_WIZARD_TYPE_CHANGE,
+        {
+          productType: type,
+          plushieType: plushieType.value
+        }
+      );
     }
 
     const validationObserver: Ref<InstanceType<
@@ -318,9 +335,6 @@ export default defineComponent({
       return isSomeCustomizationOptionBusy.value || isDisabled.value;
     });
 
-    const pageTitle = computed<string>(() => {
-      return `${plushieType.value} Order Form`;
-    });
     const submitButtonText = computed<string>(() => {
       return (
         existingCartItem.value ? i18n.t('Update') : i18n.t('Add to Cart')
@@ -442,7 +456,6 @@ export default defineComponent({
       onCustomizationOptionBusyChanged,
       onCustomizationOptionInput,
       onFormSubmit,
-      pageTitle,
       productTypeButtonsList,
       onStepChanged,
       setProductType,
