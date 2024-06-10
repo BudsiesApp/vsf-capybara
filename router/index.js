@@ -84,7 +84,7 @@ let routes = [
     component: PlushieProduct,
     props: (route) => ({
       plushieType: PlushieType.FOREVERS,
-      existingPlushieId: route.query.plushieId
+      existingPlushieId: route.query.id
     })
   },
   {

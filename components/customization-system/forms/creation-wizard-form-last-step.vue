@@ -77,7 +77,7 @@
         :disabled="isDisabled"
         @click="onAddToCartClick"
       >
-        {{ $t("Add to Cart") }}
+        {{ submitButtonText }}
       </SfButton>
 
       <MBlockStory story-slug="order_submit_agreement_petsies" />
@@ -159,6 +159,10 @@ export default defineComponent({
       type: String,
       required: true
     },
+    submitButtonText: {
+      type: String,
+      required: true
+    },
     quantity: {
       type: Number,
       required: true
@@ -197,7 +201,8 @@ export default defineComponent({
     return {
       ...useQuantityAndShippingDiscounts(),
       ...formValidation,
-      onAddToCartClick
+      onAddToCartClick,
+      validationObserver
     };
   }
 });

@@ -222,7 +222,9 @@ export default defineComponent({
       customizationAvailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
-      selectedOptionValuesIds
+      selectedOptionValuesIds,
+      customizationOptionValue,
+      updateCustomizationOptionValue
     );
     const {
       executeActionsByCustomizationIdAndCustomizationOptionValue

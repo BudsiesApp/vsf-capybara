@@ -4,7 +4,12 @@
 
     <div class="_content">
       <div class="_steps-container">
-        <sf-steps :active="currentStep" class="_steps">
+        <sf-steps
+          :active="currentStep"
+          :can-go-back="canGoBack"
+          @change="onStepChanged"
+          class="_steps"
+        >
           <sf-step name="Type">
             <m-product-type-choose-step
               :disabled="isDisabled"
@@ -25,7 +30,7 @@
                 ref="validationObserver"
               >
                 <SfHeading
-                  class="_step-title -required "
+                  class="_step-title -required"
                   :level="2"
                   :title="customizationGroup.title || customizationGroup.name"
                 />
@@ -70,6 +75,7 @@
 
             <sf-step :name="lastCustomizationGroup.name">
               <creation-wizard-form-last-step
+                :add-to-cart-action="onFormSubmit"
                 :available-customizations="
                   customizationRootGroupCustomizations[
                     lastCustomizationGroup.id
@@ -79,22 +85,23 @@
                   customizationAvailableOptionValues
                 "
                 :customization-option-value="customizationOptionValue"
+                :is-disabled="isDisabled"
                 :product="currentProduct"
-                @input="onCustomizationOptionInput"
-                :add-to-cart-action="onFormSubmit"
                 :product-type="plushieType"
+                :submit-button-text="submitButtonText"
                 :quantity.sync="quantity"
+                @input="onCustomizationOptionInput"
               />
             </sf-step>
           </template>
         </sf-steps>
       </div>
 
-      <!-- <MFloatingPhoto
-        v-if="showFloatingPhoto"
-        :image-url="floatingPhotoImageUrl"
+      <MFloatingPhoto
+        v-if="!!floatingPhotoUrl && isLastStep"
+        :image-url="floatingPhotoUrl"
         :pet-name="floatingPhotoText"
-      /> -->
+      />
     </div>
   </div>
 </template>
@@ -111,6 +118,7 @@ import {
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfHeading, SfSteps } from '@storefront-ui/vue';
 
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import CartItem from 'core/modules/cart/types/CartItem';
 import Product from 'core/modules/catalog/types/Product';
 import i18n from '@vue-storefront/core/i18n';
@@ -141,6 +149,9 @@ import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MFloatingPhoto from 'theme/components/organisms/OPlushieCreationWizard/m-floating-photo.vue';
 import MProductTypeChooseStep from 'theme/components/organisms/OPlushieCreationWizard/m-product-type-choose-step.vue';
+import { useFloatingPhoto } from 'theme/helpers/use-floating-photo';
+import { ProductEvent } from 'src/modules/shared';
+import { PlushieWizardEvents } from 'src/modules/budsies';
 
 function getAllFormRefs (
   refs: Record<string, Vue | Element | Vue[] | Element[]>
@@ -189,10 +200,22 @@ export default defineComponent({
     const currentProduct = computed<Product | undefined>(() => {
       return context.root.$store.getters['product/getCurrentProduct'];
     });
+
+    // TODO: refactor
+    if (existingCartItem.value) {
+      context.root.$store.dispatch('product/loadProduct', {
+        parentSku: existingCartItem.value.sku,
+        childSku: null
+      }).then(() => {
+        nextStep();
+      });
+    }
+
     async function setProductType (type: string): Promise<void> {
       const productSku: string = getPlushieSkuByTypes(type, plushieType.value);
 
       if (currentProduct.value?.sku === productSku) {
+        nextStep();
         return;
       }
 
@@ -200,18 +223,19 @@ export default defineComponent({
         parentSku: productSku,
         childSku: null
       });
-      // EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, product);
+
+      EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, currentProduct);
 
       resetCustomizationState();
       nextStep();
 
-      // EventBus.$emit(
-      //   PlushieWizardEvents.PLUSHIE_WIZARD_TYPE_CHANGE,
-      //   {
-      //     productType: type,
-      //     plushieType: this.plushieType
-      //   }
-      // );
+      EventBus.$emit(
+        PlushieWizardEvents.PLUSHIE_WIZARD_TYPE_CHANGE,
+        {
+          productType: type,
+          plushieType: plushieType.value
+        }
+      );
     }
 
     const validationObserver: Ref<InstanceType<
@@ -249,7 +273,9 @@ export default defineComponent({
       customizationAvailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
-      selectedOptionValuesIds
+      selectedOptionValuesIds,
+      customizationOptionValue,
+      updateCustomizationOptionValue
     );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
@@ -309,9 +335,6 @@ export default defineComponent({
       return isSomeCustomizationOptionBusy.value || isDisabled.value;
     });
 
-    const pageTitle = computed<string>(() => {
-      return `${plushieType.value} Order Form`;
-    });
     const submitButtonText = computed<string>(() => {
       return (
         existingCartItem.value ? i18n.t('Update') : i18n.t('Add to Cart')
@@ -388,6 +411,23 @@ export default defineComponent({
     async function nextStep (): Promise<void> {
       currentStep.value += 1;
     }
+    function scrollToTop (): void {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }
+    function onStepChanged (nextStep: number): void {
+      if (nextStep >= currentStep.value) {
+        return;
+      }
+
+      currentStep.value = nextStep;
+      scrollToTop();
+    }
+    const canGoBack = computed<boolean>(() => {
+      return !isSubmitting.value && (currentStep.value !== 1 || !existingCartItem.value);
+    });
+    const isLastStep = computed<boolean>(() => {
+      return currentStep.value === customizationGroups.customizationRootGroups.value.length;
+    });
 
     const formValidation = useFormValidation(validationObserver, () =>
       getAllFormRefs(context.refs)
@@ -396,10 +436,11 @@ export default defineComponent({
       ...customizationGroups,
       ...formValidation,
       ...persistedEmail,
-      // ...useFloatingPhoto(),
+      ...useFloatingPhoto(customizationState, availableCustomizations),
       ...useQuantityAndShippingDiscounts(),
       availableCustomizations,
       availableOptionCustomizations,
+      canGoBack,
       currentProduct,
       currentStep,
       customizationAvailableOptionValues,
@@ -407,6 +448,7 @@ export default defineComponent({
       customizationOptionValue,
       email,
       isDisabled,
+      isLastStep,
       isSubmitButtonDisabled,
       lastCustomizationGroup,
       mainTitleText,
@@ -414,8 +456,8 @@ export default defineComponent({
       onCustomizationOptionBusyChanged,
       onCustomizationOptionInput,
       onFormSubmit,
-      pageTitle,
       productTypeButtonsList,
+      onStepChanged,
       setProductType,
       submitButtonText,
       quantity,
