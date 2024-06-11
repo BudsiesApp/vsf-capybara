@@ -115,9 +115,10 @@ let routes = [
     name: 'golf-covers-create',
     path: '/golf-head-covers/create/',
     component: PlushieProduct,
-    props: {
-      plushieType: PlushieType.GOLF_COVERS
-    }
+    props: (route) => ({
+      plushieType: PlushieType.GOLF_COVERS,
+      existingPlushieId: route.query.id
+    })
   },
   {
     name: 'golf-covers-create-alias-1',
