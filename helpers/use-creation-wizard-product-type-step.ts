@@ -16,6 +16,7 @@ export function useCreationWizardProductTypeStep (
   preselectedProductType: Ref<string | undefined>,
   resetCustomizationState: () => void,
   nextStep: () => void,
+  afterProductTypeSet: () => void,
   { root }: SetupContext
 ) {
   const isProductLoading = ref<boolean>(false);
@@ -44,6 +45,8 @@ export function useCreationWizardProductTypeStep (
 
     await loadProduct(productSku);
     resetCustomizationState();
+
+    afterProductTypeSet();
 
     EventBus.$emit(PlushieWizardEvents.PLUSHIE_WIZARD_TYPE_CHANGE, {
       productType: type,

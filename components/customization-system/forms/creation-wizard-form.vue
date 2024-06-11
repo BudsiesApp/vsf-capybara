@@ -75,9 +75,7 @@
               <creation-wizard-form-last-step
                 :add-to-cart-action="onFormSubmit"
                 :available-customizations="
-                  customizationRootGroupCustomizations[
-                    lastStepCustomization.id
-                  ]
+                  customizationRootGroupCustomizations[lastStepCustomization.id]
                 "
                 :customization-available-option-values="
                   customizationAvailableOptionValues
@@ -90,7 +88,9 @@
                 :submit-button-text="submitButtonText"
                 :quantity.sync="quantity"
                 @input="onCustomizationOptionInput"
-                @customization-option-busy-state-changed="onCustomizationOptionBusyChanged"
+                @customization-option-busy-state-changed="
+                  onCustomizationOptionBusyChanged
+                "
               />
             </sf-step>
           </template>
@@ -134,6 +134,7 @@ import {
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useCreationWizardFormSteps } from 'theme/helpers/use-creation-wizard-form-steps';
+import { useCreationWizardPreselectedSize } from 'theme/helpers/use-creation-wizard-preselected-size';
 import { useCreationWizardProductTypeStep } from 'theme/helpers/use-creation-wizard-product-type-step';
 import { useFloatingPhoto } from 'theme/helpers/use-floating-photo';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
@@ -202,7 +203,12 @@ export default defineComponent({
     ValidationObserver
   },
   setup (props, context) {
-    const { existingCartItem, plushieType, preselectedProductType } = toRefs(props);
+    const {
+      existingCartItem,
+      plushieType,
+      preselectedProductSize,
+      preselectedProductType
+    } = toRefs(props);
     const currentProduct = computed<Product | undefined>(() => {
       return context.root.$store.getters['product/getCurrentProduct'];
     });
@@ -233,15 +239,13 @@ export default defineComponent({
       selectedOptionValuesIds,
       updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
-    const {
-      availableCustomizations,
-      customizationAvailableOptionValues
-    } = useAvailableCustomizations(
-      productCustomizations,
-      selectedOptionValuesIds,
-      customizationOptionValue,
-      updateCustomizationOptionValue
-    );
+    const { availableCustomizations, customizationAvailableOptionValues } =
+      useAvailableCustomizations(
+        productCustomizations,
+        selectedOptionValuesIds,
+        customizationOptionValue,
+        updateCustomizationOptionValue
+      );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
         productCustomizations,
@@ -256,7 +260,7 @@ export default defineComponent({
     function onCustomizationOptionInput (payload: {
       customizationId: string,
       value: CustomizationOptionValue
-    }) {
+    }): void {
       updateCustomizationOptionValue(payload);
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
@@ -301,6 +305,19 @@ export default defineComponent({
       existingCartItem
     );
 
+    const { handlePreselectedSize } = useCreationWizardPreselectedSize(
+      preselectedProductSize,
+      customizationOptionValue,
+      currentProduct,
+      availableCustomizations,
+      customizationAvailableOptionValues,
+      onCustomizationOptionInput
+    );
+
+    function afterProductTypeSet (): void {
+      void handlePreselectedSize();
+    };
+
     const productTypeStep = useCreationWizardProductTypeStep(
       plushieType,
       currentProduct,
@@ -308,6 +325,7 @@ export default defineComponent({
       preselectedProductType,
       resetCustomizationState,
       formSteps.nextStep,
+      afterProductTypeSet,
       context
     );
 
