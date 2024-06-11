@@ -1,4 +1,4 @@
-import { computed, ref, Ref } from '@vue/composition-api';
+import { computed, nextTick, ref, Ref } from '@vue/composition-api';
 
 import CartItem from 'core/modules/cart/types/CartItem';
 import { Customization } from 'src/modules/customization-system';
@@ -24,18 +24,21 @@ export function useCreationWizardFormSteps (
     return currentStep.value === customizationRootGroups.value.length;
   });
 
-  function nextStep (): void {
-    currentStep.value += 1;
-  }
   function scrollToTop (): void {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
   }
-  function onStepChanged (nextStep: number): void {
+  async function nextStep (): Promise<void> {
+    currentStep.value += 1;
+    await nextTick();
+    scrollToTop();
+  }
+  async function onStepChanged (nextStep: number): Promise<void> {
     if (nextStep >= currentStep.value) {
       return;
     }
 
     currentStep.value = nextStep;
+    await nextTick();
     scrollToTop();
   }
 

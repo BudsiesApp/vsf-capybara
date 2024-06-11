@@ -15,7 +15,7 @@ export function useCreationWizardProductTypeStep (
   existingCartItem: Ref<CartItem | undefined>,
   preselectedProductType: Ref<string | undefined>,
   resetCustomizationState: () => void,
-  nextStep: () => void,
+  nextStep: () => Promise<void>,
   afterProductTypeSet: () => void,
   { root }: SetupContext
 ) {
@@ -30,14 +30,14 @@ export function useCreationWizardProductTypeStep (
     });
 
     isProductLoading.value = false;
-    nextStep();
+    void nextStep();
   }
 
   async function setProductType (type: string): Promise<void> {
     const productSku: string = getPlushieSkuByTypes(type, plushieType.value);
 
     if (currentProduct.value?.sku === productSku) {
-      nextStep();
+      void nextStep();
       return;
     }
 
