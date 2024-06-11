@@ -1,8 +1,11 @@
 <template>
   <div id="plushie-product">
+    <SfHeading :level="1" :title="mainTitleText" />
+
     <creation-wizard-form
-      :plushie-type="plushieType"
       :existing-cart-item="existingCartItem"
+      :plushie-type="plushieType"
+      :product-type-buttons-list="productTypeButtonsList"
     />
   </div>
 </template>
@@ -14,11 +17,15 @@ import {
   PropType,
   toRefs
 } from '@vue/composition-api';
+import { SfHeading } from '@storefront-ui/vue';
 
 import { htmlDecode } from '@vue-storefront/core/filters';
+import i18n from '@vue-storefront/core/i18n';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import Product from 'core/modules/catalog/types/Product';
 
+import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
+import PlushieProductType from 'theme/interfaces/plushie-product-type';
 import { PlushieType } from 'theme/interfaces/plushie.type';
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 
@@ -27,7 +34,8 @@ import CreationWizardForm from 'theme/components/customization-system/forms/crea
 export default defineComponent({
   name: 'PlushieProduct',
   components: {
-    CreationWizardForm
+    CreationWizardForm,
+    SfHeading
   },
   props: {
     plushieType: {
@@ -53,9 +61,63 @@ export default defineComponent({
     const currentProduct = computed<Product | undefined>(
       () => context.root.$store.getters[`product/getCurrentProduct`]
     );
+
+    const foreversProductTypeButtons = computed<ProductTypeButton[]>(() => {
+      return [
+        {
+          title: i18n.t('Forevers Dog').toString(),
+          type: PlushieProductType.DOG,
+          imageSrc: '/assets/plushies/dog-icon1_1.png'
+        },
+        {
+          title: i18n.t('Forevers Cat').toString(),
+          type: PlushieProductType.CAT,
+          imageSrc: '/assets/plushies/cat-icon1_1.png'
+        },
+        {
+          title: i18n.t('Forevers Other').toString(),
+          type: PlushieProductType.OTHER,
+          imageSrc: '/assets/plushies/other-icon1_1.png'
+        }
+      ];
+    });
+    const golfCoversProductTypeButtons = computed<ProductTypeButton[]>(() => {
+      return [
+        {
+          title: i18n.t('Dog Golf Head Covers').toString(),
+          type: PlushieProductType.DOG,
+          imageSrc: '/assets/plushies/dog-icon1_1.png'
+        },
+        {
+          title: i18n.t('Cat Golf Head Covers').toString(),
+          type: PlushieProductType.CAT,
+          imageSrc: '/assets/plushies/cat-icon1_1.png'
+        },
+        {
+          title: i18n.t('Other Golf Head Covers').toString(),
+          type: PlushieProductType.OTHER,
+          imageSrc: '/assets/plushies/other-icon1_1.png'
+        }
+      ];
+    });
+    const productTypeButtonsList = computed<ProductTypeButton[]>(() => {
+      return plushieType.value === PlushieType.FOREVERS
+        ? foreversProductTypeButtons.value
+        : golfCoversProductTypeButtons.value;
+    });
+    const mainTitleText = computed<string>(() => {
+      const title =
+        plushieType.value === PlushieType.FOREVERS
+          ? i18n.t('Create Your Custom Forevers Plush')
+          : i18n.t('Create Your Custom Golf Head Covers');
+
+      return title.toString();
+    });
     return {
       ...useExistingCartItem(existingPlushieId, context),
-      currentProduct
+      currentProduct,
+      mainTitleText,
+      productTypeButtonsList
     };
   },
   beforeRouteLeave (to, from, next) {

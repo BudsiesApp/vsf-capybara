@@ -59,7 +59,7 @@
         <a
           class="_popup-link"
           href="javascript:void(0)"
-          @click="showQuantityNotes = false"
+          @click="showQuantityNotes = true"
         >{{ $t("Quantity & Shipping Discounts") }}</a>
       </div>
     </validation-provider>
@@ -74,7 +74,7 @@
       <SfButton
         class="_add-to-cart color-primary"
         type="submit"
-        :disabled="isDisabled"
+        :disabled="isSubmitButtonDisabled"
         @click="onAddToCartClick"
       >
         {{ submitButtonText }}
@@ -92,7 +92,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref, Ref } from '@vue/composition-api';
+import { computed, defineComponent, PropType, ref, Ref } from '@vue/composition-api';
 import { SfButton, SfHeading, SfInput, SfModal } from '@storefront-ui/vue';
 import { ValidationObserver, ValidationProvider } from 'vee-validate';
 
@@ -151,12 +151,12 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    isSubmitButtonDisabled: {
+      type: Boolean,
+      default: false
+    },
     product: {
       type: Object as PropType<Product>,
-      required: true
-    },
-    productType: {
-      type: String,
       required: true
     },
     submitButtonText: {
@@ -189,6 +189,21 @@ export default defineComponent({
       getAllFormRefs(context.refs)
     );
 
+    const productType = computed<string>(() => {
+      const defaultProductType = 'Plush';
+
+      if (!props.product.category) {
+        return defaultProductType;
+      }
+
+      const firstCategory = props.product.category[0];
+
+      if (!firstCategory) {
+        return defaultProductType;
+      }
+
+      return firstCategory.name;
+    });
     async function onAddToCartClick () {
       const isValid = await formValidation.validateAndGoToFirstError();
 
@@ -202,6 +217,7 @@ export default defineComponent({
       ...useQuantityAndShippingDiscounts(),
       ...formValidation,
       onAddToCartClick,
+      productType,
       validationObserver
     };
   }
