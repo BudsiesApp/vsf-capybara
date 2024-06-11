@@ -84,7 +84,9 @@ let routes = [
     component: PlushieProduct,
     props: (route) => ({
       plushieType: PlushieType.FOREVERS,
-      existingPlushieId: route.query.id
+      existingPlushieId: route.query.id,
+      preselectedProductSize: route.query.size,
+      preselectedProductType: route.query.product
     })
   },
   {
@@ -117,7 +119,8 @@ let routes = [
     component: PlushieProduct,
     props: (route) => ({
       plushieType: PlushieType.GOLF_COVERS,
-      existingPlushieId: route.query.id
+      existingPlushieId: route.query.id,
+      preselectedProductType: route.query.product
     })
   },
   {

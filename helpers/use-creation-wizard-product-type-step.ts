@@ -1,4 +1,4 @@
-import { ref, Ref, SetupContext } from '@vue/composition-api';
+import { onMounted, ref, Ref, SetupContext } from '@vue/composition-api';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import CartItem from 'core/modules/cart/types/CartItem';
@@ -13,6 +13,7 @@ export function useCreationWizardProductTypeStep (
   plushieType: Ref<PlushieType>,
   currentProduct: Ref<Product | undefined>,
   existingCartItem: Ref<CartItem | undefined>,
+  preselectedProductType: Ref<string | undefined>,
   resetCustomizationState: () => void,
   nextStep: () => void,
   { root }: SetupContext
@@ -53,6 +54,14 @@ export function useCreationWizardProductTypeStep (
   if (existingCartItem.value) {
     void loadProduct(existingCartItem.value.sku);
   }
+
+  onMounted(() => {
+    if (currentProduct.value || existingCartItem.value || !preselectedProductType.value) {
+      return;
+    }
+
+    void setProductType(preselectedProductType.value);
+  });
 
   return {
     isProductLoading,

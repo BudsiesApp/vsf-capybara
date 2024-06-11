@@ -98,7 +98,7 @@
       </div>
 
       <MFloatingPhoto
-        v-if="!!floatingPhotoUrl && isLastStep"
+        v-if="!!floatingPhotoUrl && isLastStep && stepsCustomizations.length"
         :image-url="floatingPhotoUrl"
         :pet-name="floatingPhotoText"
       />
@@ -175,6 +175,14 @@ export default defineComponent({
       type: String as PropType<PlushieType>,
       required: true
     },
+    preselectedProductSize: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
+    preselectedProductType: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
     productTypeButtonsList: {
       type: Array as PropType<ProductTypeButton[]>,
       required: true
@@ -194,7 +202,7 @@ export default defineComponent({
     ValidationObserver
   },
   setup (props, context) {
-    const { existingCartItem, plushieType } = toRefs(props);
+    const { existingCartItem, plushieType, preselectedProductType } = toRefs(props);
     const currentProduct = computed<Product | undefined>(() => {
       return context.root.$store.getters['product/getCurrentProduct'];
     });
@@ -297,6 +305,7 @@ export default defineComponent({
       plushieType,
       currentProduct,
       existingCartItem,
+      preselectedProductType,
       resetCustomizationState,
       formSteps.nextStep,
       context

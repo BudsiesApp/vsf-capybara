@@ -5,6 +5,8 @@
     <creation-wizard-form
       :existing-cart-item="existingCartItem"
       :plushie-type="plushieType"
+      :preselected-product-size="preselectedProductSize"
+      :preselected-product-type="preselectedProductType"
       :product-type-buttons-list="productTypeButtonsList"
     />
   </div>
@@ -38,13 +40,13 @@ export default defineComponent({
     SfHeading
   },
   props: {
-    plushieType: {
-      type: String as PropType<PlushieType>,
-      required: true
-    },
     existingPlushieId: {
       type: String as PropType<string | undefined>,
       default: undefined
+    },
+    plushieType: {
+      type: String as PropType<PlushieType>,
+      required: true
     },
     preselectedProductSize: {
       type: String as PropType<string | undefined>,
