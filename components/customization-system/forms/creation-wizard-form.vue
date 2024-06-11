@@ -1,12 +1,10 @@
 <template>
   <div class="creation-wizard-form">
-    <SfHeading :level="1" :title="mainTitleText" />
-
     <div class="_content">
       <div class="_steps-container">
         <sf-steps
           :active="currentStep"
-          :can-go-back="canGoBack"
+          :can-go-back="canGoBack && !isSubmitButtonDisabled"
           @change="onStepChanged"
           class="_steps"
         >
@@ -20,7 +18,7 @@
 
           <template v-if="currentProduct">
             <sf-step
-              v-for="customizationGroup in customizationCommonRootGroups"
+              v-for="customizationGroup in stepsCustomizations"
               :key="customizationGroup.id"
               :name="customizationGroup.name"
               :use-v-show="true"
@@ -64,7 +62,7 @@
                 <div class="_step-actions-container">
                   <SfButton
                     class="_button"
-                    :disabled="isDisabled"
+                    :disabled="isSubmitButtonDisabled"
                     @click="(event) => passes(() => nextStep())"
                   >
                     {{ $t("Continue") }}
@@ -73,24 +71,26 @@
               </validation-observer>
             </sf-step>
 
-            <sf-step :name="lastCustomizationGroup.name">
+            <sf-step :name="lastStepCustomization.name">
               <creation-wizard-form-last-step
                 :add-to-cart-action="onFormSubmit"
                 :available-customizations="
-                  customizationRootGroupCustomizations[
-                    lastCustomizationGroup.id
-                  ]
+                  customizationRootGroupCustomizations[lastStepCustomization.id]
                 "
                 :customization-available-option-values="
                   customizationAvailableOptionValues
                 "
                 :customization-option-value="customizationOptionValue"
                 :is-disabled="isDisabled"
+                :is-submit-button-disabled="isSubmitButtonDisabled"
                 :product="currentProduct"
                 :product-type="plushieType"
                 :submit-button-text="submitButtonText"
                 :quantity.sync="quantity"
                 @input="onCustomizationOptionInput"
+                @customization-option-busy-state-changed="
+                  onCustomizationOptionBusyChanged
+                "
               />
             </sf-step>
           </template>
@@ -98,7 +98,7 @@
       </div>
 
       <MFloatingPhoto
-        v-if="!!floatingPhotoUrl && isLastStep"
+        v-if="!!floatingPhotoUrl && isLastStep && stepsCustomizations.length"
         :image-url="floatingPhotoUrl"
         :pet-name="floatingPhotoText"
       />
@@ -118,7 +118,6 @@ import {
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfHeading, SfSteps } from '@storefront-ui/vue';
 
-import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import CartItem from 'core/modules/cart/types/CartItem';
 import Product from 'core/modules/catalog/types/Product';
 import i18n from '@vue-storefront/core/i18n';
@@ -131,16 +130,15 @@ import {
   CustomizationOptionValue,
   useCustomizationsGroups
 } from 'src/modules/customization-system';
-import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
-import getPlushieSkuByTypes from 'theme/helpers/get-plushie-sku-by-types.function';
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
-import { useCustomerEmail } from 'theme/helpers/use-customer-email';
+import { useCreationWizardFormSteps } from 'theme/helpers/use-creation-wizard-form-steps';
+import { useCreationWizardPreselectedSize } from 'theme/helpers/use-creation-wizard-preselected-size';
+import { useCreationWizardProductTypeStep } from 'theme/helpers/use-creation-wizard-product-type-step';
+import { useFloatingPhoto } from 'theme/helpers/use-floating-photo';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
-import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
 import { PlushieType } from 'theme/interfaces/plushie.type';
-import PlushieProductType from 'theme/interfaces/plushie-product-type';
 
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
 import CreationWizardFormLastStep from 'theme/components/customization-system/forms/creation-wizard-form-last-step.vue';
@@ -149,9 +147,6 @@ import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MFloatingPhoto from 'theme/components/organisms/OPlushieCreationWizard/m-floating-photo.vue';
 import MProductTypeChooseStep from 'theme/components/organisms/OPlushieCreationWizard/m-product-type-choose-step.vue';
-import { useFloatingPhoto } from 'theme/helpers/use-floating-photo';
-import { ProductEvent } from 'src/modules/shared';
-import { PlushieWizardEvents } from 'src/modules/budsies';
 
 function getAllFormRefs (
   refs: Record<string, Vue | Element | Vue[] | Element[]>
@@ -180,6 +175,18 @@ export default defineComponent({
     plushieType: {
       type: String as PropType<PlushieType>,
       required: true
+    },
+    preselectedProductSize: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
+    preselectedProductType: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
+    productTypeButtonsList: {
+      type: Array as PropType<ProductTypeButton[]>,
+      required: true
     }
   },
   components: {
@@ -196,54 +203,19 @@ export default defineComponent({
     ValidationObserver
   },
   setup (props, context) {
-    const { existingCartItem, plushieType } = toRefs(props);
+    const {
+      existingCartItem,
+      plushieType,
+      preselectedProductSize,
+      preselectedProductType
+    } = toRefs(props);
     const currentProduct = computed<Product | undefined>(() => {
       return context.root.$store.getters['product/getCurrentProduct'];
     });
 
-    // TODO: refactor
-    if (existingCartItem.value) {
-      context.root.$store.dispatch('product/loadProduct', {
-        parentSku: existingCartItem.value.sku,
-        childSku: null
-      }).then(() => {
-        nextStep();
-      });
-    }
-
-    async function setProductType (type: string): Promise<void> {
-      const productSku: string = getPlushieSkuByTypes(type, plushieType.value);
-
-      if (currentProduct.value?.sku === productSku) {
-        nextStep();
-        return;
-      }
-
-      await context.root.$store.dispatch('product/loadProduct', {
-        parentSku: productSku,
-        childSku: null
-      });
-
-      EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, currentProduct);
-
-      resetCustomizationState();
-      nextStep();
-
-      EventBus.$emit(
-        PlushieWizardEvents.PLUSHIE_WIZARD_TYPE_CHANGE,
-        {
-          productType: type,
-          plushieType: plushieType.value
-        }
-      );
-    }
-
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
     > | null> = ref(null);
-
-    const { email } = useCustomerEmail(existingCartItem);
-    const persistedEmail = usePersistedEmail(email);
 
     const productCustomizations = computed<Customization[]>(() => {
       return currentProduct.value?.customizations || [];
@@ -267,16 +239,13 @@ export default defineComponent({
       selectedOptionValuesIds,
       updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
-    const {
-      availableCustomizations,
-      availableOptionCustomizations,
-      customizationAvailableOptionValues
-    } = useAvailableCustomizations(
-      productCustomizations,
-      selectedOptionValuesIds,
-      customizationOptionValue,
-      updateCustomizationOptionValue
-    );
+    const { availableCustomizations, customizationAvailableOptionValues } =
+      useAvailableCustomizations(
+        productCustomizations,
+        selectedOptionValuesIds,
+        customizationOptionValue,
+        updateCustomizationOptionValue
+      );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
         productCustomizations,
@@ -291,7 +260,7 @@ export default defineComponent({
     function onCustomizationOptionInput (payload: {
       customizationId: string,
       value: CustomizationOptionValue
-    }) {
+    }): void {
       updateCustomizationOptionValue(payload);
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
@@ -302,13 +271,11 @@ export default defineComponent({
       quantity,
       customizationState,
       existingCartItem,
-      context,
-      email
+      context
     );
 
     async function onFormSubmit (): Promise<void> {
       try {
-        persistedEmail.persistLastUsedCustomerEmail(email.value);
         await addToCartHandler();
 
         if (!currentProduct.value) {
@@ -328,11 +295,42 @@ export default defineComponent({
       }
     }
 
+    const customizationGroups = useCustomizationsGroups(
+      availableCustomizations,
+      productCustomization
+    );
+
+    const formSteps = useCreationWizardFormSteps(
+      customizationGroups.customizationRootGroups,
+      existingCartItem
+    );
+
+    const { handlePreselectedSize } = useCreationWizardPreselectedSize(
+      preselectedProductSize,
+      customizationOptionValue,
+      currentProduct,
+      availableCustomizations,
+      customizationAvailableOptionValues,
+      onCustomizationOptionInput
+    );
+
+    function afterProductTypeSet (): void {
+      void handlePreselectedSize();
+    };
+
+    const productTypeStep = useCreationWizardProductTypeStep(
+      plushieType,
+      currentProduct,
+      existingCartItem,
+      preselectedProductType,
+      resetCustomizationState,
+      formSteps.nextStep,
+      afterProductTypeSet,
+      context
+    );
+
     const isDisabled = computed<boolean>(() => {
-      return isSubmitting.value;
-    });
-    const isSubmitButtonDisabled = computed<boolean>(() => {
-      return isSomeCustomizationOptionBusy.value || isDisabled.value;
+      return isSubmitting.value || productTypeStep.isProductLoading.value;
     });
 
     const submitButtonText = computed<string>(() => {
@@ -341,124 +339,26 @@ export default defineComponent({
       ).toString();
     });
 
-    const foreversProductTypeButtons = computed<ProductTypeButton[]>(() => {
-      return [
-        {
-          title: i18n.t('Forevers Dog').toString(),
-          type: PlushieProductType.DOG,
-          imageSrc: '/assets/plushies/dog-icon1_1.png'
-        },
-        {
-          title: i18n.t('Forevers Cat').toString(),
-          type: PlushieProductType.CAT,
-          imageSrc: '/assets/plushies/cat-icon1_1.png'
-        },
-        {
-          title: i18n.t('Forevers Other').toString(),
-          type: PlushieProductType.OTHER,
-          imageSrc: '/assets/plushies/other-icon1_1.png'
-        }
-      ];
-    });
-    const golfCoversProductTypeButtons = computed<ProductTypeButton[]>(() => {
-      return [
-        {
-          title: i18n.t('Dog Golf Head Covers').toString(),
-          type: PlushieProductType.DOG,
-          imageSrc: '/assets/plushies/dog-icon1_1.png'
-        },
-        {
-          title: i18n.t('Cat Golf Head Covers').toString(),
-          type: PlushieProductType.CAT,
-          imageSrc: '/assets/plushies/cat-icon1_1.png'
-        },
-        {
-          title: i18n.t('Other Golf Head Covers').toString(),
-          type: PlushieProductType.OTHER,
-          imageSrc: '/assets/plushies/other-icon1_1.png'
-        }
-      ];
-    });
-    const productTypeButtonsList = computed<ProductTypeButton[]>(() => {
-      return plushieType.value === PlushieType.FOREVERS
-        ? foreversProductTypeButtons.value
-        : golfCoversProductTypeButtons.value;
+    const isSubmitButtonDisabled = computed<boolean>(() => {
+      return isDisabled.value || isSomeCustomizationOptionBusy.value;
     });
 
-    const customizationGroups = useCustomizationsGroups(
-      availableCustomizations,
-      productCustomization
-    );
-
-    const customizationCommonRootGroups = computed<Customization[]>(() => {
-      const groups = customizationGroups.customizationRootGroups.value;
-      return groups.slice(0, groups.length - 1);
-    });
-    const lastCustomizationGroup = computed<Customization>(() => {
-      return customizationGroups.customizationRootGroups.value[
-        customizationGroups.customizationRootGroups.value.length - 1
-      ];
-    });
-    const mainTitleText = computed<string>(() => {
-      const title =
-        plushieType.value === PlushieType.FOREVERS
-          ? i18n.t('Create Your Custom Forevers Plush')
-          : i18n.t('Create Your Custom Golf Head Covers');
-
-      return title.toString();
-    });
-    const currentStep = ref<number>(0);
-    async function nextStep (): Promise<void> {
-      currentStep.value += 1;
-    }
-    function scrollToTop (): void {
-      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-    }
-    function onStepChanged (nextStep: number): void {
-      if (nextStep >= currentStep.value) {
-        return;
-      }
-
-      currentStep.value = nextStep;
-      scrollToTop();
-    }
-    const canGoBack = computed<boolean>(() => {
-      return !isSubmitting.value && (currentStep.value !== 1 || !existingCartItem.value);
-    });
-    const isLastStep = computed<boolean>(() => {
-      return currentStep.value === customizationGroups.customizationRootGroups.value.length;
-    });
-
-    const formValidation = useFormValidation(validationObserver, () =>
-      getAllFormRefs(context.refs)
-    );
     return {
       ...customizationGroups,
-      ...formValidation,
-      ...persistedEmail,
+      ...formSteps,
+      ...productTypeStep,
       ...useFloatingPhoto(customizationState, availableCustomizations),
-      ...useQuantityAndShippingDiscounts(),
-      availableCustomizations,
-      availableOptionCustomizations,
-      canGoBack,
+      ...useFormValidation(validationObserver, () =>
+        getAllFormRefs(context.refs)
+      ),
       currentProduct,
-      currentStep,
       customizationAvailableOptionValues,
-      customizationCommonRootGroups,
       customizationOptionValue,
-      email,
       isDisabled,
-      isLastStep,
       isSubmitButtonDisabled,
-      lastCustomizationGroup,
-      mainTitleText,
-      nextStep,
       onCustomizationOptionBusyChanged,
       onCustomizationOptionInput,
       onFormSubmit,
-      productTypeButtonsList,
-      onStepChanged,
-      setProductType,
       submitButtonText,
       quantity,
       validationObserver

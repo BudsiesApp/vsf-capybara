@@ -74,7 +74,14 @@ export default defineComponent({
     border: 1px solid var(--c-light);
     width: 100%;
     padding: var(--spacer-sm);
-    font-family: var(--font-family-primary);
+    font: var(
+      --input-font,
+      var(--input-font-weight, var(--font-normal))
+        var(--input-font-size, var(--font-lg)) /
+        var(--input-font-line-height, 1)
+        var(--input-font-family, var(--font-family-secondary))
+    );
+    color: var(--input-color, var(--c-text));
     resize: vertical;
     outline: none;
 

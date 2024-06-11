@@ -84,7 +84,9 @@ let routes = [
     component: PlushieProduct,
     props: (route) => ({
       plushieType: PlushieType.FOREVERS,
-      existingPlushieId: route.query.id
+      existingPlushieId: route.query.id,
+      preselectedProductSize: route.query.size,
+      preselectedProductType: route.query.product
     })
   },
   {
@@ -115,9 +117,11 @@ let routes = [
     name: 'golf-covers-create',
     path: '/golf-head-covers/create/',
     component: PlushieProduct,
-    props: {
-      plushieType: PlushieType.GOLF_COVERS
-    }
+    props: (route) => ({
+      plushieType: PlushieType.GOLF_COVERS,
+      existingPlushieId: route.query.id,
+      preselectedProductType: route.query.product
+    })
   },
   {
     name: 'golf-covers-create-alias-1',
