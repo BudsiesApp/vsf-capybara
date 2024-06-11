@@ -2,6 +2,12 @@
   <div id="plushie-product">
     <SfHeading :level="1" :title="mainTitleText" />
 
+    <MBlockStory
+      :story-slug="topStorySlug"
+      class="_top-block"
+      v-if="topStorySlug"
+    />
+
     <creation-wizard-form
       :existing-cart-item="existingCartItem"
       :plushie-type="plushieType"
@@ -32,11 +38,13 @@ import { PlushieType } from 'theme/interfaces/plushie.type';
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 
 import CreationWizardForm from 'theme/components/customization-system/forms/creation-wizard-form.vue';
+import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 
 export default defineComponent({
   name: 'PlushieProduct',
   components: {
     CreationWizardForm,
+    MBlockStory,
     SfHeading
   },
   props: {
@@ -115,11 +123,19 @@ export default defineComponent({
 
       return title.toString();
     });
+
+    const topStorySlug = computed<string | undefined>(() => {
+      return plushieType.value === PlushieType.FOREVERS
+        ? 'petsies_creation_page_top'
+        : 'golf_cover_creation_page_top';
+    });
+
     return {
       ...useExistingCartItem(existingPlushieId, context),
       currentProduct,
       mainTitleText,
-      productTypeButtonsList
+      productTypeButtonsList,
+      topStorySlug
     };
   },
   beforeRouteLeave (to, from, next) {
@@ -158,6 +174,12 @@ export default defineComponent({
 #plushie-product {
   padding: var(--spacer-lg) 0 0;
   box-sizing: border-box;
+
+  ._top-block {
+    margin: var(--spacer-base) auto 0;
+    max-width: 45em;
+    text-align: center;
+  }
 
   @media (min-width: $tablet-min) {
     padding: var(--spacer-lg) 1rem 0;
