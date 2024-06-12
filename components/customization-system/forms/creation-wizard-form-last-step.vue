@@ -244,6 +244,10 @@ export default defineComponent({
     --customization-option-hint-align: center;
 
     margin-top: var(--spacer-lg);
+
+    &.-widget-CardsListWidget {
+      --customization-option-widget-margin: var(--spacer-sm) calc(var(--spacer-sm) * -1) 0;
+    }
   }
 
   ._section {

@@ -143,7 +143,7 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/typography";
 
 .cards-list-widget {
-  width: 100%;
+  width: auto;
 
   ._list {
     padding: 0;
@@ -187,7 +187,6 @@ export default defineComponent({
   ._price {
     color: var(--c-accent);
     font-size: var(--font-base);
-    margin-top: 1em;
 
     --price-regular-color: var(--c-accent);
     --price-regular-font-weight: var(--font-bold);
