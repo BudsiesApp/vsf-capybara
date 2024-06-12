@@ -6,6 +6,7 @@
     tag="div"
   >
     <SfHeading
+      class="_step-title -required"
       :level="2"
       :title="$t('Customize your {productType}', { productType })"
     />
@@ -226,6 +227,13 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .creation-wizard-form-last-step {
+  ._step-title,
+  ._customization-option,
+  ._step-actions-container {
+    padding-left: var(--spacer-sm);
+    padding-right: var(--spacer-sm);
+  }
+
   ._customization-option {
     --customization-option-align-items: center;
 
@@ -233,8 +241,13 @@ export default defineComponent({
     --customization-option-label-size: var(--h3-font-size);
     --customization-option-label-weight: var(--font-medium);
     --customization-option-description-align: center;
+    --customization-option-hint-align: center;
 
     margin-top: var(--spacer-lg);
+
+    &.-widget-CardsListWidget {
+      --customization-option-widget-margin: var(--spacer-sm) calc(var(--spacer-sm) * -1) 0;
+    }
   }
 
   ._section {

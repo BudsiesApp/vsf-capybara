@@ -371,7 +371,7 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .creation-wizard-form {
-  --steps-content-padding: var(--spacer-base) var(--spacer-sm) 0;
+  --steps-content-padding: var(--spacer-base) 0 0;
   $floating-photo-width: 14%;
 
   text-align: center;
@@ -408,12 +408,18 @@ export default defineComponent({
     height: 100%;
   }
 
+  ._step-title,
+  ._customization-option,
+  ._step-actions-container {
+    padding-left: var(--spacer-sm);
+    padding-right: var(--spacer-sm);
+  }
+
   ._customization-option {
     --customization-option-align-items: center;
-
     --customization-option-label-align: center;
-
     --customization-option-description-align: center;
+    --customization-option-hint-align: center;
 
     margin-top: var(--spacer-base);
   }
