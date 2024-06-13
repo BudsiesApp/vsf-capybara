@@ -21,7 +21,6 @@
               v-for="customizationGroup in stepsCustomizations"
               :key="customizationGroup.id"
               :name="customizationGroup.name"
-              :use-v-show="true"
             >
               <validation-observer
                 v-slot="{ errors: formErrors, passes }"
