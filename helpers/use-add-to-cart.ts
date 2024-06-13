@@ -8,7 +8,7 @@ import { CustomizationStateItem } from 'src/modules/customization-system';
 import { ServerError } from 'src/modules/shared';
 
 export function useAddToCart (
-  product: Ref<Product>,
+  product: Ref<Product | undefined>,
   quantity: Ref<number>,
   customizationStateItems: Ref<CustomizationStateItem[]>,
   existingCartItem: Ref<CartItem | undefined>,
@@ -26,6 +26,9 @@ export function useAddToCart (
   }
 
   async function addToCart (): Promise<void> {
+    if (!product.value) {
+      throw new Error('Product is not defined during adding to cart');
+    }
     if (isSubmitting.value) {
       return;
     }

@@ -1,72 +1,165 @@
 <template>
   <div id="plushie-product">
-    <o-plushie-creation-wizard
+    <SfHeading :level="1" :title="mainTitleText" />
+
+    <MBlockStory
+      :story-slug="topStorySlug"
+      class="_top-block"
+      v-if="topStorySlug"
+    />
+
+    <creation-wizard-form
+      :existing-cart-item="existingCartItem"
       :plushie-type="plushieType"
-      :artwork-upload-url="artworkUploadUrl"
-      :existing-plushie-id="existingPlushieId"
+      :preselected-product-size="preselectedProductSize"
       :preselected-product-type="preselectedProductType"
-      :preselected-size="preselectedSize"
+      :product-type-buttons-list="productTypeButtonsList"
     />
   </div>
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue';
-import config from 'config';
-import { htmlDecode } from '@vue-storefront/core/filters';
-import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
+import {
+  computed,
+  defineComponent,
+  PropType,
+  toRefs
+} from '@vue/composition-api';
+import { SfHeading } from '@storefront-ui/vue';
 
+import { htmlDecode } from '@vue-storefront/core/filters';
+import i18n from '@vue-storefront/core/i18n';
+import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import Product from 'core/modules/catalog/types/Product';
 
-import OPlushieCreationWizard from 'theme/components/organisms/o-plushie-creation-wizard.vue';
+import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
+import PlushieProductType from 'theme/interfaces/plushie-product-type';
 import { PlushieType } from 'theme/interfaces/plushie.type';
+import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 
-export default Vue.extend({
+import CreationWizardForm from 'theme/components/customization-system/forms/creation-wizard-form.vue';
+import MBlockStory from 'theme/components/molecules/m-block-story.vue';
+
+export default defineComponent({
   name: 'PlushieProduct',
   components: {
-    OPlushieCreationWizard
+    CreationWizardForm,
+    MBlockStory,
+    SfHeading
   },
   props: {
+    existingPlushieId: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
     plushieType: {
       type: String as PropType<PlushieType>,
       required: true
+    },
+    preselectedProductSize: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
+    preselectedProductType: {
+      type: String as PropType<string | undefined>,
+      default: undefined
     }
   },
-  computed: {
-    getCurrentProduct (): Product | null {
-      return this.$store.getters['product/getCurrentProduct'];
-    },
-    artworkUploadUrl (): string {
-      return config.images.fileuploaderUploadUrl;
-    },
-    existingPlushieId (): string {
-      return String(this.$route.query?.id);
-    },
-    preselectedProductType (): string | undefined {
-      return this.$route.query?.product as string | undefined;
-    },
-    preselectedSize (): string | undefined {
-      return this.$route.query?.size as string | undefined;
-    }
+  setup (props, context) {
+    const { existingPlushieId, plushieType } = toRefs(props);
+
+    const currentProduct = computed<Product | undefined>(
+      () => context.root.$store.getters[`product/getCurrentProduct`]
+    );
+
+    const foreversProductTypeButtons = computed<ProductTypeButton[]>(() => {
+      return [
+        {
+          title: i18n.t('Forevers Dog').toString(),
+          type: PlushieProductType.DOG,
+          imageSrc: '/assets/plushies/dog-icon1_1.png'
+        },
+        {
+          title: i18n.t('Forevers Cat').toString(),
+          type: PlushieProductType.CAT,
+          imageSrc: '/assets/plushies/cat-icon1_1.png'
+        },
+        {
+          title: i18n.t('Forevers Other').toString(),
+          type: PlushieProductType.OTHER,
+          imageSrc: '/assets/plushies/other-icon1_1.png'
+        }
+      ];
+    });
+    const golfCoversProductTypeButtons = computed<ProductTypeButton[]>(() => {
+      return [
+        {
+          title: i18n.t('Dog Golf Head Covers').toString(),
+          type: PlushieProductType.DOG,
+          imageSrc: '/assets/plushies/dog-icon1_1.png'
+        },
+        {
+          title: i18n.t('Cat Golf Head Covers').toString(),
+          type: PlushieProductType.CAT,
+          imageSrc: '/assets/plushies/cat-icon1_1.png'
+        },
+        {
+          title: i18n.t('Other Golf Head Covers').toString(),
+          type: PlushieProductType.OTHER,
+          imageSrc: '/assets/plushies/other-icon1_1.png'
+        }
+      ];
+    });
+    const productTypeButtonsList = computed<ProductTypeButton[]>(() => {
+      return plushieType.value === PlushieType.FOREVERS
+        ? foreversProductTypeButtons.value
+        : golfCoversProductTypeButtons.value;
+    });
+    const mainTitleText = computed<string>(() => {
+      const title =
+        plushieType.value === PlushieType.FOREVERS
+          ? i18n.t('Create Your Custom Forevers Plush')
+          : i18n.t('Create Your Custom Golf Head Covers');
+
+      return title.toString();
+    });
+
+    const topStorySlug = computed<string | undefined>(() => {
+      return plushieType.value === PlushieType.FOREVERS
+        ? 'petsies_creation_page_top'
+        : 'golf_cover_creation_page_top';
+    });
+
+    return {
+      ...useExistingCartItem(existingPlushieId, context),
+      currentProduct,
+      mainTitleText,
+      productTypeButtonsList,
+      topStorySlug
+    };
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
     next();
   },
   metaInfo () {
-    const defaultProductName = this.plushieType === PlushieType.FOREVERS
-      ? 'Forevers'
-      : 'Golf Head Covers';
-    const productName = this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name || defaultProductName;
+    const defaultProductName =
+      this.plushieType === PlushieType.FOREVERS
+        ? 'Forevers'
+        : 'Golf Head Covers';
+    const productName =
+      this.currentProduct?.meta_title ||
+      this.currentProduct?.name ||
+      defaultProductName;
 
     return {
       title: htmlDecode(productName),
-      meta: this.getCurrentProduct?.meta_description
+      meta: this.currentProduct?.meta_description
         ? [
           {
             vmid: 'description',
             name: 'description',
-            content: htmlDecode(this.getCurrentProduct?.meta_description)
+            content: htmlDecode(this.currentProduct?.meta_description)
           }
         ]
         : []
@@ -82,6 +175,13 @@ export default Vue.extend({
   padding: var(--spacer-lg) 0 0;
   box-sizing: border-box;
 
+  ._top-block {
+    margin: var(--spacer-base) auto 0;
+    max-width: 45em;
+    text-align: center;
+    padding: 0 var(--spacer-sm);
+  }
+
   @media (min-width: $tablet-min) {
     padding: var(--spacer-lg) 1rem 0;
   }
@@ -90,5 +190,4 @@ export default Vue.extend({
     width: 100%;
   }
 }
-
 </style>
