@@ -158,7 +158,7 @@ function useCustomizationOptionValue (
     }
 
     const customizationStateItem =
-      customizationOptionValue.value[customization.value.optionData.sku];
+      customizationOptionValue.value[customization.value.id];
 
     if (!customizationStateItem || typeof customizationStateItem !== 'string') {
       return;
@@ -184,7 +184,8 @@ function useCustomTextFields () {
   const customTextFields = ref<CustomTextFieldInterface[]>([]);
 
   function onCustomFieldsPrepared (textFields: CustomTextFieldInterface[]) {
-    customTextFields.value = textFields;
+    // TODO: temporary - current TS version don't handle `value` type right in this case
+    (customTextFields as any).value = textFields;
   }
 
   return {
@@ -295,8 +296,9 @@ export default defineComponent({
       () => {
         const values: Record<string, string | undefined> = {};
         const customTextFields = [
-          ...frontCustomTextFields.value,
-          ...backCustomTextFields.value
+          // TODO: temporary - current TS version don't handle `value` type right in this case
+          ...(frontCustomTextFields as any).value,
+          ...(backCustomTextFields as any).value
         ];
 
         for (const field of customTextFields) {
@@ -357,7 +359,8 @@ export default defineComponent({
     }
 
     async function updateSmallBackgroundImage (): Promise<void> {
-      if (!backgroundEditor.value) {
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      if (!(backgroundEditor as any).value) {
         throw new Error('Unable to get background editor!');
       }
 
@@ -368,7 +371,8 @@ export default defineComponent({
 
       await nextTick();
 
-      const image = await backgroundEditor.value.getCroppedBackground();
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      const image = await (backgroundEditor as any).value.getCroppedBackground();
 
       if (image) {
         croppedBackground.value = image;
@@ -443,7 +447,8 @@ export default defineComponent({
 
   ._front-preview,
   ._back-preview,
-  ._design-images {
+  ._design-images,
+  .m-live-preview {
     width: 100%;
   }
 

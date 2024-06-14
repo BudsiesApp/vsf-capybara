@@ -1,9 +1,6 @@
 <template>
   <div id="customizable-product">
-    <product-structured-data
-      v-if="currentProduct"
-      :product="currentProduct"
-    />
+    <product-structured-data v-if="currentProduct" :product="currentProduct" />
 
     <component
       :is="formComponent"
@@ -27,7 +24,8 @@ import { useProductPage } from 'theme/helpers/use-product-page';
 
 enum LayoutType {
   WITH_IMAGES_GALLERY = 'with-images-gallery',
-  VERTICAL = 'vertical'
+  VERTICAL = 'vertical',
+  PHRASE_PILLOW = 'phrase-pillow'
 }
 
 export default defineComponent({
@@ -35,6 +33,7 @@ export default defineComponent({
   components: {
     FormWithImagesGallery: () => import(/* webpackChunkName: "vsf-images-gallery-form" */ 'theme/components/customization-system/forms/form-with-images-gallery.vue'),
     ProductStructuredData,
+    PhrasePillowForm: () => import(/* webpackChunkName: "vsf-phrase-pillow-form" */ 'theme/components/customization-system/forms/phrase-pillow-form.vue'),
     VerticalStepsForm: () => import(/* webpackChunkName: "vsf-vertical-form" */ 'theme/components/customization-system/forms/vertical-steps-form.vue')
   },
   props: {
@@ -65,6 +64,8 @@ export default defineComponent({
           return 'form-with-images-gallery';
         case LayoutType.VERTICAL:
           return 'vertical-steps-form';
+        case LayoutType.PHRASE_PILLOW:
+          return 'phrase-pillow-form';
       }
     });
 
@@ -101,20 +102,20 @@ export default defineComponent({
 </script>
 
   <style lang="scss" scoped>
-  @import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-  #customizable-product {
-    box-sizing: border-box;
-    padding: 0 1rem;
+#customizable-product {
+  box-sizing: border-box;
+  padding: 0 1rem;
 
-    .form-with-images-gallery {
-      margin-top: var(--spacer-lg);
-    }
-
-    @media (min-width: $tablet-min) {
-      max-width: 1272px;
-      width: 100%;
-      margin: 0 auto;
-    }
+  .form-with-images-gallery {
+    margin-top: var(--spacer-lg);
   }
-  </style>
+
+  @media (min-width: $tablet-min) {
+    max-width: 1272px;
+    width: 100%;
+    margin: 0 auto;
+  }
+}
+</style>

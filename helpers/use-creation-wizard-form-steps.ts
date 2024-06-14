@@ -1,27 +1,25 @@
-import { computed, nextTick, ref, Ref } from '@vue/composition-api';
+import { computed, nextTick, Ref } from '@vue/composition-api';
 
 import CartItem from 'core/modules/cart/types/CartItem';
 import { Customization } from 'src/modules/customization-system';
+import { useFormSteps } from './use-form-steps';
 
 export function useCreationWizardFormSteps (
   customizationRootGroups: Ref<Customization[]>,
   existingCartItem: Ref<CartItem | undefined>
 ) {
-  const currentStep = ref<number>(0);
+  const {
+    currentStep,
+    lastStepCustomization,
+    stepsCustomizations
+  } = useFormSteps(customizationRootGroups);
 
-  const stepsCustomizations = computed<Customization[]>(() => {
-    const groups = customizationRootGroups.value;
-    return groups.slice(0, groups.length - 1);
-  });
-  const lastStepCustomization = computed<Customization>(() => {
-    return customizationRootGroups.value[customizationRootGroups.value.length - 1];
+  const isLastStep = computed<boolean>(() => {
+    return currentStep.value === customizationRootGroups.value.length;
   });
 
   const canGoBack = computed<boolean>(() => {
     return (currentStep.value !== 1 || !existingCartItem.value);
-  });
-  const isLastStep = computed<boolean>(() => {
-    return currentStep.value === customizationRootGroups.value.length;
   });
 
   function scrollToTop (): void {

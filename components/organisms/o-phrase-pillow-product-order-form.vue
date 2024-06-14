@@ -635,12 +635,12 @@ interface SideDesignBundleOption extends BundleOption {
   product_links: SideDesignProductLink[]
 }
 
-interface StepsInterface {
+export interface StepsInterface {
   name: string,
   id: string
 }
 
-interface SmallBackgroundImageStyle {
+export interface SmallBackgroundImageStyle {
   width: string,
   height: string,
   top: string,

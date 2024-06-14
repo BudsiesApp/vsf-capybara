@@ -14,6 +14,8 @@ export function useBackendProductId (productId: Ref<string | number>) {
         return ProductValue.PRINTED_MASKS;
       case ProductId.PRINTED_KEYCHAINS:
         return ProductValue.PRINTED_KEYCHAINS;
+      case ProductId.PHRASE_PILLOW:
+        return ProductValue.PHRASE_PILLOW;
       case ProductId.FELTED_MAGNETS:
         return ProductValue.FELTED_MAGNETS;
       case ProductId.FELTED_ORNAMENTS:
