@@ -7,10 +7,6 @@ export function useFormSteps (
 ) {
   const currentStep = ref<number>(0);
 
-  const stepsCustomizations = computed<Customization[]>(() => {
-    const groups = customizationRootGroups.value;
-    return groups.slice(0, groups.length - 1);
-  });
   const lastStepIndex = computed<number>(() => {
     return customizationRootGroups.value.length - 1;
   });
@@ -21,7 +17,6 @@ export function useFormSteps (
   return {
     currentStep,
     lastStepCustomization,
-    lastStepIndex,
-    stepsCustomizations
+    lastStepIndex
   }
 }

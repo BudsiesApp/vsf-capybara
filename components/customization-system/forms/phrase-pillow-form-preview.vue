@@ -92,7 +92,7 @@
         </template>
       </MCustomizerPreview>
 
-      <!-- <div
+      <div
         class="_design-images-container -show-for-medium-up"
         v-if="currentDesignImages.length"
       >
@@ -102,7 +102,7 @@
           class="_design-images"
           :images="currentDesignImages"
         />
-      </div> -->
+      </div>
     </div>
   </div>
 </template>
@@ -111,6 +111,7 @@
 import {
   computed,
   defineComponent,
+  inject,
   nextTick,
   PropType,
   Ref,
@@ -123,14 +124,19 @@ import { SfHeading } from '@storefront-ui/vue';
 import {
   Customization,
   CustomizationOptionValue,
-  OptionValue
+  FileUploadValue,
+  isFileUploadValue,
+  OptionValue,
+  WidgetType
 } from 'src/modules/customization-system';
 import BackgroundOffsetSettings from 'theme/components/interfaces/background-offset-settings.interface';
 import CustomTextFieldInterface from 'theme/components/interfaces/custom-text-field.interface';
 
 import MBackgroundEditor from 'theme/components/molecules/m-background-editor.vue';
 import MCustomizerPreview from 'theme/components/molecules/m-customizer-preview.vue';
+import MDesignImages from 'theme/components/molecules/m-design-images.vue';
 import MLivePreview from 'theme/components/molecules/m-live-preview.vue';
+import { ImageHandlerService } from 'src/modules/file-storage';
 
 interface SmallBackgroundImageStyle {
   width: string,
@@ -194,6 +200,130 @@ function useCustomTextFields () {
   };
 }
 
+function useBackgroundImage (
+  isCustomizerPreviewBackSideFocused: Ref<boolean>,
+  backgroundEditor: Ref<InstanceType<typeof MBackgroundEditor> | null>,
+  customizations: Ref<Customization[]>,
+  customizationOptionValue: Ref<Record<string, CustomizationOptionValue>>
+) {
+  const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
+
+  const backgroundOffsetSettings = ref<BackgroundOffsetSettings | undefined>();
+  const croppedBackground = ref<string>('');
+
+  const relatedCustomization = computed<Customization | undefined>(() => {
+    return customizations.value.find(
+      (customization) =>
+        customization.optionData?.displayWidget === WidgetType.IMAGE_UPLOAD
+    );
+  });
+  const uploadedImage = computed<FileUploadValue | undefined>(() => {
+    if (!relatedCustomization.value) {
+      return;
+    }
+
+    const fileUploadValue = customizationOptionValue.value[relatedCustomization.value.id];
+
+    if (!fileUploadValue || !isFileUploadValue(fileUploadValue)) {
+      return;
+    }
+    return Array.isArray(fileUploadValue) ? fileUploadValue[0] : fileUploadValue;
+  });
+  const isBackgroundImageLoaded = computed<boolean>(() => {
+    return !!uploadedImage.value;
+  });
+
+  const smallBackgroundImageStyle = computed<SmallBackgroundImageStyle>(() => {
+    const defaultStyle: SmallBackgroundImageStyle = {
+      width: 'calc(100% - 2px)',
+      height: 'calc(100% - 2px)',
+      top: '1px',
+      left: '1px'
+    };
+
+    const settings = backgroundOffsetSettings.value;
+
+    if (!settings || !settings.size || !settings.position) {
+      return defaultStyle;
+    }
+
+    const style = { ...defaultStyle };
+
+    if (settings.position === 'left' || settings.position === 'right') {
+      style.width = `calc(${100 - parseFloat(settings.size)}% - 2px)`;
+    } else {
+      style.height = `calc(${100 - parseFloat(settings.size)}% - 2px)`;
+    }
+
+    if (settings.position === 'left') {
+      style.left = `calc(${parseFloat(settings.size)}% + 1px)`;
+    }
+
+    return style;
+  });
+
+  function onBackgroundImageUploaded (fileValue: FileUploadValue): void {
+    // TODO: temporary - current TS version don't handle `value` type right in this case
+    if (!(backgroundEditor as any).value) {
+      throw new Error('Unable to get Background editor element!');
+    }
+
+    if (!imageHandlerService) {
+      throw new Error('ImageHandlerService is not defined');
+    }
+
+    backgroundEditor.value.setBackgroundImage(imageHandlerService.getOriginalImageUrl(fileValue.url));
+  }
+
+  function onBackgroundOffsetSettingsPrepared (
+    settings: BackgroundOffsetSettings
+  ): void {
+    backgroundOffsetSettings.value = settings;
+  }
+
+  async function updateSmallBackgroundImage (): Promise<void> {
+    // TODO: temporary - current TS version don't handle `value` type right in this case
+    if (!(backgroundEditor as any).value) {
+      throw new Error('Unable to get background editor!');
+    }
+
+    if (!isCustomizerPreviewBackSideFocused.value) {
+      croppedBackground.value = '';
+      return;
+    }
+
+    await nextTick();
+
+    // TODO: temporary - current TS version don't handle `value` type right in this case
+    const image = await (backgroundEditor as any).value.getCroppedBackground();
+
+    if (image) {
+      croppedBackground.value = image;
+    }
+  }
+
+  watch(isCustomizerPreviewBackSideFocused, () => {
+    updateSmallBackgroundImage();
+  });
+
+  watch(uploadedImage, () => {
+    if (!uploadedImage.value) {
+      return;
+    }
+
+    onBackgroundImageUploaded(uploadedImage.value);
+  });
+
+  return {
+    backgroundOffsetSettings,
+    croppedBackground,
+    isBackgroundImageLoaded,
+    onBackgroundOffsetSettingsPrepared,
+    smallBackgroundImageStyle,
+    updateSmallBackgroundImage
+  };
+}
+
 export default defineComponent({
   props: {
     customizationOptionValue: {
@@ -208,10 +338,6 @@ export default defineComponent({
       type: Array as PropType<Customization[]>,
       required: true
     },
-    isBackgroundImageLoaded: {
-      type: Boolean,
-      default: false
-    },
     isDisabled: {
       type: Boolean,
       default: false
@@ -224,6 +350,7 @@ export default defineComponent({
   components: {
     MBackgroundEditor,
     MCustomizerPreview,
+    MDesignImages,
     MLivePreview,
     SfHeading
   },
@@ -239,10 +366,6 @@ export default defineComponent({
     );
 
     const isCustomizerPreviewBackSideFocused = ref<boolean>(false);
-    const backgroundOffsetSettings = ref<
-    BackgroundOffsetSettings | undefined
-    >();
-    const croppedBackground = ref<string>('');
 
     const optionDataSkuCustomization = computed<Record<string, Customization>>(
       () => {
@@ -260,12 +383,19 @@ export default defineComponent({
       }
     );
 
-    const { optionValueSku: frontDesign } = useCustomizationOptionValue(
+    const { optionValue: frontDesignOptionValue, optionValueSku: frontDesign } = useCustomizationOptionValue(
       optionDataSkuCustomization,
       customizationOptionValue,
       customizationOptionValues,
       FRONT_DESIGN_SKU
     );
+    const currentDesignImages = computed<string[]>(() => {
+      if (!frontDesignOptionValue.value?.galleryImages) {
+        return [];
+      }
+
+      return frontDesignOptionValue.value.galleryImages.map((image) => image.imageUrl);
+    });
 
     const { optionValueSku: backDesign } = useCustomizationOptionValue(
       optionDataSkuCustomization,
@@ -321,82 +451,22 @@ export default defineComponent({
       }
     );
 
-    const smallBackgroundImageStyle = computed<SmallBackgroundImageStyle>(
-      () => {
-        const defaultStyle: SmallBackgroundImageStyle = {
-          width: 'calc(100% - 2px)',
-          height: 'calc(100% - 2px)',
-          top: '1px',
-          left: '1px'
-        };
-
-        const settings = backgroundOffsetSettings.value;
-
-        if (!settings || !settings.size || !settings.position) {
-          return defaultStyle;
-        }
-
-        const style = { ...defaultStyle };
-
-        if (settings.position === 'left' || settings.position === 'right') {
-          style.width = `calc(${100 - parseFloat(settings.size)}% - 2px)`;
-        } else {
-          style.height = `calc(${100 - parseFloat(settings.size)}% - 2px)`;
-        }
-
-        if (settings.position === 'left') {
-          style.left = `calc(${parseFloat(settings.size)}% + 1px)`;
-        }
-
-        return style;
-      }
-    );
-
-    function onBackgroundOffsetSettingsPrepared (
-      settings: BackgroundOffsetSettings
-    ): void {
-      backgroundOffsetSettings.value = settings;
-    }
-
-    async function updateSmallBackgroundImage (): Promise<void> {
-      // TODO: temporary - current TS version don't handle `value` type right in this case
-      if (!(backgroundEditor as any).value) {
-        throw new Error('Unable to get background editor!');
-      }
-
-      if (!isCustomizerPreviewBackSideFocused.value) {
-        croppedBackground.value = '';
-        return;
-      }
-
-      await nextTick();
-
-      // TODO: temporary - current TS version don't handle `value` type right in this case
-      const image = await (backgroundEditor as any).value.getCroppedBackground();
-
-      if (image) {
-        croppedBackground.value = image;
-      }
-    }
-
-    watch(isCustomizerPreviewBackSideFocused, () => {
-      updateSmallBackgroundImage();
-    });
-
     return {
+      ...useBackgroundImage(
+        isCustomizerPreviewBackSideFocused,
+        backgroundEditor,
+        customizations,
+        customizationOptionValue
+      ),
       accentColor,
       backDesign,
       backgroundEditor,
-      backgroundOffsetSettings,
-      croppedBackground,
+      currentDesignImages,
       customTextValues,
       frontDesign,
       isCustomizerPreviewBackSideFocused,
       onBackCustomTextFieldsPrepared,
-      onBackgroundOffsetSettingsPrepared,
-      onFrontCustomTextFieldsPrepared,
-      smallBackgroundImageStyle,
-      updateSmallBackgroundImage
+      onFrontCustomTextFieldsPrepared
     };
   }
 });
@@ -445,11 +515,20 @@ export default defineComponent({
     }
   }
 
+  ._design-images-container {
+    padding: 0 0.8em;
+    margin-top: 5%;
+  }
+
   ._front-preview,
   ._back-preview,
   ._design-images,
   .m-live-preview {
     width: 100%;
+  }
+
+  ._design-images {
+    margin-top: var(--spacer-base);
   }
 
   @media (max-width: $medium-breakpoint - 1px) {
@@ -472,10 +551,6 @@ export default defineComponent({
       top: 3.4em;
       height: auto;
       padding-bottom: 0;
-    }
-
-    ._front_design_preview_container,
-    ._back_design_preview_container {
       text-align: left;
 
       .sf-heading {

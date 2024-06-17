@@ -1,27 +1,54 @@
-import { ref, Ref } from '@vue/composition-api';
+import { computed, ref, Ref } from '@vue/composition-api';
 
 import { Customization } from 'src/modules/customization-system';
 
 import { useFormSteps } from './use-form-steps';
 
+const lastStepCustomizationName = 'add to cart';
+
 export function usePhrasePillowFormSteps (
-  customizationRootGroups: Ref<Customization[]>
+  customizationRootGroups: Ref<Customization[]>,
+  customizationRootGroupCustomizations: Ref<Record<string, Customization[]>>
 ) {
   const formSteps = useFormSteps(customizationRootGroups);
+  const lastStepAvailableCustomizations = computed<Customization[]>(() => {
+    const groupCustomization = customizationRootGroups.value.find(
+      (customization) => customization.name.toLowerCase() === lastStepCustomizationName
+    );
 
-  function isLastStep (stepIndex: number): boolean {
-    return formSteps.lastStepIndex.value === stepIndex;
-  }
+    if (!groupCustomization) {
+      return [];
+    }
+
+    return customizationRootGroupCustomizations.value[groupCustomization.id] || [];
+  });
+  const stepsCustomizations = computed<Customization[]>(() => {
+    return customizationRootGroups.value.filter(
+      (customization) => customization.name.toLowerCase() !== lastStepCustomizationName
+    )
+  });
 
   const validationState = ref<Record<string, boolean>>({})
 
   async function validateStepsBefore (stepIndex: number): Promise<void> {
 
+    // for (let i = 0; i < stepIndex; i++) {
+    //   stepsCustomizations[i]
+    // }
   }
 
-  function isStepInvalid (step): boolean {
-    // TODO: implement
-    return false;
+  function resetValidationState (): void {
+    const state: Record<string, boolean> = {};
+
+    for (const customization of stepsCustomizations.value) {
+      state[customization.name] = true;
+    }
+
+    validationState.value = state;
+  }
+
+  function isStepInvalid (step: string): boolean {
+    return !validationState.value[step];
   }
 
   async function onChangeStep (stepIndex: number) {
@@ -30,10 +57,13 @@ export function usePhrasePillowFormSteps (
     formSteps.currentStep.value = stepIndex;
   }
 
+  resetValidationState();
+
   return {
     ...formSteps,
-    isLastStep,
     isStepInvalid,
-    onChangeStep
+    lastStepAvailableCustomizations,
+    onChangeStep,
+    stepsCustomizations
   }
 }

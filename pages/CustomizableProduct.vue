@@ -1,5 +1,5 @@
 <template>
-  <div id="customizable-product">
+  <div id="customizable-product" :class="`-${formComponent}`">
     <product-structured-data v-if="currentProduct" :product="currentProduct" />
 
     <component
@@ -12,7 +12,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, toRefs } from '@vue/composition-api';
+import {
+  computed,
+  defineComponent,
+  PropType,
+  toRefs
+} from '@vue/composition-api';
 
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { htmlDecode } from '@vue-storefront/core/filters';
@@ -25,16 +30,25 @@ import { useProductPage } from 'theme/helpers/use-product-page';
 enum LayoutType {
   WITH_IMAGES_GALLERY = 'with-images-gallery',
   VERTICAL = 'vertical',
-  PHRASE_PILLOW = 'phrase-pillow'
+  PHRASE_PILLOW = 'phrase-pillow',
 }
 
 export default defineComponent({
   name: 'CustomizableProduct',
   components: {
-    FormWithImagesGallery: () => import(/* webpackChunkName: "vsf-images-gallery-form" */ 'theme/components/customization-system/forms/form-with-images-gallery.vue'),
+    FormWithImagesGallery: () =>
+      import(
+        /* webpackChunkName: "vsf-images-gallery-form" */ 'theme/components/customization-system/forms/form-with-images-gallery.vue'
+      ),
     ProductStructuredData,
-    PhrasePillowForm: () => import(/* webpackChunkName: "vsf-phrase-pillow-form" */ 'theme/components/customization-system/forms/phrase-pillow-form.vue'),
-    VerticalStepsForm: () => import(/* webpackChunkName: "vsf-vertical-form" */ 'theme/components/customization-system/forms/vertical-steps-form.vue')
+    PhrasePillowForm: () =>
+      import(
+        /* webpackChunkName: "vsf-phrase-pillow-form" */ 'theme/components/customization-system/forms/phrase-pillow-form.vue'
+      ),
+    VerticalStepsForm: () =>
+      import(
+        /* webpackChunkName: "vsf-vertical-form" */ 'theme/components/customization-system/forms/vertical-steps-form.vue'
+      )
   },
   props: {
     sku: {
@@ -74,14 +88,16 @@ export default defineComponent({
       currentProduct,
       formComponent,
       showForm
-    }
+    };
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
     next();
   },
   metaInfo () {
-    const description = this.currentProduct?.meta_description || this.currentProduct?.short_description;
+    const description =
+      this.currentProduct?.meta_description ||
+      this.currentProduct?.short_description;
 
     return {
       title: htmlDecode(
@@ -112,10 +128,21 @@ export default defineComponent({
     margin-top: var(--spacer-lg);
   }
 
+  &.-phrase-pillow-form {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 0;
+  }
+
   @media (min-width: $tablet-min) {
     max-width: 1272px;
     width: 100%;
     margin: 0 auto;
+
+    &.-phrase-pillow-form {
+      margin-top: 60px;
+    }
   }
 }
 </style>

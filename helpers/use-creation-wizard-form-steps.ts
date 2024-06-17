@@ -10,9 +10,13 @@ export function useCreationWizardFormSteps (
 ) {
   const {
     currentStep,
-    lastStepCustomization,
-    stepsCustomizations
+    lastStepCustomization
   } = useFormSteps(customizationRootGroups);
+
+  const stepsCustomizations = computed<Customization[]>(() => {
+    const groups = customizationRootGroups.value;
+    return groups.slice(0, groups.length - 1);
+  });
 
   const isLastStep = computed<boolean>(() => {
     return currentStep.value === customizationRootGroups.value.length;
