@@ -33,7 +33,10 @@
 
       <div class="_customization-section">
         <form class="_form">
-          <SfSteps :active="currentStep" class="_customizer-steps">
+          <SfSteps
+            :active="currentStep"
+            class="_customizer-steps"
+          >
             <template #steps="props">
               <div
                 class="_customizer-step"
@@ -73,6 +76,12 @@
                   onCustomizationOptionBusyChanged
                 "
               />
+
+              <div class="_next-step-button-container -show-for-medium-up">
+                <SfButton class="color-primary" @click.prevent="nextStep">
+                  {{ $t("Next") }}
+                </SfButton>
+              </div>
             </sf-step>
 
             <sf-step name="Add to Cart">
@@ -449,6 +458,15 @@ export default defineComponent({
 
   .m-live-preview {
     width: 100%;
+  }
+
+  ._next-step-button-container {
+    display: flex;
+    justify-content: flex-end;
+    position: sticky;
+    bottom: var(--spacer-base);
+    margin-top: var(--spacer-base);
+    z-index: 3;
   }
 
   @media (max-width: $medium-breakpoint - 1px) {

@@ -88,6 +88,10 @@ export function usePhrasePillowFormSteps (
     formSteps.currentStep.value = stepIndex;
   }
 
+  function nextStep (): void {
+    onChangeStep(formSteps.currentStep.value + 1);
+  }
+
   resetValidationState();
 
   return {
@@ -95,6 +99,7 @@ export function usePhrasePillowFormSteps (
     activateFirstStepWithError,
     isStepInvalid,
     lastStepAvailableCustomizations,
+    nextStep,
     onChangeStep,
     stepsCustomizations,
     customizationOptionsRefs
