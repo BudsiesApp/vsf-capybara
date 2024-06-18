@@ -131,7 +131,6 @@ import {
 } from 'src/modules/customization-system';
 import { ProductValue } from 'src/modules/budsies';
 import {
-  FileProcessingRepository,
   FileProcessingRepositoryFactory,
   ImageHandlerService,
   ImageType
@@ -584,6 +583,11 @@ export default defineComponent({
       customizations,
       customizationOptionValue
     );
+
+    function switchFocusedSide (isBackSideFocused: boolean): void {
+      isCustomizerPreviewBackSideFocused.value = isBackSideFocused;
+    }
+
     return {
       ...backgroundImage,
       ...useImagesProcessing(
@@ -600,7 +604,8 @@ export default defineComponent({
       frontDesign,
       isCustomizerPreviewBackSideFocused,
       onBackCustomTextFieldsPrepared,
-      onFrontCustomTextFieldsPrepared
+      onFrontCustomTextFieldsPrepared,
+      switchFocusedSide
     };
   }
 });

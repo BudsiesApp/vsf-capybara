@@ -107,7 +107,8 @@ import {
   PropType,
   Ref,
   ref,
-  toRefs
+  toRefs,
+  watch
 } from '@vue/composition-api';
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfHeading, SfSteps } from '@storefront-ui/vue';
@@ -136,6 +137,8 @@ import PhrasePillowFormLastStep from 'theme/components/customization-system/form
 
 const svgPath =
   config.images.baseUrl + '/150/150/resize/phrase_pillow/svg-templates';
+
+const BACK_DESIGN_STEP_NAME = 'back design';
 
 export default defineComponent({
   name: 'PhrasePillowForm',
@@ -186,7 +189,6 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
-      resetCustomizationState,
       selectedOptionValuesIds,
       updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
@@ -288,6 +290,28 @@ export default defineComponent({
 
     const isSubmitButtonDisabled = computed<boolean>(() => {
       return isDisabled.value || isSomeCustomizationOptionBusy.value;
+    });
+
+    watch(formSteps.currentStep, (val, oldVal) => {
+      if (val === oldVal) {
+        return;
+      }
+
+      const previousStep = formSteps.stepsCustomizations.value[oldVal];
+      const currentStep = formSteps.stepsCustomizations.value[val];
+
+      if (
+        [
+          currentStep?.name.toLowerCase(),
+          previousStep?.name.toLowerCase()
+        ].indexOf(BACK_DESIGN_STEP_NAME) === -1
+      ) {
+        return;
+      }
+
+      preview.value?.switchFocusedSide(
+        currentStep?.name.toLowerCase() === BACK_DESIGN_STEP_NAME
+      );
     });
 
     return {
