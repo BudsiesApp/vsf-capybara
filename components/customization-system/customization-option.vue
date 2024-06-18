@@ -1,6 +1,7 @@
 <template>
   <div
     class="customization-option"
+    :class="'-widget-' + widget.component"
     :ref="validationRef"
     v-show="showCustomization"
   >

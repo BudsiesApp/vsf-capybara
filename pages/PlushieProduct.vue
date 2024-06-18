@@ -179,6 +179,7 @@ export default defineComponent({
     margin: var(--spacer-base) auto 0;
     max-width: 45em;
     text-align: center;
+    padding: 0 var(--spacer-sm);
   }
 
   @media (min-width: $tablet-min) {
