@@ -14,14 +14,21 @@
       />
     </div>
 
-    <validation-observer ref="validationObserver" class="_form-content" tag="div">
+    <validation-observer
+      ref="validationObserver"
+      class="_form-content"
+      tag="div"
+    >
       <phrase-pillow-form-preview
         :customization-option-value="customizationOptionValue"
         :customization-option-values="availableOptionValues"
         :customizations="availableCustomizations"
         :is-disabled="isDisabled"
+        :product-id="product.id"
         :svg-path="svgPath"
         class="_live-preview-section"
+        ref="preview"
+        v-if="product.id"
       />
 
       <div class="_customization-section">
@@ -37,10 +44,7 @@
                 }"
                 @click="onChangeStep(props.step.index)"
               >
-                <div
-                  class="_step-name"
-                  v-html="props.step.step"
-                />
+                <div class="_step-name" v-html="props.step.step" />
               </div>
             </template>
 
@@ -161,6 +165,8 @@ export default defineComponent({
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
     > | null> = ref(null);
+    const preview: Ref<InstanceType<typeof PhrasePillowFormPreview> | null> =
+      ref(null);
 
     const productCustomizations = computed<Customization[]>(() => {
       return product.value.customizations || [];
@@ -244,6 +250,16 @@ export default defineComponent({
         return;
       }
 
+      if (!preview.value) {
+        return;
+      }
+
+      const processedImageUploadCustomizationStateItem =
+        await preview.value.getProcessedImageUploadCustomizationStateItem();
+      updateCustomizationOptionValue(
+        processedImageUploadCustomizationStateItem
+      );
+
       try {
         await addToCartHandler();
 
@@ -286,6 +302,7 @@ export default defineComponent({
       onCustomizationOptionBusyChanged,
       onCustomizationOptionInput,
       onFormSubmit,
+      preview,
       svgPath,
       submitButtonText,
       quantity,
@@ -329,6 +346,10 @@ export default defineComponent({
   }
 
   ._customization-option {
+    --customization-option-label-align: center;
+    --customization-option-description-align: center;
+    --customization-option-hint-align: center;
+
     padding: 0 0.8em;
   }
 
@@ -471,6 +492,12 @@ export default defineComponent({
           overflow-y: visible;
         }
       }
+    }
+
+    ._customization-option {
+      --customization-option-label-align: left;
+      --customization-option-description-align: left;
+      --customization-option-hint-align: left;
     }
   }
 

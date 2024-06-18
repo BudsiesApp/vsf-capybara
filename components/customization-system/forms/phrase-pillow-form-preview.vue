@@ -98,10 +98,7 @@
       >
         <SfHeading :level="3" title="Examples of finished pillows" />
 
-        <MDesignImages
-          class="_design-images"
-          :images="currentDesignImages"
-        />
+        <MDesignImages class="_design-images" :images="currentDesignImages" />
       </div>
     </div>
   </div>
@@ -116,19 +113,30 @@ import {
   PropType,
   Ref,
   ref,
+  toRef,
   toRefs,
   watch
 } from '@vue/composition-api';
 import { SfHeading } from '@storefront-ui/vue';
 
+import config from 'config';
 import {
   Customization,
   CustomizationOptionValue,
+  CustomizationStateItem,
   FileUploadValue,
   isFileUploadValue,
   OptionValue,
   WidgetType
 } from 'src/modules/customization-system';
+import { ProductValue } from 'src/modules/budsies';
+import {
+  FileProcessingRepository,
+  FileProcessingRepositoryFactory,
+  ImageHandlerService,
+  ImageType
+} from 'src/modules/file-storage';
+
 import BackgroundOffsetSettings from 'theme/components/interfaces/background-offset-settings.interface';
 import CustomTextFieldInterface from 'theme/components/interfaces/custom-text-field.interface';
 
@@ -136,7 +144,7 @@ import MBackgroundEditor from 'theme/components/molecules/m-background-editor.vu
 import MCustomizerPreview from 'theme/components/molecules/m-customizer-preview.vue';
 import MDesignImages from 'theme/components/molecules/m-design-images.vue';
 import MLivePreview from 'theme/components/molecules/m-live-preview.vue';
-import { ImageHandlerService } from 'src/modules/file-storage';
+import { useBackendProductId } from 'theme/helpers/use-backend-product-id';
 
 interface SmallBackgroundImageStyle {
   width: string,
@@ -206,7 +214,9 @@ function useBackgroundImage (
   customizations: Ref<Customization[]>,
   customizationOptionValue: Ref<Record<string, CustomizationOptionValue>>
 ) {
-  const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
+  const imageHandlerService = inject<ImageHandlerService>(
+    'ImageHandlerService'
+  );
 
   const backgroundOffsetSettings = ref<BackgroundOffsetSettings | undefined>();
   const croppedBackground = ref<string>('');
@@ -222,12 +232,15 @@ function useBackgroundImage (
       return;
     }
 
-    const fileUploadValue = customizationOptionValue.value[relatedCustomization.value.id];
+    const fileUploadValue =
+      customizationOptionValue.value[relatedCustomization.value.id];
 
     if (!fileUploadValue || !isFileUploadValue(fileUploadValue)) {
       return;
     }
-    return Array.isArray(fileUploadValue) ? fileUploadValue[0] : fileUploadValue;
+    return Array.isArray(fileUploadValue)
+      ? fileUploadValue[fileUploadValue.length - 1]
+      : fileUploadValue;
   });
   const isBackgroundImageLoaded = computed<boolean>(() => {
     return !!uploadedImage.value;
@@ -272,7 +285,9 @@ function useBackgroundImage (
       throw new Error('ImageHandlerService is not defined');
     }
 
-    backgroundEditor.value.setBackgroundImage(imageHandlerService.getOriginalImageUrl(fileValue.url));
+    backgroundEditor.value.setBackgroundImage(
+      imageHandlerService.getOriginalImageUrl(fileValue.url)
+    );
   }
 
   function onBackgroundOffsetSettingsPrepared (
@@ -306,21 +321,125 @@ function useBackgroundImage (
     updateSmallBackgroundImage();
   });
 
-  watch(uploadedImage, () => {
-    if (!uploadedImage.value) {
-      return;
-    }
+  watch(
+    uploadedImage,
+    (
+      value: FileUploadValue | undefined,
+      oldValue: FileUploadValue | undefined
+    ) => {
+      if (!value || oldValue?.id === value.id) {
+        return;
+      }
 
-    onBackgroundImageUploaded(uploadedImage.value);
-  });
+      onBackgroundImageUploaded(value);
+    }
+  );
 
   return {
     backgroundOffsetSettings,
     croppedBackground,
     isBackgroundImageLoaded,
     onBackgroundOffsetSettingsPrepared,
+    relatedCustomization,
     smallBackgroundImageStyle,
-    updateSmallBackgroundImage
+    updateSmallBackgroundImage,
+    uploadedImage
+  };
+}
+
+const TARGET_IMAGE_SIZE = 2625;
+
+const artworkUploadUrl = config.images.fileuploaderUploadUrl as string;
+
+function useImagesProcessing (
+  imageUploadCustomization: Ref<Customization | undefined>,
+  imageUploadValue: Ref<FileUploadValue | undefined>,
+  backendProductId: Ref<ProductValue>,
+  backgroundEditor: Ref<InstanceType<typeof MBackgroundEditor> | null>
+) {
+  const fileProcessingRepositoryFactory =
+    inject<FileProcessingRepositoryFactory>('FileProcessingRepositoryFactory');
+
+  if (!fileProcessingRepositoryFactory) {
+    throw new Error('File Processing Repository Factory is not defined');
+  }
+
+  const fileProcessingRepository =
+    fileProcessingRepositoryFactory.create(artworkUploadUrl);
+
+  const backPreview = ref<InstanceType<typeof MLivePreview> | null>(null);
+  const frontPreview = ref<InstanceType<typeof MLivePreview> | null>(null);
+
+  async function getProcessedImageUploadCustomizationStateItem (): Promise<CustomizationStateItem> {
+    if (!imageUploadValue.value || !imageUploadCustomization.value) {
+      throw new Error('Unable to get original uploaded image');
+    }
+
+    // TODO: temporary - current TS version don't handle `value` type right in this case
+    if (
+      !(backgroundEditor as any).value ||
+      !(backPreview as any).value ||
+      !(frontPreview as any).value
+    ) {
+      throw new Error('Unable to get preview elements!');
+    }
+
+    // TODO: temporary - current TS version don't handle `value` type right in this case
+    const image = await (backgroundEditor as any).value.getCroppedBackground();
+    if (!image) {
+      throw new Error('Background image is unavailable!');
+    }
+
+    // TODO: temporary - current TS version don't handle `value` type right in this case
+    const backSvg = (backPreview as any).value.getCustomizedSVG(
+      TARGET_IMAGE_SIZE
+    );
+    const frontSvg = (frontPreview as any).value.getCustomizedSVG(
+      TARGET_IMAGE_SIZE,
+      image
+    );
+
+    if (!backSvg || !frontSvg) {
+      throw new Error('Unable to get vector images for conversion!');
+    }
+
+    const backDesignBlob = new Blob([backSvg], { type: 'image/svg+xml' });
+    const frontDesignBlob = new Blob([frontSvg], { type: 'image/svg+xml' });
+
+    const [frontStorageItem, backStorageItem] = await Promise.all([
+      fileProcessingRepository.uploadFile(
+        frontDesignBlob,
+        ImageType.Artwork,
+        backendProductId.value
+      ),
+      fileProcessingRepository.uploadFile(
+        backDesignBlob,
+        ImageType.Artwork,
+        backendProductId.value
+      )
+    ]);
+
+    const result: FileUploadValue[] = [];
+
+    [frontStorageItem, backStorageItem].forEach((item) => {
+      result.push({
+        id: item.id,
+        url: item.url
+      });
+    });
+
+    result.push(imageUploadValue.value);
+
+    return {
+      customizationId: imageUploadCustomization.value.id,
+      value: result
+    };
+  }
+
+  return {
+    backPreview,
+    frontPreview,
+    getProcessedImageUploadCustomizationStateItem
   };
 }
 
@@ -341,6 +460,10 @@ export default defineComponent({
     isDisabled: {
       type: Boolean,
       default: false
+    },
+    productId: {
+      type: [Number, String],
+      required: true
     },
     svgPath: {
       type: String,
@@ -383,18 +506,21 @@ export default defineComponent({
       }
     );
 
-    const { optionValue: frontDesignOptionValue, optionValueSku: frontDesign } = useCustomizationOptionValue(
-      optionDataSkuCustomization,
-      customizationOptionValue,
-      customizationOptionValues,
-      FRONT_DESIGN_SKU
-    );
+    const { optionValue: frontDesignOptionValue, optionValueSku: frontDesign } =
+      useCustomizationOptionValue(
+        optionDataSkuCustomization,
+        customizationOptionValue,
+        customizationOptionValues,
+        FRONT_DESIGN_SKU
+      );
     const currentDesignImages = computed<string[]>(() => {
       if (!frontDesignOptionValue.value?.galleryImages) {
         return [];
       }
 
-      return frontDesignOptionValue.value.galleryImages.map((image) => image.imageUrl);
+      return frontDesignOptionValue.value.galleryImages.map(
+        (image) => image.imageUrl
+      );
     });
 
     const { optionValueSku: backDesign } = useCustomizationOptionValue(
@@ -451,12 +577,20 @@ export default defineComponent({
       }
     );
 
+    const { backendProductId } = useBackendProductId(toRef(props, 'productId'));
+    const backgroundImage = useBackgroundImage(
+      isCustomizerPreviewBackSideFocused,
+      backgroundEditor,
+      customizations,
+      customizationOptionValue
+    );
     return {
-      ...useBackgroundImage(
-        isCustomizerPreviewBackSideFocused,
-        backgroundEditor,
-        customizations,
-        customizationOptionValue
+      ...backgroundImage,
+      ...useImagesProcessing(
+        backgroundImage.relatedCustomization,
+        backgroundImage.uploadedImage,
+        backendProductId,
+        backgroundEditor
       ),
       accentColor,
       backDesign,

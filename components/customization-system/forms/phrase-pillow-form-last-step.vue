@@ -178,12 +178,13 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .phrase-pillow-form-last-step {
+  $medium-breakpoint: 641px;
+
+  padding: 0 0.8em;
+  text-align: center;
+
   ._form-errors {
     margin-top: var(--spacer-xl);
-  }
-
-  ._step-title {
-    text-align: left;
   }
 
   ._error-text {
@@ -193,15 +194,37 @@ export default defineComponent({
     height: calc(var(--font-xs) * 1.2);
   }
 
-  ._actions {
+  ._actions-row {
     display: flex;
     align-items: center;
     flex-direction: column;
-    margin-top: var(--spacer-xl);
+    margin-top: var(--spacer-base);
+  }
+
+  ._animation-row {
+    margin-top: var(--spacer-base);
+    text-align: center;
   }
 
   ._qty-container {
     margin-top: var(--spacer-sm);
+  }
+
+  ._helper-text {
+    font-weight: var(--font-medium);
+    margin: var(--spacer-xs) 0;
+  }
+
+  @media (min-width: $medium-breakpoint) {
+    text-align: left;
+
+    ._actions-row {
+      align-items: flex-start;
+    }
+
+    ._step-title {
+      text-align: left;
+    }
   }
 }
 </style>
