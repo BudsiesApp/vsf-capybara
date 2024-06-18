@@ -154,11 +154,11 @@ export default defineComponent({
       isSubmitting.value = true;
 
       try {
-        if (!submitAnimator.value) {
+        if (!(submitAnimator as any).value) {
           throw new Error('Submit animation is not available!');
         }
 
-        submitAnimator.value.runProgress();
+        (submitAnimator as any).value.runProgress();
 
         await props.addToCartAction();
       } finally {

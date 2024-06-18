@@ -22,6 +22,7 @@
       v-slot="{ errors }"
       :rules="validationRules"
       :name="optionLabel"
+      ref="validationProvider"
     >
       <component
         class="_widget"

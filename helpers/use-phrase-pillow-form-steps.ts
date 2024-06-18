@@ -2,6 +2,8 @@ import { computed, ref, Ref } from '@vue/composition-api';
 
 import { Customization } from 'src/modules/customization-system';
 
+import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
+
 import { useFormSteps } from './use-form-steps';
 
 const lastStepCustomizationName = 'add to cart';
@@ -28,13 +30,31 @@ export function usePhrasePillowFormSteps (
     )
   });
 
+  const customizationOptionsRefs = ref<InstanceType<typeof CustomizationOption>[]>([])
   const validationState = ref<Record<string, boolean>>({})
 
   async function validateStepsBefore (stepIndex: number): Promise<void> {
+    const stepsValidationState: Record<string, boolean> = {};
 
-    // for (let i = 0; i < stepIndex; i++) {
-    //   stepsCustomizations[i]
-    // }
+    for (const stepCustomization of stepsCustomizations.value.slice(0, stepIndex)) {
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      const relatedCustomizationOptions = (customizationOptionsRefs as any).value.filter((item) => {
+        return item.customization?.parentId && item.customization.parentId === stepCustomization.id;
+      });
+
+      stepsValidationState[stepCustomization.name] = true;
+
+      for (const customizationOption of relatedCustomizationOptions) {
+        const result = await customizationOption.validateSilent();
+        if (!result.valid) {
+          stepsValidationState[stepCustomization.name] = false;
+          break;
+        }
+      }
+    }
+
+    // TODO: temporary - current TS version don't handle `value` type right in this case
+    validationState.value = { ...(validationState as any).value, ...stepsValidationState };
   }
 
   function resetValidationState (): void {
@@ -44,11 +64,22 @@ export function usePhrasePillowFormSteps (
       state[customization.name] = true;
     }
 
-    validationState.value = state;
+    state['Add to Cart'] = true;
+
+    (validationState as any).value = state;
   }
 
   function isStepInvalid (step: string): boolean {
     return !validationState.value[step];
+  }
+
+  function activateFirstStepWithError (): number | void {
+    stepsCustomizations.value.forEach((customization, index) => {
+      if (!validationState.value[customization.name]) {
+        formSteps.currentStep.value = index;
+        return index;
+      }
+    });
   }
 
   async function onChangeStep (stepIndex: number) {
@@ -61,9 +92,11 @@ export function usePhrasePillowFormSteps (
 
   return {
     ...formSteps,
+    activateFirstStepWithError,
     isStepInvalid,
     lastStepAvailableCustomizations,
     onChangeStep,
-    stepsCustomizations
+    stepsCustomizations,
+    customizationOptionsRefs
   }
 }

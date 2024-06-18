@@ -14,7 +14,7 @@
       />
     </div>
 
-    <validation-observer ref="formObserver" class="_form-content" tag="div">
+    <validation-observer ref="validationObserver" class="_form-content" tag="div">
       <phrase-pillow-form-preview
         :customization-option-value="customizationOptionValue"
         :customization-option-values="availableOptionValues"
@@ -55,7 +55,7 @@
                   customizationGroup.id
                 ]"
                 class="_customization-option"
-                ref="customizationOption"
+                ref="customizationOptionsRefs"
                 :key="customization.id"
                 :customization="customization"
                 :is-disabled="isDisabled"
@@ -213,6 +213,16 @@ export default defineComponent({
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
 
+    const customizationGroups = useCustomizationsGroups(
+      availableCustomizations,
+      productCustomization
+    );
+
+    const formSteps = usePhrasePillowFormSteps(
+      customizationGroups.customizationRootGroups,
+      customizationGroups.customizationRootGroupCustomizations
+    );
+
     const quantity = ref<number>(1);
     const { addToCartHandler, isSubmitting } = useAddToCart(
       product,
@@ -223,6 +233,17 @@ export default defineComponent({
     );
 
     async function onFormSubmit (): Promise<void> {
+      if (!validationObserver.value) {
+        return;
+      }
+
+      const isValid = await validationObserver.value.validate();
+
+      if (!isValid) {
+        formSteps.activateFirstStepWithError();
+        return;
+      }
+
       try {
         await addToCartHandler();
 
@@ -238,16 +259,6 @@ export default defineComponent({
         });
       }
     }
-
-    const customizationGroups = useCustomizationsGroups(
-      availableCustomizations,
-      productCustomization
-    );
-
-    const formSteps = usePhrasePillowFormSteps(
-      customizationGroups.customizationRootGroups,
-      customizationGroups.customizationRootGroupCustomizations
-    );
 
     const isDisabled = computed<boolean>(() => {
       return isSubmitting.value;
