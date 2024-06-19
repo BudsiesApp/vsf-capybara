@@ -184,8 +184,6 @@ export default defineComponent({
   }
 
   ._option-hint {
-    width: 100%;
-
     font-size: var(--customization-option-hint-size, var(--font-sm));
     text-align: var(--customization-option-hint-align, left);
     margin: var(--customization-option-hint-margin, var(--spacer-xs) 0 0);
