@@ -37,7 +37,8 @@ import {
 interface CustomizableProperty {
   customizationId: string,
   value: string,
-  isTextValue: boolean
+  isTextValue: boolean,
+  sn: number
 }
 
 export default defineComponent({
@@ -102,6 +103,7 @@ export default defineComponent({
             value: Array.isArray(customizationStateItem.value)
               ? customizationStateItem.value.join(',')
               : customizationStateItem.value,
+            sn: relatedCustomization.sn,
             isTextValue: true
           });
           continue;
@@ -123,10 +125,13 @@ export default defineComponent({
           properties.push({
             customizationId: relatedCustomization.id,
             value: selectedOptionValue.name,
+            sn: relatedCustomization.sn,
             isTextValue: false
           });
         }
       }
+
+      properties.sort((a, b) => a.sn - b.sn);
 
       return properties;
     });
