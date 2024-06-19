@@ -343,10 +343,10 @@ let routes = [
   {
     path: '/phrasepillow/index/customize/',
     name: 'phrase-pillow-customize',
-    component: PhrasePillowProduct,
+    component: CustomizableProduct,
     props: (route) => ({
-      backDesign: route.query.back_design,
-      frontDesign: route.query.front_design
+      sku: 'petsiesPhrasePillow_bundle',
+      layout: 'phrase-pillow'
     })
   },
   { name: 'recover-cart', path: '/alerts/recover/cart/id/:id/code/:code/', component: CartRecovery },

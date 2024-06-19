@@ -139,7 +139,6 @@ import { useFloatingPhoto } from 'theme/helpers/use-floating-photo';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { PlushieType } from 'theme/interfaces/plushie.type';
 
-import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
 import CreationWizardFormLastStep from 'theme/components/customization-system/forms/creation-wizard-form-last-step.vue';
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
@@ -189,7 +188,6 @@ export default defineComponent({
     }
   },
   components: {
-    ACustomProductQuantity,
     CreationWizardFormLastStep,
     CustomizationOption,
     MBlockStory,

@@ -22,21 +22,23 @@
             {{ option.name }}
           </div>
 
-          <div class="_price" v-if="isDefaultOptionValue(option) && defaultOptionValuePrice">
-            <SfPrice
-              :regular="formatPrice(defaultOptionValuePrice.regular)"
-              :special="formatPrice(defaultOptionValuePrice.special)"
-            />
-          </div>
+          <template v-if="!isOptionValuesSamePrice">
+            <div class="_price" v-if="isDefaultOptionValue(option) && defaultOptionValuePrice">
+              <SfPrice
+                :regular="formatPrice(defaultOptionValuePrice.regular)"
+                :special="formatPrice(defaultOptionValuePrice.special)"
+              />
+            </div>
 
-          <div class="_price" v-else-if="optionValuePriceDeltaDictionary[option.id]">
-            <span>+</span>
+            <div class="_price" v-else-if="optionValuePriceDeltaDictionary[option.id]">
+              <span>+</span>
 
-            <SfPrice
-              :regular="formatPrice(optionValuePriceDeltaDictionary[option.id].regular)"
-              :special="formatPrice(optionValuePriceDeltaDictionary[option.id].special)"
-            />
-          </div>
+              <SfPrice
+                :regular="formatPrice(optionValuePriceDeltaDictionary[option.id].regular)"
+                :special="formatPrice(optionValuePriceDeltaDictionary[option.id].special)"
+              />
+            </div>
+          </template>
         </div>
 
         <label class="_option-label">

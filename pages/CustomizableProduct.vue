@@ -1,9 +1,6 @@
 <template>
-  <div id="customizable-product">
-    <product-structured-data
-      v-if="currentProduct"
-      :product="currentProduct"
-    />
+  <div id="customizable-product" :class="`-${formComponent}`">
+    <product-structured-data v-if="currentProduct" :product="currentProduct" />
 
     <component
       :is="formComponent"
@@ -15,7 +12,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, toRefs } from '@vue/composition-api';
+import {
+  computed,
+  defineComponent,
+  PropType,
+  toRefs
+} from '@vue/composition-api';
 
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { htmlDecode } from '@vue-storefront/core/filters';
@@ -27,15 +29,26 @@ import { useProductPage } from 'theme/helpers/use-product-page';
 
 enum LayoutType {
   WITH_IMAGES_GALLERY = 'with-images-gallery',
-  VERTICAL = 'vertical'
+  VERTICAL = 'vertical',
+  PHRASE_PILLOW = 'phrase-pillow',
 }
 
 export default defineComponent({
   name: 'CustomizableProduct',
   components: {
-    FormWithImagesGallery: () => import(/* webpackChunkName: "vsf-images-gallery-form" */ 'theme/components/customization-system/forms/form-with-images-gallery.vue'),
+    FormWithImagesGallery: () =>
+      import(
+        /* webpackChunkName: "vsf-images-gallery-form" */ 'theme/components/customization-system/forms/form-with-images-gallery.vue'
+      ),
     ProductStructuredData,
-    VerticalStepsForm: () => import(/* webpackChunkName: "vsf-vertical-form" */ 'theme/components/customization-system/forms/vertical-steps-form.vue')
+    PhrasePillowForm: () =>
+      import(
+        /* webpackChunkName: "vsf-phrase-pillow-form" */ 'theme/components/customization-system/forms/phrase-pillow-form.vue'
+      ),
+    VerticalStepsForm: () =>
+      import(
+        /* webpackChunkName: "vsf-vertical-form" */ 'theme/components/customization-system/forms/vertical-steps-form.vue'
+      )
   },
   props: {
     sku: {
@@ -65,6 +78,8 @@ export default defineComponent({
           return 'form-with-images-gallery';
         case LayoutType.VERTICAL:
           return 'vertical-steps-form';
+        case LayoutType.PHRASE_PILLOW:
+          return 'phrase-pillow-form';
       }
     });
 
@@ -73,14 +88,16 @@ export default defineComponent({
       currentProduct,
       formComponent,
       showForm
-    }
+    };
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
     next();
   },
   metaInfo () {
-    const description = this.currentProduct?.meta_description || this.currentProduct?.short_description;
+    const description =
+      this.currentProduct?.meta_description ||
+      this.currentProduct?.short_description;
 
     return {
       title: htmlDecode(
@@ -101,20 +118,31 @@ export default defineComponent({
 </script>
 
   <style lang="scss" scoped>
-  @import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-  #customizable-product {
-    box-sizing: border-box;
-    padding: 0 1rem;
+#customizable-product {
+  box-sizing: border-box;
+  padding: 0 1rem;
 
-    .form-with-images-gallery {
-      margin-top: var(--spacer-lg);
-    }
+  .form-with-images-gallery {
+    margin-top: var(--spacer-lg);
+  }
 
-    @media (min-width: $tablet-min) {
-      max-width: 1272px;
-      width: 100%;
-      margin: 0 auto;
+  &.-phrase-pillow-form {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 0;
+  }
+
+  @media (min-width: $tablet-min) {
+    max-width: 1272px;
+    width: 100%;
+    margin: 0 auto;
+
+    &.-phrase-pillow-form {
+      margin-top: 60px;
     }
   }
-  </style>
+}
+</style>

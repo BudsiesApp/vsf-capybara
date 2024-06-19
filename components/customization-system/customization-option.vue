@@ -23,6 +23,7 @@
       v-slot="{ errors }"
       :rules="validationRules"
       :name="optionLabel"
+      ref="validationProvider"
     >
       <component
         class="_widget"
@@ -164,12 +165,16 @@ export default defineComponent({
   align-items: var(--customization-option-align-items, flex-start);
 
   ._option-label {
+    width: 100%;
+
     font-size: var(--customization-option-label-size, var(--font-base));
     font-weight: var(--customization-option-label-weight, var(--font-bold));
     text-align: var(--customization-option-label-align, left);
   }
 
   ._option-description {
+    width: 100%;
+
     font-size: var(--customization-option-description-size, var(--font-sm));
     text-align: var(--customization-option-description-align, left);
     margin: var(
@@ -179,6 +184,8 @@ export default defineComponent({
   }
 
   ._option-hint {
+    width: 100%;
+
     font-size: var(--customization-option-hint-size, var(--font-sm));
     text-align: var(--customization-option-hint-align, left);
     margin: var(--customization-option-hint-margin, var(--spacer-xs) 0 0);
