@@ -125,6 +125,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
         },
@@ -170,6 +171,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
         },
@@ -211,6 +213,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
         },
@@ -269,6 +272,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
         },
@@ -322,6 +326,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
         },
@@ -375,6 +380,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
         },
@@ -397,6 +403,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
         },
@@ -422,6 +429,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
         },
@@ -447,6 +455,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
         },
