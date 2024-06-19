@@ -162,6 +162,10 @@ export default defineComponent({
   .collected-product__properties {
     font-size: var(--font-xs);
     margin-bottom: var(--spacer-xs);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacer-xs);
   }
 
   .collected-product__properties__icon {
