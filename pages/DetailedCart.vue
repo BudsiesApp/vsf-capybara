@@ -189,16 +189,16 @@ const golfHeadCoversProductsSkus = [
 ];
 
 const printedProductSkus = [
-  'customPrintedSocks_bundle',
+  'petsiesCustomPrintedSocks_bundle',
   'customPrintedMasks_bundle',
-  'customPrintedKeychains_bundle',
+  'petsiesCustomPrintedKeychains_bundle',
   'customFeltedMagnets_bundle',
   'customFeltedOrnaments_bundle'
 ];
 
 const blanketProductsSkus = [
   'customRenaissanceBlankets_bundle',
-  'customCutOutBlankets_bundle'
+  'petsiesCustomCutOutBlankets_bundle'
 ];
 
 const clayPlushieProductSkus = [
@@ -207,9 +207,9 @@ const clayPlushieProductSkus = [
 ];
 
 const clothesProductSkus = [
-  'customPajamas_bundle',
+  'petsiesCustomPajamas_bundle',
   'customHawaiianShirts_bundle',
-  'customGolfShirts_bundle'
+  'petsiesCustomGolfShirts_bundle'
 ];
 
 const customPillowSku = 'customPillow_bundle';
@@ -419,9 +419,6 @@ export default {
           }
         });
       } else if (clothesProductSkus.includes(product.sku)) {
-        const designOptionName =
-          product.sku === 'customPajamas_bundle' ? 'product' : 'design';
-
         this.$router.push({
           name: 'clothes-product',
           params: { sku: product.sku },
