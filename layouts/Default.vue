@@ -9,7 +9,7 @@
       never
       :trigger-hydration="shouldHydrateMobileMenu"
     >
-      <OMobileMenu />
+      <OMobileMenu :menu-items="mobileMenuItems" />
     </LazyHydrate>
 
     <div id="viewport">
@@ -20,7 +20,10 @@
         <LazyHydrate
           when-visible
         >
-          <OHeader class="_main-header" />
+          <OHeader
+            :navigation-items="headerItems"
+            class="_main-header"
+          />
         </LazyHydrate>
       </div>
 
@@ -32,6 +35,7 @@
         <OFooter
           class="default-layout_footer"
           :class="{ '-show-for-medium-up': hideFooterOnMobile }"
+          :navigation-columns="footerItems"
         />
       </LazyHydrate>
 
@@ -64,11 +68,12 @@ import config from 'config';
 import { ModalList } from 'theme/store/ui/modals';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 import LazyHydrate from 'vue-lazy-hydration';
-import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
+import { isStoryblokPreview, useStoryblokPageLayout } from 'src/modules/vsf-storyblok-module';
 
 import PromotionPlatformBanner from 'src/modules/promotion-platform/components/Banner.vue';
+import { defineComponent, toRefs } from '@vue/composition-api';
 
-export default {
+export default defineComponent({
   components: {
     PromotionPlatformBanner,
     OHeader,
@@ -81,6 +86,19 @@ export default {
     OModal,
     OMobileMenu,
     LazyHydrate
+  },
+  props: {
+    previewPageLayoutStoryContent: {
+      type: Object,
+      default: undefined
+    }
+  },
+  setup (props, context) {
+    const { previewPageLayoutStoryContent } = toRefs(props);
+
+    return {
+      ...useStoryblokPageLayout(context.root.$store, previewPageLayoutStoryContent)
+    }
   },
   data () {
     return {
@@ -145,7 +163,7 @@ export default {
     }
   },
   metaInfo: Head
-};
+});
 </script>
 
 <style lang="scss" scoped>

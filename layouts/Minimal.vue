@@ -3,7 +3,7 @@
     <div id="viewport">
       <OHeaderMinimal />
       <slot />
-      <OFooter />
+      <OFooter :navigation-columns="footerItems" />
     </div>
   </div>
 </template>
@@ -11,19 +11,33 @@
 <script>
 import OHeaderMinimal from 'theme/components/organisms/o-header-minimal';
 import OFooter from 'theme/components/organisms/o-footer';
-import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
+import { isStoryblokPreview, useStoryblokPageLayout } from 'src/modules/vsf-storyblok-module';
+import { defineComponent, toRefs } from '@vue/composition-api';
 
-export default {
+export default defineComponent({
   components: {
     OHeaderMinimal,
     OFooter
+  },
+  props: {
+    previewPageLayoutStoryContent: {
+      type: Object,
+      default: undefined
+    }
+  },
+  setup (props, context) {
+    const { previewPageLayoutStoryContent } = toRefs(props);
+
+    return {
+      ...useStoryblokPageLayout(context.root.$store, previewPageLayoutStoryContent)
+    }
   },
   computed: {
     isStoryblokPreviewMode () {
       return isStoryblokPreview();
     }
   }
-}
+})
 </script>
 
 <style lang="scss">

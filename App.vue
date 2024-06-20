@@ -11,6 +11,7 @@ import get from 'lodash-es/get'
 import config from 'config';
 
 import DefaultLayout from './layouts/Default'
+import EmptyLayout from './layouts/Empty'
 import MinimalLayout from './layouts/Minimal'
 import { ModalList } from './store/ui/modals';
 
@@ -34,7 +35,8 @@ const imageHandlerService = new ImageHandlerService(
 export default {
   components: {
     DefaultLayout,
-    MinimalLayout
+    MinimalLayout,
+    EmptyLayout
   },
   computed: {
     layout () {
@@ -65,6 +67,20 @@ export default {
       }
 
       this.$store.dispatch('ui/openModal', { name: ModalList.WebsiteLeaving })
+    }
+  },
+  watch: {
+    $route: {
+      async handler (value) {
+        if (!value.query.accessDenied) {
+          return;
+        }
+
+        await this.$nextTick();
+        this.$store.dispatch('ui/openModal', { name: ModalList.Auth, payload: 'login' });
+        this.$router.push({ query: { accessDenied: undefined } });
+      },
+      immediate: true
     }
   }
 };
