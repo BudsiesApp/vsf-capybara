@@ -194,7 +194,8 @@ import {
   useCustomizationsBusyState,
   useCustomizationsGroups,
   useCustomizationState,
-  useOptionValueActions
+  useOptionValueActions,
+  useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
 import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 import i18n from '@vue-storefront/core/i18n';
@@ -289,8 +290,10 @@ export default defineComponent({
       updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
     const {
+      availableCustomization,
       availableCustomizations,
       availableOptionCustomizations,
+      availableOptionValues,
       customizationAvailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
@@ -407,6 +410,14 @@ export default defineComponent({
         existingCartItem.value ? i18n.t('Update') : i18n.t('Add to Cart')
       ).toString();
     });
+
+    useSelectedOptionValueUrlQuery(
+      availableCustomization,
+      availableOptionValues,
+      customizationOptionValue,
+      updateCustomizationOptionValue,
+      context
+    );
 
     return {
       ...useCustomizationsGroups(availableCustomizations, productCustomization),
