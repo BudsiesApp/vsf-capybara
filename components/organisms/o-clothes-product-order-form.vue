@@ -294,7 +294,7 @@ import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import { getProductGallery as getGalleryByProduct, setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 
 import { ProductPrice, getFinalPrice, getTotalPriceForProductPrices } from 'src/modules/shared/helpers/price';
-import { ProductValue, Dictionary, ExtraPhotoAddon } from 'src/modules/budsies';
+import { ProductValue, Dictionary, ExtraPhotoAddon, ProductId } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage, getProductDefaultPrice, InjectType, ServerError } from 'src/modules/shared';
 import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
@@ -497,10 +497,12 @@ export default defineComponent({
     backendProductId (): ProductValue.PAJAMAS | ProductValue.HAWAIIAN_SHIRTS | ProductValue.GOLF_SHIRTS {
       switch (this.product.id) {
         case 558:
+        case ProductId.PETSIES_PAJAMAS:
           return ProductValue.PAJAMAS;
         case 645:
           return ProductValue.HAWAIIAN_SHIRTS;
         case 626:
+        case ProductId.PETSIES_GOLF_SHIRTS:
           return ProductValue.GOLF_SHIRTS;
         default:
           throw new Error(

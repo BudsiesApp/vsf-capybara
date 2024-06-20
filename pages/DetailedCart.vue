@@ -209,16 +209,16 @@ const golfHeadCoversProductsSkus = [
 ]
 
 const printedProductSkus = [
-  'customPrintedSocks_bundle',
+  'petsiesCustomPrintedSocks_bundle',
   'customPrintedMasks_bundle',
-  'customPrintedKeychains_bundle',
+  'petsiesCustomPrintedKeychains_bundle',
   'customFeltedMagnets_bundle',
   'customFeltedOrnaments_bundle'
 ]
 
 const blanketProductsSkus = [
   'customRenaissanceBlankets_bundle',
-  'customCutOutBlankets_bundle'
+  'petsiesCustomCutOutBlankets_bundle'
 ]
 
 const clayPlushieProductSkus = [
@@ -227,9 +227,9 @@ const clayPlushieProductSkus = [
 ]
 
 const clothesProductSkus = [
-  'customPajamas_bundle',
+  'petsiesCustomPajamas_bundle',
   'customHawaiianShirts_bundle',
-  'customGolfShirts_bundle'
+  'petsiesCustomGolfShirts_bundle'
 ];
 
 const customPillowSku = 'customPillow_bundle';
@@ -435,7 +435,7 @@ export default {
           }
         })
       } else if (clothesProductSkus.includes(product.sku)) {
-        const designOptionName = product.sku === 'customPajamas_bundle' ? 'product' : 'design';
+        const designOptionName = product.sku === 'petsiesCustomPajamas_bundle' ? 'product' : 'design';
 
         this.$router.push({
           name: 'clothes-product',
@@ -459,7 +459,7 @@ export default {
           }
         });
       } else if (blanketProductsSkus.includes(product.sku)) {
-        const routeName = product.sku === 'customCutOutBlankets_bundle'
+        const routeName = product.sku === 'petsiesCustomCutOutBlankets_bundle'
           ? 'cut-out-blankets'
           : 'renaissance-blankets';
 
