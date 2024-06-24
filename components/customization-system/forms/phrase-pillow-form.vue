@@ -33,10 +33,7 @@
 
       <div class="_customization-section">
         <form class="_form">
-          <SfSteps
-            :active="currentStep"
-            class="_customizer-steps"
-          >
+          <SfSteps :active="currentStep" class="_customizer-steps">
             <template #steps="props">
               <div
                 class="_customizer-step"
@@ -384,6 +381,10 @@ export default defineComponent({
     --customization-option-hint-align: center;
 
     padding: 0 0.8em;
+
+    &.-widget-ProductionTimeSelector {
+      --select-width: 100%;
+    }
   }
 
   ._customizer-steps {

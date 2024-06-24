@@ -363,6 +363,12 @@ export default defineComponent({
     }
   }
 
+  ._customization-option {
+    &.-widget-ProductionTimeSelector {
+      --select-width: 100%;
+    }
+  }
+
   ._actions,
   ._actions-container,
   ._customization-option,

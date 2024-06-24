@@ -9,7 +9,7 @@
   >
     <sf-select-option
       v-for="option in productionTimeOptions"
-      :key="option"
+      :key="option.id"
       :value="option.id"
     >
       {{ option.text }}
@@ -56,6 +56,10 @@ export default defineComponent({
     isRequired: {
       type: Boolean,
       default: false
+    },
+    placeholder: {
+      type: String,
+      default: 'Standard Production Time'
     },
     productId: {
       type: Number,
