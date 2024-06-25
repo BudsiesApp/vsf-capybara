@@ -9,6 +9,7 @@ export function useBackendProductId (productId: Ref<string | number>) {
       case ProductId.BUDDY_PILLOW:
         return ProductValue.PILLOW;
       case ProductId.PRINTED_SOCKS:
+      case ProductId.PETSIES_PRINTED_SOCKS:
         return ProductValue.PRINTED_SOCKS;
       case ProductId.PRINTED_MASKS:
         return ProductValue.PRINTED_MASKS;
@@ -23,6 +24,7 @@ export function useBackendProductId (productId: Ref<string | number>) {
       case ProductId.RENAISSANCE_BLANKETS:
         return ProductValue.RENAISSANCE_BLANKETS;
       case ProductId.CUT_OUT_BLANKETS:
+      case ProductId.PETSIES_CUT_OUT_BLANKETS:
         return ProductValue.CUT_OUT_BLANKETS;
       case ProductId.PETSIES_FIGURINES:
         return ProductValue.PETSIES_FIGURINES;
