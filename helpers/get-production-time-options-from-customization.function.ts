@@ -39,6 +39,7 @@ export function getProductionTimeOptionsFromCustomization (
     }
 
     result.push({
+      // TODO: get rid of hardcoded id
       id: addonOption?.id || 'standard',
       text: addon.text,
       isDomestic: addon.isDomestic,
