@@ -241,7 +241,8 @@ export default defineComponent({
         productCustomizations,
         selectedOptionValuesIds,
         customizationOptionValue,
-        updateCustomizationOptionValue
+        updateCustomizationOptionValue,
+        currentProduct
       );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
