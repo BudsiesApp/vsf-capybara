@@ -209,7 +209,7 @@ const golfHeadCoversProductsSkus = [
 ]
 
 const printedProductSkus = [
-  'customPrintedSocks_bundle',
+  'petsiesCustomPrintedSocks_bundle',
   'customPrintedMasks_bundle',
   'customPrintedKeychains_bundle',
   'customFeltedMagnets_bundle',
@@ -218,7 +218,7 @@ const printedProductSkus = [
 
 const blanketProductsSkus = [
   'customRenaissanceBlankets_bundle',
-  'customCutOutBlankets_bundle'
+  'petsiesCustomCutOutBlankets_bundle'
 ]
 
 const clayPlushieProductSkus = [
@@ -459,7 +459,7 @@ export default {
           }
         });
       } else if (blanketProductsSkus.includes(product.sku)) {
-        const routeName = product.sku === 'customCutOutBlankets_bundle'
+        const routeName = product.sku === 'petsiesCustomCutOutBlankets_bundle'
           ? 'cut-out-blankets'
           : 'renaissance-blankets';
 
