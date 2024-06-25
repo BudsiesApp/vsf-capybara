@@ -39,7 +39,7 @@ export function getProductionTimeOptionsFromCustomization (
     }
 
     result.push({
-      id: addonOption?.id || '',
+      id: addonOption?.id || 'standard',
       text: addon.text,
       isDomestic: addon.isDomestic,
       optionId: bundleOptionId,

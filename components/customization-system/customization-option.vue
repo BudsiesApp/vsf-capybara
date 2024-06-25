@@ -52,6 +52,7 @@ import { ValidationProvider } from 'vee-validate';
 import {
   Customization,
   CustomizationOptionValue,
+  OptionType,
   OptionValue,
   useCustomizationOptionValidation,
   useCustomizationOptionWidget,
@@ -131,6 +132,10 @@ export default defineComponent({
       );
     });
     const showCustomization = computed<boolean>(() => {
+      if (customization.value.optionData?.type === OptionType.PRODUCTION_TIME) {
+        return true;
+      }
+
       return !(customization.value.optionData?.isRequired && optionValues.value.length === 1);
     });
 
