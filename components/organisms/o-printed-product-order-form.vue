@@ -304,7 +304,7 @@ import { getProductGallery as getGalleryByProduct, setBundleProductOptionsAsync 
 import CartItem from 'core/modules/cart/types/CartItem';
 
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
-import { Bodypart, BodypartOption, Dictionary, ExtraPhotoAddon, ProductValue } from 'src/modules/budsies';
+import { Bodypart, BodypartOption, Dictionary, ExtraPhotoAddon, ProductId, ProductValue } from 'src/modules/budsies';
 import ServerError from 'src/modules/shared/types/server-error';
 import { CustomerImage, getProductDefaultPrice, PriceHelper } from 'src/modules/shared';
 
@@ -595,6 +595,7 @@ export default defineComponent({
     backendProductId (): ProductValue {
       switch (this.product.id) {
         case 277:
+        case ProductId.PETSIES_PRINTED_SOCKS:
           return ProductValue.PRINTED_SOCKS;
         case 340:
           return ProductValue.PRINTED_MASKS;
