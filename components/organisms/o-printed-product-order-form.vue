@@ -600,7 +600,6 @@ export default defineComponent({
         case 340:
           return ProductValue.PRINTED_MASKS;
         case 353:
-        case ProductId.PETSIES_PRINTED_KEYCHAINS:
           return ProductValue.PRINTED_KEYCHAINS;
         case 446:
           return ProductValue.FELTED_MAGNETS;

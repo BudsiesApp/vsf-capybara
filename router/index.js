@@ -288,7 +288,7 @@ let routes = [
     path: '/plushie/index/printedKeychains/',
     component: PrintedProduct,
     props: route => ({
-      sku: 'petsiesCustomPrintedKeychains_bundle',
+      sku: 'customPrintedKeychains_bundle',
       productDesign: route.query.product_design
     })
   },
@@ -459,7 +459,7 @@ let routes = [
     path: '/pajamas/index/create/',
     component: ClothesProduct,
     props: (route) => ({
-      sku: 'petsiesCustomPajamas_bundle',
+      sku: 'customPajamas_bundle',
       productDesign: route.query.product_design,
       existingPlushieId: route.query.existingPlushieId
     })
@@ -479,7 +479,7 @@ let routes = [
     path: '/clothes/golf-shirts/create/',
     component: ClothesProduct,
     props: (route) => ({
-      sku: 'petsiesCustomGolfShirts_bundle',
+      sku: 'customGolfShirts_bundle',
       productDesign: route.query.product_design,
       existingPlushieId: route.query.existingPlushieId
     })
