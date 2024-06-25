@@ -209,7 +209,7 @@ import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helper
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import { getProductGallery as getGalleryByProduct, setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 
-import { ProductValue, Dictionary } from 'src/modules/budsies';
+import { ProductValue, Dictionary, ProductId } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { CustomerImage, getProductDefaultPrice, ServerError } from 'src/modules/shared';
 import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
@@ -317,6 +317,7 @@ export default defineComponent({
         case 487:
           return ProductValue.RENAISSANCE_BLANKETS;
         case 504:
+        case ProductId.PETSIES_CUT_OUT_BLANKETS:
           return ProductValue.CUT_OUT_BLANKETS;
         default:
           throw new Error(
