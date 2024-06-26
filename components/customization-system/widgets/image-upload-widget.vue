@@ -27,7 +27,7 @@ import { FileUploadValue, useFilesUpload } from 'src/modules/customization-syste
 
 import { useBackendProductId } from 'theme/helpers/use-backend-product-id';
 
-import MArtworkUpload from '../molecules/m-artwork-upload.vue';
+import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
 
 export default defineComponent({
   components: {

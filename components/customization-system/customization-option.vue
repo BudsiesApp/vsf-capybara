@@ -59,16 +59,16 @@ import {
   WidgetType
 } from 'src/modules/customization-system';
 
-import CardsListWidget from './cards-list-widget.vue';
-import CheckboxWidget from './checkbox-widget.vue';
-import ColorsListWidget from './colors-list-widget.vue';
-import DropdownWidget from './dropdown-widget.vue';
-import DropdownFreeTextWidget from './dropdown-free-text-widget.vue';
-import ImageUploadWidget from './image-upload-widget.vue';
+import CardsListWidget from './widgets/cards-list-widget.vue';
+import CheckboxWidget from './widgets/checkbox-widget.vue';
+import ColorsListWidget from './widgets/colors-list-widget.vue';
+import DropdownWidget from './widgets/dropdown-widget.vue';
+import DropdownFreeTextWidget from './widgets/dropdown-free-text-widget.vue';
+import ImageUploadWidget from './widgets/image-upload-widget.vue';
 import ProductionTimeSelector from './production-time-selector.vue';
-import TextAreaWidget from './textarea-widget.vue';
-import TextInputWidget from './text-input-widget.vue';
-import ThumbnailsListWidget from './thumbnails-list-widget.vue';
+import TextAreaWidget from './widgets/textarea-widget.vue';
+import TextInputWidget from './widgets/text-input-widget.vue';
+import ThumbnailsListWidget from './widgets/thumbnails-list-widget.vue';
 
 const customizationWidgetBusyStateChangedEventName = 'customization-option-busy-state-changed';
 
@@ -184,8 +184,6 @@ export default defineComponent({
   }
 
   ._option-hint {
-    width: 100%;
-
     font-size: var(--customization-option-hint-size, var(--font-sm));
     text-align: var(--customization-option-hint-align, left);
     margin: var(--customization-option-hint-margin, var(--spacer-xs) 0 0);

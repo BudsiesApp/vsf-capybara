@@ -31,7 +31,7 @@ import {
   useValuesSort
 } from 'src/modules/customization-system';
 
-import MMultiselect from '../molecules/m-multiselect.vue';
+import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
 
 export default defineComponent({
   name: 'DropdownFreeTextWidget',
