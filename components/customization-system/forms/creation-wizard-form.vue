@@ -109,6 +109,7 @@
 import {
   computed,
   defineComponent,
+  onMounted,
   PropType,
   Ref,
   ref,
@@ -127,7 +128,8 @@ import {
   useOptionValueActions,
   useCustomizationsBusyState,
   CustomizationOptionValue,
-  useCustomizationsGroups
+  useCustomizationsGroups,
+  useCustomizationStatePreservation
 } from 'src/modules/customization-system';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
@@ -166,6 +168,10 @@ function getAllFormRefs (
 export default defineComponent({
   name: 'CreationWizardForm',
   props: {
+    canUsePersistedCustomizationState: {
+      type: Boolean,
+      default: false
+    },
     existingCartItem: {
       type: Object as PropType<CartItem | undefined>,
       default: undefined
@@ -232,6 +238,7 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
+      replaceCustomizationState,
       resetCustomizationState,
       selectedOptionValuesIds,
       updateCustomizationOptionValue
@@ -260,36 +267,6 @@ export default defineComponent({
     }): void {
       updateCustomizationOptionValue(payload);
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
-    }
-
-    const quantity = ref<number>(1);
-    const { addToCartHandler, isSubmitting } = useAddToCart(
-      currentProduct,
-      quantity,
-      customizationState,
-      existingCartItem,
-      context
-    );
-
-    async function onFormSubmit (): Promise<void> {
-      try {
-        await addToCartHandler();
-
-        if (!currentProduct.value) {
-          throw new Error('Product is missing');
-        }
-
-        context.root.$router.push({
-          name: 'cross-sells',
-          params: { parentSku: currentProduct.value.sku }
-        });
-      } catch (error) {
-        context.root.$store.dispatch('notification/spawnNotification', {
-          type: 'danger',
-          message: 'Error: ' + error,
-          action1: { label: i18n.t('OK') }
-        });
-      }
     }
 
     const customizationGroups = useCustomizationsGroups(
@@ -325,6 +302,79 @@ export default defineComponent({
       afterProductTypeSet,
       context
     );
+
+    const additionalPreservedData = computed<Record<string, any>>(() => {
+      return {
+        productSku: currentProduct.value?.sku
+      }
+    });
+
+    const { getPreservedData, removePreservedState } =
+      useCustomizationStatePreservation(
+        plushieType,
+        customizationState,
+        existingCartItem,
+        additionalPreservedData
+      );
+
+    onMounted(async () => {
+      if (
+        existingCartItem.value ||
+        !props.canUsePersistedCustomizationState
+      ) {
+        removePreservedState();
+        return;
+      }
+
+      const preservedState = await getPreservedData();
+
+      if (!preservedState) {
+        return;
+      }
+
+      const productSku = preservedState.additionalData?.productSku;
+
+      if (!productSku) {
+        removePreservedState();
+        return;
+      }
+
+      await productTypeStep.loadProduct(productSku);
+
+      replaceCustomizationState(preservedState.customizationState);
+    });
+
+    const quantity = ref<number>(1);
+    const { addToCartHandler, isSubmitting } = useAddToCart(
+      currentProduct,
+      quantity,
+      customizationState,
+      existingCartItem,
+      context
+    );
+
+    async function onFormSubmit (): Promise<void> {
+      try {
+        await addToCartHandler();
+
+        removePreservedState();
+
+        if (!currentProduct.value) {
+          throw new Error('Product is missing');
+        }
+
+        context.root.$router.push({
+          name: 'cross-sells',
+          params: { parentSku: currentProduct.value.sku }
+        });
+      } catch (error) {
+        context.root.$store.dispatch('notification/spawnNotification', {
+          type: 'danger',
+          message: 'Error: ' + error,
+          action1: { label: i18n.t('OK') }
+        });
+      }
+    }
 
     const isDisabled = computed<boolean>(() => {
       return isSubmitting.value || productTypeStep.isProductLoading.value;

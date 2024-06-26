@@ -68,6 +68,7 @@ export function useCreationWizardProductTypeStep (
 
   return {
     isProductLoading,
+    loadProduct,
     setProductType
   }
 }

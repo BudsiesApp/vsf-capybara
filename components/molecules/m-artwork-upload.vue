@@ -53,7 +53,7 @@ import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
 import Vue, { PropType, VueConstructor } from 'vue';
 // Import Vue FilePond
 import vueFilePond, { VueFilePondComponent } from 'vue-filepond';
-import { File as FilePond, FileOrigin, FileStatus } from 'filepond';
+import { File as FilePond, FileOrigin, FilePondFile, FileStatus } from 'filepond';
 // Import image preview and file type validation plugins
 import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
@@ -237,6 +237,15 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     this.unregisterUploaderInStore();
   },
   methods: {
+    getFiles (): FilePondFile[] {
+      const fileInput = this.getFileInput();
+
+      if (!fileInput) {
+        return [];
+      }
+
+      return fileInput.getFiles();
+    },
     onFileRemove (error: FilePondErrorDescription, event: any) {
       this.updateFilesCount();
       if (error || event.origin !== FileOrigin.LOCAL) {
