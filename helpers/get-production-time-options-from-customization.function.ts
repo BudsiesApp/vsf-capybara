@@ -2,7 +2,7 @@ import { Store } from 'vuex';
 import { Logger } from '@vue-storefront/core/lib/logger';
 
 import { RushAddon } from 'src/modules/budsies';
-import { OptionValue } from 'src/modules/customization-system';
+import { OptionValue, PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID } from 'src/modules/customization-system';
 
 import ProductionTimeOption from '../components/interfaces/production-time-option.interface';
 
@@ -40,7 +40,7 @@ export function getProductionTimeOptionsFromCustomization (
 
     result.push({
       // TODO: get rid of hardcoded id
-      id: addonOption?.id || 'standard',
+      id: addonOption?.id || PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID,
       text: addon.text,
       isDomestic: addon.isDomestic,
       optionId: bundleOptionId,

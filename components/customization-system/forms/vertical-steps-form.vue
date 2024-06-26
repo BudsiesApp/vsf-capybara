@@ -194,7 +194,8 @@ import {
   useCustomizationsBusyState,
   useCustomizationsGroups,
   useCustomizationState,
-  useOptionValueActions
+  useOptionValueActions,
+  useProductionTimeSelectorCustomization
 } from 'src/modules/customization-system';
 import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 import i18n from '@vue-storefront/core/i18n';
@@ -317,6 +318,15 @@ export default defineComponent({
       updateCustomizationOptionValue(payload);
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
+
+    // TODO: temporary until separate option value for "Standard"
+    // production time will be added
+    useProductionTimeSelectorCustomization(
+      availableCustomizations,
+      customizationOptionValue,
+      existingCartItem,
+      updateCustomizationOptionValue
+    );
 
     const formValidation = useFormValidation(validationObserver, () =>
       getAllFormRefs(context.refs)

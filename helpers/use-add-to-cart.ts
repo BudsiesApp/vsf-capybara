@@ -4,7 +4,7 @@ import { Logger } from '@vue-storefront/core/lib/logger';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import { setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
-import { CustomizationStateItem } from 'src/modules/customization-system';
+import { CustomizationStateItem, filterCustomizationState } from 'src/modules/customization-system';
 import { ServerError } from 'src/modules/shared';
 
 export function useAddToCart (
@@ -45,7 +45,7 @@ export function useAddToCart (
 
     const productToAddData: Partial<CartItem> = {
       qty: quantity.value,
-      customizationState: customizationStateItems.value
+      customizationState: filterCustomizationState(customizationStateItems.value)
     };
 
     if (email?.value) {
@@ -89,7 +89,7 @@ export function useAddToCart (
     const cartItemForUpdate: Partial<CartItem> = {
       qty: quantity.value,
       product_option: productOption,
-      customizationState: customizationStateItems.value
+      customizationState: filterCustomizationState(customizationStateItems.value)
     };
 
     if (email?.value) {

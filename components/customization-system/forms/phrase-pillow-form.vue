@@ -130,7 +130,8 @@ import {
   useOptionValueActions,
   useCustomizationsBusyState,
   CustomizationOptionValue,
-  useCustomizationsGroups
+  useCustomizationsGroups,
+  useProductionTimeSelectorCustomization
 } from 'src/modules/customization-system';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
@@ -227,6 +228,15 @@ export default defineComponent({
       updateCustomizationOptionValue(payload);
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
+
+    // TODO: temporary until separate option value for "Standard"
+    // production time will be added
+    useProductionTimeSelectorCustomization(
+      availableCustomizations,
+      customizationOptionValue,
+      existingCartItem,
+      updateCustomizationOptionValue
+    );
 
     const customizationGroups = useCustomizationsGroups(
       availableCustomizations,
