@@ -109,6 +109,7 @@
 import {
   computed,
   defineComponent,
+  nextTick,
   onMounted,
   PropType,
   Ref,
@@ -318,6 +319,8 @@ export default defineComponent({
       );
 
     onMounted(async () => {
+      await nextTick();
+
       if (
         existingCartItem.value ||
         !props.canUsePersistedCustomizationState

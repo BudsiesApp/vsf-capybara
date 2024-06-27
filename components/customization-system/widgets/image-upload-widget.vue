@@ -89,7 +89,7 @@ export default defineComponent({
 
       return !(filesUploadFields.initialItems as any).value.every((item: CustomerImage) => {
         return !!currentFiles.find(
-          (file) => !file.serverId || file.serverId === item.id
+          (file) => file.serverId === item.id
         );
       });
     });

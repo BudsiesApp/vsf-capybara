@@ -347,7 +347,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           if (isAborted) {
             return;
           }
-
           load(item.id);
           this.$emit('file-added', item);
         })
@@ -388,9 +387,16 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         this.fRemoveRequestsCount--;
       }
     },
-    onFileProcessed (): void {
+    onFileProcessed (error: Error, file: FilePondFile): void {
       this.updateStatus();
       this.updateUploaderDataInStore();
+
+      // if (error) {
+      //   return;
+      // }
+
+      // console.log('PROCESSED FILE', file);
+      // debugger;
     },
     onAllFilesProcessed (): void {
       this.updateStatus();
