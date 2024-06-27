@@ -1,26 +1,46 @@
 <template>
   <div class="cart-item-configuration">
-    <div
-      class="collected-product__properties"
-      v-for="textProperty in textProperties"
-      :key="textProperty.value"
-    >
-      {{ textProperty.value }}
-    </div>
+    <template v-if="hasCustomizableProperties">
+      <div
+        class="collected-product__properties"
+        v-for="textProperty in textProperties"
+        :key="textProperty.id"
+      >
+        {{ textProperty.value }}
+      </div>
 
-    <div
-      class="collected-product__properties"
-      v-for="optionValueProperty in optionValueProperties"
-      :key="optionValueProperty.value"
-    >
-      <SfIcon
-        icon="check"
-        size="xxs"
-        color="blue-primary"
-        class="collected-product__properties__icon"
-      />
-      {{ optionValueProperty.value }}
-    </div>
+      <div
+        class="collected-product__properties"
+        v-for="optionValueProperty in optionValueProperties"
+        :key="optionValueProperty.id"
+      >
+        <SfIcon
+          icon="check"
+          size="xxs"
+          color="blue-primary"
+          class="collected-product__properties__icon"
+        />
+        {{ optionValueProperty.value }}
+      </div>
+    </template>
+
+    <template v-else>
+      <div
+        v-for="option in productOptions"
+        :key="option.label"
+        class="collected-product__properties"
+      >
+        <SfProperty
+          v-if="option.isCustom"
+          :name="option.label"
+          :value="option.value"
+        />
+
+        <div v-else>
+          {{ option.value }}
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -28,17 +48,24 @@
 import { SfIcon, SfProperty } from '@storefront-ui/vue';
 import { computed, defineComponent, PropType } from '@vue/composition-api';
 
-import CartItem from 'core/modules/cart/types/CartItem';
 import {
   Customization,
+  CustomizationStateItem,
   isFileUploadValue
 } from 'src/modules/customization-system';
 
 interface CustomizableProperty {
-  customizationId: string,
+  id: string,
   value: string,
   isTextValue: boolean,
   sn: number
+}
+
+function getCustomizablePropertyComposedId (
+  optionValue: string,
+  customizationId: string
+): string {
+  return `${customizationId}-${optionValue}`;
 }
 
 export default defineComponent({
@@ -48,23 +75,27 @@ export default defineComponent({
     SfProperty
   },
   props: {
-    cartItem: {
-      type: Object as PropType<
-      Partial<Pick<CartItem, 'customizations' | 'customizationState'>>
+    customizations: {
+      type: Array as PropType<Customization[]>,
+      default: () => ([])
+    },
+    customizationState: {
+      type: Array as PropType<CustomizationStateItem[]>,
+      default: () => ([])
+    },
+    productOptions: {
+      type: Array as PropType<
+      { value: string, label: string, isCustom?: boolean }[]
       >,
-      required: true
+      default: () => ([])
     }
   },
   setup (props) {
     const customizationDictionary = computed<Record<string, Customization>>(
       () => {
-        if (!props.cartItem.customizations) {
-          return {};
-        }
-
         const dictionary: Record<string, Customization> = {};
 
-        for (const customization of props.cartItem.customizations) {
+        for (const customization of props.customizations) {
           dictionary[customization.id] = customization;
         }
 
@@ -73,16 +104,9 @@ export default defineComponent({
     );
 
     const customizableProperties = computed<CustomizableProperty[]>(() => {
-      if (
-        !props.cartItem.customizationState ||
-        !props.cartItem.customizations
-      ) {
-        return [];
-      }
-
       const properties: CustomizableProperty[] = [];
 
-      for (const customizationStateItem of props.cartItem.customizationState) {
+      for (const customizationStateItem of props.customizationState) {
         if (isFileUploadValue(customizationStateItem.value)) {
           continue;
         }
@@ -98,11 +122,16 @@ export default defineComponent({
         }
 
         if (!relatedCustomization.optionData.values?.length) {
+          const value = Array.isArray(customizationStateItem.value)
+            ? customizationStateItem.value.join(',')
+            : customizationStateItem.value;
+
           properties.push({
-            customizationId: relatedCustomization.id,
-            value: Array.isArray(customizationStateItem.value)
-              ? customizationStateItem.value.join(',')
-              : customizationStateItem.value,
+            id: getCustomizablePropertyComposedId(
+              value,
+              customizationStateItem.customizationId
+            ),
+            value,
             sn: relatedCustomization.sn,
             isTextValue: true
           });
@@ -123,7 +152,10 @@ export default defineComponent({
           }
 
           properties.push({
-            customizationId: relatedCustomization.id,
+            id: getCustomizablePropertyComposedId(
+              selectedOptionValue.name,
+              customizationStateItem.customizationId
+            ),
             value: selectedOptionValue.name,
             sn: relatedCustomization.sn,
             isTextValue: false
@@ -134,6 +166,10 @@ export default defineComponent({
       properties.sort((a, b) => a.sn - b.sn);
 
       return properties;
+    });
+
+    const hasCustomizableProperties = computed<boolean>(() => {
+      return customizableProperties.value.length > 0;
     });
 
     const textProperties = computed<CustomizableProperty[]>(() => {
@@ -150,6 +186,7 @@ export default defineComponent({
 
     return {
       customizableProperties,
+      hasCustomizableProperties,
       optionValueProperties,
       textProperties
     };
