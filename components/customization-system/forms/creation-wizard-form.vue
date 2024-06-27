@@ -128,6 +128,7 @@ import {
   useCustomizationsBusyState,
   CustomizationOptionValue,
   useCustomizationsGroups,
+  useProductionTimeSelectorCustomization,
   useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
 
@@ -246,7 +247,8 @@ export default defineComponent({
       productCustomizations,
       selectedOptionValuesIds,
       customizationOptionValue,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      currentProduct
     );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
@@ -266,6 +268,15 @@ export default defineComponent({
       updateCustomizationOptionValue(payload);
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
+
+    // TODO: temporary until separate option value for "Standard"
+    // production time will be added
+    useProductionTimeSelectorCustomization(
+      availableCustomizations,
+      customizationOptionValue,
+      existingCartItem,
+      updateCustomizationOptionValue
+    );
 
     const quantity = ref<number>(1);
     const { addToCartHandler, isSubmitting } = useAddToCart(

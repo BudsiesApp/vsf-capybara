@@ -129,6 +129,7 @@ import {
   useCustomizationsPrice,
   useCustomizationState,
   useOptionValueActions,
+  useProductionTimeSelectorCustomization,
   useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
 import i18n from '@vue-storefront/core/i18n';
@@ -227,7 +228,8 @@ export default defineComponent({
       productCustomizations,
       selectedOptionValuesIds,
       customizationOptionValue,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      product
     );
     const {
       executeActionsByCustomizationIdAndCustomizationOptionValue
@@ -243,6 +245,15 @@ export default defineComponent({
       isSomeCustomizationOptionBusy,
       onCustomizationOptionBusyChanged
     } = useCustomizationsBusyState();
+
+    // TODO: temporary until separate option value for "Standard"
+    // production time will be added
+    useProductionTimeSelectorCustomization(
+      availableCustomizations,
+      customizationOptionValue,
+      existingCartItem,
+      updateCustomizationOptionValue
+    );
 
     function onCustomizationOptionInput (
       payload: {
@@ -371,6 +382,12 @@ export default defineComponent({
     ._add-to-cart {
       margin: 0;
       width: 100%;
+    }
+  }
+
+  ._customization-option {
+    &.-widget-ProductionTimeSelector {
+      --select-width: 100%;
     }
   }
 

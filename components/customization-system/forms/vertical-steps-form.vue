@@ -195,6 +195,7 @@ import {
   useCustomizationsGroups,
   useCustomizationState,
   useOptionValueActions,
+  useProductionTimeSelectorCustomization,
   useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
 import { usePersistedEmail } from 'src/modules/persisted-customer-data';
@@ -299,7 +300,8 @@ export default defineComponent({
       productCustomizations,
       selectedOptionValuesIds,
       customizationOptionValue,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      product
     );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
@@ -319,6 +321,15 @@ export default defineComponent({
       updateCustomizationOptionValue(payload);
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
+
+    // TODO: temporary until separate option value for "Standard"
+    // production time will be added
+    useProductionTimeSelectorCustomization(
+      availableCustomizations,
+      customizationOptionValue,
+      existingCartItem,
+      updateCustomizationOptionValue
+    );
 
     const formValidation = useFormValidation(validationObserver, () =>
       getAllFormRefs(context.refs)

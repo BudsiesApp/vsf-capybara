@@ -33,10 +33,7 @@
 
       <div class="_customization-section">
         <form class="_form">
-          <SfSteps
-            :active="currentStep"
-            class="_customizer-steps"
-          >
+          <SfSteps :active="currentStep" class="_customizer-steps">
             <template #steps="props">
               <div
                 class="_customizer-step"
@@ -134,6 +131,7 @@ import {
   useCustomizationsBusyState,
   CustomizationOptionValue,
   useCustomizationsGroups,
+  useProductionTimeSelectorCustomization,
   useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
 
@@ -211,7 +209,8 @@ export default defineComponent({
       productCustomizations,
       selectedOptionValuesIds,
       customizationOptionValue,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      product
     );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
@@ -231,6 +230,15 @@ export default defineComponent({
       updateCustomizationOptionValue(payload);
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
+
+    // TODO: temporary until separate option value for "Standard"
+    // production time will be added
+    useProductionTimeSelectorCustomization(
+      availableCustomizations,
+      customizationOptionValue,
+      existingCartItem,
+      updateCustomizationOptionValue
+    );
 
     const customizationGroups = useCustomizationsGroups(
       availableCustomizations,
@@ -394,6 +402,10 @@ export default defineComponent({
     --customization-option-hint-align: center;
 
     padding: 0 0.8em;
+
+    &.-widget-ProductionTimeSelector {
+      --select-width: 100%;
+    }
   }
 
   ._customizer-steps {
