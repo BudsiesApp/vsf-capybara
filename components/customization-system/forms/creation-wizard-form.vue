@@ -128,7 +128,8 @@ import {
   useCustomizationsBusyState,
   CustomizationOptionValue,
   useCustomizationsGroups,
-  useProductionTimeSelectorCustomization
+  useProductionTimeSelectorCustomization,
+  useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
@@ -237,14 +238,18 @@ export default defineComponent({
       selectedOptionValuesIds,
       updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
-    const { availableCustomizations, customizationAvailableOptionValues } =
-      useAvailableCustomizations(
-        productCustomizations,
-        selectedOptionValuesIds,
-        customizationOptionValue,
-        updateCustomizationOptionValue,
-        currentProduct
-      );
+    const {
+      availableCustomization,
+      availableCustomizations,
+      availableOptionValues,
+      customizationAvailableOptionValues
+    } = useAvailableCustomizations(
+      productCustomizations,
+      selectedOptionValuesIds,
+      customizationOptionValue,
+      updateCustomizationOptionValue,
+      currentProduct
+    );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
         productCustomizations,
@@ -324,7 +329,7 @@ export default defineComponent({
 
     function afterProductTypeSet (): void {
       void handlePreselectedSize();
-    };
+    }
 
     const productTypeStep = useCreationWizardProductTypeStep(
       plushieType,
@@ -350,6 +355,14 @@ export default defineComponent({
     const isSubmitButtonDisabled = computed<boolean>(() => {
       return isDisabled.value || isSomeCustomizationOptionBusy.value;
     });
+
+    useSelectedOptionValueUrlQuery(
+      availableCustomization,
+      availableOptionValues,
+      customizationOptionValue,
+      updateCustomizationOptionValue,
+      context
+    );
 
     return {
       ...customizationGroups,

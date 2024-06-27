@@ -131,7 +131,8 @@ import {
   useCustomizationsBusyState,
   CustomizationOptionValue,
   useCustomizationsGroups,
-  useProductionTimeSelectorCustomization
+  useProductionTimeSelectorCustomization,
+  useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
@@ -200,6 +201,7 @@ export default defineComponent({
       updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
     const {
+      availableCustomization,
       availableCustomizations,
       availableOptionValues,
       customizationAvailableOptionValues
@@ -330,6 +332,14 @@ export default defineComponent({
         currentStep?.name.toLowerCase() === BACK_DESIGN_STEP_NAME
       );
     });
+
+    useSelectedOptionValueUrlQuery(
+      availableCustomization,
+      availableOptionValues,
+      customizationOptionValue,
+      updateCustomizationOptionValue,
+      context
+    );
 
     return {
       ...customizationGroups,
