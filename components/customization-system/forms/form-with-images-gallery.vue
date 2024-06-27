@@ -128,7 +128,8 @@ import {
   useCustomizationsBusyState,
   useCustomizationsPrice,
   useCustomizationState,
-  useOptionValueActions
+  useOptionValueActions,
+  useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
 import i18n from '@vue-storefront/core/i18n';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
@@ -217,7 +218,9 @@ export default defineComponent({
       updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
     const {
+      availableCustomization,
       availableCustomizations,
+      availableOptionValues,
       availableOptionCustomizations,
       customizationAvailableOptionValues
     } = useAvailableCustomizations(
@@ -291,6 +294,14 @@ export default defineComponent({
     const isSubmitButtonDisabled = computed<boolean>(() => {
       return isSomeCustomizationOptionBusy.value || isDisabled.value;
     });
+
+    useSelectedOptionValueUrlQuery(
+      availableCustomization,
+      availableOptionValues,
+      customizationOptionValue,
+      updateCustomizationOptionValue,
+      context
+    );
 
     return {
       ...useProductGallery(
