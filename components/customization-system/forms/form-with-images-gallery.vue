@@ -128,7 +128,9 @@ import {
   useCustomizationsBusyState,
   useCustomizationsPrice,
   useCustomizationState,
-  useOptionValueActions
+  useOptionValueActions,
+  useProductionTimeSelectorCustomization,
+  useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
 import i18n from '@vue-storefront/core/i18n';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
@@ -217,14 +219,17 @@ export default defineComponent({
       updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
     const {
+      availableCustomization,
       availableCustomizations,
+      availableOptionValues,
       availableOptionCustomizations,
       customizationAvailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
       selectedOptionValuesIds,
       customizationOptionValue,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      product
     );
     const {
       executeActionsByCustomizationIdAndCustomizationOptionValue
@@ -240,6 +245,15 @@ export default defineComponent({
       isSomeCustomizationOptionBusy,
       onCustomizationOptionBusyChanged
     } = useCustomizationsBusyState();
+
+    // TODO: temporary until separate option value for "Standard"
+    // production time will be added
+    useProductionTimeSelectorCustomization(
+      availableCustomizations,
+      customizationOptionValue,
+      existingCartItem,
+      updateCustomizationOptionValue
+    );
 
     function onCustomizationOptionInput (
       payload: {
@@ -291,6 +305,14 @@ export default defineComponent({
     const isSubmitButtonDisabled = computed<boolean>(() => {
       return isSomeCustomizationOptionBusy.value || isDisabled.value;
     });
+
+    useSelectedOptionValueUrlQuery(
+      availableCustomization,
+      availableOptionValues,
+      customizationOptionValue,
+      updateCustomizationOptionValue,
+      context
+    );
 
     return {
       ...useProductGallery(
@@ -360,6 +382,12 @@ export default defineComponent({
     ._add-to-cart {
       margin: 0;
       width: 100%;
+    }
+  }
+
+  ._customization-option {
+    &.-widget-ProductionTimeSelector {
+      --select-width: 100%;
     }
   }
 

@@ -127,7 +127,9 @@ import {
   useOptionValueActions,
   useCustomizationsBusyState,
   CustomizationOptionValue,
-  useCustomizationsGroups
+  useCustomizationsGroups,
+  useProductionTimeSelectorCustomization,
+  useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
@@ -236,13 +238,18 @@ export default defineComponent({
       selectedOptionValuesIds,
       updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
-    const { availableCustomizations, customizationAvailableOptionValues } =
-      useAvailableCustomizations(
-        productCustomizations,
-        selectedOptionValuesIds,
-        customizationOptionValue,
-        updateCustomizationOptionValue
-      );
+    const {
+      availableCustomization,
+      availableCustomizations,
+      availableOptionValues,
+      customizationAvailableOptionValues
+    } = useAvailableCustomizations(
+      productCustomizations,
+      selectedOptionValuesIds,
+      customizationOptionValue,
+      updateCustomizationOptionValue,
+      currentProduct
+    );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
         productCustomizations,
@@ -261,6 +268,15 @@ export default defineComponent({
       updateCustomizationOptionValue(payload);
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
+
+    // TODO: temporary until separate option value for "Standard"
+    // production time will be added
+    useProductionTimeSelectorCustomization(
+      availableCustomizations,
+      customizationOptionValue,
+      existingCartItem,
+      updateCustomizationOptionValue
+    );
 
     const quantity = ref<number>(1);
     const { addToCartHandler, isSubmitting } = useAddToCart(
@@ -313,7 +329,7 @@ export default defineComponent({
 
     function afterProductTypeSet (): void {
       void handlePreselectedSize();
-    };
+    }
 
     const productTypeStep = useCreationWizardProductTypeStep(
       plushieType,
@@ -339,6 +355,14 @@ export default defineComponent({
     const isSubmitButtonDisabled = computed<boolean>(() => {
       return isDisabled.value || isSomeCustomizationOptionBusy.value;
     });
+
+    useSelectedOptionValueUrlQuery(
+      availableCustomization,
+      availableOptionValues,
+      customizationOptionValue,
+      updateCustomizationOptionValue,
+      context
+    );
 
     return {
       ...customizationGroups,
