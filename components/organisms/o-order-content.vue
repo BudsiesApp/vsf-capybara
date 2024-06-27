@@ -31,7 +31,11 @@
           {{ item.name | htmlDecode }}
         </div>
 
-        <cart-item-configuration :cart-item="item" />
+        <cart-item-configuration
+          :customizations="item.customizations"
+          :customization-state="item.customizationState"
+          :product-options="item.customOptions"
+        />
       </SfTableData>
 
       <SfTableData class="table__data">

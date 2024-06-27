@@ -27,8 +27,13 @@
                 class="sf-collected-product--detailed collected-product"
               >
                 <template #configuration>
-                  <cart-item-configuration :cart-item="product" />
+                  <cart-item-configuration
+                    :customizations="product.customizations"
+                    :customization-state="product.customizationState"
+                    :product-options="getProductOptions(product)"
+                  />
                 </template>
+
                 <template #input>
                   <SfQuantitySelector
                     :qty="product.qty"
@@ -41,9 +46,11 @@
                     {{ product.qty }}
                   </div>
                 </template>
+
                 <template #price>
                   <div />
                 </template>
+
                 <template #actions>
                   <SfButton
                     v-if="showEditButton(product.sku)"
@@ -52,6 +59,7 @@
                   >
                     Edit
                   </SfButton>
+
                   <SfButton
                     class="sf-button--text sf-collected-product__remove sf-collected-product__remove--text actions__button"
                     @click="removeHandler(product)"
@@ -59,6 +67,7 @@
                     Remove
                   </SfButton>
                 </template>
+
                 <template #remove>
                   <SfPrice
                     v-if="getProductRegularPrice(product)"
@@ -66,11 +75,13 @@
                     :special="getProductSpecialPrice(product)"
                   />
                 </template>
+
                 <template #more-actions>
                   <div />
                 </template>
               </SfCollectedProduct>
             </transition-group>
+
             <div class="_dropdown-container">
               <SfButton
                 class="color-secondary"
@@ -78,6 +89,7 @@
               >
                 Order More
               </SfButton>
+
               <MDropdown
                 :is-open="isDropdownOpen"
                 @click:close="isDropdownOpen = false"
@@ -98,6 +110,7 @@
               </MDropdown>
             </div>
           </div>
+
           <div v-else key="empty-cart" class="empty-cart">
             <SfHeading
               title="Your cart is empty"
@@ -105,6 +118,7 @@
               subtitle="Looks like you haven’t added any items to the cart yet. Start
                 shopping to fill it in."
             />
+
             <SfButton
               class="sf-button--full-width color-primary empty-cart__button"
               @click="processStartShopping"
@@ -114,6 +128,7 @@
           </div>
         </transition>
       </div>
+
       <div v-if="totalItems" class="detailed-cart__aside">
         <OrderSummary :is-updating-quantity="isUpdatingQuantity" />
 
@@ -161,6 +176,7 @@ import { mapGetters, mapState } from 'vuex';
 import { getCartItemPrice } from 'src/modules/shared';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
+import { onlineHelper } from '@vue-storefront/core/helpers';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
 import CartEvents from 'src/modules/shared/types/cart-events';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
@@ -383,6 +399,19 @@ export default {
     this.syncQuantityDebounced.cancel();
   },
   methods: {
+    getProductOptions (product) {
+      const options = onlineHelper.isOnline && product.totals && product.totals.options
+        ? product.totals.options
+        : product.options || [];
+
+      return options.map((option) => {
+        return {
+          value: option.value,
+          label: option.label,
+          isCustom: !!product.custom_options?.find((customOption) => customOption.title === option.label)
+        }
+      })
+    },
     getPlushieName (product) {
       if (!product.plushieName) {
         return '';
