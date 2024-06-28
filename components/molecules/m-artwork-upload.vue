@@ -391,12 +391,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.updateStatus();
       this.updateUploaderDataInStore();
 
-      // if (error) {
-      //   return;
-      // }
+      if (error) {
+        return;
+      }
 
-      // console.log('PROCESSED FILE', file);
-      // debugger;
+      this.$emit('file-processed', file.serverId);
     },
     onAllFilesProcessed (): void {
       this.updateStatus();
