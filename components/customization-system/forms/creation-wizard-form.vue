@@ -109,6 +109,8 @@
 import {
   computed,
   defineComponent,
+  nextTick,
+  onMounted,
   PropType,
   Ref,
   ref,
@@ -128,6 +130,7 @@ import {
   useCustomizationsBusyState,
   CustomizationOptionValue,
   useCustomizationsGroups,
+  useCustomizationStatePreservation,
   useProductionTimeSelectorCustomization,
   useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
@@ -168,6 +171,10 @@ function getAllFormRefs (
 export default defineComponent({
   name: 'CreationWizardForm',
   props: {
+    canUsePersistedCustomizationState: {
+      type: Boolean,
+      default: false
+    },
     existingCartItem: {
       type: Object as PropType<CartItem | undefined>,
       default: undefined
@@ -234,6 +241,7 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
+      replaceCustomizationState,
       resetCustomizationState,
       selectedOptionValuesIds,
       updateCustomizationOptionValue
@@ -278,36 +286,6 @@ export default defineComponent({
       updateCustomizationOptionValue
     );
 
-    const quantity = ref<number>(1);
-    const { addToCartHandler, isSubmitting } = useAddToCart(
-      currentProduct,
-      quantity,
-      customizationState,
-      existingCartItem,
-      context
-    );
-
-    async function onFormSubmit (): Promise<void> {
-      try {
-        await addToCartHandler();
-
-        if (!currentProduct.value) {
-          throw new Error('Product is missing');
-        }
-
-        context.root.$router.push({
-          name: 'cross-sells',
-          params: { parentSku: currentProduct.value.sku }
-        });
-      } catch (error) {
-        context.root.$store.dispatch('notification/spawnNotification', {
-          type: 'danger',
-          message: 'Error: ' + error,
-          action1: { label: i18n.t('OK') }
-        });
-      }
-    }
-
     const customizationGroups = useCustomizationsGroups(
       availableCustomizations,
       productCustomization
@@ -341,6 +319,87 @@ export default defineComponent({
       afterProductTypeSet,
       context
     );
+
+    const additionalPreservedData = computed<Record<string, any>>(() => {
+      return {
+        productSku: currentProduct.value?.sku,
+        stepIndex: formSteps.currentStep.value
+      }
+    });
+
+    const { getPreservedData, removePreservedState } =
+      useCustomizationStatePreservation(
+        plushieType,
+        customizationState,
+        existingCartItem,
+        additionalPreservedData
+      );
+
+    onMounted(async () => {
+      await nextTick();
+
+      if (
+        existingCartItem.value ||
+        !props.canUsePersistedCustomizationState
+      ) {
+        removePreservedState();
+        return;
+      }
+
+      const preservedState = await getPreservedData();
+
+      if (!preservedState) {
+        return;
+      }
+
+      const productSku = preservedState.additionalData?.productSku;
+
+      if (!productSku) {
+        removePreservedState();
+        return;
+      }
+
+      await productTypeStep.loadProduct(productSku);
+
+      replaceCustomizationState(preservedState.customizationState);
+
+      if (!preservedState.additionalData?.stepIndex) {
+        return;
+      }
+
+      formSteps.goToStep(preservedState.additionalData?.stepIndex);
+    });
+
+    const quantity = ref<number>(1);
+    const { addToCartHandler, isSubmitting } = useAddToCart(
+      currentProduct,
+      quantity,
+      customizationState,
+      existingCartItem,
+      context
+    );
+
+    async function onFormSubmit (): Promise<void> {
+      try {
+        await addToCartHandler();
+        removePreservedState();
+
+        if (!currentProduct.value) {
+          throw new Error('Product is missing');
+        }
+
+        context.root.$router.push({
+          name: 'cross-sells',
+          params: { parentSku: currentProduct.value.sku }
+        });
+      } catch (error) {
+        context.root.$store.dispatch('notification/spawnNotification', {
+          type: 'danger',
+          message: 'Error: ' + error,
+          action1: { label: i18n.t('OK') }
+        });
+      }
+    }
 
     const isDisabled = computed<boolean>(() => {
       return isSubmitting.value || productTypeStep.isProductLoading.value;

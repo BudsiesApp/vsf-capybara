@@ -112,6 +112,8 @@
 import {
   computed,
   defineComponent,
+  nextTick,
+  onMounted,
   PropType,
   ref,
   Ref,
@@ -128,6 +130,7 @@ import {
   useCustomizationsBusyState,
   useCustomizationsPrice,
   useCustomizationState,
+  useCustomizationStatePreservation,
   useOptionValueActions,
   useProductionTimeSelectorCustomization,
   useSelectedOptionValueUrlQuery
@@ -167,6 +170,10 @@ function getAllFormRefs (
 export default defineComponent({
   name: 'FormWithImagesGallery',
   props: {
+    canUsePersistedCustomizationState: {
+      type: Boolean,
+      default: false
+    },
     existingCartItem: {
       type: Object as PropType<CartItem | undefined>,
       default: undefined
@@ -197,6 +204,9 @@ export default defineComponent({
     const shortDescription = computed<string | undefined>(() => {
       return product.value.short_description;
     });
+    const productSku = computed<string>(() => {
+      return product.value.sku;
+    });
     const productCustomizations = computed<Customization[]>(() => {
       return product.value.customizations || [];
     });
@@ -215,6 +225,7 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
+      replaceCustomizationState,
       selectedOptionValuesIds,
       updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
@@ -231,20 +242,6 @@ export default defineComponent({
       updateCustomizationOptionValue,
       product
     );
-    const {
-      executeActionsByCustomizationIdAndCustomizationOptionValue
-    } = useOptionValueActions(
-      productCustomizations,
-      productCustomization,
-      customizationAvailableOptionValues,
-      updateCustomizationOptionValue,
-      removeCustomizationOptionValue,
-      addCustomizationOptionValue
-    );
-    const {
-      isSomeCustomizationOptionBusy,
-      onCustomizationOptionBusyChanged
-    } = useCustomizationsBusyState();
 
     // TODO: temporary until separate option value for "Standard"
     // production time will be added
@@ -254,13 +251,48 @@ export default defineComponent({
       existingCartItem,
       updateCustomizationOptionValue
     );
+    const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
+      useOptionValueActions(
+        productCustomizations,
+        productCustomization,
+        customizationAvailableOptionValues,
+        updateCustomizationOptionValue,
+        removeCustomizationOptionValue,
+        addCustomizationOptionValue
+      );
+    const { isSomeCustomizationOptionBusy, onCustomizationOptionBusyChanged } =
+      useCustomizationsBusyState();
+    const { getPreservedData, removePreservedState } =
+      useCustomizationStatePreservation(
+        productSku,
+        customizationState,
+        existingCartItem
+      );
 
-    function onCustomizationOptionInput (
-      payload: {
-        customizationId: string,
-        value: CustomizationOptionValue
+    onMounted(async () => {
+      await nextTick();
+
+      if (
+        existingCartItem.value ||
+        !props.canUsePersistedCustomizationState
+      ) {
+        removePreservedState();
+        return;
       }
-    ) {
+
+      const preservedState = await getPreservedData();
+
+      if (!preservedState) {
+        return;
+      }
+
+      replaceCustomizationState(preservedState.customizationState);
+    });
+
+    function onCustomizationOptionInput (payload: {
+      customizationId: string,
+      value: CustomizationOptionValue
+    }) {
       updateCustomizationOptionValue(payload);
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
@@ -286,6 +318,9 @@ export default defineComponent({
 
       try {
         await addToCartHandler();
+
+        removePreservedState();
+
         context.root.$router.push({
           name: 'cross-sells',
           params: { parentSku: product.value.sku }

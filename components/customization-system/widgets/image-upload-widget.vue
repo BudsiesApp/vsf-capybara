@@ -9,6 +9,7 @@
       :initial-items="initialItems"
       :max-files="maxFiles"
       @file-added="onFileAdded"
+      @file-processed="onFileProcessed"
       @file-removed="onFileRemoved"
       @is-busy-changed="$emit('widget-busy-changed', $event)"
     />
@@ -21,13 +22,25 @@
 
 <script lang="ts">
 import config from 'config';
-import { defineComponent, nextTick, PropType, ref, toRefs, watch } from '@vue/composition-api';
+import {
+  computed,
+  defineComponent,
+  nextTick,
+  PropType,
+  ref,
+  toRefs,
+  watch
+} from '@vue/composition-api';
 
-import { FileUploadValue, useFilesUpload } from 'src/modules/customization-system';
+import {
+  FileUploadValue,
+  useFilesUpload
+} from 'src/modules/customization-system';
 
 import { useBackendProductId } from 'theme/helpers/use-backend-product-id';
 
 import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
+import { CustomerImage } from 'src/modules/shared';
 
 export default defineComponent({
   components: {
@@ -51,19 +64,39 @@ export default defineComponent({
       required: true
     },
     value: {
-      type: [Object, Array] as PropType<FileUploadValue | FileUploadValue[] | undefined>,
+      type: [Object, Array] as PropType<
+      FileUploadValue | FileUploadValue[] | undefined
+      >,
       default: undefined
     }
   },
   setup (props, context) {
     const { maxValuesCount, productId, value } = toRefs(props);
 
-    const artworkUpload = ref<InstanceType<typeof MArtworkUpload> | null>(null)
-    const filesUploadFields = useFilesUpload(value, maxValuesCount, context);
+    const artworkUpload = ref<InstanceType<typeof MArtworkUpload> | null>(null);
+    const filesUploadFields = useFilesUpload(
+      value,
+      maxValuesCount,
+      context
+    );
 
-    watch(filesUploadFields.initialItems, async (newValue) => {
+    const canReplaceInitialItems = computed<boolean>(() => {
+      if (!(artworkUpload as any).value) {
+        return false;
+      }
+
       // TODO: temporary - current TS version don't handle `value` type right in this case
-      if (!newValue.length || !(artworkUpload as any).value) {
+      const currentFiles = (artworkUpload as any).value.getFiles();
+
+      return !(filesUploadFields.initialItems as any).value.every((item: CustomerImage) => {
+        return !!currentFiles.find(
+          (file) => file.serverId === item.id
+        );
+      });
+    });
+
+    watch(filesUploadFields.initialItems, async () => {
+      if (!canReplaceInitialItems.value) {
         return;
       }
 

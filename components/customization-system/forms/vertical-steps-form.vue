@@ -173,6 +173,8 @@
 import {
   computed,
   defineComponent,
+  nextTick,
+  onMounted,
   PropType,
   ref,
   Ref,
@@ -194,6 +196,7 @@ import {
   useCustomizationsBusyState,
   useCustomizationsGroups,
   useCustomizationState,
+  useCustomizationStatePreservation,
   useOptionValueActions,
   useProductionTimeSelectorCustomization,
   useSelectedOptionValueUrlQuery
@@ -235,6 +238,10 @@ function getAllFormRefs (
 export default defineComponent({
   name: 'VerticalStepsForm',
   props: {
+    canUsePersistedCustomizationState: {
+      type: Boolean,
+      default: false
+    },
     existingCartItem: {
       type: Object as PropType<CartItem | undefined>,
       default: undefined
@@ -265,6 +272,10 @@ export default defineComponent({
       typeof ValidationObserver
     > | null> = ref(null);
 
+    const productSku = computed<string>(() => {
+      return product.value.sku;
+    });
+
     const { email } = useCustomerEmail(existingCartItem);
     const persistedEmail = usePersistedEmail(email);
 
@@ -286,6 +297,7 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
+      replaceCustomizationState,
       resetCustomizationState,
       selectedOptionValuesIds,
       updateCustomizationOptionValue
@@ -321,6 +333,32 @@ export default defineComponent({
       updateCustomizationOptionValue(payload);
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
+    const { getPreservedData, removePreservedState } =
+      useCustomizationStatePreservation(
+        productSku,
+        customizationState,
+        existingCartItem
+      );
+
+    onMounted(async () => {
+      await nextTick();
+
+      if (
+        existingCartItem.value ||
+        !props.canUsePersistedCustomizationState
+      ) {
+        removePreservedState();
+        return;
+      }
+
+      const preservedState = await getPreservedData();
+
+      if (!preservedState) {
+        return;
+      }
+
+      replaceCustomizationState(preservedState.customizationState);
+    });
 
     // TODO: temporary until separate option value for "Standard"
     // production time will be added
@@ -380,6 +418,8 @@ export default defineComponent({
       try {
         persistedEmail.persistLastUsedCustomerEmail(email.value);
         await addToCartHandler();
+
+        removePreservedState();
 
         if (!shouldMakeAnother.value) {
           context.root.$router.push({

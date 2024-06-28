@@ -110,6 +110,8 @@
 import {
   computed,
   defineComponent,
+  nextTick,
+  onMounted,
   PropType,
   Ref,
   ref,
@@ -131,6 +133,7 @@ import {
   useCustomizationsBusyState,
   CustomizationOptionValue,
   useCustomizationsGroups,
+  useCustomizationStatePreservation,
   useProductionTimeSelectorCustomization,
   useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
@@ -151,6 +154,10 @@ const BACK_DESIGN_STEP_NAME = 'back design';
 export default defineComponent({
   name: 'PhrasePillowForm',
   props: {
+    canUsePersistedCustomizationState: {
+      type: Boolean,
+      default: false
+    },
     existingCartItem: {
       type: Object as PropType<CartItem | undefined>,
       default: undefined
@@ -179,6 +186,10 @@ export default defineComponent({
     const preview: Ref<InstanceType<typeof PhrasePillowFormPreview> | null> =
       ref(null);
 
+    const productSku = computed<string>(() => {
+      return product.value.sku;
+    });
+
     const productCustomizations = computed<Customization[]>(() => {
       return product.value.customizations || [];
     });
@@ -197,6 +208,7 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
+      replaceCustomizationState,
       selectedOptionValuesIds,
       updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
@@ -230,6 +242,33 @@ export default defineComponent({
       updateCustomizationOptionValue(payload);
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
+
+    const { getPreservedData, removePreservedState } =
+      useCustomizationStatePreservation(
+        productSku,
+        customizationState,
+        existingCartItem
+      );
+
+    onMounted(async () => {
+      await nextTick();
+
+      if (
+        existingCartItem.value ||
+        !props.canUsePersistedCustomizationState
+      ) {
+        removePreservedState();
+        return;
+      }
+
+      const preservedState = await getPreservedData();
+
+      if (!preservedState) {
+        return;
+      }
+
+      replaceCustomizationState(preservedState.customizationState);
+    });
 
     // TODO: temporary until separate option value for "Standard"
     // production time will be added
@@ -283,6 +322,8 @@ export default defineComponent({
 
       try {
         await addToCartHandler();
+
+        removePreservedState();
 
         context.root.$router.push({
           name: 'cross-sells',

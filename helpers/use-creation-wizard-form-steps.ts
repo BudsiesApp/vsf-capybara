@@ -29,24 +29,35 @@ export function useCreationWizardFormSteps (
   function scrollToTop (): void {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
   }
+
   async function nextStep (): Promise<void> {
     currentStep.value += 1;
     await nextTick();
     scrollToTop();
   }
+
+  async function goToStep (index: number): Promise<void> {
+    if (index < 0 || index > customizationRootGroups.value.length) {
+      return;
+    }
+
+    currentStep.value = index;
+    await nextTick();
+    scrollToTop();
+  }
+
   async function onStepChanged (nextStep: number): Promise<void> {
     if (nextStep >= currentStep.value) {
       return;
     }
 
-    currentStep.value = nextStep;
-    await nextTick();
-    scrollToTop();
+    goToStep(nextStep);
   }
 
   return {
     canGoBack,
     currentStep,
+    goToStep,
     isLastStep,
     lastStepCustomization,
     nextStep,
