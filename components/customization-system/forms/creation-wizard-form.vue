@@ -130,7 +130,9 @@ import {
   useCustomizationsBusyState,
   CustomizationOptionValue,
   useCustomizationsGroups,
-  useCustomizationStatePreservation
+  useCustomizationStatePreservation,
+  useProductionTimeSelectorCustomization,
+  useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
@@ -244,13 +246,18 @@ export default defineComponent({
       selectedOptionValuesIds,
       updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
-    const { availableCustomizations, customizationAvailableOptionValues } =
-      useAvailableCustomizations(
-        productCustomizations,
-        selectedOptionValuesIds,
-        customizationOptionValue,
-        updateCustomizationOptionValue
-      );
+    const {
+      availableCustomization,
+      availableCustomizations,
+      availableOptionValues,
+      customizationAvailableOptionValues
+    } = useAvailableCustomizations(
+      productCustomizations,
+      selectedOptionValuesIds,
+      customizationOptionValue,
+      updateCustomizationOptionValue,
+      currentProduct
+    );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
         productCustomizations,
@@ -268,6 +275,45 @@ export default defineComponent({
     }): void {
       updateCustomizationOptionValue(payload);
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
+    }
+
+    // TODO: temporary until separate option value for "Standard"
+    // production time will be added
+    useProductionTimeSelectorCustomization(
+      availableCustomizations,
+      customizationOptionValue,
+      existingCartItem,
+      updateCustomizationOptionValue
+    );
+
+    const quantity = ref<number>(1);
+    const { addToCartHandler, isSubmitting } = useAddToCart(
+      currentProduct,
+      quantity,
+      customizationState,
+      existingCartItem,
+      context
+    );
+
+    async function onFormSubmit (): Promise<void> {
+      try {
+        await addToCartHandler();
+
+        if (!currentProduct.value) {
+          throw new Error('Product is missing');
+        }
+
+        context.root.$router.push({
+          name: 'cross-sells',
+          params: { parentSku: currentProduct.value.sku }
+        });
+      } catch (error) {
+        context.root.$store.dispatch('notification/spawnNotification', {
+          type: 'danger',
+          message: 'Error: ' + error,
+          action1: { label: i18n.t('OK') }
+        });
+      }
     }
 
     const customizationGroups = useCustomizationsGroups(
@@ -291,7 +337,7 @@ export default defineComponent({
 
     function afterProductTypeSet (): void {
       void handlePreselectedSize();
-    };
+    }
 
     const productTypeStep = useCreationWizardProductTypeStep(
       plushieType,
@@ -392,6 +438,14 @@ export default defineComponent({
     const isSubmitButtonDisabled = computed<boolean>(() => {
       return isDisabled.value || isSomeCustomizationOptionBusy.value;
     });
+
+    useSelectedOptionValueUrlQuery(
+      availableCustomization,
+      availableOptionValues,
+      customizationOptionValue,
+      updateCustomizationOptionValue,
+      context
+    );
 
     return {
       ...customizationGroups,

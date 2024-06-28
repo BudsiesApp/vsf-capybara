@@ -9,7 +9,7 @@
   >
     <sf-select-option
       v-for="option in productionTimeOptions"
-      :key="option"
+      :key="option.id"
       :value="option.id"
     >
       {{ option.text }}
@@ -30,7 +30,7 @@ import {
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
-import { OptionValue, useDefaultValue } from 'src/modules/customization-system';
+import { OptionValue } from 'src/modules/customization-system';
 
 import { getProductionTimeOptionsFromCustomization } from '../../helpers/get-production-time-options-from-customization.function';
 import ProductionTimeOption from '../interfaces/production-time-option.interface';
@@ -56,6 +56,10 @@ export default defineComponent({
     isRequired: {
       type: Boolean,
       default: false
+    },
+    placeholder: {
+      type: String,
+      default: 'Select Production Time'
     },
     productId: {
       type: Number,
@@ -84,15 +88,22 @@ export default defineComponent({
       return !props.error;
     });
     const productionTimeOptions = computed<ProductionTimeOption[]>(() => {
-      return getProductionTimeOptionsFromCustomization(
+      const options = getProductionTimeOptionsFromCustomization(
         props.productId,
         props.bundleOptionId,
         props.values,
         root.$store
       );
-    });
 
-    useDefaultValue(selectedOption, values, isRequired);
+      options.unshift({
+        id: '',
+        text: props.placeholder,
+        isDomestic: false,
+        optionId: props.bundleOptionId
+      });
+
+      return options;
+    });
 
     return {
       isValid,
@@ -108,3 +119,28 @@ export default defineComponent({
   }
 });
 </script>
+
+<style lang="scss" scoped>
+.production-time-selector {
+  width: 100%;
+  max-width: 610px;
+
+  &.sf-select {
+    --select-padding: 0;
+    --select-selected-padding: var(
+      --dropdown-select-padding,
+      var(--spacer-xs) var(--spacer-lg) var(--spacer-xs) var(--spacer-2xs)
+    );
+    --select-height: var(--dropdown-select-height, auto);
+
+    ::v-deep .sf-select__selected {
+      --select-option-font-size: var(
+        --production-time-selector-option-font-size,
+        var(--font-lg)
+      );
+
+      justify-content: center;
+    }
+  }
+}
+</style>

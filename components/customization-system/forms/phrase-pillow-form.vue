@@ -33,10 +33,7 @@
 
       <div class="_customization-section">
         <form class="_form">
-          <SfSteps
-            :active="currentStep"
-            class="_customizer-steps"
-          >
+          <SfSteps :active="currentStep" class="_customizer-steps">
             <template #steps="props">
               <div
                 class="_customizer-step"
@@ -136,7 +133,9 @@ import {
   useCustomizationsBusyState,
   CustomizationOptionValue,
   useCustomizationsGroups,
-  useCustomizationStatePreservation
+  useCustomizationStatePreservation,
+  useProductionTimeSelectorCustomization,
+  useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
@@ -214,6 +213,7 @@ export default defineComponent({
       updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
     const {
+      availableCustomization,
       availableCustomizations,
       availableOptionValues,
       customizationAvailableOptionValues
@@ -221,7 +221,8 @@ export default defineComponent({
       productCustomizations,
       selectedOptionValuesIds,
       customizationOptionValue,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      product
     );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
@@ -268,6 +269,15 @@ export default defineComponent({
 
       replaceCustomizationState(preservedState.customizationState);
     });
+
+    // TODO: temporary until separate option value for "Standard"
+    // production time will be added
+    useProductionTimeSelectorCustomization(
+      availableCustomizations,
+      customizationOptionValue,
+      existingCartItem,
+      updateCustomizationOptionValue
+    );
 
     const customizationGroups = useCustomizationsGroups(
       availableCustomizations,
@@ -364,6 +374,14 @@ export default defineComponent({
       );
     });
 
+    useSelectedOptionValueUrlQuery(
+      availableCustomization,
+      availableOptionValues,
+      customizationOptionValue,
+      updateCustomizationOptionValue,
+      context
+    );
+
     return {
       ...customizationGroups,
       ...formSteps,
@@ -425,6 +443,10 @@ export default defineComponent({
     --customization-option-hint-align: center;
 
     padding: 0 0.8em;
+
+    &.-widget-ProductionTimeSelector {
+      --select-width: 100%;
+    }
   }
 
   ._customizer-steps {

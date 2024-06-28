@@ -215,6 +215,16 @@ export default defineComponent({
     margin: var(--spacer-xs) 0;
   }
 
+  ._customization-option {
+    --customization-option-label-align: center;
+    --customization-option-description-align: center;
+    --customization-option-hint-align: center;
+
+    &.-widget-ProductionTimeSelector {
+      --select-width: 100%;
+    }
+  }
+
   @media (min-width: $medium-breakpoint) {
     text-align: left;
 
@@ -224,6 +234,12 @@ export default defineComponent({
 
     ._step-title {
       text-align: left;
+    }
+
+    ._customization-option {
+      --customization-option-label-align: left;
+      --customization-option-description-align: left;
+      --customization-option-hint-align: left;
     }
   }
 }

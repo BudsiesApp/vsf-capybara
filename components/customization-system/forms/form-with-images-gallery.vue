@@ -131,7 +131,9 @@ import {
   useCustomizationsPrice,
   useCustomizationState,
   useCustomizationStatePreservation,
-  useOptionValueActions
+  useOptionValueActions,
+  useProductionTimeSelectorCustomization,
+  useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
 import i18n from '@vue-storefront/core/i18n';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
@@ -228,13 +230,25 @@ export default defineComponent({
       updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
     const {
+      availableCustomization,
       availableCustomizations,
+      availableOptionValues,
       availableOptionCustomizations,
       customizationAvailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
       selectedOptionValuesIds,
       customizationOptionValue,
+      updateCustomizationOptionValue,
+      product
+    );
+
+    // TODO: temporary until separate option value for "Standard"
+    // production time will be added
+    useProductionTimeSelectorCustomization(
+      availableCustomizations,
+      customizationOptionValue,
+      existingCartItem,
       updateCustomizationOptionValue
     );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
@@ -327,6 +341,14 @@ export default defineComponent({
       return isSomeCustomizationOptionBusy.value || isDisabled.value;
     });
 
+    useSelectedOptionValueUrlQuery(
+      availableCustomization,
+      availableOptionValues,
+      customizationOptionValue,
+      updateCustomizationOptionValue,
+      context
+    );
+
     return {
       ...useProductGallery(
         product,
@@ -395,6 +417,12 @@ export default defineComponent({
     ._add-to-cart {
       margin: 0;
       width: 100%;
+    }
+  }
+
+  ._customization-option {
+    &.-widget-ProductionTimeSelector {
+      --select-width: 100%;
     }
   }
 
