@@ -393,38 +393,6 @@ export default defineComponent({
       replaceCustomizationState(preservedState.customizationState);
     });
 
-    const quantity = ref<number>(1);
-    const { addToCartHandler, isSubmitting } = useAddToCart(
-      currentProduct,
-      quantity,
-      customizationState,
-      existingCartItem,
-      context
-    );
-
-    async function onFormSubmit (): Promise<void> {
-      try {
-        await addToCartHandler();
-
-        removePreservedState();
-
-        if (!currentProduct.value) {
-          throw new Error('Product is missing');
-        }
-
-        context.root.$router.push({
-          name: 'cross-sells',
-          params: { parentSku: currentProduct.value.sku }
-        });
-      } catch (error) {
-        context.root.$store.dispatch('notification/spawnNotification', {
-          type: 'danger',
-          message: 'Error: ' + error,
-          action1: { label: i18n.t('OK') }
-        });
-      }
-    }
-
     const isDisabled = computed<boolean>(() => {
       return isSubmitting.value || productTypeStep.isProductLoading.value;
     });
