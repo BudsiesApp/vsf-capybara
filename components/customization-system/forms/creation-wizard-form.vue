@@ -286,36 +286,6 @@ export default defineComponent({
       updateCustomizationOptionValue
     );
 
-    const quantity = ref<number>(1);
-    const { addToCartHandler, isSubmitting } = useAddToCart(
-      currentProduct,
-      quantity,
-      customizationState,
-      existingCartItem,
-      context
-    );
-
-    async function onFormSubmit (): Promise<void> {
-      try {
-        await addToCartHandler();
-
-        if (!currentProduct.value) {
-          throw new Error('Product is missing');
-        }
-
-        context.root.$router.push({
-          name: 'cross-sells',
-          params: { parentSku: currentProduct.value.sku }
-        });
-      } catch (error) {
-        context.root.$store.dispatch('notification/spawnNotification', {
-          type: 'danger',
-          message: 'Error: ' + error,
-          action1: { label: i18n.t('OK') }
-        });
-      }
-    }
-
     const customizationGroups = useCustomizationsGroups(
       availableCustomizations,
       productCustomization
@@ -352,7 +322,8 @@ export default defineComponent({
 
     const additionalPreservedData = computed<Record<string, any>>(() => {
       return {
-        productSku: currentProduct.value?.sku
+        productSku: currentProduct.value?.sku,
+        stepIndex: formSteps.currentStep.value
       }
     });
 
@@ -391,7 +362,44 @@ export default defineComponent({
       await productTypeStep.loadProduct(productSku);
 
       replaceCustomizationState(preservedState.customizationState);
+
+      if (!preservedState.additionalData?.stepIndex) {
+        return;
+      }
+
+      formSteps.goToStep(preservedState.additionalData?.stepIndex);
     });
+
+    const quantity = ref<number>(1);
+    const { addToCartHandler, isSubmitting } = useAddToCart(
+      currentProduct,
+      quantity,
+      customizationState,
+      existingCartItem,
+      context
+    );
+
+    async function onFormSubmit (): Promise<void> {
+      try {
+        await addToCartHandler();
+        removePreservedState();
+
+        if (!currentProduct.value) {
+          throw new Error('Product is missing');
+        }
+
+        context.root.$router.push({
+          name: 'cross-sells',
+          params: { parentSku: currentProduct.value.sku }
+        });
+      } catch (error) {
+        context.root.$store.dispatch('notification/spawnNotification', {
+          type: 'danger',
+          message: 'Error: ' + error,
+          action1: { label: i18n.t('OK') }
+        });
+      }
+    }
 
     const isDisabled = computed<boolean>(() => {
       return isSubmitting.value || productTypeStep.isProductLoading.value;
