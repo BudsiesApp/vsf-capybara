@@ -3,6 +3,7 @@
     <product-structured-data v-if="currentProduct" :product="currentProduct" />
 
     <component
+      :can-use-persisted-customization-state="canUsePersistedCustomizationState"
       :is="formComponent"
       :product="currentProduct"
       :existing-cart-item="existingCartItem"
@@ -16,6 +17,7 @@ import {
   computed,
   defineComponent,
   PropType,
+  ref,
   toRefs
 } from '@vue/composition-api';
 
@@ -68,6 +70,7 @@ export default defineComponent({
     const { existingPlushieId, sku } = toRefs(props);
 
     const { currentProduct, isDataLoaded } = useProductPage(sku, context);
+    const canUsePersistedCustomizationState = ref<boolean>(false);
 
     const showForm = computed<boolean>(() => {
       return isDataLoaded.value && !!currentProduct.value;
@@ -85,10 +88,16 @@ export default defineComponent({
 
     return {
       ...useExistingCartItem(existingPlushieId, context),
+      canUsePersistedCustomizationState,
       currentProduct,
       formComponent,
       showForm
     };
+  },
+  beforeRouteEnter (to, from, next) {
+    next((vm) => {
+      (vm as any).canUsePersistedCustomizationState = !from || to.path === from.path;
+    });
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);

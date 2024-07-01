@@ -2,7 +2,7 @@ import { Store } from 'vuex';
 import { Logger } from '@vue-storefront/core/lib/logger';
 
 import { RushAddon } from 'src/modules/budsies';
-import { OptionValue } from 'src/modules/customization-system';
+import { OptionValue, PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID } from 'src/modules/customization-system';
 
 import ProductionTimeOption from '../components/interfaces/production-time-option.interface';
 
@@ -20,14 +20,14 @@ export function getProductionTimeOptionsFromCustomization (
 
   const result: ProductionTimeOption[] = [];
 
-  let addonOptions: Record<string, number> = {};
+  let addonOptions: Record<string, OptionValue> = {};
 
   for (const optionValue of customizationOptionValues) {
-    if (!optionValue.sku) {
+    if (!optionValue.sku || !optionValue.bundleOptionItemId) {
       continue;
     }
 
-    addonOptions[optionValue.sku] = optionValue.bundleOptionItemId
+    addonOptions[optionValue.sku] = optionValue;
   }
 
   for (const addon of addons) {
@@ -39,13 +39,28 @@ export function getProductionTimeOptionsFromCustomization (
     }
 
     result.push({
-      id: addon.id,
+      // TODO: get rid of hardcoded id
+      id: addonOption?.id || PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID,
       text: addon.text,
       isDomestic: addon.isDomestic,
       optionId: bundleOptionId,
-      optionValueId: addonOption || 0
+      optionValueId: addonOption?.bundleOptionItemId || 0,
+      sku: addonOption?.sku
     });
   }
 
-  return result;
+  return result.sort((a, b) => {
+    const optionValueA = a.sku ? addonOptions[a.sku] : undefined;
+    const optionValueB = b.sku ? addonOptions[b.sku] : undefined;
+
+    if (!optionValueA) {
+      return -1;
+    }
+
+    if (!optionValueB) {
+      return 1;
+    }
+
+    return optionValueA.sn > optionValueB.sn ? 1 : -1;
+  });
 }

@@ -33,10 +33,7 @@
 
       <div class="_customization-section">
         <form class="_form">
-          <SfSteps
-            :active="currentStep"
-            class="_customizer-steps"
-          >
+          <SfSteps :active="currentStep" class="_customizer-steps">
             <template #steps="props">
               <div
                 class="_customizer-step"
@@ -113,6 +110,8 @@
 import {
   computed,
   defineComponent,
+  nextTick,
+  onMounted,
   PropType,
   Ref,
   ref,
@@ -135,7 +134,10 @@ import {
   CustomizationOptionValue,
   useCustomizationsGroups,
   useCustomizationsBundleOptions,
-  useCustomizationsOptionsDefaultValue
+  useCustomizationsOptionsDefaultValue,
+  useCustomizationStatePreservation,
+  useProductionTimeSelectorCustomization,
+  useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
@@ -154,6 +156,10 @@ const BACK_DESIGN_STEP_NAME = 'back design';
 export default defineComponent({
   name: 'PhrasePillowForm',
   props: {
+    canUsePersistedCustomizationState: {
+      type: Boolean,
+      default: false
+    },
     existingCartItem: {
       type: Object as PropType<CartItem | undefined>,
       default: undefined
@@ -182,6 +188,10 @@ export default defineComponent({
     const preview: Ref<InstanceType<typeof PhrasePillowFormPreview> | null> =
       ref(null);
 
+    const productSku = computed<string>(() => {
+      return product.value.sku;
+    });
+
     const productCustomizations = computed<Customization[]>(() => {
       return product.value.customizations || [];
     });
@@ -200,10 +210,12 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
+      replaceCustomizationState,
       selectedOptionValuesIds,
       updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
     const {
+      availableCustomization,
       availableCustomizations,
       availableOptionValues,
       customizationAvailableOptionValues
@@ -211,7 +223,8 @@ export default defineComponent({
       productCustomizations,
       selectedOptionValuesIds,
       customizationOptionValue,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      product
     );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
@@ -244,6 +257,42 @@ export default defineComponent({
       customizationAvailableOptionValues,
       customizationOptionValue,
       onCustomizationOptionInput
+    );
+
+    const { getPreservedData, removePreservedState } =
+      useCustomizationStatePreservation(
+        productSku,
+        customizationState,
+        existingCartItem
+      );
+
+    onMounted(async () => {
+      await nextTick();
+
+      if (
+        existingCartItem.value ||
+        !props.canUsePersistedCustomizationState
+      ) {
+        removePreservedState();
+        return;
+      }
+
+      const preservedState = await getPreservedData();
+
+      if (!preservedState) {
+        return;
+      }
+
+      replaceCustomizationState(preservedState.customizationState);
+    });
+
+    // TODO: temporary until separate option value for "Standard"
+    // production time will be added
+    useProductionTimeSelectorCustomization(
+      availableCustomizations,
+      customizationOptionValue,
+      existingCartItem,
+      updateCustomizationOptionValue
     );
 
     const customizationGroups = useCustomizationsGroups(
@@ -289,6 +338,8 @@ export default defineComponent({
 
       try {
         await addToCartHandler();
+
+        removePreservedState();
 
         context.root.$router.push({
           name: 'cross-sells',
@@ -338,6 +389,14 @@ export default defineComponent({
         currentStep?.name.toLowerCase() === BACK_DESIGN_STEP_NAME
       );
     });
+
+    useSelectedOptionValueUrlQuery(
+      availableCustomization,
+      availableOptionValues,
+      customizationOptionValue,
+      updateCustomizationOptionValue,
+      context
+    );
 
     return {
       ...customizationGroups,
@@ -400,6 +459,10 @@ export default defineComponent({
     --customization-option-hint-align: center;
 
     padding: 0 0.8em;
+
+    &.-widget-ProductionTimeSelector {
+      --select-width: 100%;
+    }
   }
 
   ._customizer-steps {

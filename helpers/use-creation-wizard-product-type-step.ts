@@ -24,13 +24,18 @@ export function useCreationWizardProductTypeStep (
   async function loadProduct (sku: string): Promise<void> {
     isProductLoading.value = true;
 
-    await root.$store.dispatch('product/loadProduct', {
-      parentSku: sku,
-      childSku: null
-    });
+    try {
+      const product = await root.$store.dispatch('product/loadProduct', {
+        parentSku: sku,
+        childSku: null
+      });
 
-    isProductLoading.value = false;
-    void nextStep();
+      await root.$store.dispatch('budsies/loadProductRushAddons', { productId: product.id });
+
+      void nextStep();
+    } finally {
+      isProductLoading.value = false;
+    }
   }
 
   async function setProductType (type: string): Promise<void> {
@@ -68,6 +73,7 @@ export function useCreationWizardProductTypeStep (
 
   return {
     isProductLoading,
+    loadProduct,
     setProductType
   }
 }

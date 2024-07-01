@@ -9,6 +9,7 @@
     />
 
     <creation-wizard-form
+      :can-use-persisted-customization-state="canUsePersistedCustomizationState"
       :existing-cart-item="existingCartItem"
       :plushie-type="plushieType"
       :preselected-product-size="preselectedProductSize"
@@ -23,6 +24,7 @@ import {
   computed,
   defineComponent,
   PropType,
+  ref,
   toRefs
 } from '@vue/composition-api';
 import { SfHeading } from '@storefront-ui/vue';
@@ -130,13 +132,21 @@ export default defineComponent({
         : 'golf_cover_creation_page_top';
     });
 
+    const canUsePersistedCustomizationState = ref<boolean>(false);
+
     return {
       ...useExistingCartItem(existingPlushieId, context),
+      canUsePersistedCustomizationState,
       currentProduct,
       mainTitleText,
       productTypeButtonsList,
       topStorySlug
     };
+  },
+  beforeRouteEnter (to, from, next) {
+    next((vm) => {
+      (vm as any).canUsePersistedCustomizationState = !from || to.path === from.path;
+    });
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);

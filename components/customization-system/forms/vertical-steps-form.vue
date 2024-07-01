@@ -173,6 +173,8 @@
 import {
   computed,
   defineComponent,
+  nextTick,
+  onMounted,
   PropType,
   ref,
   Ref,
@@ -196,7 +198,10 @@ import {
   useCustomizationsGroups,
   useCustomizationsOptionsDefaultValue,
   useCustomizationState,
-  useOptionValueActions
+  useCustomizationStatePreservation,
+  useOptionValueActions,
+  useProductionTimeSelectorCustomization,
+  useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
 import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 import i18n from '@vue-storefront/core/i18n';
@@ -235,6 +240,10 @@ function getAllFormRefs (
 export default defineComponent({
   name: 'VerticalStepsForm',
   props: {
+    canUsePersistedCustomizationState: {
+      type: Boolean,
+      default: false
+    },
     existingCartItem: {
       type: Object as PropType<CartItem | undefined>,
       default: undefined
@@ -265,6 +274,10 @@ export default defineComponent({
       typeof ValidationObserver
     > | null> = ref(null);
 
+    const productSku = computed<string>(() => {
+      return product.value.sku;
+    });
+
     const { email } = useCustomerEmail(existingCartItem);
     const persistedEmail = usePersistedEmail(email);
 
@@ -286,11 +299,13 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
+      replaceCustomizationState,
       resetCustomizationState,
       selectedOptionValuesIds,
       updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
     const {
+      availableCustomization,
       availableCustomizations,
       availableOptionCustomizations,
       availableOptionValues,
@@ -299,7 +314,8 @@ export default defineComponent({
       productCustomizations,
       selectedOptionValuesIds,
       customizationOptionValue,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      product
     );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
@@ -319,6 +335,41 @@ export default defineComponent({
       updateCustomizationOptionValue(payload);
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
+    const { getPreservedData, removePreservedState } =
+      useCustomizationStatePreservation(
+        productSku,
+        customizationState,
+        existingCartItem
+      );
+
+    onMounted(async () => {
+      await nextTick();
+
+      if (
+        existingCartItem.value ||
+        !props.canUsePersistedCustomizationState
+      ) {
+        removePreservedState();
+        return;
+      }
+
+      const preservedState = await getPreservedData();
+
+      if (!preservedState) {
+        return;
+      }
+
+      replaceCustomizationState(preservedState.customizationState);
+    });
+
+    // TODO: temporary until separate option value for "Standard"
+    // production time will be added
+    useProductionTimeSelectorCustomization(
+      availableCustomizations,
+      customizationOptionValue,
+      existingCartItem,
+      updateCustomizationOptionValue
+    );
 
     useCustomizationsBundleOptions(
       productCustomizations,
@@ -385,6 +436,8 @@ export default defineComponent({
         persistedEmail.persistLastUsedCustomerEmail(email.value);
         await addToCartHandler();
 
+        removePreservedState();
+
         if (!shouldMakeAnother.value) {
           context.root.$router.push({
             name: 'cross-sells',
@@ -425,6 +478,14 @@ export default defineComponent({
         existingCartItem.value ? i18n.t('Update') : i18n.t('Add to Cart')
       ).toString();
     });
+
+    useSelectedOptionValueUrlQuery(
+      availableCustomization,
+      availableOptionValues,
+      customizationOptionValue,
+      updateCustomizationOptionValue,
+      context
+    );
 
     return {
       ...useCustomizationsGroups(availableCustomizations, productCustomization),
