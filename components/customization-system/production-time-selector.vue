@@ -30,7 +30,7 @@ import {
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
-import { OptionValue, useDefaultValue } from 'src/modules/customization-system';
+import { OptionValue } from 'src/modules/customization-system';
 
 import { getProductionTimeOptionsFromCustomization } from '../../helpers/get-production-time-options-from-customization.function';
 import ProductionTimeOption from '../interfaces/production-time-option.interface';
@@ -53,10 +53,6 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    isRequired: {
-      type: Boolean,
-      default: false
-    },
     productId: {
       type: Number,
       required: true
@@ -71,7 +67,6 @@ export default defineComponent({
     }
   },
   setup (props, { emit, root }) {
-    const { isRequired, values } = toRefs(props);
     const selectedOption = computed<string | undefined>({
       get: () => {
         return props.value;
@@ -91,8 +86,6 @@ export default defineComponent({
         root.$store
       );
     });
-
-    useDefaultValue(selectedOption, values, isRequired);
 
     return {
       isValid,

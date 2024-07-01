@@ -127,7 +127,9 @@ import {
   useOptionValueActions,
   useCustomizationsBusyState,
   CustomizationOptionValue,
-  useCustomizationsGroups
+  useCustomizationsGroups,
+  useCustomizationsBundleOptions,
+  useCustomizationsOptionsDefaultValue
 } from 'src/modules/customization-system';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
@@ -236,13 +238,16 @@ export default defineComponent({
       selectedOptionValuesIds,
       updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
-    const { availableCustomizations, customizationAvailableOptionValues } =
-      useAvailableCustomizations(
-        productCustomizations,
-        selectedOptionValuesIds,
-        customizationOptionValue,
-        updateCustomizationOptionValue
-      );
+    const {
+      availableCustomizations,
+      availableOptionValues,
+      customizationAvailableOptionValues
+    } = useAvailableCustomizations(
+      productCustomizations,
+      selectedOptionValuesIds,
+      customizationOptionValue,
+      updateCustomizationOptionValue
+    );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
         productCustomizations,
@@ -261,6 +266,20 @@ export default defineComponent({
       updateCustomizationOptionValue(payload);
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
+
+    useCustomizationsBundleOptions(
+      productCustomizations,
+      customizationOptionValue,
+      availableOptionValues,
+      context
+    );
+
+    useCustomizationsOptionsDefaultValue(
+      availableCustomizations,
+      customizationAvailableOptionValues,
+      customizationOptionValue,
+      onCustomizationOptionInput
+    );
 
     const quantity = ref<number>(1);
     const { addToCartHandler, isSubmitting } = useAddToCart(
@@ -313,7 +332,7 @@ export default defineComponent({
 
     function afterProductTypeSet (): void {
       void handlePreselectedSize();
-    };
+    }
 
     const productTypeStep = useCreationWizardProductTypeStep(
       plushieType,

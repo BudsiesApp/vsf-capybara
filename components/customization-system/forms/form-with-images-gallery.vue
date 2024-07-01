@@ -125,7 +125,9 @@ import {
   CustomizationOptionValue,
   useAvailableCustomizations,
   useCustomizationProductDescription,
+  useCustomizationsBundleOptions,
   useCustomizationsBusyState,
+  useCustomizationsOptionsDefaultValue,
   useCustomizationsPrice,
   useCustomizationState,
   useOptionValueActions
@@ -219,6 +221,7 @@ export default defineComponent({
     const {
       availableCustomizations,
       availableOptionCustomizations,
+      availableOptionValues,
       customizationAvailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
@@ -250,6 +253,20 @@ export default defineComponent({
       updateCustomizationOptionValue(payload);
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
+
+    useCustomizationsBundleOptions(
+      productCustomizations,
+      customizationOptionValue,
+      availableOptionValues,
+      context
+    );
+
+    useCustomizationsOptionsDefaultValue(
+      availableCustomizations,
+      customizationAvailableOptionValues,
+      customizationOptionValue,
+      onCustomizationOptionInput
+    );
 
     const formValidation = useFormValidation(validationObserver, () =>
       getAllFormRefs(context.refs)

@@ -27,7 +27,6 @@ import {
 
 import {
   OptionValue,
-  useDefaultValue,
   useValuesSort
 } from 'src/modules/customization-system';
 
@@ -48,10 +47,6 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    isRequired: {
-      type: Boolean,
-      default: false
-    },
     placeholder: {
       type: String as PropType<string | undefined>,
       default: undefined
@@ -66,7 +61,7 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
-    const { isRequired, values } = toRefs(props);
+    const { values } = toRefs(props);
     const selectedOption = computed<string | undefined>({
       get: () => {
         return props.value;
@@ -78,8 +73,6 @@ export default defineComponent({
     const isValid = computed<boolean>(() => {
       return !props.error;
     });
-
-    useDefaultValue(selectedOption, values, isRequired);
 
     return {
       isValid,
