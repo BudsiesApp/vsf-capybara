@@ -5,7 +5,7 @@
       :allow-free-text="true"
       :disabled="isDisabled"
       :error-message="error"
-      id-field="id"
+      id-field="name"
       label-field="name"
       :hide-dropdown-arrow="true"
       :options="sortedValues"
@@ -66,7 +66,7 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
-    const { isRequired, values } = toRefs(props);
+    const { values } = toRefs(props);
     const selectedOption = computed<string | undefined>({
       get: () => {
         return props.value;
@@ -78,8 +78,6 @@ export default defineComponent({
     const isValid = computed<boolean>(() => {
       return !props.error;
     });
-
-    useDefaultValue(selectedOption, values, isRequired);
 
     return {
       isValid,
