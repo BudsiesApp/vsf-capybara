@@ -1,5 +1,5 @@
 <template>
-  <div class="dropdown-free-text-widget">
+  <div class="search-field-widget">
     <MMultiselect
       v-model.trim="selectedOption"
       :allow-free-text="true"
@@ -27,14 +27,13 @@ import {
 
 import {
   OptionValue,
-  useDefaultValue,
   useValuesSort
 } from 'src/modules/customization-system';
 
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
 
 export default defineComponent({
-  name: 'DropdownFreeTextWidget',
+  name: 'SearchFieldWidget',
   components: {
     MMultiselect,
     SfSelect
@@ -89,7 +88,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.dropdown-free-text-widget {
+.search-field-widget {
   --multiselect-margin: 0;
   --multiselect-tags-padding-top: var(--spacer-xs);
   --multiselect-tags-min-height: auto;
