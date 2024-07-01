@@ -51,7 +51,6 @@ import { ValidationProvider } from 'vee-validate';
 import {
   Customization,
   CustomizationOptionValue,
-  OptionType,
   OptionValue,
   useCustomizationOptionValidation,
   useCustomizationOptionWidget,
