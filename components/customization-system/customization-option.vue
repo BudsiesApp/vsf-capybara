@@ -3,7 +3,6 @@
     class="customization-option"
     :class="'-widget-' + widget.component"
     :ref="validationRef"
-    v-show="showCustomization"
   >
     <label
       class="_option-label"
@@ -131,13 +130,6 @@ export default defineComponent({
         customization.value.optionData?.displayWidget !== WidgetType.CHECKBOX
       );
     });
-    const showCustomization = computed<boolean>(() => {
-      if (customization.value.optionData?.type === OptionType.PRODUCTION_TIME) {
-        return true;
-      }
-
-      return !(customization.value.optionData?.isRequired && optionValues.value.length === 1);
-    });
 
     return {
       ...useCustomizationOptionValidation(customization),
@@ -156,7 +148,6 @@ export default defineComponent({
       optionDescription,
       optionHint,
       optionLabel,
-      showCustomization,
       showLabel
     };
   }

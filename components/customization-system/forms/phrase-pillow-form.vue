@@ -137,7 +137,10 @@ import {
   useCustomizationsOptionsDefaultValue,
   useCustomizationStatePreservation,
   useProductionTimeSelectorCustomization,
-  useSelectedOptionValueUrlQuery
+  useSelectedOptionValueUrlQuery,
+  useCustomizationsFilter,
+  useEmailCustomization,
+  requiredCustomizationsFilter
 } from 'src/modules/customization-system';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
@@ -295,8 +298,21 @@ export default defineComponent({
       updateCustomizationOptionValue
     );
 
-    const customizationGroups = useCustomizationsGroups(
+    const { emailCustomizationFilter, persistCustomerEmail } =
+      useEmailCustomization(
+        availableCustomizations,
+        customizationOptionValue,
+        updateCustomizationOptionValue
+      );
+
+    const { filteredCustomizations } = useCustomizationsFilter(
       availableCustomizations,
+      customizationAvailableOptionValues,
+      [emailCustomizationFilter, requiredCustomizationsFilter]
+    );
+
+    const customizationGroups = useCustomizationsGroups(
+      filteredCustomizations,
       productCustomization
     );
 
@@ -339,6 +355,7 @@ export default defineComponent({
       try {
         await addToCartHandler();
 
+        persistCustomerEmail();
         removePreservedState();
 
         context.root.$router.push({
