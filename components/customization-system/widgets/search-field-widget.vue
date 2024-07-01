@@ -1,11 +1,11 @@
 <template>
-  <div class="dropdown-free-text-widget">
+  <div class="search-field-widget">
     <MMultiselect
       v-model.trim="selectedOption"
       :allow-free-text="true"
       :disabled="isDisabled"
       :error-message="error"
-      id-field="id"
+      id-field="name"
       label-field="name"
       :hide-dropdown-arrow="true"
       :options="sortedValues"
@@ -27,14 +27,13 @@ import {
 
 import {
   OptionValue,
-  useDefaultValue,
   useValuesSort
 } from 'src/modules/customization-system';
 
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
 
 export default defineComponent({
-  name: 'DropdownFreeTextWidget',
+  name: 'SearchFieldWidget',
   components: {
     MMultiselect,
     SfSelect
@@ -66,7 +65,7 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
-    const { isRequired, values } = toRefs(props);
+    const { values } = toRefs(props);
     const selectedOption = computed<string | undefined>({
       get: () => {
         return props.value;
@@ -79,8 +78,6 @@ export default defineComponent({
       return !props.error;
     });
 
-    useDefaultValue(selectedOption, values, isRequired);
-
     return {
       isValid,
       selectedOption,
@@ -91,7 +88,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.dropdown-free-text-widget {
+.search-field-widget {
   --multiselect-margin: 0;
   --multiselect-tags-padding-top: var(--spacer-xs);
   --multiselect-tags-min-height: auto;
