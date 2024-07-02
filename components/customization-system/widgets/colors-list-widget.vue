@@ -83,7 +83,7 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/typography";
 
 .colors-list-widget {
-  --base-list-widget-item-absolute-width: 90px;
+  --base-list-widget-item-absolute-width: 98px;
   --base-list-widget-item-relative-width: 25.01%;
   --base-list-widget-selected-option-background: transparent;
 
@@ -91,12 +91,11 @@ export default defineComponent({
 
   ._color-wrapper {
     position: relative;
-    left: -4px;
     border: 4px solid transparent;
     width: 100%;
     height: 0;
-    padding-top: 100%;
-    overflow: hidden;
+    padding-top: calc(100% - 8px);
+    box-sizing: border-box;
 
     &.-selected {
       border-color: var(--c-primary);
@@ -104,14 +103,20 @@ export default defineComponent({
 
     &.-round {
       border-radius: 50%;
+
+      ._color {
+        border-radius: 50%;
+      }
     }
   }
 
   ._color {
     width: 100%;
-    padding-top: 100%;
     top: 0;
+    height: 100%;
     position: absolute;
+    border: 2px solid var(--c-gray-light);
+    box-sizing: border-box;
   }
 }
 </style>

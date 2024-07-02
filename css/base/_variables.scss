@@ -90,6 +90,7 @@ $forms-color-placeholder: #a09999;
     @include generate-color-variants(--_c-green-secondary, #81d57b);
     @include generate-color-variants(--_c-dark-primary, #535353);
     @include generate-color-variants(--_c-dark-secondary, #a3a3a3);
+    @include generate-color-variants(--_c-gray-light, #ccc);
     @include generate-color-variants(--_c-gray-primary, #72757E);
     @include generate-color-variants(--_c-gray-secondary, #8D8F9A);
     @include generate-color-variants(--_c-gray-accent, #e0e0e1);
@@ -114,6 +115,7 @@ $forms-color-placeholder: #a09999;
     --c-divider: var(--_c-gray-accent);
     --c-accent: var(--_c-light-primary);
     --c-final-price: var(--c-primary);
+    --c-gray-light: var(--_c-gray-light);
 
     --widget-error-message-font: var(--font-normal) var(--font-xs) var(--font-family-secondary);
     --widget-error-message-color: var(--c-danger-variant);

@@ -117,7 +117,7 @@ export default defineComponent({
           position: absolute;
           height: 24px;
           width: 24px;
-          right: 0;
+          right: 8%;
           top: 0;
           z-index: 2;
         }
