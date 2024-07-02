@@ -30,41 +30,13 @@
                 class="sf-collected-product--detailed collected-product"
               >
                 <template #configuration>
-                  <div class="collected-product__properties" v-if="getPlushieName(product)">
-                    {{ getPlushieName(product) | htmlDecode }}
-                  </div>
-                  <div class="collected-product__properties" v-if="getPlushieDesc(product)">
-                    {{ getPlushieDesc(product) | htmlDecode }}
-                  </div>
-                  <div class="collected-product__properties">
-                    <div
-                      v-for="option in getBundleProductOptions(product)"
-                      :key="option"
-                    >
-                      <SfIcon
-                        icon="check"
-                        size="xxs"
-                        color="green-primary"
-                        class="collected-product__properties__icon"
-                      />
-                      {{ option }}
-                    </div>
-                    <template v-for="option in getProductOptions(product)">
-                      <SfProperty
-                        v-if="isCustomOption(product, option)"
-                        :key="option.label"
-                        :name="option.label"
-                        :value="option.value | htmlDecode"
-                      />
-                      <div
-                        v-else
-                        :key="option.label"
-                      >
-                        {{ option.value }}
-                      </div>
-                    </template>
-                  </div>
+                  <cart-item-configuration
+                    :customizations="product.customizations"
+                    :customization-state="product.customizationState"
+                    :product-options="getProductOptions(product)"
+                  />
                 </template>
+
                 <template #input>
                   <SfQuantitySelector
                     :qty="product.qty"
@@ -77,13 +49,20 @@
                     {{ product.qty }}
                   </div>
                 </template>
+
                 <template #price>
                   <div />
                 </template>
+
                 <template #actions>
-                  <SfButton v-if="showEditButton(product.sku)" class="sf-button--text actions__button" @click="editHandler(product)">
+                  <SfButton
+                    v-if="showEditButton(product.sku)"
+                    class="sf-button--text actions__button"
+                    @click="editHandler(product)"
+                  >
                     Edit
                   </SfButton>
+
                   <SfButton
                     class="sf-button--text sf-collected-product__remove sf-collected-product__remove--text actions__button"
                     @click="removeHandler(product)"
@@ -91,6 +70,7 @@
                     Remove
                   </SfButton>
                 </template>
+
                 <template #remove>
                   <SfPrice
                     v-if="getProductRegularPrice(product)"
@@ -98,6 +78,7 @@
                     :special="getProductSpecialPrice(product)"
                   />
                 </template>
+
                 <template #more-actions>
                   <div />
                 </template>
@@ -113,6 +94,7 @@
               >
                 Order More
               </SfButton>
+
               <MDropdown
                 :is-open="isDropdownOpen"
                 @click:close="isDropdownOpen = false"
@@ -133,6 +115,7 @@
               </MDropdown>
             </div>
           </div>
+
           <div v-else key="empty-cart" class="empty-cart">
             <SfHeading
               title="Your cart is empty"
@@ -140,6 +123,7 @@
               subtitle="Looks like you haven’t added any items to the cart yet. Start
                 shopping to fill it in."
             />
+
             <SfButton
               class="sf-button--full-width color-primary empty-cart__button"
               @click="processStartShopping"
@@ -149,10 +133,9 @@
           </div>
         </transition>
       </div>
+
       <div v-if="totalItems" class="detailed-cart__aside">
-        <OrderSummary
-          :is-updating-quantity="isUpdatingQuantity"
-        />
+        <OrderSummary :is-updating-quantity="isUpdatingQuantity" />
 
         <div class="_shipping-handling-block">
           <SfHeading :level="3" title="Shipping &amp; Handling" />
@@ -176,10 +159,7 @@ import {
   SfList,
   SfCollectedProduct,
   SfButton,
-  SfImage,
-  SfProperty,
   SfHeading,
-  SfIcon,
   SfQuantitySelector
 } from '@storefront-ui/vue';
 import { OrderSummary } from './DetailedCart/index.js';
@@ -192,14 +172,15 @@ import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.functi
 import CartEvents from 'src/modules/shared/types/cart-events';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
-import { getBundleOptionsValues, getSelectedBundleOptions } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions'
-import { CART_UPD_ITEM } from '@vue-storefront/core/modules/cart/store/mutation-types'
+import { CART_UPD_ITEM } from '@vue-storefront/core/modules/cart/store/mutation-types';
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
+import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 import MDropdown from 'theme/components/molecules/m-dropdown.vue';
+import CartItemConfiguration from 'theme/components/customization-system/cart-item-configuration.vue';
 
 const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
 
@@ -207,13 +188,13 @@ const foreversProductsSkus = [
   'ForeversDog_bundle',
   'ForeversCat_bundle',
   'ForeversOther_bundle'
-]
+];
 
 const golfHeadCoversProductsSkus = [
   'golfHeadCoversDog_bundle',
   'golfHeadCoversCat_bundle',
   'golfHeadCoversOther_bundle'
-]
+];
 
 const printedProductSkus = [
   'customPrintedSocks_bundle',
@@ -277,16 +258,17 @@ const editableProductsSkus = [
 
 export default {
   name: 'DetailedCart',
+  inject: {
+    imageHandlerService: { from: 'ImageHandlerService' }
+  },
   components: {
+    CartItemConfiguration,
     MDropdown,
     SfPrice,
     SfList,
     SfCollectedProduct,
-    SfImage,
     SfButton,
     SfHeading,
-    SfProperty,
-    SfIcon,
     SfQuantitySelector,
     OrderSummary,
     ProductionSpotCountdown
@@ -434,7 +416,10 @@ export default {
     }
   },
   async mounted () {
-    this.syncQuantityDebounced = debounce(this.syncQuantity, CHANGE_QUANTITY_DEBOUNCE_TIME);
+    this.syncQuantityDebounced = debounce(
+      this.syncQuantity,
+      CHANGE_QUANTITY_DEBOUNCE_TIME
+    );
     await this.$nextTick();
     this.isMounted = true;
   },
@@ -442,6 +427,19 @@ export default {
     this.syncQuantityDebounced.cancel();
   },
   methods: {
+    getProductOptions (product) {
+      const options = onlineHelper.isOnline && product.totals && product.totals.options
+        ? product.totals.options
+        : product.options || [];
+
+      return options.map((option) => {
+        return {
+          value: option.value,
+          label: option.label,
+          isCustom: !!product.custom_options?.find((customOption) => customOption.title === option.label)
+        }
+      })
+    },
     getPlushieName (product) {
       if (!product.plushieName) {
         return '';
@@ -469,7 +467,7 @@ export default {
           query: {
             existingPlushieId: product.plushieId
           }
-        })
+        });
       } else if (product.sku === customPillowSku) {
         this.$router.push({
           name: 'pillow-product',
@@ -528,26 +526,31 @@ export default {
           }
         });
       } else if (clothesProductSkus.includes(product.sku)) {
-        const designOptionName = product.sku === 'customPajamas_bundle' ? 'product' : 'design';
+        const designOptionName =
+          product.sku === 'customPajamas_bundle' ? 'product' : 'design';
 
         this.$router.push({
           name: 'clothes-product',
           params: { sku: product.sku },
           query: {
-            existingPlushieId: product.plushieId,
-            product_design: this.getProductDesign(product, designOptionName)
+            existingPlushieId: product.plushieId
           }
         });
       } else if (golfHeadCoversProductsSkus.includes(product.sku)) {
-        this.$router.push({ name: 'golf-covers-create', query: { id: product.plushieId } });
+        this.$router.push({
+          name: 'golf-covers-create',
+          query: { id: product.plushieId }
+        });
       } else if (foreversProductsSkus.includes(product.sku)) {
-        this.$router.push({ name: 'forevers-create', query: { id: product.plushieId } });
+        this.$router.push({
+          name: 'forevers-create',
+          query: { id: product.plushieId }
+        });
       } else if (printedProductSkus.includes(product.sku)) {
         this.$router.push({
           name: 'printed-product',
           params: { sku: product.sku },
           query: {
-            product_design: this.getProductDesign(product),
             existingPlushieId: product.plushieId
           }
         });
@@ -559,7 +562,6 @@ export default {
         this.$router.push({
           name: routeName,
           query: {
-            product_design: this.getProductDesign(product),
             existingPlushieId: product.plushieId
           }
         });
@@ -576,18 +578,6 @@ export default {
         });
       }
     },
-    getProductOptions (product) {
-      return onlineHelper.isOnline && product.totals && product.totals.options
-        ? product.totals.options
-        : product.options || [];
-    },
-    isCustomOption (product, productOption) {
-      if (!product.custom_options) {
-        return false;
-      }
-
-      return product.custom_options.find(option => option.title === productOption.label) !== undefined;
-    },
     getProductRegularPrice (product) {
       return getCartItemPrice(product, {}).regular;
     },
@@ -598,48 +588,21 @@ export default {
       this.$store.dispatch('cart/removeItem', { product: product });
     },
     getThumbnailForProductExtend (product) {
+      const customizationSystemThumbnail =
+        getCustomizationSystemCartItemThumbnail(
+          product,
+          this.imageHandlerService
+        );
+
+      if (customizationSystemThumbnail) {
+        return customizationSystemThumbnail;
+      }
+
       if (product.thumbnail && product.thumbnail.includes('://')) {
         return product.thumbnail;
       }
 
       return getThumbnailForProduct(product);
-    },
-    getBundleProductOptions (product) {
-      if (!product.bundle_options ||
-          product.bundle_options.length < 2 ||
-          !product.product_option ||
-          !product.product_option.extension_attributes ||
-          !product.product_option.extension_attributes.bundle_options
-      ) {
-        return [];
-      }
-
-      let result = [];
-      const productBundleOptions = product.product_option.extension_attributes.bundle_options;
-
-      product.bundle_options.forEach(option => {
-        if (!productBundleOptions.hasOwnProperty(option.option_id)) {
-          return
-        }
-
-        const selections = productBundleOptions[option.option_id].option_selections;
-
-        if (!selections) {
-          return
-        }
-
-        selections.forEach(selection => {
-          const productLink = option.product_links.find(productLink => +productLink.id === selection);
-
-          if (!productLink) {
-            return;
-          }
-
-          result.push(productLink.product.name);
-        });
-      });
-
-      return result;
     },
     async changeProductQuantity (product, qty) {
       this.$store.commit(`cart/${CART_UPD_ITEM}`, { product, qty });
@@ -654,11 +617,13 @@ export default {
     syncQuantity () {
       this.isUpdatingQuantity = true;
 
-      return this.$store.dispatch('cart/sync', {
-        forceClientState: true
-      }).finally(() => {
-        this.isUpdatingQuantity = false;
-      });
+      return this.$store
+        .dispatch('cart/sync', {
+          forceClientState: true
+        })
+        .finally(() => {
+          this.isUpdatingQuantity = false;
+        });
     },
     onDropdownActionClick (action) {
       EventBus.$emit(CartEvents.MAKE_ANOTHER_FROM_CART, action.label);
@@ -675,13 +640,6 @@ export default {
 
       return text.substring(0, maxLength) + '...';
     },
-    getProductDesign (product, designOptionTitle = 'product') {
-      const selectedBundleOptions = getSelectedBundleOptions(product);
-      const productBundleOptions = product.bundle_options.filter((option) => option.title.toLowerCase() === designOptionTitle);
-      const selectedBundleOptionsValues = getBundleOptionsValues(selectedBundleOptions, productBundleOptions);
-
-      return selectedBundleOptionsValues[0].sku;
-    },
     getCartItemKey (cartItem) {
       return getCartItemKey(cartItem);
     },
@@ -695,13 +653,10 @@ export default {
         return;
       }
 
-      EventBus.$emit(
-        CartEvents.CART_VIEWED,
-        {
-          products: this.products,
-          platformTotals: this.$store.state.cart.platformTotals
-        }
-      );
+      EventBus.$emit(CartEvents.CART_VIEWED, {
+        products: this.products,
+        platformTotals: this.$store.state.cart.platformTotals
+      });
     }
   },
   metaInfo () {
@@ -893,17 +848,6 @@ export default {
     }
   }
 
-  &__properties {
-    font-size: var(--font-xs);
-    margin-bottom: var(--spacer-sm);
-
-    &__icon {
-      display: inline-block;
-    }
-  }
-  &__properties > div {
-    margin-bottom: var(--spacer-xs);
-  }
   @include for-mobile {
     --collected-product-remove-bottom: var(--spacer-sm);
     &:first-of-type {
