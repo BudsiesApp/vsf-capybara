@@ -62,9 +62,9 @@ import CardsListWidget from './widgets/cards-list-widget.vue';
 import CheckboxWidget from './widgets/checkbox-widget.vue';
 import ColorsListWidget from './widgets/colors-list-widget.vue';
 import DropdownWidget from './widgets/dropdown-widget.vue';
-import DropdownFreeTextWidget from './widgets/dropdown-free-text-widget.vue';
 import ImageUploadWidget from './widgets/image-upload-widget.vue';
 import ProductionTimeSelector from './production-time-selector.vue';
+import SearchFieldWidget from './widgets/search-field-widget.vue';
 import TextAreaWidget from './widgets/textarea-widget.vue';
 import TextInputWidget from './widgets/text-input-widget.vue';
 import ThumbnailsListWidget from './widgets/thumbnails-list-widget.vue';
@@ -78,9 +78,9 @@ export default defineComponent({
     CheckboxWidget,
     ColorsListWidget,
     DropdownWidget,
-    DropdownFreeTextWidget,
     ImageUploadWidget,
     ProductionTimeSelector,
+    SearchFieldWidget,
     TextAreaWidget,
     TextInputWidget,
     ThumbnailsListWidget,

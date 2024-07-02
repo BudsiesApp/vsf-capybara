@@ -343,7 +343,7 @@ export default defineComponent({
           hasDetailedDescription: false,
           isRequired: true,
           type: OptionType.GENERIC,
-          displayWidget: WidgetType.DROPDOWN_FREE_TEXT,
+          displayWidget: WidgetType.SEARCH_FIELD,
           showInUrlQuery: false,
           displayWidgetOptions: {
             placeholder: 'Select Dropdown Item'
