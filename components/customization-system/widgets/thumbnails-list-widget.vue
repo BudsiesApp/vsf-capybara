@@ -9,7 +9,11 @@
         class="_image-wrapper"
         :class="{ '-selected': selected, '-round': round }"
       >
-        <BaseImage class="_image" :src="option.thumbnailUrl" :aspect-ratio="1" />
+        <BaseImage
+          class="_image"
+          :src="option.thumbnailUrl"
+          :aspect-ratio="1"
+        />
       </div>
     </template>
   </base-list-widget>
@@ -82,11 +86,10 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
-@import "~@storefront-ui/shared/styles/helpers/typography";
 
 .thumbnails-list-widget {
-  --base-list-widget-item-absolute-width: 145px;
-  --base-list-widget-item-relative-width: 33.33%;
+  --base-list-widget-item-absolute-width: 135px;
+  --base-list-widget-item-relative-width: 145px;
 
   width: 100%;
 
@@ -123,6 +126,11 @@ export default defineComponent({
         }
       }
     }
+  }
+
+  @include for-desktop {
+    --base-list-widget-item-absolute-width: 145px;
+    --base-list-widget-item-relative-width: 33.33%;
   }
 }
 </style>
