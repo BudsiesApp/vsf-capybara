@@ -15,7 +15,7 @@
       <form @submit.prevent="onFormSubmit">
         <div
           class="_step"
-          v-for="(customizationGroup, index) in customizationRootGroups"
+          v-for="(customizationGroup, index) in commonCustomizationRootGroups"
           :key="customizationGroup.id"
         >
           <SfDivider class="_step-divider" />
@@ -49,7 +49,7 @@
           </div>
         </div>
 
-        <div class="_step">
+        <div class="_step" v-if="lastCustomizationRootGroup">
           <SfDivider class="_step-divider" />
 
           <SfHeading
@@ -57,42 +57,64 @@
             :level="3"
             :title="
               $t('Step {number}', {
-                number: customizationRootGroups.length + 1,
+                number: commonCustomizationRootGroups.length + 1,
               })
             "
           />
 
-          <validation-provider
-            v-slot="{ errors, classes }"
-            rules="required"
-            :name="'Quantity'"
-            slim
-          >
-            <div class="_quantity-field" :class="classes">
-              <SfHeading
-                class="_step-subtitle -required"
-                :level="3"
-                title="Quantity"
-                :ref="getFieldAnchorName('Quantity')"
-              />
+          <div class="_content">
+            <customization-option
+              v-for="customization in customizationRootGroupCustomizations[
+                lastCustomizationRootGroup.id
+              ]"
+              class="_customization-option"
+              ref="customizationOption"
+              :key="customization.id"
+              :customization="customization"
+              :is-disabled="isDisabled"
+              :option-values="
+                customizationAvailableOptionValues[customization.id]
+              "
+              :product-id="product.id"
+              :value="customizationOptionValue[customization.id]"
+              @input="onCustomizationOptionInput"
+              @customization-option-busy-state-changed="
+                onCustomizationOptionBusyChanged
+              "
+            />
 
-              <ACustomProductQuantity
-                v-model="quantity"
-                class="_qty-container"
-                :disabled="isDisabled"
-              />
+            <validation-provider
+              v-slot="{ errors, classes }"
+              rules="required"
+              :name="'Quantity'"
+              slim
+            >
+              <div class="_quantity-field" :class="classes">
+                <SfHeading
+                  class="_step-subtitle -required"
+                  :level="3"
+                  title="Quantity"
+                  :ref="getFieldAnchorName('Quantity')"
+                />
 
-              <div class="_error-text">
-                {{ errors[0] }}
+                <ACustomProductQuantity
+                  v-model="quantity"
+                  class="_qty-container"
+                  :disabled="isDisabled"
+                />
+
+                <div class="_error-text">
+                  {{ errors[0] }}
+                </div>
+
+                <a
+                  class="_popup-link"
+                  href="javascript:void(0)"
+                  @click="showQuantityNotes = true"
+                >{{ $t("Quantity & Shipping Discounts") }}</a>
               </div>
-
-              <a
-                class="_popup-link"
-                href="javascript:void(0)"
-                @click="showQuantityNotes = true"
-              >{{ $t("Quantity & Shipping Discounts") }}</a>
-            </div>
-          </validation-provider>
+            </validation-provider>
+          </div>
         </div>
 
         <m-form-errors
