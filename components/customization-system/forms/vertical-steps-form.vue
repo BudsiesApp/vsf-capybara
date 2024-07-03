@@ -549,6 +549,7 @@ export default defineComponent({
     --customization-option-label-size: var(--font-xl);
 
     --customization-option-description-align: center;
+    --customization-option-hint-align: center;
 
     margin-top: var(--spacer-base);
   }
