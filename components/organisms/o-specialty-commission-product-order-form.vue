@@ -507,7 +507,7 @@ export default defineComponent({
     backendProductId (): ProductValue | undefined {
       switch (this.product.id) {
         case 163:
-          return ProductValue.SPECIALITY_COMMISSION;
+          return ProductValue.SPECIALTY_COMMISSION;
         default:
           throw new Error(
             `Can't resolve Backend product ID for Magento '${this.product.id}' product ID`
