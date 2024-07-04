@@ -2,6 +2,7 @@
   <div class="text-input-widget">
     <sf-input
       class="_input"
+      :name="inputName"
       :disabled="isDisabled"
       :error-message="error"
       :placeholder="placeholder"
@@ -52,13 +53,19 @@ export default defineComponent({
         emit('input', newValue);
       }
     });
+
     const isValid = computed<boolean>(() => {
       return !props.error;
     });
 
+    const inputName = computed<string|undefined>(() => {
+      return props.type === 'email' ? 'email' : undefined;
+    });
+
     return {
       isValid,
-      valueModel
+      valueModel,
+      inputName
     };
   }
 });
