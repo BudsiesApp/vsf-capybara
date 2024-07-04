@@ -15,7 +15,7 @@
       <form @submit.prevent="onFormSubmit">
         <div
           class="_step"
-          v-for="(customizationGroup, index) in commonCustomizationRootGroups"
+          v-for="(customizationGroup, index) in customizationRootGroups"
           :key="customizationGroup.id"
         >
           <SfDivider class="_step-divider" />
@@ -46,44 +46,9 @@
                 onCustomizationOptionBusyChanged
               "
             />
-          </div>
-        </div>
-
-        <div class="_step" v-if="lastCustomizationRootGroup">
-          <SfDivider class="_step-divider" />
-
-          <SfHeading
-            class="_step-title"
-            :level="3"
-            :title="
-              $t('Step {number}', {
-                number: commonCustomizationRootGroups.length + 1,
-              })
-            "
-          />
-
-          <div class="_content">
-            <customization-option
-              v-for="customization in customizationRootGroupCustomizations[
-                lastCustomizationRootGroup.id
-              ]"
-              class="_customization-option"
-              ref="customizationOption"
-              :key="customization.id"
-              :customization="customization"
-              :is-disabled="isDisabled"
-              :option-values="
-                customizationAvailableOptionValues[customization.id]
-              "
-              :product-id="product.id"
-              :value="customizationOptionValue[customization.id]"
-              @input="onCustomizationOptionInput"
-              @customization-option-busy-state-changed="
-                onCustomizationOptionBusyChanged
-              "
-            />
 
             <validation-provider
+              v-if="isLastGroup(index)"
               v-slot="{ errors, classes }"
               rules="required"
               :name="'Quantity'"
