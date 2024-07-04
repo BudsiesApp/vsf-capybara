@@ -79,8 +79,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "~@storefront-ui/shared/styles/helpers/breakpoints";
-
 .colors-list-widget {
   --base-list-widget-item-absolute-width: 98px;
   --base-list-widget-item-relative-width: 98px;
@@ -116,10 +114,6 @@ export default defineComponent({
     position: absolute;
     border: 1px solid var(--c-gray-light);
     box-sizing: border-box;
-  }
-
-  @include for-desktop {
-    --base-list-widget-item-relative-width: 25.01%;
   }
 }
 </style>
