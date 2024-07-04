@@ -2,9 +2,11 @@
   <div class="text-input-widget">
     <sf-input
       class="_input"
+      :name="inputName"
       :disabled="isDisabled"
       :error-message="error"
       :placeholder="placeholder"
+      :type="type"
       :valid="isValid"
       v-model.trim="valueModel"
     />
@@ -33,6 +35,10 @@ export default defineComponent({
       type: String as PropType<string | undefined>,
       default: undefined
     },
+    type: {
+      type: String as PropType<'text' | 'email'>,
+      default: 'text'
+    },
     value: {
       type: [String, Array] as PropType<string | undefined>,
       default: undefined
@@ -47,13 +53,19 @@ export default defineComponent({
         emit('input', newValue);
       }
     });
+
     const isValid = computed<boolean>(() => {
       return !props.error;
     });
 
+    const inputName = computed<string|undefined>(() => {
+      return props.type === 'email' ? 'email' : undefined;
+    });
+
     return {
       isValid,
-      valueModel
+      valueModel,
+      inputName
     };
   }
 });

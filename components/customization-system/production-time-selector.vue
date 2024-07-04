@@ -53,10 +53,6 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    isRequired: {
-      type: Boolean,
-      default: false
-    },
     placeholder: {
       type: String,
       default: 'Select Production Time'
@@ -75,7 +71,6 @@ export default defineComponent({
     }
   },
   setup (props, { emit, root }) {
-    const { isRequired, values } = toRefs(props);
     const selectedOption = computed<string | undefined>({
       get: () => {
         return props.value;

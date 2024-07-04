@@ -526,9 +526,6 @@ export default {
           }
         });
       } else if (clothesProductSkus.includes(product.sku)) {
-        const designOptionName =
-          product.sku === 'customPajamas_bundle' ? 'product' : 'design';
-
         this.$router.push({
           name: 'clothes-product',
           params: { sku: product.sku },

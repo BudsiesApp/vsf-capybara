@@ -38,7 +38,7 @@
         >
           <form @submit.prevent="onFormSubmit">
             <customization-option
-              v-for="customization in availableOptionCustomizations"
+              v-for="customization in filteredCustomizations"
               class="_customization-option"
               ref="customizationOption"
               :key="customization.id"
@@ -125,12 +125,17 @@ import { ValidationObserver, ValidationProvider } from 'vee-validate';
 import {
   Customization,
   CustomizationOptionValue,
+  requiredCustomizationsFilter,
   useAvailableCustomizations,
   useCustomizationProductDescription,
+  useCustomizationsBundleOptions,
   useCustomizationsBusyState,
+  useCustomizationsFilter,
+  useCustomizationsOptionsDefaultValue,
   useCustomizationsPrice,
   useCustomizationState,
   useCustomizationStatePreservation,
+  useEmailCustomization,
   useOptionValueActions,
   useProductionTimeSelectorCustomization,
   useSelectedOptionValueUrlQuery
@@ -232,8 +237,8 @@ export default defineComponent({
     const {
       availableCustomization,
       availableCustomizations,
-      availableOptionValues,
       availableOptionCustomizations,
+      availableOptionValues,
       customizationAvailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
@@ -269,6 +274,13 @@ export default defineComponent({
         existingCartItem
       );
 
+    const { emailCustomizationFilter, persistCustomerEmail } =
+      useEmailCustomization(
+        availableCustomizations,
+        customizationOptionValue,
+        updateCustomizationOptionValue
+      );
+
     onMounted(async () => {
       await nextTick();
 
@@ -297,6 +309,20 @@ export default defineComponent({
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
 
+    useCustomizationsBundleOptions(
+      productCustomizations,
+      customizationOptionValue,
+      availableOptionValues,
+      context
+    );
+
+    useCustomizationsOptionsDefaultValue(
+      availableCustomizations,
+      customizationAvailableOptionValues,
+      customizationOptionValue,
+      onCustomizationOptionInput
+    );
+
     const formValidation = useFormValidation(validationObserver, () =>
       getAllFormRefs(context.refs)
     );
@@ -319,6 +345,7 @@ export default defineComponent({
       try {
         await addToCartHandler();
 
+        persistCustomerEmail();
         removePreservedState();
 
         context.root.$router.push({
@@ -350,6 +377,11 @@ export default defineComponent({
     );
 
     return {
+      ...useCustomizationsFilter(
+        availableOptionCustomizations,
+        customizationAvailableOptionValues,
+        [emailCustomizationFilter, requiredCustomizationsFilter]
+      ),
       ...useProductGallery(
         product,
         productCustomizations,

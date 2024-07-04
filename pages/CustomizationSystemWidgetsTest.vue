@@ -265,6 +265,17 @@ export default defineComponent({
               galleryImages: [],
               isEnabled: true,
               isDefault: false
+            },
+            {
+              id: 'item_4',
+              name: '4 Item',
+              description: `4 Item description`,
+              color: 'white',
+              price: 15,
+              sn: 3,
+              galleryImages: [],
+              isEnabled: true,
+              isDefault: false
             }
           ]
         }

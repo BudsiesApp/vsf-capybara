@@ -768,7 +768,6 @@ export default defineComponent({
     fillPetInfoStepDataFromCartItem (cartItem: CartItem): void {
       this.petInfoStepData.name = cartItem.plushieName;
       this.petInfoStepData.breed = cartItem.plushieBreed;
-      this.petInfoStepData.email = cartItem.email;
     },
     fillCustomizeStepDataFromCartItem (cartItem: CartItem): void {
       this.fillBodypartsValues(cartItem);
