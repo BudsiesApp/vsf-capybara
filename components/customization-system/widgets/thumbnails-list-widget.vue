@@ -85,11 +85,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "~@storefront-ui/shared/styles/helpers/breakpoints";
-
 .thumbnails-list-widget {
-  --base-list-widget-item-absolute-width: 135px;
-  --base-list-widget-item-relative-width: 145px;
+  --base-list-widget-item-absolute-width: 145px;
+  --base-list-widget-item-relative-width: 33.33%;
 
   width: 100%;
 
@@ -126,11 +124,6 @@ export default defineComponent({
         }
       }
     }
-  }
-
-  @include for-desktop {
-    --base-list-widget-item-absolute-width: 145px;
-    --base-list-widget-item-relative-width: 33.33%;
   }
 }
 </style>
