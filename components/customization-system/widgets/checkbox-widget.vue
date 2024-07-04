@@ -17,7 +17,7 @@
 <script lang="ts">
 import { computed, defineComponent, PropType, toRef } from '@vue/composition-api';
 
-import { OptionValue, useDefaultValue } from 'src/modules/customization-system';
+import { OptionValue } from 'src/modules/customization-system';
 
 import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
 
@@ -32,10 +32,6 @@ export default defineComponent({
       default: undefined
     },
     isDisabled: {
-      type: Boolean,
-      default: false
-    },
-    isRequired: {
       type: Boolean,
       default: false
     },
@@ -93,12 +89,6 @@ export default defineComponent({
     const isValid = computed<boolean>(() => {
       return !props.error;
     });
-
-    useDefaultValue(
-      selectedOption,
-      toRef(props, 'values'),
-      toRef(props, 'isRequired')
-    );
 
     return {
       isSelected,

@@ -46,86 +46,40 @@
                 onCustomizationOptionBusyChanged
               "
             />
-          </div>
-        </div>
 
-        <div class="_step">
-          <SfDivider class="_step-divider" />
+            <validation-provider
+              v-if="isLastGroup(index)"
+              v-slot="{ errors, classes }"
+              rules="required"
+              :name="'Quantity'"
+              slim
+            >
+              <div class="_quantity-field" :class="classes">
+                <SfHeading
+                  class="_step-subtitle -required"
+                  :level="3"
+                  title="Quantity"
+                  :ref="getFieldAnchorName('Quantity')"
+                />
 
-          <SfHeading
-            class="_step-title"
-            :level="3"
-            :title="
-              $t('Step {number}', {
-                number: customizationRootGroups.length + 1,
-              })
-            "
-          />
+                <ACustomProductQuantity
+                  v-model="quantity"
+                  class="_qty-container"
+                  :disabled="isDisabled"
+                />
 
-          <validation-provider
-            v-slot="{ errors, classes }"
-            rules="required"
-            :name="'Quantity'"
-            slim
-          >
-            <div class="_quantity-field" :class="classes">
-              <SfHeading
-                class="_step-subtitle -required"
-                :level="3"
-                title="Quantity"
-                :ref="getFieldAnchorName('Quantity')"
-              />
+                <div class="_error-text">
+                  {{ errors[0] }}
+                </div>
 
-              <ACustomProductQuantity
-                v-model="quantity"
-                class="_qty-container"
-                :disabled="isDisabled"
-              />
-
-              <div class="_error-text">
-                {{ errors[0] }}
+                <a
+                  class="_popup-link"
+                  href="javascript:void(0)"
+                  @click="showQuantityNotes = true"
+                >{{ $t("Quantity & Shipping Discounts") }}</a>
               </div>
-
-              <a
-                class="_popup-link"
-                href="javascript:void(0)"
-                @click="showQuantityNotes = true"
-              >{{ $t("Quantity & Shipping Discounts") }}</a>
-            </div>
-          </validation-provider>
-
-          <validation-provider
-            v-slot="{ errors }"
-            rules="required|email"
-            name="'Email'"
-            tag="div"
-            v-show="!hasPrefilledEmail"
-          >
-            <SfHeading
-              class="_step-subtitle"
-              :level="3"
-              :title="$t('Enter your email address')"
-              :ref="getFieldAnchorName('Email')"
-            />
-
-            <SfInput
-              class="_email-input"
-              name="email"
-              type="email"
-              v-model="email"
-              placeholder="sample@email.com"
-              :disabled="isDisabled"
-              :required="false"
-              :valid="!errors.length"
-              :error-message="errors[0]"
-            />
-
-            <div class="_email-hint">
-              <b>{{
-                $t("Sometimes our team has questions about your design")
-              }}</b>
-            </div>
-          </validation-provider>
+            </validation-provider>
+          </div>
         </div>
 
         <m-form-errors
@@ -154,7 +108,10 @@
             {{ $t("Save & Make Another") }}
           </SfButton>
 
-          <MBlockStory class="_agreement" story-slug="order_submit_agreement_petsies" />
+          <MBlockStory
+            class="_agreement"
+            story-slug="order_submit_agreement_petsies"
+          />
         </div>
 
         <MBlockStory :story-slug="bottomStorySlug" v-if="bottomStorySlug" />
@@ -192,23 +149,26 @@ import { ValidationObserver, ValidationProvider } from 'vee-validate';
 import {
   Customization,
   CustomizationOptionValue,
+  requiredCustomizationsFilter,
   useAvailableCustomizations,
+  useCustomizationsBundleOptions,
   useCustomizationsBusyState,
+  useCustomizationsFilter,
   useCustomizationsGroups,
+  useCustomizationsOptionsDefaultValue,
   useCustomizationState,
   useCustomizationStatePreservation,
+  useEmailCustomization,
   useOptionValueActions,
   useProductionTimeSelectorCustomization,
   useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
-import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 import i18n from '@vue-storefront/core/i18n';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
-import { useCustomerEmail } from 'theme/helpers/use-customer-email';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
 
@@ -276,9 +236,6 @@ export default defineComponent({
       return product.value.sku;
     });
 
-    const { email } = useCustomerEmail(existingCartItem);
-    const persistedEmail = usePersistedEmail(email);
-
     const productCustomizations = computed<Customization[]>(() => {
       return product.value.customizations || [];
     });
@@ -340,13 +297,17 @@ export default defineComponent({
         existingCartItem
       );
 
+    const { emailCustomizationFilter, persistCustomerEmail } =
+      useEmailCustomization(
+        availableCustomizations,
+        customizationOptionValue,
+        updateCustomizationOptionValue
+      );
+
     onMounted(async () => {
       await nextTick();
 
-      if (
-        existingCartItem.value ||
-        !props.canUsePersistedCustomizationState
-      ) {
+      if (existingCartItem.value || !props.canUsePersistedCustomizationState) {
         removePreservedState();
         return;
       }
@@ -369,6 +330,20 @@ export default defineComponent({
       updateCustomizationOptionValue
     );
 
+    useCustomizationsBundleOptions(
+      productCustomizations,
+      customizationOptionValue,
+      availableOptionValues,
+      context
+    );
+
+    const { setDefaultValues } = useCustomizationsOptionsDefaultValue(
+      availableCustomizations,
+      customizationAvailableOptionValues,
+      customizationOptionValue,
+      onCustomizationOptionInput
+    );
+
     const formValidation = useFormValidation(validationObserver, () =>
       getAllFormRefs(context.refs)
     );
@@ -379,14 +354,14 @@ export default defineComponent({
       quantity,
       customizationState,
       existingCartItem,
-      context,
-      email
+      context
     );
 
     const shouldMakeAnother = ref<boolean>(false);
 
     async function onSuccessAndMakeAnother (): Promise<void> {
       resetCustomizationState();
+      setDefaultValues();
       quantity.value = 1;
 
       if (validationObserver.value) {
@@ -416,9 +391,9 @@ export default defineComponent({
       }
 
       try {
-        persistedEmail.persistLastUsedCustomerEmail(email.value);
         await addToCartHandler();
 
+        persistCustomerEmail();
         removePreservedState();
 
         if (!shouldMakeAnother.value) {
@@ -470,17 +445,21 @@ export default defineComponent({
       context
     );
 
+    const { filteredCustomizations } = useCustomizationsFilter(
+      availableCustomizations,
+      customizationAvailableOptionValues,
+      [emailCustomizationFilter, requiredCustomizationsFilter]
+    );
+
     return {
-      ...useCustomizationsGroups(availableCustomizations, productCustomization),
+      ...useCustomizationsGroups(filteredCustomizations, productCustomization),
       ...useQuantityAndShippingDiscounts(),
       ...formValidation,
-      ...persistedEmail,
       availableCustomizations,
       availableOptionCustomizations,
       bottomStorySlug,
       customizationAvailableOptionValues,
       customizationOptionValue,
-      email,
       isDisabled,
       isSubmitButtonDisabled,
       onCustomizationOptionBusyChanged,
@@ -535,6 +514,7 @@ export default defineComponent({
     --customization-option-label-size: var(--font-xl);
 
     --customization-option-description-align: center;
+    --customization-option-hint-align: center;
 
     margin-top: var(--spacer-base);
   }

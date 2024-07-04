@@ -47,10 +47,6 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    isRequired: {
-      type: Boolean,
-      default: false
-    },
     placeholder: {
       type: String as PropType<string | undefined>,
       default: undefined
