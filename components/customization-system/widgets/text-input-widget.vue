@@ -5,6 +5,7 @@
       :disabled="isDisabled"
       :error-message="error"
       :placeholder="placeholder"
+      :type="type"
       :valid="isValid"
       v-model.trim="valueModel"
     />
@@ -32,6 +33,10 @@ export default defineComponent({
     placeholder: {
       type: String as PropType<string | undefined>,
       default: undefined
+    },
+    type: {
+      type: String as PropType<'text' | 'email'>,
+      default: 'text'
     },
     value: {
       type: [String, Array] as PropType<string | undefined>,

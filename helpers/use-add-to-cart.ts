@@ -12,8 +12,7 @@ export function useAddToCart (
   quantity: Ref<number>,
   customizationStateItems: Ref<CustomizationStateItem[]>,
   existingCartItem: Ref<CartItem | undefined>,
-  { root }: SetupContext,
-  email?: Ref<string | undefined>
+  { root }: SetupContext
 ) {
   const isSubmitting = ref<boolean>(false);
 
@@ -47,10 +46,6 @@ export function useAddToCart (
       qty: quantity.value,
       customizationState: filterCustomizationState(customizationStateItems.value)
     };
-
-    if (email?.value) {
-      productToAddData.email = email.value;
-    }
 
     try {
       await root.$store.dispatch('cart/addItem', {
@@ -91,10 +86,6 @@ export function useAddToCart (
       product_option: productOption,
       customizationState: filterCustomizationState(customizationStateItems.value)
     };
-
-    if (email?.value) {
-      cartItemForUpdate.email = email.value;
-    }
 
     try {
       await updateClientAndServerItem({

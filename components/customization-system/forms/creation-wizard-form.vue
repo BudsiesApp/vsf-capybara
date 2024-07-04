@@ -130,9 +130,14 @@ import {
   useCustomizationsBusyState,
   CustomizationOptionValue,
   useCustomizationsGroups,
+  useCustomizationsBundleOptions,
+  useCustomizationsOptionsDefaultValue,
   useCustomizationStatePreservation,
   useProductionTimeSelectorCustomization,
-  useSelectedOptionValueUrlQuery
+  useSelectedOptionValueUrlQuery,
+  useEmailCustomization,
+  useCustomizationsFilter,
+  requiredCustomizationsFilter
 } from 'src/modules/customization-system';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
@@ -277,6 +282,20 @@ export default defineComponent({
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
 
+    useCustomizationsBundleOptions(
+      productCustomizations,
+      customizationOptionValue,
+      availableOptionValues,
+      context
+    );
+
+    useCustomizationsOptionsDefaultValue(
+      availableCustomizations,
+      customizationAvailableOptionValues,
+      customizationOptionValue,
+      onCustomizationOptionInput
+    );
+
     // TODO: temporary until separate option value for "Standard"
     // production time will be added
     useProductionTimeSelectorCustomization(
@@ -286,8 +305,21 @@ export default defineComponent({
       updateCustomizationOptionValue
     );
 
-    const customizationGroups = useCustomizationsGroups(
+    const { emailCustomizationFilter, persistCustomerEmail } =
+      useEmailCustomization(
+        availableCustomizations,
+        customizationOptionValue,
+        updateCustomizationOptionValue
+      );
+
+    const { filteredCustomizations } = useCustomizationsFilter(
       availableCustomizations,
+      customizationAvailableOptionValues,
+      [emailCustomizationFilter, requiredCustomizationsFilter]
+    );
+
+    const customizationGroups = useCustomizationsGroups(
+      filteredCustomizations,
       productCustomization
     );
 
@@ -382,6 +414,8 @@ export default defineComponent({
     async function onFormSubmit (): Promise<void> {
       try {
         await addToCartHandler();
+
+        persistCustomerEmail();
         removePreservedState();
 
         if (!currentProduct.value) {

@@ -88,7 +88,6 @@ import { SfPrice } from '@storefront-ui/vue';
 import { BaseImage } from 'src/modules/budsies';
 import {
   OptionValue,
-  useDefaultValue,
   useListWidget,
   useOptionValuesPrice,
   useValuesSort,
@@ -115,10 +114,6 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    isRequired: {
-      type: Boolean,
-      default: false
-    },
     maxValuesCount: {
       type: Number as PropType<number | undefined>,
       default: undefined
@@ -137,15 +132,13 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const { isRequired, maxValuesCount, shape, value, values } = toRefs(props);
+    const { maxValuesCount, shape, value, values } = toRefs(props);
 
     const isRound = computed<boolean>(() => {
       return shape.value === 'round';
     });
 
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
-
-    useDefaultValue(listWidgetFields.selectedOption, values, isRequired);
 
     return {
       isRound,
