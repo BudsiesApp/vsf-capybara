@@ -1,6 +1,9 @@
 <template>
   <div class="base-list-widget" :class="{ '-disabled': isDisabled }">
-    <ul class="_options-list" :class="`-alignment-${alignment}`">
+    <ul
+      class="_options-list"
+      :class="{ [`-alignment-${alignment}`]: true, '-round': isRound }"
+    >
       <li
         v-for="option in sortedValues"
         :key="option.id"
@@ -23,19 +26,33 @@
           </div>
 
           <template v-if="!isOptionValuesSamePrice">
-            <div class="_price" v-if="isDefaultOptionValue(option) && defaultOptionValuePrice">
+            <div
+              class="_price"
+              v-if="isDefaultOptionValue(option) && defaultOptionValuePrice"
+            >
               <SfPrice
                 :regular="formatPrice(defaultOptionValuePrice.regular)"
                 :special="formatPrice(defaultOptionValuePrice.special)"
               />
             </div>
 
-            <div class="_price" v-else-if="optionValuePriceDeltaDictionary[option.id]">
+            <div
+              class="_price"
+              v-else-if="optionValuePriceDeltaDictionary[option.id]"
+            >
               <span>+</span>
 
               <SfPrice
-                :regular="formatPrice(optionValuePriceDeltaDictionary[option.id].regular)"
-                :special="formatPrice(optionValuePriceDeltaDictionary[option.id].special)"
+                :regular="
+                  formatPrice(
+                    optionValuePriceDeltaDictionary[option.id].regular
+                  )
+                "
+                :special="
+                  formatPrice(
+                    optionValuePriceDeltaDictionary[option.id].special
+                  )
+                "
               />
             </div>
           </template>
@@ -144,9 +161,13 @@ export default defineComponent({
     display: grid;
     grid-template-columns: repeat(
       auto-fill,
-      minmax(var(--base-list-widget-item-absolute-width), 1fr)
+      minmax(var(--base-list-widget-item-max-width), 1fr)
     );
     padding: 0;
+
+    &.-round {
+      row-gap: var(--spacer-xs);
+    }
 
     &.-alignment-center {
       display: flex;
@@ -154,8 +175,8 @@ export default defineComponent({
       flex-wrap: wrap;
 
       ._option {
-        width: var(--base-list-widget-item-relative-width);
-        max-width: var(--base-list-widget-item-absolute-width);
+        width: var(--base-list-widget-item-width);
+        max-width: var(--base-list-widget-item-max-width);
       }
     }
   }
@@ -261,12 +282,12 @@ export default defineComponent({
     ._options-list {
       grid-template-columns: repeat(
         auto-fill,
-        minmax(var(--base-list-widget-item-absolute-width), 1fr)
+        minmax(var(--base-list-widget-item-max-width), 1fr)
       );
 
       &.-alignment-center {
         ._option {
-          width: var(--base-list-widget-item-absolute-width);
+          width: var(--base-list-widget-item-max-width);
         }
       }
     }
