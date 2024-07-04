@@ -80,8 +80,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .colors-list-widget {
-  --base-list-widget-item-absolute-width: 98px;
-  --base-list-widget-item-relative-width: 98px;
+  --base-list-widget-item-max-width: 98px;
+  --base-list-widget-item-width: 98px;
   --base-list-widget-selected-option-background: transparent;
 
   width: 100%;

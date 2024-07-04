@@ -86,8 +86,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .thumbnails-list-widget {
-  --base-list-widget-item-absolute-width: 145px;
-  --base-list-widget-item-relative-width: 33.33%;
+  --base-list-widget-item-max-width: 145px;
+  --base-list-widget-item-width: 33.33%;
 
   width: 100%;
 
