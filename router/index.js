@@ -1,5 +1,3 @@
-import { PlushieType } from 'theme/interfaces/plushie.type';
-
 const ErrorPage = () =>
   import(/* webpackChunkName: "vsf-error" */ 'theme/pages/Error');
 const Product = () =>
@@ -269,7 +267,6 @@ let routes = [
       sku: 'customPrintedMasks_bundle',
       productDesign: route.query.product_design,
       layout: 'with-images-gallery'
-
     })
   },
   {
@@ -280,7 +277,6 @@ let routes = [
       sku: 'customPrintedKeychains_bundle',
       productDesign: route.query.product_design,
       layout: 'with-images-gallery'
-
     })
   },
   {
@@ -291,7 +287,6 @@ let routes = [
       sku: 'customFeltedMagnets_bundle',
       productDesign: route.query.product_design,
       layout: 'with-images-gallery'
-
     })
   },
   {
@@ -302,7 +297,6 @@ let routes = [
       sku: 'customFeltedOrnaments_bundle',
       productDesign: route.query.product_design,
       layout: 'with-images-gallery'
-
     })
   },
   {
@@ -614,7 +608,8 @@ let routes = [
     props: (route) => ({
       sku: route.params.sku,
       productDesign: route.query.product_design,
-      existingPlushieId: route.query.existingPlushieId
+      existingPlushieId: route.query.existingPlushieId,
+      layout: 'with-images-gallery'
     })
   },
   {
@@ -624,7 +619,8 @@ let routes = [
     props: (route) => ({
       sku: 'customPajamas_bundle',
       productDesign: route.query.product_design,
-      existingPlushieId: route.query.existingPlushieId
+      existingPlushieId: route.query.existingPlushieId,
+      layout: 'with-images-gallery'
     })
   },
   {
@@ -634,7 +630,8 @@ let routes = [
     props: (route) => ({
       sku: 'customHawaiianShirts_bundle',
       productDesign: route.query.product_design,
-      existingPlushieId: route.query.existingPlushieId
+      existingPlushieId: route.query.existingPlushieId,
+      layout: 'with-images-gallery'
     })
   },
   {
@@ -644,7 +641,8 @@ let routes = [
     props: (route) => ({
       sku: 'customGolfShirts_bundle',
       productDesign: route.query.product_design,
-      existingPlushieId: route.query.existingPlushieId
+      existingPlushieId: route.query.existingPlushieId,
+      layout: 'with-images-gallery'
     })
   },
   {
