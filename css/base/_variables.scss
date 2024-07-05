@@ -51,6 +51,7 @@ $font-family-secondary: "Gotham-Rounded-Medium";
     @include generate-color-variants(--_c-dark-secondary, #525455);
     @include generate-color-variants(--_c-gray-primary, #b8b9bb);
     @include generate-color-variants(--_c-gray-secondary, #b8b9bb);
+    @include generate-color-variants(--_c-gray-light, #ccc);
     @include generate-color-variants(--_c-light-primary, #f61857);
     @include generate-color-variants(--_c-red-primary, #f61857);
     @include generate-color-variants(--_c-red-secondary, #f61857);
@@ -71,6 +72,7 @@ $font-family-secondary: "Gotham-Rounded-Medium";
     --c-blockquote-border: var(--_c-gray-primary);
     --c-divider: var(--_c-gray-accent);
     --c-accent: var(--_c-light-primary);
+    --c-gray-light: var(--_c-gray-light); 
 
     --widget-error-message-font: var(--font-normal) var(--font-xs) var(--font-family-secondary);
     --widget-error-message-color: var(--c-danger-variant);
