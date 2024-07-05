@@ -104,7 +104,7 @@ export default defineComponent({
       required: true
     },
     value: {
-      type: [Object, String, Array, Number] as PropType<CustomizationOptionValue>,
+      type: [Object, String, Array] as PropType<CustomizationOptionValue>,
       default: undefined
     }
   },
