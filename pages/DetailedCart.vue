@@ -22,44 +22,11 @@
                 class="sf-collected-product--detailed collected-product"
               >
                 <template #configuration>
-                  <div class="collected-product__properties" v-if="getPlushieName(product)">
-                    {{ getPlushieName(product) | htmlDecode }}
-                  </div>
-
-                  <div class="collected-product__properties" v-if="getPlushieDesc(product)">
-                    {{ getPlushieDesc(product) | htmlDecode }}
-                  </div>
-
-                  <div class="collected-product__properties">
-                    <div
-                      v-for="option in getBundleProductOptions(product)"
-                      :key="option"
-                    >
-                      <SfIcon
-                        icon="check"
-                        size="xxs"
-                        color="blue-primary"
-                        class="collected-product__properties__icon"
-                      />
-                      {{ option }}
-                    </div>
-
-                    <template v-for="option in getProductOptions(product)">
-                      <SfProperty
-                        v-if="isCustomOption(product, option)"
-                        :key="option.label"
-                        :name="option.label"
-                        :value="option.value"
-                      />
-
-                      <div
-                        v-else
-                        :key="option.label"
-                      >
-                        {{ option.value }}
-                      </div>
-                    </template>
-                  </div>
+                  <cart-item-configuration
+                    :customizations="product.customizations"
+                    :customization-state="product.customizationState"
+                    :product-options="getProductOptions(product)"
+                  />
                 </template>
 
                 <template #input>
@@ -80,7 +47,11 @@
                 </template>
 
                 <template #actions>
-                  <SfButton v-if="showEditButton(product.sku)" class="sf-button--text actions__button" @click="editHandler(product)">
+                  <SfButton
+                    v-if="showEditButton(product.sku)"
+                    class="sf-button--text actions__button"
+                    @click="editHandler(product)"
+                  >
                     Edit
                   </SfButton>
 
@@ -158,10 +129,7 @@ import {
   SfList,
   SfCollectedProduct,
   SfButton,
-  SfImage,
-  SfProperty,
   SfHeading,
-  SfIcon,
   SfQuantitySelector
 } from '@storefront-ui/vue';
 import { OrderSummary } from './DetailedCart/index.js';
@@ -174,11 +142,12 @@ import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.functi
 import CartEvents from 'src/modules/shared/types/cart-events';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
-import { getBundleOptionsValues, getSelectedBundleOptions } from '@vue-storefront/core/modules/catalog/helpers/bundleOptions'
 import { CART_UPD_ITEM } from '@vue-storefront/core/modules/cart/store/mutation-types'
+import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
 import MDropdown from 'theme/components/molecules/m-dropdown.vue';
+import CartItemConfiguration from 'theme/components/customization-system/cart-item-configuration.vue';
 
 const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
 
@@ -198,16 +167,17 @@ const editableProductsSkus = [
 
 export default {
   name: 'DetailedCart',
+  inject: {
+    imageHandlerService: { from: 'ImageHandlerService' }
+  },
   components: {
+    CartItemConfiguration,
     MDropdown,
     SfPrice,
     SfList,
     SfCollectedProduct,
-    SfImage,
     SfButton,
     SfHeading,
-    SfProperty,
-    SfIcon,
     SfQuantitySelector,
     OrderSummary
   },
@@ -244,7 +214,10 @@ export default {
     }
   },
   async mounted () {
-    this.syncQuantityDebounced = debounce(this.syncQuantity, CHANGE_QUANTITY_DEBOUNCE_TIME);
+    this.syncQuantityDebounced = debounce(
+      this.syncQuantity,
+      CHANGE_QUANTITY_DEBOUNCE_TIME
+    );
     await this.$nextTick();
     this.isMounted = true;
   },
@@ -252,6 +225,19 @@ export default {
     this.syncQuantityDebounced.cancel();
   },
   methods: {
+    getProductOptions (product) {
+      const options = onlineHelper.isOnline && product.totals && product.totals.options
+        ? product.totals.options
+        : product.options || [];
+
+      return options.map((option) => {
+        return {
+          value: option.value,
+          label: option.label,
+          isCustom: !!product.custom_options?.find((customOption) => customOption.title === option.label)
+        }
+      })
+    },
     getPlushieName (product) {
       if (!product.plushieName) {
         return '';
@@ -287,18 +273,6 @@ export default {
         this.$router.push({ name: routeName, query: { existingPlushieId: product.plushieId } })
       }
     },
-    getProductOptions (product) {
-      return onlineHelper.isOnline && product.totals && product.totals.options
-        ? product.totals.options
-        : product.options || [];
-    },
-    isCustomOption (product, productOption) {
-      if (!product.custom_options) {
-        return false;
-      }
-
-      return product.custom_options.find(option => option.title === productOption.label) !== undefined;
-    },
     getProductRegularPrice (product) {
       return getCartItemPrice(product, {}).regular;
     },
@@ -309,48 +283,21 @@ export default {
       this.$store.dispatch('cart/removeItem', { product: product });
     },
     getThumbnailForProductExtend (product) {
+      const customizationSystemThumbnail =
+        getCustomizationSystemCartItemThumbnail(
+          product,
+          this.imageHandlerService
+        );
+
+      if (customizationSystemThumbnail) {
+        return customizationSystemThumbnail;
+      }
+
       if (product.thumbnail && product.thumbnail.includes('://')) {
         return product.thumbnail;
       }
 
       return getThumbnailForProduct(product);
-    },
-    getBundleProductOptions (product) {
-      if (!product.bundle_options ||
-          product.bundle_options.length < 2 ||
-          !product.product_option ||
-          !product.product_option.extension_attributes ||
-          !product.product_option.extension_attributes.bundle_options
-      ) {
-        return [];
-      }
-
-      let result = [];
-      const productBundleOptions = product.product_option.extension_attributes.bundle_options;
-
-      product.bundle_options.forEach(option => {
-        if (!productBundleOptions.hasOwnProperty(option.option_id)) {
-          return
-        }
-
-        const selections = productBundleOptions[option.option_id].option_selections;
-
-        if (!selections) {
-          return
-        }
-
-        selections.forEach(selection => {
-          const productLink = option.product_links.find(productLink => +productLink.id === selection);
-
-          if (!productLink) {
-            return;
-          }
-
-          result.push(productLink.product.name);
-        });
-      });
-
-      return result;
     },
     async changeProductQuantity (product, qty) {
       this.$store.commit(`cart/${CART_UPD_ITEM}`, { product, qty });
@@ -365,11 +312,13 @@ export default {
     syncQuantity () {
       this.isUpdatingQuantity = true;
 
-      return this.$store.dispatch('cart/sync', {
-        forceClientState: true
-      }).finally(() => {
-        this.isUpdatingQuantity = false;
-      });
+      return this.$store
+        .dispatch('cart/sync', {
+          forceClientState: true
+        })
+        .finally(() => {
+          this.isUpdatingQuantity = false;
+        });
     },
     onDropdownActionClick (action) {
       EventBus.$emit(CartEvents.MAKE_ANOTHER_FROM_CART, action.label);
@@ -386,13 +335,6 @@ export default {
 
       return text.substring(0, maxLength) + '...';
     },
-    getProductDesign (product) {
-      const selectedBundleOptions = getSelectedBundleOptions(product);
-      const productBundleOptions = product.bundle_options.filter((option) => option.title.toLowerCase() === 'product');
-      const selectedBundleOptionsValues = getBundleOptionsValues(selectedBundleOptions, productBundleOptions);
-
-      return selectedBundleOptionsValues[0].sku;
-    },
     getCartItemKey (cartItem) {
       return getCartItemKey(cartItem);
     },
@@ -406,13 +348,10 @@ export default {
         return;
       }
 
-      EventBus.$emit(
-        CartEvents.CART_VIEWED,
-        {
-          products: this.products,
-          platformTotals: this.$store.state.cart.platformTotals
-        }
-      );
+      EventBus.$emit(CartEvents.CART_VIEWED, {
+        products: this.products,
+        platformTotals: this.$store.state.cart.platformTotals
+      });
     }
   },
   metaInfo () {
@@ -564,19 +503,6 @@ export default {
       pointer-events: none;
       cursor: default;
     }
-  }
-
-  &__properties {
-    font-size: var(--font-xs);
-    margin-bottom: var(--spacer-sm);
-
-    &__icon {
-      display: inline-block;
-    }
-  }
-
-  &__properties > div {
-    margin-bottom: var(--spacer-xs);
   }
 
   @include for-mobile {

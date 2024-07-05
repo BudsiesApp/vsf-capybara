@@ -23,13 +23,13 @@ $font-family-secondary: "Gotham-Rounded-Medium";
     --font-extra-bold: 800;
     --font-black: 800;
     // font-size
-    --font-2xs: 0.703rem; 
-    --font-xs: 0.844rem; 
-    --font-sm: 0.984rem; 
-    --font-base: 1.125rem; 
-    --font-lg: 1.266rem; 
+    --font-2xs: 0.703rem;
+    --font-xs: 0.844rem;
+    --font-sm: 0.984rem;
+    --font-base: 1.125rem;
+    --font-lg: 1.266rem;
     --font-xl: 1.5rem;
-    --font-2xl: 1.875rem; 
+    --font-2xl: 1.875rem;
     // headings font-size
     --h1-font-size: 1.375rem;
     --h2-font-size: 1.375rem;
@@ -72,6 +72,9 @@ $font-family-secondary: "Gotham-Rounded-Medium";
     --c-divider: var(--_c-gray-accent);
     --c-accent: var(--_c-light-primary);
 
+    --widget-error-message-font: var(--font-normal) var(--font-xs) var(--font-family-secondary);
+    --widget-error-message-color: var(--c-danger-variant);
+
     @include assign-color-variants(--c-primary, --_c-yellow-primary);
     --c-primary-variant: var(--_c-yellow-secondary);
     @include assign-color-variants(--c-secondary, --_c-yellow-secondary);
@@ -91,15 +94,15 @@ $font-family-secondary: "Gotham-Rounded-Medium";
     --c-danger-variant: var(--_c-red-primary);
 
     @media (min-width: $tablet-min) {
-      --button-font-size: var(--font-base);
+        --button-font-size: var(--font-base);
     }
 
     @include for-desktop {
-      --h1-font-size: 2.625rem;
-      --h2-font-size: 2.625rem;
-      --h3-font-size: 1.625rem;
-      --h4-font-size: 1.125rem;
-      --h5-font-size: 0.875rem;
-      --h6-font-size: 0.625rem;
+        --h1-font-size: 2.625rem;
+        --h2-font-size: 2.625rem;
+        --h3-font-size: 1.625rem;
+        --h4-font-size: 1.125rem;
+        --h5-font-size: 0.875rem;
+        --h6-font-size: 0.625rem;
     }
-  }
+}
