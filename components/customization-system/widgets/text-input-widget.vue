@@ -40,14 +40,14 @@ export default defineComponent({
       default: 'text'
     },
     value: {
-      type: [String, Array] as PropType<string | undefined>,
+      type: [String, Number] as PropType<string | number | undefined>,
       default: undefined
     }
   },
   setup (props, { emit }) {
     const valueModel = computed<string | undefined>({
       get: () => {
-        return props.value;
+        return props.value?.toString();
       },
       set: (newValue: string | undefined) => {
         emit('input', newValue);
