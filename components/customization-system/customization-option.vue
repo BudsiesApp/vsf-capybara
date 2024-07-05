@@ -184,6 +184,15 @@ export default defineComponent({
     margin: var(--customization-option-hint-margin, var(--spacer-xs) 0 0);
   }
 
+  ._option-description,
+  ._option-hint {
+    ::v-deep {
+      li {
+        text-align: left;
+      }
+    }
+  }
+
   ._widget {
     margin: var(--customization-option-widget-margin, var(--spacer-sm) 0 0);
   }
