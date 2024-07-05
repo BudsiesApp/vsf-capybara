@@ -57,27 +57,7 @@
 
             <div
               class="_actions-container"
-              :ref="getFieldAnchorName('Quantity')"
             >
-              <validation-provider
-                v-slot="{ errors }"
-                rules="required"
-                :name="'Quantity'"
-                slim
-              >
-                <div class="_quantity-field">
-                  <a-custom-product-quantity
-                    v-model="quantity"
-                    class="_qty-container"
-                    :disabled="isDisabled"
-                  />
-
-                  <div class="_error-text">
-                    {{ errors[0] }}
-                  </div>
-                </div>
-              </validation-provider>
-
               <m-form-errors
                 class="_form-errors"
                 :form-errors="formErrors"
@@ -349,8 +329,7 @@ export default defineComponent({
         removePreservedState();
 
         context.root.$router.push({
-          name: 'cross-sells',
-          params: { parentSku: product.value.sku }
+          name: 'detailed-cart'
         });
       } catch (error) {
         context.root.$store.dispatch('notification/spawnNotification', {

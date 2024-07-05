@@ -66,6 +66,10 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/typography";
 
 .textarea-widget {
+  --input-font-family: var(--font-family-primary);
+  --input-label-font-family: var(--font-family-primary);
+  --input-error-message-font-family: var(--font-family-primary);
+
   width: 100%;
 
   ._textarea {

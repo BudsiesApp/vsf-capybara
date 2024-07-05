@@ -126,7 +126,6 @@
 import debounce from 'lodash-es/debounce';
 import {
   SfPrice,
-  SfList,
   SfCollectedProduct,
   SfButton,
   SfHeading,
@@ -146,7 +145,6 @@ import { CART_UPD_ITEM } from '@vue-storefront/core/modules/cart/store/mutation-
 import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
-import MDropdown from 'theme/components/molecules/m-dropdown.vue';
 import CartItemConfiguration from 'theme/components/customization-system/cart-item-configuration.vue';
 
 const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
@@ -172,9 +170,7 @@ export default {
   },
   components: {
     CartItemConfiguration,
-    MDropdown,
     SfPrice,
-    SfList,
     SfCollectedProduct,
     SfButton,
     SfHeading,

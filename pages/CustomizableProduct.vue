@@ -32,7 +32,6 @@ import { useProductPage } from 'theme/helpers/use-product-page';
 enum LayoutType {
   WITH_IMAGES_GALLERY = 'with-images-gallery',
   VERTICAL = 'vertical',
-  PHRASE_PILLOW = 'phrase-pillow',
 }
 
 export default defineComponent({
@@ -43,10 +42,6 @@ export default defineComponent({
         /* webpackChunkName: "vsf-images-gallery-form" */ 'theme/components/customization-system/forms/form-with-images-gallery.vue'
       ),
     ProductStructuredData,
-    PhrasePillowForm: () =>
-      import(
-        /* webpackChunkName: "vsf-phrase-pillow-form" */ 'theme/components/customization-system/forms/phrase-pillow-form.vue'
-      ),
     VerticalStepsForm: () =>
       import(
         /* webpackChunkName: "vsf-vertical-form" */ 'theme/components/customization-system/forms/vertical-steps-form.vue'
@@ -81,8 +76,6 @@ export default defineComponent({
           return 'form-with-images-gallery';
         case LayoutType.VERTICAL:
           return 'vertical-steps-form';
-        case LayoutType.PHRASE_PILLOW:
-          return 'phrase-pillow-form';
       }
     });
 

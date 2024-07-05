@@ -46,39 +46,6 @@
                 onCustomizationOptionBusyChanged
               "
             />
-
-            <validation-provider
-              v-if="isLastGroup(index)"
-              v-slot="{ errors, classes }"
-              rules="required"
-              :name="'Quantity'"
-              slim
-            >
-              <div class="_quantity-field" :class="classes">
-                <SfHeading
-                  class="_step-subtitle -required"
-                  :level="3"
-                  title="Quantity"
-                  :ref="getFieldAnchorName('Quantity')"
-                />
-
-                <ACustomProductQuantity
-                  v-model="quantity"
-                  class="_qty-container"
-                  :disabled="isDisabled"
-                />
-
-                <div class="_error-text">
-                  {{ errors[0] }}
-                </div>
-
-                <a
-                  class="_popup-link"
-                  href="javascript:void(0)"
-                  @click="showQuantityNotes = true"
-                >{{ $t("Quantity & Shipping Discounts") }}</a>
-              </div>
-            </validation-provider>
           </div>
         </div>
 
@@ -98,31 +65,15 @@
             {{ submitButtonText }}
           </SfButton>
 
-          <SfButton
-            class="_add-to-cart-and-make-another color-secondary"
-            type="submit"
-            :disabled="isSubmitButtonDisabled"
-            @click="shouldMakeAnother = true"
-            v-show="!existingCartItem"
-          >
-            {{ $t("Save & Make Another") }}
-          </SfButton>
-
           <MBlockStory
             class="_agreement"
-            story-slug="order_submit_agreement_petsies"
+            story-slug="order_submit_agreement_bulkorders"
           />
         </div>
 
         <MBlockStory :story-slug="bottomStorySlug" v-if="bottomStorySlug" />
       </form>
     </validation-observer>
-
-    <SfModal :visible="showQuantityNotes" @close="showQuantityNotes = false">
-      <div class="_popup-content">
-        <MBlockStory :story-slug="quantityAndShippingDiscountsStorySlug" />
-      </div>
-    </SfModal>
   </div>
 </template>
 
@@ -398,8 +349,7 @@ export default defineComponent({
 
         if (!shouldMakeAnother.value) {
           context.root.$router.push({
-            name: 'cross-sells',
-            params: { parentSku: product.value.sku }
+            name: 'detailed-cart'
           });
 
           return;

@@ -5,6 +5,12 @@ import { ProductId, ProductValue } from 'src/modules/budsies';
 export function useBackendProductId (productId: Ref<string | number>) {
   const backendProductId = computed<ProductValue>(() => {
     switch (productId.value) {
+      case ProductId.BULK_PLUSH_SAMPLE:
+        return ProductValue.BULK_SAMPLE;
+      case ProductId.BULK_PILLOW_SAMPLE:
+        return ProductValue.PILLOW_BULK_SAMPLE;
+      case ProductId.BULK_KEYCHAIN_SAMPLE:
+        return ProductValue.KEYCHAIN_BULK_SAMPLE;
       case ProductId.CUSTOM_PILLOW:
       case ProductId.BUDDY_PILLOW:
         return ProductValue.PILLOW;

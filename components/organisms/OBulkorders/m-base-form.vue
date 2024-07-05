@@ -900,7 +900,7 @@ export default defineComponent({
   }
 
   .m-multiselect {
-    --tags-min-height: 56px;
+   --multiselect-tags-min-height: 56px;
 
     width: 100%;
     margin: 0;
