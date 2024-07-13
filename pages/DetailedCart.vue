@@ -32,7 +32,7 @@
                 <template #configuration>
                   <cart-item-configuration
                     :customizations="product.customizations"
-                    :customization-state="product.customizationState"
+                    :customization-state="(product.extension_attributes || {}).customization_state"
                     :product-options="getProductOptions(product)"
                   />
                 </template>
@@ -465,42 +465,42 @@ export default {
         this.$router.push({
           name: 'photo-portraits-creation-page',
           query: {
-            existingPlushieId: product.plushieId
+            existingPlushieId: product.extension_attributes?.plushie_id
           }
         });
       } else if (product.sku === customPillowSku) {
         this.$router.push({
           name: 'pillow-product',
           query: {
-            existingPlushieId: product.plushieId
+            existingPlushieId: product.extension_attributes?.plushie_id
           }
         })
       } else if (product.sku === nftBudsieSku) {
         this.$router.push({
           name: 'nft-budsies-create',
           query: {
-            existingPlushieId: product.plushieId
+            existingPlushieId: product.extension_attributes?.plushie_id
           }
         });
       } else if (product.sku === buddyPillowSku) {
         this.$router.push({
           name: 'pillow-product',
           query: {
-            existingPlushieId: product.plushieId
+            existingPlushieId: product.extension_attributes?.plushie_id
           }
         })
       } else if (product.sku === budsiesPalsSku) {
         this.$router.push({
           name: 'budsies-pals-creation',
           query: {
-            existingPlushieId: product.plushieId
+            existingPlushieId: product.extension_attributes?.plushie_id
           }
         });
       } else if (product.sku === specialtyCommissionSku) {
         this.$router.push({
           name: 'specialty-commissions-creation',
           query: {
-            existingPlushieId: product.plushieId
+            existingPlushieId: product.extension_attributes?.plushie_id
           }
         });
       } else if (selfiesProductSkus.includes(product.sku)) {
@@ -511,7 +511,7 @@ export default {
         this.$router.push({
           name: routeName,
           query: {
-            existingPlushieId: product.plushieId
+            existingPlushieId: product.extension_attributes?.plushie_id
           }
         });
       } else if (budsiesPlushieProductSkus.includes(product.sku)) {
@@ -522,7 +522,7 @@ export default {
         this.$router.push({
           name: routeName,
           query: {
-            existingPlushieId: product.plushieId
+            existingPlushieId: product.extension_attributes?.plushie_id
           }
         });
       } else if (clothesProductSkus.includes(product.sku)) {
@@ -530,25 +530,25 @@ export default {
           name: 'clothes-product',
           params: { sku: product.sku },
           query: {
-            existingPlushieId: product.plushieId
+            existingPlushieId: product.extension_attributes?.plushie_id
           }
         });
       } else if (golfHeadCoversProductsSkus.includes(product.sku)) {
         this.$router.push({
           name: 'golf-covers-create',
-          query: { id: product.plushieId }
+          query: { id: product.extension_attributes?.plushie_id }
         });
       } else if (foreversProductsSkus.includes(product.sku)) {
         this.$router.push({
           name: 'forevers-create',
-          query: { id: product.plushieId }
+          query: { id: product.extension_attributes?.plushie_id }
         });
       } else if (printedProductSkus.includes(product.sku)) {
         this.$router.push({
           name: 'printed-product',
           params: { sku: product.sku },
           query: {
-            existingPlushieId: product.plushieId
+            existingPlushieId: product.extension_attributes?.plushie_id
           }
         });
       } else if (blanketProductsSkus.includes(product.sku)) {
@@ -559,7 +559,7 @@ export default {
         this.$router.push({
           name: routeName,
           query: {
-            existingPlushieId: product.plushieId
+            existingPlushieId: product.extension_attributes?.plushie_id
           }
         });
       } else if (clayPlushieProductSkus.includes(product.sku)) {
@@ -570,7 +570,7 @@ export default {
         this.$router.push({
           name: routeName,
           query: {
-            existingPlushieId: product.plushieId
+            existingPlushieId: product.extension_attributes?.plushie_id
           }
         });
       }

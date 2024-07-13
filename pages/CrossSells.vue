@@ -142,7 +142,7 @@ export default defineComponent({
       }
 
       return (
-        selfiesSkus.includes(this.currentProduct.sku)
+        selfiesSkus?.includes(this.currentProduct.sku)
           ? this.$t('Selfies Accessories')
           : this.$t('Budsies Accessories')
       ).toString();

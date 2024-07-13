@@ -44,7 +44,9 @@ export function useAddToCart (
 
     const productToAddData: Partial<CartItem> = {
       qty: quantity.value,
-      customizationState: filterCustomizationState(customizationStateItems.value)
+      extension_attributes: {
+        customization_state: filterCustomizationState(customizationStateItems.value)
+      }
     };
 
     try {
@@ -84,7 +86,9 @@ export function useAddToCart (
     const cartItemForUpdate: Partial<CartItem> = {
       qty: quantity.value,
       product_option: productOption,
-      customizationState: filterCustomizationState(customizationStateItems.value)
+      extension_attributes: {
+        customization_state: filterCustomizationState(customizationStateItems.value)
+      }
     };
 
     try {

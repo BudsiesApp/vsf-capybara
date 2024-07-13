@@ -411,7 +411,7 @@ export default defineComponent({
         return;
       }
 
-      return this.cartItems.find((item) => item.plushieId && item.plushieId === this.existingPlushieId);
+      return this.cartItems.find((item) => item.extension_attributes?.plushie_id && item.extension_attributes?.plushie_id === this.existingPlushieId);
     },
     hospitalsList (): Hospital[] {
       return this.$store.getters['budsies/getHospitals'];
@@ -500,7 +500,7 @@ export default defineComponent({
       }
 
       this.description = existingCartItem.plushieDescription || '';
-      this.plushieId = Number(existingCartItem.plushieId);
+      this.plushieId = Number(existingCartItem.extension_attributes?.plushie_id);
       this.selectedHospitalId = existingCartItem.hospitalId;
       this.participantName = existingCartItem.participantName;
       this.parentName = existingCartItem.parentName;

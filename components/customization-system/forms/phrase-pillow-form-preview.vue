@@ -369,7 +369,10 @@ function useImagesProcessing (
   const backPreview = ref<InstanceType<typeof MLivePreview> | null>(null);
   const frontPreview = ref<InstanceType<typeof MLivePreview> | null>(null);
 
-  async function getProcessedImageUploadCustomizationStateItem (): Promise<CustomizationStateItem> {
+  async function getProcessedImageUploadCustomizationStateItem (): Promise<{
+    customizationId: string,
+    value: CustomizationOptionValue
+  }> {
     if (!imageUploadValue.value || !imageUploadCustomization.value) {
       throw new Error('Unable to get original uploaded image');
     }

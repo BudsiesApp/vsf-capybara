@@ -87,7 +87,7 @@ export default Vue.extend({
         return;
       }
 
-      return this.cartItems.find((item) => item.plushieId && item.plushieId === this.existingPlushieId);
+      return this.cartItems.find((item) => item.extension_attributes?.plushie_id && item.extension_attributes?.plushie_id === this.existingPlushieId);
     },
     showForm (): boolean {
       return this.isDataLoaded && !!this.getCurrentProduct;

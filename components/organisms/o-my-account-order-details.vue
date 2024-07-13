@@ -192,7 +192,7 @@ export default {
           qty: product.qty_ordered,
           regularPrice: `$${product.row_total_incl_tax}`,
           customizations: product.customizations,
-          customizationState: product.customizationState,
+          customizationState: product.extension_attributes?.customization_state,
           customOptions: product.custom_options
         }
       });
