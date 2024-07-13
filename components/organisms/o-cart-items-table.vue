@@ -55,7 +55,7 @@ export default {
           name: cartItem.name,
           qty: cartItem.qty,
           customizations: cartItem.customizations,
-          customizationState: cartItem.customizationState,
+          customizationState: cartItem.extension_attributes?.customization_state,
           specialPrice: this.getProductSpecialPrice(cartItem),
           regularPrice: this.getProductRegularPrice(cartItem)
         }

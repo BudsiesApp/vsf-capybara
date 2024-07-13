@@ -112,7 +112,7 @@ export default defineComponent({
         }
 
         const relatedCustomization =
-          customizationDictionary.value[customizationStateItem.customizationId];
+          customizationDictionary.value[customizationStateItem.customization_id];
 
         if (
           !relatedCustomization?.showInCart ||
@@ -129,7 +129,7 @@ export default defineComponent({
           properties.push({
             id: getCustomizablePropertyComposedId(
               value,
-              customizationStateItem.customizationId
+              customizationStateItem.customization_id
             ),
             value,
             sn: relatedCustomization.sn,
@@ -154,7 +154,7 @@ export default defineComponent({
           properties.push({
             id: getCustomizablePropertyComposedId(
               selectedOptionValue.name,
-              customizationStateItem.customizationId
+              customizationStateItem.customization_id
             ),
             value: selectedOptionValue.name,
             sn: relatedCustomization.sn,

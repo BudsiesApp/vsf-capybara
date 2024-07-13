@@ -659,7 +659,7 @@ export default defineComponent({
         return;
       }
 
-      return this.cartItems.find((item) => item.plushieId === this.existingPlushieId);
+      return this.cartItems.find((item) => item.extension_attributes?.plushie_id === this.existingPlushieId);
     },
     mainTitleText (): TranslateResult {
       return this.$t(

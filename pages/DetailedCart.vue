@@ -24,7 +24,7 @@
                 <template #configuration>
                   <cart-item-configuration
                     :customizations="product.customizations"
-                    :customization-state="product.customizationState"
+                    :customization-state="(product.extension_attributes || {}).customization_state"
                     :product-options="getProductOptions(product)"
                   />
                 </template>
@@ -266,7 +266,7 @@ export default {
           routeName = 'plush-sample';
         }
 
-        this.$router.push({ name: routeName, query: { existingPlushieId: product.plushieId } })
+        this.$router.push({ name: routeName, query: { existingPlushieId: product.extension_attributes?.plushie_id } })
       }
     },
     getProductRegularPrice (product) {

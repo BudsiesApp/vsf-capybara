@@ -210,6 +210,7 @@ export default defineComponent({
       selectedOptionValuesIds,
       updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
+
     const {
       availableCustomization,
       availableCustomizations,
@@ -223,6 +224,7 @@ export default defineComponent({
       updateCustomizationOptionValue,
       product
     );
+
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
         productCustomizations,
@@ -232,8 +234,10 @@ export default defineComponent({
         removeCustomizationOptionValue,
         addCustomizationOptionValue
       );
+
     const { isSomeCustomizationOptionBusy, onCustomizationOptionBusyChanged } =
       useCustomizationsBusyState();
+
     function onCustomizationOptionInput (payload: {
       customizationId: string,
       value: CustomizationOptionValue
@@ -241,6 +245,7 @@ export default defineComponent({
       updateCustomizationOptionValue(payload);
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
+
     const { getPreservedData, removePreservedState } =
       useCustomizationStatePreservation(
         productSku,
