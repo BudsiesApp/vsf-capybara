@@ -594,7 +594,7 @@ export default defineComponent({
         return;
       }
 
-      return this.cartItems.find((item) => item.plushieId && item.plushieId === this.existingPlushieId);
+      return this.cartItems.find((item) => item.extension_attributes?.plushie_id && item.extension_attributes?.plushie_id === this.existingPlushieId);
     },
     getBodypartOptions (): (id: string) => BodypartOption[] {
       return this.$store.getters['budsies/getBodypartOptions']
@@ -673,7 +673,7 @@ export default defineComponent({
       }
 
       this.quantity = cartItem.qty || 1;
-      this.plushieId = Number(cartItem.plushieId);
+      this.plushieId = Number(cartItem.extension_attributes?.plushie_id);
       this.name = cartItem.plushieName;
 
       this.fillCustomerImagesFromCartItem(cartItem);
@@ -925,7 +925,7 @@ export default defineComponent({
         await this.updateClientAndServerItem({
           product: Object.assign({}, existingCartItem, {
             qty: this.quantity,
-            plushieId: existingCartItem.plushieId,
+            plushieId: existingCartItem.extension_attributes?.plushie_id,
             plushieName: this.name,
             email: this.email,
             bodyparts: this.getBodypartsData(),

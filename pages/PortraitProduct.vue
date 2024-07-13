@@ -77,7 +77,7 @@ export default Vue.extend({
         return;
       }
 
-      return this.cartItems.find((item) => item.plushieId && item.plushieId === this.existingPlushieId);
+      return this.cartItems.find((item) => item.extension_attributes?.plushie_id && item.extension_attributes?.plushie_id === this.existingPlushieId);
     },
     nameStepHint (): string {
       return this.$t('<strong>Please note:</strong> Write exactly what you\'d like printed above the pet\'s photo here. It\'s printed as written. If you have multiple pets, you can separate each pet\'s name with a comma or "&". Next, select "Add more pets" below and upload each pet\'s photo separately in the order you wrote their names. Pets will be positioned from left to right in the order below, 1, 2, 3, etc.')

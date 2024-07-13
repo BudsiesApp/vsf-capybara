@@ -654,7 +654,7 @@ export default defineComponent({
     },
     fillProductTypeStepDataFromCartItem (cartItem: CartItem): void {
       this.productTypeStepData.product = cartItem;
-      this.productTypeStepData.plushieId = cartItem.plushieId ? Number.parseInt(cartItem.plushieId, 10) : undefined;
+      this.productTypeStepData.plushieId = cartItem.extension_attributes?.plushie_id ? Number.parseInt(cartItem.extension_attributes?.plushie_id, 10) : undefined;
     },
     async fillProductTypeStepDataFromPersistedState (persistedState?: PlushieCreationWizardPersistedState): Promise<void> {
       if (!persistedState?.productTypeData) {

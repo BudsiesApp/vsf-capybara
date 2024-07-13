@@ -14,7 +14,7 @@ export function useExistingCartItem (
       return;
     }
 
-    return cartItems.value.find((item) => item.plushieId && item.plushieId === existingPlushieId.value);
+    return cartItems.value.find((item) => item.extension_attributes?.plushie_id && item.extension_attributes?.plushie_id === existingPlushieId.value);
   });
 
   return {
