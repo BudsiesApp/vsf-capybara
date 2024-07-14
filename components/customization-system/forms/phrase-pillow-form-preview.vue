@@ -120,10 +120,10 @@ import {
 import { SfHeading } from '@storefront-ui/vue';
 
 import config from 'config';
+import { getThumbnailPath } from '@vue-storefront/core/helpers';
 import {
   Customization,
   CustomizationOptionValue,
-  CustomizationStateItem,
   FileUploadValue,
   isFileUploadValue,
   OptionValue,
@@ -521,7 +521,7 @@ export default defineComponent({
       }
 
       return frontDesignOptionValue.value.galleryImages.map(
-        (image) => image.imageUrl
+        (image) => getThumbnailPath(image.imageUrl, 500, 500, '')
       );
     });
 

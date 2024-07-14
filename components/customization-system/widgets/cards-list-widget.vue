@@ -69,6 +69,7 @@ import {
   toRefs
 } from '@vue/composition-api';
 import { SfPrice } from '@storefront-ui/vue';
+import { getThumbnailPath } from '@vue-storefront/core/helpers';
 
 import { BaseImage } from 'src/modules/budsies';
 import {
@@ -113,7 +114,10 @@ export default defineComponent({
     const { maxValuesCount, value, values } = toRefs(props);
 
     function getItemImage (optionValue: OptionValue): string | undefined {
-      return optionValue.thumbnailUrl;
+      if (!optionValue.thumbnailUrl) {
+        return;
+      }
+      return getThumbnailPath(optionValue.thumbnailUrl, 500, 500, '');
     }
 
     const isValid = computed<boolean>(() => {

@@ -9,10 +9,11 @@
         class="_image-wrapper"
         :class="{ '-selected': selected, '-round': round }"
       >
-        <BaseImage
+        <base-image
           class="_image"
-          :src="option.thumbnailUrl"
+          :src="getItemImage(option)"
           :aspect-ratio="1"
+          v-if="getItemImage(option)"
         />
       </div>
     </template>
@@ -21,6 +22,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { getThumbnailPath } from '@vue-storefront/core/helpers';
 
 import { BaseImage } from 'src/modules/budsies';
 import {
@@ -77,8 +79,16 @@ export default defineComponent({
       }
     });
 
+    function getItemImage (optionValue: OptionValue): string | undefined {
+      if (!optionValue.thumbnailUrl) {
+        return;
+      }
+      return getThumbnailPath(optionValue.thumbnailUrl, 210, 210, '');
+    }
+
     return {
-      selectedOption
+      selectedOption,
+      getItemImage
     };
   }
 });
