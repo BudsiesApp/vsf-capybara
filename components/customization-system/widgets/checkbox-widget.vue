@@ -49,11 +49,15 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
+    const sortedValues = computed<OptionValue[]>(() => {
+      return props.values.sort((a, b) => a.sn - b.sn);
+    });
+
     const valueIdForSelectedState = computed<string>(() => {
-      return props.values[0].id;
+      return sortedValues.value[0].id;
     });
     const valueIdForUnselectedState = computed<string>(() => {
-      return props.values[1]?.id || '';
+      return sortedValues.value[1]?.id || '';
     });
 
     const selectedOption = computed<string | string[] | undefined>({
