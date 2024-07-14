@@ -1,5 +1,7 @@
 import { ComputedRef, Ref, computed } from '@vue/composition-api';
 
+import config from 'config';
+import { getThumbnailPath } from '@vue-storefront/core/helpers';
 import { getProductGallery } from '@vue-storefront/core/modules/catalog/helpers';
 import Product from 'core/modules/catalog/types/Product';
 import { Customization } from 'src/modules/customization-system';
@@ -21,7 +23,13 @@ export function useProductGallery (
 ) {
   const mainProductImages = computed<ZoomGalleryImage[]>(() => {
     return getProductGallery(product.value)
-      .map(getZoomGalleryImage)
+      .map((image: any) => {
+        return {
+          stage: image.src,
+          thumb: image.src,
+          big: image.src
+        };
+      });
   });
   const optionValueImages = computed<Record<string, ZoomGalleryImage[]>>(() => {
     const result: Record<string, ZoomGalleryImage[]> = {};
@@ -38,7 +46,13 @@ export function useProductGallery (
 
         result[value.id] = value.galleryImages
           .sort((a, b) => a.sn > b.sn ? 1 : -1)
-          .map(getZoomGalleryImage);
+          .map(image => {
+            return {
+              stage: getThumbnailPath(image.imageUrl, config.products.gallery.width, config.products.gallery.height, ''),
+              thumb: getThumbnailPath(image.imageUrl, config.products.gallery.width, config.products.gallery.height, ''),
+              big: getThumbnailPath(image.imageUrl, config.products.gallery.width, config.products.gallery.height, '')
+            }
+          });
       }
     }
 
