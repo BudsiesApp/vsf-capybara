@@ -87,6 +87,7 @@ export function useAddToCart (
       qty: quantity.value,
       product_option: productOption,
       extension_attributes: {
+        ...existingCartItem.value.extension_attributes,
         customization_state: filterCustomizationState(customizationStateItems.value)
       }
     };
