@@ -33,7 +33,11 @@
 
       <div class="_customization-section">
         <form class="_form">
-          <SfSteps :active="currentStep" class="_customizer-steps">
+          <SfSteps
+            :active="currentStep"
+            :steps="stepsList"
+            class="_customizer-steps"
+          >
             <template #steps="props">
               <div
                 class="_customizer-step"
@@ -81,7 +85,7 @@
               </div>
             </sf-step>
 
-            <sf-step name="Add to Cart">
+            <sf-step :name="lastStepName">
               <phrase-pillow-form-last-step
                 :add-to-cart-action="onFormSubmit"
                 :available-customizations="lastStepAvailableCustomizations"
