@@ -480,10 +480,11 @@ export default defineComponent({
   }
 
   ._step-title {
-    @include border(--step-border, 0 0 4px 0, solid, var(--c-warning));
-    --heading-title-color: var(--c-warning);
+    @include border(--step-border, 0 0 4px 0, solid, var(--c-primary));
+    --heading-title-color: var(--c-primary);
+    --heading-title-font-family: var(--font-family-primary);
+    --heading-padding: 0 0 var(--spacer-xs);
     --heading-title-margin: var(--spacer-xl) 0 0;
-    --heading-title-font-size: var(--font-xl);
 
     display: inline-block;
     text-transform: uppercase;
