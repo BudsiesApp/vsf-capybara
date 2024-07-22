@@ -453,6 +453,7 @@ export default defineComponent({
       availableCustomization,
       availableOptionValues,
       customizationOptionValue,
+      currentProduct,
       updateCustomizationOptionValue,
       context
     );
