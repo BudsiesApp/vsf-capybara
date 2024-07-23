@@ -32,7 +32,6 @@ import { CROSS_SELL, useRelatedProducts } from 'theme/helpers/use-related-produc
 import { getFieldAnchorName } from 'theme/helpers/use-form-validation';
 
 import AddonOption from '../interfaces/addon-option.interface';
-import SelectedAddon from '../interfaces/selected-addon.interface';
 
 import MAddonsSelector from '../molecules/m-addons-selector.vue';
 
@@ -102,20 +101,15 @@ export default defineComponent({
       return this.relatedProducts.map(getAddonOptionFromProduct);
     },
     selectedProducts: {
-      get (): SelectedAddon[] {
-        return this.value.map((product) => {
-          return {
-            addonOptionValueId: product.id as number,
-            optionsValues: {}
-          }
-        });
+      get (): number[] {
+        return this.value.map((product) => product.id as number);
       },
-      set (value: SelectedAddon[]) {
+      set (value: number[]) {
         this.$emit(
           'input',
           value.map(
-            (option) => this.getRelatedProductById(
-              option.addonOptionValueId
+            (optionId) => this.getRelatedProductById(
+              optionId
             )
           )
         );
