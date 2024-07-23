@@ -15,6 +15,7 @@ import CartItem from 'core/modules/cart/types/CartItem';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
 import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
 
+import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
 import { OrderContentItem } from '../interfaces/order-content-item.interface';
 
 import OOrderContent from './o-order-content.vue';
@@ -57,7 +58,8 @@ export default {
           customizations: cartItem.customizations,
           customizationState: cartItem.extension_attributes?.customization_state,
           specialPrice: this.getProductSpecialPrice(cartItem),
-          regularPrice: this.getProductRegularPrice(cartItem)
+          regularPrice: this.getProductRegularPrice(cartItem),
+          customOptions: getCartItemOptions(cartItem)
         }
       });
     }
