@@ -6,8 +6,6 @@ const Product = () =>
   import(/* webpackChunkName: "vsf-product" */ 'theme/pages/Product');
 const PlushieProduct = () =>
   import(/* webpackChunkName: "vsf-forevers-product" */ 'theme/pages/PlushieProduct');
-const PhrasePillowProduct = () =>
-  import(/* webpackChunkName: "vsf-phrase-pillow-product" */ 'theme/pages/PhrasePillowProduct');
 const Category = () =>
   import(/* webpackChunkName: "vsf-category" */ 'theme/pages/Category');
 const Checkout = () =>
