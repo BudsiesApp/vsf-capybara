@@ -5,6 +5,19 @@ import { ProductId, ProductValue } from 'src/modules/budsies';
 export function useBackendProductId (productId: Ref<string | number>) {
   const backendProductId = computed<ProductValue>(() => {
     switch (productId.value) {
+      case ProductId.BOBBLEHEADS:
+        return ProductValue.BOBBLEHEADS;
+      case ProductId.BUDSIES:
+      case ProductId.BUDSIES_PUPPETS:
+      case ProductId.BUDSIES_NFT:
+        return ProductValue.BUDSIE;
+      case ProductId.BUDSIES_PALS:
+        return ProductValue.BUDSIES_PALS;
+      case ProductId.SELFIES:
+      case ProductId.SELFIES_PUPPETS:
+        return ProductValue.SELFIE;
+      case ProductId.SPECIALTY_COMMISSION:
+        return ProductValue.SPECIALTY_COMMISSION;
       case ProductId.CUSTOM_PILLOW:
       case ProductId.BUDDY_PILLOW:
         return ProductValue.PILLOW;
@@ -16,11 +29,14 @@ export function useBackendProductId (productId: Ref<string | number>) {
       case ProductId.PRINTED_KEYCHAINS:
         return ProductValue.PRINTED_KEYCHAINS;
       case ProductId.PHRASE_PILLOW:
+      case ProductId.BUDSIES_PHRASE_PILLOWS:
         return ProductValue.PHRASE_PILLOW;
       case ProductId.FELTED_MAGNETS:
         return ProductValue.FELTED_MAGNETS;
       case ProductId.FELTED_ORNAMENTS:
         return ProductValue.FELTED_ORNAMENTS;
+      case ProductId.FIGURINES:
+        return ProductValue.FIGURINES;
       case ProductId.RENAISSANCE_BLANKETS:
         return ProductValue.RENAISSANCE_BLANKETS;
       case ProductId.CUT_OUT_BLANKETS:
