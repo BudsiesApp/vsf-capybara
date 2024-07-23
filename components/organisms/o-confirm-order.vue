@@ -225,6 +225,7 @@ import { Payment } from '@vue-storefront/core/modules/checkout/components/Paymen
 import { onlineHelper } from '@vue-storefront/core/helpers';
 import { ProductId } from 'src/modules/budsies';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
+import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
 import { AFFIRM_BEFORE_PLACE_ORDER, AFFIRM_MODAL_CLOSED, AFFIRM_CHECKOUT_ERROR } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';
 import { getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
 import { getCartItemPrice } from 'src/modules/shared';
@@ -257,6 +258,9 @@ export default {
     SfCollectedProduct
   },
   mixins: [OrderReview, Payment],
+  inject: {
+    imageHandlerService: { from: 'ImageHandlerService' }
+  },
   data () {
     return {
       isCheckoutInProgress: false,
@@ -346,6 +350,16 @@ export default {
       return this.truncate(name);
     },
     getThumbnailForProduct (product) {
+      const customizationSystemThumbnail =
+        getCustomizationSystemCartItemThumbnail(
+          product,
+          this.imageHandlerService
+        );
+
+      if (customizationSystemThumbnail) {
+        return customizationSystemThumbnail;
+      }
+
       if (product.thumbnail && product.thumbnail.includes('://')) {
         return product.thumbnail;
       }
