@@ -90,43 +90,14 @@
                 class="collected-product"
               >
                 <template #configuration>
-                  <div class="collected-product__option" v-if="getPlushieName(product)">
-                    {{ getPlushieName(product) | htmlDecode }}
-                  </div>
-                  <div
-                    class="collected-product__option"
-                    v-for="option in getBundleProductOptions(product)"
-                    :key="option"
-                  >
-                    <SfIcon
-                      icon="check"
-                      size="xxs"
-                      color="blue-primary"
-                      class="collected-product__option__icon"
-                    />
-                    {{ option }}
-                  </div>
+                  <cart-item-configuration
+                    :customizations="product.customizations"
+                    :customization-state="(product.extension_attributes || {}).customization_state"
+                    :product-options="getCartItemOptions(product)"
+                  />
                 </template>
                 <template #actions>
                   <div>
-                    <div class="collected-product__properties">
-                      <template v-for="option in getProductOptions(product)">
-                        <SfProperty
-                          v-if="isCustomOption(product, option)"
-                          :key="option.label"
-                          :name="option.label"
-                          :value="option.value"
-                          class="collected-product__property"
-                        />
-                        <div
-                          v-else
-                          :key="option.label"
-                          class="collected-product__property"
-                        >
-                          {{ option.value }}
-                        </div>
-                      </template>
-                    </div>
                     <div class="collected-product__action">
                       {{ $t('Quantity') }}:
                       <span class="product__qty">{{ product.qty }}</span>
@@ -233,12 +204,7 @@
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
-import { registerModule } from '@vue-storefront/core/lib/modules';
-import { OrderModule } from '@vue-storefront/core/modules/order';
-import { OrderReview } from '@vue-storefront/core/modules/checkout/components/OrderReview';
-import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
-import { createSmoothscroll } from 'theme/helpers';
+import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 import {
   SfRadio,
   SfIcon,
@@ -248,27 +214,35 @@ import {
   SfButton,
   SfHeading,
   SfAccordion,
-  SfCollectedProduct,
-  SfProperty
+  SfCollectedProduct
 } from '@storefront-ui/vue';
-import MPriceSummary from 'theme/components/molecules/m-price-summary';
-import APromoCode from 'theme/components/atoms/a-promo-code';
-import OGiftCardPayment from './o-gift-card-payment.vue';
 
+import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
+import { registerModule } from '@vue-storefront/core/lib/modules';
+import { OrderModule } from '@vue-storefront/core/modules/order';
+import { OrderReview } from '@vue-storefront/core/modules/checkout/components/OrderReview';
+import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
 import { onlineHelper } from '@vue-storefront/core/helpers';
 import { ProductId } from 'src/modules/budsies';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
 import { AFFIRM_BEFORE_PLACE_ORDER, AFFIRM_MODAL_CLOSED, AFFIRM_CHECKOUT_ERROR } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';
+import { getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
 import { getCartItemPrice } from 'src/modules/shared';
 
+import { createSmoothscroll } from 'theme/helpers';
+import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
+
+import APromoCode from 'theme/components/atoms/a-promo-code';
+import CartItemConfiguration from 'theme/components/customization-system/cart-item-configuration.vue';
+import MPriceSummary from 'theme/components/molecules/m-price-summary';
 import OCartItemsTable from 'theme/components/organisms/o-cart-items-table';
-import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
-import { getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
+import OGiftCardPayment from 'theme/components/organisms/o-gift-card-payment.vue';
 
 export default {
   name: 'OConfirmOrder',
   components: {
     APromoCode,
+    CartItemConfiguration,
     MPriceSummary,
     OCartItemsTable,
     OGiftCardPayment,
@@ -280,8 +254,7 @@ export default {
     SfButton,
     SfHeading,
     SfAccordion,
-    SfCollectedProduct,
-    SfProperty
+    SfCollectedProduct
   },
   mixins: [OrderReview, Payment],
   data () {
@@ -358,6 +331,7 @@ export default {
     ...mapActions('ui', {
       openModal: 'openModal'
     }),
+    getCartItemOptions,
     getPlushieName (product) {
       if (!product.plushieName) {
         return '';
