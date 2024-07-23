@@ -6,7 +6,7 @@
         v-for="textProperty in textProperties"
         :key="textProperty.id"
       >
-        {{ textProperty.value }}
+        {{ truncate(textProperty.value) }}
       </div>
 
       <div
@@ -37,7 +37,7 @@
         />
 
         <div v-else>
-          {{ option.value }}
+          {{ truncate(option.value) }}
         </div>
       </div>
     </template>
@@ -53,6 +53,8 @@ import {
   CustomizationStateItem,
   isFileUploadValue
 } from 'src/modules/customization-system';
+
+import { useMobileObserver } from 'theme/helpers/use-mobile-observer';
 
 interface CustomizableProperty {
   id: string,
@@ -91,6 +93,8 @@ export default defineComponent({
     }
   },
   setup (props) {
+    const { isMobile } = useMobileObserver();
+
     const customizationDictionary = computed<Record<string, Customization>>(
       () => {
         const dictionary: Record<string, Customization> = {};
@@ -184,11 +188,22 @@ export default defineComponent({
       );
     });
 
+    function truncate (text: string, desktopLength = 75, mobileLength = 50) {
+      const maxLength = isMobile.value ? mobileLength : desktopLength;
+
+      if (text.length <= maxLength) {
+        return text;
+      }
+
+      return text.substring(0, maxLength) + '...';
+    }
+
     return {
       customizableProperties,
       hasCustomizableProperties,
       optionValueProperties,
-      textProperties
+      textProperties,
+      truncate
     };
   }
 });
