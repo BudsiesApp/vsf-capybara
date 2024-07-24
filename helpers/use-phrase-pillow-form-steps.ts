@@ -6,7 +6,7 @@ import CustomizationOption from 'theme/components/customization-system/customiza
 
 import { useFormSteps } from './use-form-steps';
 
-const lastStepCustomizationName = 'add to cart';
+const lastStepName = 'Add to Cart';
 
 export function usePhrasePillowFormSteps (
   customizationRootGroups: Ref<Customization[]>,
@@ -15,7 +15,7 @@ export function usePhrasePillowFormSteps (
   const formSteps = useFormSteps(customizationRootGroups);
   const lastStepAvailableCustomizations = computed<Customization[]>(() => {
     const groupCustomization = customizationRootGroups.value.find(
-      (customization) => customization.name.toLowerCase() === lastStepCustomizationName
+      (customization) => customization.name.toLowerCase() === lastStepName.toLowerCase()
     );
 
     if (!groupCustomization) {
@@ -26,7 +26,7 @@ export function usePhrasePillowFormSteps (
   });
   const stepsCustomizations = computed<Customization[]>(() => {
     return customizationRootGroups.value.filter(
-      (customization) => customization.name.toLowerCase() !== lastStepCustomizationName
+      (customization) => customization.name.toLowerCase() !== lastStepName.toLowerCase()
     )
   });
 
@@ -57,6 +57,14 @@ export function usePhrasePillowFormSteps (
     validationState.value = { ...(validationState as any).value, ...stepsValidationState };
   }
 
+  const stepsList = computed<string[]>(() => {
+    const stepsNames = stepsCustomizations.value.map(({ name }) => name);
+
+    stepsNames.push(lastStepName);
+
+    return stepsNames;
+  });
+
   function resetValidationState (): void {
     const state: Record<string, boolean> = {};
 
@@ -64,7 +72,7 @@ export function usePhrasePillowFormSteps (
       state[customization.name] = true;
     }
 
-    state['Add to Cart'] = true;
+    state[lastStepName] = true;
 
     (validationState as any).value = state;
   }
@@ -99,9 +107,11 @@ export function usePhrasePillowFormSteps (
     activateFirstStepWithError,
     isStepInvalid,
     lastStepAvailableCustomizations,
+    lastStepName,
     nextStep,
     onChangeStep,
     stepsCustomizations,
+    stepsList,
     customizationOptionsRefs
   }
 }
