@@ -25,7 +25,7 @@
                   <cart-item-configuration
                     :customizations="product.customizations"
                     :customization-state="(product.extension_attributes || {}).customization_state"
-                    :product-options="getProductOptions(product)"
+                    :product-options="getCartItemOptions(product)"
                   />
                 </template>
 
@@ -136,7 +136,6 @@ import { mapGetters, mapState } from 'vuex';
 import { getCartItemPrice } from 'src/modules/shared';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
-import { onlineHelper } from '@vue-storefront/core/helpers';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
 import CartEvents from 'src/modules/shared/types/cart-events';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
@@ -146,6 +145,7 @@ import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customizati
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
 import CartItemConfiguration from 'theme/components/customization-system/cart-item-configuration.vue';
+import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
 
 const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
 
@@ -221,39 +221,7 @@ export default {
     this.syncQuantityDebounced.cancel();
   },
   methods: {
-    getProductOptions (product) {
-      const options = onlineHelper.isOnline && product.totals && product.totals.options
-        ? product.totals.options
-        : product.options || [];
-
-      return options.map((option) => {
-        return {
-          value: option.value,
-          label: option.label,
-          isCustom: !!product.custom_options?.find((customOption) => customOption.title === option.label)
-        }
-      })
-    },
-    getPlushieName (product) {
-      if (!product.plushieName) {
-        return '';
-      }
-
-      let name = product.plushieName;
-
-      if (product.plushieBreed) {
-        name += ', ' + product.plushieBreed;
-      }
-
-      return this.truncate(name);
-    },
-    getPlushieDesc (product) {
-      if (!product.plushieDescription) {
-        return '';
-      }
-
-      return this.truncate(product.plushieDescription, 150, 50);
-    },
+    getCartItemOptions,
     editHandler (product) {
       if (bulkSampleProductSkus.includes(product.sku)) {
         let routeName;
@@ -321,15 +289,6 @@ export default {
     },
     showEditButton (productSku) {
       return editableProductsSkus.includes(productSku);
-    },
-    truncate (text, desktopLength = 75, mobileLength = 50) {
-      const maxLength = this.isMobile ? mobileLength : desktopLength;
-
-      if (text.length <= maxLength) {
-        return text;
-      }
-
-      return text.substring(0, maxLength) + '...';
     },
     getCartItemKey (cartItem) {
       return getCartItemKey(cartItem);

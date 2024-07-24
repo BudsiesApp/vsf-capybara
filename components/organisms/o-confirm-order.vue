@@ -90,43 +90,14 @@
                 class="collected-product"
               >
                 <template #configuration>
-                  <div class="collected-product__option" v-if="getPlushieName(product)">
-                    {{ getPlushieName(product) | htmlDecode }}
-                  </div>
-                  <div
-                    class="collected-product__option"
-                    v-for="option in getBundleProductOptions(product)"
-                    :key="option"
-                  >
-                    <SfIcon
-                      icon="check"
-                      size="xxs"
-                      color="blue-primary"
-                      class="collected-product__option__icon"
-                    />
-                    {{ option }}
-                  </div>
+                  <cart-item-configuration
+                    :customizations="product.customizations"
+                    :customization-state="(product.extension_attributes || {}).customization_state"
+                    :product-options="getCartItemOptions(product)"
+                  />
                 </template>
                 <template #actions>
                   <div>
-                    <div class="collected-product__properties">
-                      <template v-for="option in getProductOptions(product)">
-                        <SfProperty
-                          v-if="isCustomOption(product, option)"
-                          :key="option.label"
-                          :name="option.label"
-                          :value="option.value"
-                          class="collected-product__property"
-                        />
-                        <div
-                          v-else
-                          :key="option.label"
-                          class="collected-product__property"
-                        >
-                          {{ option.value }}
-                        </div>
-                      </template>
-                    </div>
                     <div class="collected-product__action">
                       {{ $t('Quantity') }}:
                       <span class="product__qty">{{ product.qty }}</span>
@@ -232,12 +203,7 @@
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
-import { registerModule } from '@vue-storefront/core/lib/modules';
-import { OrderModule } from '@vue-storefront/core/modules/order';
-import { OrderReview } from '@vue-storefront/core/modules/checkout/components/OrderReview';
-import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
-import { createSmoothscroll } from 'theme/helpers';
+import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 import {
   SfRadio,
   SfIcon,
@@ -247,26 +213,33 @@ import {
   SfButton,
   SfHeading,
   SfAccordion,
-  SfCollectedProduct,
-  SfProperty
+  SfCollectedProduct
 } from '@storefront-ui/vue';
-import MPriceSummary from 'theme/components/molecules/m-price-summary';
-import APromoCode from 'theme/components/atoms/a-promo-code';
 
-import { onlineHelper } from '@vue-storefront/core/helpers';
-import { ProductId } from 'src/modules/budsies';
+import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
+import { registerModule } from '@vue-storefront/core/lib/modules';
+import { OrderModule } from '@vue-storefront/core/modules/order';
+import { OrderReview } from '@vue-storefront/core/modules/checkout/components/OrderReview';
+import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
+import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
 import { AFFIRM_BEFORE_PLACE_ORDER, AFFIRM_MODAL_CLOSED, AFFIRM_CHECKOUT_ERROR } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';
+import { getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
 import { getCartItemPrice } from 'src/modules/shared';
 
+import { createSmoothscroll } from 'theme/helpers';
+import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
+
+import APromoCode from 'theme/components/atoms/a-promo-code';
+import CartItemConfiguration from 'theme/components/customization-system/cart-item-configuration.vue';
+import MPriceSummary from 'theme/components/molecules/m-price-summary';
 import OCartItemsTable from 'theme/components/organisms/o-cart-items-table';
-import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
-import { getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
 
 export default {
   name: 'OConfirmOrder',
   components: {
     APromoCode,
+    CartItemConfiguration,
     MPriceSummary,
     OCartItemsTable,
     SfRadio,
@@ -277,10 +250,12 @@ export default {
     SfButton,
     SfHeading,
     SfAccordion,
-    SfCollectedProduct,
-    SfProperty
+    SfCollectedProduct
   },
   mixins: [OrderReview, Payment],
+  inject: {
+    imageHandlerService: { from: 'ImageHandlerService' }
+  },
   data () {
     return {
       isCheckoutInProgress: false,
@@ -355,20 +330,18 @@ export default {
     ...mapActions('ui', {
       openModal: 'openModal'
     }),
-    getPlushieName (product) {
-      if (!product.plushieName) {
-        return '';
-      }
-
-      let name = product.plushieName;
-
-      if (product.plushieBreed) {
-        name += ', ' + product.plushieBreed;
-      }
-
-      return this.truncate(name);
-    },
+    getCartItemOptions,
     getThumbnailForProduct (product) {
+      const customizationSystemThumbnail =
+        getCustomizationSystemCartItemThumbnail(
+          product,
+          this.imageHandlerService
+        );
+
+      if (customizationSystemThumbnail) {
+        return customizationSystemThumbnail;
+      }
+
       if (product.thumbnail && product.thumbnail.includes('://')) {
         return product.thumbnail;
       }
@@ -381,63 +354,6 @@ export default {
     getProductSpecialPrice (product) {
       return getCartItemPrice(product, {}).special;
     },
-    getProductOptions (product) {
-      return onlineHelper.isOnline && product.totals && product.totals.options
-        ? product.totals.options
-        : product.options || [];
-    },
-    isCustomOption (product, productOption) {
-      if (!product.custom_options) {
-        return false;
-      }
-
-      return product.custom_options.find(option => option.title === productOption.label) !== undefined;
-    },
-    getBundleProductOptions (product) {
-      if (!product.bundle_options ||
-          product.bundle_options.length < 2 ||
-          !product.product_option ||
-          !product.product_option.extension_attributes ||
-          !product.product_option.extension_attributes.bundle_options
-      ) {
-        return [];
-      }
-
-      let result = [];
-      const productBundleOptions = product.product_option.extension_attributes.bundle_options;
-
-      product.bundle_options.forEach(option => {
-        // Hide Forevers simple products
-        if ([ProductId.FOREVERS_DOG, ProductId.FOREVERS_CAT, ProductId.FOREVERS_OTHER]
-          .includes(product.id) && option.title.toLowerCase() === 'product'
-        ) {
-          return;
-        }
-
-        if (!productBundleOptions.hasOwnProperty(option.option_id)) {
-          return
-        }
-
-        const selections = productBundleOptions[option.option_id].option_selections;
-
-        if (!selections) {
-          return
-        }
-
-        selections.forEach(selection => {
-          const productLink = option.product_links.find(productLink => +productLink.id === selection);
-
-          if (!productLink) {
-            return;
-          }
-
-          result.push(productLink.product.name);
-        });
-      });
-
-      return result;
-    },
-    onSuccess () {},
     onFailure (response) {
       this.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
@@ -451,15 +367,6 @@ export default {
         message: this.$t('Something went wrong. Please try another payment method'),
         action1: { label: this.$t('OK') }
       });
-    },
-    truncate (text, desktopLength = 75, mobileLength = 50) {
-      const maxLength = this.isMobile ? mobileLength : desktopLength;
-
-      if (text.length <= maxLength) {
-        return text;
-      }
-
-      return text.substring(0, maxLength) + '...';
     },
     onAffirmBeforePlaceOrderHandler () {
       this.isCheckoutInProgress = true;
