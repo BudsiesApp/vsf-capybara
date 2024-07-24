@@ -120,6 +120,10 @@ $forms-color-placeholder: #a09999;
     --c-divider: var(--_c-gray-accent);
     --c-accent: var(--_c-blue-primary);
     --c-final-price: var(--c-primary);
+    --c-gray-light: var(--_c-gray-light);
+
+    --widget-error-message-font: var(--font-normal) var(--font-xs) var(--font-family-secondary);
+    --widget-error-message-color: var(--c-danger-variant);
 
     --c-button-border: var(--_c-red-secondary);
     --c-button-background: var(--_c-light-primary);
