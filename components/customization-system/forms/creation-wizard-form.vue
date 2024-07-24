@@ -5,10 +5,11 @@
         <sf-steps
           :active="currentStep"
           :can-go-back="canGoBack && !isSubmitButtonDisabled"
+          :steps="stepsList"
           @change="onStepChanged"
           class="_steps"
         >
-          <sf-step name="Type">
+          <sf-step :name="productTypeChooseStepName">
             <m-product-type-choose-step
               :disabled="isDisabled"
               :product-type-buttons-list="productTypeButtonsList"
