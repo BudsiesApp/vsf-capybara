@@ -211,6 +211,9 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .cart-item-configuration {
+  --property-name-font-size: var(--font-xs);
+  --property-value-font-size: var(--font-xs);
+
   .collected-product__properties {
     font-size: var(--font-xs);
     margin-bottom: var(--spacer-xs);
