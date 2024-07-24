@@ -4,6 +4,8 @@ import CartItem from 'core/modules/cart/types/CartItem';
 import { Customization } from 'src/modules/customization-system';
 import { useFormSteps } from './use-form-steps';
 
+const productTypeChooseStepName = 'Type';
+
 export function useCreationWizardFormSteps (
   customizationRootGroups: Ref<Customization[]>,
   existingCartItem: Ref<CartItem | undefined>
@@ -25,6 +27,14 @@ export function useCreationWizardFormSteps (
   const canGoBack = computed<boolean>(() => {
     return (currentStep.value !== 1 || !existingCartItem.value);
   });
+
+  const stepsList = computed<string[]>(() => {
+    const stepsNames = customizationRootGroups.value.map(({ name }) => name);
+
+    stepsNames.unshift(productTypeChooseStepName);
+
+    return stepsNames;
+  })
 
   function scrollToTop (): void {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
@@ -62,6 +72,8 @@ export function useCreationWizardFormSteps (
     lastStepCustomization,
     nextStep,
     onStepChanged,
-    stepsCustomizations
+    productTypeChooseStepName,
+    stepsCustomizations,
+    stepsList
   }
 }
