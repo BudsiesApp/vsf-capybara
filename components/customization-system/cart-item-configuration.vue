@@ -51,6 +51,7 @@ import { computed, defineComponent, PropType } from '@vue/composition-api';
 import {
   Customization,
   CustomizationStateItem,
+  getCustomizationValueIdFieldKey,
   isFileUploadValue
 } from 'src/modules/customization-system';
 
@@ -145,9 +146,17 @@ export default defineComponent({
         const selectedValues = Array.isArray(customizationStateItem.value)
           ? customizationStateItem.value
           : [customizationStateItem.value];
+        const optionValueKey = getCustomizationValueIdFieldKey(relatedCustomization.optionData);
+
         const selectedOptionValues =
           relatedCustomization.optionData.values.filter((optionValue) => {
-            return selectedValues.includes(optionValue.id);
+            const optionValueId = optionValue[optionValueKey];
+
+            if (!optionValueId) {
+              return false;
+            }
+
+            return selectedValues.includes(optionValueId);
           });
 
         for (const selectedOptionValue of selectedOptionValues) {
