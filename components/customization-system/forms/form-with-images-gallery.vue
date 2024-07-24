@@ -372,6 +372,7 @@ export default defineComponent({
       availableCustomization,
       availableOptionValues,
       customizationOptionValue,
+      product,
       updateCustomizationOptionValue,
       context
     );
