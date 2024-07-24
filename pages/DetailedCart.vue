@@ -400,26 +400,6 @@ export default {
   },
   methods: {
     getCartItemOptions,
-    getPlushieName (product) {
-      if (!product.plushieName) {
-        return '';
-      }
-
-      let name = product.plushieName;
-
-      if (product.plushieBreed) {
-        name += ', ' + product.plushieBreed;
-      }
-
-      return this.truncate(name);
-    },
-    getPlushieDesc (product) {
-      if (!product.plushieDescription) {
-        return '';
-      }
-
-      return this.truncate(product.plushieDescription, 150, 50);
-    },
     editHandler (product) {
       if (product.sku === customPhotoPortraitsSku) {
         this.$router.push({
@@ -539,15 +519,6 @@ export default {
     },
     showEditButton (productSku) {
       return editableProductsSkus.includes(productSku);
-    },
-    truncate (text, desktopLength = 75, mobileLength = 50) {
-      const maxLength = this.isMobile ? mobileLength : desktopLength;
-
-      if (text.length <= maxLength) {
-        return text;
-      }
-
-      return text.substring(0, maxLength) + '...';
     },
     getCartItemKey (cartItem) {
       return getCartItemKey(cartItem);
