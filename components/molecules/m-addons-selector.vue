@@ -347,10 +347,6 @@ export default Vue.extend({
     }
   }
 
-  ._addon-option-item {
-    margin-top: var(--spacer-sm);
-  }
-
   &.-skin-budsies {
     ._item {
       ._price {
