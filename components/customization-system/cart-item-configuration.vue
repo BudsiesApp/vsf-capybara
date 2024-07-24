@@ -6,7 +6,7 @@
         v-for="textProperty in textProperties"
         :key="textProperty.id"
       >
-        {{ textProperty.value }}
+        {{ truncate(textProperty.value) }}
       </div>
 
       <div
@@ -37,7 +37,7 @@
         />
 
         <div v-else>
-          {{ option.value }}
+          {{ truncate(option.value) }}
         </div>
       </div>
     </template>
@@ -51,8 +51,11 @@ import { computed, defineComponent, PropType } from '@vue/composition-api';
 import {
   Customization,
   CustomizationStateItem,
+  getCustomizationValueIdFieldKey,
   isFileUploadValue
 } from 'src/modules/customization-system';
+
+import { useMobileObserver } from 'theme/helpers/use-mobile-observer';
 
 interface CustomizableProperty {
   id: string,
@@ -91,6 +94,8 @@ export default defineComponent({
     }
   },
   setup (props) {
+    const { isMobile } = useMobileObserver();
+
     const customizationDictionary = computed<Record<string, Customization>>(
       () => {
         const dictionary: Record<string, Customization> = {};
@@ -141,9 +146,17 @@ export default defineComponent({
         const selectedValues = Array.isArray(customizationStateItem.value)
           ? customizationStateItem.value
           : [customizationStateItem.value];
+        const optionValueKey = getCustomizationValueIdFieldKey(relatedCustomization.optionData);
+
         const selectedOptionValues =
           relatedCustomization.optionData.values.filter((optionValue) => {
-            return selectedValues.includes(optionValue.id);
+            const optionValueId = optionValue[optionValueKey];
+
+            if (!optionValueId) {
+              return false;
+            }
+
+            return selectedValues.includes(optionValueId);
           });
 
         for (const selectedOptionValue of selectedOptionValues) {
@@ -184,11 +197,22 @@ export default defineComponent({
       );
     });
 
+    function truncate (text: string, desktopLength = 75, mobileLength = 50) {
+      const maxLength = isMobile.value ? mobileLength : desktopLength;
+
+      if (text.length <= maxLength) {
+        return text;
+      }
+
+      return text.substring(0, maxLength) + '...';
+    }
+
     return {
       customizableProperties,
       hasCustomizableProperties,
       optionValueProperties,
-      textProperties
+      textProperties,
+      truncate
     };
   }
 });
@@ -196,6 +220,9 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .cart-item-configuration {
+  --property-name-font-size: var(--font-xs);
+  --property-value-font-size: var(--font-xs);
+
   .collected-product__properties {
     font-size: var(--font-xs);
     margin-bottom: var(--spacer-xs);
