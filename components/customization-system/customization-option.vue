@@ -4,12 +4,11 @@
     :class="'-widget-' + widget.component"
     :ref="validationRef"
   >
-    <label
-      class="_option-label"
-      v-if="showLabel"
-    >
-      {{ optionLabel }}
-    </label>
+    <slot name="label" v-if="showLabel" :label="optionLabel">
+      <label class="_option-label">
+        {{ optionLabel }}
+      </label>
+    </slot>
 
     <div
       class="_option-description"
@@ -69,7 +68,8 @@ import TextAreaWidget from './widgets/textarea-widget.vue';
 import TextInputWidget from './widgets/text-input-widget.vue';
 import ThumbnailsListWidget from './widgets/thumbnails-list-widget.vue';
 
-const customizationWidgetBusyStateChangedEventName = 'customization-option-busy-state-changed';
+const customizationWidgetBusyStateChangedEventName =
+  'customization-option-busy-state-changed';
 
 export default defineComponent({
   name: 'CustomizationOption',

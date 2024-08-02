@@ -22,7 +22,7 @@
           <validation-provider
             tag="div"
             class="_section"
-            name="'Size'"
+            name="Size"
             v-slot="{errors}"
           >
             <AOrderedHeading
@@ -102,7 +102,7 @@ interface PillowSizeOption {
 
 extend('required', {
   ...required,
-  message: '{_field_} field is required'
+  message: 'The \'{_field_}\' field is required'
 })
 
 function getBaseForm (

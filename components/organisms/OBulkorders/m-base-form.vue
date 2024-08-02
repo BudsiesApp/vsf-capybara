@@ -4,7 +4,7 @@
       tag="div"
       class="_section"
       v-slot="{ errors }"
-      name="'Artwork'"
+      name="Artwork"
       rules="requiredArtwork"
     >
       <AOrderedHeading
@@ -39,7 +39,7 @@
       tag="div"
       class="_section"
       v-slot="{ errors }"
-      name="'Project Name'"
+      name="Project Name"
       rules="required"
     >
       <AOrderedHeading
@@ -70,7 +70,7 @@
       class="_section"
       v-slot="{ errors }"
       rules="required"
-      name="'Design'"
+      name="Design"
     >
       <AOrderedHeading
         :order="3"
@@ -117,7 +117,7 @@
         tag="div"
         v-slot="{ errors, failedRules }"
         rules="required|min_value:50"
-        name="'Quantity'"
+        name="Quantity"
       >
         <SfInput
           :label="$t('Quantity')"
@@ -150,7 +150,7 @@
         tag="div" v-slot="{ errors }"
         rules="min_value:50"
         class="_additional-quantity"
-        name="'Additional Quantity'"
+        name="Additional Quantity"
         v-show="showAdditionalQuantity"
       >
         <span class="_helper">
@@ -201,7 +201,7 @@
         tag="div"
         v-slot="{ errors }"
         rules="required"
-        name="'Deadline'"
+        name="Deadline"
       >
         <SfRadio
           value="0"
@@ -226,7 +226,7 @@
       <validation-provider
         tag="div"
         v-slot="{ errors }"
-        name="'Deadline Date'"
+        name="Deadline Date"
         :ref="getFieldAnchorName('Deadline Date')"
         :rules="deadline === '1' ? 'required' : ''"
       >
@@ -257,7 +257,7 @@
       class="_section"
       v-slot="{ errors }"
       rules="required"
-      name="'Country'"
+      name="Country"
     >
       <AOrderedHeading
         :order="countryStepOrder"
@@ -297,7 +297,7 @@
         <validation-provider
           v-slot="{ errors }"
           rules="required"
-          name="'First Name'"
+          name="First Name"
           slim
         >
           <SfInput
@@ -320,7 +320,7 @@
         <validation-provider
           v-slot="{ errors }"
           rules="required|email"
-          name="'Email'"
+          name="Email"
           slim
         >
           <SfInput
@@ -337,7 +337,7 @@
         <validation-provider
           v-slot="{ errors }"
           :rules="phoneValidationRules"
-          name="'Phone Number'"
+          name="Phone Number"
           slim
         >
           <SfInput
@@ -383,7 +383,7 @@
     <validation-provider
       v-slot="{ errors }"
       :rules="{ required: { allowFalse: false } }"
-      name="'Agreement'"
+      name="Agreement"
       slim
     >
       <MCheckbox
@@ -446,7 +446,7 @@ const Countries = require('@vue-storefront/i18n/resource/countries.json');
 
 extend('required', {
   ...required,
-  message: '{_field_} field is required'
+  message: 'The \'{_field_}\' field is required'
 });
 
 extend('requiredArtwork', {
@@ -456,7 +456,7 @@ extend('requiredArtwork', {
 
 extend('min_value', {
   ...min_value,
-  message: '{_field_} field should be greater than {min}'
+  message: 'The \'{_field_}\' field should be greater than {min}'
 });
 
 extend('email', email);
