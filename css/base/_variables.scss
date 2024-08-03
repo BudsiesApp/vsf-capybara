@@ -77,6 +77,7 @@ $font-family-secondary: "Gotham-Rounded-Medium";
     --widget-error-message-font: var(--font-normal) var(--font-xs) var(--font-family-secondary);
     --widget-error-message-color: var(--c-danger-variant);
     --customization-option-required-field-mark-color: var(--c-warning);
+    --vertical-steps-form-step-title-color: var(--c-primary);
 
     @include assign-color-variants(--c-primary, --_c-yellow-primary);
     --c-primary-variant: var(--_c-yellow-secondary);
