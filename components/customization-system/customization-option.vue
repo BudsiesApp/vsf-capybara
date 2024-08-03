@@ -6,6 +6,7 @@
   >
     <label
       class="_option-label"
+      :class="{ '-required': isFieldRequired }"
       v-if="showLabel"
     >
       {{ optionLabel }}
@@ -69,7 +70,8 @@ import TextAreaWidget from './widgets/textarea-widget.vue';
 import TextInputWidget from './widgets/text-input-widget.vue';
 import ThumbnailsListWidget from './widgets/thumbnails-list-widget.vue';
 
-const customizationWidgetBusyStateChangedEventName = 'customization-option-busy-state-changed';
+const customizationWidgetBusyStateChangedEventName =
+  'customization-option-busy-state-changed';
 
 export default defineComponent({
   name: 'CustomizationOption',
@@ -165,6 +167,13 @@ export default defineComponent({
     font-size: var(--customization-option-label-size, var(--font-base));
     font-weight: var(--customization-option-label-weight, var(--font-bold));
     text-align: var(--customization-option-label-align, left);
+
+    &.-required {
+      &::after {
+        color: var(--customization-option-required-field-mark-color);
+        content: "*";
+      }
+    }
   }
 
   ._option-description {
