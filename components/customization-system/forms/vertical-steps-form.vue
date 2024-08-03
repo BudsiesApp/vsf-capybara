@@ -531,8 +531,8 @@ export default defineComponent({
   }
 
   ._step-title {
-    @include border(--step-border, 0 0 4px 0, solid, var(--c-warning));
-    --heading-title-color: var(--c-warning);
+    @include border(--step-border, 0 0 4px 0, solid, var(--vertical-steps-form-step-title-color, var(--c-warning)));
+    --heading-title-color: var(--vertical-steps-form-step-title-color, var(--c-warning));
     --heading-title-margin: var(--spacer-xl) 0 0;
     --heading-title-font-size: var(--font-xl);
 
