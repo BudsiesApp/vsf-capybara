@@ -87,8 +87,8 @@ $font-family-intro: "GothamRounded", "Helvetica", sans-serif;
 
     --widget-error-message-font: var(--font-normal) var(--font-xs) var(--font-family-secondary);
     --widget-error-message-color: var(--c-danger-variant);
+    --customization-option-required-field-mark-color: var(--c-danger-variant);
     --vertical-steps-form-step-title-color: var(--c-danger);
-    
     @include assign-color-variants(--c-primary, --_c-green-primary);
     --c-primary-variant: var(--_c-green-primary-darken);
     
