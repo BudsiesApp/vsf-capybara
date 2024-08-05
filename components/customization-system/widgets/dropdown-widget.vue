@@ -9,11 +9,11 @@
     v-if="showSelect"
   >
     <sf-select-option
-      v-for="optionValue in sortedValuesWithPlaceholder"
+      v-for="optionValue in dropdownOptions"
       :key="optionValue.id"
       :value="optionValue.id"
     >
-      {{ optionValue.name }}
+      {{ optionValue.label }}
     </sf-select-option>
   </sf-select>
 </template>
@@ -37,10 +37,17 @@ import {
 
 import {
   OptionValue,
+  useOptionValuesPrice,
   useValuesSort
 } from 'src/modules/customization-system';
+import { PriceHelper } from 'src/modules/shared';
 
 const defaultPlaceholder = 'Select Option';
+
+interface DropdownOption {
+  id: string,
+  label: string
+}
 
 export default defineComponent({
   name: 'DropdownWidget',
@@ -69,14 +76,14 @@ export default defineComponent({
       default: () => []
     }
   },
-  setup (props, { emit }) {
+  setup (props, context) {
     const { placeholder, values } = toRefs(props);
     const selectedOption = computed<string | undefined>({
       get: () => {
         return props.value;
       },
       set: (newValue) => {
-        emit('input', newValue);
+        context.emit('input', newValue);
       }
     });
     const isValid = computed<boolean>(() => {
@@ -85,18 +92,36 @@ export default defineComponent({
 
     const { sortedValues } = useValuesSort(values);
 
-    const sortedValuesWithPlaceholder = computed<OptionValue[]>(() => {
-      return [
+    const { isOptionValuesSamePrice, optionValuePriceDictionary } = useOptionValuesPrice(
+      sortedValues,
+      context
+    );
+
+    const dropdownOptions = computed<DropdownOption[]>(() => {
+      const options: DropdownOption[] = [
         {
           id: '',
-          name: placeholder.value || defaultPlaceholder,
-          isEnabled: true,
-          isDefault: false,
-          sn: -1,
-          galleryImages: []
-        },
-        ...sortedValues.value
+          label: placeholder.value || defaultPlaceholder
+        }
       ];
+
+      sortedValues.value.forEach((optionValue) => {
+        const optionValuePrice = optionValuePriceDictionary.value[optionValue.id];
+        const finalPrice = optionValuePrice ? PriceHelper.getFinalPrice(optionValuePrice) : null;
+        const canShowPrice = !isOptionValuesSamePrice.value || sortedValues.value.length === 1;
+        let label = optionValue.name || '';
+
+        if (canShowPrice && finalPrice) {
+          label += ` ${PriceHelper.formatPrice(finalPrice)}`;
+        }
+
+        options.push({
+          id: optionValue.id,
+          label
+        });
+      });
+
+      return options;
     });
 
     const showSelect = ref<boolean>(true);
@@ -107,10 +132,10 @@ export default defineComponent({
     });
 
     return {
+      dropdownOptions,
       isValid,
       selectedOption,
-      showSelect,
-      sortedValuesWithPlaceholder
+      showSelect
     };
   },
   computed: {

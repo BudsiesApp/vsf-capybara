@@ -6,6 +6,10 @@ export function getCartItemOptions (cartItem: CartItem): {
   label: string,
   value: string
 }[] {
+  if (cartItem.type_id !== 'configurable') {
+    return [];
+  }
+
   const options = onlineHelper.isOnline && cartItem.totals && cartItem.totals.options
     ? cartItem.totals.options
     : cartItem.options || [];
