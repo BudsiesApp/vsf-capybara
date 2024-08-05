@@ -6,8 +6,6 @@ const Product = () =>
   import(/* webpackChunkName: "vsf-product" */ 'theme/pages/Product');
 const PlushieProduct = () =>
   import(/* webpackChunkName: "vsf-forevers-product" */ 'theme/pages/PlushieProduct');
-const PhrasePillowProduct = () =>
-  import(/* webpackChunkName: "vsf-phrase-pillow-product" */ 'theme/pages/PhrasePillowProduct');
 const Category = () =>
   import(/* webpackChunkName: "vsf-category" */ 'theme/pages/Category');
 const Checkout = () =>
@@ -269,7 +267,7 @@ let routes = [
     path: '/plushie/index/printedSocks/',
     component: CustomizableProduct,
     props: route => ({
-      sku: 'customPrintedSocks_bundle',
+      sku: 'petsiesCustomPrintedSocks_bundle',
       productDesign: route.query.product_design,
       existingPlushieId: route.query.existingPlushieId
     })
@@ -343,10 +341,10 @@ let routes = [
   {
     path: '/phrasepillow/index/customize/',
     name: 'phrase-pillow-customize',
-    component: PhrasePillowProduct,
+    component: CustomizableProduct,
     props: (route) => ({
-      backDesign: route.query.back_design,
-      frontDesign: route.query.front_design
+      sku: 'petsiesPhrasePillow_bundle',
+      layout: 'phrase-pillow'
     })
   },
   { name: 'recover-cart', path: '/alerts/recover/cart/id/:id/code/:code/', component: CartRecovery },
@@ -377,7 +375,7 @@ let routes = [
     path: '/blankets/index/create/type/cut-out-blankets/',
     component: CustomizableProduct,
     props: (route) => ({
-      sku: 'customCutOutBlankets_bundle',
+      sku: 'petsiesCustomCutOutBlankets_bundle',
       existingPlushieId: route.query.existingPlushieId,
       productDesign: route.query.product_design
     })

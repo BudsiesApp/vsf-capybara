@@ -5,10 +5,11 @@
         <sf-steps
           :active="currentStep"
           :can-go-back="canGoBack && !isSubmitButtonDisabled"
+          :steps="stepsList"
           @change="onStepChanged"
           class="_steps"
         >
-          <sf-step name="Type">
+          <sf-step :name="productTypeChooseStepName">
             <m-product-type-choose-step
               :disabled="isDisabled"
               :product-type-buttons-list="productTypeButtonsList"
@@ -21,7 +22,6 @@
               v-for="customizationGroup in stepsCustomizations"
               :key="customizationGroup.id"
               :name="customizationGroup.name"
-              :use-v-show="true"
             >
               <validation-observer
                 v-slot="{ errors: formErrors, passes }"
@@ -110,6 +110,8 @@
 import {
   computed,
   defineComponent,
+  nextTick,
+  onMounted,
   PropType,
   Ref,
   ref,
@@ -128,7 +130,15 @@ import {
   useOptionValueActions,
   useCustomizationsBusyState,
   CustomizationOptionValue,
-  useCustomizationsGroups
+  useCustomizationsGroups,
+  useCustomizationsBundleOptions,
+  useCustomizationsOptionsDefaultValue,
+  useCustomizationStatePreservation,
+  useProductionTimeSelectorCustomization,
+  useSelectedOptionValueUrlQuery,
+  useEmailCustomization,
+  useCustomizationsFilter,
+  requiredCustomizationsFilter
 } from 'src/modules/customization-system';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
@@ -140,7 +150,6 @@ import { useFloatingPhoto } from 'theme/helpers/use-floating-photo';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { PlushieType } from 'theme/interfaces/plushie.type';
 
-import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
 import CreationWizardFormLastStep from 'theme/components/customization-system/forms/creation-wizard-form-last-step.vue';
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
@@ -168,6 +177,10 @@ function getAllFormRefs (
 export default defineComponent({
   name: 'CreationWizardForm',
   props: {
+    canUsePersistedCustomizationState: {
+      type: Boolean,
+      default: false
+    },
     existingCartItem: {
       type: Object as PropType<CartItem | undefined>,
       default: undefined
@@ -190,7 +203,6 @@ export default defineComponent({
     }
   },
   components: {
-    ACustomProductQuantity,
     CreationWizardFormLastStep,
     CustomizationOption,
     MBlockStory,
@@ -235,17 +247,23 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
+      replaceCustomizationState,
       resetCustomizationState,
       selectedOptionValuesIds,
       updateCustomizationOptionValue
     } = useCustomizationState(existingCartItem);
-    const { availableCustomizations, customizationAvailableOptionValues } =
-      useAvailableCustomizations(
-        productCustomizations,
-        selectedOptionValuesIds,
-        customizationOptionValue,
-        updateCustomizationOptionValue
-      );
+    const {
+      availableCustomization,
+      availableCustomizations,
+      availableOptionValues,
+      customizationAvailableOptionValues
+    } = useAvailableCustomizations(
+      productCustomizations,
+      selectedOptionValuesIds,
+      customizationOptionValue,
+      updateCustomizationOptionValue,
+      currentProduct
+    );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
         productCustomizations,
@@ -265,38 +283,44 @@ export default defineComponent({
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
 
-    const quantity = ref<number>(1);
-    const { addToCartHandler, isSubmitting } = useAddToCart(
-      currentProduct,
-      quantity,
-      customizationState,
-      existingCartItem,
+    useCustomizationsBundleOptions(
+      productCustomizations,
+      customizationOptionValue,
+      availableOptionValues,
       context
     );
 
-    async function onFormSubmit (): Promise<void> {
-      try {
-        await addToCartHandler();
+    useCustomizationsOptionsDefaultValue(
+      availableCustomizations,
+      customizationAvailableOptionValues,
+      customizationOptionValue,
+      onCustomizationOptionInput
+    );
 
-        if (!currentProduct.value) {
-          throw new Error('Product is missing');
-        }
+    // TODO: temporary until separate option value for "Standard"
+    // production time will be added
+    useProductionTimeSelectorCustomization(
+      availableCustomizations,
+      customizationOptionValue,
+      existingCartItem,
+      updateCustomizationOptionValue
+    );
 
-        context.root.$router.push({
-          name: 'cross-sells',
-          params: { parentSku: currentProduct.value.sku }
-        });
-      } catch (error) {
-        context.root.$store.dispatch('notification/spawnNotification', {
-          type: 'danger',
-          message: 'Error: ' + error,
-          action1: { label: i18n.t('OK') }
-        });
-      }
-    }
+    const { emailCustomizationFilter, persistCustomerEmail } =
+      useEmailCustomization(
+        availableCustomizations,
+        customizationOptionValue,
+        updateCustomizationOptionValue
+      );
+
+    const { filteredCustomizations } = useCustomizationsFilter(
+      availableCustomizations,
+      customizationAvailableOptionValues,
+      [emailCustomizationFilter, requiredCustomizationsFilter]
+    );
 
     const customizationGroups = useCustomizationsGroups(
-      availableCustomizations,
+      filteredCustomizations,
       productCustomization
     );
 
@@ -316,7 +340,7 @@ export default defineComponent({
 
     function afterProductTypeSet (): void {
       void handlePreselectedSize();
-    };
+    }
 
     const productTypeStep = useCreationWizardProductTypeStep(
       plushieType,
@@ -328,6 +352,89 @@ export default defineComponent({
       afterProductTypeSet,
       context
     );
+
+    const additionalPreservedData = computed<Record<string, any>>(() => {
+      return {
+        productSku: currentProduct.value?.sku,
+        stepIndex: formSteps.currentStep.value
+      }
+    });
+
+    const { getPreservedData, removePreservedState } =
+      useCustomizationStatePreservation(
+        plushieType,
+        customizationState,
+        existingCartItem,
+        additionalPreservedData
+      );
+
+    onMounted(async () => {
+      await nextTick();
+
+      if (
+        existingCartItem.value ||
+        !props.canUsePersistedCustomizationState
+      ) {
+        removePreservedState();
+        return;
+      }
+
+      const preservedState = await getPreservedData();
+
+      if (!preservedState) {
+        return;
+      }
+
+      const productSku = preservedState.additionalData?.productSku;
+
+      if (!productSku) {
+        removePreservedState();
+        return;
+      }
+
+      await productTypeStep.loadProduct(productSku);
+
+      replaceCustomizationState(preservedState.customizationState);
+
+      if (!preservedState.additionalData?.stepIndex) {
+        return;
+      }
+
+      formSteps.goToStep(preservedState.additionalData?.stepIndex);
+    });
+
+    const quantity = ref<number>(1);
+    const { addToCartHandler, isSubmitting } = useAddToCart(
+      currentProduct,
+      quantity,
+      customizationState,
+      existingCartItem,
+      context
+    );
+
+    async function onFormSubmit (): Promise<void> {
+      try {
+        await addToCartHandler();
+
+        persistCustomerEmail();
+        removePreservedState();
+
+        if (!currentProduct.value) {
+          throw new Error('Product is missing');
+        }
+
+        context.root.$router.push({
+          name: 'cross-sells',
+          params: { parentSku: currentProduct.value.sku }
+        });
+      } catch (error) {
+        context.root.$store.dispatch('notification/spawnNotification', {
+          type: 'danger',
+          message: 'Error: ' + error,
+          action1: { label: i18n.t('OK') }
+        });
+      }
+    }
 
     const isDisabled = computed<boolean>(() => {
       return isSubmitting.value || productTypeStep.isProductLoading.value;
@@ -342,6 +449,15 @@ export default defineComponent({
     const isSubmitButtonDisabled = computed<boolean>(() => {
       return isDisabled.value || isSomeCustomizationOptionBusy.value;
     });
+
+    useSelectedOptionValueUrlQuery(
+      availableCustomization,
+      availableOptionValues,
+      customizationOptionValue,
+      currentProduct,
+      updateCustomizationOptionValue,
+      context
+    );
 
     return {
       ...customizationGroups,

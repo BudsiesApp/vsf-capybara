@@ -125,6 +125,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
         },
@@ -135,6 +136,7 @@ export default defineComponent({
           maxValuesCount: 0,
           hasGalleryImages: false,
           hasDetailedDescription: false,
+          showInUrlQuery: false,
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.CARDS_LIST,
@@ -170,6 +172,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
         },
@@ -183,6 +186,7 @@ export default defineComponent({
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.CHECKBOX,
+          showInUrlQuery: false,
           values: [
             {
               id: 'yes',
@@ -211,6 +215,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
         },
@@ -224,6 +229,7 @@ export default defineComponent({
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.COLORS_LIST,
+          showInUrlQuery: false,
           displayWidgetOptions: {
             shape: 'square',
             alignment: 'left'
@@ -259,6 +265,17 @@ export default defineComponent({
               galleryImages: [],
               isEnabled: true,
               isDefault: false
+            },
+            {
+              id: 'item_4',
+              name: '4 Item',
+              description: `4 Item description`,
+              color: 'white',
+              price: 15,
+              sn: 3,
+              galleryImages: [],
+              isEnabled: true,
+              isDefault: false
             }
           ]
         }
@@ -269,6 +286,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
         },
@@ -282,6 +300,7 @@ export default defineComponent({
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.DROPDOWN,
+          showInUrlQuery: false,
           displayWidgetOptions: {
             placeholder: 'Select Item'
           },
@@ -322,6 +341,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
         },
@@ -334,7 +354,8 @@ export default defineComponent({
           hasDetailedDescription: false,
           isRequired: true,
           type: OptionType.GENERIC,
-          displayWidget: WidgetType.DROPDOWN_FREE_TEXT,
+          displayWidget: WidgetType.SEARCH_FIELD,
+          showInUrlQuery: false,
           displayWidgetOptions: {
             placeholder: 'Select Dropdown Item'
           },
@@ -375,6 +396,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
         },
@@ -388,6 +410,7 @@ export default defineComponent({
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.IMAGE_UPLOAD,
+          showInUrlQuery: false,
           values: []
         }
       },
@@ -397,6 +420,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
         },
@@ -410,6 +434,7 @@ export default defineComponent({
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.TEXT_INPUT,
+          showInUrlQuery: false,
           displayWidgetOptions: {
             placeholder: 'Enter your pet\'s name'
           },
@@ -422,6 +447,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
         },
@@ -435,6 +461,7 @@ export default defineComponent({
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.TEXT_AREA,
+          showInUrlQuery: false,
           displayWidgetOptions: {
             placeholder: 'Describe your pet\'s'
           },
@@ -447,6 +474,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
         },
@@ -460,6 +488,7 @@ export default defineComponent({
           isRequired: true,
           type: OptionType.GENERIC,
           displayWidget: WidgetType.THUMBNAILS_LIST,
+          showInUrlQuery: false,
           displayWidgetOptions: {
             shape: 'square',
             alignment: 'left'

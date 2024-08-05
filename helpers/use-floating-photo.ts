@@ -40,7 +40,7 @@ export function useFloatingPhoto (
       return '';
     }
 
-    const value = customizationState.value.find((item) => item.customizationId === relatedCustomization.id)?.value;
+    const value = customizationState.value.find((item) => item.customization_id === relatedCustomization.id)?.value;
 
     if (!value || isFileUploadValue(value) || Array.isArray(value)) {
       return '';

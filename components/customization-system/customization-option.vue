@@ -3,10 +3,10 @@
     class="customization-option"
     :class="'-widget-' + widget.component"
     :ref="validationRef"
-    v-show="showCustomization"
   >
     <label
       class="_option-label"
+      :class="{ '-required': isFieldRequired }"
       v-if="showLabel"
     >
       {{ optionLabel }}
@@ -23,6 +23,7 @@
       v-slot="{ errors }"
       :rules="validationRules"
       :name="optionLabel"
+      ref="validationProvider"
     >
       <component
         class="_widget"
@@ -58,18 +59,19 @@ import {
   WidgetType
 } from 'src/modules/customization-system';
 
-import CardsListWidget from './cards-list-widget.vue';
-import CheckboxWidget from './checkbox-widget.vue';
-import ColorsListWidget from './colors-list-widget.vue';
-import DropdownWidget from './dropdown-widget.vue';
-import DropdownFreeTextWidget from './dropdown-free-text-widget.vue';
-import ImageUploadWidget from './image-upload-widget.vue';
+import CardsListWidget from './widgets/cards-list-widget.vue';
+import CheckboxWidget from './widgets/checkbox-widget.vue';
+import ColorsListWidget from './widgets/colors-list-widget.vue';
+import DropdownWidget from './widgets/dropdown-widget.vue';
+import ImageUploadWidget from './widgets/image-upload-widget.vue';
 import ProductionTimeSelector from './production-time-selector.vue';
-import TextAreaWidget from './textarea-widget.vue';
-import TextInputWidget from './text-input-widget.vue';
-import ThumbnailsListWidget from './thumbnails-list-widget.vue';
+import SearchFieldWidget from './widgets/search-field-widget.vue';
+import TextAreaWidget from './widgets/textarea-widget.vue';
+import TextInputWidget from './widgets/text-input-widget.vue';
+import ThumbnailsListWidget from './widgets/thumbnails-list-widget.vue';
 
-const customizationWidgetBusyStateChangedEventName = 'customization-option-busy-state-changed';
+const customizationWidgetBusyStateChangedEventName =
+  'customization-option-busy-state-changed';
 
 export default defineComponent({
   name: 'CustomizationOption',
@@ -78,9 +80,9 @@ export default defineComponent({
     CheckboxWidget,
     ColorsListWidget,
     DropdownWidget,
-    DropdownFreeTextWidget,
     ImageUploadWidget,
     ProductionTimeSelector,
+    SearchFieldWidget,
     TextAreaWidget,
     TextInputWidget,
     ThumbnailsListWidget,
@@ -129,9 +131,6 @@ export default defineComponent({
         customization.value.optionData?.displayWidget !== WidgetType.CHECKBOX
       );
     });
-    const showCustomization = computed<boolean>(() => {
-      return !(customization.value.optionData?.isRequired && optionValues.value.length === 1);
-    });
 
     return {
       ...useCustomizationOptionValidation(customization),
@@ -150,7 +149,6 @@ export default defineComponent({
       optionDescription,
       optionHint,
       optionLabel,
-      showCustomization,
       showLabel
     };
   }
@@ -164,12 +162,23 @@ export default defineComponent({
   align-items: var(--customization-option-align-items, flex-start);
 
   ._option-label {
+    width: 100%;
+
     font-size: var(--customization-option-label-size, var(--font-base));
     font-weight: var(--customization-option-label-weight, var(--font-bold));
     text-align: var(--customization-option-label-align, left);
+
+    &.-required {
+      &::after {
+        color: var(--customization-option-required-field-mark-color);
+        content: "*";
+      }
+    }
   }
 
   ._option-description {
+    width: 100%;
+
     font-size: var(--customization-option-description-size, var(--font-sm));
     text-align: var(--customization-option-description-align, left);
     margin: var(
@@ -182,6 +191,15 @@ export default defineComponent({
     font-size: var(--customization-option-hint-size, var(--font-sm));
     text-align: var(--customization-option-hint-align, left);
     margin: var(--customization-option-hint-margin, var(--spacer-xs) 0 0);
+  }
+
+  ._option-description,
+  ._option-hint {
+    ::v-deep {
+      li {
+        text-align: left;
+      }
+    }
   }
 
   ._widget {

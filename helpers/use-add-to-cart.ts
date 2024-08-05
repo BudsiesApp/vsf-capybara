@@ -4,7 +4,7 @@ import { Logger } from '@vue-storefront/core/lib/logger';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import { setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
-import { CustomizationStateItem } from 'src/modules/customization-system';
+import { CustomizationStateItem, filterCustomizationState } from 'src/modules/customization-system';
 import { ServerError } from 'src/modules/shared';
 
 export function useAddToCart (
@@ -12,8 +12,7 @@ export function useAddToCart (
   quantity: Ref<number>,
   customizationStateItems: Ref<CustomizationStateItem[]>,
   existingCartItem: Ref<CartItem | undefined>,
-  { root }: SetupContext,
-  email?: Ref<string | undefined>
+  { root }: SetupContext
 ) {
   const isSubmitting = ref<boolean>(false);
 
@@ -45,12 +44,10 @@ export function useAddToCart (
 
     const productToAddData: Partial<CartItem> = {
       qty: quantity.value,
-      customizationState: customizationStateItems.value
+      extension_attributes: {
+        customization_state: filterCustomizationState(customizationStateItems.value)
+      }
     };
-
-    if (email?.value) {
-      productToAddData.email = email.value;
-    }
 
     try {
       await root.$store.dispatch('cart/addItem', {
@@ -89,12 +86,11 @@ export function useAddToCart (
     const cartItemForUpdate: Partial<CartItem> = {
       qty: quantity.value,
       product_option: productOption,
-      customizationState: customizationStateItems.value
+      extension_attributes: {
+        ...existingCartItem.value.extension_attributes,
+        customization_state: filterCustomizationState(customizationStateItems.value)
+      }
     };
-
-    if (email?.value) {
-      cartItemForUpdate.email = email.value;
-    }
 
     try {
       await updateClientAndServerItem({
