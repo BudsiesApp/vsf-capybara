@@ -92,7 +92,7 @@ export default defineComponent({
 
     const { sortedValues } = useValuesSort(values);
 
-    const { optionValuePriceDictionary } = useOptionValuesPrice(
+    const { isOptionValuesSamePrice, optionValuePriceDictionary } = useOptionValuesPrice(
       sortedValues,
       context
     );
@@ -108,9 +108,10 @@ export default defineComponent({
       sortedValues.value.forEach((optionValue) => {
         const optionValuePrice = optionValuePriceDictionary.value[optionValue.id];
         const finalPrice = optionValuePrice ? PriceHelper.getFinalPrice(optionValuePrice) : null;
+        const canShowPrice = !isOptionValuesSamePrice.value || sortedValues.value.length === 1;
         let label = optionValue.name || '';
 
-        if (finalPrice) {
+        if (canShowPrice && finalPrice) {
           label += ` ${PriceHelper.formatPrice(finalPrice)}`;
         }
 
