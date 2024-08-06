@@ -49,6 +49,50 @@
           </div>
         </div>
 
+        <validation-provider
+          :rules="{ required: { allowFalse: false } }"
+          :name="$t('Agreement')"
+          v-slot="{ errors }"
+          tag="div"
+          class="_agreement-container"
+        >
+          <SfCheckbox
+            class="_agreement"
+            :disabled="isDisabled"
+            :ref="getFieldAnchorName('Agreement')"
+            v-model="agreement"
+          >
+            <template #label>
+              <span>
+                {{ $t("I agree to") }}
+
+                <a
+                  href="/media/bulkOrder/agreement/Standard_Bulk_Order_Customer_Agreement.pdf"
+                  target="_blank"
+                >{{ $t("Bulk Order Customer Agreement") }}</a>,
+
+                <a href="/terms-of-service/" target="_blank">{{
+                  $t("Terms of Service")
+                }}</a>, and
+
+                <a href="/privacy-policy/" target="_blank">{{
+                  $t("Privacy Policy")
+                }}</a>.
+
+                {{
+                  $t(
+                    "I understand that Stuffed Animal Pros happily takes care of all tears, defects, and shipping damage with a refund, replacement, or repair."
+                  )
+                }}
+              </span>
+            </template>
+          </SfCheckbox>
+
+          <div class="_error-text">
+            {{ errors[0] }}
+          </div>
+        </validation-provider>
+
         <m-form-errors
           class="_form-errors"
           :form-errors="formErrors"
@@ -90,6 +134,7 @@ import {
 } from '@vue/composition-api';
 import {
   SfButton,
+  SfCheckbox,
   SfDivider,
   SfHeading,
   SfInput,
@@ -120,7 +165,10 @@ import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
-import { useFormValidation } from 'theme/helpers/use-form-validation';
+import {
+  getFieldAnchorName,
+  useFormValidation
+} from 'theme/helpers/use-form-validation';
 import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
 
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
@@ -132,7 +180,7 @@ import MProductDescriptionStory from 'theme/components/molecules/m-product-descr
 function getAllFormRefs (
   refs: Record<string, Vue | Element | Vue[] | Element[]>
 ): Record<string, Vue | Element | Vue[] | Element[]> {
-  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = {};
+  const refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = {};
   const customizationOptions = refs['customizationOption'] as InstanceType<
     typeof CustomizationOption
   >[];
@@ -143,7 +191,7 @@ function getAllFormRefs (
     }
   }
 
-  return refsDictionary;
+  return { ...refsDictionary, ...refs };
 }
 
 export default defineComponent({
@@ -169,6 +217,7 @@ export default defineComponent({
     MFormErrors,
     MProductDescriptionStory,
     SfButton,
+    SfCheckbox,
     SfDivider,
     SfHeading,
     SfInput,
@@ -312,6 +361,7 @@ export default defineComponent({
       existingCartItem,
       context
     );
+    const agreement = ref<boolean>(false);
 
     const shouldMakeAnother = ref<boolean>(false);
 
@@ -411,11 +461,13 @@ export default defineComponent({
       ...useCustomizationsGroups(filteredCustomizations, productCustomization),
       ...useQuantityAndShippingDiscounts(),
       ...formValidation,
+      agreement,
       availableCustomizations,
       availableOptionCustomizations,
       bottomStorySlug,
       customizationAvailableOptionValues,
       customizationOptionValue,
+      getFieldAnchorName,
       isDisabled,
       isSubmitButtonDisabled,
       onCustomizationOptionBusyChanged,
@@ -544,9 +596,35 @@ export default defineComponent({
     margin-top: var(--spacer-xl);
   }
 
+  ._error-text {
+    font: var(--widget-error-message-font);
+    color: var(--widget-error-message-color);
+    margin-top: var(--spacer-xs);
+  }
+
+  ._agreement-container {
+    max-width: 720px;
+    width: 100%;
+    margin: var(--spacer-sm) auto 0;
+  }
+
   ._agreement {
-    margin: var(--spacer-xl) auto 0;
-    max-width: 45rem;
+    margin-top: var(--spacer-xl);
+    font-size: var(--font-sm);
+    text-align: start;
+
+    ::v-deep {
+      .sf-checkbox {
+        &__container {
+          align-items: flex-start;
+        }
+
+        &__checkmark {
+          flex-shrink: 0;
+          margin-right: var(--spacer-sm);
+        }
+      }
+    }
   }
 
   @media (min-width: $tablet-min) {
