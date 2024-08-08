@@ -56,6 +56,7 @@ $font-family-intro: "GothamRounded", "Helvetica", sans-serif;
     @include generate-color-variants(--_c-green-secondary, #e9f0d8);
     @include generate-color-variants(--_c-dark-primary, #535353);
     @include generate-color-variants(--_c-dark-secondary, #a3a3a3);
+    @include generate-color-variants(--_c-gray-light, #ccc);
     @include generate-color-variants(--_c-gray-primary, #72757E);
     @include generate-color-variants(--_c-gray-secondary, #8D8F9A);
     @include generate-color-variants(--_c-gray-accent, #e0e0e1);
@@ -82,7 +83,12 @@ $font-family-intro: "GothamRounded", "Helvetica", sans-serif;
     --c-divider: var(--_c-gray-accent);
     --c-footer-gray: #585858;
     --c-accent: var(--_c-green-primary);
-    
+    --c-gray-light: var(--_c-gray-light);
+
+    --widget-error-message-font: var(--font-normal) var(--font-xs) var(--font-family-secondary);
+    --widget-error-message-color: var(--c-danger-variant);
+    --customization-option-required-field-mark-color: var(--c-danger-variant);
+    --vertical-steps-form-step-title-color: var(--c-danger);
     @include assign-color-variants(--c-primary, --_c-green-primary);
     --c-primary-variant: var(--_c-green-primary-darken);
     
