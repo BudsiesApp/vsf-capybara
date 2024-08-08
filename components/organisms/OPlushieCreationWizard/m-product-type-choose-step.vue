@@ -39,8 +39,6 @@ import {
 import PlushieProductType from 'theme/interfaces/plushie-product-type';
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
 
-import ForeversWizardProductTypeStepData from '../../interfaces/plushie-wizard-product-type-step-data.interface';
-
 export default Vue.extend({
   name: 'MProductTypeChooseStep',
   components: {
@@ -49,13 +47,6 @@ export default Vue.extend({
     BaseImage
   },
   props: {
-    value: {
-      type: Object as PropType<ForeversWizardProductTypeStepData>,
-      default: () => ({
-        product: undefined,
-        plushieId: undefined
-      })
-    },
     disabled: {
       type: Boolean,
       default: false
