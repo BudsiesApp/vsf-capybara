@@ -27,10 +27,13 @@ export function useCreationWizardProductTypeStep (
     try {
       const product = await root.$store.dispatch('product/loadProduct', {
         parentSku: sku,
-        childSku: null
+        childSku: null,
+        setCurrent: false
       });
 
       await root.$store.dispatch('budsies/loadProductRushAddons', { productId: product.id });
+
+      await root.$store.dispatch('product/setCurrent', product);
 
       void nextStep();
     } finally {
