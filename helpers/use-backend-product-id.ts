@@ -1,12 +1,29 @@
 import { computed, Ref } from '@vue/composition-api';
 
-import Product from '@vue-storefront/core/modules/catalog/types/Product';
-
 import { ProductId, ProductValue } from 'src/modules/budsies';
 
-export function useBackendProductId (product: Ref<Product>) {
+export function useBackendProductId (productId: Ref<string | number>) {
   const backendProductId = computed<ProductValue>(() => {
-    switch (product.value.id) {
+    switch (productId.value) {
+      case ProductId.BULK_PLUSH_SAMPLE:
+        return ProductValue.BULK_SAMPLE;
+      case ProductId.BULK_PILLOW_SAMPLE:
+        return ProductValue.PILLOW_BULK_SAMPLE;
+      case ProductId.BULK_KEYCHAIN_SAMPLE:
+        return ProductValue.KEYCHAIN_BULK_SAMPLE;
+      case ProductId.BOBBLEHEADS:
+        return ProductValue.BOBBLEHEADS;
+      case ProductId.BUDSIES:
+      case ProductId.BUDSIES_PUPPETS:
+      case ProductId.BUDSIES_NFT:
+        return ProductValue.BUDSIE;
+      case ProductId.BUDSIES_PALS:
+        return ProductValue.BUDSIES_PALS;
+      case ProductId.SELFIES:
+      case ProductId.SELFIES_PUPPETS:
+        return ProductValue.SELFIE;
+      case ProductId.SPECIALTY_COMMISSION:
+        return ProductValue.SPECIALTY_COMMISSION;
       case ProductId.CUSTOM_PILLOW:
       case ProductId.BUDDY_PILLOW:
         return ProductValue.PILLOW;
@@ -17,10 +34,15 @@ export function useBackendProductId (product: Ref<Product>) {
         return ProductValue.PRINTED_MASKS;
       case ProductId.PRINTED_KEYCHAINS:
         return ProductValue.PRINTED_KEYCHAINS;
+      case ProductId.PHRASE_PILLOW:
+      case ProductId.BUDSIES_PHRASE_PILLOWS:
+        return ProductValue.PHRASE_PILLOW;
       case ProductId.FELTED_MAGNETS:
         return ProductValue.FELTED_MAGNETS;
       case ProductId.FELTED_ORNAMENTS:
         return ProductValue.FELTED_ORNAMENTS;
+      case ProductId.FIGURINES:
+        return ProductValue.FIGURINES;
       case ProductId.RENAISSANCE_BLANKETS:
         return ProductValue.RENAISSANCE_BLANKETS;
       case ProductId.CUT_OUT_BLANKETS:
@@ -54,7 +76,7 @@ export function useBackendProductId (product: Ref<Product>) {
         return ProductValue.PHOTO_PORTRAITS;
       default:
         throw new Error(
-          `Can't resolve Backend product ID for Magento '${product.value.id}' product ID`
+          `Can't resolve Backend product ID for Magento '${productId.value}' product ID`
         );
     }
   });

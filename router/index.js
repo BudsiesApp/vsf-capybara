@@ -1,5 +1,3 @@
-import BulksampleProduct from 'theme/interfaces/bulksample-product.type';
-
 const ErrorPage = () =>
   import(/* webpackChunkName: "vsf-error" */ 'theme/pages/Error');
 const Checkout = () =>
@@ -10,8 +8,6 @@ const MyAccount = () =>
   import(/* webpackChunkName: "vsf-my-account" */ 'theme/pages/MyAccount');
 const CartRecovery = () =>
   import(/* webpackChunkName: "vsf-cart-recovery" */ 'theme/pages/CartRecovery');
-const Bulksample = () =>
-  import(/* webpackChunkName: "vsf-bulksample" */ 'theme/pages/Bulksample');
 const KeychainQuote = () =>
   import(/* webpackChunkName: "vsf-keychain-quote" */ 'theme/pages/KeychainQuote');
 const PillowQuote = () =>
@@ -22,6 +18,8 @@ const BulkorderConfirmation = () =>
 import(/* webpackChunkName: "vsf-bulkorder-confirmation" */ 'theme/pages/BulkorderConfirmation');
 const BulkorderQuotation = () =>
 import(/* webpackChunkName: "vsf-bulkorder-quotation" */ 'theme/pages/BulkorderQuotation');
+const CustomizableProduct = () =>
+  import(/* webpackChunkName: "vsf-customizable-product" */ 'theme/pages/CustomizableProduct');
 const PasswordReset = () =>
   import(/* webpackChunkName: "vsf-password-reset" */ 'theme/pages/PasswordReset');
 
@@ -57,36 +55,36 @@ let routes = [
   {
     name: 'plush-sample',
     path: '/bulk-samples/create/',
-    component: Bulksample,
+    component: CustomizableProduct,
     props: (route) => {
       return {
         sku: 'CustomBulkSample_bundle',
         existingPlushieId: route.query.existingPlushieId,
-        type: BulksampleProduct.PLUSH
+        layout: 'vertical'
       }
     }
   },
   {
     name: 'pillow-sample',
     path: '/bulk-pillow-samples/create/',
-    component: Bulksample,
+    component: CustomizableProduct,
     props: (route) => {
       return {
         sku: 'pillowBulkSample_bundle',
         existingPlushieId: route.query.existingPlushieId,
-        type: BulksampleProduct.PILLOW
+        layout: 'vertical'
       }
     }
   },
   {
     name: 'keychain-sample',
     path: '/bulk-keychain-samples/create/',
-    component: Bulksample,
+    component: CustomizableProduct,
     props: (route) => {
       return {
         sku: 'keychainBulkSample_bundle',
         existingPlushieId: route.query.existingPlushieId,
-        type: BulksampleProduct.KEYCHAIN
+        layout: 'vertical'
       }
     }
   },

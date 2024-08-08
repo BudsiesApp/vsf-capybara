@@ -23,13 +23,13 @@ $font-family-secondary: "Gotham-Rounded-Medium";
     --font-extra-bold: 800;
     --font-black: 800;
     // font-size
-    --font-2xs: 0.703rem; 
-    --font-xs: 0.844rem; 
-    --font-sm: 0.984rem; 
-    --font-base: 1.125rem; 
-    --font-lg: 1.266rem; 
+    --font-2xs: 0.703rem;
+    --font-xs: 0.844rem;
+    --font-sm: 0.984rem;
+    --font-base: 1.125rem;
+    --font-lg: 1.266rem;
     --font-xl: 1.5rem;
-    --font-2xl: 1.875rem; 
+    --font-2xl: 1.875rem;
     // headings font-size
     --h1-font-size: 1.375rem;
     --h2-font-size: 1.375rem;
@@ -51,6 +51,7 @@ $font-family-secondary: "Gotham-Rounded-Medium";
     @include generate-color-variants(--_c-dark-secondary, #525455);
     @include generate-color-variants(--_c-gray-primary, #b8b9bb);
     @include generate-color-variants(--_c-gray-secondary, #b8b9bb);
+    @include generate-color-variants(--_c-gray-light, #ccc);
     @include generate-color-variants(--_c-light-primary, #f61857);
     @include generate-color-variants(--_c-red-primary, #f61857);
     @include generate-color-variants(--_c-red-secondary, #f61857);
@@ -71,6 +72,12 @@ $font-family-secondary: "Gotham-Rounded-Medium";
     --c-blockquote-border: var(--_c-gray-primary);
     --c-divider: var(--_c-gray-accent);
     --c-accent: var(--_c-light-primary);
+    --c-gray-light: var(--_c-gray-light); 
+
+    --widget-error-message-font: var(--font-normal) var(--font-xs) var(--font-family-primary);
+    --widget-error-message-color: var(--c-danger-variant);
+    --customization-option-required-field-mark-color: var(--c-warning);
+    --vertical-steps-form-step-title-color: var(--c-primary);
 
     @include assign-color-variants(--c-primary, --_c-yellow-primary);
     --c-primary-variant: var(--_c-yellow-secondary);
@@ -91,15 +98,15 @@ $font-family-secondary: "Gotham-Rounded-Medium";
     --c-danger-variant: var(--_c-red-primary);
 
     @media (min-width: $tablet-min) {
-      --button-font-size: var(--font-base);
+        --button-font-size: var(--font-base);
     }
 
     @include for-desktop {
-      --h1-font-size: 2.625rem;
-      --h2-font-size: 2.625rem;
-      --h3-font-size: 1.625rem;
-      --h4-font-size: 1.125rem;
-      --h5-font-size: 0.875rem;
-      --h6-font-size: 0.625rem;
+        --h1-font-size: 2.625rem;
+        --h2-font-size: 2.625rem;
+        --h3-font-size: 1.625rem;
+        --h4-font-size: 1.125rem;
+        --h5-font-size: 0.875rem;
+        --h6-font-size: 0.625rem;
     }
-  }
+}
