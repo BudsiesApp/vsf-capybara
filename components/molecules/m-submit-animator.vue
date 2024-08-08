@@ -77,7 +77,7 @@ export default Vue.extend({
         );
 
         initialWidth = this.currentStep.value;
-        this.currentStepIndex += 1;
+        this.currentStepIndex = Math.min(this.currentStepIndex + 1, this.steps.length - 1);
       }
     },
     async animate (
