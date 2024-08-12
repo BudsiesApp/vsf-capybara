@@ -196,6 +196,7 @@ export default defineComponent({
 
     const {
       customizationOptionValue,
+      customizationState,
       selectedOptionValuesIds,
       updateCustomizationOptionValue
     } = useCustomizationState();
@@ -223,28 +224,6 @@ export default defineComponent({
       }
     );
 
-    const colorPaletteCustomizationSelectedOptionValues = computed<
-    OptionValue[]
-    >(() => {
-      if (!colorPaletteCustomization.value) {
-        return [];
-      }
-
-      const selectedCustomizationOptionValue =
-        customizationOptionValue.value[colorPaletteCustomization.value.id];
-
-      if (!selectedCustomizationOptionValue) {
-        return [];
-      }
-
-      return (
-        getCustomizationSelectedValues(
-          colorPaletteCustomization.value,
-          selectedCustomizationOptionValue
-        ) || []
-      );
-    });
-
     function onCustomizationOptionInput (payload: {
       customizationId: string,
       value: CustomizationOptionValue
@@ -252,30 +231,12 @@ export default defineComponent({
       updateCustomizationOptionValue(payload);
     }
 
-    function getSelectedColorPaletteOptionValuesNames (): string[] {
-      if (!colorPaletteCustomization.value) {
-        return [];
-      }
-
-      const optionValuesNames: string[] = [];
-
-      for (const optionValue of colorPaletteCustomizationSelectedOptionValues.value) {
-        if (!optionValue.name) {
-          continue;
-        }
-
-        optionValuesNames.push(optionValue.name);
-      }
-
-      return optionValuesNames;
-    }
-
     return {
       colorPaletteCustomization,
       colorPaletteCustomizationOptionValues,
       customizationAvailableOptionValues,
       customizationOptionValue,
-      getSelectedColorPaletteOptionValuesNames,
+      customizationState,
       onCustomizationOptionInput,
       validationObserver,
       ...useBulkOrdersBaseForm(),
@@ -383,8 +344,7 @@ export default defineComponent({
               this.bulkordersBaseFormData.additionalQuantity || '',
             deadline_date: this.bulkordersBaseFormData.deadlineDate,
             client_type_id: this.bulkordersBaseFormData.customerType || '',
-            // TODO: rename field based on API side changes
-            body_parts: this.getSelectedColorPaletteOptionValuesNames(),
+            customization_state: this.customizationState,
             agreement: this.bulkordersBaseFormData.agreement
           }
         );
