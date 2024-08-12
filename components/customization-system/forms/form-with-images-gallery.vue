@@ -264,10 +264,7 @@ export default defineComponent({
     onMounted(async () => {
       await nextTick();
 
-      if (
-        existingCartItem.value ||
-        !props.canUsePersistedCustomizationState
-      ) {
+      if (existingCartItem.value || !props.canUsePersistedCustomizationState) {
         removePreservedState();
         return;
       }
@@ -466,6 +463,15 @@ export default defineComponent({
 
     ._gallery {
       margin-top: 0;
+    }
+  }
+
+  @include for-desktop {
+    ._customization-option {
+      &.-widget-ThumbnailsListWidget {
+        --thumbnails-list-widget-item-max-width: 120px;
+        --thumbnails-list-widget-round-item-max-width: 20%;
+      }
     }
   }
 }

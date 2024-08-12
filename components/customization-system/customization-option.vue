@@ -4,11 +4,13 @@
     :class="'-widget-' + widget.component"
     :ref="validationRef"
   >
-    <slot name="label" v-if="showLabel" :label="optionLabel">
-      <label class="_option-label">
-        {{ optionLabel }}
-      </label>
-    </slot>
+    <label
+      class="_option-label"
+      :class="{ '-required': isFieldRequired }"
+      v-if="showLabel"
+    >
+      {{ optionLabel }}
+    </label>
 
     <div
       class="_option-description"
@@ -165,6 +167,13 @@ export default defineComponent({
     font-size: var(--customization-option-label-size, var(--font-base));
     font-weight: var(--customization-option-label-weight, var(--font-bold));
     text-align: var(--customization-option-label-align, left);
+
+    &.-required {
+      &::after {
+        color: var(--customization-option-required-field-mark-color);
+        content: "*";
+      }
+    }
   }
 
   ._option-description {
