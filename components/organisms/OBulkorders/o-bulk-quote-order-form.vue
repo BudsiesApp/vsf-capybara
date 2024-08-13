@@ -4,7 +4,7 @@
 
     <validation-observer
       ref="validationObserver"
-      v-slot="{errors: formErrors}"
+      v-slot="{ errors: formErrors }"
       slim
     >
       <m-base-form
@@ -19,49 +19,29 @@
         :get-field-anchor-name="getFieldAnchorName"
         @calculation-animation-finished="onCalculationAnimationFinished"
       >
-        <template #bodyparts v-if="colorPaletteBodypart">
+        <template #bodyparts v-if="colorPaletteCustomization">
           <div class="_section">
-            <AOrderedHeading
-              :order="4"
-              :level="3"
-              :title="$t('Color Palette')"
-              class="_title -required"
-              :ref="getFieldAnchorName('Color Palette')"
-            />
-
-            <span class="_subtitle">
-              {{ $t('Please select the colors of your design to help us accurately bring your character to life.') }}
-            </span>
-
-            <validation-provider
-              v-slot="{ errors }"
-              rules="required"
-              name="'Color Palette'"
-              slim
+            <customization-option
+              class="_customization-option"
+              ref="customizationOption"
+              :customization="colorPaletteCustomization"
+              :is-disabled="isDisabled"
+              :option-values="colorPaletteCustomizationOptionValues"
+              :product-id="product.id"
+              :value="
+                customizationOptionValue[colorPaletteCustomization.id]
+              "
+              @input="onCustomizationOptionInput"
             >
-              <m-bodypart-option-configurator
-                v-model="color"
-                :name="colorPaletteBodypart.code"
-                :max-values="colorPaletteBodypart.maxValues"
-                :options="colorPaletteOptions"
-                :disabled="isDisabled"
-                compact-mode
-                type="bodypart"
-                class="_color-palette"
-              />
-
-              <div class="_error-text -center" v-if="errors.length">
-                {{ errors[0] }}
-              </div>
-            </validation-provider>
-
-            <span class="_input-hint">
-              {{ $t('Click an existing color to deselect it.') }}
-            </span>
-
-            <span class="_input-hint">
-              {{ $t('Please note any special requests in the description above') }}
-            </span>
+              <template #label="{ label }">
+                <AOrderedHeading
+                  :order="4"
+                  :level="3"
+                  :title="label"
+                  class="_title -required"
+                />
+              </template>
+            </customization-option>
           </div>
         </template>
 
@@ -76,7 +56,11 @@
             />
 
             <div class="_helper">
-              {{ $t('Typical sizes are 6" (small), 8" (regular), 12" (large), and 16" (maximum). It\'s OK if you’re not sure.') }}
+              {{
+                $t(
+                  'Typical sizes are 6" (small), 8" (regular), 12" (large), and 16" (maximum). It\'s OK if you’re not sure.'
+                )
+              }}
             </div>
 
             <validation-provider
@@ -99,10 +83,14 @@
 
         <template #quantity-helper>
           <span class="_helper">
-            {{ $t('Need less than 50? Order directly from our sister brand, Budsies. Budsies specializes in one-off or low quantity production at a simple, flat price. You\'ll automatically get discounts of 10-20% when you add qty 10 or 20 to your cart.') }}
+            {{
+              $t(
+                "Need less than 50? Order directly from our sister brand, Budsies. Budsies specializes in one-off or low quantity production at a simple, flat price. You'll automatically get discounts of 10-20% when you add qty 10 or 20 to your cart."
+              )
+            }}
 
             <a :href="budsiesStoreDomain" target="_blank">
-              {{ $t('Visit Budsies!') }}
+              {{ $t("Visit Budsies!") }}
             </a>
           </span>
         </template>
@@ -115,11 +103,8 @@
       />
 
       <div class="_button-container">
-        <SfButton
-          @click="onSubmit"
-          :disabled="isDisabled"
-        >
-          {{ $t('Get My Quote') }}
+        <SfButton @click="onSubmit" :disabled="isDisabled">
+          {{ $t("Get My Quote") }}
         </SfButton>
       </div>
     </validation-observer>
@@ -132,22 +117,42 @@ import { ValidationObserver, ValidationProvider, extend } from 'vee-validate';
 import { between, required } from 'vee-validate/dist/rules';
 import { SfButton, SfHeading, SfInput } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
-import { defineComponent, PropType, Ref, ref } from '@vue/composition-api';
+import {
+  computed,
+  defineComponent,
+  PropType,
+  Ref,
+  ref,
+  toRefs
+} from '@vue/composition-api';
 
 import Product from 'core/modules/catalog/types/Product';
-import { Bodypart, BodypartOption, BodypartValue, BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo, Dictionary } from 'src/modules/budsies';
+import {
+  BulkorderQuoteProductId,
+  BulkOrderStatus,
+  BulkOrderInfo
+} from 'src/modules/budsies';
+import {
+  Customization,
+  CustomizationOptionValue,
+  getCustomizationSelectedValues,
+  OptionValue,
+  useAvailableCustomizations,
+  useCustomizationState
+} from 'src/modules/customization-system';
 import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 
 import MBaseForm from './m-base-form.vue';
-import MBodypartOptionConfigurator from '../../molecules/m-bodypart-option-configurator.vue';
 import AOrderedHeading from '../../atoms/a-ordered-heading.vue';
+import CustomizationOption from '../../customization-system/customization-option.vue';
+import MBodypartOptionConfigurator from '../../molecules/m-bodypart-option-configurator.vue';
 import MFormErrors from '../../molecules/m-form-errors.vue';
 
 extend('required', {
   ...required,
-  message: '{_field_} field is required'
-})
+  message: 'The \'{_field_}\' field is required'
+});
 
 extend('between', {
   ...between,
@@ -171,20 +176,72 @@ function getFormAllRefs (
 ): Record<string, Vue | Element | Vue[] | Element[]> {
   const baseForm = getBaseForm(refs);
 
-  return { ...refs, ...baseForm.$refs }
+  return { ...refs, ...baseForm.$refs, ...(refs.customizationOption as any).$refs };
 }
+
+const COLOR_PALETTE_CUSTOMIZATION_SKU = 'bulk_sample_color_palette';
 
 export default defineComponent({
   name: 'OBulkQuoteOrderForm',
-  setup (_, setupContext) {
-    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+  setup (props, setupContext) {
+    const { product } = toRefs(props);
+
+    const productCustomizations = computed<Customization[]>(() => {
+      return product.value.customizations || [];
+    });
+
+    const validationObserver: Ref<InstanceType<
+      typeof ValidationObserver
+    > | null> = ref(null);
+
+    const {
+      customizationOptionValue,
+      customizationState,
+      selectedOptionValuesIds,
+      updateCustomizationOptionValue
+    } = useCustomizationState();
+
+    const { availableCustomizations, customizationAvailableOptionValues } =
+      useAvailableCustomizations(
+        productCustomizations,
+        selectedOptionValuesIds,
+        customizationOptionValue,
+        updateCustomizationOptionValue,
+        product
+      );
+
+    const colorPaletteCustomization = computed<Customization | undefined>(
+      () => {
+        return availableCustomizations.value.find(
+          (item) => item.optionData?.sku?.toLowerCase() === COLOR_PALETTE_CUSTOMIZATION_SKU
+        );
+      }
+    );
+
+    const colorPaletteCustomizationOptionValues = computed<OptionValue[]>(
+      () => {
+        return colorPaletteCustomization.value?.optionData?.values || [];
+      }
+    );
+
+    function onCustomizationOptionInput (payload: {
+      customizationId: string,
+      value: CustomizationOptionValue
+    }) {
+      updateCustomizationOptionValue(payload);
+    }
 
     return {
+      colorPaletteCustomization,
+      colorPaletteCustomizationOptionValues,
+      customizationAvailableOptionValues,
+      customizationOptionValue,
+      customizationState,
+      onCustomizationOptionInput,
       validationObserver,
       ...useBulkOrdersBaseForm(),
-      ...useFormValidation(
-        validationObserver,
-        () => getFormAllRefs(setupContext.refs)
+      ...useFormValidation(validationObserver, () =>
+        getFormAllRefs(setupContext.refs)
       )
     };
   },
@@ -200,6 +257,7 @@ export default defineComponent({
   },
   components: {
     AOrderedHeading,
+    CustomizationOption,
     MBaseForm,
     MBodypartOptionConfigurator,
     MFormErrors,
@@ -213,51 +271,13 @@ export default defineComponent({
     return {
       isSubmitting: false,
       bulkSize: undefined as string | undefined,
-      color: undefined as BodypartOption[] | undefined,
       showCalculationAnimation: false,
       onCalculationAnimationFinished: () => {}
-    }
+    };
   },
   computed: {
     bulkOrderInfo (): BulkOrderInfo | undefined {
       return this.$store.getters['budsies/getBulkorderInfo'];
-    },
-    bodyparts (): Bodypart[] {
-      return this.$store.getters['budsies/getProductBodyparts'](this.product.id);
-    },
-    colorPaletteBodypart (): Bodypart | undefined {
-      return this.bodyparts.find((bodypart) => {
-        return bodypart.name.toLowerCase() === 'color palette';
-      })
-    },
-    colorPaletteOptions (): BodypartOption[] {
-      if (!this.colorPaletteBodypart) {
-        return [];
-      }
-
-      const bodypartsValues: BodypartValue[] =
-       this.$store.getters['budsies/getBodypartBodypartsValues'](this.colorPaletteBodypart.id);
-
-      if (!bodypartsValues.length) {
-        return [];
-      }
-
-      const result: BodypartOption[] = [];
-
-      for (const bodypartValue of bodypartsValues) {
-        result.push({
-          id: bodypartValue.id,
-          label: bodypartValue.name,
-          value: bodypartValue.code,
-          isSelected: false,
-          contentTypeId: bodypartValue.contentTypeId,
-          color: bodypartValue.color,
-          image: bodypartValue.image,
-          group: 'default'
-        });
-      }
-
-      return result;
     },
     isDisabled (): boolean {
       return this.isSubmitting;
@@ -267,13 +287,6 @@ export default defineComponent({
     }
   },
   methods: {
-    getBodypartsData (): Dictionary<string[]> {
-      if (!this.color || !this.colorPaletteBodypart) {
-        return {};
-      }
-
-      return { [this.colorPaletteBodypart.id]: this.color.map(item => item.id) };
-    },
     async onSubmit (): Promise<void> {
       if (this.isDisabled) {
         return;
@@ -291,18 +304,18 @@ export default defineComponent({
         this.onCalculationAnimationFinished = resolve;
       });
 
-      Promise.all([
-        calculationAnimationPromise,
-        this.submitBulkorder()
-      ]).then(() => {
-        this.redirect();
-      }).catch((error) => {
-        this.onFailure(error.message);
+      Promise.all([calculationAnimationPromise, this.submitBulkorder()])
+        .then(() => {
+          this.redirect();
+        })
+        .catch((error) => {
+          this.onFailure(error.message);
 
-        throw error;
-      }).finally(() => {
-        this.showCalculationAnimation = false;
-      });
+          throw error;
+        })
+        .finally(() => {
+          this.showCalculationAnimation = false;
+        });
     },
     async submitBulkorder (): Promise<void> {
       this.isSubmitting = true;
@@ -318,16 +331,20 @@ export default defineComponent({
             qty: this.bulkordersBaseFormData.quantity,
             project_name: this.bulkordersBaseFormData.name,
             description: this.bulkordersBaseFormData.description,
-            uploaded_artwork_ids: this.bulkordersBaseFormData.customerImages.map((image) => image.id),
+            uploaded_artwork_ids:
+              this.bulkordersBaseFormData.customerImages.map(
+                (image) => image.id
+              ),
             email: this.bulkordersBaseFormData.customerEmail,
             phone: this.bulkordersBaseFormData.customerPhone,
             country_id: this.bulkordersBaseFormData.country,
             first_name: this.bulkordersBaseFormData.customerFirstName,
             last_name: this.bulkordersBaseFormData.customerLastName,
-            alternative_qty: this.bulkordersBaseFormData.additionalQuantity || '',
+            alternative_qty:
+              this.bulkordersBaseFormData.additionalQuantity || '',
             deadline_date: this.bulkordersBaseFormData.deadlineDate,
             client_type_id: this.bulkordersBaseFormData.customerType || '',
-            body_parts: this.getBodypartsData(),
+            customization_state: this.customizationState,
             agreement: this.bulkordersBaseFormData.agreement
           }
         );
@@ -353,7 +370,10 @@ export default defineComponent({
           this.$router.push({ name: 'bulkorder-confirmation' });
           break;
         default:
-          this.$router.push({ name: 'bulkorder-quotation', params: { bulkorderId: this.bulkOrderInfo.id } });
+          this.$router.push({
+            name: 'bulkorder-quotation',
+            params: { bulkorderId: this.bulkOrderInfo.id }
+          });
       }
     },
     onFailure (message: any): void {
@@ -369,62 +389,81 @@ export default defineComponent({
       baseForm.persistCustomerData();
     }
   }
-})
+});
 </script>
 
 <style lang="scss" scoped>
 .o-bulk-quote-order-form {
   padding: var(--spacer-lg);
 
-      ._title {
-        margin-bottom: var(--spacer-2xl);
-      }
+  ._customization-option {
+    --customization-option-align-items: center;
+    --customization-option-hint-align: center;
+    --widget-error-message-font: var(--font-normal) var(--font-xs) var(--font-family-primary);
 
-      ._form-errors {
-        margin-top: var(--spacer-lg);
-      }
+    width: 100%;
+    text-align: center;
+  }
 
-      ._button-container {
-        display: flex;
-        justify-content: center;
-        margin-top: var(--spacer-lg);
-      }
+  ._title {
+    margin-bottom: var(--spacer-2xl);
+  }
 
-    ._input-hint {
-        text-align: center;
-        font-weight: 600;
-    }
+  ._form-errors {
+    margin-top: var(--spacer-lg);
+  }
 
-    ._error-text {
-        color: var(--c-danger-variant);
-        font-size: var(--font-xs);
-        margin-top: var(--spacer-xs);
-        height: calc(var(--font-xs) * 1.2);
-        font-weight: var(--font-medium);
+  ._button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--spacer-lg);
+  }
 
-        &.-center {
-          text-align: center;
-          margin-bottom: var(--spacer-sm);
-        }
-    }
+  ._input-hint {
+    text-align: center;
+    font-weight: 600;
+  }
 
-    ._section {
-        margin-bottom: var(--spacer-2xl);
-        display: flex;
-        flex-direction: column;
+  ._error-text {
+    color: var(--c-danger-variant);
+    font-size: var(--font-xs);
+    margin-top: var(--spacer-xs);
+    height: calc(var(--font-xs) * 1.2);
+    font-weight: var(--font-medium);
 
-        ._title {
-            margin-bottom: var(--spacer-base);
-        }
-    }
-
-    ._subtitle {
-        text-align: center;
-    }
-
-    ._color-palette {
+    &.-center {
       text-align: center;
-      margin: var(--spacer-base) 0;
+      margin-bottom: var(--spacer-sm);
     }
+  }
+
+  ._section {
+    margin-bottom: var(--spacer-2xl);
+    display: flex;
+    flex-direction: column;
+
+    ._title {
+      margin-bottom: var(--spacer-base);
+
+      &.-required {
+        ::v-deep .sf-heading__title {
+          &::after {
+            content: "*";
+            color: var(--c-warning);
+            margin-left: -0.3em;
+          }
+        }
+      }
+    }
+  }
+
+  ._subtitle {
+    text-align: center;
+  }
+
+  ._color-palette {
+    text-align: center;
+    margin: var(--spacer-base) 0;
+  }
 }
 </style>
