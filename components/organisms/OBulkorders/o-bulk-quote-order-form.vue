@@ -179,7 +179,7 @@ function getFormAllRefs (
   return { ...refs, ...baseForm.$refs, ...(refs.customizationOption as any).$refs };
 }
 
-const COLOR_PALETTE_CUSTOMIZATION_NAME = 'color palette';
+const COLOR_PALETTE_CUSTOMIZATION_SKU = 'bulk_sample_color_palette';
 
 export default defineComponent({
   name: 'OBulkQuoteOrderForm',
@@ -213,7 +213,7 @@ export default defineComponent({
     const colorPaletteCustomization = computed<Customization | undefined>(
       () => {
         return availableCustomizations.value.find(
-          ({ name }) => name.toLowerCase() === COLOR_PALETTE_CUSTOMIZATION_NAME
+          (item) => item.optionData?.sku?.toLowerCase() === COLOR_PALETTE_CUSTOMIZATION_SKU
         );
       }
     );
