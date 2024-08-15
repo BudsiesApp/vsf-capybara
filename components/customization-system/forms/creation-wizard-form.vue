@@ -144,6 +144,7 @@ import {
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useCreationWizardFormSteps } from 'theme/helpers/use-creation-wizard-form-steps';
+import { useCreationWizardGtmEvents } from 'theme/helpers/use-creation-wizard-gtm-events';
 import { useCreationWizardPreselectedSize } from 'theme/helpers/use-creation-wizard-preselected-size';
 import { useCreationWizardProductTypeStep } from 'theme/helpers/use-creation-wizard-product-type-step';
 import { useFloatingPhoto } from 'theme/helpers/use-floating-photo';
@@ -324,9 +325,16 @@ export default defineComponent({
       productCustomization
     );
 
+    const { onStepSubmit } = useCreationWizardGtmEvents(
+      availableCustomizations,
+      customizationOptionValue,
+      plushieType
+    )
+
     const formSteps = useCreationWizardFormSteps(
       customizationGroups.customizationRootGroups,
-      existingCartItem
+      existingCartItem,
+      onStepSubmit
     );
 
     const { handlePreselectedSize } = useCreationWizardPreselectedSize(
@@ -569,3 +577,11 @@ export default defineComponent({
   }
 }
 </style>
+
+function useCreationWizardGtmEvent(): { onStepSubmit: any; } {
+  throw new Error('Function not implemented.');
+}
+
+function useCreationWizardGtmEvent(): { onStepSubmit: any; } {
+  throw new Error('Function not implemented.');
+}
