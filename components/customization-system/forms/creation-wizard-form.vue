@@ -577,11 +577,3 @@ export default defineComponent({
   }
 }
 </style>
-
-function useCreationWizardGtmEvent(): { onStepSubmit: any; } {
-  throw new Error('Function not implemented.');
-}
-
-function useCreationWizardGtmEvent(): { onStepSubmit: any; } {
-  throw new Error('Function not implemented.');
-}
