@@ -149,6 +149,7 @@ import {
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { usePhrasePillowFormSteps } from 'theme/helpers/use-phrase-pillow-form-steps';
+import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
@@ -325,7 +326,7 @@ export default defineComponent({
       customizationGroups.customizationRootGroupCustomizations
     );
 
-    const quantity = ref<number>(1);
+    const { quantity } = useProductQuantity(existingCartItem);
     const { addToCartHandler, isSubmitting } = useAddToCart(
       product,
       quantity,
