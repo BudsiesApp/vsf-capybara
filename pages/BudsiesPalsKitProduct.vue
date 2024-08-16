@@ -36,6 +36,7 @@
         <o-budsies-pals-kit-product-order-form
           class="_form"
           :product="getCurrentProduct"
+          :hospitals-list="hospitalsList"
           v-if="showForm"
         />
       </div>
@@ -58,17 +59,21 @@ import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import Product from 'core/modules/catalog/types/Product';
 
-import { ProductStructuredData } from 'src/modules/budsies';
+import { Hospital, ProductStructuredData } from 'src/modules/budsies';
 import { ProductEvent } from 'src/modules/shared';
 
 import OBudsiesPalsKitProductOrderForm from 'theme/components/organisms/o-budsies-pals-kit-product-order-form.vue';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
+import { SearchQuery } from 'storefront-query-builder';
 
 interface InjectedServices {
   window: Window
 }
 
 const budsiesPalsKitSku = 'palsKit';
+const budsiesPalsSku = 'customPals_bundle';
+
+const HOSPITAL_CUSTOMIZATION_NAME = 'hospital';
 
 export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   name: 'BudsiesPalsKitProduct',
@@ -96,6 +101,41 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
       return product;
     },
+    hospitalsList (): Hospital[] {
+      if (!this.palsKitProduct) {
+        return [];
+      }
+
+      const hospitalCustomization = this.palsKitProduct.customizations?.find((customization) => {
+        return customization.name.toLowerCase() === HOSPITAL_CUSTOMIZATION_NAME;
+      });
+
+      if (!hospitalCustomization) {
+        return [];
+      }
+
+      const availableOptionValues = hospitalCustomization.optionData?.values?.filter((value) => {
+        return value.isEnabled && value.name;
+      });
+
+      if (!availableOptionValues) {
+        return [];
+      }
+
+      availableOptionValues.sort((a, b) => {
+        return a.sn < b.sn ? -1 : 1
+      });
+
+      return availableOptionValues.map((value) => {
+        return {
+          id: value.id,
+          name: value.name || ''
+        }
+      })
+    },
+    palsKitProduct (): Product | undefined {
+      return this.$store.getters['product/getProductBySkuDictionary'][budsiesPalsSku];
+    },
     showForm (): boolean {
       return this.isDataLoaded && !!this.getCurrentProduct;
     }
@@ -120,17 +160,29 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   methods: {
     async loadData (): Promise<void> {
       this.isDataLoaded = false;
+      let searchQuery = new SearchQuery();
+      searchQuery = searchQuery.applyFilter({
+        key: 'sku',
+        value: {
+          'in': [budsiesPalsKitSku, budsiesPalsSku]
+        }
+      });
 
-      const [product] = await Promise.all([
-        this.$store.dispatch('product/loadProduct', {
-          parentSku: budsiesPalsKitSku,
-          setCurrent: true
-        }),
-        this.$store.dispatch('budsies/fetchHospitalsList')
-      ]);
+      await this.$store.dispatch('product/findProducts', {
+        query: searchQuery,
+        size: 2
+      });
+
+      const palsKitProduct = this.$store.getters['product/getProductBySkuDictionary'][budsiesPalsKitSku];
+
+      if (!palsKitProduct) {
+        throw new Error(`Product with "${budsiesPalsKitSku}" sku not found`);
+      }
+
+      await this.$store.dispatch('product/setCurrent', palsKitProduct);
 
       this.isDataLoaded = true;
-      catalogHooksExecutors.productPageVisited(product);
+      catalogHooksExecutors.productPageVisited(palsKitProduct);
     }
   },
   metaInfo () {
