@@ -74,20 +74,10 @@
           </validation-provider>
         </div>
       </validation-provider>
-
-      <SfCheckbox
-        v-model="shouldSendFriend"
-        class="_send-friend"
-        :disabled="isDisabled"
-      >
-        <template #label>
-          <span class="_checkbox-label"> Send Gift Card to friend </span>
-        </template>
-      </SfCheckbox>
     </div>
 
     <transition name="maxHeight">
-      <div v-if="showSendFriendFields" class="_form-block">
+      <div class="_form-block">
         <div class="_form-field">
           <label> Sender name (optional): </label>
 
@@ -423,6 +413,15 @@ export default Vue.extend({
     },
     updateGiftCardOrderFormData (giftCardOrderFormData: GiftCardOrderFormData) {
       this.$emit('update:giftCardOrderFormData', giftCardOrderFormData);
+    }
+  },
+  watch: {
+    showCustomPriceAmountInput (value: boolean) {
+      if (value) {
+        return;
+      }
+
+      this.customPriceAmount = 0;
     }
   }
 });
