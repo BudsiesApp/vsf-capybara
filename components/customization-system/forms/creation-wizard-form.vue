@@ -148,6 +148,7 @@ import { useCreationWizardPreselectedSize } from 'theme/helpers/use-creation-wiz
 import { useCreationWizardProductTypeStep } from 'theme/helpers/use-creation-wizard-product-type-step';
 import { useFloatingPhoto } from 'theme/helpers/use-floating-photo';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 import { PlushieType } from 'theme/interfaces/plushie.type';
 
 import CreationWizardFormLastStep from 'theme/components/customization-system/forms/creation-wizard-form-last-step.vue';
@@ -403,7 +404,7 @@ export default defineComponent({
       formSteps.goToStep(preservedState.additionalData?.stepIndex);
     });
 
-    const quantity = ref<number>(1);
+    const { quantity } = useProductQuantity(existingCartItem);
     const { addToCartHandler, isSubmitting } = useAddToCart(
       currentProduct,
       quantity,
