@@ -6,7 +6,7 @@ export function getCartItemOptions (cartItem: CartItem): {
   label: string,
   value: string
 }[] {
-  if (cartItem.type_id !== 'configurable') {
+  if (!cartItem.custom_options?.length && !cartItem.configurable_options?.length) {
     return [];
   }
 
