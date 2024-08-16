@@ -93,6 +93,10 @@ export default Vue.extend({
     product: {
       type: Object as PropType<Product>,
       required: true
+    },
+    hospitalsList: {
+      type: Array as PropType<Hospital[]>,
+      default: () => ([])
     }
   },
   components: {
@@ -111,9 +115,6 @@ export default Vue.extend({
     }
   },
   computed: {
-    hospitalsList (): Hospital[] {
-      return this.$store.getters['budsies/getHospitals'];
-    },
     hospitalCustomOption (): CustomOption | undefined {
       return this.product.custom_options?.find(
         (option) => option.title.toLowerCase() === hospitalCustomOptionTitle
