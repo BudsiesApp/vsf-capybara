@@ -125,8 +125,9 @@ import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
-import { useProductGallery } from 'theme/helpers/use-product-gallery';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { useProductGallery } from 'theme/helpers/use-product-gallery';
+import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 
 import ACustomPrice from 'theme/components/atoms/a-custom-price.vue';
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
@@ -304,7 +305,7 @@ export default defineComponent({
       getAllFormRefs(context.refs)
     );
 
-    const quantity = ref<number>(1);
+    const { quantity } = useProductQuantity(existingCartItem);
     const { addToCartHandler, isSubmitting } = useAddToCart(
       product,
       quantity,
