@@ -3,8 +3,7 @@
     <ul class="_list">
       <li
         class="_item"
-        :class="{ '--is-selected': isSelected(optionValue) }"
-        v-for="(optionValue, index) in sortedValues"
+        v-for="optionValue in sortedValues"
         :key="optionValue.id"
       >
         <m-checkbox
@@ -15,47 +14,69 @@
           v-model="selectedOption"
           ref="checkboxes"
         >
-          <template #label>
-            <div class="sf-checkbox__label _title-wrapper">
-              <div class="_title" v-if="optionValue.name">
-                {{ optionValue.name }}
+          <template #checkmark="{ isChecked }">
+            <div class="_checkmark-container">
+              <div
+                class="sf-checkbox__checkmark"
+                :class="{ 'sf-checkbox__checkmark--is-active': isChecked }"
+              >
+                <SfIcon
+                  v-show="isChecked"
+                  icon="check"
+                  size="12px"
+                  color="white"
+                />
               </div>
 
-              <div
-                class="_price"
-                v-if="optionValuePriceDictionary[optionValue.id]"
-              >
-                <strong> + </strong>
+              <div class="sf-checkbox__label _title-wrapper">
+                <div class="_title" v-if="optionValue.name">
+                  {{ optionValue.name }}
+                </div>
 
-                <SfPrice
-                  :regular="formatPrice(optionValuePriceDictionary[optionValue.id].regular)"
-                  :special="formatPrice(optionValuePriceDictionary[optionValue.id].special)"
-                />
+                <div
+                  class="_price"
+                  v-if="optionValuePriceDictionary[optionValue.id]"
+                >
+                  <strong> + </strong>
+
+                  <SfPrice
+                    :regular="
+                      formatPrice(
+                        optionValuePriceDictionary[optionValue.id].regular
+                      )
+                    "
+                    :special="
+                      formatPrice(
+                        optionValuePriceDictionary[optionValue.id].special
+                      )
+                    "
+                  />
+                </div>
               </div>
             </div>
           </template>
-        </m-checkbox>
 
-        <div
-          class="_description-wrapper"
-        >
-          <div class="_media" v-if="getItemImage(optionValue)">
-            <div class="_image-container">
-              <base-image
-                class="_image"
-                v-if="getItemImage(optionValue)"
-                :aspect-ratio="1"
-                :src="getItemImage(optionValue)"
+          <template #label>
+            <div class="_description-wrapper">
+              <div class="_media" v-if="getItemImage(optionValue)">
+                <div class="_image-container">
+                  <base-image
+                    class="_image"
+                    v-if="getItemImage(optionValue)"
+                    :aspect-ratio="1"
+                    :src="getItemImage(optionValue)"
+                  />
+                </div>
+              </div>
+
+              <div
+                class="_description"
+                v-html="optionValue.description"
+                v-if="optionValue.description"
               />
             </div>
-          </div>
-
-          <div
-            class="_description"
-            v-html="optionValue.description"
-            v-if="optionValue.description"
-          />
-        </div>
+          </template>
+        </m-checkbox>
       </li>
     </ul>
 
@@ -72,7 +93,7 @@ import {
   PropType,
   toRefs
 } from '@vue/composition-api';
-import { SfPrice } from '@storefront-ui/vue';
+import { SfIcon, SfPrice } from '@storefront-ui/vue';
 import { getThumbnailPath } from '@vue-storefront/core/helpers';
 
 import { BaseImage } from 'src/modules/budsies';
@@ -90,6 +111,7 @@ export default defineComponent({
   components: {
     BaseImage,
     MCheckbox,
+    SfIcon,
     SfPrice
   },
   props: {
@@ -137,8 +159,6 @@ export default defineComponent({
       ...useOptionValuesPrice(values, context),
       ...useValuesSort(values)
     };
-  },
-  methods: {
   }
 });
 </script>
@@ -157,21 +177,33 @@ export default defineComponent({
 
   ._item {
     cursor: pointer;
-    padding: var(--spacer-sm);
-    transition: background-color 0.15s cubic-bezier(0.65, 0.05, 0.35, 1);
-
-    &.--is-selected {
-      background-color: var(--c-secondary);
-    }
   }
 
   ._checkbox {
     --checkbox-font-size: var(--font-size-base);
+    --m-checkbox-align-items: flex-start;
+
+    padding: var(--spacer-sm);
+    transition: background-color 0.15s cubic-bezier(0.65, 0.05, 0.35, 1);
+
+    &.sf-checkbox--is-active {
+      background-color: var(--c-secondary);
+    }
+
+    ::v-deep {
+      .sf-checkbox__container {
+        flex-direction: column;
+      }
+    }
+  }
+
+  ._checkmark-container {
+    display: flex;
   }
 
   ._title-wrapper {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     flex-direction: row;
     gap: var(--spacer-xs);
   }
@@ -179,11 +211,13 @@ export default defineComponent({
   ._title {
     font-weight: var(--font-semibold);
     margin-top: calc(var(--checkbox-size, 1.5rem) / 10);
+    text-align: start;
   }
 
   ._price {
     color: var(--c-accent);
     font-size: var(--font-base);
+    white-space: nowrap;
 
     --price-regular-color: var(--c-accent);
     --price-regular-font-weight: var(--font-bold);
