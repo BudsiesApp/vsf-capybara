@@ -237,7 +237,7 @@ export default defineComponent({
     display: flex;
     flex-direction: row;
     flex-grow: 1;
-    gap: var(--spacer-xs);
+    gap: var(--spacer-sm);
     margin-top: var(--spacer-xs);
   }
 
