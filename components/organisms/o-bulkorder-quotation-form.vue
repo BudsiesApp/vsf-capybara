@@ -498,9 +498,9 @@ export default defineComponent({
 
       this.isSubmitting = true;
 
-      if (!this.$store.getters['cart/getCartToken']) {
-        await this.$store.dispatch('cart/connect', { guestCart: true });
-      }
+      await this.$store.dispatch('cart/create', {
+        ignoreClientItemsCount: true
+      });
 
       const include3dRendering = !!this.selectedAddons.find(
         (selectedAddon) => selectedAddon.addonOptionValueId === this.get3dRenderingAddonOptionValueId()
