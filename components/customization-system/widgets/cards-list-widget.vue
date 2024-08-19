@@ -12,7 +12,6 @@
           :valid="isValid"
           :value="optionValue.id"
           v-model="selectedOption"
-          ref="checkboxes"
         >
           <template #checkmark="{ isChecked }">
             <div class="_checkmark-container">
