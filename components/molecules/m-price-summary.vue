@@ -7,9 +7,9 @@
       :class="{'sf-property--large': isLarge}"
     />
     <SfProperty
-      v-if="prices.regular_subtotal"
+      v-if="regularSubtotalPrice"
       :name="$t('Subtotal')"
-      :value="prices.regular_subtotal | price"
+      :value="regularSubtotalPrice | price"
       class="sf-property--full-width property"
       :class="{'sf-property--large': isLarge}"
     />
@@ -21,7 +21,7 @@
       :class="{'sf-property--large': isLarge}"
     />
     <SfProperty
-      v-if="prices.tax || prices.tax === 0"
+      v-if="prices.tax"
       :name="$t('Tax')"
       :value="prices.tax | price"
       class="sf-property--full-width property"
@@ -111,6 +111,9 @@ export default {
         result[price.code] = price.value;
         return result;
       }, {});
+    },
+    regularSubtotalPrice () {
+      return this.prices.regular_subtotal || this.prices.subtotal;
     },
     totalItems () {
       return this.productsInCart.reduce((result, product) => {
