@@ -18,10 +18,7 @@
       </template>
     </SfModal>
 
-    <product-structured-data
-      v-if="product"
-      :product="product"
-    />
+    <product-structured-data v-if="product" :product="product" />
 
     <div class="_content">
       <div class="_col -left">
@@ -45,6 +42,8 @@
           :gift-card-order-form-data.sync="giftCardOrderFormData"
           :gift-card-templates-list="giftCardTemplatesList"
           :is-disabled="isSubmitting"
+          :price-amount-list="priceAmountList"
+          :custom-amount-values="customAmountValues"
           @submit-form="onFormSubmit"
           @show-preview="onShowPreviewModalHandler"
         />
@@ -80,25 +79,33 @@ import MProductDescriptionStory from 'theme/components/molecules/m-product-descr
 import GiftCardTemplate from 'src/modules/gift-card/types/GiftCardTemplate.interface';
 import { ImageHandlerService } from 'src/modules/file-storage';
 import { InjectType, ProductEvent } from 'src/modules/shared';
-import { GiftCardOptions, GiftCardTemplateSize } from 'src/modules/gift-card';
+import {
+  AMASTY_GIFT_CARD_SKU,
+  AmGiftCardType,
+  GiftCardOptions,
+  GiftCardTemplateSize
+} from 'src/modules/gift-card';
 import ServerError from 'src/modules/shared/types/server-error';
 
 import { ProductStructuredData } from 'src/modules/budsies';
-import { LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME } from 'src/modules/persisted-customer-data';
+import {
+  LAST_USED_CUSTOMER_FIRST_NAME,
+  LAST_USED_CUSTOMER_LAST_NAME
+} from 'src/modules/persisted-customer-data';
 
 import GiftCardOrderFormData from 'theme/components/interfaces/gift-card-order-form-data.interface';
 
 const defaultGiftCardOrderFormData: GiftCardOrderFormData = {
   selectedTemplateId: undefined,
   priceAmount: 200,
-  shouldSendFriend: false,
+  shouldSendFriend: true,
   customerName: '',
   recipientName: '',
   recipientEmail: '',
   shouldShipPhysically: false,
   customMessage: '',
   qty: 1,
-  customPriceAmount: 200
+  customPriceAmount: 0
 };
 
 const giftCardSku = 'GiftCard';
@@ -119,6 +126,16 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     imageHandlerService: { from: 'ImageHandlerService' }
   } as unknown as InjectType<InjectedServices>,
   computed: {
+    customAmountValues (): {min?: number, max?: number} | undefined {
+      if (!this.product) {
+        return;
+      }
+
+      return {
+        min: this.product.am_open_amount_min,
+        max: this.product.am_open_amount_max
+      }
+    },
     customerName (): string {
       return this.giftCardOrderFormData.shouldSendFriend
         ? this.giftCardOrderFormData.customerName
@@ -136,13 +153,18 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return this.$store.getters['product/getProductBySkuDictionary'];
     },
     giftCardTemplatesList (): GiftCardTemplate[] {
+      if (!this.product) {
+        return [];
+      }
+
+      if (this.product.sku === AMASTY_GIFT_CARD_SKU) {
+        return this.getGiftCardTemplatesFromProduct(this.product);
+      }
       return this.$store.getters['giftCard/currentStoreGiftCardTemplates'];
     },
     loggedUserFullName (): string {
-      const firstName = this.$store
-        .getters[LAST_USED_CUSTOMER_FIRST_NAME];
-      const lastName = this.$store
-        .getters[LAST_USED_CUSTOMER_LAST_NAME];
+      const firstName = this.$store.getters[LAST_USED_CUSTOMER_FIRST_NAME];
+      const lastName = this.$store.getters[LAST_USED_CUSTOMER_LAST_NAME];
 
       let fullName = '';
 
@@ -162,10 +184,20 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         this.giftCardOrderFormData.customPriceAmount
       );
     },
+    priceAmountList (): number[] | undefined {
+      if (!this.product) {
+        return;
+      }
+
+      return this.product.am_gift_card_prices
+    },
     product (): Product | null {
       const product = this.$store.getters['product/getCurrentProduct'];
 
-      if (product?.sku !== giftCardSku) {
+      if (
+        product?.sku !== giftCardSku &&
+        product?.sku !== AMASTY_GIFT_CARD_SKU
+      ) {
         return null;
       }
 
@@ -177,7 +209,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         : this.giftCardOrderFormData.recipientEmail;
     },
     recipientName (): string {
-      return this.giftCardOrderFormData.shouldSendFriend
+      return this.giftCardOrderFormData.shouldSendFriend && !this.giftCardOrderFormData.shouldShipPhysically
         ? this.giftCardOrderFormData.recipientName
         : '';
     },
@@ -189,9 +221,17 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         return undefined;
       }
 
-      const card = this.$store.getters['giftCard/getGiftCardTemplateById'](
-        this.giftCardOrderFormData.selectedTemplateId
+      const card = this.giftCardTemplatesList.find(
+        (item) => item.id === this.giftCardOrderFormData.selectedTemplateId
       );
+
+      if (!card) {
+        return;
+      }
+
+      const pathType = this.product?.sku === AMASTY_GIFT_CARD_SKU
+        ? 'am_gift_card'
+        : 'giftcard'
 
       return {
         ...card,
@@ -199,7 +239,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           card.backgroundImage,
           GiftCardTemplateSize.width,
           GiftCardTemplateSize.height,
-          'giftcard'
+          pathType
         )
       };
     },
@@ -233,13 +273,25 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     this.removeEventBusListeners();
   },
   async asyncData ({ store }): Promise<void> {
-    const [, product] = await Promise.all([
-      store.dispatch('giftCard/loadGiftCardsTemplates'),
-      store.dispatch('product/loadProduct', {
-        parentSku: giftCardSku,
+    let product: Product | undefined = await store.dispatch(
+      'product/loadProduct',
+      {
+        parentSku: AMASTY_GIFT_CARD_SKU,
         setCurrent: false
-      })
-    ]);
+      }
+    );
+
+    if (!product) {
+      const result = await Promise.all([
+        store.dispatch('giftCard/loadGiftCardsTemplates'),
+        store.dispatch('product/loadProduct', {
+          parentSku: giftCardSku,
+          setCurrent: false
+        })
+      ]);
+
+      product = result[1] as Product | undefined;
+    }
 
     if (isServer) {
       await store.dispatch('product/setCurrent', product);
@@ -252,33 +304,17 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       }
 
       try {
-        const giftCardOptions: GiftCardOptions = {
-          product: this.product.id as number,
-          related_product: '',
-          qty: this.giftCardOrderFormData.qty,
-          price_amount: this.priceAmount,
-          amount: this.priceAmount,
-          giftcard_template_id: this.giftCardOrderFormData.selectedTemplateId,
-          send_friend: this.giftCardOrderFormData.shouldSendFriend ? 1 : '',
-          customer_name: this.customerName,
-          recipient_name: this.recipientName,
-          recipient_email: this.recipientEmail,
-          recipient_address: '',
-          message: this.customMessage,
-          notify_success: 0
-        };
+        const giftCardData = this.getGiftCardData();
 
-        if (this.giftCardOrderFormData.shouldShipPhysically) {
-          giftCardOptions.recipient_ship = 'yes';
-        }
+        const productToAdd: any = {
+          ...this.product,
+          ...giftCardData,
+          qty: this.giftCardOrderFormData.qty
+        };
 
         try {
           await this.$store.dispatch('cart/addItem', {
-            productToAdd: {
-              ...this.product,
-              qty: this.giftCardOrderFormData.qty,
-              giftcard_options: giftCardOptions
-            }
+            productToAdd
           });
         } catch (error) {
           if (error instanceof ServerError) {
@@ -297,6 +333,77 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     closePreviewModal (): void {
       this.showPreviewModal = false;
+    },
+    getGiftCardData () {
+      if (!this.product) {
+        throw new Error('Product is not defined');
+      }
+
+      if (!this.giftCardOrderFormData.selectedTemplateId) {
+        throw new Error('Gift Card template is not selected');
+      }
+
+      if (this.product.sku === AMASTY_GIFT_CARD_SKU) {
+        const options = {
+          am_giftcard_image: this.giftCardOrderFormData.selectedTemplateId,
+          am_giftcard_amount: this.giftCardOrderFormData.priceAmount,
+          am_giftcard_amount_custom:
+            this.giftCardOrderFormData.customPriceAmount,
+          am_giftcard_sender_name: this.customerName,
+          am_giftcard_recipient_name: this.recipientName,
+          am_giftcard_recipient_email: this.recipientEmail,
+          am_giftcard_message: this.customMessage,
+          am_giftcard_type: this.giftCardOrderFormData.shouldShipPhysically
+            ? AmGiftCardType.PHYSICAL
+            : AmGiftCardType.VIRTUAL
+        };
+
+        return {
+          product_option: {
+            extension_attributes: {
+              am_giftcard_options: options
+            }
+          }
+        };
+      }
+
+      const giftCardOptions: GiftCardOptions = {
+        product: this.product.id as number,
+        related_product: '',
+        qty: this.giftCardOrderFormData.qty,
+        price_amount: this.priceAmount,
+        amount: this.priceAmount,
+        giftcard_template_id: this.giftCardOrderFormData.selectedTemplateId,
+        send_friend: this.giftCardOrderFormData.shouldSendFriend ? 1 : '',
+        customer_name: this.customerName,
+        recipient_name: this.recipientName,
+        recipient_email: this.recipientEmail,
+        recipient_address: '',
+        message: this.customMessage,
+        notify_success: 0
+      };
+
+      if (this.giftCardOrderFormData.shouldShipPhysically) {
+        giftCardOptions.recipient_ship = 'yes';
+      }
+
+      return {
+        giftcard_options: giftCardOptions
+      };
+    },
+    getGiftCardTemplatesFromProduct (product: Product): GiftCardTemplate[] {
+      if (!product.gift_card_images_data) {
+        return [];
+      }
+
+      return product.gift_card_images_data.map((item) => {
+        return {
+          id: item.id,
+          name: item.gift_card_title || item.title,
+          backgroundImage: item.image_path,
+          textColor: '#003e6b'
+        };
+      });
     },
     goToCart (): void {
       this.$router.push(localizedRoute({ name: 'detailed-cart' }));
@@ -334,8 +441,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         return;
       }
 
-      const product = this.getProductBySkuDictionary[giftCardSku];
-      await this.$store.dispatch('product/setCurrent', product)
+      const product =
+        this.getProductBySkuDictionary[AMASTY_GIFT_CARD_SKU] ||
+        this.getProductBySkuDictionary[giftCardSku];
+      await this.$store.dispatch('product/setCurrent', product);
     },
     updateCustomerName (): void {
       this.giftCardOrderFormData.customerName = this.loggedUserFullName;
@@ -343,9 +452,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   },
   metaInfo () {
     return {
-      title: htmlDecode(
-        this.product?.meta_title || this.product?.name
-      ),
+      title: htmlDecode(this.product?.meta_title || this.product?.name),
       meta: this.product?.meta_description
         ? [
           {

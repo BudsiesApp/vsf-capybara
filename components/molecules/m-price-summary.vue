@@ -42,6 +42,15 @@
         :class="{'sf-property--large': isLarge}"
       />
     </template>
+
+    <SfProperty
+      v-if="prices.amasty_giftcard"
+      :name="$t('Gift Cards Applied')"
+      :value="prices.amasty_giftcard | price"
+      class="sf-property--full-width property --marked"
+      :class="{'sf-property--large': isLarge}"
+    />
+
     <template v-if="prices.savings">
       <SfProperty
         :name="$t('Price Savings')"
