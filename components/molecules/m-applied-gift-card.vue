@@ -11,43 +11,8 @@
     <div class="_code-actions">
       <div
         class="_code-amount"
-        v-show="!isAmountEditing"
-        @click="startEdit"
       >
         ${{ giftCardValue }}
-      </div>
-
-      <SfInput
-        class="_code-amount-input"
-        :disabled="isSubmitting"
-        v-model="newGiftCardValue"
-        v-show="isAmountEditing"
-      />
-
-      <div
-        class="_amount-edit"
-        :disabled="isSubmitting"
-      >
-        <SfIcon
-          icon="check"
-          size="xxs"
-          :title="editLabel"
-          @click="changeAppliedGiftCardValue"
-          v-show="!isSubmittingNewValue && isAmountEditing"
-        />
-
-        <SfIcon
-          size="xxs"
-          :title="editLabel"
-          @click="startEdit"
-          v-show="!isSubmittingNewValue && !isAmountEditing"
-        >
-          <div class="_edit-icon" />
-        </SfIcon>
-
-        <div class="_loader" v-show="isSubmittingNewValue">
-          <SfLoader class="_sf-loader" :loading="true" />
-        </div>
       </div>
 
       <div class="_code -close">
@@ -120,8 +85,7 @@ export default AppliedGiftCard.extend({
   }
 
   ._code-remove,
-  ._amount-edit,
-  ._code-amount {
+  ._amount-edit {
     cursor: pointer;
   }
 
