@@ -57,7 +57,7 @@
           <validation-provider
             v-slot="{ errors }"
             slim
-            rules="required"
+            :rules="customPriceAmountRules"
             name="'Price Amount'"
             class="_custom-price-amount"
             v-if="showCustomPriceAmountInput"
@@ -88,46 +88,47 @@
           />
         </div>
 
-        <validation-provider
-          v-slot="{ errors, classes }"
-          rules="required"
-          name="'Recipient Name'"
-          slim
-        >
-          <div class="_form-field" :class="classes">
-            <label>Recipient name:</label>
+        <template v-if="showRecipientFields">
+          <validation-provider
+            v-slot="{ errors, classes }"
+            rules="required"
+            name="'Recipient Name'"
+            slim
+          >
+            <div class="_form-field" :class="classes">
+              <label>Recipient name:</label>
 
-            <SfInput
-              name="recipient_name"
-              v-model="recipientName"
-              :required="true"
-              :disabled="isDisabled"
-              :valid="!errors.length"
-              :error-message="errors[0]"
-            />
-          </div>
-        </validation-provider>
+              <SfInput
+                name="recipient_name"
+                v-model="recipientName"
+                :required="true"
+                :disabled="isDisabled"
+                :valid="!errors.length"
+                :error-message="errors[0]"
+              />
+            </div>
+          </validation-provider>
 
-        <validation-provider
-          v-slot="{ errors, classes }"
-          rules="required|email"
-          name="'Recipient Email'"
-          slim
-          v-if="showRecipientEmailInput"
-        >
-          <div class="_form-field" :class="classes">
-            <label>Recipient email address:</label>
+          <validation-provider
+            v-slot="{ errors, classes }"
+            rules="required|email"
+            name="'Recipient Email'"
+            slim
+          >
+            <div class="_form-field" :class="classes">
+              <label>Recipient email address:</label>
 
-            <SfInput
-              name="recipient_email"
-              v-model.trim="recipientEmail"
-              :disabled="isDisabled"
-              :required="true"
-              :valid="!errors.length"
-              :error-message="errors[0]"
-            />
-          </div>
-        </validation-provider>
+              <SfInput
+                name="recipient_email"
+                v-model.trim="recipientEmail"
+                :disabled="isDisabled"
+                :required="true"
+                :valid="!errors.length"
+                :error-message="errors[0]"
+              />
+            </div>
+          </validation-provider>
+        </template>
 
         <SfCheckbox
           v-model="shouldShipPhysically"
@@ -141,7 +142,7 @@
           </template>
         </SfCheckbox>
 
-        <div class="_ship-description" v-if="!showRecipientEmailInput">
+        <div class="_ship-description" v-if="!showRecipientFields">
           All physical gift cards in the same order will be sent to the same
           shipping address entered during checkout.
         </div>
@@ -206,7 +207,7 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
-import { required, email } from 'vee-validate/dist/rules';
+import { required, email, between } from 'vee-validate/dist/rules';
 import {
   mapMobileObserver,
   unMapMobileObserver
@@ -220,6 +221,9 @@ import GiftCardTemplate from 'src/modules/gift-card/types/GiftCardTemplate.inter
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
 
 const maxCharactersRemaining = 240;
+const DEFAULT_CUSTOM_PRICE_AMOUNT = 200;
+const DEFAULT_MINIMUM_CUSTOM_PRICE_AMOUNT = 5;
+const DEFAULT_MAXIMUM_CUSTOM_PRICE_AMOUNT = 1000;
 
 extend('required', {
   ...required,
@@ -229,6 +233,11 @@ extend('required', {
 extend('email', {
   ...email,
   message: 'Please, provide the correct email address'
+});
+
+extend('between', {
+  ...between,
+  message: 'Please, enter amount between {min} and {max}'
 });
 
 export default Vue.extend({
@@ -254,6 +263,19 @@ export default Vue.extend({
     isDisabled: {
       type: Boolean,
       default: false
+    },
+    priceAmountList: {
+      type: Array as PropType<number[]>,
+      default: () => ([50, 100, 150, 200, 250])
+    },
+    customAmountValues: {
+      type: Object as PropType<{min?: number, max?: number}>,
+      default: () => (
+        {
+          min: DEFAULT_MINIMUM_CUSTOM_PRICE_AMOUNT,
+          max: DEFAULT_MAXIMUM_CUSTOM_PRICE_AMOUNT
+        }
+      )
     }
   },
   computed: {
@@ -294,8 +316,17 @@ export default Vue.extend({
       set (value: number) {
         this.updateGiftCardOrderFormData({
           ...this.giftCardOrderFormData,
-          customPriceAmount: value
+          customPriceAmount: value || 0
         });
+      }
+    },
+    customPriceAmountRules () {
+      return {
+        required,
+        between: {
+          min: this.customAmountValues.min || DEFAULT_MINIMUM_CUSTOM_PRICE_AMOUNT,
+          max: this.customAmountValues.max || DEFAULT_MAXIMUM_CUSTOM_PRICE_AMOUNT
+        }
       }
     },
     isSelectedPriceAmountSlim () {
@@ -305,7 +336,7 @@ export default Vue.extend({
       id: number,
       value: string
     }[] {
-      const options = [50, 100, 150, 200, 250].map((price) => ({
+      const options = this.priceAmountList.map((price) => ({
         id: price,
         value: `$${price} Petsies Gift Card`
       }));
@@ -386,7 +417,7 @@ export default Vue.extend({
     showCustomPriceAmountInput (): boolean {
       return this.selectedPriceAmount === 0;
     },
-    showRecipientEmailInput (): boolean {
+    showRecipientFields (): boolean {
       return !this.shouldShipPhysically;
     },
     showSendFriendFields (): boolean {
@@ -418,6 +449,7 @@ export default Vue.extend({
   watch: {
     showCustomPriceAmountInput (value: boolean) {
       if (value) {
+        this.customPriceAmount = DEFAULT_CUSTOM_PRICE_AMOUNT;
         return;
       }
 

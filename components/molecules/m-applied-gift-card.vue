@@ -4,7 +4,21 @@
       {{ maskedGiftCardCode }}
     </div>
 
+    <div class="_code -open">
+      (
+    </div>
+
     <div class="_code-actions">
+      <div
+        class="_code-amount"
+      >
+        ${{ giftCardValue }}
+      </div>
+
+      <div class="_code -close">
+        )
+      </div>
+
       <div
         class="_code-remove"
         @click="removeAppliedGiftCard"
@@ -71,8 +85,7 @@ export default AppliedGiftCard.extend({
   }
 
   ._code-remove,
-  ._amount-edit,
-  ._code-amount {
+  ._amount-edit {
     cursor: pointer;
   }
 

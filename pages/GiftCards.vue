@@ -42,6 +42,8 @@
           :gift-card-order-form-data.sync="giftCardOrderFormData"
           :gift-card-templates-list="giftCardTemplatesList"
           :is-disabled="isSubmitting"
+          :price-amount-list="priceAmountList"
+          :custom-amount-values="customAmountValues"
           @submit-form="onFormSubmit"
           @show-preview="onShowPreviewModalHandler"
         />
@@ -77,7 +79,12 @@ import MProductDescriptionStory from 'theme/components/molecules/m-product-descr
 import GiftCardTemplate from 'src/modules/gift-card/types/GiftCardTemplate.interface';
 import { ImageHandlerService } from 'src/modules/file-storage';
 import { InjectType, ProductEvent } from 'src/modules/shared';
-import { AMASTY_GIFT_CARD_SKU, AmGiftCardType, GiftCardOptions, GiftCardTemplateSize } from 'src/modules/gift-card';
+import {
+  AMASTY_GIFT_CARD_SKU,
+  AmGiftCardType,
+  GiftCardOptions,
+  GiftCardTemplateSize
+} from 'src/modules/gift-card';
 import ServerError from 'src/modules/shared/types/server-error';
 
 import { ProductStructuredData } from 'src/modules/budsies';
@@ -119,6 +126,16 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     imageHandlerService: { from: 'ImageHandlerService' }
   } as unknown as InjectType<InjectedServices>,
   computed: {
+    customAmountValues (): {min?: number, max?: number} | undefined {
+      if (!this.product) {
+        return;
+      }
+
+      return {
+        min: this.product.am_open_amount_min,
+        max: this.product.am_open_amount_max
+      }
+    },
     customerName (): string {
       return this.giftCardOrderFormData.shouldSendFriend
         ? this.giftCardOrderFormData.customerName
@@ -167,10 +184,20 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         this.giftCardOrderFormData.customPriceAmount
       );
     },
+    priceAmountList (): number[] | undefined {
+      if (!this.product) {
+        return;
+      }
+
+      return this.product.am_gift_card_prices
+    },
     product (): Product | null {
       const product = this.$store.getters['product/getCurrentProduct'];
 
-      if (product?.sku !== giftCardSku && product?.sku !== AMASTY_GIFT_CARD_SKU) {
+      if (
+        product?.sku !== giftCardSku &&
+        product?.sku !== AMASTY_GIFT_CARD_SKU
+      ) {
         return null;
       }
 
@@ -182,7 +209,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         : this.giftCardOrderFormData.recipientEmail;
     },
     recipientName (): string {
-      return this.giftCardOrderFormData.shouldSendFriend
+      return this.giftCardOrderFormData.shouldSendFriend && !this.giftCardOrderFormData.shouldShipPhysically
         ? this.giftCardOrderFormData.recipientName
         : '';
     },
@@ -202,13 +229,17 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         return;
       }
 
+      const pathType = this.product?.sku === AMASTY_GIFT_CARD_SKU
+        ? 'am_gift_card'
+        : 'giftcard'
+
       return {
         ...card,
         backgroundImage: getThumbnailPath(
           card.backgroundImage,
           GiftCardTemplateSize.width,
           GiftCardTemplateSize.height,
-          'giftcard'
+          pathType
         )
       };
     },
@@ -277,16 +308,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
         const productToAdd: any = {
           ...this.product,
+          ...giftCardData,
           qty: this.giftCardOrderFormData.qty
-        }
-
-        if (this.product.sku === AMASTY_GIFT_CARD_SKU) {
-          productToAdd.product_option.extension_attributes = {
-            am_giftcard_options: giftCardData
-          }
-        } else {
-          productToAdd.giftcard_options = giftCardData;
-        }
+        };
 
         try {
           await this.$store.dispatch('cart/addItem', {
@@ -323,7 +347,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         const options = {
           am_giftcard_image: this.giftCardOrderFormData.selectedTemplateId,
           am_giftcard_amount: this.giftCardOrderFormData.priceAmount,
-          am_giftcard_amount_custom: this.giftCardOrderFormData.customPriceAmount,
+          am_giftcard_amount_custom:
+            this.giftCardOrderFormData.customPriceAmount,
           am_giftcard_sender_name: this.customerName,
           am_giftcard_recipient_name: this.recipientName,
           am_giftcard_recipient_email: this.recipientEmail,
@@ -333,7 +358,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
             : AmGiftCardType.VIRTUAL
         };
 
-        return options;
+        return {
+          product_option: {
+            extension_attributes: {
+              am_giftcard_options: options
+            }
+          }
+        };
       }
 
       const giftCardOptions: GiftCardOptions = {
@@ -356,7 +387,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         giftCardOptions.recipient_ship = 'yes';
       }
 
-      return giftCardOptions;
+      return {
+        giftcard_options: giftCardOptions
+      };
     },
     getGiftCardTemplatesFromProduct (product: Product): GiftCardTemplate[] {
       if (!product.gift_card_images_data) {
