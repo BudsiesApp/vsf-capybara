@@ -3,6 +3,7 @@
     <validation-provider
       slim
       rules="required|min:2"
+      name="'First name'"
       v-slot="{errors}"
     >
       <SfInput
@@ -21,6 +22,7 @@
     <validation-provider
       slim
       rules="required"
+      name="'Last name'"
       v-slot="{errors}"
     >
       <SfInput
@@ -39,6 +41,7 @@
     <validation-provider
       slim
       rules="required"
+      name="'Address'"
       v-slot="{errors}"
     >
       <SfInput
@@ -57,6 +60,7 @@
     <validation-provider
       slim
       rules="required"
+      name="'Country'"
       v-slot="{errors}"
     >
       <MMultiselect
@@ -89,6 +93,7 @@
     <validation-provider
       slim
       rules="required"
+      name="'State'"
       ref="stateValidator"
       v-slot="{errors}"
       v-if="isSelectedCountryHasStates && canShowStateSelector"
@@ -112,6 +117,7 @@
     <validation-provider
       slim
       rules="required"
+      name="'City'"
       v-slot="{errors}"
     >
       <SfInput
@@ -130,6 +136,7 @@
     <validation-provider
       slim
       rules="required|min:3"
+      name="'Zip Code'"
       v-slot="{errors}"
     >
       <SfInput
@@ -149,6 +156,7 @@
     <validation-provider
       v-slot="{ errors }"
       :rules="phoneValidationRules"
+      name="'Phone number'"
       ref="phoneValidator"
       slim
     >
