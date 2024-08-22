@@ -192,7 +192,8 @@ export default {
         country: '',
         phoneNumber: '',
         defaultShipping: false,
-        defaultBilling: false
+        defaultBilling: false,
+        customerId: undefined
       },
       countries: Countries,
       state: State.LIST
@@ -204,10 +205,10 @@ export default {
       return this.$store.state.user.current;
     },
     defaultBillingAddress () {
-      return this.addresses.find((address) => address.id === this.currentUser.default_billing);
+      return this.addresses.find((address) => String(address.id) === String(this.currentUser.default_billing));
     },
     defaultShippingAddress () {
-      return this.addresses.find((address) => address.id === this.currentUser.default_shipping);
+      return this.addresses.find((address) => String(address.id) === String(this.currentUser.default_shipping));
     },
     addresses () {
       return this.currentUser?.addresses || [];
@@ -243,7 +244,8 @@ export default {
         country: address.country_id,
         phoneNumber: address.telephone,
         defaultBilling: address.default_billing,
-        defaultShipping: address.default_shipping
+        defaultShipping: address.default_shipping,
+        customerId: address.customer_id
       };
       this.state = State.EDIT;
     },
@@ -259,7 +261,8 @@ export default {
         country: '',
         phoneNumber: '',
         defaultShipping: false,
-        defaultBilling: false
+        defaultBilling: false,
+        customerId: undefined
       }
     },
     async onAddressUpdate () {
