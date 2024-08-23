@@ -7,7 +7,9 @@
         --overlay-z-index: 20
     }
     &__dropdown {
-        --select-dropdown-z-index: 21;
+        // some third party widgets on production has such values
+        // so it's overlap dropdown content
+        --select-dropdown-z-index: 2147483648;
 
         .sf-select__options {
             // For Firefox
@@ -34,6 +36,10 @@
     }
 
     @include for-desktop {
+        &__dropdown {
+         --select-dropdown-z-index: 21;   
+        }
+
         &__options {
             overflow: auto;
         }
@@ -44,6 +50,7 @@
         @supports (-webkit-touch-callout: none) {
             --select-option-border-color: var(--c-gray-lighten);
             --select-dropdown-background: var(--c-black-lighten);
+            --overlay-background: rgba(255, 255, 255, 0.7);
 
             .sf-select-option {
                 color: var(--c-white-darken);
