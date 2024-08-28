@@ -25,7 +25,7 @@
           :style="headingStyles"
         >
           <template #title>
-            <h2
+            <h1
               class="sf-heading__title sf-heading__title--h2"
               v-html="nl2br(itemData.title)"
             />
