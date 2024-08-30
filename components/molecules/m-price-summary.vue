@@ -44,9 +44,9 @@
     </template>
 
     <SfProperty
-      v-if="prices.amasty_giftcard"
+      v-if="prices.amgiftcard"
       :name="$t('Gift Cards Applied')"
-      :value="prices.amasty_giftcard | price"
+      :value="prices.amgiftcard | price"
       class="sf-property--full-width property --marked"
       :class="{'sf-property--large': isLarge}"
     />
