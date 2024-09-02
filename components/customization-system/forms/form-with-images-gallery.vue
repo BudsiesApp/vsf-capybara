@@ -245,8 +245,7 @@ export default defineComponent({
       productCustomizations,
       selectedOptionValuesIds,
       customizationOptionValue,
-      updateCustomizationOptionValue,
-      product
+      updateCustomizationOptionValue
     );
 
     // TODO: temporary until separate option value for "Standard"
