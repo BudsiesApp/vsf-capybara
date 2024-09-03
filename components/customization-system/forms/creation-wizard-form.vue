@@ -134,7 +134,6 @@ import {
   useCustomizationsBundleOptions,
   useCustomizationsOptionsDefaultValue,
   useCustomizationStatePreservation,
-  useProductionTimeSelectorCustomization,
   useSelectedOptionValueUrlQuery,
   useEmailCustomization,
   useCustomizationsFilter,
@@ -262,8 +261,7 @@ export default defineComponent({
       productCustomizations,
       selectedOptionValuesIds,
       customizationOptionValue,
-      updateCustomizationOptionValue,
-      currentProduct
+      updateCustomizationOptionValue
     );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
@@ -296,15 +294,6 @@ export default defineComponent({
       customizationAvailableOptionValues,
       customizationOptionValue,
       onCustomizationOptionInput
-    );
-
-    // TODO: temporary until separate option value for "Standard"
-    // production time will be added
-    useProductionTimeSelectorCustomization(
-      availableCustomizations,
-      customizationOptionValue,
-      existingCartItem,
-      updateCustomizationOptionValue
     );
 
     const { emailCustomizationFilter, persistCustomerEmail } =

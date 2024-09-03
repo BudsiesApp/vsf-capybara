@@ -399,7 +399,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return product.gift_card_images_data.map((item) => {
         return {
           id: item.id,
-          name: item.gift_card_title || item.title,
+          name: item.title,
           backgroundImage: item.image_path,
           textColor: '#003e6b'
         };
