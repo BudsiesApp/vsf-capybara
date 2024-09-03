@@ -160,7 +160,6 @@ import {
   useCustomizationStatePreservation,
   useEmailCustomization,
   useOptionValueActions,
-  useProductionTimeSelectorCustomization,
   useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
 import i18n from '@vue-storefront/core/i18n';
@@ -271,8 +270,7 @@ export default defineComponent({
       productCustomizations,
       selectedOptionValuesIds,
       customizationOptionValue,
-      updateCustomizationOptionValue,
-      product
+      updateCustomizationOptionValue
     );
 
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
@@ -326,15 +324,6 @@ export default defineComponent({
 
       replaceCustomizationState(preservedState.customizationState);
     });
-
-    // TODO: temporary until separate option value for "Standard"
-    // production time will be added
-    useProductionTimeSelectorCustomization(
-      availableCustomizations,
-      customizationOptionValue,
-      existingCartItem,
-      updateCustomizationOptionValue
-    );
 
     useCustomizationsBundleOptions(
       productCustomizations,

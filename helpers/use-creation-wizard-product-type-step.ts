@@ -4,6 +4,7 @@ import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import CartItem from 'core/modules/cart/types/CartItem';
 import Product from 'core/modules/catalog/types/Product';
 import { PlushieWizardEvents } from 'src/modules/budsies';
+import { updateProductProductionTimeCustomizationData } from 'src/modules/customization-system';
 import { ProductEvent } from 'src/modules/shared';
 
 import { PlushieType } from 'theme/interfaces/plushie.type';
@@ -25,13 +26,18 @@ export function useCreationWizardProductTypeStep (
     isProductLoading.value = true;
 
     try {
-      const product = await root.$store.dispatch('product/loadProduct', {
+      let product = await root.$store.dispatch('product/loadProduct', {
         parentSku: sku,
         childSku: null,
         setCurrent: false
       });
 
       await root.$store.dispatch('budsies/loadProductRushAddons', { productId: product.id });
+
+      product = updateProductProductionTimeCustomizationData(
+        product,
+        root.$store
+      );
 
       await root.$store.dispatch('product/setCurrent', product);
 
