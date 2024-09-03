@@ -4,6 +4,7 @@ import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import Product from 'core/modules/catalog/types/Product';
 import { ProductEvent } from 'src/modules/shared';
+import { updateProductProductionTimeCustomizationData } from 'src/modules/customization-system';
 
 export function useProductPage (
   sku: Ref<string>,
@@ -24,9 +25,9 @@ export function useProductPage (
   async function loadData (): Promise<void> {
     isDataLoaded.value = false;
 
-    const product = await root.$store.dispatch('product/loadProduct', {
+    let product = await root.$store.dispatch('product/loadProduct', {
       parentSku: sku.value,
-      setCurrent: true
+      setCurrent: false
     });
 
     if (!product) {
@@ -37,6 +38,13 @@ export function useProductPage (
     await root.$store.dispatch('budsies/loadProductRushAddons', {
       productId: product.id
     });
+
+    product = updateProductProductionTimeCustomizationData(
+      product,
+      root.$store
+    );
+
+    await root.$store.dispatch('product/setCurrent', product);
 
     catalogHooksExecutors.productPageVisited(product);
 
