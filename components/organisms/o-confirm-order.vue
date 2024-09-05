@@ -135,12 +135,18 @@
         class="sf-heading--left sf-heading--no-underline title"
       />
 
-      <APromoCode :allow-promo-code-removal="false" />
+      <APromoCode
+        :allow-promo-code-removal="false"
+        :disabled="isCheckoutInProgress"
+      />
     </div>
 
     <div class="totals desktop-only">
       <div class="totals__element">
-        <APromoCode :allow-promo-code-removal="false" />
+        <APromoCode
+          :allow-promo-code-removal="false"
+          :disabled="isCheckoutInProgress"
+        />
       </div>
       <MPriceSummary class="totals__element" />
     </div>
@@ -150,7 +156,11 @@
       class="sf-heading--left sf-heading--no-underline title"
     />
     <div class="form">
-      <OGiftCardPayment :cart-items="cartItems" />
+      <OGiftCardPayment
+        :cart-items="cartItems"
+        :disabled="isCheckoutInProgress"
+      />
+
       <div class="form__radio-group">
         <component
           v-for="method in paymentMethods"
@@ -160,13 +170,13 @@
           :is="componentsByMethodCode[method.code]"
           :show-content="payment.paymentMethod === method.code"
           @success="placeOrder"
-          @error="onBraintreePaymentMethodError"
         >
           <template>
             <SfRadio
               v-model="payment.paymentMethod"
               :label="method.title ? method.title : method.name"
               :value="method.code"
+              :disabled="isCheckoutInProgress"
               name="payment-method"
               class="form__radio payment-method"
               @input="onPaymentMethodChange"
@@ -220,13 +230,14 @@ import {
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
 import { registerModule } from '@vue-storefront/core/lib/modules';
 import { OrderModule } from '@vue-storefront/core/modules/order';
+import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { OrderReview } from '@vue-storefront/core/modules/checkout/components/OrderReview';
 import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
 import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
-import { AFFIRM_BEFORE_PLACE_ORDER, AFFIRM_MODAL_CLOSED, AFFIRM_CHECKOUT_ERROR } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';
+import { AFFIRM_MODAL_CLOSED } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';
 import { getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
-import { getCartItemPrice } from 'src/modules/shared';
+import { getCartItemPrice, PAYMENT_ERROR_EVENT } from 'src/modules/shared';
 
 import { createSmoothscroll } from 'theme/helpers';
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
@@ -318,16 +329,16 @@ export default {
     registerModule(OrderModule);
   },
   async beforeMount () {
-    this.$bus.$on(AFFIRM_BEFORE_PLACE_ORDER, this.onAffirmBeforePlaceOrderHandler);
     this.$bus.$on(AFFIRM_MODAL_CLOSED, this.onAffirmModalClosedHandler);
-    this.$bus.$on(AFFIRM_CHECKOUT_ERROR, this.onAffirmPlaceOrderError);
+    this.$bus.$on(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
+    this.$bus.$on(PAYMENT_ERROR_EVENT, this.onPaymentErrorEventHandler);
 
     this.braintreeClient = await this.$store.dispatch('braintree/createBraintreeClient');
   },
   beforeDestroy () {
-    this.$bus.$off(AFFIRM_BEFORE_PLACE_ORDER, this.onAffirmBeforePlaceOrderHandler);
     this.$bus.$off(AFFIRM_MODAL_CLOSED, this.onAffirmModalClosedHandler);
-    this.$bus.$off(AFFIRM_CHECKOUT_ERROR, this.onAffirmPlaceOrderError);
+    this.$bus.$off(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler)
+    this.$bus.$off(PAYMENT_ERROR_EVENT, this.onPaymentErrorEventHandler);
   },
   methods: {
     ...mapActions('ui', {
@@ -364,24 +375,18 @@ export default {
         action1: { label: this.$t('OK') }
       });
     },
-    onBraintreePaymentMethodError () {
-      this.$store.dispatch('notification/spawnNotification', {
-        type: 'danger',
-        message: this.$t('Something went wrong. Please try another payment method'),
-        action1: { label: this.$t('OK') }
-      });
-    },
-    onAffirmBeforePlaceOrderHandler () {
-      this.isCheckoutInProgress = true;
-    },
     onAffirmModalClosedHandler () {
       this.isCheckoutInProgress = false;
     },
-    onAffirmPlaceOrderError () {
+    onOrderErrorEventHandler () {
       this.isCheckoutInProgress = false;
+    },
+    onPaymentErrorEventHandler () {
+      this.isCheckoutInProgress = false;
+
       this.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
-        message: this.$t('Something went wrong'),
+        message: this.$t('Something went wrong. Please try another payment method'),
         action1: { label: this.$t('OK') }
       });
     },
@@ -393,6 +398,12 @@ export default {
       this.changePaymentMethod();
     },
     onPlaceOrder () {
+      if (this.isCheckoutInProgress) {
+        return;
+      }
+
+      this.isCheckoutInProgress = true;
+
       if (!this.isBraintreeMethodSelected) {
         this.placeOrder();
         return;

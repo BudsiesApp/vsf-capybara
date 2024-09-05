@@ -5,7 +5,11 @@
     </div>
 
     <template v-if="showContent">
-      <SfCheckbox v-model="useGiftCard" class="_checkbox">
+      <SfCheckbox
+        :disabled="isDisabled"
+        v-model="useGiftCard"
+        class="_checkbox"
+      >
         <template #label>
           <span class="sf-checkbox__label">
             {{ $t('Use gift card to checkout') }}
@@ -21,6 +25,7 @@
             :key="giftCard.code"
             :gift-card-code="giftCard.code"
             :gift-card-value="giftCard.value"
+            :disabled="isDisabled"
           />
         </div>
 
@@ -51,7 +56,7 @@
                 :valid="!errors.length"
                 :error-message="errors[0]"
                 :value="giftCardCode"
-                :disabled="isSubmitting"
+                :disabled="isDisabled"
                 @input="onGiftCardCodeChangeHandler"
               />
             </div>
@@ -64,7 +69,7 @@
 
           <SfButton
             class="color-secondary _apply-button"
-            :disabled="isSubmitting"
+            :disabled="isDisabled"
             @click.native="() => passes(() => onApplyGiftCardCode())"
           >
             {{ $t('Apply Gift Card') }}
@@ -88,6 +93,12 @@ import GiftCardPayment from 'src/modules/gift-card/mixins/Payment';
 import MAppliedGiftCard from 'theme/components/molecules/m-applied-gift-card.vue';
 
 export default GiftCardPayment.extend({
+  props: {
+    disabled: {
+      type: Boolean,
+      default: false
+    }
+  },
   components: {
     MAppliedGiftCard,
     SfButton,
@@ -96,6 +107,11 @@ export default GiftCardPayment.extend({
     SfLoader,
     ValidationObserver,
     ValidationProvider
+  },
+  computed: {
+    isDisabled (): boolean {
+      return this.isSubmitting || this.disabled;
+    }
   }
 });
 </script>
