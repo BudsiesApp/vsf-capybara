@@ -9,13 +9,14 @@
         v-model="promoCode"
         name="promoCode"
         :placeholder="$t('Add a discount code')"
-        :disabled="isSubmitting"
+        :disabled="isSubmitting || disabled"
         class="sf-input--filled a-promo-code__input"
         @keyup.enter="applyCoupon"
       />
 
       <MSpinnerButton
         :show-spinner="isSubmitting"
+        :disabled="disabled"
         class="_circle-button"
         button-class="sf-button--text -icon-button"
         @click="applyCoupon"
@@ -31,6 +32,7 @@
     <MSpinnerButton
       v-else-if="allowPromoCodeRemoval"
       :show-spinner="isSubmitting"
+      :disabled="disabled"
       class="a-promo-code__button"
       button-class="color-secondary"
       @click="removeCoupon"
@@ -65,6 +67,10 @@ export default {
     allowPromoCodeRemoval: {
       type: Boolean,
       default: true
+    },
+    disabled: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -91,7 +97,7 @@ export default {
   },
   methods: {
     async applyCoupon () {
-      if (this.isSubmitting) {
+      if (this.isSubmitting || this.disabled) {
         return;
       }
 
@@ -112,7 +118,7 @@ export default {
       }
     },
     async removeCoupon () {
-      if (this.isSubmitting) {
+      if (this.isSubmitting || this.disabled) {
         return;
       }
 
