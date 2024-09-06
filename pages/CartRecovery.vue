@@ -50,7 +50,10 @@ export default Vue.extend({
 
       this.$store.commit('cart/' + types.CART_LOAD_CART_SERVER_TOKEN, cartToken)
 
-      await this.$store.dispatch('cart/load', { forceClientState: false })
+      await this.$store.dispatch(
+        'cart/pullServerCart',
+        { forceSync: true }
+      );
 
       EventBus.$emit('after-cart-recovery', cartToken)
 
