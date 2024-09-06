@@ -206,8 +206,7 @@ export default defineComponent({
         productCustomizations,
         selectedOptionValuesIds,
         customizationOptionValue,
-        updateCustomizationOptionValue,
-        product
+        updateCustomizationOptionValue
       );
 
     const colorPaletteCustomization = computed<Customization | undefined>(
