@@ -1,6 +1,7 @@
 import { computed, onBeforeMount, onServerPrefetch, ref, Ref, SetupContext, watch } from '@vue/composition-api';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
+import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import Product from 'core/modules/catalog/types/Product';
 import { ProductEvent } from 'src/modules/shared';
@@ -24,6 +25,7 @@ export function useProductPage (
 
   async function loadData (): Promise<void> {
     isDataLoaded.value = false;
+    root.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
 
     let product = await root.$store.dispatch('product/loadProduct', {
       parentSku: sku.value,
