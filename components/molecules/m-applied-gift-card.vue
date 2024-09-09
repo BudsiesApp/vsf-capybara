@@ -22,7 +22,7 @@
       <div
         class="_code-remove"
         @click="removeAppliedGiftCard"
-        :disabled="isSubmitting"
+        :disabled="isDisabled"
       >
         <SfIcon icon="cross" size="xxs" title="Remove" v-show="!isRemoving" />
 
@@ -44,10 +44,21 @@ import {
 import AppliedGiftCard from 'src/modules/gift-card/mixins/AppliedGiftCard';
 
 export default AppliedGiftCard.extend({
+  props: {
+    disabled: {
+      type: Boolean,
+      default: false
+    }
+  },
   components: {
     SfIcon,
     SfInput,
     SfLoader
+  },
+  computed: {
+    isDisabled (): boolean {
+      return this.isSubmitting || this.disabled;
+    }
   }
 });
 </script>
