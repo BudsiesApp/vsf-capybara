@@ -1,6 +1,7 @@
 import { onMounted, ref, Ref, SetupContext } from '@vue/composition-api';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
+import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import CartItem from 'core/modules/cart/types/CartItem';
 import Product from 'core/modules/catalog/types/Product';
 import { PlushieWizardEvents } from 'src/modules/budsies';
@@ -24,6 +25,7 @@ export function useCreationWizardProductTypeStep (
 
   async function loadProduct (sku: string): Promise<void> {
     isProductLoading.value = true;
+    root.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
 
     try {
       let product = await root.$store.dispatch('product/loadProduct', {
