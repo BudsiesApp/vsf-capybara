@@ -6,7 +6,7 @@
 
     <div
       class="category__short-description"
-      v-html="getCurrentCategory.short_desc"
+      v-html="getCurrentCategory.description"
     />
 
     <div class="navbar section" v-if="false">

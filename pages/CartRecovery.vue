@@ -72,7 +72,10 @@ export default Vue.extend({
         cartToken
       );
 
-      await this.$store.dispatch('cart/load', { forceClientState: false });
+      await this.$store.dispatch(
+        'cart/pullServerCart',
+        { forceSync: true }
+      );
 
       EventBus.$emit('after-cart-recovery', cartToken);
 
