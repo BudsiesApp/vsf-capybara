@@ -79,13 +79,23 @@
     <transition name="maxHeight">
       <div class="_form-block">
         <div class="_form-field">
-          <label> Sender name (optional): </label>
+          <validation-provider
+            v-slot="{ errors }"
+            slim
+            rules="required"
+            name="'Sender Name'"
+          >
+            <label> Sender name </label>
 
-          <SfInput
-            name="customer_name"
-            v-model="customerName"
-            :disabled="isDisabled"
-          />
+            <SfInput
+              name="customer_name"
+              v-model="customerName"
+              :disabled="isDisabled"
+              :required="true"
+              :valid="!errors.length"
+              :error-message="errors[0]"
+            />
+          </validation-provider>
         </div>
 
         <template v-if="showRecipientFields">
