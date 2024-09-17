@@ -179,7 +179,6 @@
               :disabled="isCheckoutInProgress"
               name="payment-method"
               class="form__radio payment-method"
-              @input="onPaymentMethodChange"
             >
               <template v-if="method.icon" #label>
                 <div class="_method-label">
@@ -279,6 +278,11 @@ export default {
       isCheckoutInProgress: false,
       braintreeClient: undefined
     };
+  },
+  watch: {
+    'payment.paymentMethod' () {
+      this.onPaymentMethodChange()
+    }
   },
   computed: {
     ...mapGetters({
