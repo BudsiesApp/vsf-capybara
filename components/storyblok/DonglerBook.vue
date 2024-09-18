@@ -116,7 +116,9 @@ export default Blok.extend({
 
       this.$store.commit(
         SET_LAST_USED_CUSTOMER_EMAIL,
-        this.email
+        {
+          value: this.email
+        }
       );
 
       try {

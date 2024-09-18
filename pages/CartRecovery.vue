@@ -69,7 +69,7 @@ export default Vue.extend({
 
       this.$store.commit(
         'cart/' + types.CART_LOAD_CART_SERVER_TOKEN,
-        cartToken
+        { token: cartToken }
       );
 
       await this.$store.dispatch(

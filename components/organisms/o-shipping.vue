@@ -363,22 +363,30 @@ export default {
 
       this.$store.commit(
         SET_LAST_USED_CUSTOMER_FIRST_NAME,
-        this.shipping.firstName
+        {
+          value: this.shipping.firstName
+        }
       );
 
       this.$store.commit(
         SET_LAST_USED_CUSTOMER_LAST_NAME,
-        this.shipping.lastName
+        {
+          value: this.shipping.lastName
+        }
       );
 
       this.$store.commit(
         SET_LAST_USED_CUSTOMER_PHONE_NUMBER,
-        this.shipping.phoneNumber
+        {
+          value: this.shipping.phoneNumber
+        }
       );
 
       this.$store.commit(
         SET_LAST_USED_CUSTOMER_SHIPPING_COUNTRY,
-        this.shipping.country
+        {
+          value: this.shipping.country
+        }
       );
 
       this.sendDataToCheckout();
