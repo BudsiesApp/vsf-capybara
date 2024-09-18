@@ -37,61 +37,76 @@ export default Vue.extend({
       return this.isShowError
         ? 'Sorry, we were unable to restore your cart content.'
         : 'Please wait, we are restoring your cart content...';
+    },
+    isUserSessionStarted (): boolean {
+      return this.$store.getters['user/getIsSessionStarted'];
     }
   },
-  async mounted () {
-    try {
-      let cartToken: string | undefined;
-      const payload = {
-        recoveryId: this.$route.params.id,
-        recoveryCode: this.$route.params.code
-      };
-
-      try {
-        cartToken = await this.$store.dispatch(
-          'budsies/loadRecoverableCart',
-          payload
-        );
-      } catch (error) {
-        if ((error as any)?.code !== 401) {
-          throw error;
-        }
-
-        cartToken = await this.$store.dispatch(
-          'budsies/loadRecoverableCart',
-          payload
-        );
-      }
-
-      if (!cartToken) {
-        throw new Error('Cart Token is missing');
-      }
-
-      this.$store.commit(
-        'cart/' + types.CART_LOAD_CART_SERVER_TOKEN,
-        { token: cartToken }
-      );
-
-      await this.$store.dispatch(
-        'cart/pullServerCart',
-        { forceSync: true }
-      );
-
-      EventBus.$emit('after-cart-recovery', cartToken);
-
-      await this.$store.dispatch('cart/syncTotals');
-
-      this.$router.push(localizedRoute({ name: 'detailed-cart' }));
-    } catch (error) {
-      this.isShowError = true;
-      Logger.error(error, 'budsies')();
-    } finally {
-      this.isLoading = false;
+  async mounted (): Promise<void> {
+    if (this.isUserSessionStarted) {
+      return this.recoverCart();
     }
+
+    EventBus.$once('session-after-started', this.recoverCart);
+  },
+  beforeDestroy (): void {
+    EventBus.$off('session-after-started', this.recoverCart);
   },
   methods: {
     goToHomepage (): void {
       this.$router.push(localizedRoute('/'));
+    },
+    async recoverCart (): Promise<void> {
+      try {
+        let cartToken: string | undefined;
+        const payload = {
+          recoveryId: this.$route.params.id,
+          recoveryCode: this.$route.params.code
+        };
+
+        try {
+          cartToken = await this.$store.dispatch(
+            'budsies/loadRecoverableCart',
+            payload
+          );
+        } catch (error) {
+          if ((error as any)?.code !== 401) {
+            throw error;
+          }
+
+          cartToken = await this.$store.dispatch(
+            'budsies/loadRecoverableCart',
+            payload
+          );
+        }
+
+        if (!cartToken) {
+          throw new Error('Cart Token is missing');
+        }
+
+        this.$store.commit(
+          'cart/' + types.CART_LOAD_CART_SERVER_TOKEN,
+          {
+            value: cartToken
+          }
+        );
+
+        await this.$store.dispatch(
+          'cart/pullServerCart',
+          { forceSync: true }
+        );
+
+        EventBus.$emit('after-cart-recovery', cartToken);
+
+        await this.$store.dispatch('cart/syncTotals');
+
+        this.$router.push(localizedRoute({ name: 'detailed-cart' }));
+      } catch (error) {
+        this.isShowError = true;
+        Logger.error(error, 'budsies')();
+      } finally {
+        this.isLoading = false;
+      }
     }
   }
 });
