@@ -489,7 +489,7 @@ let routes = [
     path: '/customer/account/resetpassword/',
     component: PasswordReset,
     props: (route) => ({
-      id: route.query.id,
+      email: route.query.email,
       token: route.query.token
     })
   },
