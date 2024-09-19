@@ -46,6 +46,10 @@ import MPassword from 'theme/components/molecules/m-password.vue';
 export default Vue.extend({
   name: 'PasswordReset',
   props: {
+    id: {
+      type: String,
+      default: ''
+    },
     email: {
       type: String,
       default: ''
@@ -74,7 +78,7 @@ export default Vue.extend({
   },
   computed: {
     showForm (): boolean {
-      return !!this.email && !!this.token;
+      return (!!this.id || !!this.email) && !!this.token;
     }
   },
   mounted (): void {
@@ -97,9 +101,11 @@ export default Vue.extend({
 
       try {
         await this.$store.dispatch('user/passwordResetConfirm', {
+          id: this.id,
           email: this.email,
-          resetToken: this.token,
-          newPassword: this.passwordData.password
+          token: this.token,
+          password: this.passwordData.password,
+          confirmation: this.passwordData.repeatPassword
         });
 
         this.isSuccess = true;

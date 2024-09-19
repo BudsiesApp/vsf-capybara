@@ -488,10 +488,21 @@ let routes = [
     name: 'password-reset',
     path: '/customer/account/resetpassword/',
     component: PasswordReset,
-    props: (route) => ({
-      email: route.query.email,
-      token: route.query.token
-    })
+    props: (route) => {
+      let properties = {
+        token: route.query.token
+      }
+
+      if (route.query.id) {
+        properties.id = route.query.id;
+      }
+
+      if (route.query.email) {
+        properties.email = route.query.email;
+      }
+
+      return properties;
+    }
   },
   {
     name: 'photo-portraits-creation-page',
