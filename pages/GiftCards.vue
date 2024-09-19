@@ -209,7 +209,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         : this.giftCardOrderFormData.recipientEmail;
     },
     recipientName (): string {
-      return this.giftCardOrderFormData.shouldSendFriend && !this.giftCardOrderFormData.shouldShipPhysically
+      return this.giftCardOrderFormData.shouldSendFriend
         ? this.giftCardOrderFormData.recipientName
         : '';
     },
