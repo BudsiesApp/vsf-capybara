@@ -98,47 +98,46 @@
           </validation-provider>
         </div>
 
-        <template v-if="showRecipientFields">
-          <validation-provider
-            v-slot="{ errors, classes }"
-            rules="required"
-            name="'Recipient Name'"
-            slim
-          >
-            <div class="_form-field" :class="classes">
-              <label>Recipient name:</label>
+        <validation-provider
+          v-slot="{ errors, classes }"
+          rules="required"
+          name="'Recipient Name'"
+          slim
+        >
+          <div class="_form-field" :class="classes">
+            <label>Recipient name:</label>
 
-              <SfInput
-                name="recipient_name"
-                v-model="recipientName"
-                :required="true"
-                :disabled="isDisabled"
-                :valid="!errors.length"
-                :error-message="errors[0]"
-              />
-            </div>
-          </validation-provider>
+            <SfInput
+              name="recipient_name"
+              v-model="recipientName"
+              :required="true"
+              :disabled="isDisabled"
+              :valid="!errors.length"
+              :error-message="errors[0]"
+            />
+          </div>
+        </validation-provider>
 
-          <validation-provider
-            v-slot="{ errors, classes }"
-            rules="required|email"
-            name="'Recipient Email'"
-            slim
-          >
-            <div class="_form-field" :class="classes">
-              <label>Recipient email address:</label>
+        <validation-provider
+          v-slot="{ errors, classes }"
+          rules="required|email"
+          name="'Recipient Email'"
+          slim
+          v-if="showRecipientFields"
+        >
+          <div class="_form-field" :class="classes">
+            <label>Recipient email address:</label>
 
-              <SfInput
-                name="recipient_email"
-                v-model.trim="recipientEmail"
-                :disabled="isDisabled"
-                :required="true"
-                :valid="!errors.length"
-                :error-message="errors[0]"
-              />
-            </div>
-          </validation-provider>
-        </template>
+            <SfInput
+              name="recipient_email"
+              v-model.trim="recipientEmail"
+              :disabled="isDisabled"
+              :required="true"
+              :valid="!errors.length"
+              :error-message="errors[0]"
+            />
+          </div>
+        </validation-provider>
 
         <SfCheckbox
           v-model="shouldShipPhysically"
