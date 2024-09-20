@@ -381,23 +381,17 @@ export default {
 
       this.$store.commit(
         SET_LAST_USED_CUSTOMER_FIRST_NAME,
-        {
-          value: this.payment.firstName
-        }
+        this.payment.firstName
       );
 
       this.$store.commit(
         SET_LAST_USED_CUSTOMER_LAST_NAME,
-        {
-          value: this.payment.lastName
-        }
+        this.payment.lastName
       );
 
       this.$store.commit(
         SET_LAST_USED_CUSTOMER_PHONE_NUMBER,
-        {
-          value: this.payment.phoneNumber
-        }
+        this.payment.phoneNumber
       );
 
       this.sendDataToCheckout();

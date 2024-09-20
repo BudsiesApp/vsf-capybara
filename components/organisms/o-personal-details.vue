@@ -222,23 +222,17 @@ export default {
 
       this.$store.commit(
         SET_LAST_USED_CUSTOMER_EMAIL,
-        {
-          value: this.personalDetails.emailAddress
-        }
+        this.personalDetails.emailAddress
       );
 
       this.$store.commit(
         SET_LAST_USED_CUSTOMER_FIRST_NAME,
-        {
-          value: this.personalDetails.firstName
-        }
+        this.personalDetails.firstName
       );
 
       this.$store.commit(
         SET_LAST_USED_CUSTOMER_LAST_NAME,
-        {
-          value: this.personalDetails.lastName
-        }
+        this.personalDetails.lastName
       );
 
       this.sendDataToCheckout();
