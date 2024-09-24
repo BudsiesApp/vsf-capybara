@@ -515,7 +515,7 @@ export default defineComponent({
           }
         );
 
-        await this.$store.dispatch('cart/synchronizeCart', { forceClientState: false, forceSync: true });
+        await this.$store.dispatch('cart/sync', { forceSync: true });
 
         this.$router.push({ name: 'detailed-cart' });
       } finally {
