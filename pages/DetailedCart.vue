@@ -70,9 +70,9 @@
 
                 <template #remove>
                   <SfPrice
-                    v-if="getProductRegularPrice(product)"
-                    :regular="getProductRegularPrice(product)"
-                    :special="getProductSpecialPrice(product)"
+                    v-if="getProductRegularPrice(product, campaignContent)"
+                    :regular="getProductRegularPrice(product, campaignContent)"
+                    :special="getProductSpecialPrice(product, campaignContent)"
                   />
                 </template>
 
@@ -385,6 +385,9 @@ export default {
     },
     canShowProductionSpotCountdown () {
       return this.products.some((product) => isCustomProduct(product.id));
+    },
+    campaignContent () {
+      return this.$store.getters['promotionPlatform/campaignContent'];
     }
   },
   async mounted () {
@@ -467,10 +470,12 @@ export default {
         });
       }
     },
-    getProductRegularPrice (product) {
+    // TODO: campaignContent param is quick fix, need to refactor
+    getProductRegularPrice (product, campaignContent) {
       return getCartItemPrice(product, {}).regular;
     },
-    getProductSpecialPrice (product) {
+    // TODO: campaignContent param is quick fix, need to refactor
+    getProductSpecialPrice (product, campaignContent) {
       return getCartItemPrice(product, {}).special;
     },
     removeHandler (product) {
