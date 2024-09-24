@@ -17,16 +17,69 @@
             class="collected-product-list"
           >
             <transition-group name="fade" tag="div">
-              <m-cart-item
+              <SfCollectedProduct
                 v-for="product in products"
                 :key="getCartItemKey(product)"
-                :cart-item="product"
-                :disabled="isUpdatingQuantity"
-                :show-edit-button="showEditButton(product)"
-                @edit="editHandler"
-                @remove="removeHandler"
-                @update-quantity="changeProductQuantity"
-              />
+                :image="getThumbnailForProductExtend(product)"
+                image-width="140"
+                image-height="140"
+                :title="product.name"
+                class="sf-collected-product--detailed collected-product"
+              >
+                <template #configuration>
+                  <cart-item-configuration
+                    :customizations="product.customizations"
+                    :customization-state="(product.extension_attributes || {}).customization_state"
+                    :product-options="getCartItemOptions(product)"
+                  />
+                </template>
+
+                <template #input>
+                  <SfQuantitySelector
+                    :qty="product.qty"
+                    :disabled="isUpdatingQuantity"
+                    @input="changeProductQuantity(product, $event)"
+                    v-if="showQuantitySelectorForProduct(product)"
+                  />
+
+                  <div class="_quantity" v-else>
+                    {{ product.qty }}
+                  </div>
+                </template>
+
+                <template #price>
+                  <div />
+                </template>
+
+                <template #actions>
+                  <SfButton
+                    v-if="showEditButton(product.sku)"
+                    class="sf-button--text actions__button"
+                    @click="editHandler(product)"
+                  >
+                    Edit
+                  </SfButton>
+
+                  <SfButton
+                    class="sf-button--text sf-collected-product__remove sf-collected-product__remove--text actions__button"
+                    @click="removeHandler(product)"
+                  >
+                    Remove
+                  </SfButton>
+                </template>
+
+                <template #remove>
+                  <SfPrice
+                    v-if="getProductRegularPrice(product, campaignContent)"
+                    :regular="getProductRegularPrice(product, campaignContent)"
+                    :special="getProductSpecialPrice(product, campaignContent)"
+                  />
+                </template>
+
+                <template #more-actions>
+                  <div />
+                </template>
+              </SfCollectedProduct>
             </transition-group>
 
             <div class="_dropdown-container">
@@ -136,7 +189,6 @@ import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-qu
 import MDropdown from 'theme/components/molecules/m-dropdown.vue';
 import CartItemConfiguration from 'theme/components/customization-system/cart-item-configuration.vue';
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
-import MCartItem from 'theme/components/molecules/m-cart-item.vue';
 
 const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
 
@@ -205,8 +257,7 @@ export default {
     SfHeading,
     SfQuantitySelector,
     OrderSummary,
-    ProductionSpotCountdown,
-    MCartItem
+    ProductionSpotCountdown
   },
   data () {
     return {
@@ -334,6 +385,9 @@ export default {
     },
     canShowProductionSpotCountdown () {
       return this.products.some((product) => isCustomProduct(product.id));
+    },
+    campaignContent () {
+      return this.$store.getters['promotionPlatform/campaignContent'];
     }
   },
   async mounted () {
@@ -416,10 +470,12 @@ export default {
         });
       }
     },
-    getProductRegularPrice (product) {
+    // TODO: campaignContent param is quick fix, need to refactor
+    getProductRegularPrice (product, campaignContent) {
       return getCartItemPrice(product, {}).regular;
     },
-    getProductSpecialPrice (product) {
+    // TODO: campaignContent param is quick fix, need to refactor
+    getProductSpecialPrice (product, campaignContent) {
       return getCartItemPrice(product, {}).special;
     },
     removeHandler (product) {
@@ -442,8 +498,8 @@ export default {
 
       return getThumbnailForProduct(product);
     },
-    async changeProductQuantity ({ cartItem, qty }) {
-      this.$store.commit(`cart/${CART_UPD_ITEM}`, { product: cartItem, qty });
+    async changeProductQuantity (product, qty) {
+      this.$store.commit(`cart/${CART_UPD_ITEM}`, { product, qty });
 
       if (this.$store.getters['cart/isCartSyncEnabled']) {
         this.syncQuantityDebounced();
@@ -536,6 +592,19 @@ export default {
     margin: var(--spacer-sm) 0;
   }
 
+  .sf-collected-product {
+    --collected-product-image-background: none;
+    --collected-product-main-margin: 0 var(--spacer-sm);
+
+    .sf-price {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    &__remove {
+      position: static;
+    }
+  }
   ._dropdown-container {
     display: inline-block;
     position: relative;
@@ -596,6 +665,17 @@ export default {
 
   @include for-desktop {
     display: flex;
+    .sf-collected-product {
+      .sf-price {
+        flex-direction: row;
+      }
+      ::v-deep &__details {
+        flex-grow: 3;
+      }
+      ::v-deep &__actions {
+        flex-grow: 1;
+      }
+    }
     &__main {
       flex: 1;
     }
@@ -608,14 +688,31 @@ export default {
 .collected-product-list {
   text-align: left;
 }
-.m-cart-item {
+.collected-product {
+  --collected-product-padding: var(--spacer-sm) 0;
+  --collected-product-title-font-size: var(--font-sm);
+  --collected-product-title-font-weight: var(--font-semibold);
+  border: 1px solid var(--c-light);
+  border-width: 1px 0 0 0;
+
+  ::v-deep {
+    .sf-link {
+      pointer-events: none;
+      cursor: default;
+    }
+  }
+
   @include for-mobile {
+    --collected-product-remove-bottom: var(--spacer-sm);
     &:first-of-type {
       border: none;
     }
   }
+  @include for-desktop {
+    --collected-product-padding: var(--spacer-lg) 0;
+    --collected-product-title-font-size: var(--font-base);
+  }
 }
-
 .actions {
   &__button {
     margin-bottom: var(--spacer-xs);
