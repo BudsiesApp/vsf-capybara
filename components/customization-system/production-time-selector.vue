@@ -12,7 +12,8 @@
       :key="option.id"
       :value="option.id"
     >
-      {{ option.text }}
+      <!-- There should be no white-spaces/newlines between the tag and the text because of the `white-space: pre-line` style applied -->
+      <span class="_option-text">{{ option.text }}</span>
     </sf-select-option>
   </sf-select>
 </template>
@@ -109,6 +110,11 @@ export default defineComponent({
   computed: {
     ...mapMobileObserver()
   },
+  methods: {
+    getOptionText (option: ProductionTimeOption): string {
+      return option.text.replace(/\n/g, '<br/>');
+    }
+  },
   beforeDestroy (): void {
     unMapMobileObserver();
   }
@@ -119,6 +125,10 @@ export default defineComponent({
 .production-time-selector {
   width: 100%;
   max-width: 610px;
+
+  ._option-text {
+    white-space: pre-line;
+  }
 
   &.sf-select {
     --select-padding: 0;
