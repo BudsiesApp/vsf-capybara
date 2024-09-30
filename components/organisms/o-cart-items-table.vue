@@ -14,6 +14,7 @@ import { getCartItemPrice } from 'src/modules/shared';
 import CartItem from 'core/modules/cart/types/CartItem';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
 import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
+import CampaignContent from 'src/modules/promotion-platform/types/CampaignContent.model';
 
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
 import { OrderContentItem } from '../interfaces/order-content-item.interface';
@@ -48,7 +49,11 @@ export default {
     }
   },
   computed: {
+    campaignContent (): CampaignContent | undefined {
+      return this.$store.getters['promotionPlatform/campaignContent'];
+    },
     tableItems (): OrderContentItem[] {
+      const _ = this.campaignContent;
       return this.cartItems.map((cartItem) => {
         return {
           key: this.getCartItemKey(cartItem),

@@ -25,7 +25,11 @@ export default {
     }
   },
   computed: {
+    campaignContent () {
+      return this.$store.getters['promotionPlatform/campaignContent'];
+    },
     price () {
+      const _ = this.campaignContent;
       return getProductDefaultPrice(this.product, this.customOptions, false)
     }
   }

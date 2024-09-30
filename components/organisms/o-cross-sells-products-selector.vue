@@ -25,6 +25,7 @@ import { SfHeading } from '@storefront-ui/vue';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { getProductGallery } from '@vue-storefront/core/modules/catalog/helpers';
+import CampaignContent from 'src/modules/promotion-platform/types/CampaignContent.model';
 import { getProductDefaultPrice } from 'src/modules/shared';
 import { getFinalPrice } from 'src/modules/shared/helpers/price';
 
@@ -94,10 +95,14 @@ export default defineComponent({
     }
   },
   computed: {
+    campaignContent (): CampaignContent | undefined {
+      return this.$store.getters['promotionPlatform/campaignContent'];
+    },
     isDisabled (): boolean {
       return this.$store.getters['cart/getIsAdding'];
     },
     productOptions (): AddonOption[] {
+      const _ = this.campaignContent;
       return this.relatedProducts.map(getAddonOptionFromProduct);
     },
     selectedProducts: {

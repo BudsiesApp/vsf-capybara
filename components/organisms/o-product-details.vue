@@ -149,7 +149,11 @@ export default {
     availability () {
       return this.product.stock && this.product.stock.is_in_stock ? 'InStock' : 'OutOfStock'
     },
+    campaignContent () {
+      return this.$store.getters['promotionPlatform/campaignContent'];
+    },
     productPrice () {
+      const _ = this.campaignContent;
       const price = getProductDefaultPrice(this.product, {}, false);
       return price.special ? price.special : price.regular
     },

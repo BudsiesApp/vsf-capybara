@@ -57,7 +57,11 @@ export default {
     }
   },
   computed: {
+    campaignContent () {
+      return this.$store.getters['promotionPlatform/campaignContent'];
+    },
     carouselProducts () {
+      const _ = this.campaignContent;
       return this.products.map(prepareCategoryProduct);
     }
   }

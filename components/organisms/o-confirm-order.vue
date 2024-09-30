@@ -85,8 +85,8 @@
                 v-model="product.qty"
                 :image="getThumbnailForProduct(product)"
                 :title="product.name | htmlDecode"
-                :regular-price="getProductRegularPrice(product)"
-                :special-price="getProductSpecialPrice(product)"
+                :regular-price="getProductRegularPrice(product, campaignContent)"
+                :special-price="getProductSpecialPrice(product, campaignContent)"
                 class="collected-product"
               >
                 <template #configuration>
@@ -292,6 +292,9 @@ export default {
       isGiftCardProcessing: 'giftCard/isGiftCardProcessing'
     }),
     ...mapMobileObserver(),
+    campaignContent () {
+      return this.$store.getters['promotionPlatform/campaignContent'];
+    },
     cartItems () {
       return this.$store.getters['cart/getCartItems'];
     },
@@ -366,10 +369,10 @@ export default {
 
       return getThumbnailForProduct(product);
     },
-    getProductRegularPrice (product) {
+    getProductRegularPrice (product, campaignContent) {
       return getCartItemPrice(product, {}).regular;
     },
-    getProductSpecialPrice (product) {
+    getProductSpecialPrice (product, campaignContent) {
       return getCartItemPrice(product, {}).special;
     },
     onFailure (response) {

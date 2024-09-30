@@ -37,6 +37,7 @@ import ProductImage from '../core/ProductImage.vue';
 import { LocalizedRoute, StoreView } from 'core/lib/types';
 import config from 'config';
 import Product from 'core/modules/catalog/types/Product';
+import CampaignContent from 'src/modules/promotion-platform/types/CampaignContent.model';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
 import { getProductDefaultPrice } from 'src/modules/shared';
 
@@ -56,6 +57,9 @@ export default Blok.extend({
     }
   },
   computed: {
+    campaignContent (): CampaignContent | undefined {
+      return this.$store.getters['promotionPlatform/campaignContent'];
+    },
     itemData (): ProductData {
       return this.item as ProductData;
     },
@@ -67,6 +71,7 @@ export default Blok.extend({
         return undefined;
       }
 
+      const _ = this.campaignContent;
       const price = getProductDefaultPrice(this.product, {}, false);
 
       return getFinalPrice(price);

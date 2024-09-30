@@ -411,7 +411,11 @@ export default {
           })
         : this.getCurrentPageProducts;
     },
+    campaignContent () {
+      return this.$store.getters['promotionPlatform/campaignContent'];
+    },
     preparedProducts () {
+      const _ = this.campaignContent;
       return this.products.map(prepareCategoryProduct);
     },
     totalPages () {
