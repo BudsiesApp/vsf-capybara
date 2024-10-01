@@ -229,7 +229,7 @@ import {
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
 import { registerModule } from '@vue-storefront/core/lib/modules';
 import { OrderModule } from '@vue-storefront/core/modules/order';
-import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
+import { ORDER_CONFLICT_EVENT, ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { OrderReview } from '@vue-storefront/core/modules/checkout/components/OrderReview';
 import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
@@ -336,6 +336,7 @@ export default {
     this.$bus.$on(AFFIRM_MODAL_CLOSED, this.onAffirmModalClosedHandler);
     this.$bus.$on(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
     this.$bus.$on(PAYMENT_ERROR_EVENT, this.onPaymentErrorEventHandler);
+    this.$bus.$on(ORDER_CONFLICT_EVENT, this.onOrderConflictEventHandler);
 
     this.braintreeClient = await this.$store.dispatch('braintree/createBraintreeClient');
   },
@@ -343,6 +344,7 @@ export default {
     this.$bus.$off(AFFIRM_MODAL_CLOSED, this.onAffirmModalClosedHandler);
     this.$bus.$off(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler)
     this.$bus.$off(PAYMENT_ERROR_EVENT, this.onPaymentErrorEventHandler);
+    this.$bus.$off(ORDER_CONFLICT_EVENT, this.onOrderConflictEventHandler);
   },
   methods: {
     ...mapActions('ui', {
@@ -383,6 +385,17 @@ export default {
       this.isCheckoutInProgress = false;
     },
     onOrderErrorEventHandler () {
+      this.isCheckoutInProgress = false;
+    },
+    onOrderConflictEventHandler () {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'info',
+        message: this.$t('Looks like cart items were changed. Please review items and try to place order again.'),
+        action1: { label: this.$t('OK') }
+      });
+
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+
       this.isCheckoutInProgress = false;
     },
     onPaymentErrorEventHandler () {
