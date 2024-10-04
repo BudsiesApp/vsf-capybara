@@ -228,8 +228,8 @@ import {
 
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
 import { registerModule } from '@vue-storefront/core/lib/modules';
-import { OrderModule } from '@vue-storefront/core/modules/order';
-import { ORDER_CONFLICT_EVENT, ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
+import { OrderModule, ORDER_CONFLICT_EVENT } from '@vue-storefront/core/modules/order';
+import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { OrderReview } from '@vue-storefront/core/modules/checkout/components/OrderReview';
 import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
@@ -388,14 +388,6 @@ export default {
       this.isCheckoutInProgress = false;
     },
     onOrderConflictEventHandler () {
-      this.$store.dispatch('notification/spawnNotification', {
-        type: 'info',
-        message: this.$t('Looks like cart items were changed. Please review items and try to place order again.'),
-        action1: { label: this.$t('OK') }
-      });
-
-      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-
       this.isCheckoutInProgress = false;
     },
     onPaymentErrorEventHandler () {
