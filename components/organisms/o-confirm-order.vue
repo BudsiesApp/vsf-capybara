@@ -223,7 +223,7 @@ import {
 
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
 import { registerModule } from '@vue-storefront/core/lib/modules';
-import { OrderModule } from '@vue-storefront/core/modules/order';
+import { OrderModule, ORDER_CONFLICT_EVENT } from '@vue-storefront/core/modules/order';
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { OrderReview } from '@vue-storefront/core/modules/checkout/components/OrderReview';
 import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
@@ -329,6 +329,7 @@ export default {
     this.$bus.$on(AFFIRM_MODAL_CLOSED, this.onAffirmModalClosedHandler);
     this.$bus.$on(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
     this.$bus.$on(PAYMENT_ERROR_EVENT, this.onPaymentErrorEventHandler);
+    this.$bus.$on(ORDER_CONFLICT_EVENT, this.onOrderConflictEventHandler);
 
     this.braintreeClient = await this.$store.dispatch('braintree/createBraintreeClient');
   },
@@ -336,6 +337,7 @@ export default {
     this.$bus.$off(AFFIRM_MODAL_CLOSED, this.onAffirmModalClosedHandler);
     this.$bus.$off(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler)
     this.$bus.$off(PAYMENT_ERROR_EVENT, this.onPaymentErrorEventHandler);
+    this.$bus.$off(ORDER_CONFLICT_EVENT, this.onOrderConflictEventHandler);
   },
   methods: {
     ...mapActions('ui', {
@@ -376,6 +378,9 @@ export default {
       this.isCheckoutInProgress = false;
     },
     onOrderErrorEventHandler () {
+      this.isCheckoutInProgress = false;
+    },
+    onOrderConflictEventHandler () {
       this.isCheckoutInProgress = false;
     },
     onPaymentErrorEventHandler () {
