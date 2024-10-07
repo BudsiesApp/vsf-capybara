@@ -9,6 +9,7 @@ import { Dictionary } from 'src/modules/budsies';
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 
 import { prepareCategoryProduct } from 'theme/helpers';
+import CampaignContent from 'src/modules/promotion-platform/types/CampaignContent.model';
 
 export const CROSS_SELL = 'crosssell';
 export const UP_SELL = 'upsell';
@@ -36,6 +37,9 @@ export function useRelatedProducts (
   const productBySkuDictionary = computed<Record<string, Product>>(() => {
     return rootStore.getters['product/getProductBySkuDictionary'];
   });
+  const campaignContent = computed<CampaignContent | undefined>(() => {
+    return rootStore.getters['promotionPlatform/campaignContent'];
+  })
   const relatedProducts = computed(() => {
     if (!currentProduct.value) {
       return [];
@@ -55,6 +59,7 @@ export function useRelatedProducts (
     return dictionary;
   });
   const preparedRelatedProducts = computed(() => {
+    const _ = campaignContent.value;
     return relatedProducts.value.map(
       (item: Product) => (
         {
