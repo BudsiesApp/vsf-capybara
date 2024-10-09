@@ -129,10 +129,7 @@ export default Vue.extend({
         loop: true,
         slidesPerView: this.defaultSlidesPerView,
         modules: [Autoplay, Navigation],
-        navigation: {
-          nextEl: '.swiper-button-next',
-          prevEl: '.swiper-button-prev'
-        },
+
         init: false,
         breakpoints: this.breakpoints,
         spaceBetween: this.spaceBetween
@@ -174,6 +171,18 @@ export default Vue.extend({
     this.destroySwiper();
   },
   methods: {
+    getNavigationButtons (): {
+      nextEl: Element,
+      prevEl: Element
+    } {
+      const nextButton = this.$refs['next-button'] as InstanceType<typeof SfButton>;
+      const prevButton = this.$refs['prev-button'] as InstanceType<typeof SfButton>;
+
+      return {
+        nextEl: nextButton.$el,
+        prevEl: prevButton.$el
+      }
+    },
     getCarouselRoot (): HTMLElement {
       return this.$refs.swiper as HTMLElement;
     },
@@ -187,7 +196,10 @@ export default Vue.extend({
 
       this.swiper = new Swiper(
         this.getCarouselRoot(),
-        this.swiperOptions
+        {
+          ...this.swiperOptions,
+          navigation: this.getNavigationButtons()
+        }
       );
 
       this.swiper.on('init', onInit);
