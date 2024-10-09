@@ -112,7 +112,7 @@
                 class="products__product-card"
                 :image-height="352"
                 :image-width="352"
-                @click.native="() => onProductCardClick(product.sku)"
+                @click.native.capture="() => onProductCardClick(product.sku)"
               />
             </transition-group>
           </lazy-hydrate>
