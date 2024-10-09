@@ -3,34 +3,38 @@
     class="o-carousel"
     :style="style"
   >
-    <div ref="swiper" class="swiper">
-      <div class="swiper-wrapper">
-        <div
-          class="swiper-slide"
-          v-for="(item) in items"
-          :key="item.key"
-        >
-          <slot :item="item.data" />
+    <div class="_wrapper">
+      <div ref="swiper" class="swiper">
+        <div class="swiper-wrapper">
+          <div
+            class="swiper-slide"
+            v-for="item in items"
+            :key="item.key"
+          >
+            <slot :item="item.data" />
+          </div>
         </div>
       </div>
+    </div>
 
-      <div
-        class="swiper-buttons"
-        :class="{'-counter': showCounter}"
-        v-show="isSwiperInitialized"
-      >
-        <sf-button
-          class="_arrow swiper-button-prev -left sf-button--pure"
-        />
+    <div
+      class="swiper-buttons"
+      :class="{ '-counter': showCounter }"
+      v-show="isSwiperInitialized"
+    >
+      <sf-button
+        ref="prev-button"
+        class="_arrow swiper-button-prev -left sf-button--pure"
+      />
 
-        <div class="_counter" v-if="showCounter">
-          {{ counterText }}
-        </div>
-
-        <sf-button
-          class="_arrow _arrow-right swiper-button-next sf-button--pure"
-        />
+      <div class="_counter" v-if="showCounter">
+        {{ counterText }}
       </div>
+
+      <sf-button
+        ref="next-button"
+        class="_arrow _arrow-right swiper-button-next sf-button--pure"
+      />
     </div>
   </div>
 </template>
@@ -50,7 +54,10 @@ import 'swiper/modules/navigation.scss';
 import { BreakpointValue } from 'src/modules/shared';
 
 import { OCarouselItem } from '../interfaces/o-carousel-item.interface';
-import { mapMobileObserver, unMapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
+import {
+  mapMobileObserver,
+  unMapMobileObserver
+} from '@storefront-ui/vue/src/utilities/mobile-observer';
 
 export default Vue.extend({
   name: 'OCarousel',
@@ -92,7 +99,7 @@ export default Vue.extend({
       currentSlideIndex: 0,
       swiper: undefined as Swiper | undefined,
       isSwiperInitialized: false
-    }
+    };
   },
   computed: {
     ...mapMobileObserver(),
@@ -103,7 +110,7 @@ export default Vue.extend({
 
       return {
         delay: this.autoplayDelay
-      }
+      };
     },
     breakpoints (): {
       [width: number]: SwiperOptions,
@@ -111,12 +118,9 @@ export default Vue.extend({
     } {
       return {
         [BreakpointValue.MEDIUM]: {
-          slidesPerView: Math.min(
-            this.slidesPerView,
-            this.maxSlidesPerView
-          )
+          slidesPerView: Math.min(this.slidesPerView, this.maxSlidesPerView)
         }
-      }
+      };
     },
     swiperOptions (): SwiperOptions {
       return {
@@ -124,10 +128,7 @@ export default Vue.extend({
         direction: 'horizontal',
         loop: true,
         slidesPerView: this.defaultSlidesPerView,
-        modules: [
-          Autoplay,
-          Navigation
-        ],
+        modules: [Autoplay, Navigation],
         navigation: {
           nextEl: '.swiper-button-next',
           prevEl: '.swiper-button-prev'
@@ -135,10 +136,12 @@ export default Vue.extend({
         init: false,
         breakpoints: this.breakpoints,
         spaceBetween: this.spaceBetween
-      }
+      };
     },
     defaultSlidesPerView (): number {
-      let defaultSlidesPerView = this.slidesPerViewMobile ? this.slidesPerViewMobile : this.slidesPerView;
+      let defaultSlidesPerView = this.slidesPerViewMobile
+        ? this.slidesPerViewMobile
+        : this.slidesPerView;
       return Math.min(defaultSlidesPerView, this.maxSlidesPerView);
     },
     style (): Record<string, string> {
@@ -188,7 +191,7 @@ export default Vue.extend({
       );
 
       this.swiper.on('init', onInit);
-      this.swiper.on('realIndexChange', onRealIndexChange)
+      this.swiper.on('realIndexChange', onRealIndexChange);
 
       this.swiper.init();
     },
@@ -204,11 +207,11 @@ export default Vue.extend({
     },
     updateSwiper (options?: SwiperOptions): void {
       if (!this.swiper) {
-        return
+        return;
       }
 
       if (options) {
-        this.swiper.params = { ...this.swiper.params, ...options }
+        this.swiper.params = { ...this.swiper.params, ...options };
       }
 
       this.swiper.update();
@@ -227,7 +230,7 @@ export default Vue.extend({
   },
   watch: {
     autoplay (val) {
-      this.updateSwiper({ autoplay: this.autoplayOptions })
+      this.updateSwiper({ autoplay: this.autoplayOptions });
 
       if (!this.swiper) {
         return;
@@ -240,7 +243,7 @@ export default Vue.extend({
       }
     },
     autoplayDelay () {
-      this.updateSwiper({ autoplay: this.autoplayOptions })
+      this.updateSwiper({ autoplay: this.autoplayOptions });
     },
     slidesPerView () {
       this.reInitSwiper();
@@ -249,7 +252,7 @@ export default Vue.extend({
       this.reInitSwiper();
     },
     spaceBetween (val) {
-      this.updateSwiper({ spaceBetween: val })
+      this.updateSwiper({ spaceBetween: val });
     },
     'items.length' () {
       this.reInitSwiper();
@@ -258,13 +261,19 @@ export default Vue.extend({
       this.updateSwiper();
     }
   }
-})
+});
 </script>
 
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .o-carousel {
+  position: relative;
+
+  ._wrapper {
+    padding: var(--spacer-base);
+  }
+
   .swiper-wrapper {
     padding: 0;
   }
@@ -277,6 +286,7 @@ export default Vue.extend({
   .swiper-buttons {
     --swiper-navigation-size: var(--font-xl);
     --swiper-navigation-color: var(--c-primary);
+    --swiper-navigation-sides-offset: 0;
 
     display: flex;
 
