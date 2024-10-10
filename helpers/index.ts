@@ -4,9 +4,10 @@ import { currentStoreView } from '@vue-storefront/core/lib/multistore'
 import { productThumbnailPath, getThumbnailPath, isServer } from '@vue-storefront/core/helpers'
 import { htmlDecode } from '@vue-storefront/core/filters'
 
-import { getProductDefaultPrice, getProductDefaultDiscount } from 'src/modules/shared';
+import { PriceHelper } from 'src/modules/shared';
 
 import getProductImagePlaceholder from '@vue-storefront/core/modules/cart/helpers/getProductImagePlaceholder';
+import Product from 'core/modules/catalog/types/Product';
 
 export function getPathForStaticPage (path: string) {
   const { storeCode } = currentStoreView()
@@ -53,22 +54,28 @@ export function getTopLevelCategories (categoryList) {
   )
 }
 
-export function prepareCategoryProduct (product) {
+export function prepareCategoryProduct (
+  product,
+  productPriceDictionary: Record<string, PriceHelper.ProductPrice>,
+  productDiscountDictionary: Record<string, PriceHelper.ProductDiscount>
+) {
   const imagePath = productThumbnailPath(product);
   const thumbnailPath = !imagePath ? getProductImagePlaceholder() : getThumbnailPath(
     imagePath,
     config.products.thumbnails.width,
     config.products.thumbnails.height
   );
+  const price = productPriceDictionary[product.id];
+  const discount = productDiscountDictionary[product.id];
 
   return {
-    discount: getProductDefaultDiscount(product),
+    discount: PriceHelper.formatProductDiscount(discount),
     id: product.id,
     sku: product.sku,
     title: htmlDecode(product.name),
     image: thumbnailPath,
     link: formatProductLink(product, currentStoreView().storeCode),
-    price: getProductDefaultPrice(product, {}),
+    price: PriceHelper.formatProductPrice(price),
     rating: {
       max: 5,
       score: 5

@@ -37,9 +37,8 @@ import ProductImage from '../core/ProductImage.vue';
 import { LocalizedRoute, StoreView } from 'core/lib/types';
 import config from 'config';
 import Product from 'core/modules/catalog/types/Product';
-import CampaignContent from 'src/modules/promotion-platform/types/CampaignContent.model';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
-import { getProductDefaultPrice } from 'src/modules/shared';
+import { PriceHelper } from 'src/modules/shared';
 
 import ProductData from './interfaces/product-data.interface';
 import getProductImagePlaceholder from '@vue-storefront/core/modules/cart/helpers/getProductImagePlaceholder';
@@ -57,8 +56,8 @@ export default Blok.extend({
     }
   },
   computed: {
-    campaignContent (): CampaignContent | undefined {
-      return this.$store.getters['promotionPlatform/campaignContent'];
+    productPriceDictionary (): Record<string, PriceHelper.ProductPrice> {
+      return this.$store.getters['product/productPriceDictionary'];
     },
     itemData (): ProductData {
       return this.item as ProductData;
@@ -71,8 +70,7 @@ export default Blok.extend({
         return undefined;
       }
 
-      const _ = this.campaignContent;
-      const price = getProductDefaultPrice(this.product, {}, false);
+      const price = this.productPriceDictionary[this.product.id];
 
       return getFinalPrice(price);
     },

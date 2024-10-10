@@ -7,7 +7,6 @@
 
 <script>
 import ACustomPrice from '../atoms/a-custom-price.vue';
-import { getProductDefaultPrice } from 'src/modules/shared'
 
 export default {
   name: 'AProductPrice',
@@ -25,12 +24,11 @@ export default {
     }
   },
   computed: {
-    campaignContent () {
-      return this.$store.getters['promotionPlatform/campaignContent'];
+    productPriceDictionary () {
+      return this.$store.getters['product/productPriceDictionary'];
     },
     price () {
-      const _ = this.campaignContent;
-      return getProductDefaultPrice(this.product, this.customOptions, false)
+      return this.productPriceDictionary[this.product.id];
     }
   }
 }

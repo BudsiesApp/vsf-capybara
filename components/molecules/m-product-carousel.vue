@@ -35,13 +35,8 @@
 </template>
 <script>
 import { SfCarousel } from '@storefront-ui/vue';
-import { htmlDecode } from '@vue-storefront/core/filters';
-import config from 'config';
-import { currentStoreView } from '@vue-storefront/core/lib/multistore';
-import { formatProductLink } from '@vue-storefront/core/modules/url/helpers';
-import { productThumbnailPath } from '@vue-storefront/core/helpers';
-import { prepareCategoryProduct } from 'theme/helpers';
 
+import { prepareCategoryProduct } from 'theme/helpers';
 import OProductCard from 'theme/components/organisms/o-product-card';
 
 export default {
@@ -57,12 +52,21 @@ export default {
     }
   },
   computed: {
-    campaignContent () {
-      return this.$store.getters['promotionPlatform/campaignContent'];
+    productPriceDictionary () {
+      return this.$store.getters['product/productPriceDictionary'];
+    },
+    productDiscountDictionary () {
+      return this.$store.getters['product/productDiscountDictionary'];
     },
     carouselProducts () {
       const _ = this.campaignContent;
-      return this.products.map(prepareCategoryProduct);
+      return this.products.map(
+        (product) => prepareCategoryProduct(
+          product,
+          this.productPriceDictionary,
+          this.productDiscountDictionary
+        )
+      );
     }
   }
 };
