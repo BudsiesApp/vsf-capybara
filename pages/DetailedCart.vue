@@ -137,8 +137,7 @@
           <p>Once completed, your order will ship via USPS</p>
           <ul>
             <li>
-              Petsies: (<strong>US</strong>) $13.95, $5.95 for each additional;
-              (<strong>International</strong>) $25.95, $5.95 for each additional
+              Petsies: (<strong>US</strong>) starting at $14.95; (<strong>International</strong>) starting at $26.95
             </li>
             <li>
               Pillows: <strong>(US</strong>) starting at $9.95;&nbsp;(<strong>International)</strong>
@@ -154,7 +153,12 @@
                 target="_blank"
               >here</a>. Rates determined by weight
             </li>
-            <li>Tracking number will be emailed to you at time of shipment</li>
+            <li>
+              Shipping discounted on additional items in the same order
+            </li>
+            <li>
+              Tracking number will be emailed to you at time of shipment
+            </li>
           </ul>
         </div>
       </div>
