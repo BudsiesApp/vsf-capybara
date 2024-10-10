@@ -142,7 +142,7 @@
           <p>Once completed, your Budsies will ship via USPS Priority Mail (US); First Class Mail (Int'l)</p>
           <ul>
             <li>Custom Plushies: (<strong>US</strong>) $14.95, $7.95 for each additional; (<strong>International</strong>) $26.95, $7.95 for each additional</li>
-            <li>Custom Pillows: <strong>(US</strong>) starting at $9.95;&nbsp;(<strong>International)</strong> $20.95</li>
+            <li>Custom Pillows: <strong>(US</strong>) starting at $4.95;&nbsp;(<strong>International)</strong> $14.95</li>
             <li>International shipping rates will increase if supersized items are purchased.</li>
             <li>Read more about rates&nbsp;<a href="https://support.budsies.com/support/solutions/articles/13000033713-shipping-handling-fees" target="_blank">here</a>. Rates determined by weight</li>
             <li>Tracking number will be emailed to you at time of shipment</li>
