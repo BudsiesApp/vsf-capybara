@@ -82,6 +82,8 @@
       </SfButton>
 
       <MBlockStory story-slug="order_submit_agreement_petsies" />
+
+      <california-privacy-notice-link />
     </div>
 
     <SfModal :visible="showQuantityNotes" @close="showQuantityNotes = false">
@@ -103,6 +105,7 @@ import {
   OptionValue
 } from 'src/modules/customization-system';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
@@ -171,6 +174,7 @@ export default defineComponent({
   },
   components: {
     ACustomProductQuantity,
+    CaliforniaPrivacyNoticeLink,
     CustomizationOption,
     MBlockStory,
     MFormErrors,

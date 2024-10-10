@@ -407,7 +407,7 @@ export default {
     }
   }
 
-  ._legal_information,
+  ._legal-information,
   .opt-out-link,
   .california-privacy-notice-link {
     --privacy-notice-link-font-size: var(--font-xs);

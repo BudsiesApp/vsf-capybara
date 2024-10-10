@@ -210,6 +210,8 @@
         {{ $t('Add to Cart') }}
       </SfButton>
 
+      <MBlockStory story-slug="order_submit_agreement_petsies" />
+
       <california-privacy-notice-link />
     </div>
   </validation-observer>
@@ -231,6 +233,7 @@ import GiftCardTemplate from 'src/modules/gift-card/types/GiftCardTemplate.inter
 import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
+import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 
 const maxCharactersRemaining = 240;
 const DEFAULT_CUSTOM_PRICE_AMOUNT = 200;
@@ -255,8 +258,9 @@ extend('between', {
 export default Vue.extend({
   name: 'OGiftCardOrderForm',
   components: {
-    CaliforniaPrivacyNoticeLink,
     ACustomProductQuantity,
+    MBlockStory,
+    CaliforniaPrivacyNoticeLink,
     SfButton,
     SfCheckbox,
     SfInput,

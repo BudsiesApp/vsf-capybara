@@ -92,6 +92,10 @@
                 >
                   {{ $t("Add to Cart") }}
                 </SfButton>
+
+                <MBlockStory story-slug="order_submit_agreement_petsies" />
+
+                <california-privacy-notice-link />
               </div>
             </div>
           </form>
@@ -142,6 +146,7 @@ import {
 import i18n from '@vue-storefront/core/i18n';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
@@ -151,6 +156,7 @@ import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 import ACustomPrice from 'theme/components/atoms/a-custom-price.vue';
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
+import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
 import MZoomGallery from 'theme/components/molecules/m-zoom-gallery.vue';
@@ -191,7 +197,9 @@ export default defineComponent({
   components: {
     ACustomPrice,
     ACustomProductQuantity,
+    CaliforniaPrivacyNoticeLink,
     CustomizationOption,
+    MBlockStory,
     MFormErrors,
     MProductDescriptionStory,
     MZoomGallery,

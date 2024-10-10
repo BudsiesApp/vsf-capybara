@@ -56,6 +56,10 @@
         <div class="_submit-disclaimer _helper-text">
           {{ $t("I have seen and approve the Live Preview of my design.") }}
         </div>
+
+        <MBlockStory story-slug="order_submit_agreement_petsies" />
+
+        <california-privacy-notice-link />
       </div>
     </template>
 
@@ -82,6 +86,7 @@ import {
   CustomizationOptionValue,
   OptionValue
 } from 'src/modules/customization-system';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import SubmitAnimationStepsInterface from 'theme/components/interfaces/submit-animation-steps.interface';
 
@@ -133,6 +138,7 @@ export default defineComponent({
   },
   components: {
     ACustomProductQuantity,
+    CaliforniaPrivacyNoticeLink,
     CustomizationOption,
     MBlockStory,
     MSubmitAnimator,
