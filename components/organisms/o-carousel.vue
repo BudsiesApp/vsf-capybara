@@ -299,6 +299,7 @@ export default Vue.extend({
       --swiper-navigation-sides-offset: 0;
 
       height: 35%;
+      max-height: 10rem;
       background: rgba(#fff, 0.7);
       transform: translateY(-50%);
       margin-top: 0;
