@@ -300,9 +300,10 @@ export default Vue.extend({
 
       height: 35%;
       max-height: 10rem;
-      background: rgba(#fff, 0.7);
-      transform: translateY(-50%);
       margin-top: 0;
+      transform: translateY(-50%);
+      background: rgba(#fff, 0.7);
+      font-weight: bold;
 
       &.-left {
         padding-left: calc(var(--spacer-xs) + var(--spacer-2xs));
