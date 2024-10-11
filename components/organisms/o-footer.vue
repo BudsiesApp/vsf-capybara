@@ -65,10 +65,13 @@
             {{ $t('Terms of Service') }}
           </router-link>
           |
-          <router-link to="/privacy-policy" exact>
-            {{ $t('Privacy Policy') }}
-          </router-link>
+
+          <privacy-policy-link />
+
+          <california-privacy-notice-link text="| California Privacy Notice" />
         </div>
+
+        <opt-out-link />
       </div>
     </SfFooter>
   </footer>
@@ -83,11 +86,16 @@ import config from 'config';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import get from 'lodash-es/get';
 
-import MBudsiesBrands from '../molecules/m-budsies-brands';
+import { CaliforniaPrivacyNoticeLink, OptOutLink, PrivacyPolicyLink } from 'src/modules/true-vault';
+
+import MBudsiesBrands from '../molecules/m-budsies-brands.vue';
 
 export default {
   name: 'OFooter',
   components: {
+    CaliforniaPrivacyNoticeLink,
+    OptOutLink,
+    PrivacyPolicyLink,
     MBudsiesBrands,
     MNewsletterSubscription,
     SfFooter,
@@ -314,7 +322,23 @@ export default {
     width: 100%;
   }
 
-  ._legal-information {
+  ._subscription-form {
+    ._subscription-form-title {
+      display: none;
+    }
+  }
+
+  ._legal-information,
+  .opt-out-link,
+  .california-privacy-notice-link {
+    --privacy-notice-link-font-size: var(--font-xs);
+    --privacy-notice-link-color: var(--c-text);
+    --privacy-notice-link-margin: 0;
+    --privacy-notice-display: inline;
+
+    --opt-out-link-font-size: var(--font-xs);
+    --opt-out-link-color: var(--c-text);
+
     color: var(--c-text);
     font-size: var(--font-xs);
     margin-top: var(--spacer-xs);

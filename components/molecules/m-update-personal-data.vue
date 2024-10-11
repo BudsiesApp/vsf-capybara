@@ -42,8 +42,9 @@
     </div>
     <p class="notice">
       {{ $t('At Budsies, we attach great importance to privacy issues and are committed to protecting the personal data of our users. Learn more about how we care and use your personal data in the') }}
-      <a :href="localizedRoute('/privacy-policy')">{{ $t('Privacy Policy') }}</a>.
+      <privacy-policy-link />
     </p>
+    <california-privacy-notice-link />
   </div>
 </template>
 
@@ -54,9 +55,13 @@ import { SfInput, SfButton } from '@storefront-ui/vue';
 import { required, minLength, email } from 'vuelidate/lib/validators';
 import { unicodeAlpha } from '@vue-storefront/core/helpers/validators';
 
+import { CaliforniaPrivacyNoticeLink, PrivacyPolicyLink } from 'src/modules/true-vault';
+
 export default {
   name: 'MUpdatePersonalData',
   components: {
+    CaliforniaPrivacyNoticeLink,
+    PrivacyPolicyLink,
     SfInput,
     SfButton
   },
@@ -165,5 +170,8 @@ a {
   &:hover {
     color: var(--c-text);
   }
+}
+.california-privacy-notice-link {
+  --privacy-notice-link-display: inline;
 }
 </style>
