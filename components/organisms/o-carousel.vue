@@ -3,38 +3,36 @@
     class="o-carousel"
     :style="style"
   >
-    <div class="_wrapper">
-      <div ref="swiper" class="swiper">
-        <div class="swiper-wrapper">
-          <div
-            class="swiper-slide"
-            v-for="item in items"
-            :key="item.key"
-          >
-            <slot :item="item.data" />
-          </div>
+    <div ref="swiper" class="swiper">
+      <div class="swiper-wrapper">
+        <div
+          class="swiper-slide"
+          v-for="item in items"
+          :key="item.key"
+        >
+          <slot :item="item.data" />
         </div>
       </div>
-    </div>
 
-    <div
-      class="swiper-buttons"
-      :class="{ '-counter': showCounter }"
-      v-show="isSwiperInitialized"
-    >
-      <sf-button
-        ref="prev-button"
-        class="_arrow swiper-button-prev -left sf-button--pure"
-      />
+      <div
+        class="swiper-buttons"
+        :class="{ '-counter': showCounter }"
+        v-show="isSwiperInitialized"
+      >
+        <sf-button
+          ref="prev-button"
+          class="_arrow swiper-button-prev -left sf-button--pure"
+        />
 
-      <div class="_counter" v-if="showCounter">
-        {{ counterText }}
+        <div class="_counter" v-if="showCounter">
+          {{ counterText }}
+        </div>
+
+        <sf-button
+          ref="next-button"
+          class="_arrow -right swiper-button-next sf-button--pure"
+        />
       </div>
-
-      <sf-button
-        ref="next-button"
-        class="_arrow _arrow-right swiper-button-next sf-button--pure"
-      />
     </div>
   </div>
 </template>
@@ -282,10 +280,6 @@ export default Vue.extend({
 .o-carousel {
   position: relative;
 
-  ._wrapper {
-    padding: var(--spacer-base);
-  }
-
   .swiper-wrapper {
     padding: 0;
   }
@@ -298,9 +292,31 @@ export default Vue.extend({
   .swiper-buttons {
     --swiper-navigation-size: var(--font-xl);
     --swiper-navigation-color: var(--c-primary);
-    --swiper-navigation-sides-offset: 0;
 
     display: flex;
+
+    ._arrow {
+      --swiper-navigation-sides-offset: 0;
+
+      height: 35%;
+      background: #fffefeb3;
+      transform: translateY(-50%);
+      margin-top: 0;
+
+      &.-left {
+        padding-left: var(--spacer-sm);
+        padding-right: var(--spacer-base);
+        border-top-right-radius: 12px;
+        border-bottom-right-radius: 12px;
+      }
+
+      &.-right {
+        padding-right: var(--spacer-sm);
+        padding-left: var(--spacer-base);
+        border-top-left-radius: 12px;
+        border-bottom-left-radius: 12px;
+      }
+    }
 
     &.-counter {
       --swiper-navigation-size: var(--font-sm);
@@ -319,6 +335,7 @@ export default Vue.extend({
         top: auto;
         left: auto;
         right: auto;
+
       }
     }
   }
