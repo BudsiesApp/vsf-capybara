@@ -288,8 +288,8 @@ export default Vue.extend({
   }
 
   .swiper-buttons {
-    --swiper-navigation-size: var(--font-xl);
-    --swiper-navigation-color: var(--c-primary);
+    --swiper-navigation-size: var(--font-2xl);
+    --swiper-navigation-color: var(--c-text);
 
     display: flex;
 
@@ -301,13 +301,16 @@ export default Vue.extend({
       margin-top: 0;
       transform: translateY(-50%);
       background: rgba(#fff, 0.7);
-      font-weight: bold;
 
       &.-left {
         padding-left: calc(var(--spacer-xs) + var(--spacer-2xs));
         padding-right: var(--spacer-sm);
         border-top-right-radius: 12px;
         border-bottom-right-radius: 12px;
+
+        &::after {
+          content: '\276C';
+        }
       }
 
       &.-right {
@@ -315,6 +318,10 @@ export default Vue.extend({
         padding-left: var(--spacer-sm);
         border-top-left-radius: 12px;
         border-bottom-left-radius: 12px;
+
+        &::after {
+          content: '\276D';
+        }
       }
     }
 
