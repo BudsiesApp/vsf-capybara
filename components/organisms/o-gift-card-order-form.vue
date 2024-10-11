@@ -210,8 +210,6 @@
         {{ $t('Add to Cart') }}
       </SfButton>
 
-      <m-order-submit-agreement class="_agreement" />
-
       <california-privacy-notice-link />
     </div>
   </validation-observer>
@@ -233,7 +231,6 @@ import GiftCardTemplate from 'src/modules/gift-card/types/GiftCardTemplate.inter
 import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
-import MOrderSubmitAgreement from 'theme/components/molecules/m-order-submit-agreement.vue';
 
 const maxCharactersRemaining = 240;
 const DEFAULT_CUSTOM_PRICE_AMOUNT = 200;
@@ -259,7 +256,6 @@ export default Vue.extend({
   name: 'OGiftCardOrderForm',
   components: {
     ACustomProductQuantity,
-    MOrderSubmitAgreement,
     CaliforniaPrivacyNoticeLink,
     SfButton,
     SfCheckbox,
