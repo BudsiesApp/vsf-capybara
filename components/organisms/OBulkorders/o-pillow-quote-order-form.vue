@@ -1,10 +1,14 @@
 <template>
   <div class="o-pillow-quote-order-form">
-    <SfHeading :level="1" :title="$t('Pillow Bulk Order Quote')" class="_title" />
+    <SfHeading
+      :level="1"
+      :title="$t('Pillow Bulk Order Quote')"
+      class="_title"
+    />
 
     <validation-observer
       ref="validationObserver"
-      v-slot="{errors: formErrors}"
+      v-slot="{ errors: formErrors }"
       slim
     >
       <m-base-form
@@ -23,7 +27,7 @@
             tag="div"
             class="_section"
             name="Size"
-            v-slot="{errors}"
+            v-slot="{ errors }"
           >
             <AOrderedHeading
               :order="6"
@@ -34,7 +38,7 @@
             />
 
             <div class="_hint">
-              {{ $t('It\'s OK if you\'re not sure.') }}
+              {{ $t("It's OK if you're not sure.") }}
             </div>
 
             <SfSelect
@@ -65,12 +69,13 @@
       />
 
       <div class="_button-container">
-        <SfButton
-          @click="onSubmit"
-          :disabled="isDisabled"
-        >
-          {{ $t('Get My Quote') }}
+        <SfButton @click="onSubmit" :disabled="isDisabled">
+          {{ $t("Get My Quote") }}
         </SfButton>
+      </div>
+
+      <div class="_notice-link-container">
+        <california-privacy-notice-link />
       </div>
     </validation-observer>
   </div>
@@ -85,8 +90,17 @@ import { SfButton, SfSelect, SfHeading } from '@storefront-ui/vue';
 import { defineComponent, PropType, Ref, ref } from '@vue/composition-api';
 
 import Product from 'core/modules/catalog/types/Product';
-import { BundleOption, BundleOptionsProductLink } from 'core/modules/catalog/types/BundleOption';
-import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo } from 'src/modules/budsies';
+import {
+  BundleOption,
+  BundleOptionsProductLink
+} from 'core/modules/catalog/types/BundleOption';
+import {
+  BulkorderQuoteProductId,
+  BulkOrderStatus,
+  BulkOrderInfo
+} from 'src/modules/budsies';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
+
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
 
@@ -122,13 +136,15 @@ function getFormAllRefs (
 ): Record<string, Vue | Element | Vue[] | Element[]> {
   const baseForm = getBaseForm(refs);
 
-  return { ...refs, ...baseForm.$refs }
+  return { ...refs, ...baseForm.$refs };
 }
 
 export default defineComponent({
   name: 'OPillowQuoteOrderForm',
   setup (_, setupContext) {
-    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+    const validationObserver: Ref<InstanceType<
+      typeof ValidationObserver
+    > | null> = ref(null);
 
     return {
       validationObserver,
@@ -150,6 +166,7 @@ export default defineComponent({
     }
   },
   components: {
+    CaliforniaPrivacyNoticeLink,
     MBaseForm,
     MFormErrors,
     SfButton,
@@ -165,7 +182,7 @@ export default defineComponent({
       pillowSize: undefined as string | undefined,
       showCalculationAnimation: false,
       onCalculationAnimationFinished: () => {}
-    }
+    };
   },
   computed: {
     bulkOrderInfo (): BulkOrderInfo | undefined {
@@ -194,7 +211,7 @@ export default defineComponent({
           value: this.getPillowSizeValue(productLink).toString(),
           title: this.getPillowSizeTitle(productLink).toString()
         });
-      })
+      });
 
       return options;
     },
@@ -212,7 +229,9 @@ export default defineComponent({
     this.pillowSize = this.defaultPillowSizeValue;
   },
   methods: {
-    getPillowSizeTitle (sizeProductLink: BundleOptionsProductLink): TranslateResult {
+    getPillowSizeTitle (
+      sizeProductLink: BundleOptionsProductLink
+    ): TranslateResult {
       switch (sizeProductLink.sku) {
         case 'simplePillowBulkSample_small':
           return this.$t('12" small');
@@ -314,7 +333,10 @@ export default defineComponent({
           this.$router.push({ name: 'bulkorder-confirmation' });
           break;
         default:
-          this.$router.push({ name: 'bulkorder-quotation', params: { bulkorderId: this.bulkOrderInfo.id } });
+          this.$router.push({
+            name: 'bulkorder-quotation',
+            params: { bulkorderId: this.bulkOrderInfo.id }
+          });
       }
     },
     onFailure (message: any): void {
@@ -330,43 +352,47 @@ export default defineComponent({
       baseForm.persistCustomerData();
     }
   }
-})
+});
 </script>
 
-  <style lang="scss" scoped>
-  .o-pillow-quote-order-form {
-    padding: var(--spacer-lg);
+<style lang="scss" scoped>
+.o-pillow-quote-order-form {
+  padding: var(--spacer-lg);
+
+  ._title {
+    margin-bottom: var(--spacer-2xl);
+  }
+
+  ._form-errors {
+    margin-top: var(--spacer-lg);
+  }
+
+  ._button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--spacer-lg);
+  }
+
+  ._section {
+    margin-bottom: var(--spacer-2xl);
+    display: flex;
+    flex-direction: column;
 
     ._title {
-      margin-bottom: var(--spacer-2xl);
-    }
-
-    ._form-errors {
-      margin-top: var(--spacer-lg);
-    }
-
-    ._button-container {
-      display: flex;
-      justify-content: center;
-      margin-top: var(--spacer-lg);
-    }
-
-    ._section {
-        margin-bottom: var(--spacer-2xl);
-        display: flex;
-        flex-direction: column;
-
-        ._title {
-            margin-bottom: var(--spacer-base);
-        }
-    }
-
-    ._error-text {
-        color: var(--c-danger-variant);
-        font-size: var(--font-xs);
-        margin-top: var(--spacer-xs);
-        height: calc(var(--font-xs) * 1.2);
-        font-weight: var(--font-medium);
+      margin-bottom: var(--spacer-base);
     }
   }
-  </style>
+
+  ._error-text {
+    color: var(--c-danger-variant);
+    font-size: var(--font-xs);
+    margin-top: var(--spacer-xs);
+    height: calc(var(--font-xs) * 1.2);
+    font-weight: var(--font-medium);
+  }
+
+  ._notice-link-container {
+    text-align: center;
+  }
+}
+</style>

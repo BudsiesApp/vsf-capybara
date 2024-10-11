@@ -75,9 +75,7 @@
                   $t("Terms of Service")
                 }}</a>, and
 
-                <a href="/privacy-policy/" target="_blank">{{
-                  $t("Privacy Policy")
-                }}</a>.
+                <privacy-policy-link />.
 
                 {{
                   $t(
@@ -108,8 +106,6 @@
           >
             {{ submitButtonText }}
           </SfButton>
-
-          <m-order-submit-agreement class="_agreement" />
 
           <california-privacy-notice-link />
         </div>
@@ -161,7 +157,7 @@ import i18n from '@vue-storefront/core/i18n';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
-import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
+import { CaliforniaPrivacyNoticeLink, PrivacyPolicyLink } from 'src/modules/true-vault';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import {
@@ -175,7 +171,6 @@ import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quan
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
-import MOrderSubmitAgreement from 'theme/components/molecules/m-order-submit-agreement.vue';
 import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
 
 function getAllFormRefs (
@@ -217,8 +212,8 @@ export default defineComponent({
     CustomizationOption,
     MBlockStory,
     MFormErrors,
-    MOrderSubmitAgreement,
     MProductDescriptionStory,
+    PrivacyPolicyLink,
     SfButton,
     SfCheckbox,
     SfDivider,

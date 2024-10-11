@@ -13,7 +13,7 @@ export default defineComponent({
   },
   setup () {
     return {
-      storySlug: 'order_submit_agreement_petsies'
+      storySlug: 'order_submit_agreement_bulkorders'
     }
   }
 })
