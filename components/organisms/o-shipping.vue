@@ -200,6 +200,8 @@
           {{ $t('Edit contact') }}
         </SfButton>
       </div>
+
+      <california-privacy-notice-link />
     </div>
   </div>
 </template>
@@ -221,6 +223,7 @@ import {
   METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
 } from 'src/modules/vsf-amazon-pay/index';
 import { LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, LAST_USED_CUSTOMER_PHONE_NUMBER, LAST_USED_CUSTOMER_SHIPPING_COUNTRY, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_PHONE_NUMBER, SET_LAST_USED_CUSTOMER_SHIPPING_COUNTRY } from 'src/modules/persisted-customer-data';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
 
@@ -231,6 +234,7 @@ const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3}
 export default {
   name: 'OShipping',
   components: {
+    CaliforniaPrivacyNoticeLink,
     SfInput,
     SfRadio,
     SfButton,
@@ -562,5 +566,9 @@ export default {
       max-width: 240px;
     }
   }
+}
+
+.california-privacy-notice-link {
+  --privacy-notice-link-display: inline;
 }
 </style>

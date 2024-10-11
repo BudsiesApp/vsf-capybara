@@ -51,6 +51,8 @@
     <SfButton class="sf-button--text action-button" @click.native="switchElem('login')">
       {{ `${$t('or')} ${$t('login in to your account')}` }}
     </SfButton>
+
+    <california-privacy-notice-link />
   </div>
 </template>
 
@@ -62,11 +64,14 @@ import { SfInput, SfButton } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
 import { mapActions } from 'vuex';
 
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
+
 import MPassword from 'theme/components/molecules/m-password.vue';
 
 export default {
   name: 'MRegister',
   components: {
+    CaliforniaPrivacyNoticeLink,
     SfInput,
     SfButton,
     MPassword
@@ -218,6 +223,10 @@ export default {
   &__submit {
     margin: var(--spacer-xl) 0 0 0;
   }
+}
+.california-privacy-notice-link {
+  --privacy-notice-link-display: inline;
+  --privacy-notice-link-margin: 0;
 }
 .action-button {
   margin: var(--spacer-xl) 0;

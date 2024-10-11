@@ -34,7 +34,11 @@
         </MSpinnerButton>
       </form>
 
-      <div class="_success-message" v-else>
+      <california-privacy-notice-link />
+
+      <notice-of-financial-incentive-link />
+
+      <div class="_success-message" v-if="!displayForm">
         {{ successMessage }}
       </div>
     </validation-observer>
@@ -51,6 +55,7 @@ import Task from '@vue-storefront/core/lib/sync/types/Task';
 import i18n from '@vue-storefront/i18n';
 
 import { usePersistedEmail } from 'src/modules/persisted-customer-data';
+import { CaliforniaPrivacyNoticeLink, NoticeOfFinancialIncentiveLink } from 'src/modules/true-vault';
 
 import MSpinnerButton from 'theme/components/molecules/m-spinner-button.vue';
 
@@ -64,8 +69,10 @@ extend('email', email);
 export default defineComponent({
   name: 'MSubscriptionForm',
   components: {
-    SfInput,
+    CaliforniaPrivacyNoticeLink,
     MSpinnerButton,
+    NoticeOfFinancialIncentiveLink,
+    SfInput,
     ValidationProvider,
     ValidationObserver
   },
@@ -196,6 +203,14 @@ export default defineComponent({
   ._success-message {
     color: var(--c-text);
     margin-bottom: calc(var(--font-xs) * 1.2);
+  }
+
+  .california-privacy-notice-link {
+    --privacy-notice-link-margin: var(--spacer-xs) var(--spacer-sm) 0 0;
+  }
+
+  .notice-of-financial-incentive-link {
+    --financial-incentive-link-display: inline-block;
   }
 }
 </style>

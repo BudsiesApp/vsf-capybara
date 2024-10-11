@@ -109,10 +109,9 @@
             {{ submitButtonText }}
           </SfButton>
 
-          <MBlockStory
-            class="_agreement"
-            story-slug="order_submit_agreement_bulkorders"
-          />
+          <m-order-submit-agreement class="_agreement" />
+
+          <california-privacy-notice-link />
         </div>
 
         <MBlockStory :story-slug="bottomStorySlug" v-if="bottomStorySlug" />
@@ -162,6 +161,7 @@ import i18n from '@vue-storefront/core/i18n';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import {
@@ -175,6 +175,7 @@ import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quan
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
+import MOrderSubmitAgreement from 'theme/components/molecules/m-order-submit-agreement.vue';
 import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
 
 function getAllFormRefs (
@@ -212,9 +213,11 @@ export default defineComponent({
   },
   components: {
     ACustomProductQuantity,
+    CaliforniaPrivacyNoticeLink,
     CustomizationOption,
     MBlockStory,
     MFormErrors,
+    MOrderSubmitAgreement,
     MProductDescriptionStory,
     SfButton,
     SfCheckbox,

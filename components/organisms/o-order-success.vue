@@ -147,6 +147,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
   } as unknown as InjectType<InjectedServices>,
   components: {
     MSocialSharing,
+    NoticeOfFinancialIncentiveLink,
     SfButton,
     SfHeading
   },
@@ -308,6 +309,11 @@ $number-margin-right-desktop: var(--spacer-sm);
     &.-small {
       font-size: var(--font-sm);
     }
+  }
+
+  .notice-of-financial-incentive-link {
+    --financial-incentive-link-margin: var(--spacer-sm) 0 0;
+    --financial-incentive-link-display: inline-block;
   }
 
   @include for-desktop {

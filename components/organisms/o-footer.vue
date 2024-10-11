@@ -43,7 +43,14 @@
 
       <div class="_copyright">
         {{ $t('Copyright {year}. Budsies PR LLC. All Rights Reserved.', {year: new Date().getFullYear()}) }}
+        |
+
+        <privacy-policy-link />
+
+        <california-privacy-notice-link text="| California Privacy Notice" />
       </div>
+
+      <opt-out-link />
     </SfFooter>
   </footer>
 </template>
@@ -56,11 +63,16 @@ import config from 'config';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import get from 'lodash-es/get';
 
-import MBudsiesBrands from '../molecules/m-budsies-brands';
+import { CaliforniaPrivacyNoticeLink, OptOutLink, PrivacyPolicyLink } from 'src/modules/true-vault';
+
+import MBudsiesBrands from '../molecules/m-budsies-brands.vue';
 
 export default {
   name: 'OFooter',
   components: {
+    CaliforniaPrivacyNoticeLink,
+    OptOutLink,
+    PrivacyPolicyLink,
     MBudsiesBrands,
     SfFooter,
     SfList,
@@ -201,6 +213,22 @@ export default {
   }
 
   ._copyright {
+    --privacy-notice-link-font-size: var(--font-xs);
+    --privacy-notice-link-color: var(--c-light-variant);
+    --privacy-notice-link-margin: 0;
+    --privacy-notice-display: inline;
+
+    --opt-out-link-font-size: var(--font-xs);
+    --opt-out-link-color: var(--c-light-variant);
+
+    // color: var(--c-light-variant);
+    // font-size: var(--font-xs);
+    // margin-top: var(--spacer-xs);
+
+    a {
+      color: inherit;
+    }
+
     margin-top: var(--spacer-base);
     font-size: var(--font-xs);
     text-align: center;
