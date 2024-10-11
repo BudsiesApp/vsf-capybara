@@ -70,9 +70,9 @@
 
                 <template #remove>
                   <SfPrice
-                    v-if="getProductRegularPrice(product, campaignContent)"
-                    :regular="getProductRegularPrice(product, campaignContent)"
-                    :special="getProductSpecialPrice(product, campaignContent)"
+                    v-if="cartItemPriceDictionary[product.checksum]"
+                    :regular="formatPrice(cartItemPriceDictionary[product.checksum]).regular"
+                    :special="formatPrice(cartItemPriceDictionary[product.checksum]).special"
                   />
                 </template>
 
@@ -173,9 +173,10 @@ import {
 } from '@storefront-ui/vue';
 import { OrderSummary } from './DetailedCart/index.js';
 import { mapGetters, mapState } from 'vuex';
-import { getCartItemPrice } from 'src/modules/shared';
+import { PriceHelper } from 'src/modules/shared';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
+import { CART_ITEM_PRICE_DICTIONARY } from 'core/modules/catalog';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
 import CartEvents from 'src/modules/shared/types/cart-events';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
@@ -374,6 +375,9 @@ export default {
       products: 'cart/getCartItems'
     }),
     ...mapMobileObserver(),
+    cartItemPriceDictionary () {
+      return this.$store.getters[CART_ITEM_PRICE_DICTIONARY];
+    },
     totalItems () {
       return this.products.reduce(
         (totalItems, product) => totalItems + parseInt(product.qty, 10),
@@ -385,9 +389,6 @@ export default {
     },
     canShowProductionSpotCountdown () {
       return this.products.some((product) => isCustomProduct(product.id));
-    },
-    campaignContent () {
-      return this.$store.getters['promotionPlatform/campaignContent'];
     }
   },
   async mounted () {
@@ -470,13 +471,8 @@ export default {
         });
       }
     },
-    // TODO: campaignContent param is quick fix, need to refactor
-    getProductRegularPrice (product, campaignContent) {
-      return getCartItemPrice(product, {}).regular;
-    },
-    // TODO: campaignContent param is quick fix, need to refactor
-    getProductSpecialPrice (product, campaignContent) {
-      return getCartItemPrice(product, {}).special;
+    formatPrice (price) {
+      return PriceHelper.formatPrice(price);
     },
     removeHandler (product) {
       this.$store.dispatch('cart/removeItem', { product: product });

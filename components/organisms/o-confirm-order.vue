@@ -85,8 +85,8 @@
                 v-model="product.qty"
                 :image="getThumbnailForProduct(product)"
                 :title="product.name | htmlDecode"
-                :regular-price="getProductRegularPrice(product, campaignContent)"
-                :special-price="getProductSpecialPrice(product, campaignContent)"
+                :regular-price="formatPrice(cartItemPriceDictionary[product.checksum].regular)"
+                :special-price="formatPrice(cartItemPriceDictionary[product.checksum].special)"
                 class="collected-product"
               >
                 <template #configuration>
@@ -232,11 +232,12 @@ import { OrderModule, ORDER_CONFLICT_EVENT } from '@vue-storefront/core/modules/
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { OrderReview } from '@vue-storefront/core/modules/checkout/components/OrderReview';
 import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
+import { CART_ITEM_PRICE_DICTIONARY } from 'core/modules/catalog';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
 import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
 import { AFFIRM_MODAL_CLOSED } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';
 import { getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
-import { getCartItemPrice, PAYMENT_ERROR_EVENT } from 'src/modules/shared';
+import { PAYMENT_ERROR_EVENT, PriceHelper } from 'src/modules/shared';
 
 import { createSmoothscroll } from 'theme/helpers';
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
@@ -292,8 +293,8 @@ export default {
       isGiftCardProcessing: 'giftCard/isGiftCardProcessing'
     }),
     ...mapMobileObserver(),
-    campaignContent () {
-      return this.$store.getters['promotionPlatform/campaignContent'];
+    cartItemPriceDictionary () {
+      return this.$store.getters[CART_ITEM_PRICE_DICTIONARY]
     },
     cartItems () {
       return this.$store.getters['cart/getCartItems'];
@@ -353,6 +354,9 @@ export default {
     ...mapActions('ui', {
       openModal: 'openModal'
     }),
+    formatPrice (price) {
+      return PriceHelper.formatPrice(price);
+    },
     getCartItemOptions,
     getThumbnailForProduct (product) {
       const customizationSystemThumbnail =
@@ -370,12 +374,6 @@ export default {
       }
 
       return getThumbnailForProduct(product);
-    },
-    getProductRegularPrice (product, campaignContent) {
-      return getCartItemPrice(product, {}).regular;
-    },
-    getProductSpecialPrice (product, campaignContent) {
-      return getCartItemPrice(product, {}).special;
     },
     onFailure (response) {
       this.$store.dispatch('notification/spawnNotification', {
