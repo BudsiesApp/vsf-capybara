@@ -108,10 +108,7 @@
             {{ $t("Save & Make Another") }}
           </SfButton>
 
-          <MBlockStory
-            class="_agreement"
-            story-slug="order_submit_agreement_petsies"
-          />
+          <m-order-submit-agreement class="_agreement" />
 
           <california-privacy-notice-link />
         </div>
@@ -179,6 +176,7 @@ import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quan
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
+import MOrderSubmitAgreement from 'theme/components/molecules/m-order-submit-agreement.vue';
 import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
 
 function getAllFormRefs (
@@ -220,6 +218,7 @@ export default defineComponent({
     CustomizationOption,
     MBlockStory,
     MFormErrors,
+    MOrderSubmitAgreement,
     MProductDescriptionStory,
     SfButton,
     SfDivider,

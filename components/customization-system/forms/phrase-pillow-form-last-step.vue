@@ -57,7 +57,7 @@
           {{ $t("I have seen and approve the Live Preview of my design.") }}
         </div>
 
-        <MBlockStory story-slug="order_submit_agreement_petsies" />
+        <m-order-submit-agreement />
 
         <california-privacy-notice-link />
       </div>
@@ -93,6 +93,7 @@ import SubmitAnimationStepsInterface from 'theme/components/interfaces/submit-an
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
+import MOrderSubmitAgreement from 'theme/components/molecules/m-order-submit-agreement.vue';
 import MSubmitAnimator from 'theme/components/molecules/m-submit-animator.vue';
 
 const submitAnimationSteps: SubmitAnimationStepsInterface[] = [
@@ -141,6 +142,7 @@ export default defineComponent({
     CaliforniaPrivacyNoticeLink,
     CustomizationOption,
     MBlockStory,
+    MOrderSubmitAgreement,
     MSubmitAnimator,
     SfButton,
     SfHeading,
