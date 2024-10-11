@@ -299,20 +299,20 @@ export default Vue.extend({
       --swiper-navigation-sides-offset: 0;
 
       height: 35%;
-      background: #fffefeb3;
+      background: rgba(#fff, 0.7);
       transform: translateY(-50%);
       margin-top: 0;
 
       &.-left {
-        padding-left: var(--spacer-sm);
-        padding-right: var(--spacer-base);
+        padding-left: calc(var(--spacer-xs) + var(--spacer-2xs));
+        padding-right: var(--spacer-sm);
         border-top-right-radius: 12px;
         border-bottom-right-radius: 12px;
       }
 
       &.-right {
-        padding-right: var(--spacer-sm);
-        padding-left: var(--spacer-base);
+        padding-right: calc(var(--spacer-xs) + var(--spacer-2xs));
+        padding-left: var(--spacer-sm);
         border-top-left-radius: 12px;
         border-bottom-left-radius: 12px;
       }
