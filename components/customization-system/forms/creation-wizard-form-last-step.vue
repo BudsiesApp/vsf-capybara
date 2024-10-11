@@ -81,7 +81,9 @@
         {{ submitButtonText }}
       </SfButton>
 
-      <MBlockStory story-slug="order_submit_agreement_petsies" />
+      <m-order-submit-agreement />
+
+      <california-privacy-notice-link />
     </div>
 
     <SfModal :visible="showQuantityNotes" @close="showQuantityNotes = false">
@@ -103,6 +105,7 @@ import {
   OptionValue
 } from 'src/modules/customization-system';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
@@ -111,6 +114,7 @@ import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quan
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
+import MOrderSubmitAgreement from 'theme/components/molecules/m-order-submit-agreement.vue';
 
 function getAllFormRefs (
   refs: Record<string, Vue | Element | Vue[] | Element[]>
@@ -171,9 +175,11 @@ export default defineComponent({
   },
   components: {
     ACustomProductQuantity,
+    CaliforniaPrivacyNoticeLink,
     CustomizationOption,
     MBlockStory,
     MFormErrors,
+    MOrderSubmitAgreement,
     SfButton,
     SfHeading,
     SfInput,

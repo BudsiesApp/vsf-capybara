@@ -257,6 +257,7 @@ export default Vue.extend({
   components: {
     CaliforniaPrivacyNoticeLink,
     ACustomProductQuantity,
+    CaliforniaPrivacyNoticeLink,
     SfButton,
     SfCheckbox,
     SfInput,
