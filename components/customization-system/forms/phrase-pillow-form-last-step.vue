@@ -212,6 +212,10 @@ export default defineComponent({
     text-align: center;
   }
 
+  ._quantity-field {
+    margin-top: var(--spacer-base);
+  }
+
   ._qty-container {
     margin-top: var(--spacer-sm);
   }
