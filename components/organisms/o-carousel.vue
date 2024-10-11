@@ -278,8 +278,6 @@ export default Vue.extend({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .o-carousel {
-  position: relative;
-
   .swiper-wrapper {
     padding: 0;
   }
@@ -337,7 +335,6 @@ export default Vue.extend({
         top: auto;
         left: auto;
         right: auto;
-
       }
     }
   }
