@@ -158,30 +158,24 @@ export default defineComponent({
   width: 100%;
 
   ._options-list {
-    display: grid;
-    grid-template-columns: repeat(
-      auto-fill,
-      minmax(var(--_item-max-width), 1fr)
-    );
+    display: flex;
+    flex-wrap: wrap;
     padding: 0;
 
-    --_item-max-width: var(--base-list-widget-item-max-width);
-
     &.-round {
-      --_item-max-width: var(--base-list-widget-round-item-max-width, var(--base-list-widget-item-max-width));
-
       row-gap: var(--spacer-xs);
+    }
+
+    ._option {
+      width: var(--base-list-widget-item-width);
+      max-width: var(--base-list-widget-item-max-width);
+      min-width: var(--base-list-widget-item-min-width);
     }
 
     &.-alignment-center {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
-
-      ._option {
-        width: var(--base-list-widget-item-width);
-        max-width: var(--_item-max-width);
-      }
     }
   }
 
@@ -195,7 +189,7 @@ export default defineComponent({
     flex-shrink: 0;
     flex-grow: 0;
     display: block;
-    padding: var(--spacer-sm);
+    padding: var(--spacer-xs);
     box-sizing: border-box;
 
     &.-selected {
@@ -240,6 +234,7 @@ export default defineComponent({
   ._name {
     font-weight: var(--font-semibold);
     margin-top: var(--spacer-xs);
+    display: var(--base-list-widget-name-display, block);
   }
 
   ._price {
@@ -283,17 +278,8 @@ export default defineComponent({
   }
 
   @include for-desktop {
-    ._options-list {
-      grid-template-columns: repeat(
-        auto-fill,
-        minmax(var(--_item-max-width), 1fr)
-      );
-
-      &.-alignment-center {
-        ._option {
-          width: var(--_item-max-width);
-        }
-      }
+    ._option {
+      padding: var(--spacer-sm);
     }
   }
 }
