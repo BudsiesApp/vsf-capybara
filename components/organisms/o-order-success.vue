@@ -126,6 +126,8 @@
             <p class="_text -small">
               {{ $t('Rewards dollars may be applied onto existing orders within 7 days of checkout.') }}
             </p>
+
+            <notice-of-financial-incentive-link />
           </div>
         </div>
       </div>
@@ -139,6 +141,7 @@ import { SfButton, SfHeading } from '@storefront-ui/vue';
 
 import { Order } from 'core/modules/order/types/Order';
 import { InjectType } from 'src/modules/shared';
+import { NoticeOfFinancialIncentiveLink } from 'src/modules/true-vault'
 
 import MSocialSharing from 'theme/components/molecules/m-social-sharing.vue';
 
@@ -180,6 +183,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
     MShareSpecialStoryForm,
     MShareBirthdayForm,
     MSocialSharing,
+    NoticeOfFinancialIncentiveLink,
     SfButton,
     SfHeading
   },
@@ -307,6 +311,11 @@ $number-margin-right-desktop: var(--spacer-sm);
     ._button {
       margin: 0 auto;
     }
+  }
+
+  .notice-of-financial-incentive-link {
+    --financial-incentive-link-margin: var(--spacer-sm) 0 0;
+    --financial-incentive-link-display: inline-block;
   }
 
   @include for-desktop {
