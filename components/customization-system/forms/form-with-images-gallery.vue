@@ -398,6 +398,14 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/typography";
 
 .form-with-images-gallery {
+  ._customization-option {
+    &.-widget-ThumbnailsListWidget {
+      --thumbnails-list-widget-item-width: 20%;
+      --thumbnails-list-widget-round-item-min-width: 90px;
+      --thumbnails-list-widget-name-display: none;
+    }
+  }
+
   ._product {
     display: flex;
     flex-direction: column;
@@ -465,13 +473,11 @@ export default defineComponent({
     ._gallery {
       margin-top: 0;
     }
-  }
 
-  @include for-desktop {
     ._customization-option {
       &.-widget-ThumbnailsListWidget {
-        --thumbnails-list-widget-item-max-width: 120px;
-        --thumbnails-list-widget-round-item-max-width: 20%;
+        --thumbnails-list-widget-name-display: block;
+        --thumbnails-list-widget-item-min-width: 90px;
       }
     }
   }
