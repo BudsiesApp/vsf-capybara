@@ -147,7 +147,6 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
   } as unknown as InjectType<InjectedServices>,
   components: {
     MSocialSharing,
-    NoticeOfFinancialIncentiveLink,
     SfButton,
     SfHeading
   },
