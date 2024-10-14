@@ -255,8 +255,8 @@ extend('between', {
 export default Vue.extend({
   name: 'OGiftCardOrderForm',
   components: {
-    CaliforniaPrivacyNoticeLink,
     ACustomProductQuantity,
+    CaliforniaPrivacyNoticeLink,
     SfButton,
     SfCheckbox,
     SfInput,
