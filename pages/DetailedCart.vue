@@ -138,15 +138,7 @@
         <OrderSummary :is-updating-quantity="isUpdatingQuantity" />
 
         <div class="_shipping-handling-block">
-          <SfHeading :level="3" title="Shipping &amp; Handling" />
-          <p>Once completed, your Budsies will ship via USPS Priority Mail (US); First Class Mail (Int'l)</p>
-          <ul>
-            <li>Custom Plushies: (<strong>US</strong>) $14.95, $7.95 for each additional; (<strong>International</strong>) $26.95, $7.95 for each additional</li>
-            <li>Custom Pillows: <strong>(US</strong>) starting at $4.95;&nbsp;(<strong>International)</strong> $14.95</li>
-            <li>International shipping rates will increase if supersized items are purchased.</li>
-            <li>Read more about rates&nbsp;<a href="https://support.budsies.com/support/solutions/articles/13000033713-shipping-handling-fees" target="_blank">here</a>. Rates determined by weight</li>
-            <li>Tracking number will be emailed to you at time of shipment</li>
-          </ul>
+          <MBlockStory story-slug="cart_shipping_handling" />
         </div>
       </div>
     </div>
@@ -178,6 +170,7 @@ import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.functi
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
+import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MDropdown from 'theme/components/molecules/m-dropdown.vue';
 import CartItemConfiguration from 'theme/components/customization-system/cart-item-configuration.vue';
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
@@ -263,6 +256,7 @@ export default {
   },
   components: {
     CartItemConfiguration,
+    MBlockStory,
     MDropdown,
     SfPrice,
     SfList,
@@ -758,8 +752,6 @@ export default {
     ._shipping-handling-block {
       margin: var(--spacer-xl) 0;
       padding: 0 var(--spacer-xl);
-      font-size: var(--font-xs);
-      line-height: 1.6;
     }
   }
 

@@ -206,10 +206,12 @@ export default defineComponent({
   }
 
   .california-privacy-notice-link {
+    --privacy-notice-link-color: var(--c-white);
     --privacy-notice-link-margin: var(--spacer-xs) var(--spacer-sm) 0 0;
   }
 
   .notice-of-financial-incentive-link {
+    --financial-incentive-link-color: var(--c-white);
     --financial-incentive-link-display: inline-block;
   }
 }
