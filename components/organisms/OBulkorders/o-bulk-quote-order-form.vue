@@ -107,6 +107,10 @@
           {{ $t("Get My Quote") }}
         </SfButton>
       </div>
+
+      <div class="_notice-link-container">
+        <california-privacy-notice-link />
+      </div>
     </validation-observer>
   </div>
 </template>
@@ -135,11 +139,12 @@ import {
 import {
   Customization,
   CustomizationOptionValue,
-  getCustomizationSelectedValues,
   OptionValue,
   useAvailableCustomizations,
   useCustomizationState
 } from 'src/modules/customization-system';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
+
 import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 
@@ -256,6 +261,7 @@ export default defineComponent({
   },
   components: {
     AOrderedHeading,
+    CaliforniaPrivacyNoticeLink,
     CustomizationOption,
     MBaseForm,
     MBodypartOptionConfigurator,
@@ -463,6 +469,10 @@ export default defineComponent({
   ._color-palette {
     text-align: center;
     margin: var(--spacer-base) 0;
+  }
+
+  ._notice-link-container {
+    text-align: center;
   }
 }
 </style>

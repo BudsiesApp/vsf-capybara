@@ -18,6 +18,8 @@
           {{ $t('Add Address') }}
         </SfButton>
       </div>
+
+      <california-privacy-notice-link />
     </validation-observer>
   </div>
 </template>
@@ -31,6 +33,7 @@ import { SfButton } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
 
 import { usePersistedFirstName, usePersistedLastName, usePersistedPhoneNumber } from 'src/modules/persisted-customer-data';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import { BaseAddressFormValue } from 'theme/components/interfaces/base-address-form-value.interface';
 
@@ -44,6 +47,7 @@ BaseAddressFormValue,
 export default defineComponent({
   name: 'OAddAddressForm',
   components: {
+    CaliforniaPrivacyNoticeLink,
     SfButton,
     OBaseAddressForm,
     ValidationObserver
@@ -164,6 +168,11 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: space-between;
+  }
+
+  .california-privacy-notice-link {
+    --privacy-notice-link-width: 100%;
+    --privacy-notice-link-text-align: end;
   }
 }
 </style>

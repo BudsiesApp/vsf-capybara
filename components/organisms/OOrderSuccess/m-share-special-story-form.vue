@@ -40,6 +40,8 @@
           {{ submitButtonText }}
         </SfButton>
       </div>
+
+      <california-privacy-notice-link />
     </validation-observer>
   </div>
 </template>
@@ -53,6 +55,8 @@ import { mapState } from 'vuex';
 import { SfButton } from '@storefront-ui/vue';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
+
 extend('required', {
   ...required,
   message: 'The {_field_} field is required'
@@ -61,6 +65,7 @@ extend('required', {
 export default Vue.extend({
   name: 'MShareSpecialStoryForm',
   components: {
+    CaliforniaPrivacyNoticeLink,
     SfButton,
     ValidationProvider,
     ValidationObserver
@@ -156,6 +161,11 @@ export default Vue.extend({
     font-size: var(--font-xs);
     margin-top: 0.5em;
     color: var(--c-danger);
+  }
+
+  .california-privacy-notice-link {
+    --privacy-notice-link-text-align: end;
+    --privacy-notice-link-width: 100%;
   }
 
   @include for-desktop {

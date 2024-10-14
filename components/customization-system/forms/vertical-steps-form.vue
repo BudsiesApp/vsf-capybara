@@ -75,9 +75,7 @@
                   $t("Terms of Service")
                 }}</a>, and
 
-                <a href="/privacy-policy/" target="_blank">{{
-                  $t("Privacy Policy")
-                }}</a>.
+                <privacy-policy-link />.
 
                 {{
                   $t(
@@ -109,10 +107,7 @@
             {{ submitButtonText }}
           </SfButton>
 
-          <MBlockStory
-            class="_agreement"
-            story-slug="order_submit_agreement_bulkorders"
-          />
+          <california-privacy-notice-link />
         </div>
 
         <MBlockStory :story-slug="bottomStorySlug" v-if="bottomStorySlug" />
@@ -162,6 +157,7 @@ import i18n from '@vue-storefront/core/i18n';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
+import { CaliforniaPrivacyNoticeLink, PrivacyPolicyLink } from 'src/modules/true-vault';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import {
@@ -212,10 +208,12 @@ export default defineComponent({
   },
   components: {
     ACustomProductQuantity,
+    CaliforniaPrivacyNoticeLink,
     CustomizationOption,
     MBlockStory,
     MFormErrors,
     MProductDescriptionStory,
+    PrivacyPolicyLink,
     SfButton,
     SfCheckbox,
     SfDivider,
