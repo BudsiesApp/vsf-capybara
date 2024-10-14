@@ -7,7 +7,7 @@
       <div class="swiper-wrapper">
         <div
           class="swiper-slide"
-          v-for="(item) in items"
+          v-for="item in items"
           :key="item.key"
         >
           <slot :item="item.data" />
@@ -16,10 +16,11 @@
 
       <div
         class="swiper-buttons"
-        :class="{'-counter': showCounter}"
+        :class="{ '-counter': showCounter }"
         v-show="isSwiperInitialized"
       >
         <sf-button
+          ref="prev-button"
           class="_arrow swiper-button-prev -left sf-button--pure"
         />
 
@@ -28,7 +29,8 @@
         </div>
 
         <sf-button
-          class="_arrow _arrow-right swiper-button-next sf-button--pure"
+          ref="next-button"
+          class="_arrow -right swiper-button-next sf-button--pure"
         />
       </div>
     </div>
@@ -50,7 +52,10 @@ import 'swiper/modules/navigation.scss';
 import { BreakpointValue } from 'src/modules/shared';
 
 import { OCarouselItem } from '../interfaces/o-carousel-item.interface';
-import { mapMobileObserver, unMapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
+import {
+  mapMobileObserver,
+  unMapMobileObserver
+} from '@storefront-ui/vue/src/utilities/mobile-observer';
 
 export default Vue.extend({
   name: 'OCarousel',
@@ -92,7 +97,7 @@ export default Vue.extend({
       currentSlideIndex: 0,
       swiper: undefined as Swiper | undefined,
       isSwiperInitialized: false
-    }
+    };
   },
   computed: {
     ...mapMobileObserver(),
@@ -103,7 +108,7 @@ export default Vue.extend({
 
       return {
         delay: this.autoplayDelay
-      }
+      };
     },
     breakpoints (): {
       [width: number]: SwiperOptions,
@@ -111,12 +116,9 @@ export default Vue.extend({
     } {
       return {
         [BreakpointValue.MEDIUM]: {
-          slidesPerView: Math.min(
-            this.slidesPerView,
-            this.maxSlidesPerView
-          )
+          slidesPerView: Math.min(this.slidesPerView, this.maxSlidesPerView)
         }
-      }
+      };
     },
     swiperOptions (): SwiperOptions {
       return {
@@ -124,21 +126,17 @@ export default Vue.extend({
         direction: 'horizontal',
         loop: true,
         slidesPerView: this.defaultSlidesPerView,
-        modules: [
-          Autoplay,
-          Navigation
-        ],
-        navigation: {
-          nextEl: '.swiper-button-next',
-          prevEl: '.swiper-button-prev'
-        },
+        modules: [Autoplay, Navigation],
+
         init: false,
         breakpoints: this.breakpoints,
         spaceBetween: this.spaceBetween
-      }
+      };
     },
     defaultSlidesPerView (): number {
-      let defaultSlidesPerView = this.slidesPerViewMobile ? this.slidesPerViewMobile : this.slidesPerView;
+      let defaultSlidesPerView = this.slidesPerViewMobile
+        ? this.slidesPerViewMobile
+        : this.slidesPerView;
       return Math.min(defaultSlidesPerView, this.maxSlidesPerView);
     },
     style (): Record<string, string> {
@@ -171,6 +169,18 @@ export default Vue.extend({
     this.destroySwiper();
   },
   methods: {
+    getNavigationButtons (): {
+      nextEl: Element,
+      prevEl: Element
+    } {
+      const nextButton = this.$refs['next-button'] as InstanceType<typeof SfButton>;
+      const prevButton = this.$refs['prev-button'] as InstanceType<typeof SfButton>;
+
+      return {
+        nextEl: nextButton.$el,
+        prevEl: prevButton.$el
+      }
+    },
     getCarouselRoot (): HTMLElement {
       return this.$refs.swiper as HTMLElement;
     },
@@ -184,11 +194,14 @@ export default Vue.extend({
 
       this.swiper = new Swiper(
         this.getCarouselRoot(),
-        this.swiperOptions
+        {
+          ...this.swiperOptions,
+          navigation: this.getNavigationButtons()
+        }
       );
 
       this.swiper.on('init', onInit);
-      this.swiper.on('realIndexChange', onRealIndexChange)
+      this.swiper.on('realIndexChange', onRealIndexChange);
 
       this.swiper.init();
     },
@@ -204,11 +217,11 @@ export default Vue.extend({
     },
     updateSwiper (options?: SwiperOptions): void {
       if (!this.swiper) {
-        return
+        return;
       }
 
       if (options) {
-        this.swiper.params = { ...this.swiper.params, ...options }
+        this.swiper.params = { ...this.swiper.params, ...options };
       }
 
       this.swiper.update();
@@ -227,7 +240,7 @@ export default Vue.extend({
   },
   watch: {
     autoplay (val) {
-      this.updateSwiper({ autoplay: this.autoplayOptions })
+      this.updateSwiper({ autoplay: this.autoplayOptions });
 
       if (!this.swiper) {
         return;
@@ -240,7 +253,7 @@ export default Vue.extend({
       }
     },
     autoplayDelay () {
-      this.updateSwiper({ autoplay: this.autoplayOptions })
+      this.updateSwiper({ autoplay: this.autoplayOptions });
     },
     slidesPerView () {
       this.reInitSwiper();
@@ -249,7 +262,7 @@ export default Vue.extend({
       this.reInitSwiper();
     },
     spaceBetween (val) {
-      this.updateSwiper({ spaceBetween: val })
+      this.updateSwiper({ spaceBetween: val });
     },
     'items.length' () {
       this.reInitSwiper();
@@ -258,7 +271,7 @@ export default Vue.extend({
       this.updateSwiper();
     }
   }
-})
+});
 </script>
 
 <style lang="scss" scoped>
@@ -275,10 +288,42 @@ export default Vue.extend({
   }
 
   .swiper-buttons {
-    --swiper-navigation-size: var(--font-xl);
-    --swiper-navigation-color: var(--c-primary);
+    --swiper-navigation-size: var(--font-2xl);
+    --swiper-navigation-color: var(--c-text);
 
     display: flex;
+
+    ._arrow {
+      --swiper-navigation-sides-offset: 0;
+
+      height: 35%;
+      max-height: 10rem;
+      margin-top: 0;
+      transform: translateY(-50%);
+      background: rgba(#fff, 0.7);
+
+      &.-left {
+        padding-left: calc(var(--spacer-xs) + var(--spacer-2xs));
+        padding-right: var(--spacer-sm);
+        border-top-right-radius: 12px;
+        border-bottom-right-radius: 12px;
+
+        &::after {
+          content: '\276C';
+        }
+      }
+
+      &.-right {
+        padding-right: calc(var(--spacer-xs) + var(--spacer-2xs));
+        padding-left: var(--spacer-sm);
+        border-top-left-radius: 12px;
+        border-bottom-left-radius: 12px;
+
+        &::after {
+          content: '\276D';
+        }
+      }
+    }
 
     &.-counter {
       --swiper-navigation-size: var(--font-sm);
