@@ -475,6 +475,11 @@ export default defineComponent({
     &.-widget-ProductionTimeSelector {
       --select-width: 100%;
     }
+
+    &.-widget-ThumbnailsListWidget {
+      --thumbnails-list-widget-item-width: 33%;
+      --thumbnails-list-widget-item-min-width: 33%;
+    }
   }
 
   ._customizer-steps {
@@ -626,11 +631,14 @@ export default defineComponent({
         }
       }
     }
+  }
 
+  @media(min-width: $tablet-min) {
     ._customization-option {
-      --customization-option-label-align: left;
-      --customization-option-description-align: left;
-      --customization-option-hint-align: left;
+      &.-widget-ThumbnailsListWidget {
+        --thumbnails-list-widget-item-width: 25%;
+        --thumbnails-list-widget-item-min-width: 25%;
+      }
     }
   }
 

@@ -7,6 +7,8 @@
     <SfButton class="sf-button sf-button--outline _submit-button">
       {{ $t('Notify Customer Support') }}
     </SfButton>
+
+    <california-privacy-notice-link />
   </form>
 </template>
 
@@ -14,9 +16,12 @@
 import Vue, { PropType } from 'vue'
 import { SfInput, SfButton } from '@storefront-ui/vue';
 
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
+
 export default Vue.extend({
   name: 'MNotifyCustomerSupportForm',
   components: {
+    CaliforniaPrivacyNoticeLink,
     SfInput,
     SfButton
   },
@@ -69,6 +74,11 @@ export default Vue.extend({
 .m-notify-customer-support-form {
   ._submit-button {
     margin: auto;
+  }
+
+  .california-privacy-notice-link {
+    --privacy-notice-link-width: 100%;
+    --privacy-notice-link-text-align: center;
   }
 }
 </style>

@@ -133,29 +133,7 @@
         <OrderSummary :is-updating-quantity="isUpdatingQuantity" />
 
         <div class="_shipping-handling-block">
-          <SfHeading :level="3" title="Shipping &amp; Handling" />
-          <p>Once completed, your order will ship via USPS</p>
-          <ul>
-            <li>
-              Petsies: (<strong>US</strong>) $13.95, $5.95 for each additional;
-              (<strong>International</strong>) $25.95, $5.95 for each additional
-            </li>
-            <li>
-              Pillows: <strong>(US</strong>) starting at $9.95;&nbsp;(<strong>International)</strong>
-              $20.95
-            </li>
-            <li>
-              Petsies Socks, Masks &amp; Keychains: (<strong>US</strong>) $4.95;
-              (<strong>International</strong>)&nbsp;$9.95
-            </li>
-            <li>
-              Read more about rates&nbsp;<a
-                href="http://support.mypetsies.com/support/solutions/articles/13000017023-shipping-handling-fees"
-                target="_blank"
-              >here</a>. Rates determined by weight
-            </li>
-            <li>Tracking number will be emailed to you at time of shipment</li>
-          </ul>
+          <MBlockStory story-slug="cart_shipping_handling" />
         </div>
       </div>
     </div>
@@ -187,6 +165,7 @@ import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customizati
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
+import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MDropdown from 'theme/components/molecules/m-dropdown.vue';
 import CartItemConfiguration from 'theme/components/customization-system/cart-item-configuration.vue';
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
@@ -250,6 +229,7 @@ export default {
   },
   components: {
     CartItemConfiguration,
+    MBlockStory,
     MDropdown,
     SfPrice,
     SfList,
@@ -647,8 +627,6 @@ export default {
     ._shipping-handling-block {
       margin: var(--spacer-xl) 0;
       padding: 0 var(--spacer-xl);
-      font-size: var(--font-xs);
-      line-height: 1.6;
     }
   }
 
