@@ -234,7 +234,7 @@ import { OrderModule, ORDER_CONFLICT_EVENT } from '@vue-storefront/core/modules/
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { OrderReview } from '@vue-storefront/core/modules/checkout/components/OrderReview';
 import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
-import { CART_ITEM_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
+import { CART_ITEM_PRICE_DICTIONARY } from '@vue-storefront/core/modules/cart';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
 import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
 import { AFFIRM_MODAL_CLOSED } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';

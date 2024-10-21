@@ -10,7 +10,7 @@
 import { PropType } from 'vue';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
 
-import { CART_ITEM_PRICE_DICTIONARY, GET_CART_ITEM_PRICE } from '@vue-storefront/core/modules/catalog';
+import { CART_ITEM_PRICE_DICTIONARY, GET_CART_ITEM_PRICE } from '@vue-storefront/core/modules/cart';
 import CartItem from 'core/modules/cart/types/CartItem';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
 import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
