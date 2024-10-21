@@ -58,7 +58,6 @@ export default {
       return this.$store.getters[PRODUCT_PRICE_DICTIONARY];
     },
     carouselProducts () {
-      const _ = this.campaignContent;
       return this.products.map(
         (product) => prepareCategoryProduct(
           product,

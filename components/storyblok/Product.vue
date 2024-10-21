@@ -43,7 +43,6 @@ import { PriceHelper } from 'src/modules/shared';
 
 import ProductData from './interfaces/product-data.interface';
 import getProductImagePlaceholder from '@vue-storefront/core/modules/cart/helpers/getProductImagePlaceholder';
-import { formatPrice, getFinalPrice } from 'src/modules/shared/helpers/price';
 
 export default Blok.extend({
   name: 'StoryblokProductBlock',
@@ -73,14 +72,14 @@ export default Blok.extend({
 
       const price = this.productPriceDictionary[this.product.id];
 
-      return getFinalPrice(price);
+      return PriceHelper.getFinalPrice(price);
     },
     formattedPrice (): string {
       if (!this.price) {
         return '';
       }
 
-      return formatPrice(this.price);
+      return PriceHelper.formatPrice(this.price);
     },
     name (): string {
       if (!this.product) {
