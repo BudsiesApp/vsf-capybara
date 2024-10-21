@@ -10,16 +10,16 @@
 import { PropType } from 'vue';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
 
+import { CART_ITEM_PRICE_DICTIONARY, GET_CART_ITEM_PRICE } from '@vue-storefront/core/modules/catalog';
 import CartItem from 'core/modules/cart/types/CartItem';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
 import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
+import { PriceHelper } from 'src/modules/shared';
 
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
 import { OrderContentItem } from '../interfaces/order-content-item.interface';
 
 import OOrderContent from './o-order-content.vue';
-import { PriceHelper } from 'src/modules/shared';
-import { CART_ITEM_PRICE_DICTIONARY, GET_CART_ITEM_PRICE } from 'core/modules/catalog';
 
 export default {
   name: 'OCartItemsTable',

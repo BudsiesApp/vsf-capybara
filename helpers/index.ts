@@ -56,8 +56,7 @@ export function getTopLevelCategories (categoryList) {
 
 export function prepareCategoryProduct (
   product,
-  productPriceDictionary: Record<string, PriceHelper.ProductPrice>,
-  productDiscountDictionary: Record<string, PriceHelper.ProductDiscount>
+  productPriceDictionary: Record<string, PriceHelper.ProductPrice>
 ) {
   const imagePath = productThumbnailPath(product);
   const thumbnailPath = !imagePath ? getProductImagePlaceholder() : getThumbnailPath(
@@ -66,10 +65,10 @@ export function prepareCategoryProduct (
     config.products.thumbnails.height
   );
   const price = productPriceDictionary[product.id];
-  const discount = productDiscountDictionary[product.id];
+  const discount = PriceHelper.getProductDiscount(price);
 
   return {
-    discount: PriceHelper.formatProductDiscount(discount),
+    discount: PriceHelper.formatProductDiscount(discount).discountPercent,
     id: product.id,
     sku: product.sku,
     title: htmlDecode(product.name),

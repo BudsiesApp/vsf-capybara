@@ -154,7 +154,7 @@ import { mapGetters, mapState } from 'vuex';
 import { PriceHelper } from 'src/modules/shared';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
-import { CART_ITEM_PRICE_DICTIONARY } from 'core/modules/catalog';
+import { CART_ITEM_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
 import CartEvents from 'src/modules/shared/types/cart-events';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
@@ -452,7 +452,7 @@ export default {
       }
     },
     formatPrice (price) {
-      return PriceHelper.formatPrice(price);
+      return PriceHelper.formatProductPrice(price);
     },
     removeHandler (product) {
       this.$store.dispatch('cart/removeItem', { product: product });

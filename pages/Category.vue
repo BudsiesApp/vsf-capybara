@@ -411,12 +411,15 @@ export default {
           })
         : this.getCurrentPageProducts;
     },
-    campaignContent () {
-      return this.$store.getters['promotionPlatform/campaignContent'];
-    },
     preparedProducts () {
-      const _ = this.campaignContent;
-      return this.products.map(prepareCategoryProduct);
+      const productPriceDictionary = this.$store.getters['product/productPriceDictionary'];
+
+      return this.products.map(
+        (product) => prepareCategoryProduct(
+          product,
+          productPriceDictionary
+        )
+      );
     },
     totalPages () {
       return Math.ceil(this.getCategoryProductsTotal / THEME_PAGE_SIZE);

@@ -55,16 +55,12 @@ export default {
     productPriceDictionary () {
       return this.$store.getters['product/productPriceDictionary'];
     },
-    productDiscountDictionary () {
-      return this.$store.getters['product/productDiscountDictionary'];
-    },
     carouselProducts () {
       const _ = this.campaignContent;
       return this.products.map(
         (product) => prepareCategoryProduct(
           product,
-          this.productPriceDictionary,
-          this.productDiscountDictionary
+          this.productPriceDictionary
         )
       );
     }
