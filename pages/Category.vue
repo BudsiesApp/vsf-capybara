@@ -233,6 +233,7 @@ import {
   mapMobileObserver,
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
+import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-headers.function';
 
@@ -412,7 +413,7 @@ export default {
         : this.getCurrentPageProducts;
     },
     preparedProducts () {
-      const productPriceDictionary = this.$store.getters['product/productPriceDictionary'];
+      const productPriceDictionary = this.$store.getters[PRODUCT_PRICE_DICTIONARY];
 
       return this.products.map(
         (product) => prepareCategoryProduct(

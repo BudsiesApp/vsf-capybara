@@ -36,6 +36,8 @@
 <script>
 import { SfCarousel } from '@storefront-ui/vue';
 
+import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
+
 import { prepareCategoryProduct } from 'theme/helpers';
 import OProductCard from 'theme/components/organisms/o-product-card';
 
@@ -53,7 +55,7 @@ export default {
   },
   computed: {
     productPriceDictionary () {
-      return this.$store.getters['product/productPriceDictionary'];
+      return this.$store.getters[PRODUCT_PRICE_DICTIONARY];
     },
     carouselProducts () {
       const _ = this.campaignContent;

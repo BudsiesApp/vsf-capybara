@@ -36,6 +36,7 @@ import { formatProductLink } from '@vue-storefront/core/modules/url/helpers';
 import ProductImage from '../core/ProductImage.vue';
 import { LocalizedRoute, StoreView } from 'core/lib/types';
 import config from 'config';
+import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import Product from 'core/modules/catalog/types/Product';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
 import { PriceHelper } from 'src/modules/shared';
@@ -57,7 +58,7 @@ export default Blok.extend({
   },
   computed: {
     productPriceDictionary (): Record<string, PriceHelper.ProductPrice> {
-      return this.$store.getters['product/productPriceDictionary'];
+      return this.$store.getters[PRODUCT_PRICE_DICTIONARY];
     },
     itemData (): ProductData {
       return this.item as ProductData;
