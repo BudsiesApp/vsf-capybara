@@ -10,10 +10,11 @@
 import { PropType } from 'vue';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
 
-import { getCartItemPrice } from 'src/modules/shared';
+import { CART_ITEM_PRICE_DICTIONARY, GET_CART_ITEM_PRICE } from '@vue-storefront/core/modules/cart';
 import CartItem from 'core/modules/cart/types/CartItem';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
 import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
+import { PriceHelper } from 'src/modules/shared';
 
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
 import { OrderContentItem } from '../interfaces/order-content-item.interface';
@@ -48,8 +49,16 @@ export default {
     }
   },
   computed: {
+    cartItemPriceDictionary (): Record<string, PriceHelper.ProductPrice> {
+      return this.$store.getters[CART_ITEM_PRICE_DICTIONARY];
+    },
     tableItems (): OrderContentItem[] {
       return this.cartItems.map((cartItem) => {
+        const price: PriceHelper.ProductPrice = cartItem.checksum
+          ? this.cartItemPriceDictionary[cartItem.checksum]
+          : this.$store.getters[GET_CART_ITEM_PRICE](cartItem);
+        const formattedPrice = PriceHelper.formatProductPrice(price);
+
         return {
           key: this.getCartItemKey(cartItem),
           thumbnail: this.getThumbnailForProduct(cartItem),
@@ -57,20 +66,14 @@ export default {
           qty: cartItem.qty,
           customizations: cartItem.customizations,
           customizationState: cartItem.extension_attributes?.customization_state,
-          specialPrice: this.getProductSpecialPrice(cartItem),
-          regularPrice: this.getProductRegularPrice(cartItem),
+          specialPrice: formattedPrice.special,
+          regularPrice: formattedPrice.regular,
           customOptions: getCartItemOptions(cartItem)
         }
       });
     }
   },
   methods: {
-    getProductRegularPrice (product: CartItem): string {
-      return getCartItemPrice(product, {}).regular;
-    },
-    getProductSpecialPrice (product: CartItem): string {
-      return getCartItemPrice(product, {}).special;
-    },
     getThumbnailForProduct (product: CartItem): string {
       const customizationSystemThumbnail = getCustomizationSystemCartItemThumbnail(product, this.imageHandlerService);
 
