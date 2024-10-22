@@ -187,10 +187,10 @@ import { required } from 'vuelidate/lib/validators';
 import { ValidationObserver } from 'vee-validate';
 import { TranslateResult } from 'vue-i18n';
 
-import { getProductDefaultPrice } from 'src/modules/shared';
+import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
+import { PriceHelper } from 'src/modules/shared';
 import { components } from 'src/modules/vsf-storyblok-module/components';
 import { ItemData } from 'src/modules/vsf-storyblok-module';
-import { getFinalPrice } from 'src/modules/shared/helpers/price';
 import { BulkorderQuote, BulkOrderInfo, BulkOrderStatus, BulkorderQuoteProductId } from 'src/modules/budsies';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
@@ -256,6 +256,9 @@ export default defineComponent({
     MFormErrors
   },
   computed: {
+    productPriceDictionary (): Record<string, PriceHelper.ProductPrice> {
+      return this.$store.getters[PRODUCT_PRICE_DICTIONARY];
+    },
     quotes (): BulkorderQuote[] | undefined {
       return this.$store.getters['budsies/getBulkorderQuotes'](this.bulkorderInfo.id);
     },
@@ -362,7 +365,7 @@ export default defineComponent({
       let price = 0;
 
       if (this.sampleProduct) {
-        price = getProductDefaultPrice(this.sampleProduct, {}, false).regular;
+        price = this.productPriceDictionary[this.sampleProduct.id].regular;
       }
 
       return '$' + price.toString();
@@ -383,14 +386,14 @@ export default defineComponent({
         }
 
         const images: string[] = getGalleryByProduct(productLink.product).map((i: any) => i.src);
-        const price = getProductDefaultPrice(productLink.product, {}, false);
+        const price = this.productPriceDictionary[productLink.product.id];
 
         result.push({
           id: Number(productLink.product.id),
           sku: productLink.product.sku,
           name: productLink.product.name,
           description: productLink.product.short_description || '',
-          price: getFinalPrice(price),
+          price: PriceHelper.getFinalPrice(price),
           specialPrice: price.special,
           regularPrice: price.regular,
           images: images,
