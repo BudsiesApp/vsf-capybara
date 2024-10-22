@@ -59,7 +59,8 @@ export default {
           customizationState: cartItem.extension_attributes?.customization_state,
           specialPrice: this.getProductSpecialPrice(cartItem),
           regularPrice: this.getProductRegularPrice(cartItem),
-          customOptions: getCartItemOptions(cartItem)
+          customOptions: getCartItemOptions(cartItem),
+          estimatedShipment: cartItem.extension_attributes?.estimated_shipment
         }
       });
     }
