@@ -6,8 +6,9 @@
 </template>
 
 <script>
+import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
+
 import ACustomPrice from '../atoms/a-custom-price.vue';
-import { getProductDefaultPrice } from 'src/modules/shared'
 
 export default {
   name: 'AProductPrice',
@@ -25,8 +26,11 @@ export default {
     }
   },
   computed: {
+    productPriceDictionary () {
+      return this.$store.getters[PRODUCT_PRICE_DICTIONARY];
+    },
     price () {
-      return getProductDefaultPrice(this.product, this.customOptions, false)
+      return this.productPriceDictionary[this.product.id];
     }
   }
 }

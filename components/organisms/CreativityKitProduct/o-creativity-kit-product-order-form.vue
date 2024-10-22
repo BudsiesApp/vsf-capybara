@@ -49,9 +49,10 @@ import { SfButton, SfHeading } from '@storefront-ui/vue';
 import { BundleOption } from 'core/modules/catalog/types/BundleOption';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { Logger } from '@vue-storefront/core/lib/logger';
+import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import * as catalogTypes from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import i18n from '@vue-storefront/i18n';
-import { getProductDefaultPrice, PriceHelper, ServerError } from 'src/modules/shared';
+import { PriceHelper, ServerError } from 'src/modules/shared';
 
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
 
@@ -93,8 +94,11 @@ export default Vue.extend({
     }
   },
   computed: {
+    productPriceDictionary (): Record<string, PriceHelper.ProductPrice> {
+      return this.$store.getters[PRODUCT_PRICE_DICTIONARY];
+    },
     baseProductFinalPrice (): number {
-      const price = getProductDefaultPrice(this.product, {}, false);
+      const price = this.productPriceDictionary[this.product.id];
       return PriceHelper.getFinalPrice(price)
     },
     defaultOption (): CreativityKitFormOption | undefined {
@@ -128,7 +132,7 @@ export default Vue.extend({
           continue;
         }
 
-        const price = getProductDefaultPrice(productLink.product, {}, false);
+        const price = this.productPriceDictionary[productLink.product.id];
         const finalPrice = PriceHelper.getFinalPrice(price);
 
         let image = productLink.product.image;

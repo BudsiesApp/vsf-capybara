@@ -202,10 +202,11 @@ import { SfHeading } from '@storefront-ui/vue';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { htmlDecode } from '@vue-storefront/core/filters';
+import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import Product from 'core/modules/catalog/types/Product';
-import { getProductDefaultPrice, PriceHelper, ProductEvent } from 'src/modules/shared';
+import { PriceHelper, ProductEvent } from 'src/modules/shared';
 
 import { ProductStructuredData } from 'src/modules/budsies';
 
@@ -256,22 +257,25 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       const productBySku = this.$store.getters['product/getProductBySkuDictionary'];
       return productBySku[budsieProductSku];
     },
+    productPriceDictionary (): Record<string, PriceHelper.ProductPrice> {
+      return this.$store.getters[PRODUCT_PRICE_DICTIONARY];
+    },
     budsieProductPrice (): number {
-      const price = getProductDefaultPrice(
-        this.getBudsieProduct,
-        {},
-        false
-      );
+      if (!this.getBudsieProduct) {
+        return budsieShippingPrice;
+      }
+
+      const price = this.productPriceDictionary[this.getBudsieProduct.id];
       const finalPrice = PriceHelper.getFinalPrice(price);
 
       return finalPrice + budsieShippingPrice;
     },
     superizedAddonPrice (): number {
-      const price = getProductDefaultPrice(
-        this.superizedAddonProduct,
-        {},
-        false
-      );
+      if (!this.superizedAddonProduct) {
+        return 0;
+      }
+
+      const price = this.productPriceDictionary[this.superizedAddonProduct.id];
 
       return PriceHelper.getFinalPrice(price);
     },
