@@ -74,7 +74,6 @@ import OCrossSellsProductsSelector from 'theme/components/organisms/o-cross-sell
 import { ModalList } from 'theme/store/ui/modals';
 import getProductImagePlaceholder from '@vue-storefront/core/modules/cart/helpers/getProductImagePlaceholder';
 import { mapActions } from 'vuex';
-import { getProductDefaultPrice } from 'src/modules/shared';
 
 export default {
   inject: {
@@ -148,10 +147,6 @@ export default {
     },
     availability () {
       return this.product.stock && this.product.stock.is_in_stock ? 'InStock' : 'OutOfStock'
-    },
-    productPrice () {
-      const price = getProductDefaultPrice(this.product, {}, false);
-      return price.special ? price.special : price.regular
     },
     sharingData () {
       // todo may contains html tags
