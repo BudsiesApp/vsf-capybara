@@ -1,16 +1,18 @@
 <template>
   <div class="cart-item-configuration">
-    <div
-      class="collected-product__properties _shipment-promise"
-      v-html="shipmentPromiseText"
-      v-if="shipmentPromiseText"
-    />
+    <div class="_shipment">
+      <div
+        class="collected-product__properties _shipment-promise"
+        v-html="shipmentPromiseText"
+        v-if="shipmentPromiseText"
+      />
 
-    <div
-      class="collected-product__properties _offer-expiration-date-text"
-      v-if="offerExpirationDateText"
-    >
-      {{ offerExpirationDateText }}
+      <div
+        class="collected-product__properties _offer-expiration-date-text"
+        v-if="offerExpirationDateText"
+      >
+        {{ offerExpirationDateText }}
+      </div>
     </div>
 
     <template v-if="hasCustomizableProperties">
@@ -263,8 +265,14 @@ export default defineComponent({
     display: inline-block;
   }
 
-  ._offer-expiration-date-text {
-    font-size: var(--font-2xs)
+  ._shipment {
+    margin-bottom: var(--spacer-xs);
   }
+
+  ._shipment-promise,
+  ._offer-expiration-date-text {
+    margin-bottom: 0;
+  }
+
 }
 </style>
