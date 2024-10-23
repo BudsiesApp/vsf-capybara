@@ -217,15 +217,15 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
-      replaceCustomizationState,
       selectedOptionValuesIds,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      mergeCustomizationState
     } = useCustomizationState(existingCartItem);
     const {
-      availableCustomization,
       availableCustomizations,
       availableOptionValues,
-      customizationAvailableOptionValues
+      customizationAvailableOptionValues,
+      removeUnavailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
       selectedOptionValuesIds,
@@ -265,11 +265,22 @@ export default defineComponent({
       onCustomizationOptionInput
     );
 
+    const { statePreservationCustomizationsFilter } = useSelectedOptionValueUrlQuery(
+      productCustomizations,
+      availableOptionValues,
+      customizationOptionValue,
+      product,
+      mergeCustomizationState,
+      removeUnavailableOptionValues,
+      context
+    );
+
     const { getPreservedData, removePreservedState } =
       useCustomizationStatePreservation(
         productSku,
         customizationState,
-        existingCartItem
+        existingCartItem,
+        [statePreservationCustomizationsFilter]
       );
 
     onMounted(async () => {
@@ -289,7 +300,8 @@ export default defineComponent({
         return;
       }
 
-      replaceCustomizationState(preservedState.customizationState);
+      mergeCustomizationState(preservedState.customizationState);
+      removeUnavailableOptionValues();
     });
 
     const { emailCustomizationFilter, persistCustomerEmail } =
@@ -400,15 +412,6 @@ export default defineComponent({
         currentStep?.name.toLowerCase() === BACK_DESIGN_STEP_NAME
       );
     });
-
-    useSelectedOptionValueUrlQuery(
-      availableCustomization,
-      availableOptionValues,
-      customizationOptionValue,
-      product,
-      updateCustomizationOptionValue,
-      context
-    );
 
     return {
       ...customizationGroups,

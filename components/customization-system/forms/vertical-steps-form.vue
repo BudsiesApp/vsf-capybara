@@ -257,18 +257,18 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
-      replaceCustomizationState,
       resetCustomizationState,
       selectedOptionValuesIds,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      mergeCustomizationState
     } = useCustomizationState(existingCartItem);
 
     const {
-      availableCustomization,
       availableCustomizations,
       availableOptionCustomizations,
       availableOptionValues,
-      customizationAvailableOptionValues
+      customizationAvailableOptionValues,
+      removeUnavailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
       selectedOptionValuesIds,
@@ -297,11 +297,22 @@ export default defineComponent({
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
 
+    const { statePreservationCustomizationsFilter } = useSelectedOptionValueUrlQuery(
+      productCustomizations,
+      availableOptionValues,
+      customizationOptionValue,
+      product,
+      mergeCustomizationState,
+      removeUnavailableOptionValues,
+      context
+    );
+
     const { getPreservedData, removePreservedState } =
       useCustomizationStatePreservation(
         productSku,
         customizationState,
-        existingCartItem
+        existingCartItem,
+        [statePreservationCustomizationsFilter]
       );
 
     const { emailCustomizationFilter, persistCustomerEmail } =
@@ -325,7 +336,8 @@ export default defineComponent({
         return;
       }
 
-      replaceCustomizationState(preservedState.customizationState);
+      mergeCustomizationState(preservedState.customizationState);
+      removeUnavailableOptionValues();
     });
 
     useCustomizationsBundleOptions(
@@ -434,15 +446,6 @@ export default defineComponent({
         existingCartItem.value ? i18n.t('Update') : i18n.t('Add to Cart')
       ).toString();
     });
-
-    useSelectedOptionValueUrlQuery(
-      availableCustomization,
-      availableOptionValues,
-      customizationOptionValue,
-      product,
-      updateCustomizationOptionValue,
-      context
-    );
 
     const { filteredCustomizations } = useCustomizationsFilter(
       availableCustomizations,

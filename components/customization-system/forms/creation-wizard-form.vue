@@ -247,16 +247,16 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
-      replaceCustomizationState,
       resetCustomizationState,
       selectedOptionValuesIds,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      mergeCustomizationState
     } = useCustomizationState(existingCartItem);
     const {
-      availableCustomization,
       availableCustomizations,
       availableOptionValues,
-      customizationAvailableOptionValues
+      customizationAvailableOptionValues,
+      removeUnavailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
       selectedOptionValuesIds,
@@ -350,11 +350,21 @@ export default defineComponent({
       }
     });
 
+    const { statePreservationCustomizationsFilter } = useSelectedOptionValueUrlQuery(
+      productCustomizations,
+      availableOptionValues,
+      customizationOptionValue,
+      currentProduct,
+      mergeCustomizationState,
+      removeUnavailableOptionValues,
+      context
+    );
     const { getPreservedData, removePreservedState } =
       useCustomizationStatePreservation(
         plushieType,
         customizationState,
         existingCartItem,
+        [statePreservationCustomizationsFilter],
         additionalPreservedData
       );
 
@@ -384,7 +394,8 @@ export default defineComponent({
 
       await productTypeStep.loadProduct(productSku);
 
-      replaceCustomizationState(preservedState.customizationState);
+      mergeCustomizationState(preservedState.customizationState);
+      removeUnavailableOptionValues();
 
       if (!preservedState.additionalData?.stepIndex) {
         return;
@@ -439,15 +450,6 @@ export default defineComponent({
     const isSubmitButtonDisabled = computed<boolean>(() => {
       return isDisabled.value || isSomeCustomizationOptionBusy.value;
     });
-
-    useSelectedOptionValueUrlQuery(
-      availableCustomization,
-      availableOptionValues,
-      customizationOptionValue,
-      currentProduct,
-      updateCustomizationOptionValue,
-      context
-    );
 
     return {
       ...customizationGroups,
