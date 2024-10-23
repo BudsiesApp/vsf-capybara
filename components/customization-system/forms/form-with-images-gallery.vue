@@ -240,16 +240,16 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
-      replaceCustomizationState,
       selectedOptionValuesIds,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      mergeCustomizationState
     } = useCustomizationState(existingCartItem);
     const {
-      availableCustomization,
       availableCustomizations,
       availableOptionCustomizations,
       availableOptionValues,
-      customizationAvailableOptionValues
+      customizationAvailableOptionValues,
+      removeUnavailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
       selectedOptionValuesIds,
@@ -268,11 +268,23 @@ export default defineComponent({
       );
     const { isSomeCustomizationOptionBusy, onCustomizationOptionBusyChanged } =
       useCustomizationsBusyState();
+
+    const { statePreservationCustomizationsFilter } = useSelectedOptionValueUrlQuery(
+      productCustomizations,
+      availableOptionValues,
+      customizationOptionValue,
+      product,
+      mergeCustomizationState,
+      removeUnavailableOptionValues,
+      context
+    );
+
     const { getPreservedData, removePreservedState } =
       useCustomizationStatePreservation(
         productSku,
         customizationState,
-        existingCartItem
+        existingCartItem,
+        [statePreservationCustomizationsFilter]
       );
 
     const { emailCustomizationFilter, persistCustomerEmail } =
@@ -296,7 +308,8 @@ export default defineComponent({
         return;
       }
 
-      replaceCustomizationState(preservedState.customizationState);
+      mergeCustomizationState(preservedState.customizationState);
+      removeUnavailableOptionValues();
     });
 
     function onCustomizationOptionInput (payload: {
@@ -365,15 +378,6 @@ export default defineComponent({
     const isSubmitButtonDisabled = computed<boolean>(() => {
       return isSomeCustomizationOptionBusy.value || isDisabled.value;
     });
-
-    useSelectedOptionValueUrlQuery(
-      availableCustomization,
-      availableOptionValues,
-      customizationOptionValue,
-      product,
-      updateCustomizationOptionValue,
-      context
-    );
 
     return {
       ...useCustomizationsFilter(
