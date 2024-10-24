@@ -28,32 +28,18 @@
           <template v-if="!isOptionValuesSamePrice">
             <div
               class="_price"
-              v-if="isDefaultOptionValue(option) && defaultOptionValuePrice"
+              v-if="isDefaultOptionValue(option) && defaultOptionValueFinalPrice"
             >
-              <SfPrice
-                :regular="formatPrice(defaultOptionValuePrice.regular)"
-                :special="formatPrice(defaultOptionValuePrice.special)"
-              />
+              {{ formatPrice(defaultOptionValueFinalPrice) }}
             </div>
 
             <div
               class="_price"
-              v-else-if="optionValuePriceDeltaDictionary[option.id]"
+              v-else-if="optionValueFinalPriceDeltaDictionary[option.id]"
             >
-              <span>+</span>
+              <span v-if="optionValueFinalPriceDeltaDictionary[option.id] > 0">+</span>
 
-              <SfPrice
-                :regular="
-                  formatPrice(
-                    optionValuePriceDeltaDictionary[option.id].regular
-                  )
-                "
-                :special="
-                  formatPrice(
-                    optionValuePriceDeltaDictionary[option.id].special
-                  )
-                "
-              />
+              {{ formatPrice(optionValueFinalPriceDeltaDictionary[option.id]) }}
             </div>
           </template>
         </div>
