@@ -1,5 +1,20 @@
 <template>
   <div class="cart-item-configuration">
+    <div class="_shipment">
+      <div
+        class="collected-product__properties _shipment-promise"
+        v-html="shipmentPromiseText"
+        v-if="shipmentPromiseText"
+      />
+
+      <div
+        class="collected-product__properties _offer-expiration-date-text"
+        v-if="offerExpirationDateText"
+      >
+        {{ offerExpirationDateText }}
+      </div>
+    </div>
+
     <template v-if="hasCustomizableProperties">
       <div
         class="collected-product__properties"
@@ -46,13 +61,20 @@
 
 <script lang="ts">
 import { SfIcon, SfProperty } from '@storefront-ui/vue';
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import {
+  computed,
+  defineComponent,
+  PropType,
+  toRef
+} from '@vue/composition-api';
 
 import {
   Customization,
   CustomizationStateItem,
+  EstimatedShipment,
   getCustomizationValueIdFieldKey,
-  isFileUploadValue
+  isFileUploadValue,
+  useEstimatedShipment
 } from 'src/modules/customization-system';
 
 import { useMobileObserver } from 'theme/helpers/use-mobile-observer';
@@ -80,17 +102,21 @@ export default defineComponent({
   props: {
     customizations: {
       type: Array as PropType<Customization[]>,
-      default: () => ([])
+      default: () => []
     },
     customizationState: {
       type: Array as PropType<CustomizationStateItem[]>,
-      default: () => ([])
+      default: () => []
+    },
+    estimatedShipment: {
+      type: Object as PropType<EstimatedShipment | undefined>,
+      default: undefined
     },
     productOptions: {
       type: Array as PropType<
       { value: string, label: string, isCustom?: boolean }[]
       >,
-      default: () => ([])
+      default: () => []
     }
   },
   setup (props) {
@@ -146,7 +172,9 @@ export default defineComponent({
         const selectedValues = Array.isArray(customizationStateItem.value)
           ? customizationStateItem.value
           : [customizationStateItem.value];
-        const optionValueKey = getCustomizationValueIdFieldKey(relatedCustomization.optionData);
+        const optionValueKey = getCustomizationValueIdFieldKey(
+          relatedCustomization.optionData
+        );
 
         const selectedOptionValues =
           relatedCustomization.optionData.values.filter((optionValue) => {
@@ -208,6 +236,7 @@ export default defineComponent({
     }
 
     return {
+      ...useEstimatedShipment(toRef(props, 'estimatedShipment')),
       customizableProperties,
       hasCustomizableProperties,
       optionValueProperties,
@@ -235,5 +264,15 @@ export default defineComponent({
   .collected-product__properties__icon {
     display: inline-block;
   }
+
+  ._shipment {
+    margin-bottom: var(--spacer-xs);
+  }
+
+  ._shipment-promise,
+  ._offer-expiration-date-text {
+    margin-bottom: 0;
+  }
+
 }
 </style>

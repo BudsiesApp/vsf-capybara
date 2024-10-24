@@ -386,7 +386,8 @@ export default {
       );
 
       this.sendDataToCheckout();
-      this.$store.dispatch('cart/syncTotals', { forceServerSync: true });
+      await this.$store.dispatch('cart/syncTotals', { forceServerSync: true });
+      this.$store.dispatch('cart/pullEstimatedShipments');
     },
     validateCountryRelatedFields () {
       this.$v.shipping.region_id.$touch();
