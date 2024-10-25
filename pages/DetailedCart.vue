@@ -26,6 +26,7 @@
                     :customizations="product.customizations"
                     :customization-state="(product.extension_attributes || {}).customization_state"
                     :product-options="getCartItemOptions(product)"
+                    :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
                   />
                 </template>
 
