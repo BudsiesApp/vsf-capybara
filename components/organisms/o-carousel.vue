@@ -90,6 +90,14 @@ export default Vue.extend({
     items: {
       type: Array as PropType<OCarouselItem[]>,
       required: true
+    },
+    expandSlideWidth: {
+      type: Boolean,
+      default: true
+    },
+    slideToClickedSlide: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -124,10 +132,10 @@ export default Vue.extend({
       return {
         autoplay: this.autoplayOptions,
         direction: 'horizontal',
-        loop: true,
+        loop: this.isLoopAvailable,
         slidesPerView: this.defaultSlidesPerView,
+        slideToClickedSlide: this.slideToClickedSlide,
         modules: [Autoplay, Navigation],
-
         init: false,
         breakpoints: this.breakpoints,
         spaceBetween: this.spaceBetween
@@ -158,7 +166,14 @@ export default Vue.extend({
       return `${this.currentSlideIndex + 1} / ${this.items.length}`;
     },
     maxSlidesPerView (): number {
-      return this.items.length;
+      if (this.expandSlideWidth) {
+        return this.items.length;
+      }
+
+      return this.slidesPerView;
+    },
+    isLoopAvailable (): boolean {
+      return this.defaultSlidesPerView <= this.items.length;
     }
   },
   mounted (): void {
@@ -191,6 +206,20 @@ export default Vue.extend({
       const onRealIndexChange = (swiper: Swiper) => {
         this.currentSlideIndex = swiper.realIndex;
       };
+      const onSlideClick = (swiper: Swiper) => {
+        if (swiper.clickedIndex === undefined) {
+          return;
+        }
+
+        let slideIndex = swiper.clickedSlide.getAttribute('data-swiper-slide-index');
+
+        // When loop mode is disabled we can just use `clickedIndex` property
+        if (slideIndex === undefined || slideIndex === null) {
+          slideIndex = swiper.clickedIndex;
+        }
+
+        this.$emit('slide-clicked', Number(slideIndex));
+      }
 
       this.swiper = new Swiper(
         this.getCarouselRoot(),
@@ -202,6 +231,7 @@ export default Vue.extend({
 
       this.swiper.on('init', onInit);
       this.swiper.on('realIndexChange', onRealIndexChange);
+      this.swiper.on('click', onSlideClick);
 
       this.swiper.init();
     },
@@ -212,6 +242,7 @@ export default Vue.extend({
 
       this.swiper.off('init');
       this.swiper.off('realIndexChange');
+      this.swiper.off('click');
       this.swiper.destroy();
       this.swiper = undefined;
     },
@@ -236,6 +267,20 @@ export default Vue.extend({
       await this.$nextTick();
 
       this.initSwiper();
+    },
+    slideNext () {
+      if (!this.swiper) {
+        return;
+      }
+
+      this.swiper.slideNext();
+    },
+    slidePrevious () {
+      if (!this.swiper) {
+        return;
+      }
+
+      this.swiper.slidePrev();
     }
   },
   watch: {
@@ -269,6 +314,9 @@ export default Vue.extend({
     },
     isMobile () {
       this.updateSwiper();
+    },
+    slideToClickedSlide (val) {
+      this.updateSwiper({ slideToClickedSlide: val });
     }
   }
 });
@@ -276,10 +324,16 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "theme/css/mixins/swiper-arrow.scss";
 
 .o-carousel {
   .swiper-wrapper {
     padding: 0;
+  }
+
+  .swiper {
+    height: 100%;
+    width: 100%;
   }
 
   .swiper-slide {
@@ -288,7 +342,7 @@ export default Vue.extend({
   }
 
   .swiper-buttons {
-    --swiper-navigation-size: var(--font-2xl);
+    --swiper-navigation-size: var(--carousel-navigation-size, var(--font-2xl));
     --swiper-navigation-color: var(--c-text);
 
     display: flex;
@@ -296,32 +350,10 @@ export default Vue.extend({
     ._arrow {
       --swiper-navigation-sides-offset: 0;
 
-      height: 35%;
-      max-height: 10rem;
-      margin-top: 0;
-      transform: translateY(-50%);
-      background: rgba(#fff, 0.7);
+      @include swiper-arrow();
 
-      &.-left {
-        padding-left: calc(var(--spacer-xs) + var(--spacer-2xs));
-        padding-right: var(--spacer-sm);
-        border-top-right-radius: 12px;
-        border-bottom-right-radius: 12px;
-
-        &::after {
-          content: '\276C';
-        }
-      }
-
-      &.-right {
-        padding-right: calc(var(--spacer-xs) + var(--spacer-2xs));
-        padding-left: var(--spacer-sm);
-        border-top-left-radius: 12px;
-        border-bottom-left-radius: 12px;
-
-        &::after {
-          content: '\276D';
-        }
+      &[disabled] {
+        display: none;
       }
     }
 

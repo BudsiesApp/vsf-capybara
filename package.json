@@ -38,7 +38,7 @@
     "quicklink": "^2.0.0-alpha",
     "storefront-query-builder": "https://github.com/vuestorefront/storefront-query-builder.git",
     "supports-webp": "^2.0.1",
-    "swiper": "^11.0.6",
+    "swiper": "^11.1.14",
     "uuid": "^8.0.0",
     "vee-validate": "^3.4.14",
     "vue": "^2.6.11",

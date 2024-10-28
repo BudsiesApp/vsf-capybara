@@ -4,49 +4,45 @@
     class="m-zoom-gallery"
     :class="{
       '-horizontal': isHorizontalThumbnails,
-      '-slider-disabled': !shouldInitThumbnailsSlider,
-      '-show-arrows': showArrows
+      '-first-slide-active': isFirstSlideActive,
+      '-last-slide-active': isLastSlideActive
     }"
   >
-    <div
-      class="_thumbnails"
-    >
-      <component
-        :is="shouldInitThumbnailsSlider ? 'VueSlickCarousel' : 'div'"
+    <div class="_thumbnails">
+      <o-carousel
         class="_carousel"
-        :arrows="showArrows"
-        :vertical="!isHorizontalThumbnails"
-        :slides-to-show="slidesToShow"
-        :slides-to-scroll="1"
-        :focus-on-select="true"
+        ref="carousel"
+        :items="carouselItems"
+        :slides-per-view="slidesToShow"
+        :show-counter="false"
+        :expand-slide-width="false"
+        :slide-to-clicked-slide="true"
+        @slide-clicked="setCurrentIndex"
       >
-        <template #prevArrow="{currentSlide}">
-          <button v-show="currentSlide != 0" />
-        </template>
-
-        <div
-          v-for="(image, index) in images"
-          :key="JSON.stringify(image.thumb)"
-          class="_thumbnail-item"
-          @click="setCurrentIndex(index)"
-        >
-          <div class="_thumbnail-item-content-wrapper">
-            <BaseImage
-              class="_image"
-              object-fit="cover"
-              :src="getImageSrc(image, 'thumb')"
-              :srcsets="getImageSrcSets(image, 'thumb')"
-              :alt="image.alt"
-              :title="image.title"
-              :aspect-ratio="1.0"
-            />
+        <template #default="{ item: image  }">
+          <div
+            :key="JSON.stringify(image.thumb)"
+            class="_thumbnail-item"
+          >
+            <div class="_thumbnail-item-content-wrapper">
+              <BaseImage
+                class="_image"
+                object-fit="cover"
+                :src="getImageSrc(image, 'thumb')"
+                :srcsets="getImageSrcSets(image, 'thumb')"
+                :alt="image.alt"
+                :title="image.title"
+                :aspect-ratio="1.0"
+              />
+            </div>
           </div>
-        </div>
-      </component>
+        </template>
+      </o-carousel>
     </div>
 
     <div class="_stage">
       <div class="_stage-content">
+        <div class="_arrow -left" @click="goToPreviousImage" />
         <div
           ref="stageImageWrapper"
           class="_image-wrapper cloud-zoom"
@@ -63,6 +59,7 @@
             :lazy="lazyLoadStageImage"
           />
         </div>
+        <div class="_arrow -right" @click="goToNextImage" />
       </div>
     </div>
   </div>
@@ -72,13 +69,13 @@
 import debounce from 'lodash.debounce';
 import Vue, { PropType } from 'vue';
 
-import VueSlickCarousel from 'vue-slick-carousel';
 import jQuery from 'jquery';
-import 'vue-slick-carousel/dist/vue-slick-carousel.css';
-import 'vue-slick-carousel/dist/vue-slick-carousel-theme.css';
 
 import { BaseImage, ImageSourceItem } from 'src/modules/budsies';
 import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
+
+import OCarousel from '../organisms/o-carousel.vue';
+import { OCarouselItem } from '../interfaces/o-carousel-item.interface';
 
 require('@cabbiepete/cloud-zoom');
 require('@cabbiepete/cloud-zoom/cloud-zoom.css');
@@ -92,7 +89,7 @@ export default Vue.extend({
   name: 'MZoomGallery',
   components: {
     BaseImage,
-    VueSlickCarousel
+    OCarousel
   },
   props: {
     images: {
@@ -115,9 +112,23 @@ export default Vue.extend({
       fWindowResizeHandler: undefined as () => void | undefined,
       fIsCloudZoomInitialized: false,
       slidesToShow: 5
-    }
+    };
   },
   computed: {
+    isFirstSlideActive (): boolean {
+      return this.currentIndex === 0;
+    },
+    isLastSlideActive (): boolean {
+      return this.currentIndex === this.carouselItems.length - 1;
+    },
+    carouselItems (): OCarouselItem[] {
+      return this.images.map((image) => {
+        return {
+          key: image.big,
+          data: image
+        };
+      });
+    },
     isHorizontalThumbnails (): boolean {
       if (this.horizontalThumbnails) {
         return true;
@@ -152,9 +163,6 @@ export default Vue.extend({
         });
       }
     },
-    shouldInitThumbnailsSlider: function (): boolean {
-      return this.fShouldInitThumbnailsSlider;
-    },
     showArrows (): boolean {
       return this.images.length > this.slidesToShow;
     }
@@ -177,6 +185,37 @@ export default Vue.extend({
     window.removeEventListener('resize', this.fWindowResizeHandler);
   },
   methods: {
+    getCarousel (): InstanceType<typeof OCarousel> {
+      return this.$refs.carousel as InstanceType<typeof OCarousel>;
+    },
+    goToPreviousImage (): void {
+      if (this.currentIndex === undefined) {
+        return;
+      }
+
+      const newIndex = this.currentIndex - 1;
+
+      if (newIndex < 0) {
+        return;
+      }
+
+      this.currentIndex = newIndex;
+      this.getCarousel().slidePrevious();
+    },
+    goToNextImage (): void {
+      if (this.currentIndex === undefined) {
+        return;
+      }
+
+      const newIndex = this.currentIndex + 1;
+
+      if (newIndex >= this.carouselItems.length) {
+        return;
+      }
+
+      this.currentIndex = newIndex;
+      this.getCarousel().slideNext();
+    },
     canCloudZoomInit (): boolean {
       const zoomGallery = this.getZoomGallery();
 
@@ -184,14 +223,17 @@ export default Vue.extend({
         return false;
       }
       const zoomGalleryWidthInPercent =
-            (zoomGallery.clientWidth / window.innerWidth) * 100;
+        (zoomGallery.clientWidth / window.innerWidth) * 100;
 
       return (
         zoomGalleryWidthInPercent <=
-            maximumZoomGalleryWidthAllowedForCloudZoomInit
+        maximumZoomGalleryWidthAllowedForCloudZoomInit
       );
     },
-    getImageSrc (image: ZoomGalleryImage, variant: ImageKeys): string | undefined {
+    getImageSrc (
+      image: ZoomGalleryImage,
+      variant: ImageKeys
+    ): string | undefined {
       const value = image[variant];
       if (typeof value !== 'string') {
         return undefined;
@@ -199,7 +241,10 @@ export default Vue.extend({
 
       return value;
     },
-    getImageSrcSets (image: ZoomGalleryImage, variant: ImageKeys): ImageSourceItem[] | undefined {
+    getImageSrcSets (
+      image: ZoomGalleryImage,
+      variant: ImageKeys
+    ): ImageSourceItem[] | undefined {
       const value = image[variant];
       if (!Array.isArray(value)) {
         return undefined;
@@ -255,7 +300,8 @@ export default Vue.extend({
       (jQuery(imageWrapper) as any).CloudZoom({
         adjustX: 10,
         showTitle: false,
-        transparentImage: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+        transparentImage:
+          'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
       });
       this.fIsCloudZoomInitialized = true;
     },
@@ -275,222 +321,148 @@ export default Vue.extend({
       handler (prev: ZoomGalleryImage[], next: ZoomGalleryImage[]) {
         if (JSON.stringify(prev) === JSON.stringify(next)) {
           return;
-        };
-
-        this.fShouldInitThumbnailsSlider = false;
+        }
 
         this.currentIndex = undefined;
 
         if (this.images.length) {
           this.currentIndex = 0;
-
-          this.$nextTick(() => {
-            this.fShouldInitThumbnailsSlider = true;
-          })
         }
       },
       immediate: true
     }
   }
-})
+});
 </script>
 
 <style lang="scss" scoped>
+@import "theme/css/mixins/swiper-arrow.scss";
+
 .m-zoom-gallery {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  ._carousel {
+    --carousel-navigation-size: var(--font-base);
+  }
+
+  &.-first-slide-active {
+    ._carousel,
+    ._stage-content {
+      --previous-arrow-display: none;
+    }
+  }
+
+  &.-last-slide-active {
+    ._stage-content {
+      --next-arrow-display: none;
+    }
+  }
+
+  ._thumbnails {
+    width: 15.5%;
+
+    ._thumbnail-item {
+      display: block !important;
+      position: relative;
+      cursor: pointer;
+      padding-top: 100%;
+      margin-bottom: 8.1%;
+    }
+
+    ._thumbnail-item-content-wrapper {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 100%;
+    }
+  }
+
+  ._stage {
+    padding-top: 83%;
+    position: relative;
+    width: 83%;
+
+    ._stage-content {
+      height: 100%;
+      left: 0;
+      position: absolute;
+      top: 0;
+      width: 100%;
+
+      ._arrow {
+        @include swiper-arrow();
+        font-size: var(--font-xl);
+        z-index: 101;
+
+        &.-right {
+          left: auto;
+          right: 0;
+        }
+
+        &.-left {
+          right: auto;
+          left: 0;
+        }
+      }
+    }
+
+    ._image-wrapper {
+      display: block;
+      height: 100%;
+      width: 100%;
+
+      ._image {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    ::v-deep #wrap,
+    ::v-deep .cloud-zoom-wrap {
+      height: 100%;
+      position: static;
+      z-index: 100;
+
+      .mousetrap {
+        z-index: 100 !important;
+      }
+
+      .cloud-zoom-big {
+        z-index: 150 !important;
+        background-color: var(--c-white);
+      }
+    }
+  }
+
+  &.-horizontal {
+    flex-direction: column-reverse;
 
     ._thumbnails {
-        width: 15.5%;
+      position: relative;
+      margin-top: 0.5em;
+      width: 100%;
+      padding-top: 18.99%;
 
-        ._thumbnail-item {
-            display: block !important;
-            position: relative;
-            cursor: pointer;
-            padding-top: 100%;
-            margin-bottom: 8.1%;
-        }
+      ._carousel {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+      }
 
-        ._thumbnail-item-content-wrapper {
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            width: 100%;
-        }
-
-        ::v-deep {
-          .slick-list {
-            .slick-track {
-                height: auto !important;
-            }
-
-            .slick-slide {
-              border: none;
-
-              &:first-child {
-                ._thumbnail-item {
-                  margin-top: 0;
-                }
-              }
-
-              &:last-child {
-                ._thumbnail-item {
-                    margin-bottom: 0;
-                }
-              }
-            }
-          }
-
-          .slick-slider {
-            .slick-prev,
-            .slick-next {
-              height: 100%;
-              width: 35px;
-              background: rgba(245, 245,245, 0.7);
-              z-index: 2;
-
-              &:before {
-                color: var(--c-text);
-                font-size: 25px;
-                display: inline-block;
-              }
-            }
-
-            .slick-prev {
-              left: 0;
-              padding: 0 2px 0 4px;
-            }
-
-            .slick-next {
-              right: 0;
-              padding: 0 4px 0 2px;
-            }
-
-            &.slick-vertical {
-              .slick-prev,
-              .slick-next {
-                height: 35px;
-                width: 100%;
-                transform: none;
-
-                &::before {
-                  transform: rotate(90deg);
-                }
-              }
-
-              .slick-prev {
-                top: 0;
-                bottom: auto;
-                padding: 4px 0 2px;
-              }
-
-              .slick-next {
-                bottom: 0;
-                top: auto;
-                padding: 2px 0 4px;
-              }
-            }
-          }
-        }
+      ._thumbnail-item {
+        padding-top: 100%;
+      }
     }
 
     ._stage {
-        padding-top: 83%;
-        position: relative;
-        width: 83%;
-
-        ._stage-content {
-            height: 100%;
-            left: 0;
-            position: absolute;
-            top: 0;
-            width: 100%;
-        }
-
-        ._image-wrapper {
-          display: block;
-            height: 100%;
-            width: 100%;
-
-            ._image {
-                width: 100%;
-                height: 100%;
-            }
-        }
-
-        ::v-deep #wrap,
-        ::v-deep .cloud-zoom-wrap {
-            height: 100%;
-            position: static;
-            z-index: 100;
-
-            .mousetrap {
-                z-index: 100 !important;
-            }
-
-            .cloud-zoom-big {
-                z-index: 150 !important;
-                background-color: var(--c-white);
-            }
-        }
+      padding-top: 99%;
+      width: 100%;
     }
-
-    &.-horizontal {
-        flex-direction: column-reverse;
-
-        ._thumbnails {
-            position: relative;
-            margin-top: 0.5em;
-            width: 100%;
-            padding-top: 18.99%;
-
-            ._carousel {
-              position: absolute;
-              top: 0;
-              left: 0;
-              height: 100%;
-              width: 100%;
-            }
-
-            ._thumbnail-item {
-              padding-top: 100%;
-            }
-
-            ::v-deep .slick-track {
-                display: flex;
-                justify-content: center;
-
-                .slick-slide {
-                    margin: 0 0.15em;
-                }
-            }
-        }
-
-        ._stage {
-            padding-top: 99%;
-            width: 100%;
-        }
-    }
-
-    &.-slider-disabled {
-      ._carousel {
-        display: grid;
-        grid-template-rows: repeat(5, minmax(0, 1fr));
-        grid-template-columns: 1fr;
-        grid-auto-columns: 0;
-        grid-auto-rows: 0;
-        overflow: hidden;
-      }
-
-      &.-horizontal {
-        ._carousel {
-          grid-template-columns: repeat(5, minmax(0, 1fr));
-          grid-template-rows: 1fr;
-          grid-column-gap: 1%;
-        }
-      }
-    }
+  }
 }
 </style>
