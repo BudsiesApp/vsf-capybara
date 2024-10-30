@@ -129,7 +129,7 @@ export default defineComponent({
     return {
       isRound,
       ...listWidgetFields,
-      ...useOptionValuesPrice(values, context),
+      ...useOptionValuesPrice(values, context, true),
       ...useValuesSort(values)
     };
   }
