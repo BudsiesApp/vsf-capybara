@@ -269,7 +269,7 @@ export default defineComponent({
     const { isSomeCustomizationOptionBusy, onCustomizationOptionBusyChanged } =
       useCustomizationsBusyState();
 
-    const { statePreservationCustomizationsFilter } = useSelectedOptionValueUrlQuery(
+    const { unhandledCustomizationsFilter } = useSelectedOptionValueUrlQuery(
       productCustomizations,
       availableOptionValues,
       customizationOptionValue,
@@ -284,7 +284,7 @@ export default defineComponent({
         productSku,
         customizationState,
         existingCartItem,
-        [statePreservationCustomizationsFilter]
+        [unhandledCustomizationsFilter]
       );
 
     const { emailCustomizationFilter, persistCustomerEmail } =

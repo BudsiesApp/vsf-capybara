@@ -297,7 +297,7 @@ export default defineComponent({
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
 
-    const { statePreservationCustomizationsFilter } = useSelectedOptionValueUrlQuery(
+    const { unhandledCustomizationsFilter } = useSelectedOptionValueUrlQuery(
       productCustomizations,
       availableOptionValues,
       customizationOptionValue,
@@ -312,7 +312,7 @@ export default defineComponent({
         productSku,
         customizationState,
         existingCartItem,
-        [statePreservationCustomizationsFilter]
+        [unhandledCustomizationsFilter]
       );
 
     const { emailCustomizationFilter, persistCustomerEmail } =

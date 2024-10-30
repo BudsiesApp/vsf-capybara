@@ -265,7 +265,7 @@ export default defineComponent({
       onCustomizationOptionInput
     );
 
-    const { statePreservationCustomizationsFilter } = useSelectedOptionValueUrlQuery(
+    const { unhandledCustomizationsFilter } = useSelectedOptionValueUrlQuery(
       productCustomizations,
       availableOptionValues,
       customizationOptionValue,
@@ -280,7 +280,7 @@ export default defineComponent({
         productSku,
         customizationState,
         existingCartItem,
-        [statePreservationCustomizationsFilter]
+        [unhandledCustomizationsFilter]
       );
 
     onMounted(async () => {

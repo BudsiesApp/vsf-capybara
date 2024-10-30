@@ -350,7 +350,7 @@ export default defineComponent({
       }
     });
 
-    const { statePreservationCustomizationsFilter } = useSelectedOptionValueUrlQuery(
+    const { unhandledCustomizationsFilter } = useSelectedOptionValueUrlQuery(
       productCustomizations,
       availableOptionValues,
       customizationOptionValue,
@@ -364,7 +364,7 @@ export default defineComponent({
         plushieType,
         customizationState,
         existingCartItem,
-        [statePreservationCustomizationsFilter],
+        [unhandledCustomizationsFilter],
         additionalPreservedData
       );
 
