@@ -110,8 +110,6 @@
 import {
   computed,
   defineComponent,
-  nextTick,
-  onMounted,
   PropType,
   Ref,
   ref,
@@ -137,7 +135,8 @@ import {
   useSelectedOptionValueUrlQuery,
   useEmailCustomization,
   useCustomizationsFilter,
-  requiredCustomizationsFilter
+  requiredCustomizationsFilter,
+  PersistedData
 } from 'src/modules/customization-system';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
@@ -216,6 +215,7 @@ export default defineComponent({
   },
   setup (props, context) {
     const {
+      canUsePersistedCustomizationState,
       existingCartItem,
       plushieType,
       preselectedProductSize,
@@ -359,32 +359,8 @@ export default defineComponent({
       removeUnavailableOptionValues,
       context
     );
-    const { getPreservedData, removePreservedState } =
-      useCustomizationStatePreservation(
-        plushieType,
-        customizationState,
-        existingCartItem,
-        [unhandledCustomizationsFilter],
-        additionalPreservedData
-      );
 
-    onMounted(async () => {
-      await nextTick();
-
-      if (
-        existingCartItem.value ||
-        !props.canUsePersistedCustomizationState
-      ) {
-        removePreservedState();
-        return;
-      }
-
-      const preservedState = await getPreservedData();
-
-      if (!preservedState) {
-        return;
-      }
-
+    const beforeCustomizationStateMerge = async (preservedState: PersistedData) => {
       const productSku = preservedState.additionalData?.productSku;
 
       if (!productSku) {
@@ -393,16 +369,29 @@ export default defineComponent({
       }
 
       await productTypeStep.loadProduct(productSku);
+    };
 
-      mergeCustomizationState(preservedState.customizationState);
-      removeUnavailableOptionValues();
-
-      if (!preservedState.additionalData?.stepIndex) {
+    const afterCustomizationStateMerge = (persistedData: PersistedData) => {
+      if (!persistedData.additionalData?.stepIndex) {
         return;
       }
 
-      formSteps.goToStep(preservedState.additionalData?.stepIndex);
-    });
+      formSteps.goToStep(persistedData.additionalData?.stepIndex);
+    }
+
+    const { removePreservedState } =
+      useCustomizationStatePreservation(
+        plushieType,
+        customizationState,
+        existingCartItem,
+        [unhandledCustomizationsFilter],
+        canUsePersistedCustomizationState,
+        mergeCustomizationState,
+        removeUnavailableOptionValues,
+        beforeCustomizationStateMerge,
+        afterCustomizationStateMerge,
+        additionalPreservedData
+      );
 
     const { quantity } = useProductQuantity(existingCartItem);
     const { addToCartHandler, isSubmitting } = useAddToCart(

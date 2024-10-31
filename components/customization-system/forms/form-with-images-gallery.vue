@@ -116,8 +116,6 @@
 import {
   computed,
   defineComponent,
-  nextTick,
-  onMounted,
   PropType,
   ref,
   Ref,
@@ -210,7 +208,7 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
-    const { existingCartItem, product } = toRefs(props);
+    const { canUsePersistedCustomizationState, existingCartItem, product } = toRefs(props);
 
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
@@ -279,12 +277,15 @@ export default defineComponent({
       context
     );
 
-    const { getPreservedData, removePreservedState } =
+    const { removePreservedState } =
       useCustomizationStatePreservation(
         productSku,
         customizationState,
         existingCartItem,
-        [unhandledCustomizationsFilter]
+        [unhandledCustomizationsFilter],
+        canUsePersistedCustomizationState,
+        mergeCustomizationState,
+        removeUnavailableOptionValues
       );
 
     const { emailCustomizationFilter, persistCustomerEmail } =
@@ -293,24 +294,6 @@ export default defineComponent({
         customizationOptionValue,
         updateCustomizationOptionValue
       );
-
-    onMounted(async () => {
-      await nextTick();
-
-      if (existingCartItem.value || !props.canUsePersistedCustomizationState) {
-        removePreservedState();
-        return;
-      }
-
-      const preservedState = await getPreservedData();
-
-      if (!preservedState) {
-        return;
-      }
-
-      mergeCustomizationState(preservedState.customizationState);
-      removeUnavailableOptionValues();
-    });
 
     function onCustomizationOptionInput (payload: {
       customizationId: string,

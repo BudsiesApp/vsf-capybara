@@ -114,8 +114,6 @@
 import {
   computed,
   defineComponent,
-  nextTick,
-  onMounted,
   PropType,
   Ref,
   ref,
@@ -187,7 +185,7 @@ export default defineComponent({
     ValidationObserver
   },
   setup (props, context) {
-    const { existingCartItem, product } = toRefs(props);
+    const { canUsePersistedCustomizationState, existingCartItem, product } = toRefs(props);
 
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
@@ -275,34 +273,16 @@ export default defineComponent({
       context
     );
 
-    const { getPreservedData, removePreservedState } =
+    const { removePreservedState } =
       useCustomizationStatePreservation(
         productSku,
         customizationState,
         existingCartItem,
-        [unhandledCustomizationsFilter]
+        [unhandledCustomizationsFilter],
+        canUsePersistedCustomizationState,
+        mergeCustomizationState,
+        removeUnavailableOptionValues
       );
-
-    onMounted(async () => {
-      await nextTick();
-
-      if (
-        existingCartItem.value ||
-        !props.canUsePersistedCustomizationState
-      ) {
-        removePreservedState();
-        return;
-      }
-
-      const preservedState = await getPreservedData();
-
-      if (!preservedState) {
-        return;
-      }
-
-      mergeCustomizationState(preservedState.customizationState);
-      removeUnavailableOptionValues();
-    });
 
     const { emailCustomizationFilter, persistCustomerEmail } =
       useEmailCustomization(
