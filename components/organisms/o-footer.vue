@@ -80,7 +80,7 @@
 
           <privacy-policy-link />
 
-          <california-privacy-notice-link text="| California Privacy Notice" />
+          <component :is="$additionalContent.CaliforniaPrivacyNoticeLink" v-if="$additionalContent.CaliforniaPrivacyNoticeLink" />
         </div>
 
         <opt-out-link />

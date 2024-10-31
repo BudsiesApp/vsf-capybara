@@ -44,7 +44,7 @@
       {{ $t('At Budsies, we attach great importance to privacy issues and are committed to protecting the personal data of our users. Learn more about how we care and use your personal data in the') }}
       <privacy-policy-link />
     </p>
-    <california-privacy-notice-link />
+    <component :is="$additionalContent.CaliforniaPrivacyNoticeLink" v-if="$additionalContent.CaliforniaPrivacyNoticeLink" />
   </div>
 </template>
 

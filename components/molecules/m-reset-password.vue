@@ -23,7 +23,7 @@
           {{ $t('Reset password') }}
         </SfButton>
 
-        <california-privacy-notice-link />
+        <component :is="$additionalContent.CaliforniaPrivacyNoticeLink" v-if="$additionalContent.CaliforniaPrivacyNoticeLink" />
       </form>
     </template>
     <div v-else>

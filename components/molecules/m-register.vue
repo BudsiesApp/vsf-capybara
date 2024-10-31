@@ -52,7 +52,7 @@
       {{ `${$t('or')} ${$t('login in to your account')}` }}
     </SfButton>
 
-    <california-privacy-notice-link />
+    <component :is="$additionalContent.CaliforniaPrivacyNoticeLink" v-if="$additionalContent.CaliforniaPrivacyNoticeLink" />
   </div>
 </template>
 

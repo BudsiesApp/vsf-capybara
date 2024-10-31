@@ -50,7 +50,7 @@
         {{ $t('We\'ll send you a digital copy of the coloring book via email for you to download when ready!') }}
       </div>
 
-      <california-privacy-notice-link />
+      <component :is="$additionalContent.CaliforniaPrivacyNoticeLink" v-if="$additionalContent.CaliforniaPrivacyNoticeLink" />
     </form>
 
     <div class="_success-message" v-show="isSubmitted">

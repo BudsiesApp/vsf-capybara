@@ -108,7 +108,7 @@
           </SfButton>
         </div>
 
-        <california-privacy-notice-link />
+        <component :is="$additionalContent.CaliforniaPrivacyNoticeLink" v-if="$additionalContent.CaliforniaPrivacyNoticeLink" />
       </form>
     </validation-observer>
   </div>

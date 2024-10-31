@@ -34,7 +34,7 @@
         </MSpinnerButton>
       </form>
 
-      <california-privacy-notice-link />
+      <component :is="$additionalContent.CaliforniaPrivacyNoticeLink" v-if="$additionalContent.CaliforniaPrivacyNoticeLink" />
 
       <notice-of-financial-incentive-link />
 

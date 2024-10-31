@@ -95,7 +95,7 @@
 
                 <m-order-submit-agreement />
 
-                <california-privacy-notice-link />
+                <component :is="$additionalContent.CaliforniaPrivacyNoticeLink" v-if="$additionalContent.CaliforniaPrivacyNoticeLink" />
               </div>
             </div>
           </form>

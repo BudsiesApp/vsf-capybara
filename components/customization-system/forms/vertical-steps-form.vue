@@ -110,7 +110,7 @@
 
           <m-order-submit-agreement class="_agreement" />
 
-          <california-privacy-notice-link />
+          <component :is="$additionalContent.CaliforniaPrivacyNoticeLink" v-if="$additionalContent.CaliforniaPrivacyNoticeLink" />
         </div>
 
         <MBlockStory :story-slug="bottomStorySlug" v-if="bottomStorySlug" />

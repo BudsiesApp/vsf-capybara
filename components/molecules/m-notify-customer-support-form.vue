@@ -8,7 +8,7 @@
       {{ $t('Notify Customer Support') }}
     </SfButton>
 
-    <california-privacy-notice-link />
+    <component :is="$additionalContent.CaliforniaPrivacyNoticeLink" v-if="$additionalContent.CaliforniaPrivacyNoticeLink" />
   </form>
 </template>
 

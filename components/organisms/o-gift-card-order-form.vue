@@ -210,7 +210,7 @@
         {{ $t('Add to Cart') }}
       </SfButton>
 
-      <california-privacy-notice-link />
+      <component :is="$additionalContent.CaliforniaPrivacyNoticeLink" v-if="$additionalContent.CaliforniaPrivacyNoticeLink" />
     </div>
   </validation-observer>
 </template>
