@@ -88,7 +88,7 @@ export default Blok.extend({
     padding: 15px;
   }
 
-  @include image-modifiers(promotion-platform-image-banner-container);
+  @include image-modifiers("promotion-platform-image-banner-container ::v-deep img");
 
 ::v-deep {
     .show-for-medium-up {
