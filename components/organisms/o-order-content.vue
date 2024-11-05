@@ -35,6 +35,7 @@
           :customizations="item.customizations"
           :customization-state="item.customizationState"
           :product-options="item.customOptions"
+          :estimated-shipment="item.estimatedShipment"
         />
       </SfTableData>
 

@@ -78,6 +78,7 @@ export default Blok.extend({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+@import "src/modules/vsf-storyblok-module/css/image-modifiers";
 
 .promotion-platform-image-banner-wrapper {
   .promotion-platform-image-banner-container {
@@ -86,6 +87,8 @@ export default Blok.extend({
     justify-content: center;
     padding: 15px;
   }
+
+  @include image-modifiers("promotion-platform-image-banner-container ::v-deep img");
 
 ::v-deep {
     .show-for-medium-up {

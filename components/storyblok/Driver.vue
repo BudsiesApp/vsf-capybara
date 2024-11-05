@@ -96,12 +96,15 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+@import "src/modules/vsf-storyblok-module/css/image-modifiers";
 
 $color-transition-overlay-bg: rgba(0, 0, 0, 0.3);
 $transition-zoom-in-scale: 1.25;
 $transition-zoom-in-time: 0.5s;
 
 .storyblok-driver {
+  @include image-modifiers(_image);
+
   ._link {
     display: block;
     text-decoration: none;

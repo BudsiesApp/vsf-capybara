@@ -1,5 +1,5 @@
 import CartItemOption from 'core/modules/cart/types/CartItemOption';
-import { Customization, CustomizationStateItem } from 'src/modules/customization-system';
+import { Customization, CustomizationStateItem, EstimatedShipment } from 'src/modules/customization-system';
 
 export interface OrderContentItem {
   key: string,
@@ -9,6 +9,7 @@ export interface OrderContentItem {
   customizations?: Customization[],
   customizationState?: CustomizationStateItem[],
   customOptions: CartItemOption[],
+  estimatedShipment?: EstimatedShipment,
   specialPrice?: string,
   regularPrice: string
 }
