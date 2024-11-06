@@ -360,15 +360,15 @@ export default defineComponent({
       context
     );
 
-    const beforeCustomizationStateMerge = async (preservedState: PersistedData) => {
+    const beforeCustomizationStateMerge = async (preservedState: PersistedData): Promise<boolean> => {
       const productSku = preservedState.additionalData?.productSku;
 
       if (!productSku) {
-        removePreservedState();
-        return;
+        return false;
       }
 
       await productTypeStep.loadProduct(productSku);
+      return true;
     };
 
     const afterCustomizationStateMerge = (persistedData: PersistedData) => {
