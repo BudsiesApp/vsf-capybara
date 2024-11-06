@@ -114,8 +114,6 @@
 import {
   computed,
   defineComponent,
-  nextTick,
-  onMounted,
   PropType,
   Ref,
   ref,
@@ -187,7 +185,7 @@ export default defineComponent({
     ValidationObserver
   },
   setup (props, context) {
-    const { existingCartItem, product } = toRefs(props);
+    const { canUsePersistedCustomizationState, existingCartItem, product } = toRefs(props);
 
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
@@ -217,15 +215,15 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
-      replaceCustomizationState,
       selectedOptionValuesIds,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      mergeCustomizationState
     } = useCustomizationState(existingCartItem);
     const {
-      availableCustomization,
       availableCustomizations,
       availableOptionValues,
-      customizationAvailableOptionValues
+      customizationAvailableOptionValues,
+      removeUnavailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
       selectedOptionValuesIds,
@@ -265,32 +263,26 @@ export default defineComponent({
       onCustomizationOptionInput
     );
 
-    const { getPreservedData, removePreservedState } =
+    const { unhandledCustomizationsFilter } = useSelectedOptionValueUrlQuery(
+      productCustomizations,
+      availableOptionValues,
+      customizationOptionValue,
+      product,
+      mergeCustomizationState,
+      removeUnavailableOptionValues,
+      context
+    );
+
+    const { removePreservedState } =
       useCustomizationStatePreservation(
         productSku,
         customizationState,
-        existingCartItem
+        existingCartItem,
+        [unhandledCustomizationsFilter],
+        canUsePersistedCustomizationState,
+        mergeCustomizationState,
+        removeUnavailableOptionValues
       );
-
-    onMounted(async () => {
-      await nextTick();
-
-      if (
-        existingCartItem.value ||
-        !props.canUsePersistedCustomizationState
-      ) {
-        removePreservedState();
-        return;
-      }
-
-      const preservedState = await getPreservedData();
-
-      if (!preservedState) {
-        return;
-      }
-
-      replaceCustomizationState(preservedState.customizationState);
-    });
 
     const { emailCustomizationFilter, persistCustomerEmail } =
       useEmailCustomization(
@@ -400,15 +392,6 @@ export default defineComponent({
         currentStep?.name.toLowerCase() === BACK_DESIGN_STEP_NAME
       );
     });
-
-    useSelectedOptionValueUrlQuery(
-      availableCustomization,
-      availableOptionValues,
-      customizationOptionValue,
-      product,
-      updateCustomizationOptionValue,
-      context
-    );
 
     return {
       ...customizationGroups,
