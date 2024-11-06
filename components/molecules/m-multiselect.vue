@@ -530,16 +530,17 @@ export default Vue.extend({
     @supports (-webkit-touch-callout: none) {
       ::v-deep .multiselect {
         .multiselect__content-wrapper {
-          background-color: var(--c-dark-variant);
+          background-color: var(--ios-select-dropdown-background);
         }
 
         .multiselect__option {
-          background-color: var(--c-dark-variant);
-          border-color: var(--c-gray-lighten);
+          background-color: var(--ios-select-dropdown-background);
+          border-color: var(--ios-select-option-border-color);
+          color: var(--c-white);
 
           &.multiselect__option--highlight {
-            background-color: var(--c-dark-lighten);
-            color: var(--c-white-darken);
+            background-color: var(--ios-select-option-active-background);
+            color: var(--c-white);
           }
         }
       }
