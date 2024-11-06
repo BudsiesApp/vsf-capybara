@@ -144,9 +144,12 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 <style lang="scss">
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+@import "src/modules/vsf-storyblok-module/css/image-modifiers";
 
 .storyblok-image {
   text-align: center;
+
+  @include image-modifiers(_image);
 
   ._image {
     vertical-align: bottom;
