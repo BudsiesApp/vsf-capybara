@@ -110,8 +110,6 @@
 import {
   computed,
   defineComponent,
-  nextTick,
-  onMounted,
   PropType,
   Ref,
   ref,
@@ -137,7 +135,8 @@ import {
   useSelectedOptionValueUrlQuery,
   useEmailCustomization,
   useCustomizationsFilter,
-  requiredCustomizationsFilter
+  requiredCustomizationsFilter,
+  PersistedData
 } from 'src/modules/customization-system';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
@@ -216,6 +215,7 @@ export default defineComponent({
   },
   setup (props, context) {
     const {
+      canUsePersistedCustomizationState,
       existingCartItem,
       plushieType,
       preselectedProductSize,
@@ -247,16 +247,16 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
-      replaceCustomizationState,
       resetCustomizationState,
       selectedOptionValuesIds,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      mergeCustomizationState
     } = useCustomizationState(existingCartItem);
     const {
-      availableCustomization,
       availableCustomizations,
       availableOptionValues,
-      customizationAvailableOptionValues
+      customizationAvailableOptionValues,
+      removeUnavailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
       selectedOptionValuesIds,
@@ -350,48 +350,48 @@ export default defineComponent({
       }
     });
 
-    const { getPreservedData, removePreservedState } =
+    const { unhandledCustomizationsFilter } = useSelectedOptionValueUrlQuery(
+      productCustomizations,
+      availableOptionValues,
+      customizationOptionValue,
+      currentProduct,
+      mergeCustomizationState,
+      removeUnavailableOptionValues,
+      context
+    );
+
+    const beforeCustomizationStateMerge = async (preservedState: PersistedData): Promise<boolean> => {
+      const productSku = preservedState.additionalData?.productSku;
+
+      if (!productSku) {
+        return false;
+      }
+
+      await productTypeStep.loadProduct(productSku);
+      return true;
+    };
+
+    const afterCustomizationStateMerge = (persistedData: PersistedData) => {
+      if (!persistedData.additionalData?.stepIndex) {
+        return;
+      }
+
+      formSteps.goToStep(persistedData.additionalData?.stepIndex);
+    }
+
+    const { removePreservedState } =
       useCustomizationStatePreservation(
         plushieType,
         customizationState,
         existingCartItem,
+        [unhandledCustomizationsFilter],
+        canUsePersistedCustomizationState,
+        mergeCustomizationState,
+        removeUnavailableOptionValues,
+        beforeCustomizationStateMerge,
+        afterCustomizationStateMerge,
         additionalPreservedData
       );
-
-    onMounted(async () => {
-      await nextTick();
-
-      if (
-        existingCartItem.value ||
-        !props.canUsePersistedCustomizationState
-      ) {
-        removePreservedState();
-        return;
-      }
-
-      const preservedState = await getPreservedData();
-
-      if (!preservedState) {
-        return;
-      }
-
-      const productSku = preservedState.additionalData?.productSku;
-
-      if (!productSku) {
-        removePreservedState();
-        return;
-      }
-
-      await productTypeStep.loadProduct(productSku);
-
-      replaceCustomizationState(preservedState.customizationState);
-
-      if (!preservedState.additionalData?.stepIndex) {
-        return;
-      }
-
-      formSteps.goToStep(preservedState.additionalData?.stepIndex);
-    });
 
     const { quantity } = useProductQuantity(existingCartItem);
     const { addToCartHandler, isSubmitting } = useAddToCart(
@@ -439,15 +439,6 @@ export default defineComponent({
     const isSubmitButtonDisabled = computed<boolean>(() => {
       return isDisabled.value || isSomeCustomizationOptionBusy.value;
     });
-
-    useSelectedOptionValueUrlQuery(
-      availableCustomization,
-      availableOptionValues,
-      customizationOptionValue,
-      currentProduct,
-      updateCustomizationOptionValue,
-      context
-    );
 
     return {
       ...customizationGroups,
