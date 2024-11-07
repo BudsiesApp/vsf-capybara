@@ -30,6 +30,7 @@
         ref="multiselect"
         @open="isOpen = !isOpen"
         @close="onClose"
+        @autocomplete-option-not-found="onAutocompleteOptionNotFound"
       >
         <template #caret>
           <SfChevron
@@ -74,7 +75,12 @@ import {
   mapMobileObserver,
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
-import { disableBodyScroll, enableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
+import {
+  disableBodyScroll,
+  enableBodyScroll,
+  clearAllBodyScrollLocks
+} from 'body-scroll-lock';
+import { logAutocompleteOptionNotFound } from 'src/modules/error-logging';
 
 type Option = Record<string, any> | string;
 
@@ -166,7 +172,7 @@ export default Vue.extend({
       isOpen: false,
       instanceId: '',
       customOptions: [] as Option[]
-    }
+    };
   },
   computed: {
     ...mapMobileObserver(),
@@ -176,11 +182,11 @@ export default Vue.extend({
           return undefined;
         }
 
-        const option = this.allOptions.find(option => {
+        const option = this.allOptions.find((option) => {
           if (this.idField && typeof option === 'object') {
-            return option[this.idField] === this.value
+            return option[this.idField] === this.value;
           } else {
-            return option === this.value
+            return option === this.value;
           }
         });
 
@@ -188,8 +194,8 @@ export default Vue.extend({
       },
       set (value: Option | undefined): void {
         if (!value) {
-          this.$emit('input', undefined)
-          this.$emit('change', undefined)
+          this.$emit('input', undefined);
+          this.$emit('change', undefined);
         }
 
         let valueId;
@@ -213,7 +219,7 @@ export default Vue.extend({
         if (typeof a === 'string' && b === 'string') {
           return a.localeCompare(b);
         } else if (typeof a !== 'string' && typeof b !== 'string') {
-          return a[this.labelField].localeCompare(b[this.labelField])
+          return a[this.labelField].localeCompare(b[this.labelField]);
         }
       });
 
@@ -228,6 +234,9 @@ export default Vue.extend({
     this.enableBodyScroll();
   },
   methods: {
+    onAutocompleteOptionNotFound (value: string): void {
+      logAutocompleteOptionNotFound(this.autocomplete, value);
+    },
     disableOnePasswordForMultiselect (): void {
       const input = this.getMultiselectInput();
 
@@ -409,12 +418,13 @@ export default Vue.extend({
       }
 
       &::-webkit-scrollbar-thumb {
-          border-radius: 1em;
-          background: var(--c-dark-variant);
+        border-radius: 1em;
+        background: var(--c-dark-variant);
       }
     }
 
-    &__input, &__single {
+    &__input,
+    &__single {
       margin-bottom: 0;
       min-height: 31px;
       font-size: var(--font-lg);
@@ -449,6 +459,7 @@ export default Vue.extend({
       .sf-chevron {
         --chevron-color: var(--input-border-color);
       }
+
       .multiselect__tags {
         border-color: var(--input-border-color);
       }
@@ -466,7 +477,7 @@ export default Vue.extend({
 
     &.--required {
       &::after {
-        content: ' *';
+        content: " *";
         color: var(--input-label-color, var(--c-primary));
       }
     }
@@ -532,18 +543,18 @@ export default Vue.extend({
     // Hack for detect iOS Safari
     @supports (-webkit-touch-callout: none) {
       ::v-deep .multiselect {
-
         .multiselect__content-wrapper {
-          background-color: var(--c-black-lighten);
+          background-color: var(--ios-select-dropdown-background);
         }
 
         .multiselect__option {
-          background-color: var(--c-black-lighten);
-          border-color: var(--c-gray-lighten);
-          color: var(--c-white-darken);
+          background-color: var(--ios-select-dropdown-background);
+          border-color: var(--ios-select-option-border-color);
+          color: var(--c-white);
 
           &.multiselect__option--highlight {
-            background-color: var(--c-dark-lighten);
+            background-color: var(--ios-select-option-active-background);
+            color: var(--c-white);
           }
         }
       }

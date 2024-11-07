@@ -120,8 +120,6 @@
 import {
   computed,
   defineComponent,
-  nextTick,
-  onMounted,
   PropType,
   ref,
   Ref,
@@ -224,7 +222,7 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
-    const { existingCartItem, product } = toRefs(props);
+    const { canUsePersistedCustomizationState, existingCartItem, product } = toRefs(props);
 
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
@@ -252,18 +250,18 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
-      replaceCustomizationState,
       resetCustomizationState,
       selectedOptionValuesIds,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      mergeCustomizationState
     } = useCustomizationState(existingCartItem);
 
     const {
-      availableCustomization,
       availableCustomizations,
       availableOptionCustomizations,
       availableOptionValues,
-      customizationAvailableOptionValues
+      customizationAvailableOptionValues,
+      removeUnavailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
       selectedOptionValuesIds,
@@ -292,11 +290,25 @@ export default defineComponent({
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
 
-    const { getPreservedData, removePreservedState } =
+    const { unhandledCustomizationsFilter } = useSelectedOptionValueUrlQuery(
+      productCustomizations,
+      availableOptionValues,
+      customizationOptionValue,
+      product,
+      mergeCustomizationState,
+      removeUnavailableOptionValues,
+      context
+    );
+
+    const { removePreservedState } =
       useCustomizationStatePreservation(
         productSku,
         customizationState,
-        existingCartItem
+        existingCartItem,
+        [unhandledCustomizationsFilter],
+        canUsePersistedCustomizationState,
+        mergeCustomizationState,
+        removeUnavailableOptionValues
       );
 
     const { emailCustomizationFilter, persistCustomerEmail } =
@@ -305,23 +317,6 @@ export default defineComponent({
         customizationOptionValue,
         updateCustomizationOptionValue
       );
-
-    onMounted(async () => {
-      await nextTick();
-
-      if (existingCartItem.value || !props.canUsePersistedCustomizationState) {
-        removePreservedState();
-        return;
-      }
-
-      const preservedState = await getPreservedData();
-
-      if (!preservedState) {
-        return;
-      }
-
-      replaceCustomizationState(preservedState.customizationState);
-    });
 
     useCustomizationsBundleOptions(
       productCustomizations,
@@ -429,15 +424,6 @@ export default defineComponent({
         existingCartItem.value ? i18n.t('Update') : i18n.t('Add to Cart')
       ).toString();
     });
-
-    useSelectedOptionValueUrlQuery(
-      availableCustomization,
-      availableOptionValues,
-      customizationOptionValue,
-      product,
-      updateCustomizationOptionValue,
-      context
-    );
 
     const { filteredCustomizations } = useCustomizationsFilter(
       availableCustomizations,

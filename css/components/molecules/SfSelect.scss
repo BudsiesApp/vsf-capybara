@@ -1,11 +1,13 @@
 .sf-select {
     --select-error-message-color: var(--c-danger-variant);
+    --select-option-padding: var(--spacer-xs) var(--spacer-sm);
     --input-error-message-font-weight: var(--font-light);
     --input-error-message-font-family: var(--font-family-primary);
 
     &__overlay {
         --overlay-z-index: 20
     }
+
     &__dropdown {
         // some third party widgets on production has such values
         // so it's overlap dropdown content
@@ -18,8 +20,8 @@
 
             &::-webkit-scrollbar {
                 width: 6px;
-            } 
-    
+            }
+
             &::-webkit-scrollbar-thumb {
                 border-radius: 1em;
                 background: var(--c-dark-variant);
@@ -36,8 +38,10 @@
     }
 
     @include for-desktop {
+        --select-option-padding: var(--spacer-sm);
+
         &__dropdown {
-         --select-dropdown-z-index: 21;   
+            --select-dropdown-z-index: 21;
         }
 
         &__options {
@@ -48,21 +52,20 @@
     @media (prefers-color-scheme: dark) {
         // Hack for detect iOS Safari
         @supports (-webkit-touch-callout: none) {
-            --select-option-border-color: var(--c-gray-lighten);
-            --select-dropdown-background: var(--c-black-lighten);
+            --select-option-border-color: var(--ios-select-option-border-color);
+            --select-dropdown-background: var(--ios-select-dropdown-background);
             --overlay-background: rgba(255, 255, 255, 0.7);
 
-            .sf-select-option {
-                color: var(--c-white-darken);
+            .sf-select__dropdown {
+                .sf-select-option {
+                    color: var(--c-white);
 
-                &.sf-select-option--is-active {
-                    --select-option-background: var(--c-dark-lighten);
+                    &.sf-select-option--is-active {
+                        --select-option-background: var(--ios-select-option-active-background);
+
+                        color: var(--c-white);
+                    }
                 }
-            }
-
-            .sf-select__cancel {
-                --button-background: var(--c-dark-darken);
-                --button-color: var(--c-white-darken);
             }
         }
     }

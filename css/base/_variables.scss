@@ -79,6 +79,10 @@ $font-family-secondary: "Gotham-Rounded-Medium";
     --customization-option-required-field-mark-color: var(--c-warning);
     --vertical-steps-form-step-title-color: var(--c-primary);
 
+    --ios-select-dropdown-background: #4e4e4e;
+    --ios-select-option-active-background: #636465;
+    --ios-select-option-border-color: #606060;
+
     @include assign-color-variants(--c-primary, --_c-yellow-primary);
     --c-primary-variant: var(--_c-yellow-secondary);
     @include assign-color-variants(--c-secondary, --_c-yellow-secondary);
