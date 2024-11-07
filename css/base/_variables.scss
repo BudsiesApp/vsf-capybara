@@ -89,6 +89,11 @@ $font-family-intro: "GothamRounded", "Helvetica", sans-serif;
     --widget-error-message-color: var(--c-danger-variant);
     --customization-option-required-field-mark-color: var(--c-danger-variant);
     --vertical-steps-form-step-title-color: var(--c-danger);
+
+    --ios-select-dropdown-background: #4e4e4e;
+    --ios-select-option-active-background: #636465;
+    --ios-select-option-border-color: #606060;
+    
     @include assign-color-variants(--c-primary, --_c-green-primary);
     --c-primary-variant: var(--_c-green-primary-darken);
     
