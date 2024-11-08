@@ -24,6 +24,7 @@
       :show-no-results="!allowFreeText"
       :max-height="190"
       :autocomplete="autocomplete"
+      :autocomplete-value-search="autocompleteValueSearch"
       open-direction="below"
       :disabled="disabled"
       ref="multiselect"
@@ -163,6 +164,10 @@ export default Vue.extend({
     hideDropdownArrow: {
       type: Boolean,
       default: false
+    },
+    autocompleteValueSearch: {
+      type: Function as PropType<((option: any, value: string) => boolean) | undefined>,
+      default: undefined
     }
   },
   data () {
