@@ -94,7 +94,9 @@
       </p>
 
       <template v-if="$additionalContent.footerLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.footerLinks" />
+        <div class="_additional-links">
+          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.footerLinks" />
+        </div>
       </template>
     </div>
   </footer>
@@ -426,9 +428,16 @@ export default {
     flex-basis: auto;
   }
 
-  ._copyright,
-  .opt-out-link,
-  .california-privacy-notice-link {
+  ._copyright {
+    color: var(--c-footer-gray);
+    font-size: var(--font-2xs);
+
+    a {
+      color: inherit;
+    }
+  }
+
+  ._additional-links {
     --privacy-notice-link-font-size: var(--font-2xs);
     --privacy-notice-link-color: var(--c-footer-gray);
     --privacy-notice-link-margin: 0;
@@ -437,12 +446,10 @@ export default {
     --opt-out-link-font-size: var(--font-2xs);
     --opt-out-link-color: var(--c-footer-gray);
 
-    color: var(--c-footer-gray);
-    font-size: var(--font-2xs);
-
-    a {
-      color: inherit;
-    }
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--spacer-sm);
+    row-gap: var(--spacer-xs);
   }
 
   .social-icon {
