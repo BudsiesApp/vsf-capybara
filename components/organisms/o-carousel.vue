@@ -17,7 +17,7 @@
       <div
         class="swiper-buttons"
         :class="{ '-counter': showCounter }"
-        v-show="isSwiperInitialized"
+        v-show="isSwiperInitialized && showNavigationButtons"
       >
         <sf-button
           ref="prev-button"
@@ -98,6 +98,14 @@ export default Vue.extend({
     slideToClickedSlide: {
       type: Boolean,
       default: false
+    },
+    centeredSlides: {
+      type: Boolean,
+      default: false
+    },
+    showNavigationButtons: {
+      type: Boolean,
+      default: true
     }
   },
   data () {
@@ -138,7 +146,8 @@ export default Vue.extend({
         modules: [Autoplay, Navigation],
         init: false,
         breakpoints: this.breakpoints,
-        spaceBetween: this.spaceBetween
+        spaceBetween: this.spaceBetween,
+        centeredSlides: this.centeredSlides
       };
     },
     defaultSlidesPerView (): number {
@@ -200,8 +209,9 @@ export default Vue.extend({
       return this.$refs.swiper as HTMLElement;
     },
     initSwiper (): void {
-      const onInit = () => {
+      const onInit = (swiper: Swiper) => {
         this.isSwiperInitialized = true;
+        this.$emit('swiper-init', swiper)
       };
       const onRealIndexChange = (swiper: Swiper) => {
         this.currentSlideIndex = swiper.realIndex;
@@ -281,6 +291,17 @@ export default Vue.extend({
       }
 
       this.swiper.slidePrev();
+    },
+    slideTo (index: number) {
+      if (!this.swiper) {
+        return;
+      }
+
+      if (this.isLoopAvailable) {
+        return this.swiper.slideToLoop(index);
+      }
+
+      this.swiper.slideTo(index);
     }
   },
   watch: {
@@ -317,6 +338,9 @@ export default Vue.extend({
     },
     slideToClickedSlide (val) {
       this.updateSwiper({ slideToClickedSlide: val });
+    },
+    centeredSlides (val) {
+      this.updateSwiper({ centeredSlides: val });
     }
   }
 });

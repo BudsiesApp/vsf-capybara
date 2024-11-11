@@ -5,7 +5,7 @@
     :class="{
       '-horizontal': isHorizontalThumbnails,
       '-first-slide-active': isFirstSlideActive,
-      '-last-slide-active': isLastSlideActive
+      '-last-slide-active': isLastSlideActive,
     }"
   >
     <div class="_thumbnails">
@@ -17,13 +17,12 @@
         :show-counter="false"
         :expand-slide-width="false"
         :slide-to-clicked-slide="true"
-        @slide-clicked="setCurrentIndex"
+        :centered-slides="false"
+        :show-navigation-buttons="false"
+        @slide-clicked="onThumbnailSlideClicked"
       >
-        <template #default="{ item: image  }">
-          <div
-            :key="JSON.stringify(image.thumb)"
-            class="_thumbnail-item"
-          >
+        <template #default="{ item: image }">
+          <div :key="JSON.stringify(image.thumb)" class="_thumbnail-item">
             <div class="_thumbnail-item-content-wrapper">
               <BaseImage
                 class="_image"
@@ -43,22 +42,47 @@
     <div class="_stage">
       <div class="_stage-content">
         <div class="_arrow -left" @click="goToPreviousImage" />
-        <div
-          ref="stageImageWrapper"
-          class="_image-wrapper cloud-zoom"
-          :href="stageImage.big"
-          v-if="stageImage"
-        >
-          <BaseImage
-            class="_image"
-            :src="getImageSrc(stageImage, 'stage')"
-            :srcsets="getImageSrcSets(stageImage, 'stage')"
-            :alt="stageImage.alt"
-            :title="stageImage.title"
-            :aspect-ratio="1.0"
-            :lazy="lazyLoadStageImage"
-          />
+
+        <div class="_cloud-zoom-wrapper" v-if="stageImage">
+          <div
+            ref="stageImageWrapper"
+            class="_image-wrapper cloud-zoom"
+            :href="stageImage.big"
+          >
+            <BaseImage
+              class="_image"
+              :src="getImageSrc(stageImage, 'stage')"
+              :srcsets="getImageSrcSets(stageImage, 'stage')"
+              :alt="stageImage.alt"
+              :title="stageImage.title"
+              :aspect-ratio="1.0"
+              :lazy="lazyLoadStageImage"
+            />
+          </div>
         </div>
+
+        <o-carousel
+          ref="stageCarousel"
+          :show-counter="false"
+          :items="carouselItems"
+          :slides-per-view="1"
+          :show-navigation-buttons="false"
+        >
+          <template #default="{ item: image }">
+            <div class="_image-wrapper" :href="image.big" v-if="image">
+              <BaseImage
+                class="_image"
+                :src="getImageSrc(image, 'stage')"
+                :srcsets="getImageSrcSets(image, 'stage')"
+                :alt="image.alt"
+                :title="image.title"
+                :aspect-ratio="1.0"
+                :lazy="lazyLoadStageImage"
+              />
+            </div>
+          </template>
+        </o-carousel>
+
         <div class="_arrow -right" @click="goToNextImage" />
       </div>
     </div>
@@ -185,6 +209,17 @@ export default Vue.extend({
     window.removeEventListener('resize', this.fWindowResizeHandler);
   },
   methods: {
+    onThumbnailSlideClicked (slideIndex: number): void {
+      this.setCurrentIndex(slideIndex);
+
+      const stageCarousel = this.getStageCarousel();
+
+      stageCarousel.slideTo(slideIndex);
+    },
+
+    getStageCarousel (): InstanceType<typeof OCarousel> {
+      return this.$refs.stageCarousel as InstanceType<typeof OCarousel>;
+    },
     getCarousel (): InstanceType<typeof OCarousel> {
       return this.$refs.carousel as InstanceType<typeof OCarousel>;
     },
@@ -201,6 +236,7 @@ export default Vue.extend({
 
       this.currentIndex = newIndex;
       this.getCarousel().slidePrevious();
+      this.getStageCarousel().slidePrevious();
     },
     goToNextImage (): void {
       if (this.currentIndex === undefined) {
@@ -215,6 +251,7 @@ export default Vue.extend({
 
       this.currentIndex = newIndex;
       this.getCarousel().slideNext();
+      this.getStageCarousel().slideNext();
     },
     canCloudZoomInit (): boolean {
       const zoomGallery = this.getZoomGallery();
@@ -406,6 +443,18 @@ export default Vue.extend({
           right: auto;
           left: 0;
         }
+      }
+    }
+
+    ._cloud-zoom-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+
+      ._image {
+        visibility: hidden;
       }
     }
 
