@@ -13,8 +13,8 @@
   "license": "MIT",
   "dependencies": {
     "@cabbiepete/cloud-zoom": "https://github.com/GorbunovStudio/cloud-zoom.git#gorbunov-studio",
-    "@storefront-ui/shared": "https://gitpkg.vercel.app/BudsiesApp/storefront-ui/packages/shared?b757f7a8bded1fbaba87a533eb09aaa6303d20cf",
-    "@storefront-ui/vue": "https://gitpkg.vercel.app/BudsiesApp/storefront-ui/packages/vue?b757f7a8bded1fbaba87a533eb09aaa6303d20cf",
+    "@storefront-ui/shared": "https://gitpkg.vercel.app/BudsiesApp/storefront-ui/packages/shared?a318b31fbe68657cb629bf40ef040d4f572e30a3",
+    "@storefront-ui/vue": "https://gitpkg.vercel.app/BudsiesApp/storefront-ui/packages/vue?a318b31fbe68657cb629bf40ef040d4f572e30a3",
     "@types/croppie": "^2.5.4",
     "@types/lodash.debounce": "^4.0.7",
     "@types/lodash.throttle": "^4.1.6",
