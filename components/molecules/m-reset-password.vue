@@ -23,7 +23,9 @@
           {{ $t('Reset password') }}
         </SfButton>
 
-        <california-privacy-notice-link />
+        <template v-if="$additionalContent.formLinks">
+          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.formLinks" />
+        </template>
       </form>
     </template>
     <div v-else>
@@ -44,12 +46,9 @@ import { SfInput, SfButton } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
 import { mapActions } from 'vuex';
 
-import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
-
 export default {
   name: 'MResetPassword',
   components: {
-    CaliforniaPrivacyNoticeLink,
     SfInput,
     SfButton
   },

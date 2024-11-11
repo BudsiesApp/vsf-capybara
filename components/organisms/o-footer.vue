@@ -46,13 +46,11 @@
         |
 
         <privacy-policy-link />
-
-        <california-privacy-notice-link text="| California Privacy Notice" />
       </div>
 
-      <div class="_opt-out-link-container">
-        <opt-out-link />
-      </div>
+      <template v-if="$additionalContent.footerLinks">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.footerLinks" />
+      </template>
     </SfFooter>
   </footer>
 </template>
@@ -65,15 +63,13 @@ import config from 'config';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import get from 'lodash-es/get';
 
-import { CaliforniaPrivacyNoticeLink, OptOutLink, PrivacyPolicyLink } from 'src/modules/true-vault';
+import { PrivacyPolicyLink } from 'src/modules/shared';
 
 import MBudsiesBrands from '../molecules/m-budsies-brands.vue';
 
 export default {
   name: 'OFooter',
   components: {
-    CaliforniaPrivacyNoticeLink,
-    OptOutLink,
     PrivacyPolicyLink,
     MBudsiesBrands,
     SfFooter,

@@ -41,7 +41,9 @@
         </SfButton>
       </div>
 
-      <california-privacy-notice-link />
+      <template v-if="$additionalContent.formLinks">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.formLinks" />
+      </template>
     </validation-observer>
   </div>
 </template>
@@ -55,8 +57,6 @@ import { mapState } from 'vuex';
 import { SfButton } from '@storefront-ui/vue';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 
-import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
-
 extend('required', {
   ...required,
   message: 'The {_field_} field is required'
@@ -65,7 +65,6 @@ extend('required', {
 export default Vue.extend({
   name: 'MShareSpecialStoryForm',
   components: {
-    CaliforniaPrivacyNoticeLink,
     SfButton,
     ValidationProvider,
     ValidationObserver
