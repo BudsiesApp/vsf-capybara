@@ -17,7 +17,11 @@
               @click.native="onLinkClick(link)"
               exact
             >
-              <SfMenuItem class="sf-footer__menu-item" :label="link.name" icon="" />
+              <SfMenuItem
+                class="sf-footer__menu-item"
+                :label="link.name"
+                icon=""
+              />
             </router-link>
           </SfListItem>
         </SfList>
@@ -27,13 +31,21 @@
         <SfList>
           <SfListItem>
             <a href="mailto:info@stuffedanimalpros.com">
-              <SfMenuItem class="sf-footer__menu-item" :label="$t('info@stuffedanimalpros.com')" icon="" />
+              <SfMenuItem
+                class="sf-footer__menu-item"
+                :label="$t('info@stuffedanimalpros.com')"
+                icon=""
+              />
             </a>
           </SfListItem>
 
           <SfListItem>
             <router-link to="/contact/">
-              <SfMenuItem class="sf-footer__menu-item" :label="$t('Request A Call')" icon="" />
+              <SfMenuItem
+                class="sf-footer__menu-item"
+                :label="$t('Request A Call')"
+                icon=""
+              />
             </router-link>
           </SfListItem>
         </SfList>
@@ -49,7 +61,13 @@
       </div>
 
       <template v-if="$additionalContent.footerLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.footerLinks" />
+        <div class="_additional-links">
+          <component
+            :is="linkComponent.component"
+            :key="linkComponent.key"
+            v-for="linkComponent in $additionalContent.footerLinks"
+          />
+        </div>
       </template>
     </SfFooter>
   </footer>
@@ -58,7 +76,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { SfFooter, SfList, SfMenuItem } from '@storefront-ui/vue';
-import { ModalList } from 'theme/store/ui/modals'
+import { ModalList } from 'theme/store/ui/modals';
 import config from 'config';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import get from 'lodash-es/get';
@@ -136,7 +154,7 @@ export default {
       openModal: 'openModal'
     }),
     showLanguageSwitcher () {
-      this.openModal({ name: ModalList.LanguageSwitcher })
+      this.openModal({ name: ModalList.LanguageSwitcher });
     },
     onLinkClick (link) {
       if (!link.clickHandler) {
@@ -207,11 +225,6 @@ export default {
   }
 
   ._copyright {
-    --privacy-notice-link-font-size: var(--font-xs);
-    --privacy-notice-link-color: var(--c-text);
-    --privacy-notice-link-margin: 0;
-    --privacy-notice-display: inline;
-
     margin-top: var(--spacer-base);
     font-size: var(--font-xs);
     text-align: center;
@@ -222,21 +235,20 @@ export default {
     }
   }
 
-  ._opt-out-link-container {
+  ._additional-links {
     --opt-out-link-font-size: var(--font-xs);
     --opt-out-link-color: var(--c-text);
+    --privacy-notice-link-font-size: var(--font-xs);
+    --privacy-notice-link-color: var(--c-text);
+    --privacy-notice-link-margin: 0;
+    --privacy-notice-display: inline;
 
+    margin-top: var(--spacer-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
-    text-align: center;
-
-    .opt-out-link {
-      display: inline-block;
-      margin-top: var(--spacer-sm);
-
-      &:empty {
-        display: none;
-      }
-    }
+    row-gap: var(--spacer-xs);
   }
 
   @include for-desktop {
