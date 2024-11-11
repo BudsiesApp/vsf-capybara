@@ -95,7 +95,9 @@
 
                 <m-order-submit-agreement />
 
-                <component :is="$additionalContent.CaliforniaPrivacyNoticeLink" v-if="$additionalContent.CaliforniaPrivacyNoticeLink" />
+                <template v-if="$additionalContent.formLinks">
+                  <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.formLinks" />
+                </template>
               </div>
             </div>
           </form>
@@ -144,7 +146,6 @@ import {
 import i18n from '@vue-storefront/core/i18n';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
-import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
@@ -196,7 +197,6 @@ export default defineComponent({
   components: {
     ACustomPrice,
     ACustomProductQuantity,
-    CaliforniaPrivacyNoticeLink,
     CustomizationOption,
     MBlockStory,
     MFormErrors,

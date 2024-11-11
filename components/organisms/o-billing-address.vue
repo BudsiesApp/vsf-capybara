@@ -193,7 +193,9 @@
       </div>
     </div>
 
-    <component :is="$additionalContent.CaliforniaPrivacyNoticeLink" v-if="$additionalContent.CaliforniaPrivacyNoticeLink" />
+    <template v-if="$additionalContent.formLinks">
+      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.formLinks" />
+    </template>
     <!-- This dummy container below is needed because src\modules\payment-cash-on-delivery\index.ts
          tries to inject here a component with payment description -->
     <div v-show="false" id="checkout-order-review-additional-container" />
@@ -223,7 +225,6 @@ import {
   METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
 } from 'src/modules/vsf-amazon-pay/index';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
-import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
@@ -232,7 +233,6 @@ const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3}
 export default {
   name: 'OBillingAddress',
   components: {
-    CaliforniaPrivacyNoticeLink,
     SfInput,
     SfButton,
     SfHeading,

@@ -50,7 +50,9 @@
         {{ $t('We\'ll send you a digital copy of the coloring book via email for you to download when ready!') }}
       </div>
 
-      <component :is="$additionalContent.CaliforniaPrivacyNoticeLink" v-if="$additionalContent.CaliforniaPrivacyNoticeLink" />
+      <template v-if="$additionalContent.formLinks">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.formLinks" />
+      </template>
     </form>
 
     <div class="_success-message" v-show="isSubmitted">
@@ -76,14 +78,12 @@ import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
 import { DonglerBookService } from 'src/modules/dongler-book';
 import { LAST_USED_CUSTOMER_EMAIL, SET_LAST_USED_CUSTOMER_EMAIL } from 'src/modules/persisted-customer-data';
-import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import DonglerBookData from './interfaces/dongler-book-data.interface';
 
 export default Blok.extend({
   name: 'StoryblokDonglerBook',
   components: {
-    CaliforniaPrivacyNoticeLink,
     SfHeading,
     SfInput,
     SfButton

@@ -52,7 +52,9 @@
       {{ `${$t('or')} ${$t('login in to your account')}` }}
     </SfButton>
 
-    <component :is="$additionalContent.CaliforniaPrivacyNoticeLink" v-if="$additionalContent.CaliforniaPrivacyNoticeLink" />
+    <template v-if="$additionalContent.formLinks">
+      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.formLinks" />
+    </template>
   </div>
 </template>
 
@@ -64,14 +66,11 @@ import { SfInput, SfButton } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
 import { mapActions } from 'vuex';
 
-import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
-
 import MPassword from 'theme/components/molecules/m-password.vue';
 
 export default {
   name: 'MRegister',
   components: {
-    CaliforniaPrivacyNoticeLink,
     SfInput,
     SfButton,
     MPassword

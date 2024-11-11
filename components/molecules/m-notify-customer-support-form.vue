@@ -8,7 +8,9 @@
       {{ $t('Notify Customer Support') }}
     </SfButton>
 
-    <component :is="$additionalContent.CaliforniaPrivacyNoticeLink" v-if="$additionalContent.CaliforniaPrivacyNoticeLink" />
+    <template v-if="$additionalContent.formLinks">
+      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.formLinks" />
+    </template>
   </form>
 </template>
 
@@ -16,12 +18,9 @@
 import Vue, { PropType } from 'vue'
 import { SfInput, SfButton } from '@storefront-ui/vue';
 
-import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
-
 export default Vue.extend({
   name: 'MNotifyCustomerSupportForm',
   components: {
-    CaliforniaPrivacyNoticeLink,
     SfInput,
     SfButton
   },

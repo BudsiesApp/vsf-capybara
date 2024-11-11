@@ -34,9 +34,9 @@
         </MSpinnerButton>
       </form>
 
-      <component :is="$additionalContent.CaliforniaPrivacyNoticeLink" v-if="$additionalContent.CaliforniaPrivacyNoticeLink" />
-
-      <notice-of-financial-incentive-link />
+      <template v-if="$additionalContent.financialIncentivesLinks">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.financialIncentivesLinks" />
+      </template>
 
       <div class="_success-message" v-if="!displayForm">
         {{ successMessage }}
@@ -55,7 +55,6 @@ import Task from '@vue-storefront/core/lib/sync/types/Task';
 import i18n from '@vue-storefront/i18n';
 
 import { usePersistedEmail } from 'src/modules/persisted-customer-data';
-import { CaliforniaPrivacyNoticeLink, NoticeOfFinancialIncentiveLink } from 'src/modules/true-vault';
 
 import MSpinnerButton from 'theme/components/molecules/m-spinner-button.vue';
 
@@ -69,9 +68,7 @@ extend('email', email);
 export default defineComponent({
   name: 'MSubscriptionForm',
   components: {
-    CaliforniaPrivacyNoticeLink,
     MSpinnerButton,
-    NoticeOfFinancialIncentiveLink,
     SfInput,
     ValidationProvider,
     ValidationObserver
