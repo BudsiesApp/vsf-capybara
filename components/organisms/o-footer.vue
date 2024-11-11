@@ -91,11 +91,11 @@
       <p class="_copyright">
         ©{{ new Date().getFullYear() }} {{ $t('Budsies PR LLC. All Rights Reserved') }}. |
         <privacy-policy-link />
-
-        <california-privacy-notice-link text="| California Privacy Notice" />
       </p>
 
-      <opt-out-link />
+      <template v-if="$additionalContent.footerLinks">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.footerLinks" />
+      </template>
     </div>
   </footer>
 </template>
@@ -109,15 +109,13 @@ import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import get from 'lodash-es/get';
 
 import { BaseImage } from 'src/modules/budsies';
-import { CaliforniaPrivacyNoticeLink, OptOutLink, PrivacyPolicyLink } from 'src/modules/true-vault';
+import { PrivacyPolicyLink } from 'src/modules/shared';
 
 import MBudsiesBrands from '../molecules/m-budsies-brands';
 
 export default {
   name: 'OFooter',
   components: {
-    CaliforniaPrivacyNoticeLink,
-    OptOutLink,
     PrivacyPolicyLink,
     MBudsiesBrands,
     SfButton,

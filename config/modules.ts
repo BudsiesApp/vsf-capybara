@@ -27,6 +27,7 @@ import { RaffleModule } from 'src/modules/raffle'
 import { InspirationMachineModule } from 'src/modules/inspiration-machine'
 import { MailchimpModule } from 'src/modules/mailchimp'
 import { PersistedCustomerDataModule } from 'src/modules/persisted-customer-data'
+import { TrueVaultModule } from 'src/modules/true-vault';
 
 import registerStoryblokComponents from 'theme/components/storyblok'
 
@@ -54,7 +55,7 @@ const extendUrlModule: StorefrontModule = function ({ store }) {
 // TODO:distributed across proper pages BEFORE 1.11
 export function registerClientModules () {
   registerStoryblokComponents()
-
+  registerModule(TrueVaultModule)
   registerModule(PageLoadingIndicatorModule)
   registerModule(UrlModule)
   registerModule(CatalogModule)

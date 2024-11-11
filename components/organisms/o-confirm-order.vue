@@ -211,7 +211,9 @@
       </SfButton>
     </div>
 
-    <california-privacy-notice-link />
+    <template v-if="$additionalContent.formLinks">
+      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.formLinks" />
+    </template>
   </div>
 </template>
 <script>
@@ -240,7 +242,6 @@ import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customizati
 import { AFFIRM_MODAL_CLOSED } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';
 import { getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
 import { getCartItemPrice, PAYMENT_ERROR_EVENT } from 'src/modules/shared';
-import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import { createSmoothscroll } from 'theme/helpers';
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
@@ -255,7 +256,6 @@ export default {
   name: 'OConfirmOrder',
   components: {
     APromoCode,
-    CaliforniaPrivacyNoticeLink,
     CartItemConfiguration,
     MPriceSummary,
     OCartItemsTable,

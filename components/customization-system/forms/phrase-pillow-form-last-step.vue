@@ -59,7 +59,9 @@
 
         <m-order-submit-agreement />
 
-        <california-privacy-notice-link />
+        <template v-if="$additionalContent.formLinks">
+          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.formLinks" />
+        </template>
       </div>
     </template>
 
@@ -86,7 +88,6 @@ import {
   CustomizationOptionValue,
   OptionValue
 } from 'src/modules/customization-system';
-import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import SubmitAnimationStepsInterface from 'theme/components/interfaces/submit-animation-steps.interface';
 
@@ -139,7 +140,6 @@ export default defineComponent({
   },
   components: {
     ACustomProductQuantity,
-    CaliforniaPrivacyNoticeLink,
     CustomizationOption,
     MBlockStory,
     MOrderSubmitAgreement,
