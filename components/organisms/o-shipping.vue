@@ -92,6 +92,7 @@
         :class="{[vuelidateErrorClassName]: $v.shipping.region_id.$error}"
         name="address-level1"
         autocomplete="address-level1"
+        :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
         :label="$t('State / Province')"
         :required="true"
         id-field="id"
@@ -226,6 +227,7 @@ import {
 } from 'src/modules/vsf-amazon-pay/index';
 import { LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, LAST_USED_CUSTOMER_PHONE_NUMBER, LAST_USED_CUSTOMER_SHIPPING_COUNTRY, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_PHONE_NUMBER, SET_LAST_USED_CUSTOMER_SHIPPING_COUNTRY } from 'src/modules/persisted-customer-data';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
+import { stateCodeAutocompleteOptionSearch } from 'src/modules/shared';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
@@ -328,6 +330,7 @@ export default {
     }
   },
   methods: {
+    stateCodeAutocompleteOptionSearch,
     async onChangeCountry () {
       this.changeCountry();
 
