@@ -107,6 +107,7 @@
           v-model="payment.region_id"
           name="address-level1"
           autocomplete="address-level1"
+          :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
           class="
           form__element
           form__element--half
@@ -224,6 +225,7 @@ import {
 } from 'src/modules/vsf-amazon-pay/index';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
 import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
+import { stateCodeAutocompleteOptionSearch } from 'src/modules/shared';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
@@ -364,6 +366,7 @@ export default {
     EventBus.$off('user-after-loggedin', this.fillLastUsedCustomerData);
   },
   methods: {
+    stateCodeAutocompleteOptionSearch,
     async changeCountry () {
       await this.$nextTick();
       this.payment.state = '';
