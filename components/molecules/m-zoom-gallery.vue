@@ -4,8 +4,6 @@
     class="m-zoom-gallery"
     :class="{
       '-horizontal': isHorizontalThumbnails,
-      '-first-slide-active': isFirstSlideActive,
-      '-last-slide-active': isLastSlideActive,
     }"
   >
     <div class="_thumbnails">
@@ -16,7 +14,6 @@
         :slides-per-view="slidesToShow"
         :show-counter="false"
         :expand-slide-width="false"
-        :slide-to-clicked-slide="true"
         :centered-slides="false"
         :show-navigation-buttons="false"
         @slide-clicked="onThumbnailSlideClicked"
@@ -41,7 +38,7 @@
 
     <div class="_stage">
       <div class="_stage-content">
-        <div class="_arrow -left" @click="goToPreviousImage" />
+        <div class="_arrow -left desktop-only" @click="goToPreviousImage" />
 
         <div class="_cloud-zoom-wrapper" v-if="stageImage">
           <div
@@ -65,8 +62,9 @@
           ref="stageCarousel"
           :show-counter="false"
           :items="carouselItems"
-          :slides-per-view="1"
+          :slides-per-view="STAGE_SLIDES_PER_VIEW"
           :show-navigation-buttons="false"
+          @active-index-changed="onStageActiveIndexChanged"
         >
           <template #default="{ item: image }">
             <div class="_image-wrapper" :href="image.big" v-if="image">
@@ -77,13 +75,19 @@
                 :alt="image.alt"
                 :title="image.title"
                 :aspect-ratio="1.0"
-                :lazy="lazyLoadStageImage"
+                :lazy="true"
               />
             </div>
           </template>
         </o-carousel>
 
-        <div class="_arrow -right" @click="goToNextImage" />
+        <div class="_arrow -right desktop-only" @click="goToNextImage" />
+
+        <div class="_mobile-swipe-hint mobile-only">
+          <span class="_hint">
+            {{ $t("Swipe") }}
+          </span>
+        </div>
       </div>
     </div>
   </div>
@@ -108,6 +112,9 @@ type ImageKeys = keyof ZoomGalleryImage;
 
 const maximumZoomGalleryWidthAllowedForCloudZoomInit = 50;
 const debounceTime = 300;
+
+// hack to make one slide working with `loop` correctly.
+const STAGE_SLIDES_PER_VIEW = 1.00001;
 
 export default Vue.extend({
   name: 'MZoomGallery',
@@ -135,7 +142,8 @@ export default Vue.extend({
       fShouldInitThumbnailsSlider: false,
       fWindowResizeHandler: undefined as () => void | undefined,
       fIsCloudZoomInitialized: false,
-      slidesToShow: 5
+      slidesToShow: 5,
+      STAGE_SLIDES_PER_VIEW
     };
   },
   computed: {
@@ -209,14 +217,15 @@ export default Vue.extend({
     window.removeEventListener('resize', this.fWindowResizeHandler);
   },
   methods: {
+    onStageActiveIndexChanged (activeIndex: number): void {
+      this.setCurrentIndex(activeIndex);
+      this.getCarousel().slideTo(activeIndex);
+    },
     onThumbnailSlideClicked (slideIndex: number): void {
-      this.setCurrentIndex(slideIndex);
-
       const stageCarousel = this.getStageCarousel();
 
       stageCarousel.slideTo(slideIndex);
     },
-
     getStageCarousel (): InstanceType<typeof OCarousel> {
       return this.$refs.stageCarousel as InstanceType<typeof OCarousel>;
     },
@@ -228,30 +237,26 @@ export default Vue.extend({
         return;
       }
 
-      const newIndex = this.currentIndex - 1;
+      let newIndex = this.currentIndex - 1;
 
       if (newIndex < 0) {
-        return;
+        newIndex = this.carouselItems.length - 1;
       }
 
-      this.currentIndex = newIndex;
-      this.getCarousel().slidePrevious();
-      this.getStageCarousel().slidePrevious();
+      this.getStageCarousel().slideTo(newIndex);
     },
     goToNextImage (): void {
       if (this.currentIndex === undefined) {
         return;
       }
 
-      const newIndex = this.currentIndex + 1;
+      let newIndex = this.currentIndex + 1;
 
       if (newIndex >= this.carouselItems.length) {
-        return;
+        newIndex = 0;
       }
 
-      this.currentIndex = newIndex;
-      this.getCarousel().slideNext();
-      this.getStageCarousel().slideNext();
+      this.getStageCarousel().slideTo(newIndex);
     },
     canCloudZoomInit (): boolean {
       const zoomGallery = this.getZoomGallery();
@@ -384,16 +389,30 @@ export default Vue.extend({
     --carousel-navigation-size: var(--font-base);
   }
 
-  &.-first-slide-active {
-    ._carousel,
-    ._stage-content {
-      --previous-arrow-display: none;
-    }
-  }
+  ._mobile-swipe-hint {
+    position: absolute;
+    bottom: 0;
+    z-index: 100;
+    width: 100%;
+    display: flex;
+    justify-content: center;
 
-  &.-last-slide-active {
-    ._stage-content {
-      --next-arrow-display: none;
+    ._hint {
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 0 var(--spacer-xs);
+      border-top-right-radius: 4px;
+      border-top-left-radius: 4px;
+
+      &::before {
+        content: "\00AB";
+        font-size: var(--font-lg);
+      }
+
+      &::after {
+        content: "\00BB";
+        font-size: var(--font-lg);
+      }
     }
   }
 
@@ -431,18 +450,8 @@ export default Vue.extend({
 
       ._arrow {
         @include swiper-arrow();
-        font-size: var(--font-xl);
+        font-size: var(--font-base);
         z-index: 101;
-
-        &.-right {
-          left: auto;
-          right: 0;
-        }
-
-        &.-left {
-          right: auto;
-          left: 0;
-        }
       }
     }
 
@@ -509,7 +518,7 @@ export default Vue.extend({
     }
 
     ._stage {
-      padding-top: 99%;
+      padding-top: 100%;
       width: 100%;
     }
   }

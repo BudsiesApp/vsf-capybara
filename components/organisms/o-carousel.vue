@@ -95,10 +95,6 @@ export default Vue.extend({
       type: Boolean,
       default: true
     },
-    slideToClickedSlide: {
-      type: Boolean,
-      default: false
-    },
     centeredSlides: {
       type: Boolean,
       default: false
@@ -142,7 +138,8 @@ export default Vue.extend({
         direction: 'horizontal',
         loop: this.isLoopAvailable,
         slidesPerView: this.defaultSlidesPerView,
-        slideToClickedSlide: this.slideToClickedSlide,
+        slideToClickedSlide: false,
+        loopAddBlankSlides: false,
         modules: [Autoplay, Navigation],
         init: false,
         breakpoints: this.breakpoints,
@@ -215,6 +212,7 @@ export default Vue.extend({
       };
       const onRealIndexChange = (swiper: Swiper) => {
         this.currentSlideIndex = swiper.realIndex;
+        this.$emit('active-index-changed', this.currentSlideIndex);
       };
       const onSlideClick = (swiper: Swiper) => {
         if (swiper.clickedIndex === undefined) {
@@ -278,27 +276,14 @@ export default Vue.extend({
 
       this.initSwiper();
     },
-    slideNext () {
-      if (!this.swiper) {
-        return;
-      }
-
-      this.swiper.slideNext();
-    },
-    slidePrevious () {
-      if (!this.swiper) {
-        return;
-      }
-
-      this.swiper.slidePrev();
-    },
     slideTo (index: number) {
       if (!this.swiper) {
         return;
       }
 
       if (this.isLoopAvailable) {
-        return this.swiper.slideToLoop(index);
+        this.swiper.slideToLoop(index);
+        return;
       }
 
       this.swiper.slideTo(index);
@@ -335,9 +320,6 @@ export default Vue.extend({
     },
     isMobile () {
       this.updateSwiper();
-    },
-    slideToClickedSlide (val) {
-      this.updateSwiper({ slideToClickedSlide: val });
     },
     centeredSlides (val) {
       this.updateSwiper({ centeredSlides: val });
