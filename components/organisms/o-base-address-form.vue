@@ -103,6 +103,7 @@
         class="form__element form__element--half form__select"
         name="address-level1"
         autocomplete="address-level1"
+        :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
         :label="$t('State / Province')"
         :required="true"
         id-field="id"
@@ -181,6 +182,7 @@ import { min, regex, required } from 'vee-validate/dist/rules';
 import Vue, { PropType } from 'vue';
 import { SfInput } from '@storefront-ui/vue';
 
+import { stateCodeAutocompleteOptionSearch } from 'src/modules/shared';
 import { BaseAddressFormValue } from 'theme/components/interfaces/base-address-form-value.interface';
 
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
@@ -326,6 +328,7 @@ export default Vue.extend({
     }
   },
   methods: {
+    stateCodeAutocompleteOptionSearch,
     async onChangeCountry (): Promise<void> {
       await this.$nextTick();
       this.validateCountryRelatedFields();
