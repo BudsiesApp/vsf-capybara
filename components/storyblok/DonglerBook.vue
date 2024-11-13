@@ -50,8 +50,8 @@
         {{ $t('We\'ll send you a digital copy of the coloring book via email for you to download when ready!') }}
       </div>
 
-      <template v-if="$additionalContent.formLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.formLinks" />
+      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
       </template>
     </form>
 

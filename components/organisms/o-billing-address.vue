@@ -194,8 +194,8 @@
       </div>
     </div>
 
-    <template v-if="$additionalContent.formLinks">
-      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.formLinks" />
+    <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
     </template>
     <!-- This dummy container below is needed because src\modules\payment-cash-on-delivery\index.ts
          tries to inject here a component with payment description -->
