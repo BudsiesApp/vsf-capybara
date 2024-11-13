@@ -343,12 +343,12 @@ export default defineComponent({
       try {
         await addToCartHandler();
 
+        persistCustomerEmail();
+        removePreservedState();
+
         if (isUnmounted.value) {
           return;
         }
-
-        persistCustomerEmail();
-        removePreservedState();
 
         context.root.$router.push({
           name: 'cross-sells',
