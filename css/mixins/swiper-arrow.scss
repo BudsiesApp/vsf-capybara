@@ -12,11 +12,15 @@
   margin-top: 0;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(#000000, 0.6);
+  background: rgba(#000000, 0.4);
   color: var(--c-white);
   font-weight: lighter;
 
   cursor: pointer;
+
+  &:hover {
+    background: rgba(#000000, 0.6);
+  }
 
   &:after {
     border: 1px solid white;

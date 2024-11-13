@@ -391,7 +391,7 @@ export default Vue.extend({
 
   ._mobile-swipe-hint {
     position: absolute;
-    bottom: 0;
+    bottom: var(--spacer-2xs);
     z-index: 100;
     width: 100%;
     display: flex;
@@ -400,18 +400,27 @@ export default Vue.extend({
     ._hint {
       background: rgba(0, 0, 0, 0.6);
       color: white;
-      padding: 0 var(--spacer-xs);
-      border-top-right-radius: 4px;
-      border-top-left-radius: 4px;
+      padding: calc(var(--spacer-2xs) / 2) var(--spacer-xs);
+      border-radius: 4px;
+
+      &::before,
+      &::after {
+        content: "";
+        background: url('/assets/arrow.svg');
+        background-size: contain;
+        background-repeat: no-repeat;
+        width: 48px;
+        height: 6px;
+        display: inline-block;
+      }
 
       &::before {
-        content: "\00AB";
-        font-size: var(--font-lg);
+        rotate: 180deg;
+        margin-right: var(--spacer-xs);
       }
 
       &::after {
-        content: "\00BB";
-        font-size: var(--font-lg);
+        margin-left: var(--spacer-xs);
       }
     }
   }
