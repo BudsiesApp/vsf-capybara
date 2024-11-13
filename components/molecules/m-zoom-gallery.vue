@@ -398,10 +398,15 @@ export default Vue.extend({
     justify-content: center;
 
     ._hint {
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.4);
       color: white;
-      padding: calc(var(--spacer-2xs) / 2) var(--spacer-xs);
+      padding: 0 var(--spacer-xs);
       border-radius: 4px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacer-xs);
 
       &::before,
       &::after {
@@ -411,16 +416,11 @@ export default Vue.extend({
         background-repeat: no-repeat;
         width: 48px;
         height: 6px;
-        display: inline-block;
+        display: block;
       }
 
       &::before {
         rotate: 180deg;
-        margin-right: var(--spacer-xs);
-      }
-
-      &::after {
-        margin-left: var(--spacer-xs);
       }
     }
   }
