@@ -6,7 +6,7 @@
 
     <div
       class="category__short-description"
-      v-html="getCurrentCategory.short_desc"
+      v-html="getCurrentCategory.description"
     />
 
     <div class="navbar section" v-if="false">
@@ -112,7 +112,7 @@
                 class="products__product-card"
                 :image-height="352"
                 :image-width="352"
-                @click.native="() => onProductCardClick(product.sku)"
+                @click.native.capture="() => onProductCardClick(product.sku)"
               />
             </transition-group>
           </lazy-hydrate>

@@ -11,43 +11,8 @@
     <div class="_code-actions">
       <div
         class="_code-amount"
-        v-show="!isAmountEditing"
-        @click="startEdit"
       >
         ${{ giftCardValue }}
-      </div>
-
-      <SfInput
-        class="_code-amount-input"
-        :disabled="isSubmitting"
-        v-model="newGiftCardValue"
-        v-show="isAmountEditing"
-      />
-
-      <div
-        class="_amount-edit"
-        :disabled="isSubmitting"
-      >
-        <SfIcon
-          icon="check"
-          size="xxs"
-          :title="editLabel"
-          @click="changeAppliedGiftCardValue"
-          v-show="!isSubmittingNewValue && isAmountEditing"
-        />
-
-        <SfIcon
-          size="xxs"
-          :title="editLabel"
-          @click="startEdit"
-          v-show="!isSubmittingNewValue && !isAmountEditing"
-        >
-          <div class="_edit-icon" />
-        </SfIcon>
-
-        <div class="_loader" v-show="isSubmittingNewValue">
-          <SfLoader class="_sf-loader" :loading="true" />
-        </div>
       </div>
 
       <div class="_code -close">
@@ -57,7 +22,7 @@
       <div
         class="_code-remove"
         @click="removeAppliedGiftCard"
-        :disabled="isSubmitting"
+        :disabled="isDisabled"
       >
         <SfIcon icon="cross" size="xxs" title="Remove" v-show="!isRemoving" />
 
@@ -79,10 +44,21 @@ import {
 import AppliedGiftCard from 'src/modules/gift-card/mixins/AppliedGiftCard';
 
 export default AppliedGiftCard.extend({
+  props: {
+    disabled: {
+      type: Boolean,
+      default: false
+    }
+  },
   components: {
     SfIcon,
     SfInput,
     SfLoader
+  },
+  computed: {
+    isDisabled (): boolean {
+      return this.isSubmitting || this.disabled;
+    }
   }
 });
 </script>
@@ -120,8 +96,7 @@ export default AppliedGiftCard.extend({
   }
 
   ._code-remove,
-  ._amount-edit,
-  ._code-amount {
+  ._amount-edit {
     cursor: pointer;
   }
 

@@ -107,6 +107,8 @@
             {{ submitButtonText }}
           </SfButton>
         </div>
+
+        <california-privacy-notice-link />
       </form>
     </validation-observer>
   </div>
@@ -119,6 +121,8 @@ import Vue, { VueConstructor } from 'vue'
 import { mapState } from 'vuex';
 import { SfButton, SfInput, SfSelect } from '@storefront-ui/vue';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
+
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 extend('required', {
   ...required,
@@ -179,6 +183,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveData>).extend({
     }
   },
   components: {
+    CaliforniaPrivacyNoticeLink,
     SfButton,
     SfInput,
     SfSelect,
@@ -314,6 +319,11 @@ export default (Vue as VueConstructor<Vue & NonReactiveData>).extend({
     ._thank-you {
       margin-bottom: var(--spacer-sm);
     }
+  }
+
+  .california-privacy-notice-link {
+    --privacy-notice-link-text-align: end;
+    --privacy-notice-link-width: 100%;
   }
 
   @include for-desktop {

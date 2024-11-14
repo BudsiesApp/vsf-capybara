@@ -107,6 +107,7 @@
           v-model="payment.region_id"
           name="address-level1"
           autocomplete="address-level1"
+          :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
           class="
           form__element
           form__element--half
@@ -192,6 +193,8 @@
         </SfButton>
       </div>
     </div>
+
+    <california-privacy-notice-link />
     <!-- This dummy container below is needed because src\modules\payment-cash-on-delivery\index.ts
          tries to inject here a component with payment description -->
     <div v-show="false" id="checkout-order-review-additional-container" />
@@ -221,6 +224,8 @@ import {
   METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
 } from 'src/modules/vsf-amazon-pay/index';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
+import { stateCodeAutocompleteOptionSearch } from 'src/modules/shared';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
@@ -229,6 +234,7 @@ const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3}
 export default {
   name: 'OBillingAddress',
   components: {
+    CaliforniaPrivacyNoticeLink,
     SfInput,
     SfButton,
     SfHeading,
@@ -360,6 +366,7 @@ export default {
     EventBus.$off('user-after-loggedin', this.fillLastUsedCustomerData);
   },
   methods: {
+    stateCodeAutocompleteOptionSearch,
     async changeCountry () {
       await this.$nextTick();
       this.payment.state = '';
@@ -514,5 +521,9 @@ export default {
       display: flex;
     }
   }
+}
+
+.california-privacy-notice-link {
+  --privacy-notice-link-display: inline;
 }
 </style>

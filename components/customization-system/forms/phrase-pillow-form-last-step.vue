@@ -56,6 +56,10 @@
         <div class="_submit-disclaimer _helper-text">
           {{ $t("I have seen and approve the Live Preview of my design.") }}
         </div>
+
+        <m-order-submit-agreement />
+
+        <california-privacy-notice-link />
       </div>
     </template>
 
@@ -82,12 +86,14 @@ import {
   CustomizationOptionValue,
   OptionValue
 } from 'src/modules/customization-system';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import SubmitAnimationStepsInterface from 'theme/components/interfaces/submit-animation-steps.interface';
 
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
+import MOrderSubmitAgreement from 'theme/components/molecules/m-order-submit-agreement.vue';
 import MSubmitAnimator from 'theme/components/molecules/m-submit-animator.vue';
 
 const submitAnimationSteps: SubmitAnimationStepsInterface[] = [
@@ -133,8 +139,10 @@ export default defineComponent({
   },
   components: {
     ACustomProductQuantity,
+    CaliforniaPrivacyNoticeLink,
     CustomizationOption,
     MBlockStory,
+    MOrderSubmitAgreement,
     MSubmitAnimator,
     SfButton,
     SfHeading,
@@ -204,6 +212,10 @@ export default defineComponent({
   ._animation-row {
     margin-top: var(--spacer-base);
     text-align: center;
+  }
+
+  ._quantity-field {
+    margin-top: var(--spacer-base);
   }
 
   ._qty-container {

@@ -114,8 +114,6 @@
 import {
   computed,
   defineComponent,
-  nextTick,
-  onMounted,
   PropType,
   Ref,
   ref,
@@ -140,7 +138,6 @@ import {
   useCustomizationsBundleOptions,
   useCustomizationsOptionsDefaultValue,
   useCustomizationStatePreservation,
-  useProductionTimeSelectorCustomization,
   useSelectedOptionValueUrlQuery,
   useCustomizationsFilter,
   useEmailCustomization,
@@ -148,7 +145,9 @@ import {
 } from 'src/modules/customization-system';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
+import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import { usePhrasePillowFormSteps } from 'theme/helpers/use-phrase-pillow-form-steps';
+import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
@@ -187,7 +186,7 @@ export default defineComponent({
     ValidationObserver
   },
   setup (props, context) {
-    const { existingCartItem, product } = toRefs(props);
+    const { canUsePersistedCustomizationState, existingCartItem, product } = toRefs(props);
 
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
@@ -217,21 +216,20 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
-      replaceCustomizationState,
       selectedOptionValuesIds,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      mergeCustomizationState
     } = useCustomizationState(existingCartItem);
     const {
-      availableCustomization,
       availableCustomizations,
       availableOptionValues,
-      customizationAvailableOptionValues
+      customizationAvailableOptionValues,
+      removeUnavailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
       selectedOptionValuesIds,
       customizationOptionValue,
-      updateCustomizationOptionValue,
-      product
+      updateCustomizationOptionValue
     );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
@@ -266,41 +264,26 @@ export default defineComponent({
       onCustomizationOptionInput
     );
 
-    const { getPreservedData, removePreservedState } =
+    const { unhandledCustomizationsFilter } = useSelectedOptionValueUrlQuery(
+      productCustomizations,
+      availableOptionValues,
+      customizationOptionValue,
+      product,
+      mergeCustomizationState,
+      removeUnavailableOptionValues,
+      context
+    );
+
+    const { removePreservedState } =
       useCustomizationStatePreservation(
         productSku,
         customizationState,
-        existingCartItem
+        existingCartItem,
+        [unhandledCustomizationsFilter],
+        canUsePersistedCustomizationState,
+        mergeCustomizationState,
+        removeUnavailableOptionValues
       );
-
-    onMounted(async () => {
-      await nextTick();
-
-      if (
-        existingCartItem.value ||
-        !props.canUsePersistedCustomizationState
-      ) {
-        removePreservedState();
-        return;
-      }
-
-      const preservedState = await getPreservedData();
-
-      if (!preservedState) {
-        return;
-      }
-
-      replaceCustomizationState(preservedState.customizationState);
-    });
-
-    // TODO: temporary until separate option value for "Standard"
-    // production time will be added
-    useProductionTimeSelectorCustomization(
-      availableCustomizations,
-      customizationOptionValue,
-      existingCartItem,
-      updateCustomizationOptionValue
-    );
 
     const { emailCustomizationFilter, persistCustomerEmail } =
       useEmailCustomization(
@@ -325,7 +308,7 @@ export default defineComponent({
       customizationGroups.customizationRootGroupCustomizations
     );
 
-    const quantity = ref<number>(1);
+    const { quantity } = useProductQuantity(existingCartItem);
     const { addToCartHandler, isSubmitting } = useAddToCart(
       product,
       quantity,
@@ -333,6 +316,8 @@ export default defineComponent({
       existingCartItem,
       context
     );
+
+    const { isUnmounted } = useComponentUnmountedChecker();
 
     async function onFormSubmit (): Promise<void> {
       if (!validationObserver.value) {
@@ -356,11 +341,19 @@ export default defineComponent({
         processedImageUploadCustomizationStateItem
       );
 
+      if (isUnmounted.value) {
+        return;
+      }
+
       try {
         await addToCartHandler();
 
         persistCustomerEmail();
         removePreservedState();
+
+        if (isUnmounted.value) {
+          return;
+        }
 
         context.root.$router.push({
           name: 'cross-sells',
@@ -410,15 +403,6 @@ export default defineComponent({
         currentStep?.name.toLowerCase() === BACK_DESIGN_STEP_NAME
       );
     });
-
-    useSelectedOptionValueUrlQuery(
-      availableCustomization,
-      availableOptionValues,
-      customizationOptionValue,
-      product,
-      updateCustomizationOptionValue,
-      context
-    );
 
     return {
       ...customizationGroups,
@@ -484,6 +468,11 @@ export default defineComponent({
 
     &.-widget-ProductionTimeSelector {
       --select-width: 100%;
+    }
+
+    &.-widget-ThumbnailsListWidget {
+      --thumbnails-list-widget-item-width: 33%;
+      --thumbnails-list-widget-item-min-width: 33%;
     }
   }
 
@@ -636,11 +625,14 @@ export default defineComponent({
         }
       }
     }
+  }
 
+  @media(min-width: $tablet-min) {
     ._customization-option {
-      --customization-option-label-align: left;
-      --customization-option-description-align: left;
-      --customization-option-hint-align: left;
+      &.-widget-ThumbnailsListWidget {
+        --thumbnails-list-widget-item-width: 25%;
+        --thumbnails-list-widget-item-min-width: 25%;
+      }
     }
   }
 

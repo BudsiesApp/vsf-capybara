@@ -17,7 +17,6 @@ import { ModalList } from './store/ui/modals';
 import { FileProcessingRepositoryFactory, ImageHandlerService, itemFactory } from 'src/modules/file-storage'
 import { ErrorConverterService } from 'src/modules/budsies'
 import { isServer } from '@vue-storefront/core/helpers'
-import { syncCartWhenLocalStorageChange } from '@vue-storefront/core/modules/cart/helpers'
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { USER_LEAVING_WEBSITE } from 'src/modules/promotion-platform';
 import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
@@ -42,11 +41,9 @@ export default {
     }
   },
   mounted () {
-    syncCartWhenLocalStorageChange.addEventListener();
     EventBus.$on(USER_LEAVING_WEBSITE, this.onUserLeavingWebsite)
   },
   beforeDestroy () {
-    syncCartWhenLocalStorageChange.removeEventListener();
     EventBus.$off(USER_LEAVING_WEBSITE, this.onUserLeavingWebsite);
   },
   serverPrefetch () {

@@ -50,6 +50,10 @@ export default Vue.extend({
       type: String,
       default: ''
     },
+    email: {
+      type: String,
+      default: ''
+    },
     token: {
       type: String,
       default: ''
@@ -74,7 +78,7 @@ export default Vue.extend({
   },
   computed: {
     showForm (): boolean {
-      return !!this.id && !!this.token;
+      return (!!this.id || !!this.email) && !!this.token;
     }
   },
   mounted (): void {
@@ -98,6 +102,7 @@ export default Vue.extend({
       try {
         await this.$store.dispatch('user/passwordResetConfirm', {
           id: this.id,
+          email: this.email,
           token: this.token,
           password: this.passwordData.password,
           confirmation: this.passwordData.repeatPassword

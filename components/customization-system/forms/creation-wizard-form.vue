@@ -110,8 +110,6 @@
 import {
   computed,
   defineComponent,
-  nextTick,
-  onMounted,
   PropType,
   Ref,
   ref,
@@ -134,21 +132,23 @@ import {
   useCustomizationsBundleOptions,
   useCustomizationsOptionsDefaultValue,
   useCustomizationStatePreservation,
-  useProductionTimeSelectorCustomization,
   useSelectedOptionValueUrlQuery,
   useEmailCustomization,
   useCustomizationsFilter,
-  requiredCustomizationsFilter
+  requiredCustomizationsFilter,
+  PersistedData
 } from 'src/modules/customization-system';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
+import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import { useCreationWizardFormSteps } from 'theme/helpers/use-creation-wizard-form-steps';
 import { useCreationWizardGtmEvents } from 'theme/helpers/use-creation-wizard-gtm-events';
 import { useCreationWizardPreselectedSize } from 'theme/helpers/use-creation-wizard-preselected-size';
 import { useCreationWizardProductTypeStep } from 'theme/helpers/use-creation-wizard-product-type-step';
 import { useFloatingPhoto } from 'theme/helpers/use-floating-photo';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 import { PlushieType } from 'theme/interfaces/plushie.type';
 
 import CreationWizardFormLastStep from 'theme/components/customization-system/forms/creation-wizard-form-last-step.vue';
@@ -217,6 +217,7 @@ export default defineComponent({
   },
   setup (props, context) {
     const {
+      canUsePersistedCustomizationState,
       existingCartItem,
       plushieType,
       preselectedProductSize,
@@ -248,22 +249,21 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
-      replaceCustomizationState,
       resetCustomizationState,
       selectedOptionValuesIds,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      mergeCustomizationState
     } = useCustomizationState(existingCartItem);
     const {
-      availableCustomization,
       availableCustomizations,
       availableOptionValues,
-      customizationAvailableOptionValues
+      customizationAvailableOptionValues,
+      removeUnavailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
       selectedOptionValuesIds,
       customizationOptionValue,
-      updateCustomizationOptionValue,
-      currentProduct
+      updateCustomizationOptionValue
     );
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
@@ -296,15 +296,6 @@ export default defineComponent({
       customizationAvailableOptionValues,
       customizationOptionValue,
       onCustomizationOptionInput
-    );
-
-    // TODO: temporary until separate option value for "Standard"
-    // production time will be added
-    useProductionTimeSelectorCustomization(
-      availableCustomizations,
-      customizationOptionValue,
-      existingCartItem,
-      updateCustomizationOptionValue
     );
 
     const { emailCustomizationFilter, persistCustomerEmail } =
@@ -368,50 +359,50 @@ export default defineComponent({
       }
     });
 
-    const { getPreservedData, removePreservedState } =
+    const { unhandledCustomizationsFilter } = useSelectedOptionValueUrlQuery(
+      productCustomizations,
+      availableOptionValues,
+      customizationOptionValue,
+      currentProduct,
+      mergeCustomizationState,
+      removeUnavailableOptionValues,
+      context
+    );
+
+    const beforeCustomizationStateMerge = async (preservedState: PersistedData): Promise<boolean> => {
+      const productSku = preservedState.additionalData?.productSku;
+
+      if (!productSku) {
+        return false;
+      }
+
+      await productTypeStep.loadProduct(productSku);
+      return true;
+    };
+
+    const afterCustomizationStateMerge = (persistedData: PersistedData) => {
+      if (!persistedData.additionalData?.stepIndex) {
+        return;
+      }
+
+      formSteps.goToStep(persistedData.additionalData?.stepIndex);
+    }
+
+    const { removePreservedState } =
       useCustomizationStatePreservation(
         plushieType,
         customizationState,
         existingCartItem,
+        [unhandledCustomizationsFilter],
+        canUsePersistedCustomizationState,
+        mergeCustomizationState,
+        removeUnavailableOptionValues,
+        beforeCustomizationStateMerge,
+        afterCustomizationStateMerge,
         additionalPreservedData
       );
 
-    onMounted(async () => {
-      await nextTick();
-
-      if (
-        existingCartItem.value ||
-        !props.canUsePersistedCustomizationState
-      ) {
-        removePreservedState();
-        return;
-      }
-
-      const preservedState = await getPreservedData();
-
-      if (!preservedState) {
-        return;
-      }
-
-      const productSku = preservedState.additionalData?.productSku;
-
-      if (!productSku) {
-        removePreservedState();
-        return;
-      }
-
-      await productTypeStep.loadProduct(productSku);
-
-      replaceCustomizationState(preservedState.customizationState);
-
-      if (!preservedState.additionalData?.stepIndex) {
-        return;
-      }
-
-      formSteps.goToStep(preservedState.additionalData?.stepIndex);
-    });
-
-    const quantity = ref<number>(1);
+    const { quantity } = useProductQuantity(existingCartItem);
     const { addToCartHandler, isSubmitting } = useAddToCart(
       currentProduct,
       quantity,
@@ -420,6 +411,8 @@ export default defineComponent({
       context
     );
 
+    const { isUnmounted } = useComponentUnmountedChecker();
+
     async function onFormSubmit (): Promise<void> {
       try {
         await addToCartHandler();
@@ -427,8 +420,8 @@ export default defineComponent({
         persistCustomerEmail();
         removePreservedState();
 
-        if (!currentProduct.value) {
-          throw new Error('Product is missing');
+        if (isUnmounted.value || !currentProduct.value) {
+          return;
         }
 
         context.root.$router.push({
@@ -457,15 +450,6 @@ export default defineComponent({
     const isSubmitButtonDisabled = computed<boolean>(() => {
       return isDisabled.value || isSomeCustomizationOptionBusy.value;
     });
-
-    useSelectedOptionValueUrlQuery(
-      availableCustomization,
-      availableOptionValues,
-      customizationOptionValue,
-      currentProduct,
-      updateCustomizationOptionValue,
-      context
-    );
 
     return {
       ...customizationGroups,
