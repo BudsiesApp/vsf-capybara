@@ -143,6 +143,7 @@ import ProductTypeButton from 'theme/components/interfaces/product-type-button.i
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import { useCreationWizardFormSteps } from 'theme/helpers/use-creation-wizard-form-steps';
+import { useCreationWizardGtmEvents } from 'theme/helpers/use-creation-wizard-gtm-events';
 import { useCreationWizardPreselectedSize } from 'theme/helpers/use-creation-wizard-preselected-size';
 import { useCreationWizardProductTypeStep } from 'theme/helpers/use-creation-wizard-product-type-step';
 import { useFloatingPhoto } from 'theme/helpers/use-floating-photo';
@@ -315,9 +316,16 @@ export default defineComponent({
       productCustomization
     );
 
+    const { onStepSubmit } = useCreationWizardGtmEvents(
+      availableCustomizations,
+      customizationOptionValue,
+      plushieType
+    )
+
     const formSteps = useCreationWizardFormSteps(
       customizationGroups.customizationRootGroups,
-      existingCartItem
+      existingCartItem,
+      onStepSubmit
     );
 
     const { handlePreselectedSize } = useCreationWizardPreselectedSize(

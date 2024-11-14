@@ -5,10 +5,12 @@ import { Customization } from 'src/modules/customization-system';
 import { useFormSteps } from './use-form-steps';
 
 const productTypeChooseStepName = 'Type';
+const previousCustomizationStepOffset = 2;
 
 export function useCreationWizardFormSteps (
   customizationRootGroups: Ref<Customization[]>,
-  existingCartItem: Ref<CartItem | undefined>
+  existingCartItem: Ref<CartItem | undefined>,
+  afterStepChanged: (previousStepCustomization?: Customization) => void
 ) {
   const {
     currentStep,
@@ -34,7 +36,11 @@ export function useCreationWizardFormSteps (
     stepsNames.unshift(productTypeChooseStepName);
 
     return stepsNames;
-  })
+  });
+
+  const previousStepCustomization = computed<Customization | undefined>(() => {
+    return customizationRootGroups.value[currentStep.value - previousCustomizationStepOffset];
+  });
 
   function scrollToTop (): void {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
@@ -42,6 +48,7 @@ export function useCreationWizardFormSteps (
 
   async function nextStep (): Promise<void> {
     currentStep.value += 1;
+    afterStepChanged(previousStepCustomization.value);
     await nextTick();
     scrollToTop();
   }
