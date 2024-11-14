@@ -28,12 +28,10 @@
         <slot />
       </div>
 
-      <LazyHydrate when-visible>
-        <OFooter
-          class="default-layout_footer"
-          :class="{ '-show-for-medium-up': hideFooterOnMobile }"
-        />
-      </LazyHydrate>
+      <OFooter
+        class="default-layout_footer"
+        :class="{ '-show-for-medium-up': hideFooterOnMobile }"
+      />
 
       <LazyHydrate never :trigger-hydration="shouldHydrateModals">
         <OModal />
