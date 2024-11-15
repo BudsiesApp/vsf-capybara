@@ -1,0 +1,79 @@
+@mixin swiper-arrow() {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border-radius: 100%;
+  border: 1px solid var(--c-white);
+  box-sizing: border-box;
+  margin-top: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(#000000, 0.4);
+  color: var(--c-white);
+  font-weight: lighter;
+
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(#000000, 0.6);
+  }
+
+  &:after {
+    border: 1px solid white;
+    border-top: 0;
+    border-left: 0;
+    width: 10px;
+    height: 10px;
+    transform: translate(-2px, -2px);
+  }
+
+  &.-left {
+    display: var(--previous-arrow-display, flex);
+    left: var(--spacer-sm);
+    right: auto;
+
+    &::after {
+      content: '';
+      rotate: 135deg;
+    }
+  }
+
+  &.-right {
+    display: var(--next-arrow-display, flex);
+    right: var(--spacer-sm);
+    left: auto;
+
+    &::after {
+      content: '';
+      rotate: -45deg;
+    }
+  }
+
+  &.-vertical-layout {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+
+    &.-left {
+     top: var(--spacer-sm);
+     bottom: auto; 
+
+     &::after {
+      rotate: -135deg;
+     }
+    }
+
+    &.-right {
+      top: auto;
+      bottom: var(--spacer-sm);
+
+     &::after {
+      rotate: 45deg;
+     }
+    }
+  }
+}
