@@ -18,6 +18,8 @@
           {{ $t('Update Address') }}
         </SfButton>
       </div>
+
+      <california-privacy-notice-link />
     </validation-observer>
   </div>
 </template>
@@ -29,11 +31,14 @@ import { TranslateResult } from 'vue-i18n';
 import { SfButton } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
 
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
+
 import OBaseAddressForm from './o-base-address-form.vue';
 
 export default Vue.extend({
   name: 'OEditAddressForm',
   components: {
+    CaliforniaPrivacyNoticeLink,
     OBaseAddressForm,
     SfButton,
     ValidationObserver
@@ -92,7 +97,8 @@ export default Vue.extend({
         country_id: this.existingAddress.country,
         telephone: this.existingAddress.phoneNumber,
         default_shipping: this.existingAddress.defaultShipping,
-        default_billing: this.existingAddress.defaultBilling
+        default_billing: this.existingAddress.defaultBilling,
+        customer_id: this.existingAddress.customerId
       }
 
       return this.$store.dispatch('budsies/updateAddress', { address: addressToUpdate });
@@ -117,6 +123,11 @@ export default Vue.extend({
     display: flex;
     align-items: center;
     justify-content: space-between;
+  }
+
+  .california-privacy-notice-link {
+    --privacy-notice-link-width: 100%;
+    --privacy-notice-link-text-align: end;
   }
 }
 </style>

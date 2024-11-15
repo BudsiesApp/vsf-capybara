@@ -43,6 +43,15 @@
 
       <div class="_copyright">
         {{ $t('Copyright {year}. Budsies PR LLC. All Rights Reserved.', {year: new Date().getFullYear()}) }}
+        |
+
+        <privacy-policy-link />
+
+        <california-privacy-notice-link text="| California Privacy Notice" />
+      </div>
+
+      <div class="_opt-out-link-container">
+        <opt-out-link />
       </div>
     </SfFooter>
   </footer>
@@ -56,11 +65,16 @@ import config from 'config';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import get from 'lodash-es/get';
 
-import MBudsiesBrands from '../molecules/m-budsies-brands';
+import { CaliforniaPrivacyNoticeLink, OptOutLink, PrivacyPolicyLink } from 'src/modules/true-vault';
+
+import MBudsiesBrands from '../molecules/m-budsies-brands.vue';
 
 export default {
   name: 'OFooter',
   components: {
+    CaliforniaPrivacyNoticeLink,
+    OptOutLink,
+    PrivacyPolicyLink,
     MBudsiesBrands,
     SfFooter,
     SfList,
@@ -93,10 +107,6 @@ export default {
             {
               name: this.$t('Our Team'),
               link: '/team/'
-            },
-            {
-              name: this.$t('Privacy Policy'),
-              link: '/privacy-policy/'
             },
             {
               name: this.$t('Terms of Service'),
@@ -201,10 +211,36 @@ export default {
   }
 
   ._copyright {
+    --privacy-notice-link-font-size: var(--font-xs);
+    --privacy-notice-link-color: var(--c-text);
+    --privacy-notice-link-margin: 0;
+    --privacy-notice-display: inline;
+
     margin-top: var(--spacer-base);
     font-size: var(--font-xs);
     text-align: center;
     width: 100%;
+
+    a {
+      color: inherit;
+    }
+  }
+
+  ._opt-out-link-container {
+    --opt-out-link-font-size: var(--font-xs);
+    --opt-out-link-color: var(--c-text);
+
+    width: 100%;
+    text-align: center;
+
+    .opt-out-link {
+      display: inline-block;
+      margin-top: var(--spacer-sm);
+
+      &:empty {
+        display: none;
+      }
+    }
   }
 
   @include for-desktop {

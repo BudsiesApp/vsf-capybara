@@ -90,43 +90,15 @@
                 class="collected-product"
               >
                 <template #configuration>
-                  <div class="collected-product__option" v-if="getPlushieName(product)">
-                    {{ getPlushieName(product) | htmlDecode }}
-                  </div>
-                  <div
-                    class="collected-product__option"
-                    v-for="option in getBundleProductOptions(product)"
-                    :key="option"
-                  >
-                    <SfIcon
-                      icon="check"
-                      size="xxs"
-                      color="blue-primary"
-                      class="collected-product__option__icon"
-                    />
-                    {{ option }}
-                  </div>
+                  <cart-item-configuration
+                    :customizations="product.customizations"
+                    :customization-state="(product.extension_attributes || {}).customization_state"
+                    :product-options="getCartItemOptions(product)"
+                    :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
+                  />
                 </template>
                 <template #actions>
                   <div>
-                    <div class="collected-product__properties">
-                      <template v-for="option in getProductOptions(product)">
-                        <SfProperty
-                          v-if="isCustomOption(product, option)"
-                          :key="option.label"
-                          :name="option.label"
-                          :value="option.value"
-                          class="collected-product__property"
-                        />
-                        <div
-                          v-else
-                          :key="option.label"
-                          class="collected-product__property"
-                        >
-                          {{ option.value }}
-                        </div>
-                      </template>
-                    </div>
                     <div class="collected-product__action">
                       {{ $t('Quantity') }}:
                       <span class="product__qty">{{ product.qty }}</span>
@@ -164,12 +136,18 @@
         class="sf-heading--left sf-heading--no-underline title"
       />
 
-      <APromoCode :allow-promo-code-removal="false" />
+      <APromoCode
+        :allow-promo-code-removal="false"
+        :disabled="isCheckoutInProgress"
+      />
     </div>
 
     <div class="totals desktop-only">
       <div class="totals__element">
-        <APromoCode :allow-promo-code-removal="false" />
+        <APromoCode
+          :allow-promo-code-removal="false"
+          :disabled="isCheckoutInProgress"
+        />
       </div>
       <MPriceSummary class="totals__element" />
     </div>
@@ -188,16 +166,15 @@
           :is="componentsByMethodCode[method.code]"
           :show-content="payment.paymentMethod === method.code"
           @success="placeOrder"
-          @error="onBraintreePaymentMethodError"
         >
           <template>
             <SfRadio
               v-model="payment.paymentMethod"
               :label="method.title ? method.title : method.name"
               :value="method.code"
+              :disabled="isCheckoutInProgress"
               name="payment-method"
               class="form__radio payment-method"
-              @input="onPaymentMethodChange"
             >
               <template v-if="method.icon" #label>
                 <div class="_method-label">
@@ -228,16 +205,13 @@
         {{ $t('Place the order') }}
       </SfButton>
     </div>
+
+    <california-privacy-notice-link />
   </div>
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
-import { registerModule } from '@vue-storefront/core/lib/modules';
-import { OrderModule } from '@vue-storefront/core/modules/order';
-import { OrderReview } from '@vue-storefront/core/modules/checkout/components/OrderReview';
-import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
-import { createSmoothscroll } from 'theme/helpers';
+import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 import {
   SfRadio,
   SfIcon,
@@ -247,26 +221,36 @@ import {
   SfButton,
   SfHeading,
   SfAccordion,
-  SfCollectedProduct,
-  SfProperty
+  SfCollectedProduct
 } from '@storefront-ui/vue';
-import MPriceSummary from 'theme/components/molecules/m-price-summary';
-import APromoCode from 'theme/components/atoms/a-promo-code';
 
-import { onlineHelper } from '@vue-storefront/core/helpers';
-import { ProductId } from 'src/modules/budsies';
+import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
+import { registerModule } from '@vue-storefront/core/lib/modules';
+import { OrderModule, ORDER_CONFLICT_EVENT } from '@vue-storefront/core/modules/order';
+import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
+import { OrderReview } from '@vue-storefront/core/modules/checkout/components/OrderReview';
+import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
-import { AFFIRM_BEFORE_PLACE_ORDER, AFFIRM_MODAL_CLOSED, AFFIRM_CHECKOUT_ERROR } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';
-import { getCartItemPrice } from 'src/modules/shared';
-
-import OCartItemsTable from 'theme/components/organisms/o-cart-items-table';
-import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
+import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
+import { AFFIRM_MODAL_CLOSED } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';
 import { getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
+import { getCartItemPrice, PAYMENT_ERROR_EVENT } from 'src/modules/shared';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
+
+import { createSmoothscroll } from 'theme/helpers';
+import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
+
+import APromoCode from 'theme/components/atoms/a-promo-code';
+import CartItemConfiguration from 'theme/components/customization-system/cart-item-configuration.vue';
+import MPriceSummary from 'theme/components/molecules/m-price-summary';
+import OCartItemsTable from 'theme/components/organisms/o-cart-items-table';
 
 export default {
   name: 'OConfirmOrder',
   components: {
     APromoCode,
+    CaliforniaPrivacyNoticeLink,
+    CartItemConfiguration,
     MPriceSummary,
     OCartItemsTable,
     SfRadio,
@@ -277,15 +261,22 @@ export default {
     SfButton,
     SfHeading,
     SfAccordion,
-    SfCollectedProduct,
-    SfProperty
+    SfCollectedProduct
   },
   mixins: [OrderReview, Payment],
+  inject: {
+    imageHandlerService: { from: 'ImageHandlerService' }
+  },
   data () {
     return {
       isCheckoutInProgress: false,
       braintreeClient: undefined
     };
+  },
+  watch: {
+    'payment.paymentMethod' () {
+      this.onPaymentMethodChange()
+    }
   },
   computed: {
     ...mapGetters({
@@ -340,35 +331,35 @@ export default {
     registerModule(OrderModule);
   },
   async beforeMount () {
-    this.$bus.$on(AFFIRM_BEFORE_PLACE_ORDER, this.onAffirmBeforePlaceOrderHandler);
     this.$bus.$on(AFFIRM_MODAL_CLOSED, this.onAffirmModalClosedHandler);
-    this.$bus.$on(AFFIRM_CHECKOUT_ERROR, this.onAffirmPlaceOrderError);
+    this.$bus.$on(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
+    this.$bus.$on(PAYMENT_ERROR_EVENT, this.onPaymentErrorEventHandler);
+    this.$bus.$on(ORDER_CONFLICT_EVENT, this.onOrderConflictEventHandler);
 
     this.braintreeClient = await this.$store.dispatch('braintree/createBraintreeClient');
   },
   beforeDestroy () {
-    this.$bus.$off(AFFIRM_BEFORE_PLACE_ORDER, this.onAffirmBeforePlaceOrderHandler);
     this.$bus.$off(AFFIRM_MODAL_CLOSED, this.onAffirmModalClosedHandler);
-    this.$bus.$off(AFFIRM_CHECKOUT_ERROR, this.onAffirmPlaceOrderError);
+    this.$bus.$off(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler)
+    this.$bus.$off(PAYMENT_ERROR_EVENT, this.onPaymentErrorEventHandler);
+    this.$bus.$off(ORDER_CONFLICT_EVENT, this.onOrderConflictEventHandler);
   },
   methods: {
     ...mapActions('ui', {
       openModal: 'openModal'
     }),
-    getPlushieName (product) {
-      if (!product.plushieName) {
-        return '';
-      }
-
-      let name = product.plushieName;
-
-      if (product.plushieBreed) {
-        name += ', ' + product.plushieBreed;
-      }
-
-      return this.truncate(name);
-    },
+    getCartItemOptions,
     getThumbnailForProduct (product) {
+      const customizationSystemThumbnail =
+        getCustomizationSystemCartItemThumbnail(
+          product,
+          this.imageHandlerService
+        );
+
+      if (customizationSystemThumbnail) {
+        return customizationSystemThumbnail;
+      }
+
       if (product.thumbnail && product.thumbnail.includes('://')) {
         return product.thumbnail;
       }
@@ -381,63 +372,6 @@ export default {
     getProductSpecialPrice (product) {
       return getCartItemPrice(product, {}).special;
     },
-    getProductOptions (product) {
-      return onlineHelper.isOnline && product.totals && product.totals.options
-        ? product.totals.options
-        : product.options || [];
-    },
-    isCustomOption (product, productOption) {
-      if (!product.custom_options) {
-        return false;
-      }
-
-      return product.custom_options.find(option => option.title === productOption.label) !== undefined;
-    },
-    getBundleProductOptions (product) {
-      if (!product.bundle_options ||
-          product.bundle_options.length < 2 ||
-          !product.product_option ||
-          !product.product_option.extension_attributes ||
-          !product.product_option.extension_attributes.bundle_options
-      ) {
-        return [];
-      }
-
-      let result = [];
-      const productBundleOptions = product.product_option.extension_attributes.bundle_options;
-
-      product.bundle_options.forEach(option => {
-        // Hide Forevers simple products
-        if ([ProductId.FOREVERS_DOG, ProductId.FOREVERS_CAT, ProductId.FOREVERS_OTHER]
-          .includes(product.id) && option.title.toLowerCase() === 'product'
-        ) {
-          return;
-        }
-
-        if (!productBundleOptions.hasOwnProperty(option.option_id)) {
-          return
-        }
-
-        const selections = productBundleOptions[option.option_id].option_selections;
-
-        if (!selections) {
-          return
-        }
-
-        selections.forEach(selection => {
-          const productLink = option.product_links.find(productLink => +productLink.id === selection);
-
-          if (!productLink) {
-            return;
-          }
-
-          result.push(productLink.product.name);
-        });
-      });
-
-      return result;
-    },
-    onSuccess () {},
     onFailure (response) {
       this.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
@@ -445,33 +379,21 @@ export default {
         action1: { label: this.$t('OK') }
       });
     },
-    onBraintreePaymentMethodError () {
-      this.$store.dispatch('notification/spawnNotification', {
-        type: 'danger',
-        message: this.$t('Something went wrong. Please try another payment method'),
-        action1: { label: this.$t('OK') }
-      });
-    },
-    truncate (text, desktopLength = 75, mobileLength = 50) {
-      const maxLength = this.isMobile ? mobileLength : desktopLength;
-
-      if (text.length <= maxLength) {
-        return text;
-      }
-
-      return text.substring(0, maxLength) + '...';
-    },
-    onAffirmBeforePlaceOrderHandler () {
-      this.isCheckoutInProgress = true;
-    },
     onAffirmModalClosedHandler () {
       this.isCheckoutInProgress = false;
     },
-    onAffirmPlaceOrderError () {
+    onOrderErrorEventHandler () {
       this.isCheckoutInProgress = false;
+    },
+    onOrderConflictEventHandler () {
+      this.isCheckoutInProgress = false;
+    },
+    onPaymentErrorEventHandler () {
+      this.isCheckoutInProgress = false;
+
       this.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
-        message: this.$t('Something went wrong'),
+        message: this.$t('Something went wrong. Please try another payment method'),
         action1: { label: this.$t('OK') }
       });
     },
@@ -483,6 +405,12 @@ export default {
       this.changePaymentMethod();
     },
     onPlaceOrder () {
+      if (this.isCheckoutInProgress) {
+        return;
+      }
+
+      this.isCheckoutInProgress = true;
+
       if (!this.isBraintreeMethodSelected) {
         this.placeOrder();
         return;
@@ -674,6 +602,9 @@ a {
       margin-top: 0;
     }
   }
+}
+.california-privacy-notice-link {
+  --privacy-notice-link-display: inline;
 }
 
 @include for-desktop {

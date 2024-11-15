@@ -22,6 +22,8 @@
         <SfButton class="sf-button--full-width form__submit">
           {{ $t('Reset password') }}
         </SfButton>
+
+        <california-privacy-notice-link />
       </form>
     </template>
     <div v-else>
@@ -37,15 +39,20 @@
 
 <script>
 import i18n from '@vue-storefront/i18n';
-import { Logger } from '@vue-storefront/core/lib/logger';
 import { required, email } from 'vuelidate/lib/validators';
 import { SfInput, SfButton } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
 import { mapActions } from 'vuex';
 
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
+
 export default {
   name: 'MResetPassword',
-  components: { SfInput, SfButton },
+  components: {
+    CaliforniaPrivacyNoticeLink,
+    SfInput,
+    SfButton
+  },
   data () {
     return {
       email: '',
@@ -118,6 +125,11 @@ export default {
   }
   &__submit {
     margin: var(--spacer-xl) 0 0 0;
+  }
+
+  .california-privacy-notice-link {
+    --privacy-notice-link-width: 100%;
+    --privacy-notice-link-text-align: center;
   }
 }
 .action-button {

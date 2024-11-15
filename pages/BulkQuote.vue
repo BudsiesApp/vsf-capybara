@@ -71,21 +71,15 @@ export default {
   methods: {
     async loadData (): Promise<void> {
       this.isDataLoading = true;
-      const product = await this.$store.dispatch('product/loadProduct',
-        {
-          parentSku: bulkQuoteProductSku,
-          setCurrent: true
-        }
-      );
-
-      const productRelatedDataLoadingPromises = [this.$store.dispatch('budsies/loadProductBodyparts', { productId: product.id })];
-      const customerTypesLoadingPromise = this.$store.dispatch('budsies/fetchCustomerTypes');
-
-      if (this.$isServer) {
-        productRelatedDataLoadingPromises.push(customerTypesLoadingPromise);
-      }
-
-      await Promise.all(productRelatedDataLoadingPromises);
+      const [product] = await Promise.all([
+        this.$store.dispatch('product/loadProduct',
+          {
+            parentSku: bulkQuoteProductSku,
+            setCurrent: true
+          }
+        ),
+        this.$store.dispatch('budsies/fetchCustomerTypes')
+      ]);
 
       this.isDataLoading = false;
       catalogHooksExecutors.productPageVisited(product);

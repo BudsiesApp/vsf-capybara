@@ -32,6 +32,10 @@
           {{ $t('Get My Quote') }}
         </SfButton>
       </div>
+
+      <div class="_notice-link-container">
+        <california-privacy-notice-link />
+      </div>
     </validation-observer>
   </div>
 </template>
@@ -44,6 +48,8 @@ import { defineComponent, PropType, Ref, ref } from '@vue/composition-api';
 
 import Product from 'core/modules/catalog/types/Product';
 import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo } from 'src/modules/budsies';
+import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
+
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
 
@@ -88,6 +94,7 @@ export default defineComponent({
     }
   },
   components: {
+    CaliforniaPrivacyNoticeLink,
     MBaseForm,
     MFormErrors,
     SfButton,
@@ -226,6 +233,10 @@ export default defineComponent({
     display: flex;
     justify-content: center;
     margin-top: var(--spacer-lg);
+  }
+
+  ._notice-link-container {
+    text-align: center;
   }
 }
 </style>

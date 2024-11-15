@@ -17,7 +17,6 @@ import { ModalList } from './store/ui/modals';
 import { FileProcessingRepositoryFactory, ImageHandlerService, itemFactory } from 'src/modules/file-storage'
 import { ErrorConverterService } from 'src/modules/budsies'
 import { isServer } from '@vue-storefront/core/helpers'
-import { syncCartWhenLocalStorageChange } from '@vue-storefront/core/modules/cart/helpers'
 import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
 
 const windowObject = isServer ? {} : window;
@@ -38,12 +37,6 @@ export default {
     layout () {
       return `${get(this.$route, 'meta.layout', 'default')}-layout`
     }
-  },
-  mounted () {
-    syncCartWhenLocalStorageChange.addEventListener();
-  },
-  beforeDestroy () {
-    syncCartWhenLocalStorageChange.removeEventListener();
   },
   serverPrefetch () {
     return this.$store.dispatch('backend-settings/fetchSettings');
