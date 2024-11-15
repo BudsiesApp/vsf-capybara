@@ -52,4 +52,28 @@
       rotate: -45deg;
     }
   }
+
+  &.-vertical-layout {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+
+    &.-left {
+     top: var(--spacer-sm);
+     bottom: auto; 
+
+     &::after {
+      rotate: -135deg;
+     }
+    }
+
+    &.-right {
+      top: auto;
+      bottom: var(--spacer-sm);
+
+     &::after {
+      rotate: 45deg;
+     }
+    }
+  }
 }

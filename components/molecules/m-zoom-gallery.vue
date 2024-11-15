@@ -16,6 +16,7 @@
         :expand-slide-width="false"
         :centered-slides="false"
         :show-navigation-buttons="false"
+        :horizontal-slides="isHorizontalThumbnails"
         @slide-clicked="onThumbnailSlideClicked"
       >
         <template #default="{ item: image }">
@@ -383,7 +384,9 @@ export default Vue.extend({
 .m-zoom-gallery {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: flex-end;
+  align-items: flex-start;
+  position: relative;
 
   ._carousel {
     --carousel-navigation-size: var(--font-base);
@@ -427,6 +430,10 @@ export default Vue.extend({
 
   ._thumbnails {
     width: 15.5%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
 
     ._thumbnail-item {
       display: block !important;
@@ -506,6 +513,7 @@ export default Vue.extend({
 
   &.-horizontal {
     flex-direction: column-reverse;
+    justify-content: space-between;
 
     ._thumbnails {
       position: relative;
