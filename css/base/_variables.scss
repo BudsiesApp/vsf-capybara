@@ -134,6 +134,10 @@ $forms-color-placeholder: #a09999;
 
     --brands-slogan-color: var(--c-text);
 
+    --ios-select-dropdown-background: #4e4e4e;
+    --ios-select-option-active-background: #636465;
+    --ios-select-option-border-color: #606060;
+
     @include assign-color-variants(--c-primary, --_c-blue-primary);
     --c-primary-variant: var(--_c-blue-primary-darken);
     @include assign-color-variants(--c-secondary, --_c-blue-secondary);

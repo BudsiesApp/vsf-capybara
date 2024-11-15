@@ -1,6 +1,7 @@
 <template>
   <base-list-widget
     class="thumbnails-list-widget"
+    :class="{'-round': isRound}"
     v-bind="$props"
     v-model="selectedOption"
   >
@@ -79,6 +80,10 @@ export default defineComponent({
       }
     });
 
+    const isRound = computed<boolean>(() => {
+      return props.shape === 'round';
+    });
+
     function getItemImage (optionValue: OptionValue): string | undefined {
       if (!optionValue.thumbnailUrl) {
         return;
@@ -87,6 +92,7 @@ export default defineComponent({
     }
 
     return {
+      isRound,
       selectedOption,
       getItemImage
     };
@@ -96,11 +102,17 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .thumbnails-list-widget {
+  --base-list-widget-item-width: var(--thumbnails-list-widget-item-width, 33.33%);
   --base-list-widget-item-max-width: var(--thumbnails-list-widget-item-max-width, 130px);
-  --base-list-widget-round-item-max-width: var(--thumbnails-list-widget-round-item-max-width, 130px);
-  --base-list-widget-item-width: 33.33%;
+  --base-list-widget-item-min-width: var(--thumbnails-list-widget-item-min-width, 65px);
+  --base-list-widget-name-display: var(--thumbnails-list-widget-name-display, block);
 
   width: 100%;
+
+  &.-round {
+    --base-list-widget-item-min-width: var(--thumbnails-list-widget-round-item-min-width, --thumbnails-list-widget-item-min-width);
+    --base-list-widget-name-display: block;
+  }
 
   ._image-wrapper {
     position: relative;

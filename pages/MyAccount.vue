@@ -15,11 +15,11 @@
       @click:change="changeActivePage"
     >
       <SfContentCategory :title="$t('Personal Details')">
-        <SfContentPage :title="$t('My profile')">
+        <SfContentPage class="_personal-details" :title="$t('My profile')">
           <OMyAccountProfile />
         </SfContentPage>
 
-        <SfContentPage :title="$t('Address Book')">
+        <SfContentPage class="_tab-content" :title="$t('Address Book')">
           <OMyAccountAddressBook />
         </SfContentPage>
 
@@ -27,7 +27,7 @@
       </SfContentCategory>
 
       <SfContentCategory :title="$t('Order details')">
-        <SfContentPage :title="$t('Order history')">
+        <SfContentPage class="_tab-content" :title="$t('Order history')">
           <OMyAccountOrdersHistory />
         </SfContentPage>
       </SfContentCategory>
@@ -36,13 +36,17 @@
 </template>
 
 <script>
+import { SfBreadcrumbs, SfContentPages } from '@storefront-ui/vue';
+import { mapMobileObserver, unMapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
+
 import MyAccount from '@vue-storefront/core/pages/MyAccount';
 
 import OMyAccountProfile from 'theme/components/organisms/o-my-account-profile';
 import OMyAccountAddressBook from 'theme/components/organisms/o-my-account-address-book';
 import OMyAccountOrdersHistory from 'theme/components/organisms/o-my-account-orders-history';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
-import { SfBreadcrumbs, SfContentPages } from '@storefront-ui/vue';
+
+const DEFAULT_ACTIVE_PAGE = 'My profile';
 
 export default {
   components: {
@@ -55,7 +59,7 @@ export default {
   mixins: [MyAccount],
   data () {
     return {
-      activePage: this.$t('My profile'),
+      activePage: '',
       breadcrumbs: [
         {
           text: this.$t('Home'),
@@ -72,6 +76,19 @@ export default {
       ]
     };
   },
+  mounted () {
+    if (this.isMobile) {
+      return;
+    }
+
+    this.activePage = this.$t(DEFAULT_ACTIVE_PAGE).toString();
+  },
+  computed: {
+    ...mapMobileObserver()
+  },
+  beforeDestroy () {
+    unMapMobileObserver();
+  },
   methods: {
     changeActivePage (title) {
       if (title === 'Log out') {
@@ -83,6 +100,13 @@ export default {
     async logout () {
       await this.$store.dispatch('user/logout', {});
       this.$router.push(this.localizedRoute('/'));
+    }
+  },
+  watch: {
+    isMobile () {
+      if (!this.isMobile && !this.activePage) {
+        this.activePage = this.$t(DEFAULT_ACTIVE_PAGE).toString();
+      }
     }
   }
 };
@@ -115,6 +139,14 @@ export default {
     --content-pages-section-margin: 0;
     --content-pages-sidebar-category-title-font-weight: var(--font-normal);
     --content-pages-sidebar-category-title-margin: var(--spacer-xl) var(--spacer-sm) 0 var(--spacer-base);
+
+    ._tab-content {
+      --tabs-content-tab-padding: var(--spacer-base) var(--spacer-sm);
+    }
+
+    ._personal-details {
+      --tabs-content-tab-padding: 0 var(--spacer-sm);
+    }
   }
 
   @include for-desktop {

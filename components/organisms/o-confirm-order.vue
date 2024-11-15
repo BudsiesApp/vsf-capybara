@@ -94,6 +94,7 @@
                     :customizations="product.customizations"
                     :customization-state="(product.extension_attributes || {}).customization_state"
                     :product-options="getCartItemOptions(product)"
+                    :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
                   />
                 </template>
                 <template #actions>
@@ -209,6 +210,10 @@
         {{ $t('Place the order') }}
       </SfButton>
     </div>
+
+    <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+    </template>
   </div>
 </template>
 <script>
@@ -604,6 +609,9 @@ a {
       margin-top: 0;
     }
   }
+}
+.california-privacy-notice-link {
+  --privacy-notice-link-display: inline;
 }
 
 @include for-desktop {

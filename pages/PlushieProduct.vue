@@ -33,6 +33,7 @@ import { htmlDecode } from '@vue-storefront/core/filters';
 import i18n from '@vue-storefront/core/i18n';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import Product from 'core/modules/catalog/types/Product';
+import { getCanonicalUrl } from 'src/modules/shared';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
 import PlushieProductType from 'theme/interfaces/plushie-product-type';
@@ -162,17 +163,28 @@ export default defineComponent({
       this.currentProduct?.name ||
       defaultProductName;
 
+    const description = this.currentProduct?.meta_description;
+
+    const meta: any[] = [
+      {
+        rel: 'canonical',
+        href: getCanonicalUrl(this.$ssrContext, this.$router)
+      }
+    ];
+
+    if (description) {
+      meta.push(
+        {
+          vmid: 'description',
+          name: 'description',
+          content: htmlDecode(description)
+        }
+      );
+    }
+
     return {
       title: htmlDecode(productName),
-      meta: this.currentProduct?.meta_description
-        ? [
-          {
-            vmid: 'description',
-            name: 'description',
-            content: htmlDecode(this.currentProduct?.meta_description)
-          }
-        ]
-        : []
+      meta
     };
   }
 });

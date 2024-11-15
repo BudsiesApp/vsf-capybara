@@ -81,7 +81,11 @@
         {{ submitButtonText }}
       </SfButton>
 
-      <MBlockStory story-slug="order_submit_agreement_petsies" />
+      <m-order-submit-agreement />
+
+      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      </template>
     </div>
 
     <SfModal :visible="showQuantityNotes" @close="showQuantityNotes = false">
@@ -111,6 +115,7 @@ import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quan
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
+import MOrderSubmitAgreement from 'theme/components/molecules/m-order-submit-agreement.vue';
 
 function getAllFormRefs (
   refs: Record<string, Vue | Element | Vue[] | Element[]>
@@ -174,6 +179,7 @@ export default defineComponent({
     CustomizationOption,
     MBlockStory,
     MFormErrors,
+    MOrderSubmitAgreement,
     SfButton,
     SfHeading,
     SfInput,

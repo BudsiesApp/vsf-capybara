@@ -40,6 +40,10 @@
           {{ submitButtonText }}
         </SfButton>
       </div>
+
+      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      </template>
     </validation-observer>
   </div>
 </template>
@@ -156,6 +160,11 @@ export default Vue.extend({
     font-size: var(--font-xs);
     margin-top: 0.5em;
     color: var(--c-danger);
+  }
+
+  .california-privacy-notice-link {
+    --privacy-notice-link-text-align: end;
+    --privacy-notice-link-width: 100%;
   }
 
   @include for-desktop {

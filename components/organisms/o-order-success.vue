@@ -264,6 +264,11 @@ $number-margin-right-desktop: var(--spacer-sm);
     }
   }
 
+  .notice-of-financial-incentive-link {
+    --financial-incentive-link-margin: var(--spacer-sm) 0 0;
+    --financial-incentive-link-display: inline-block;
+  }
+
   @include for-desktop {
     ._content {
       flex-direction: row;

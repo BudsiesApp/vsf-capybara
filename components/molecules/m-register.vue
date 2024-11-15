@@ -51,6 +51,10 @@
     <SfButton class="sf-button--text action-button" @click.native="switchElem('login')">
       {{ `${$t('or')} ${$t('login in to your account')}` }}
     </SfButton>
+
+    <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+    </template>
   </div>
 </template>
 
@@ -218,6 +222,10 @@ export default {
   &__submit {
     margin: var(--spacer-xl) 0 0 0;
   }
+}
+.california-privacy-notice-link {
+  --privacy-notice-link-display: inline;
+  --privacy-notice-link-margin: 0;
 }
 .action-button {
   margin: var(--spacer-xl) 0;

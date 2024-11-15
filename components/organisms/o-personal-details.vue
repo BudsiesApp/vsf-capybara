@@ -91,12 +91,7 @@
                     {{ $t('and') }}
                   </span>
 
-                  <router-link
-                    target="_blank"
-                    to="/privacy-policy/"
-                  >
-                    {{ $t('Privacy Policy') }}
-                  </router-link>
+                  <privacy-policy-link />
                 </span>
               </template>
             </SfCheckbox>
@@ -129,6 +124,10 @@
           {{ $t('or login to your account') }}
         </SfButton>
       </div>
+
+      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      </template>
     </div>
   </div>
 </template>
@@ -140,6 +139,7 @@ import { ModalList } from 'theme/store/ui/modals'
 import { mapActions } from 'vuex';
 
 import { LAST_USED_CUSTOMER_EMAIL, LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_EMAIL, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME } from 'src/modules/persisted-customer-data';
+import { PrivacyPolicyLink } from 'src/modules/shared';
 
 import { createSmoothscroll } from 'theme/helpers';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
@@ -151,6 +151,7 @@ export default {
   name: 'OPersonalDetails',
   components: {
     APromoCode,
+    PrivacyPolicyLink,
     SfInput,
     SfButton,
     SfHeading,
@@ -268,6 +269,13 @@ export default {
 
   .m-password {
     flex: 0 0 100%;
+  }
+
+  .california-privacy-notice-link {
+    width: 100%;
+
+    --privacy-notice-link-text-align: start;
+    --privacy-notice-link-margin: 0;
   }
 }
 
