@@ -19,7 +19,9 @@
         </SfButton>
       </div>
 
-      <california-privacy-notice-link />
+      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      </template>
     </validation-observer>
   </div>
 </template>
@@ -33,7 +35,6 @@ import { SfButton } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
 
 import { usePersistedFirstName, usePersistedLastName, usePersistedPhoneNumber } from 'src/modules/persisted-customer-data';
-import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import { BaseAddressFormValue } from 'theme/components/interfaces/base-address-form-value.interface';
 
@@ -47,7 +48,6 @@ BaseAddressFormValue,
 export default defineComponent({
   name: 'OAddAddressForm',
   components: {
-    CaliforniaPrivacyNoticeLink,
     SfButton,
     OBaseAddressForm,
     ValidationObserver

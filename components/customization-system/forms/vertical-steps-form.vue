@@ -107,7 +107,9 @@
             {{ submitButtonText }}
           </SfButton>
 
-          <california-privacy-notice-link />
+          <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+            <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+          </template>
         </div>
 
         <MBlockStory :story-slug="bottomStorySlug" v-if="bottomStorySlug" />
@@ -155,7 +157,7 @@ import i18n from '@vue-storefront/core/i18n';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
-import { CaliforniaPrivacyNoticeLink, PrivacyPolicyLink } from 'src/modules/true-vault';
+import { PrivacyPolicyLink } from 'src/modules/shared';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
@@ -207,7 +209,6 @@ export default defineComponent({
   },
   components: {
     ACustomProductQuantity,
-    CaliforniaPrivacyNoticeLink,
     CustomizationOption,
     MBlockStory,
     MFormErrors,
