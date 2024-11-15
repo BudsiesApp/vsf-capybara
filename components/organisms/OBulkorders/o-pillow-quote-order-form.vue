@@ -94,6 +94,7 @@ import {
   BulkOrderStatus,
   BulkOrderInfo
 } from 'src/modules/budsies';
+import { Customization, OptionValue } from 'src/modules/customization-system';
 import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import { useFormValidation } from 'theme/helpers/use-form-validation';
@@ -102,7 +103,6 @@ import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
 import MBaseForm from './m-base-form.vue';
 import AOrderedHeading from '../../atoms/a-ordered-heading.vue';
 import MFormErrors from '../../molecules/m-form-errors.vue';
-import { Customization, OptionValue } from 'src/modules/customization-system';
 
 interface PillowSizeOption {
   id: number | string,
