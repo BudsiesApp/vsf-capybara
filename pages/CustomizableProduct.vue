@@ -28,6 +28,7 @@ import { ProductStructuredData } from 'src/modules/budsies';
 
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 import { useProductPage } from 'theme/helpers/use-product-page';
+import { getCanonicalUrl } from 'src/modules/shared';
 
 enum LayoutType {
   WITH_IMAGES_GALLERY = 'with-images-gallery',
@@ -101,19 +102,28 @@ export default defineComponent({
       this.currentProduct?.meta_description ||
       this.currentProduct?.short_description;
 
+    const meta: any[] = [
+      {
+        rel: 'canonical',
+        href: getCanonicalUrl(this.$ssrContext, this.$router)
+      }
+    ];
+
+    if (description) {
+      meta.push(
+        {
+          vmid: 'description',
+          name: 'description',
+          content: htmlDecode(description)
+        }
+      );
+    }
+
     return {
       title: htmlDecode(
         this.currentProduct?.meta_title || this.currentProduct?.name
       ),
-      meta: description
-        ? [
-          {
-            vmid: 'description',
-            name: 'description',
-            content: htmlDecode(description)
-          }
-        ]
-        : []
+      meta
     };
   }
 });

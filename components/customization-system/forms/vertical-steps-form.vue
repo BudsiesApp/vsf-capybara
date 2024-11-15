@@ -160,6 +160,7 @@ import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { PrivacyPolicyLink } from 'src/modules/shared';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
+import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import {
   getFieldAnchorName,
   useFormValidation
@@ -373,6 +374,8 @@ export default defineComponent({
       );
     }
 
+    const { isUnmounted } = useComponentUnmountedChecker();
+
     async function onFormSubmit (): Promise<void> {
       const isValid = await formValidation.validateAndGoToFirstError();
 
@@ -385,6 +388,10 @@ export default defineComponent({
 
         persistCustomerEmail();
         removePreservedState();
+
+        if (isUnmounted.value) {
+          return;
+        }
 
         if (!shouldMakeAnother.value) {
           context.root.$router.push({
