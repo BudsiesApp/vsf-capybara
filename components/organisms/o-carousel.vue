@@ -17,7 +17,7 @@
       <div
         class="swiper-buttons"
         :class="{ '-counter': showCounter }"
-        v-show="isSwiperInitialized"
+        v-show="isSwiperInitialized && showNavigationButtons"
       >
         <sf-button
           ref="prev-button"
@@ -90,6 +90,18 @@ export default Vue.extend({
     items: {
       type: Array as PropType<OCarouselItem[]>,
       required: true
+    },
+    expandSlideWidth: {
+      type: Boolean,
+      default: true
+    },
+    centeredSlides: {
+      type: Boolean,
+      default: false
+    },
+    showNavigationButtons: {
+      type: Boolean,
+      default: true
     }
   },
   data () {
@@ -124,13 +136,15 @@ export default Vue.extend({
       return {
         autoplay: this.autoplayOptions,
         direction: 'horizontal',
-        loop: true,
+        loop: this.isLoopAvailable,
         slidesPerView: this.defaultSlidesPerView,
+        slideToClickedSlide: false,
+        loopAddBlankSlides: false,
         modules: [Autoplay, Navigation],
-
         init: false,
         breakpoints: this.breakpoints,
-        spaceBetween: this.spaceBetween
+        spaceBetween: this.spaceBetween,
+        centeredSlides: this.centeredSlides
       };
     },
     defaultSlidesPerView (): number {
@@ -158,7 +172,14 @@ export default Vue.extend({
       return `${this.currentSlideIndex + 1} / ${this.items.length}`;
     },
     maxSlidesPerView (): number {
-      return this.items.length;
+      if (this.expandSlideWidth) {
+        return this.items.length;
+      }
+
+      return this.slidesPerView;
+    },
+    isLoopAvailable (): boolean {
+      return this.defaultSlidesPerView <= this.items.length;
     }
   },
   mounted (): void {
@@ -185,12 +206,28 @@ export default Vue.extend({
       return this.$refs.swiper as HTMLElement;
     },
     initSwiper (): void {
-      const onInit = () => {
+      const onInit = (swiper: Swiper) => {
         this.isSwiperInitialized = true;
+        this.$emit('swiper-init', swiper)
       };
       const onRealIndexChange = (swiper: Swiper) => {
         this.currentSlideIndex = swiper.realIndex;
+        this.$emit('active-index-changed', this.currentSlideIndex);
       };
+      const onSlideClick = (swiper: Swiper) => {
+        if (swiper.clickedIndex === undefined) {
+          return;
+        }
+
+        let slideIndex = swiper.clickedSlide.getAttribute('data-swiper-slide-index');
+
+        // When loop mode is disabled we can just use `clickedIndex` property
+        if (slideIndex === undefined || slideIndex === null) {
+          slideIndex = swiper.clickedIndex;
+        }
+
+        this.$emit('slide-clicked', Number(slideIndex));
+      }
 
       this.swiper = new Swiper(
         this.getCarouselRoot(),
@@ -202,6 +239,7 @@ export default Vue.extend({
 
       this.swiper.on('init', onInit);
       this.swiper.on('realIndexChange', onRealIndexChange);
+      this.swiper.on('click', onSlideClick);
 
       this.swiper.init();
     },
@@ -212,6 +250,7 @@ export default Vue.extend({
 
       this.swiper.off('init');
       this.swiper.off('realIndexChange');
+      this.swiper.off('click');
       this.swiper.destroy();
       this.swiper = undefined;
     },
@@ -236,6 +275,18 @@ export default Vue.extend({
       await this.$nextTick();
 
       this.initSwiper();
+    },
+    slideTo (index: number) {
+      if (!this.swiper) {
+        return;
+      }
+
+      if (this.isLoopAvailable) {
+        this.swiper.slideToLoop(index);
+        return;
+      }
+
+      this.swiper.slideTo(index);
     }
   },
   watch: {
@@ -269,6 +320,9 @@ export default Vue.extend({
     },
     isMobile () {
       this.updateSwiper();
+    },
+    centeredSlides (val) {
+      this.updateSwiper({ centeredSlides: val });
     }
   }
 });
@@ -276,10 +330,16 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "theme/css/mixins/swiper-arrow.scss";
 
 .o-carousel {
   .swiper-wrapper {
     padding: 0;
+  }
+
+  .swiper {
+    height: 100%;
+    width: 100%;
   }
 
   .swiper-slide {
@@ -288,7 +348,7 @@ export default Vue.extend({
   }
 
   .swiper-buttons {
-    --swiper-navigation-size: var(--font-2xl);
+    --swiper-navigation-size: var(--carousel-navigation-size, var(--font-2xl));
     --swiper-navigation-color: var(--c-text);
 
     display: flex;
@@ -296,32 +356,10 @@ export default Vue.extend({
     ._arrow {
       --swiper-navigation-sides-offset: 0;
 
-      height: 35%;
-      max-height: 10rem;
-      margin-top: 0;
-      transform: translateY(-50%);
-      background: rgba(#fff, 0.7);
+      @include swiper-arrow();
 
-      &.-left {
-        padding-left: calc(var(--spacer-xs) + var(--spacer-2xs));
-        padding-right: var(--spacer-sm);
-        border-top-right-radius: 12px;
-        border-bottom-right-radius: 12px;
-
-        &::after {
-          content: '\276C';
-        }
-      }
-
-      &.-right {
-        padding-right: calc(var(--spacer-xs) + var(--spacer-2xs));
-        padding-left: var(--spacer-sm);
-        border-top-left-radius: 12px;
-        border-bottom-left-radius: 12px;
-
-        &::after {
-          content: '\276D';
-        }
+      &[disabled] {
+        display: none;
       }
     }
 
