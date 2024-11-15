@@ -85,15 +85,10 @@
 import i18n from '@vue-storefront/i18n';
 import { ValidationObserver, ValidationProvider, extend } from 'vee-validate';
 import { required } from 'vee-validate/dist/rules';
-import { TranslateResult } from 'vue-i18n';
 import { SfButton, SfSelect, SfHeading } from '@storefront-ui/vue';
 import { defineComponent, PropType, Ref, ref } from '@vue/composition-api';
 
 import Product from 'core/modules/catalog/types/Product';
-import {
-  BundleOption,
-  BundleOptionsProductLink
-} from 'core/modules/catalog/types/BundleOption';
 import {
   BulkorderQuoteProductId,
   BulkOrderStatus,
@@ -107,6 +102,7 @@ import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
 import MBaseForm from './m-base-form.vue';
 import AOrderedHeading from '../../atoms/a-ordered-heading.vue';
 import MFormErrors from '../../molecules/m-form-errors.vue';
+import { Customization, OptionValue } from 'src/modules/customization-system';
 
 interface PillowSizeOption {
   id: number | string,
@@ -138,6 +134,8 @@ function getFormAllRefs (
 
   return { ...refs, ...baseForm.$refs };
 }
+
+const SIZE_CUSTOMIZATION_NAME = 'size';
 
 export default defineComponent({
   name: 'OPillowQuoteOrderForm',
@@ -194,57 +192,43 @@ export default defineComponent({
     isDisabled (): boolean {
       return this.isSubmitting;
     },
+    pillowSizeCustomization (): Customization | undefined {
+      return this.product.customizations?.find(
+        (customization) => customization.name.toLowerCase() === SIZE_CUSTOMIZATION_NAME
+      );
+    },
     pillowSizeOptions (): PillowSizeOption[] {
       const options: PillowSizeOption[] = [];
 
-      if (!this.productBundleOption) {
+      if (!this.pillowSizeCustomization?.optionData?.values) {
         return options;
       }
 
-      this.productBundleOption.product_links.forEach((productLink) => {
-        if (!productLink.product) {
+      this.pillowSizeCustomization.optionData.values.forEach((item) => {
+        const value = this.getPillowSizeValue(item);
+
+        if (!item.name || !value) {
           return;
         }
 
         options.push({
-          id: productLink.id,
-          value: this.getPillowSizeValue(productLink).toString(),
-          title: this.getPillowSizeTitle(productLink).toString()
+          id: item.id,
+          value: value.toString(),
+          title: item.name
         });
       });
 
       return options;
-    },
-    productBundleOption (): BundleOption | undefined {
-      if (!this.product.bundle_options) {
-        return;
-      }
-
-      return this.product.bundle_options.find(
-        (bundleOption) => bundleOption.title.toLowerCase() === 'product'
-      );
     }
   },
   async beforeMount (): Promise<void> {
     this.pillowSize = this.defaultPillowSizeValue;
   },
   methods: {
-    getPillowSizeTitle (
-      sizeProductLink: BundleOptionsProductLink
-    ): TranslateResult {
-      switch (sizeProductLink.sku) {
-        case 'simplePillowBulkSample_small':
-          return this.$t('12" small');
-        case 'simplePillowBulkSample_medium':
-          return this.$t('16" medium');
-        case 'simplePillowBulkSample_large':
-          return this.$t('18" large');
-        default:
-          throw new Error('Wrong pillow size sku!');
-      }
-    },
-    getPillowSizeValue (sizeProductLink: BundleOptionsProductLink): number {
-      switch (sizeProductLink.sku) {
+    getPillowSizeValue (optionValue: OptionValue): number | undefined {
+      switch (optionValue.sku) {
+        case 'simplePillowBulkSample_xsmall':
+          return 8;
         case 'simplePillowBulkSample_small':
           return 12;
         case 'simplePillowBulkSample_medium':
@@ -252,7 +236,7 @@ export default defineComponent({
         case 'simplePillowBulkSample_large':
           return 18;
         default:
-          throw new Error('Wrong pillow size sku!');
+          return undefined;
       }
     },
     async onSubmit (): Promise<void> {
