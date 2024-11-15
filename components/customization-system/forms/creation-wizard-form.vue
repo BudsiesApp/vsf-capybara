@@ -141,7 +141,9 @@ import {
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
+import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import { useCreationWizardFormSteps } from 'theme/helpers/use-creation-wizard-form-steps';
+import { useCreationWizardGtmEvents } from 'theme/helpers/use-creation-wizard-gtm-events';
 import { useCreationWizardPreselectedSize } from 'theme/helpers/use-creation-wizard-preselected-size';
 import { useCreationWizardProductTypeStep } from 'theme/helpers/use-creation-wizard-product-type-step';
 import { useFloatingPhoto } from 'theme/helpers/use-floating-photo';
@@ -314,9 +316,16 @@ export default defineComponent({
       productCustomization
     );
 
+    const { onStepSubmit } = useCreationWizardGtmEvents(
+      availableCustomizations,
+      customizationOptionValue,
+      plushieType
+    )
+
     const formSteps = useCreationWizardFormSteps(
       customizationGroups.customizationRootGroups,
-      existingCartItem
+      existingCartItem,
+      onStepSubmit
     );
 
     const { handlePreselectedSize } = useCreationWizardPreselectedSize(
@@ -402,6 +411,8 @@ export default defineComponent({
       context
     );
 
+    const { isUnmounted } = useComponentUnmountedChecker();
+
     async function onFormSubmit (): Promise<void> {
       try {
         await addToCartHandler();
@@ -409,8 +420,8 @@ export default defineComponent({
         persistCustomerEmail();
         removePreservedState();
 
-        if (!currentProduct.value) {
-          throw new Error('Product is missing');
+        if (isUnmounted.value || !currentProduct.value) {
+          return;
         }
 
         context.root.$router.push({

@@ -145,6 +145,7 @@ import {
 } from 'src/modules/customization-system';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
+import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import { usePhrasePillowFormSteps } from 'theme/helpers/use-phrase-pillow-form-steps';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 
@@ -316,6 +317,8 @@ export default defineComponent({
       context
     );
 
+    const { isUnmounted } = useComponentUnmountedChecker();
+
     async function onFormSubmit (): Promise<void> {
       if (!validationObserver.value) {
         return;
@@ -338,11 +341,19 @@ export default defineComponent({
         processedImageUploadCustomizationStateItem
       );
 
+      if (isUnmounted.value) {
+        return;
+      }
+
       try {
         await addToCartHandler();
 
         persistCustomerEmail();
         removePreservedState();
+
+        if (isUnmounted.value) {
+          return;
+        }
 
         context.root.$router.push({
           name: 'cross-sells',
