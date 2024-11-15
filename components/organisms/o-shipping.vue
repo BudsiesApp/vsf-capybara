@@ -92,6 +92,7 @@
         :class="{[vuelidateErrorClassName]: $v.shipping.region_id.$error}"
         name="address-level1"
         autocomplete="address-level1"
+        :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
         :label="$t('State / Province')"
         :required="true"
         id-field="id"
@@ -201,7 +202,9 @@
         </SfButton>
       </div>
 
-      <california-privacy-notice-link />
+      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      </template>
     </div>
   </div>
 </template>
@@ -223,8 +226,8 @@ import {
   METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
 } from 'src/modules/vsf-amazon-pay/index';
 import { LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, LAST_USED_CUSTOMER_PHONE_NUMBER, LAST_USED_CUSTOMER_SHIPPING_COUNTRY, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_PHONE_NUMBER, SET_LAST_USED_CUSTOMER_SHIPPING_COUNTRY } from 'src/modules/persisted-customer-data';
-import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
+import { stateCodeAutocompleteOptionSearch } from 'src/modules/shared';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
@@ -234,7 +237,6 @@ const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3}
 export default {
   name: 'OShipping',
   components: {
-    CaliforniaPrivacyNoticeLink,
     SfInput,
     SfRadio,
     SfButton,
@@ -328,6 +330,7 @@ export default {
     }
   },
   methods: {
+    stateCodeAutocompleteOptionSearch,
     async onChangeCountry () {
       this.changeCountry();
 
@@ -386,7 +389,8 @@ export default {
       );
 
       this.sendDataToCheckout();
-      this.$store.dispatch('cart/syncTotals', { forceServerSync: true });
+      await this.$store.dispatch('cart/syncTotals', { forceServerSync: true });
+      this.$store.dispatch('cart/pullEstimatedShipments');
     },
     validateCountryRelatedFields () {
       this.$v.shipping.region_id.$touch();

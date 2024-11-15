@@ -82,6 +82,7 @@ export default defineComponent({
 .colors-list-widget {
   --base-list-widget-item-max-width: 98px;
   --base-list-widget-item-width: 98px;
+  --base-list-widget-item-min-width: 98px;
   --base-list-widget-selected-option-background: transparent;
 
   width: 100%;

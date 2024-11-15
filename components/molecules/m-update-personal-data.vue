@@ -44,7 +44,9 @@
       {{ $t('At Budsies, we attach great importance to privacy issues and are committed to protecting the personal data of our users. Learn more about how we care and use your personal data in the') }}
       <privacy-policy-link />
     </p>
-    <california-privacy-notice-link />
+    <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+    </template>
   </div>
 </template>
 
@@ -55,12 +57,11 @@ import { SfInput, SfButton } from '@storefront-ui/vue';
 import { required, minLength, email } from 'vuelidate/lib/validators';
 import { unicodeAlpha } from '@vue-storefront/core/helpers/validators';
 
-import { CaliforniaPrivacyNoticeLink, PrivacyPolicyLink } from 'src/modules/true-vault';
+import { PrivacyPolicyLink } from 'src/modules/shared';
 
 export default {
   name: 'MUpdatePersonalData',
   components: {
-    CaliforniaPrivacyNoticeLink,
     PrivacyPolicyLink,
     SfInput,
     SfButton

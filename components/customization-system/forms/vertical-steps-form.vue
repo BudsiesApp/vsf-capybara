@@ -110,7 +110,9 @@
 
           <m-order-submit-agreement class="_agreement" />
 
-          <california-privacy-notice-link />
+          <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+            <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+          </template>
         </div>
 
         <MBlockStory :story-slug="bottomStorySlug" v-if="bottomStorySlug" />
@@ -129,8 +131,6 @@
 import {
   computed,
   defineComponent,
-  nextTick,
-  onMounted,
   PropType,
   ref,
   Ref,
@@ -165,9 +165,9 @@ import i18n from '@vue-storefront/core/i18n';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
-import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
+import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
@@ -214,7 +214,6 @@ export default defineComponent({
   },
   components: {
     ACustomProductQuantity,
-    CaliforniaPrivacyNoticeLink,
     CustomizationOption,
     MBlockStory,
     MFormErrors,
@@ -229,7 +228,7 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
-    const { existingCartItem, product } = toRefs(props);
+    const { canUsePersistedCustomizationState, existingCartItem, product } = toRefs(props);
 
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
@@ -257,18 +256,18 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
-      replaceCustomizationState,
       resetCustomizationState,
       selectedOptionValuesIds,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      mergeCustomizationState
     } = useCustomizationState(existingCartItem);
 
     const {
-      availableCustomization,
       availableCustomizations,
       availableOptionCustomizations,
       availableOptionValues,
-      customizationAvailableOptionValues
+      customizationAvailableOptionValues,
+      removeUnavailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
       selectedOptionValuesIds,
@@ -297,11 +296,25 @@ export default defineComponent({
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
 
-    const { getPreservedData, removePreservedState } =
+    const { unhandledCustomizationsFilter } = useSelectedOptionValueUrlQuery(
+      productCustomizations,
+      availableOptionValues,
+      customizationOptionValue,
+      product,
+      mergeCustomizationState,
+      removeUnavailableOptionValues,
+      context
+    );
+
+    const { removePreservedState } =
       useCustomizationStatePreservation(
         productSku,
         customizationState,
-        existingCartItem
+        existingCartItem,
+        [unhandledCustomizationsFilter],
+        canUsePersistedCustomizationState,
+        mergeCustomizationState,
+        removeUnavailableOptionValues
       );
 
     const { emailCustomizationFilter, persistCustomerEmail } =
@@ -310,23 +323,6 @@ export default defineComponent({
         customizationOptionValue,
         updateCustomizationOptionValue
       );
-
-    onMounted(async () => {
-      await nextTick();
-
-      if (existingCartItem.value || !props.canUsePersistedCustomizationState) {
-        removePreservedState();
-        return;
-      }
-
-      const preservedState = await getPreservedData();
-
-      if (!preservedState) {
-        return;
-      }
-
-      replaceCustomizationState(preservedState.customizationState);
-    });
 
     useCustomizationsBundleOptions(
       productCustomizations,
@@ -381,6 +377,8 @@ export default defineComponent({
       );
     }
 
+    const { isUnmounted } = useComponentUnmountedChecker();
+
     async function onFormSubmit (): Promise<void> {
       const isValid = await formValidation.validateAndGoToFirstError();
 
@@ -393,6 +391,10 @@ export default defineComponent({
 
         persistCustomerEmail();
         removePreservedState();
+
+        if (isUnmounted.value) {
+          return;
+        }
 
         if (!shouldMakeAnother.value) {
           context.root.$router.push({
@@ -434,15 +436,6 @@ export default defineComponent({
         existingCartItem.value ? i18n.t('Update') : i18n.t('Add to Cart')
       ).toString();
     });
-
-    useSelectedOptionValueUrlQuery(
-      availableCustomization,
-      availableOptionValues,
-      customizationOptionValue,
-      product,
-      updateCustomizationOptionValue,
-      context
-    );
 
     const { filteredCustomizations } = useCustomizationsFilter(
       availableCustomizations,

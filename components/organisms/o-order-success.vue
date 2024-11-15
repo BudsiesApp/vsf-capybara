@@ -96,7 +96,6 @@ import { SfButton, SfHeading } from '@storefront-ui/vue';
 
 import { Order } from 'core/modules/order/types/Order';
 import { InjectType } from 'src/modules/shared';
-import { NoticeOfFinancialIncentiveLink } from 'src/modules/true-vault'
 
 import MSocialSharing from 'theme/components/molecules/m-social-sharing.vue';
 
@@ -136,7 +135,6 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
   components: {
     MShareBirthdayForm,
     MSocialSharing,
-    NoticeOfFinancialIncentiveLink,
     SfButton,
     SfHeading
   },

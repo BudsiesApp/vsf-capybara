@@ -108,7 +108,9 @@
           </SfButton>
         </div>
 
-        <california-privacy-notice-link />
+        <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+        </template>
       </form>
     </validation-observer>
   </div>
@@ -121,8 +123,6 @@ import Vue, { VueConstructor } from 'vue'
 import { mapState } from 'vuex';
 import { SfButton, SfInput, SfSelect } from '@storefront-ui/vue';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
-
-import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 extend('required', {
   ...required,
@@ -183,7 +183,6 @@ export default (Vue as VueConstructor<Vue & NonReactiveData>).extend({
     }
   },
   components: {
-    CaliforniaPrivacyNoticeLink,
     SfButton,
     SfInput,
     SfSelect,

@@ -31,6 +31,7 @@
                     :customizations="product.customizations"
                     :customization-state="(product.extension_attributes || {}).customization_state"
                     :product-options="getCartItemOptions(product)"
+                    :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
                   />
                 </template>
 
@@ -559,8 +560,6 @@ export default {
     ._shipping-handling-block {
       margin: var(--spacer-xl) 0;
       padding: 0 var(--spacer-xl);
-      font-size: var(--font-xs);
-      line-height: 1.6;
     }
   }
 
