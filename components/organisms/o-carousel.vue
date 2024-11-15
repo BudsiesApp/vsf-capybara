@@ -1,6 +1,7 @@
 <template>
   <div
     class="o-carousel"
+    :class="{'-vertical': !horizontalSlides}"
     :style="style"
   >
     <div ref="swiper" class="swiper">
@@ -22,6 +23,7 @@
         <sf-button
           ref="prev-button"
           class="_arrow swiper-button-prev -left sf-button--pure"
+          :class="{'-vertical-layout': !horizontalSlides}"
         />
 
         <div class="_counter" v-if="showCounter">
@@ -31,6 +33,7 @@
         <sf-button
           ref="next-button"
           class="_arrow -right swiper-button-next sf-button--pure"
+          :class="{'-vertical-layout': !horizontalSlides}"
         />
       </div>
     </div>
@@ -102,6 +105,10 @@ export default Vue.extend({
     showNavigationButtons: {
       type: Boolean,
       default: true
+    },
+    horizontalSlides: {
+      type: Boolean,
+      default: true
     }
   },
   data () {
@@ -133,9 +140,11 @@ export default Vue.extend({
       };
     },
     swiperOptions (): SwiperOptions {
+      const direction = this.horizontalSlides ? 'horizontal' : 'vertical';
+
       return {
         autoplay: this.autoplayOptions,
-        direction: 'horizontal',
+        direction,
         loop: this.isLoopAvailable,
         slidesPerView: this.defaultSlidesPerView,
         slideToClickedSlide: false,
@@ -160,10 +169,10 @@ export default Vue.extend({
       const oneItemGap = gapTotal / this.slidesPerView;
 
       style['--item-margin'] = `${this.spaceBetween}px`;
-      style['--item-width'] = `calc(100% / ${this.slidesPerView} - ${oneItemGap}px)`;
+      style['--item-size'] = `calc(100% / ${this.slidesPerView} - ${oneItemGap}px)`;
 
       if (this.slidesPerViewMobile) {
-        style['--item-width-mobile'] = `calc(100% / ${this.slidesPerViewMobile} - ${oneItemGap}px)`;
+        style['--item-size-mobile'] = `calc(100% / ${this.slidesPerViewMobile} - ${oneItemGap}px)`;
       }
 
       return style;
@@ -323,6 +332,9 @@ export default Vue.extend({
     },
     centeredSlides (val) {
       this.updateSwiper({ centeredSlides: val });
+    },
+    horizontalSlides () {
+      this.reInitSwiper();
     }
   }
 });
@@ -343,7 +355,7 @@ export default Vue.extend({
   }
 
   .swiper-slide {
-    width: var(--item-width-mobile, --item-width);
+    width: var(--item-size-mobile, --item-size);
     margin-right: var(--item-margin);
   }
 
@@ -395,9 +407,30 @@ export default Vue.extend({
     }
   }
 
-  @include for-desktop {
+  &.-vertical {
+    height: 100%;
+
+    .swiper-wrapper {
+      flex-direction: column;
+    }
+
     .swiper-slide {
-      width: var(--item-width);
+      width: 100%;
+      height: var(--item-size-mobile, --item-size);
+      margin-right: 0;
+      margin-bottom: var(--item-margin);
+    }
+  }
+
+  @include for-desktop {
+    &.-vertical {
+      .swiper-slide {
+        height: var(--item-size);
+      }
+    }
+
+    .swiper-slide {
+      width: var(--item-size);
     }
   }
 }
