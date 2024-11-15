@@ -210,8 +210,8 @@
         {{ $t('Add to Cart') }}
       </SfButton>
 
-      <template v-if="$additionalContent.formLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.formLinks" />
+      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
       </template>
     </div>
   </validation-observer>
