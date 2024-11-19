@@ -125,7 +125,9 @@
         </SfButton>
       </div>
 
-      <california-privacy-notice-link />
+      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      </template>
     </div>
   </div>
 </template>
@@ -137,7 +139,7 @@ import { ModalList } from 'theme/store/ui/modals'
 import { mapActions } from 'vuex';
 
 import { LAST_USED_CUSTOMER_EMAIL, LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_EMAIL, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME } from 'src/modules/persisted-customer-data';
-import { CaliforniaPrivacyNoticeLink, PrivacyPolicyLink } from 'src/modules/true-vault';
+import { PrivacyPolicyLink } from 'src/modules/shared';
 
 import { createSmoothscroll } from 'theme/helpers';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
@@ -149,7 +151,6 @@ export default {
   name: 'OPersonalDetails',
   components: {
     APromoCode,
-    CaliforniaPrivacyNoticeLink,
     PrivacyPolicyLink,
     SfInput,
     SfButton,

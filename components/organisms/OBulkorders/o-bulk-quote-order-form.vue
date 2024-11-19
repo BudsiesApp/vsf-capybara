@@ -109,7 +109,9 @@
       </div>
 
       <div class="_notice-link-container">
-        <california-privacy-notice-link />
+        <template v-if="$additionalContent.formLinks">
+          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.formLinks" />
+        </template>
       </div>
     </validation-observer>
   </div>
@@ -143,7 +145,6 @@ import {
   useAvailableCustomizations,
   useCustomizationState
 } from 'src/modules/customization-system';
-import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
@@ -261,7 +262,6 @@ export default defineComponent({
   },
   components: {
     AOrderedHeading,
-    CaliforniaPrivacyNoticeLink,
     CustomizationOption,
     MBaseForm,
     MBodypartOptionConfigurator,
