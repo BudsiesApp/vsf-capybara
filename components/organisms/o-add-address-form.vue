@@ -18,6 +18,10 @@
           {{ $t('Add Address') }}
         </SfButton>
       </div>
+
+      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      </template>
     </validation-observer>
   </div>
 </template>
@@ -164,6 +168,11 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: space-between;
+  }
+
+  .california-privacy-notice-link {
+    --privacy-notice-link-width: 100%;
+    --privacy-notice-link-text-align: end;
   }
 }
 </style>

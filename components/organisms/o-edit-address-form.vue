@@ -18,6 +18,10 @@
           {{ $t('Update Address') }}
         </SfButton>
       </div>
+
+      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      </template>
     </validation-observer>
   </div>
 </template>
@@ -92,7 +96,8 @@ export default Vue.extend({
         country_id: this.existingAddress.country,
         telephone: this.existingAddress.phoneNumber,
         default_shipping: this.existingAddress.defaultShipping,
-        default_billing: this.existingAddress.defaultBilling
+        default_billing: this.existingAddress.defaultBilling,
+        customer_id: this.existingAddress.customerId
       }
 
       return this.$store.dispatch('budsies/updateAddress', { address: addressToUpdate });
@@ -117,6 +122,11 @@ export default Vue.extend({
     display: flex;
     align-items: center;
     justify-content: space-between;
+  }
+
+  .california-privacy-notice-link {
+    --privacy-notice-link-width: 100%;
+    --privacy-notice-link-text-align: end;
   }
 }
 </style>

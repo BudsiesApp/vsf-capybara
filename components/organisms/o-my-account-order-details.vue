@@ -142,10 +142,15 @@ import {
   SfProperty
 } from '@storefront-ui/vue';
 
+import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
+
 import OOrderContent from './o-order-content';
 
 export default {
   name: 'OMyAccountOrderDetails',
+  inject: {
+    imageHandlerService: { from: 'ImageHandlerService' }
+  },
   components: {
     OOrderContent,
     SfArrow,
@@ -184,21 +189,23 @@ export default {
           key: product.id,
           thumbnail: this.getThumbnailForProduct(product),
           name: product.name,
-          plushieName: product.plushieName,
-          plushieBreed: product.plushieBreed,
           qty: product.qty_ordered,
-          customOptions: product.custom_options,
           regularPrice: `$${product.row_total_incl_tax}`,
-          bundleOptions: this.getBundleProductOptions(product).map((option) => option.name)
+          customizations: product.customizations,
+          customizationState: product.extension_attributes?.customization_state,
+          customOptions: product.custom_options
         }
       });
     }
   },
   methods: {
-    getBundleProductOptions (product) {
-      return product.upgrades ? product.upgrades : [];
-    },
     getThumbnailForProduct (product) {
+      const customizationSystemThumbnail = getCustomizationSystemCartItemThumbnail(product, this.imageHandlerService);
+
+      if (customizationSystemThumbnail) {
+        return customizationSystemThumbnail;
+      }
+
       if (product.thumbnail.includes('https://')) {
         return product.thumbnail;
       }

@@ -29,7 +29,7 @@
             class="products__product-card"
             :image-height="352"
             :image-width="352"
-            @click.native="() => onProductCardClick(crossSellsProduct.sku, 'Cross Sells')"
+            @click.native.capture="() => onProductCardClick(crossSellsProduct.sku, 'Cross Sells')"
           />
         </transition-group>
       </div>
@@ -58,7 +58,7 @@
             class="products__product-card"
             :image-height="352"
             :image-width="352"
-            @click.native="() => onProductCardClick(upSellsProduct.sku, 'Up Sells')"
+            @click.native.capture="() => onProductCardClick(upSellsProduct.sku, 'Up Sells')"
           />
         </transition-group>
       </div>

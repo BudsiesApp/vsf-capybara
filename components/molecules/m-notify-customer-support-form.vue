@@ -7,6 +7,10 @@
     <SfButton class="sf-button sf-button--outline _submit-button">
       {{ $t('Notify Customer Support') }}
     </SfButton>
+
+    <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+    </template>
   </form>
 </template>
 
@@ -69,6 +73,11 @@ export default Vue.extend({
 .m-notify-customer-support-form {
   ._submit-button {
     margin: auto;
+  }
+
+  .california-privacy-notice-link {
+    --privacy-notice-link-width: 100%;
+    --privacy-notice-link-text-align: center;
   }
 }
 </style>

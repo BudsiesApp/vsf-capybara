@@ -126,6 +126,10 @@
             <p class="_text -small">
               {{ $t('Rewards dollars may be applied onto existing orders within 7 days of checkout.') }}
             </p>
+
+            <template v-if="$additionalContent.financialIncentivesLinks">
+              <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.financialIncentivesLinks" />
+            </template>
           </div>
         </div>
       </div>
@@ -307,6 +311,11 @@ $number-margin-right-desktop: var(--spacer-sm);
     ._button {
       margin: 0 auto;
     }
+  }
+
+  .notice-of-financial-incentive-link {
+    --financial-incentive-link-margin: var(--spacer-sm) 0 0;
+    --financial-incentive-link-display: inline-block;
   }
 
   @include for-desktop {

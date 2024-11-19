@@ -3,6 +3,7 @@
     <validation-provider
       slim
       rules="required|min:2"
+      name="'First name'"
       v-slot="{errors}"
     >
       <SfInput
@@ -21,6 +22,7 @@
     <validation-provider
       slim
       rules="required"
+      name="'Last name'"
       v-slot="{errors}"
     >
       <SfInput
@@ -39,6 +41,7 @@
     <validation-provider
       slim
       rules="required"
+      name="'Address'"
       v-slot="{errors}"
     >
       <SfInput
@@ -57,6 +60,7 @@
     <validation-provider
       slim
       rules="required"
+      name="'Country'"
       v-slot="{errors}"
     >
       <MMultiselect
@@ -89,6 +93,7 @@
     <validation-provider
       slim
       rules="required"
+      name="'State'"
       ref="stateValidator"
       v-slot="{errors}"
       v-if="isSelectedCountryHasStates && canShowStateSelector"
@@ -98,6 +103,7 @@
         class="form__element form__element--half form__select"
         name="address-level1"
         autocomplete="address-level1"
+        :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
         :label="$t('State / Province')"
         :required="true"
         id-field="id"
@@ -112,6 +118,7 @@
     <validation-provider
       slim
       rules="required"
+      name="'City'"
       v-slot="{errors}"
     >
       <SfInput
@@ -130,6 +137,7 @@
     <validation-provider
       slim
       rules="required|min:3"
+      name="'Zip Code'"
       v-slot="{errors}"
     >
       <SfInput
@@ -149,6 +157,7 @@
     <validation-provider
       v-slot="{ errors }"
       :rules="phoneValidationRules"
+      name="'Phone number'"
       ref="phoneValidator"
       slim
     >
@@ -173,6 +182,7 @@ import { min, regex, required } from 'vee-validate/dist/rules';
 import Vue, { PropType } from 'vue';
 import { SfInput } from '@storefront-ui/vue';
 
+import { stateCodeAutocompleteOptionSearch } from 'src/modules/shared';
 import { BaseAddressFormValue } from 'theme/components/interfaces/base-address-form-value.interface';
 
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
@@ -318,6 +328,7 @@ export default Vue.extend({
     }
   },
   methods: {
+    stateCodeAutocompleteOptionSearch,
     async onChangeCountry (): Promise<void> {
       await this.$nextTick();
       this.validateCountryRelatedFields();

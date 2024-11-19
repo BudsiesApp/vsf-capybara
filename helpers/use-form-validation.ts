@@ -32,7 +32,8 @@ export function useFormValidation (
   ): void {
     const fieldAnchorName = getFieldAnchorName(field);
 
-    let ref = getFormFieldsRefs()[fieldAnchorName];
+    const refs = getFormFieldsRefs();
+    let ref = refs[fieldAnchorName];
 
     if (!ref) {
       Logger.warn(`Reference for the field with error not found. Field: ${field}, ref: ${fieldAnchorName}`, 'budsies')();

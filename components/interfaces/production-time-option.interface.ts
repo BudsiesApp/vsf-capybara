@@ -3,5 +3,6 @@ export default interface ProductionTimeOption {
   text: string,
   isDomestic: boolean,
   optionId: number,
-  optionValueId?: number
+  optionValueId?: number,
+  sku?: string
 }

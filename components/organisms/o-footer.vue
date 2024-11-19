@@ -82,10 +82,13 @@
             {{ $t('Terms of Service') }}
           </router-link>
           |
-          <router-link to="/privacy-policy" exact>
-            {{ $t('Privacy Policy') }}
-          </router-link>
+
+          <privacy-policy-link />
         </div>
+
+        <template v-if="$additionalContent.footerLinks">
+          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.footerLinks" />
+        </template>
       </div>
     </SfFooter>
   </footer>
@@ -100,10 +103,12 @@ import { NavigationColumn } from 'src/modules/vsf-storyblok-module';
 import MBudsiesBrands from 'theme/components/molecules/m-budsies-brands.vue';
 import MNewsletterSubscription from 'theme/components/molecules/m-newsletter-subscription.vue';
 import NavigationItem from 'theme/components/storyblok/NavigationItem.vue';
+import { PrivacyPolicyLink } from 'src/modules/shared';
 
 export default Vue.extend({
   name: 'OFooter',
   components: {
+    PrivacyPolicyLink,
     MBudsiesBrands,
     MNewsletterSubscription,
     SfFooter,
@@ -275,7 +280,17 @@ export default Vue.extend({
     }
   }
 
-  ._legal-information {
+  ._legal-information,
+  .opt-out-link,
+  .california-privacy-notice-link {
+    --privacy-notice-link-font-size: var(--font-xs);
+    --privacy-notice-link-color: var(--c-light-variant);
+    --privacy-notice-link-margin: 0;
+    --privacy-notice-display: inline;
+
+    --opt-out-link-font-size: var(--font-xs);
+    --opt-out-link-color: var(--c-light-variant);
+
     color: var(--c-light-variant);
     font-size: var(--font-xs);
     margin-top: var(--spacer-xs);

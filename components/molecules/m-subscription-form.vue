@@ -34,7 +34,11 @@
         </MSpinnerButton>
       </form>
 
-      <div class="_success-message" v-else>
+      <template v-if="$additionalContent.financialIncentivesLinks">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.financialIncentivesLinks" />
+      </template>
+
+      <div class="_success-message" v-if="!displayForm">
         {{ successMessage }}
       </div>
     </validation-observer>
@@ -64,8 +68,8 @@ extend('email', email);
 export default defineComponent({
   name: 'MSubscriptionForm',
   components: {
-    SfInput,
     MSpinnerButton,
+    SfInput,
     ValidationProvider,
     ValidationObserver
   },
@@ -196,6 +200,16 @@ export default defineComponent({
   ._success-message {
     color: var(--c-text);
     margin-bottom: calc(var(--font-xs) * 1.2);
+  }
+
+  .california-privacy-notice-link {
+    --privacy-notice-link-color: var(--c-white);
+    --privacy-notice-link-margin: var(--spacer-xs) var(--spacer-sm) 0 0;
+  }
+
+  .notice-of-financial-incentive-link {
+    --financial-incentive-link-color: var(--c-white);
+    --financial-incentive-link-display: inline-block;
   }
 }
 </style>

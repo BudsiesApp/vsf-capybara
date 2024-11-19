@@ -1,5 +1,4 @@
 import { PlushieType } from 'theme/interfaces/plushie.type';
-import PlushieProductType from 'theme/interfaces/plushie-product-type';
 
 import getForeversSkuByType from './get-forevers-sku-by-type.function';
 import getGolfCoverSkuByType from './get-golf-covers-sku-by-type.function';

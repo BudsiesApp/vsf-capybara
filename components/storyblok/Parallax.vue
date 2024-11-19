@@ -40,8 +40,11 @@ export default Blok.extend({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+@import "src/modules/vsf-storyblok-module/css/image-modifiers";
 
 .aatoryblok-parallax {
   @include display-property-handling;
+
+  @include image-modifiers("m-parallax-section");
 }
 </style>
