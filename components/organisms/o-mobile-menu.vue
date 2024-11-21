@@ -8,6 +8,7 @@
       <MMenu
         ref="mobile-menu"
         v-show="isMobileMenu"
+        :menu-items="menuItems"
         class="_mobile-menu mobile-only"
         @close="onMenuCloseHandler"
       />
@@ -16,14 +17,21 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import Vue, { PropType } from 'vue'
 import { mapState } from 'vuex'
 import { disableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
 
 import MMenu from '../molecules/m-menu.vue';
+import { NavigationColumn } from 'src/modules/vsf-storyblok-module';
 
 export default Vue.extend({
   name: 'OMobileMenu',
+  props: {
+    menuItems: {
+      type: Array as PropType<NavigationColumn[]>,
+      required: true
+    }
+  },
   components: {
     MMenu
   },
