@@ -18,6 +18,7 @@
         :show-navigation-buttons="false"
         :horizontal-slides="isHorizontalThumbnails"
         @slide-clicked="onThumbnailSlideClicked"
+        @active-index-changed="onThumbnailActiveIndexChanged"
       >
         <template #default="{ item: image }">
           <div :key="JSON.stringify(image.thumb)" class="_thumbnail-item">
@@ -68,7 +69,11 @@
           @active-index-changed="onStageActiveIndexChanged"
         >
           <template #default="{ item: image }">
-            <div class="_image-wrapper" :href="image.big" v-if="image">
+            <div
+              class="_image-wrapper"
+              :href="image.big"
+              v-if="image"
+            >
               <BaseImage
                 class="_image"
                 :src="getImageSrc(image, 'stage')"
@@ -84,10 +89,20 @@
 
         <div class="_arrow -right desktop-only" @click="goToNextImage" />
 
-        <div class="_mobile-swipe-hint mobile-only">
-          <span class="_hint">
-            {{ $t("Swipe") }}
-          </span>
+        <div class="_mobile-swipe-hint mobile-only" v-show="carouselItems.length > 1">
+          <div class="_bullets-container">
+            <div
+              class="_bullets"
+              :class="animationClass"
+              @animationend="onBulletsAnimationEnd"
+            >
+              <div class="_bullet" />
+              <div class="_bullet -previous" />
+              <div class="_bullet -center" />
+              <div class="_bullet -next" />
+              <div class="_bullet" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -117,6 +132,16 @@ const debounceTime = 300;
 // hack to make one slide working with `loop` correctly.
 const STAGE_SLIDES_PER_VIEW = 1.00001;
 
+enum BulletsAnimationClass {
+  NEXT = '-slide-next',
+  PREVIOUS = '-slide-previous'
+}
+
+enum ClickedSlidePosition {
+  NEXT = 'next',
+  PREVIOUS = 'previous'
+}
+
 export default Vue.extend({
   name: 'MZoomGallery',
   components: {
@@ -144,7 +169,10 @@ export default Vue.extend({
       fWindowResizeHandler: undefined as () => void | undefined,
       fIsCloudZoomInitialized: false,
       slidesToShow: 5,
-      STAGE_SLIDES_PER_VIEW
+      STAGE_SLIDES_PER_VIEW,
+      animationClass: undefined as undefined | BulletsAnimationClass,
+      lastClickedSlide: undefined as undefined | ClickedSlidePosition,
+      currentLoopIndex: undefined as number | undefined
     };
   },
   computed: {
@@ -218,14 +246,69 @@ export default Vue.extend({
     window.removeEventListener('resize', this.fWindowResizeHandler);
   },
   methods: {
-    onStageActiveIndexChanged (activeIndex: number): void {
-      this.setCurrentIndex(activeIndex);
-      this.getCarousel().slideTo(activeIndex);
+    onBulletsAnimationEnd (): void {
+      this.animationClass = undefined;
     },
-    onThumbnailSlideClicked (slideIndex: number): void {
+    onStageActiveIndexChanged (
+      {
+        realIndex
+      }: {
+        realIndex: number,
+        index: number
+      }
+    ): void {
+      if (this.currentIndex !== undefined) {
+        const isLoopBackward = realIndex === this.carouselItems.length - 1 &&
+          this.currentIndex === 0;
+        const isLoopForward = realIndex === 0 &&
+          this.currentIndex === this.carouselItems.length - 1;
+
+        let isNextSlideSelected = !isLoopBackward &&
+          (realIndex > this.currentIndex || isLoopForward);
+
+        if (this.lastClickedSlide) {
+          isNextSlideSelected = this.lastClickedSlide === ClickedSlidePosition.NEXT;
+        }
+
+        this.animationClass = isNextSlideSelected
+          ? BulletsAnimationClass.NEXT
+          : BulletsAnimationClass.PREVIOUS;
+      } else {
+        this.animationClass = undefined;
+      }
+
+      this.setCurrentIndex(realIndex);
+      this.getCarousel().slideTo(realIndex);
+      this.lastClickedSlide = undefined;
+    },
+    onThumbnailActiveIndexChanged (
+      {
+        index
+      }: {
+        realIndex: number,
+        index: number
+      }
+    ): void {
+      this.currentLoopIndex = index;
+    },
+    onThumbnailSlideClicked (
+      {
+        realIndex,
+        index
+      }: {
+        realIndex: number,
+        index: number
+      }
+    ): void {
+      if (this.currentLoopIndex !== undefined) {
+        this.lastClickedSlide = index > this.currentLoopIndex
+          ? ClickedSlidePosition.NEXT
+          : ClickedSlidePosition.PREVIOUS;
+      }
+
       const stageCarousel = this.getStageCarousel();
 
-      stageCarousel.slideTo(slideIndex);
+      stageCarousel.slideTo(realIndex);
     },
     getStageCarousel (): InstanceType<typeof OCarousel> {
       return this.$refs.stageCarousel as InstanceType<typeof OCarousel>;
@@ -367,9 +450,11 @@ export default Vue.extend({
         }
 
         this.currentIndex = undefined;
+        this.currentLoopIndex = undefined;
 
         if (this.images.length) {
           this.currentIndex = 0;
+          this.currentLoopIndex = 0;
         }
       },
       immediate: true
@@ -380,6 +465,9 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 @import "theme/css/mixins/swiper-arrow.scss";
+
+$bullet-size: 12px;
+$animation-duration: 0.3s;
 
 .m-zoom-gallery {
   display: flex;
@@ -400,30 +488,87 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
 
-    ._hint {
-      background: rgba(0, 0, 0, 0.4);
-      color: white;
-      padding: 0 var(--spacer-xs);
+    ._bullets-container {
+      overflow: hidden;
+      width: calc(calc(#{$bullet-size} * 3) + var(--spacer-sm));
+      background-color: rgba(0, 0, 0, 0.3);
       border-radius: 4px;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--spacer-xs);
+      padding: var(--spacer-2xs);
+    }
 
-      &::before,
-      &::after {
-        content: "";
-        background: url('/assets/arrow.svg');
-        background-size: contain;
-        background-repeat: no-repeat;
-        width: 48px;
-        height: 6px;
-        display: block;
+    ._bullets {
+      display: flex;
+      height: 16px;
+      align-items: center;
+      column-gap: var(--spacer-xs);
+      transform: translateX(calc(#{$bullet-size} * -2 + var(--spacer-2xs)));
+
+      &.-slide-previous {
+        animation: slide-previous $animation-duration;
+
+        ._bullet {
+          &.-center {
+            animation: bullet-unscale $animation-duration;
+          }
+
+          &.-previous {
+            animation: bullet-scale $animation-duration;
+          }
+        }
       }
 
-      &::before {
-        rotate: 180deg;
+      &.-slide-next {
+        animation: slide-next $animation-duration;
+
+        ._bullet {
+          &.-center {
+            animation: bullet-unscale $animation-duration;
+          }
+
+          &.-next {
+            animation: bullet-scale $animation-duration;
+          }
+        }
+      }
+
+      ._bullet {
+        box-sizing: border-box;
+        flex-basis: $bullet-size;
+        flex-shrink: 0;
+        height: $bullet-size;
+        border: 1px solid var(--c-white);
+        border-radius: 100%;
+
+        &.-center {
+          background-color: var(--c-white);
+          transform: scale(1.3);
+        }
+      }
+    }
+
+    @keyframes bullet-unscale {
+      to {
+        transform: scale(1);
+        background-color: rgba(0, 0, 0, 0);
+      }
+    }
+
+    @keyframes bullet-scale {
+      to {
+        transform: scale(1.3);
+        background-color: var(--c-white);
+      }
+    }
+
+    @keyframes slide-previous {
+      to {
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slide-next {
+      to {
+        transform: translateX(calc(#{$bullet-size} * -4 + 0.5rem));
       }
     }
   }

@@ -1,7 +1,7 @@
 <template>
   <div
     class="o-carousel"
-    :class="{'-vertical': !horizontalSlides}"
+    :class="{ '-vertical': !horizontalSlides }"
     :style="style"
   >
     <div ref="swiper" class="swiper">
@@ -23,7 +23,7 @@
         <sf-button
           ref="prev-button"
           class="_arrow swiper-button-prev -left sf-button--pure"
-          :class="{'-vertical-layout': !horizontalSlides}"
+          :class="{ '-vertical-layout': !horizontalSlides }"
         />
 
         <div class="_counter" v-if="showCounter">
@@ -33,7 +33,7 @@
         <sf-button
           ref="next-button"
           class="_arrow -right swiper-button-next sf-button--pure"
-          :class="{'-vertical-layout': !horizontalSlides}"
+          :class="{ '-vertical-layout': !horizontalSlides }"
         />
       </div>
     </div>
@@ -221,21 +221,33 @@ export default Vue.extend({
       };
       const onRealIndexChange = (swiper: Swiper) => {
         this.currentSlideIndex = swiper.realIndex;
-        this.$emit('active-index-changed', this.currentSlideIndex);
+        this.$emit(
+          'active-index-changed',
+          {
+            realIndex: this.currentSlideIndex,
+            index: swiper.activeIndex
+          }
+        );
       };
       const onSlideClick = (swiper: Swiper) => {
         if (swiper.clickedIndex === undefined) {
           return;
         }
 
-        let slideIndex = swiper.clickedSlide.getAttribute('data-swiper-slide-index');
+        let slideIndex: string | number | null = swiper.clickedSlide.getAttribute('data-swiper-slide-index');
 
         // When loop mode is disabled we can just use `clickedIndex` property
         if (slideIndex === undefined || slideIndex === null) {
           slideIndex = swiper.clickedIndex;
         }
 
-        this.$emit('slide-clicked', Number(slideIndex));
+        this.$emit(
+          'slide-clicked',
+          {
+            realIndex: Number(slideIndex),
+            index: swiper.clickedIndex
+          }
+        );
       }
 
       this.swiper = new Swiper(
