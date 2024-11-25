@@ -400,7 +400,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 @import "theme/css/mixins/swiper-arrow.scss";
 
-$bullet-size: 10px;
+$bullet-size: 8px;
 
 .m-zoom-gallery {
   display: flex;
@@ -415,7 +415,7 @@ $bullet-size: 10px;
 
   ._mobile-swipe-hint {
     position: absolute;
-    bottom: var(--spacer-2xs);
+    bottom: var(--spacer-xs);
     z-index: 100;
     width: 100%;
     display: flex;
@@ -431,11 +431,12 @@ $bullet-size: 10px;
         flex-basis: $bullet-size;
         flex-shrink: 0;
         height: $bullet-size;
-        border: 1px solid var(--c-gray-darken);
+        border: 1px solid rgba(0, 0, 0, 0.2);
         border-radius: 100%;
+        background-color: rgba(255, 255, 255, 0.3);
 
         &.-center {
-          background-color: var(--c-gray-darken);
+          background-color: rgba(255, 255, 255, 0.8);
         }
       }
     }
