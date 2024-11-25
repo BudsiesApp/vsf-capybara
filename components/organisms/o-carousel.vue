@@ -223,10 +223,7 @@ export default Vue.extend({
         this.currentSlideIndex = swiper.realIndex;
         this.$emit(
           'active-index-changed',
-          {
-            realIndex: this.currentSlideIndex,
-            index: swiper.activeIndex
-          }
+          this.currentSlideIndex
         );
       };
       const onSlideClick = (swiper: Swiper) => {
@@ -241,13 +238,7 @@ export default Vue.extend({
           slideIndex = swiper.clickedIndex;
         }
 
-        this.$emit(
-          'slide-clicked',
-          {
-            realIndex: Number(slideIndex),
-            index: swiper.clickedIndex
-          }
-        );
+        this.$emit('slide-clicked', Number(slideIndex));
       }
 
       this.swiper = new Swiper(
