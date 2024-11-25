@@ -39,7 +39,11 @@
 
     <div class="_stage">
       <div class="_stage-content">
-        <div class="_arrow -left desktop-only" @click="goToPreviousImage" />
+        <div
+          class="_arrow -left desktop-only"
+          v-show="canShowArrows"
+          @click="goToPreviousImage"
+        />
 
         <div class="_cloud-zoom-wrapper" v-if="stageImage">
           <div
@@ -68,7 +72,11 @@
           @active-index-changed="onStageActiveIndexChanged"
         >
           <template #default="{ item: image }">
-            <div class="_image-wrapper" :href="image.big" v-if="image">
+            <div
+              class="_image-wrapper"
+              :href="image.big"
+              v-if="image"
+            >
               <BaseImage
                 class="_image"
                 :src="getImageSrc(image, 'stage')"
@@ -82,12 +90,20 @@
           </template>
         </o-carousel>
 
-        <div class="_arrow -right desktop-only" @click="goToNextImage" />
+        <div
+          class="_arrow -right desktop-only"
+          v-show="canShowArrows"
+          @click="goToNextImage"
+        />
 
-        <div class="_mobile-swipe-hint mobile-only">
-          <span class="_hint">
-            {{ $t("Swipe") }}
-          </span>
+        <div class="_mobile-swipe-hint mobile-only" v-show="canShowArrows">
+          <div
+            class="_bullets"
+          >
+            <div class="_bullet" />
+            <div class="_bullet -center" />
+            <div class="_bullet" />
+          </div>
         </div>
       </div>
     </div>
@@ -148,6 +164,9 @@ export default Vue.extend({
     };
   },
   computed: {
+    canShowArrows (): boolean {
+      return this.carouselItems.length > 1;
+    },
     isFirstSlideActive (): boolean {
       return this.currentIndex === 0;
     },
@@ -218,14 +237,14 @@ export default Vue.extend({
     window.removeEventListener('resize', this.fWindowResizeHandler);
   },
   methods: {
-    onStageActiveIndexChanged (activeIndex: number): void {
-      this.setCurrentIndex(activeIndex);
-      this.getCarousel().slideTo(activeIndex);
+    onStageActiveIndexChanged (realIndex: number): void {
+      this.setCurrentIndex(realIndex);
+      this.getCarousel().slideTo(realIndex);
     },
-    onThumbnailSlideClicked (slideIndex: number): void {
+    onThumbnailSlideClicked (realIndex: number): void {
       const stageCarousel = this.getStageCarousel();
 
-      stageCarousel.slideTo(slideIndex);
+      stageCarousel.slideTo(realIndex);
     },
     getStageCarousel (): InstanceType<typeof OCarousel> {
       return this.$refs.stageCarousel as InstanceType<typeof OCarousel>;
@@ -381,6 +400,8 @@ export default Vue.extend({
 <style lang="scss" scoped>
 @import "theme/css/mixins/swiper-arrow.scss";
 
+$bullet-size: 8px;
+
 .m-zoom-gallery {
   display: flex;
   flex-direction: row;
@@ -394,36 +415,29 @@ export default Vue.extend({
 
   ._mobile-swipe-hint {
     position: absolute;
-    bottom: var(--spacer-2xs);
+    bottom: var(--spacer-xs);
     z-index: 100;
     width: 100%;
     display: flex;
     justify-content: center;
 
-    ._hint {
-      background: rgba(0, 0, 0, 0.4);
-      color: white;
-      padding: 0 var(--spacer-xs);
-      border-radius: 4px;
+    ._bullets {
       display: flex;
-      flex-direction: row;
       align-items: center;
-      justify-content: space-between;
-      gap: var(--spacer-xs);
+      column-gap: var(--spacer-xs);
 
-      &::before,
-      &::after {
-        content: "";
-        background: url('/assets/arrow.svg');
-        background-size: contain;
-        background-repeat: no-repeat;
-        width: 48px;
-        height: 6px;
-        display: block;
-      }
+      ._bullet {
+        box-sizing: border-box;
+        flex-basis: $bullet-size;
+        flex-shrink: 0;
+        height: $bullet-size;
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        border-radius: 100%;
+        background-color: rgba(255, 255, 255, 0.3);
 
-      &::before {
-        rotate: 180deg;
+        &.-center {
+          background-color: rgba(255, 255, 255, 0.8);
+        }
       }
     }
   }
