@@ -13,7 +13,11 @@
               class="_production-spot-countdown"
             />
 
-            <SfStep v-for="step in availableSteps" :key="step.key" :name="step.name">
+            <SfStep
+              v-for="step in availableSteps"
+              :key="step.key"
+              :name="step.name"
+            >
               <component :is="step.component" :is-active="true" />
             </SfStep>
           </template>
@@ -216,6 +220,13 @@ export default {
           'There is no Internet connection. You can still place your order. We will notify you if any of ordered products is not available because we cannot check it right now.'
         )
       });
+    }
+  },
+  watch: {
+    showThankYouPage (value) {
+      if (!value && !this.productsInCart.length) {
+        this.$router.push({ name: 'detailed-cart' });
+      }
     }
   },
   metaInfo () {
