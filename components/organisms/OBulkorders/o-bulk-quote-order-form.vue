@@ -64,7 +64,7 @@
             >
               <template #label="{ label, isFieldRequired }">
                 <AOrderedHeading
-                  :order="5"
+                  :order="7"
                   :level="3"
                   :title="label"
                   class="_title"
