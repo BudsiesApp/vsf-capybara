@@ -1,6 +1,10 @@
 <template>
   <div class="o-bulk-quote-order-form">
-    <SfHeading :level="1" :title="$t('Bulk Order Quote')" class="_title" />
+    <SfHeading
+      :level="1"
+      :title="$t('Bulk Order Quote')"
+      class="_title"
+    />
 
     <validation-observer
       ref="validationObserver"
@@ -28,8 +32,7 @@
               :is-disabled="isDisabled"
               :option-values="colorPaletteCustomizationOptionValues"
               :product-id="product.id"
-              :value="
-                customizationOptionValue[colorPaletteCustomization.id]
+              :value="customizationOptionValue[colorPaletteCustomization.id]
               "
               @input="onCustomizationOptionInput"
             >
@@ -45,39 +48,28 @@
           </div>
         </template>
 
-        <template #size>
+        <template #size v-if="sizeCustomization">
           <div class="_section">
-            <AOrderedHeading
-              :order="7"
-              :level="3"
-              :title="$t('What’s your preferred size?')"
-              class="_title"
-              :ref="getFieldAnchorName('Size')"
-            />
-
-            <div class="_helper">
-              {{
-                $t(
-                  'Typical sizes are 6" (small), 8" (regular), 12" (large), and 16" (maximum). It\'s OK if you’re not sure.'
-                )
-              }}
-            </div>
-
-            <validation-provider
-              v-slot="{ errors }"
-              :name="$t('\'Size\'')"
-              rules="required|between:6,16"
-              slim
+            <customization-option
+              class="_customization-option"
+              ref="customizationOption"
+              :customization="sizeCustomization"
+              :is-disabled="isDisabled"
+              :option-values="sizeCustomizationOptionValues"
+              :product-id="product.id"
+              :value="customizationOptionValue[sizeCustomization.id]
+              "
+              @input="onCustomizationOptionInput"
             >
-              <SfInput
-                :label="$t('Size')"
-                :valid="!errors.length"
-                :error-message="errors[0]"
-                name="size"
-                class="sf-input--required"
-                v-model="bulkSize"
-              />
-            </validation-provider>
+              <template #label="{ label }">
+                <AOrderedHeading
+                  :order="4"
+                  :level="3"
+                  :title="label"
+                  class="_title -required"
+                />
+              </template>
+            </customization-option>
           </div>
         </template>
 
@@ -110,7 +102,11 @@
 
       <div class="_notice-link-container">
         <template v-if="$additionalContent.formLinks">
-          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.formLinks" />
+          <component
+            :is="linkComponent.component"
+            :key="linkComponent.key"
+            v-for="linkComponent in $additionalContent.formLinks"
+          />
         </template>
       </div>
     </validation-observer>
@@ -186,6 +182,7 @@ function getFormAllRefs (
 }
 
 const COLOR_PALETTE_CUSTOMIZATION_SKU = 'bulk_sample_color_palette';
+const SIZE_CUSTOMIZATION_NAME = 'size';
 
 export default defineComponent({
   name: 'OBulkQuoteOrderForm',
@@ -225,7 +222,29 @@ export default defineComponent({
 
     const colorPaletteCustomizationOptionValues = computed<OptionValue[]>(
       () => {
-        return colorPaletteCustomization.value?.optionData?.values || [];
+        if (!colorPaletteCustomization.value) {
+          return [];
+        }
+
+        return customizationAvailableOptionValues.value[colorPaletteCustomization.value.id] || [];
+      }
+    );
+
+    const sizeCustomization = computed<Customization | undefined>(
+      () => {
+        return availableCustomizations.value.find(
+          (item) => item.name?.toLowerCase() === SIZE_CUSTOMIZATION_NAME
+        );
+      }
+    );
+
+    const sizeCustomizationOptionValues = computed<OptionValue[]>(
+      () => {
+        if (!sizeCustomization.value) {
+          return [];
+        }
+
+        return customizationAvailableOptionValues.value[sizeCustomization.value.id] || [];
       }
     );
 
@@ -243,6 +262,8 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       onCustomizationOptionInput,
+      sizeCustomization,
+      sizeCustomizationOptionValues,
       validationObserver,
       ...useBulkOrdersBaseForm(),
       ...useFormValidation(validationObserver, () =>
@@ -402,12 +423,16 @@ export default defineComponent({
   padding: var(--spacer-lg);
 
   ._customization-option {
-    --customization-option-align-items: center;
-    --customization-option-hint-align: center;
-    --widget-error-message-font: var(--font-normal) var(--font-xs) var(--font-family-primary);
+    --dropdown-widget-max-width: 100%;
 
-    width: 100%;
-    text-align: center;
+    &.-ColorsListWidget {
+      --customization-option-align-items: center;
+      --customization-option-hint-align: center;
+      --widget-error-message-font: var(--font-normal) var(--font-xs) var(--font-family-primary);
+
+      width: 100%;
+      text-align: center;
+    }
   }
 
   ._title {
