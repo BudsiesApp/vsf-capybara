@@ -36,12 +36,13 @@
               "
               @input="onCustomizationOptionInput"
             >
-              <template #label="{ label }">
+              <template #label="{ label, isFieldRequired }">
                 <AOrderedHeading
                   :order="4"
                   :level="3"
                   :title="label"
-                  class="_title -required"
+                  class="_title"
+                  :class="{'-required': isFieldRequired}"
                 />
               </template>
             </customization-option>
@@ -61,12 +62,13 @@
               "
               @input="onCustomizationOptionInput"
             >
-              <template #label="{ label }">
+              <template #label="{ label, isFieldRequired }">
                 <AOrderedHeading
-                  :order="4"
+                  :order="5"
                   :level="3"
                   :title="label"
-                  class="_title -required"
+                  class="_title"
+                  :class="{'-required': isFieldRequired}"
                 />
               </template>
             </customization-option>
@@ -425,9 +427,10 @@ export default defineComponent({
   ._customization-option {
     --dropdown-widget-max-width: 100%;
 
-    &.-ColorsListWidget {
+    &.-widget-ColorsListWidget {
       --customization-option-align-items: center;
       --customization-option-hint-align: center;
+      --customization-option-description-align: center;
       --widget-error-message-font: var(--font-normal) var(--font-xs) var(--font-family-primary);
 
       width: 100%;
@@ -437,6 +440,7 @@ export default defineComponent({
 
   ._title {
     margin-bottom: var(--spacer-2xl);
+    align-self: center;
   }
 
   ._form-errors {
