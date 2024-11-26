@@ -298,7 +298,6 @@ export default defineComponent({
   data () {
     return {
       isSubmitting: false,
-      bulkSize: undefined as string | undefined,
       showCalculationAnimation: false,
       onCalculationAnimationFinished: () => {}
     };
@@ -355,7 +354,6 @@ export default defineComponent({
           'budsies/createBulkorder',
           {
             product_id: BulkorderQuoteProductId.PLUSHIE,
-            size: this.bulkSize,
             qty: this.bulkordersBaseFormData.quantity,
             project_name: this.bulkordersBaseFormData.name,
             description: this.bulkordersBaseFormData.description,
