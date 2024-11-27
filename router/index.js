@@ -87,30 +87,30 @@ let routes = [
       preselectedProductType: route.query.product
     })
   },
-  {
-    name: 'forevers-create-alias-1',
-    path: '/plushie/index/creationwizard/category_id/13/',
-    redirect: {
-      name: 'forevers-create'
-    }
-  },
-  {
-    name: 'forevers-create-alias-2',
-    path: '/plushie/index/creationwizard/category_id/13/attributeId/:plushieId/',
-    redirect: {
-      name: 'forevers-create'
-    }
-  },
-  {
-    name: 'forevers-create-alias-3',
-    path: '/plushie/index/precreate/type/forevers/product/:productType/',
-    redirect: (route) => ({
-      name: 'forevers-create',
-      query: {
-        product: route.params.productType
-      }
-    })
-  },
+  // {
+  //  name: 'forevers-create-alias-1',
+  //  path: '/plushie/index/creationwizard/category_id/13/',
+  //  redirect: {
+  //    name: 'forevers-create'
+  //  }
+  // },
+  // {
+  //  name: 'forevers-create-alias-2',
+  //  path: '/plushie/index/creationwizard/category_id/13/attributeId/:plushieId/',
+  //  redirect: {
+  //    name: 'forevers-create'
+  //  }
+  // },
+  // {
+  //  name: 'forevers-create-alias-3',
+  //  path: '/plushie/index/precreate/type/forevers/product/:productType/',
+  //  redirect: (route) => ({
+  //    name: 'forevers-create',
+  //    query: {
+  //      product: route.params.productType
+  //    }
+  //  })
+  // },
   {
     name: 'golf-covers-create',
     path: '/golf-head-covers/create/',
@@ -121,30 +121,30 @@ let routes = [
       preselectedProductType: route.query.product
     })
   },
-  {
-    name: 'golf-covers-create-alias-1',
-    path: '/plushie/index/creationwizard/category_id/124/',
-    redirect: {
-      name: 'golf-covers-create'
-    }
-  },
-  {
-    name: 'golf-covers-create-alias-2',
-    path: '/plushie/index/creationwizard/category_id/124/attributeId/:plushieId/',
-    redirect: {
-      name: 'golf-covers-create'
-    }
-  },
-  {
-    name: 'golf-covers-create-alias-3',
-    path: '/plushie/index/precreate/type/golf-head-covers/product/:productType/',
-    redirect: (route) => ({
-      name: 'golf-covers-create',
-      query: {
-        product: route.params.productType
-      }
-    })
-  },
+  // {
+  //  name: 'golf-covers-create-alias-1',
+  //  path: '/plushie/index/creationwizard/category_id/124/',
+  //  redirect: {
+  //    name: 'golf-covers-create'
+  //  }
+  // },
+  // {
+  //  name: 'golf-covers-create-alias-2',
+  //  path: '/plushie/index/creationwizard/category_id/124/attributeId/:plushieId/',
+  //  redirect: {
+  //    name: 'golf-covers-create'
+  //  }
+  // },
+  // {
+  //  name: 'golf-covers-create-alias-3',
+  //  path: '/plushie/index/precreate/type/golf-head-covers/product/:productType/',
+  //  redirect: (route) => ({
+  //    name: 'golf-covers-create',
+  //    query: {
+  //      product: route.params.productType
+  //    }
+  //  })
+  // },
   {
     name: 'printed-product',
     path: '/printed/p/:sku/',
@@ -165,16 +165,16 @@ let routes = [
       layout: 'vertical'
     })
   },
-  {
-    name: 'pillow-product-alias',
-    path: '/plushie/index/create/id/:plushieId/type/pillow/',
-    redirect: (route) => ({
-      name: 'pillow-product',
-      query: {
-        existingPlushieId: route.params.plushieId
-      }
-    })
-  },
+  // {
+  //  name: 'pillow-product-alias',
+  //  path: '/plushie/index/create/id/:plushieId/type/pillow/',
+  //  redirect: (route) => ({
+  //    name: 'pillow-product',
+  //    query: {
+  //      existingPlushieId: route.params.plushieId
+  //    }
+  //  })
+  // },
   { name: 'cross-sells', path: '/cross-sells/p/:parentSku/', component: CrossSells, props: true },
   {
     name: 'cross-sells-alias',
@@ -264,7 +264,7 @@ let routes = [
   },
   {
     name: 'printed-socks-creation-page',
-    path: '/plushie/index/printedSocks/',
+    path: '/pet-socks/',
     component: CustomizableProduct,
     props: route => ({
       sku: 'petsiesCustomPrintedSocks_bundle',
@@ -274,7 +274,7 @@ let routes = [
   },
   {
     name: 'printed-masks-creation-page',
-    path: '/plushie/index/printedMasks/',
+    path: '/custom-face-masks/',
     component: CustomizableProduct,
     props: route => ({
       sku: 'customPrintedMasks_bundle',
@@ -283,7 +283,7 @@ let routes = [
   },
   {
     name: 'printed-keychains-creation-page',
-    path: '/plushie/index/printedKeychains/',
+    path: '/pet-keychains/',
     component: CustomizableProduct,
     props: route => ({
       sku: 'customPrintedKeychains_bundle',
@@ -292,7 +292,7 @@ let routes = [
   },
   {
     name: 'felted-magnets-creation-page',
-    path: '/plushie/index/feltedMagnets/',
+    path: '/felted-magnets/',
     component: CustomizableProduct,
     props: route => ({
       sku: 'customFeltedMagnets_bundle',
@@ -301,7 +301,7 @@ let routes = [
   },
   {
     name: 'felted-ornaments-creation-page',
-    path: '/plushie/index/feltedOrnaments/',
+    path: '/felted-ornaments/',
     component: CustomizableProduct,
     props: route => ({
       sku: 'customFeltedOrnaments_bundle',
@@ -339,7 +339,7 @@ let routes = [
     }
   },
   {
-    path: '/phrasepillow/index/customize/',
+    path: '/photo-pillows/create/',
     name: 'phrase-pillow-customize',
     component: CustomizableProduct,
     props: (route) => ({
@@ -362,7 +362,7 @@ let routes = [
   },
   {
     name: 'renaissance-blankets',
-    path: '/blankets/index/create/type/renaissance-blankets/',
+    path: '/renaissance-blankets/',
     component: CustomizableProduct,
     props: (route) => ({
       sku: 'customRenaissanceBlankets_bundle',
@@ -372,7 +372,7 @@ let routes = [
   },
   {
     name: 'cut-out-blankets',
-    path: '/blankets/index/create/type/cut-out-blankets/',
+    path: '/custom-pet-photo-blankets/',
     component: CustomizableProduct,
     props: (route) => ({
       sku: 'petsiesCustomCutOutBlankets_bundle',
@@ -400,6 +400,7 @@ let routes = [
       }
     }
   },
+  // TODO: is it possible to make parametrized redirect on the Magento side
   {
     name: 'figurines-alias-1',
     path: '/plushie/index/create/id/:plushieId/type/petsies-figurine/',
@@ -456,7 +457,7 @@ let routes = [
   },
   {
     name: 'pajamas-creation',
-    path: '/pajamas/index/create/',
+    path: '/custom-pajamas/',
     component: CustomizableProduct,
     props: (route) => ({
       sku: 'customPajamas_bundle',
