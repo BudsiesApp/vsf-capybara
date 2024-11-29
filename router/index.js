@@ -146,16 +146,6 @@ let routes = [
     })
   },
   {
-    name: 'printed-product',
-    path: '/printed/p/:sku/',
-    component: CustomizableProduct,
-    props: route => ({
-      sku: route.params.sku,
-      productDesign: route.query.product_design,
-      existingPlushieId: route.query.existingPlushieId
-    })
-  },
-  {
     name: 'pillow-product',
     path: '/pillows/create/',
     component: CustomizableProduct,
@@ -294,7 +284,8 @@ let routes = [
     component: CustomizableProduct,
     props: route => ({
       sku: 'customPrintedMasks_bundle',
-      productDesign: route.query.product_design
+      productDesign: route.query.product_design,
+      existingPlushieId: route.query.existingPlushieId
     })
   },
   {
@@ -311,7 +302,8 @@ let routes = [
     component: CustomizableProduct,
     props: route => ({
       sku: 'customPrintedKeychains_bundle',
-      productDesign: route.query.product_design
+      productDesign: route.query.product_design,
+      existingPlushieId: route.query.existingPlushieId
     })
   },
   {
@@ -328,7 +320,8 @@ let routes = [
     component: CustomizableProduct,
     props: route => ({
       sku: 'customFeltedMagnets_bundle',
-      productDesign: route.query.product_design
+      productDesign: route.query.product_design,
+      existingPlushieId: route.query.existingPlushieId
     })
   },
   {
@@ -345,7 +338,8 @@ let routes = [
     component: CustomizableProduct,
     props: route => ({
       sku: 'customFeltedOrnaments_bundle',
-      productDesign: route.query.product_design
+      productDesign: route.query.product_design,
+      existingPlushieId: route.query.existingPlushieId
     })
   },
   {
@@ -392,7 +386,8 @@ let routes = [
     component: CustomizableProduct,
     props: (route) => ({
       sku: 'petsiesPhrasePillow_bundle',
-      layout: 'phrase-pillow'
+      layout: 'phrase-pillow',
+      existingPlushieId: route.query.existingPlushieId
     })
   },
   { name: 'recover-cart', path: '/alerts/recover/cart/id/:id/code/:code/', component: CartRecovery },
@@ -506,16 +501,6 @@ let routes = [
       sku: 'petsiesBobbleheads_bundle',
       existingPlushieId: route.query.existingPlushieId,
       layout: 'vertical'
-    })
-  },
-  {
-    name: 'clothes-product',
-    path: '/clothes/p/:sku/',
-    component: CustomizableProduct,
-    props: (route) => ({
-      sku: route.params.sku,
-      productDesign: route.query.product_design,
-      existingPlushieId: route.query.existingPlushieId
     })
   },
   {
