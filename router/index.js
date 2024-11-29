@@ -87,30 +87,30 @@ let routes = [
       preselectedProductType: route.query.product
     })
   },
-  // {
-  //  name: 'forevers-create-alias-1',
-  //  path: '/plushie/index/creationwizard/category_id/13/',
-  //  redirect: {
-  //    name: 'forevers-create'
-  //  }
-  // },
-  // {
-  //  name: 'forevers-create-alias-2',
-  //  path: '/plushie/index/creationwizard/category_id/13/attributeId/:plushieId/',
-  //  redirect: {
-  //    name: 'forevers-create'
-  //  }
-  // },
-  // {
-  //  name: 'forevers-create-alias-3',
-  //  path: '/plushie/index/precreate/type/forevers/product/:productType/',
-  //  redirect: (route) => ({
-  //    name: 'forevers-create',
-  //    query: {
-  //      product: route.params.productType
-  //    }
-  //  })
-  // },
+  {
+    name: 'forevers-create-alias-1',
+    path: '/plushie/index/creationwizard/category_id/13/',
+    redirect: {
+      name: 'forevers-create'
+    }
+  },
+  {
+    name: 'forevers-create-alias-2',
+    path: '/plushie/index/creationwizard/category_id/13/attributeId/:plushieId/',
+    redirect: {
+      name: 'forevers-create'
+    }
+  },
+  {
+    name: 'forevers-create-alias-3',
+    path: '/plushie/index/precreate/type/forevers/product/:productType/',
+    redirect: (route) => ({
+      name: 'forevers-create',
+      query: {
+        product: route.params.productType
+      }
+    })
+  },
   {
     name: 'golf-covers-create',
     path: '/golf-head-covers/create/',
@@ -121,30 +121,30 @@ let routes = [
       preselectedProductType: route.query.product
     })
   },
-  // {
-  //  name: 'golf-covers-create-alias-1',
-  //  path: '/plushie/index/creationwizard/category_id/124/',
-  //  redirect: {
-  //    name: 'golf-covers-create'
-  //  }
-  // },
-  // {
-  //  name: 'golf-covers-create-alias-2',
-  //  path: '/plushie/index/creationwizard/category_id/124/attributeId/:plushieId/',
-  //  redirect: {
-  //    name: 'golf-covers-create'
-  //  }
-  // },
-  // {
-  //  name: 'golf-covers-create-alias-3',
-  //  path: '/plushie/index/precreate/type/golf-head-covers/product/:productType/',
-  //  redirect: (route) => ({
-  //    name: 'golf-covers-create',
-  //    query: {
-  //      product: route.params.productType
-  //    }
-  //  })
-  // },
+  {
+    name: 'golf-covers-create-alias-1',
+    path: '/plushie/index/creationwizard/category_id/124/',
+    redirect: {
+      name: 'golf-covers-create'
+    }
+  },
+  {
+    name: 'golf-covers-create-alias-2',
+    path: '/plushie/index/creationwizard/category_id/124/attributeId/:plushieId/',
+    redirect: {
+      name: 'golf-covers-create'
+    }
+  },
+  {
+    name: 'golf-covers-create-alias-3',
+    path: '/plushie/index/precreate/type/golf-head-covers/product/:productType/',
+    redirect: (route) => ({
+      name: 'golf-covers-create',
+      query: {
+        product: route.params.productType
+      }
+    })
+  },
   {
     name: 'printed-product',
     path: '/printed/p/:sku/',
@@ -165,16 +165,16 @@ let routes = [
       layout: 'vertical'
     })
   },
-  // {
-  //  name: 'pillow-product-alias',
-  //  path: '/plushie/index/create/id/:plushieId/type/pillow/',
-  //  redirect: (route) => ({
-  //    name: 'pillow-product',
-  //    query: {
-  //      existingPlushieId: route.params.plushieId
-  //    }
-  //  })
-  // },
+  {
+    name: 'pillow-product-alias',
+    path: '/plushie/index/create/id/:plushieId/type/pillow/',
+    redirect: (route) => ({
+      name: 'pillow-product',
+      query: {
+        existingPlushieId: route.params.plushieId
+      }
+    })
+  },
   { name: 'cross-sells', path: '/cross-sells/p/:parentSku/', component: CrossSells, props: true },
   {
     name: 'cross-sells-alias',
@@ -400,7 +400,6 @@ let routes = [
       }
     }
   },
-  // TODO: is it possible to make parametrized redirect on the Magento side
   {
     name: 'figurines-alias-1',
     path: '/plushie/index/create/id/:plushieId/type/petsies-figurine/',
