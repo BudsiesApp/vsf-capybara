@@ -263,6 +263,14 @@ let routes = [
     }
   },
   {
+    name: 'printed-socks-creation-page-alias-1',
+    path: '/plushie/index/printedSocks/',
+    redirect: (route) => ({
+      name: 'printed-socks-creation-page',
+      query: route.query
+    })
+  },
+  {
     name: 'printed-socks-creation-page',
     path: '/pet-socks/',
     component: CustomizableProduct,
@@ -270,6 +278,14 @@ let routes = [
       sku: 'petsiesCustomPrintedSocks_bundle',
       productDesign: route.query.product_design,
       existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
+    name: 'printed-masks-creation-page-alias-1',
+    path: '/plushie/index/printedMasks/',
+    redirect: (route) => ({
+      name: 'printed-masks-creation-page',
+      query: route.query
     })
   },
   {
@@ -282,6 +298,14 @@ let routes = [
     })
   },
   {
+    name: 'printed-keychains-creation-page-alias-1',
+    path: '/plushie/index/printedKeychains/',
+    redirect: (route) => ({
+      name: 'printed-keychains-creation-page',
+      query: route.query
+    })
+  },
+  {
     name: 'printed-keychains-creation-page',
     path: '/pet-keychains/',
     component: CustomizableProduct,
@@ -291,12 +315,28 @@ let routes = [
     })
   },
   {
+    name: 'felted-magnets-creation-page-alias-1',
+    path: '/plushie/index/feltedMagnets/',
+    redirect: (route) => ({
+      name: 'felted-magnets-creation-page',
+      query: route.query
+    })
+  },
+  {
     name: 'felted-magnets-creation-page',
     path: '/felted-magnets/',
     component: CustomizableProduct,
     props: route => ({
       sku: 'customFeltedMagnets_bundle',
       productDesign: route.query.product_design
+    })
+  },
+  {
+    name: 'felted-ornaments-creation-page-alias-1',
+    path: '/plushie/index/feltedOrnaments/',
+    redirect: (route) => ({
+      name: 'felted-ornaments-creation-page',
+      query: route.query
     })
   },
   {
@@ -339,6 +379,14 @@ let routes = [
     }
   },
   {
+    name: 'phrase-pillow-customize-alias-1',
+    path: '/phrasepillow/index/customize/',
+    redirect: (route) => ({
+      name: 'phrase-pillow-customize',
+      query: route.query
+    })
+  },
+  {
     path: '/photo-pillows/create/',
     name: 'phrase-pillow-customize',
     component: CustomizableProduct,
@@ -361,6 +409,14 @@ let routes = [
     }
   },
   {
+    name: 'renaissance-blankets-alias-1',
+    path: '/blankets/index/create/type/renaissance-blankets/',
+    redirect: (route) => ({
+      name: 'renaissance-blankets',
+      query: route.query
+    })
+  },
+  {
     name: 'renaissance-blankets',
     path: '/renaissance-blankets/',
     component: CustomizableProduct,
@@ -368,6 +424,14 @@ let routes = [
       sku: 'customRenaissanceBlankets_bundle',
       existingPlushieId: route.query.existingPlushieId,
       productDesign: route.query.product_design
+    })
+  },
+  {
+    name: 'cut-out-blankets-alias-1',
+    path: '/blankets/index/create/type/cut-out-blankets/',
+    redirect: (route) => ({
+      name: 'cut-out-blankets',
+      query: route.query
     })
   },
   {
@@ -452,6 +516,14 @@ let routes = [
       sku: route.params.sku,
       productDesign: route.query.product_design,
       existingPlushieId: route.query.existingPlushieId
+    })
+  },
+  {
+    name: 'pajamas-creation-alias-1',
+    path: '/pajamas/index/create/',
+    redirect: (route) => ({
+      name: 'pajamas-creation',
+      query: route.query
     })
   },
   {
