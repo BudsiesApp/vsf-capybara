@@ -1,16 +1,23 @@
-import { computed, nextTick, Ref } from '@vue/composition-api';
+import { computed, nextTick, Ref, SetupContext, watch } from '@vue/composition-api';
 
 import CartItem from 'core/modules/cart/types/CartItem';
 import { Customization } from 'src/modules/customization-system';
 import { useFormSteps } from './use-form-steps';
+import debounce from 'lodash.debounce';
 
 const productTypeChooseStepName = 'Type';
 const previousCustomizationStepOffset = 2;
+const updateQueryDebounceTime = 100;
+
+function getStepQueryValue (step: number, stepsList: string[]): string {
+  return stepsList[step].toLowerCase().replace(/ /g, '-');
+}
 
 export function useCreationWizardFormSteps (
   customizationRootGroups: Ref<Customization[]>,
   existingCartItem: Ref<CartItem | undefined>,
-  afterStepChanged: (previousStepCustomization?: Customization) => void
+  afterStepChanged: (previousStepCustomization?: Customization) => void,
+  { root }: SetupContext
 ) {
   const {
     currentStep,
@@ -70,6 +77,30 @@ export function useCreationWizardFormSteps (
 
     goToStep(nextStep);
   }
+
+  const updateStepQuery = debounce(
+    (step: number) => {
+      const stepQueryValue = getStepQueryValue(step, stepsList.value);
+
+      root.$router.replace({
+        query: {
+          ...root.$route.query,
+          step: stepQueryValue
+        }
+      });
+    },
+    updateQueryDebounceTime
+  );
+
+  watch(
+    currentStep,
+    (value) => {
+      updateStepQuery(value);
+    },
+    {
+      immediate: true
+    }
+  );
 
   return {
     canGoBack,
