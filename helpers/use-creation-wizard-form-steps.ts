@@ -1,9 +1,10 @@
+import debounce from 'lodash.debounce';
 import { computed, nextTick, Ref, SetupContext, watch } from '@vue/composition-api';
 
 import CartItem from 'core/modules/cart/types/CartItem';
 import { Customization } from 'src/modules/customization-system';
+
 import { useFormSteps } from './use-form-steps';
-import debounce from 'lodash.debounce';
 
 const productTypeChooseStepName = 'Type';
 const previousCustomizationStepOffset = 2;
