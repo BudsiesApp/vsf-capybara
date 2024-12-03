@@ -355,8 +355,8 @@ export default Vue.extend({
     horizontalSlides () {
       this.reInitSwiper();
     },
-    isLoopAvailable (val: boolean) {
-      this.updateSwiper({ loop: val });
+    isLoopAvailable () {
+      this.reInitSwiper();
     }
   }
 });
