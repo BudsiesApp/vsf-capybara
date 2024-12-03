@@ -12,6 +12,7 @@ import config from 'config';
 
 import DefaultLayout from './layouts/Default'
 import MinimalLayout from './layouts/Minimal'
+import SimpleLayout from './layouts/Simple'
 import { ModalList } from './store/ui/modals';
 
 import { FileProcessingRepositoryFactory, ImageHandlerService, itemFactory } from 'src/modules/file-storage'
@@ -33,7 +34,8 @@ const imageHandlerService = new ImageHandlerService(
 export default {
   components: {
     DefaultLayout,
-    MinimalLayout
+    MinimalLayout,
+    SimpleLayout
   },
   computed: {
     layout () {
