@@ -325,7 +325,8 @@ export default defineComponent({
     const formSteps = useCreationWizardFormSteps(
       customizationGroups.customizationRootGroups,
       existingCartItem,
-      onStepSubmit
+      onStepSubmit,
+      context
     );
 
     const { handlePreselectedSize } = useCreationWizardPreselectedSize(
