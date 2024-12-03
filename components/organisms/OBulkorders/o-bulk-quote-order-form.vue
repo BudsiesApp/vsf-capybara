@@ -257,12 +257,33 @@ export default defineComponent({
       updateCustomizationOptionValue(payload);
     }
 
+    function getSizeNumber (): number | undefined {
+      const sizeCustomizationId = sizeCustomization.value?.id;
+
+      if (!sizeCustomizationId) {
+        return;
+      }
+
+      const selectedSizeOptionValue = sizeCustomizationOptionValues.value.find(
+        (optionValue) => optionValue.id === customizationOptionValue.value[sizeCustomizationId]
+      );
+
+      if (!selectedSizeOptionValue || !selectedSizeOptionValue.name) {
+        return;
+      }
+
+      const sizeNumber = /(\d+)/.exec(selectedSizeOptionValue.name);
+
+      return sizeNumber ? parseInt(sizeNumber[0], 10) : undefined;
+    }
+
     return {
       colorPaletteCustomization,
       colorPaletteCustomizationOptionValues,
       customizationAvailableOptionValues,
       customizationOptionValue,
       customizationState,
+      getSizeNumber,
       onCustomizationOptionInput,
       sizeCustomization,
       sizeCustomizationOptionValues,
@@ -349,11 +370,15 @@ export default defineComponent({
 
       this.persistCustomerData();
 
+      // const filteredCustomizationState = this.customizationState.filter((stateItem) => stateItem.customization_id !== this.sizeCustomization?.id);
+      const filteredCustomizationState = this.customizationState;
+
       try {
         const bulkOrderId = await this.$store.dispatch(
           'budsies/createBulkorder',
           {
             product_id: BulkorderQuoteProductId.PLUSHIE,
+            size: this.getSizeNumber()?.toString(),
             qty: this.bulkordersBaseFormData.quantity,
             project_name: this.bulkordersBaseFormData.name,
             description: this.bulkordersBaseFormData.description,
@@ -370,7 +395,7 @@ export default defineComponent({
               this.bulkordersBaseFormData.additionalQuantity || '',
             deadline_date: this.bulkordersBaseFormData.deadlineDate,
             client_type_id: this.bulkordersBaseFormData.customerType || '',
-            customization_state: this.customizationState,
+            customization_state: filteredCustomizationState,
             agreement: this.bulkordersBaseFormData.agreement
           }
         );
