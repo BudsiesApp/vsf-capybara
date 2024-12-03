@@ -370,9 +370,6 @@ export default defineComponent({
 
       this.persistCustomerData();
 
-      // const filteredCustomizationState = this.customizationState.filter((stateItem) => stateItem.customization_id !== this.sizeCustomization?.id);
-      const filteredCustomizationState = this.customizationState;
-
       try {
         const bulkOrderId = await this.$store.dispatch(
           'budsies/createBulkorder',
@@ -395,7 +392,7 @@ export default defineComponent({
               this.bulkordersBaseFormData.additionalQuantity || '',
             deadline_date: this.bulkordersBaseFormData.deadlineDate,
             client_type_id: this.bulkordersBaseFormData.customerType || '',
-            customization_state: filteredCustomizationState,
+            customization_state: this.customizationState,
             agreement: this.bulkordersBaseFormData.agreement
           }
         );
