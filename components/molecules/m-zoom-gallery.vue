@@ -117,11 +117,11 @@ import Vue, { PropType } from 'vue';
 import jQuery from 'jquery';
 
 import { BaseImage, ImageSourceItem } from 'src/modules/budsies';
+import { BreakpointValue } from 'src/modules/shared';
 import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
 
 import OCarousel from '../organisms/o-carousel.vue';
 import { OCarouselItem } from '../interfaces/o-carousel-item.interface';
-import { BreakpointValue } from 'src/modules/shared';
 
 require('@cabbiepete/cloud-zoom');
 require('@cabbiepete/cloud-zoom/cloud-zoom.css');
