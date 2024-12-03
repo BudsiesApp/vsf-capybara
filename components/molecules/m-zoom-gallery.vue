@@ -121,13 +121,13 @@ import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
 
 import OCarousel from '../organisms/o-carousel.vue';
 import { OCarouselItem } from '../interfaces/o-carousel-item.interface';
+import { BreakpointValue } from 'src/modules/shared';
 
 require('@cabbiepete/cloud-zoom');
 require('@cabbiepete/cloud-zoom/cloud-zoom.css');
 
 type ImageKeys = keyof ZoomGalleryImage;
 
-const maximumZoomGalleryWidthAllowedForCloudZoomInit = 50;
 const debounceTime = 300;
 
 // hack to make one slide working with `loop` correctly.
@@ -279,18 +279,7 @@ export default Vue.extend({
       this.getStageCarousel().slideTo(newIndex);
     },
     canCloudZoomInit (): boolean {
-      const zoomGallery = this.getZoomGallery();
-
-      if (!zoomGallery) {
-        return false;
-      }
-      const zoomGalleryWidthInPercent =
-        (zoomGallery.clientWidth / window.innerWidth) * 100;
-
-      return (
-        zoomGalleryWidthInPercent <=
-        maximumZoomGalleryWidthAllowedForCloudZoomInit
-      );
+      return window.innerWidth > BreakpointValue.MEDIUM;
     },
     getImageSrc (
       image: ZoomGalleryImage,
