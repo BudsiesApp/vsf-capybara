@@ -11,7 +11,13 @@
       v-if="showForm"
     />
 
-    <form-with-images-gallery-placeholder class="_placeholder" v-show="showPlaceholder" />
+    <template v-if="formPlaceholderComponent">
+      <component
+        :is="formPlaceholderComponent"
+        class="_placeholder"
+        v-show="showPlaceholder"
+      />
+    </template>
   </div>
 </template>
 
@@ -21,7 +27,8 @@ import {
   defineComponent,
   PropType,
   ref,
-  toRefs
+  toRefs,
+  watch
 } from '@vue/composition-api';
 
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
@@ -93,6 +100,14 @@ export default defineComponent({
           return 'phrase-pillow-form';
       }
     });
+    const formPlaceholderComponent = computed<string | undefined>(() => {
+      switch (props.layout) {
+        case LayoutType.WITH_IMAGES_GALLERY:
+          return 'form-with-images-gallery-placeholder';
+        default:
+          return undefined;
+      }
+    });
 
     const isFormMounted = ref(isServer);
     const isLeavePage = ref(false);
@@ -105,11 +120,24 @@ export default defineComponent({
       return !isLeavePage.value && (!showForm.value || !isFormMounted.value);
     });
 
+    watch(
+      sku,
+      (newValue, oldValue) => {
+        if (newValue === oldValue) {
+          return;
+        }
+
+        isFormMounted.value = false;
+        isLeavePage.value = false;
+      }
+    );
+
     return {
       ...useExistingCartItem(existingPlushieId, context),
       canUsePersistedCustomizationState,
       currentProduct,
       formComponent,
+      formPlaceholderComponent,
       isLeavePage,
       onFormMounted,
       showForm,
