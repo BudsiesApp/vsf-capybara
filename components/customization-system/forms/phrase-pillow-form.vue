@@ -1,10 +1,14 @@
 <template>
-  <div class="phrase-pillow-form -skin-petsies">
+  <div class="phrase-pillow-form -skin-budsies">
     <div class="_header -show-for-medium-up">
-      <SfHeading :level="1" title="Pillow Customizer" class="_main-header" />
+      <SfHeading
+        :level="1"
+        title="Pillow Customizer"
+        class="_main-header"
+      />
 
       <div class="_notes">
-        <MBlockStory story-slug="petsies_phrase_pillows_top" />
+        <MBlockStory story-slug="budsies_phrase_pillows_top" />
       </div>
 
       <SfHeading
@@ -654,6 +658,7 @@ export default defineComponent({
     }
   }
 
+  &.-skin-budsies,
   &.-skin-petsies {
     ._customizer-step {
       color: var(--c-dark-variant);
