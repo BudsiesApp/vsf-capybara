@@ -7,8 +7,11 @@
       :is="formComponent"
       :product="currentProduct"
       :existing-cart-item="existingCartItem"
+      @hook:mounted="onFormMounted"
       v-if="showForm"
     />
+
+    <form-with-images-gallery-placeholder class="_placeholder" v-show="showPlaceholder" />
   </div>
 </template>
 
@@ -23,12 +26,15 @@ import {
 
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { htmlDecode } from '@vue-storefront/core/filters';
+import { isServer } from '@vue-storefront/core/helpers';
 
 import { ProductStructuredData } from 'src/modules/budsies';
+import { getCanonicalUrl } from 'src/modules/shared';
 
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 import { useProductPage } from 'theme/helpers/use-product-page';
-import { getCanonicalUrl } from 'src/modules/shared';
+
+import FormWithImagesGalleryPlaceholder from 'theme/components/customization-system/forms/placeholders/form-with-images-gallery-placeholder.vue';
 
 enum LayoutType {
   WITH_IMAGES_GALLERY = 'with-images-gallery',
@@ -39,6 +45,7 @@ enum LayoutType {
 export default defineComponent({
   name: 'CustomizableProduct',
   components: {
+    FormWithImagesGalleryPlaceholder,
     FormWithImagesGallery: () =>
       import(
         /* webpackChunkName: "vsf-images-gallery-form" */ 'theme/components/customization-system/forms/form-with-images-gallery.vue'
@@ -87,12 +94,26 @@ export default defineComponent({
       }
     });
 
+    const isFormMounted = ref(isServer);
+    const isLeavePage = ref(false);
+
+    function onFormMounted () {
+      isFormMounted.value = true;
+    }
+
+    const showPlaceholder = computed<boolean>(() => {
+      return !isLeavePage.value && (!showForm.value || !isFormMounted.value);
+    });
+
     return {
       ...useExistingCartItem(existingPlushieId, context),
       canUsePersistedCustomizationState,
       currentProduct,
       formComponent,
-      showForm
+      isLeavePage,
+      onFormMounted,
+      showForm,
+      showPlaceholder
     };
   },
   beforeRouteEnter (to, from, next) {
@@ -102,6 +123,7 @@ export default defineComponent({
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
+    this.isLeavePage = true;
     next();
   },
   metaInfo () {
@@ -143,7 +165,8 @@ export default defineComponent({
   box-sizing: border-box;
   padding: 0 1rem;
 
-  .form-with-images-gallery {
+  .form-with-images-gallery,
+  ._placeholder {
     margin-top: var(--spacer-lg);
   }
 
