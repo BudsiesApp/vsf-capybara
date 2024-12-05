@@ -24,7 +24,11 @@
         slim
       >
         <div class="_quantity-field">
-          <SfHeading :level="4" class="_step-title" title="Quantity" />
+          <SfHeading
+            :level="4"
+            class="_step-title"
+            title="Quantity"
+          />
 
           <ACustomProductQuantity
             :value="quantity"
@@ -40,7 +44,7 @@
       </validation-provider>
 
       <div class="_bottom-static-block">
-        <MBlockStory story-slug="petsies_phrase_pillows_bottom" />
+        <MBlockStory story-slug="budsies_phrase_pillows_bottom" />
       </div>
 
       <div class="_actions-row">
@@ -60,7 +64,11 @@
         <m-order-submit-agreement />
 
         <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+          <component
+            :is="linkComponent.component"
+            :key="linkComponent.key"
+            v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks"
+          />
         </template>
       </div>
     </template>
