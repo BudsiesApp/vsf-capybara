@@ -42,6 +42,8 @@ import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 import { useProductPage } from 'theme/helpers/use-product-page';
 
 import FormWithImagesGalleryPlaceholder from 'theme/components/customization-system/forms/placeholders/form-with-images-gallery-placeholder.vue';
+import VerticalStepsFormPlaceholder from 'theme/components/customization-system/forms/placeholders/vertical-steps-form-placeholder.vue';
+import PhrasePillowFormPlaceholder from 'theme/components/customization-system/forms/placeholders/phrase-pillow-form-placeholder.vue';
 
 enum LayoutType {
   WITH_IMAGES_GALLERY = 'with-images-gallery',
@@ -62,10 +64,12 @@ export default defineComponent({
       import(
         /* webpackChunkName: "vsf-phrase-pillow-form" */ 'theme/components/customization-system/forms/phrase-pillow-form.vue'
       ),
+    PhrasePillowFormPlaceholder,
     VerticalStepsForm: () =>
       import(
         /* webpackChunkName: "vsf-vertical-form" */ 'theme/components/customization-system/forms/vertical-steps-form.vue'
-      )
+      ),
+    VerticalStepsFormPlaceholder
   },
   props: {
     sku: {
@@ -104,6 +108,10 @@ export default defineComponent({
       switch (props.layout) {
         case LayoutType.WITH_IMAGES_GALLERY:
           return 'form-with-images-gallery-placeholder';
+        case LayoutType.VERTICAL:
+          return 'vertical-steps-form-placeholder';
+        case LayoutType.PHRASE_PILLOW:
+          return 'phrase-pillow-form-placeholder';
         default:
           return undefined;
       }
@@ -194,7 +202,7 @@ export default defineComponent({
   padding: 0 1rem;
 
   .form-with-images-gallery,
-  ._placeholder {
+  .form-with-images-gallery-placeholder {
     margin-top: var(--spacer-lg);
   }
 
