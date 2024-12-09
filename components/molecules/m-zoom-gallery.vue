@@ -116,6 +116,7 @@ import Vue, { PropType } from 'vue';
 
 import jQuery from 'jquery';
 
+import { isServer } from '@vue-storefront/core/helpers';
 import { BaseImage, ImageSourceItem } from 'src/modules/budsies';
 import { BreakpointValue } from 'src/modules/shared';
 import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
@@ -279,6 +280,10 @@ export default Vue.extend({
       this.getStageCarousel().slideTo(newIndex);
     },
     canCloudZoomInit (): boolean {
+      if (isServer) {
+        return false;
+      }
+
       return window.innerWidth > BreakpointValue.MEDIUM;
     },
     getImageSrc (
