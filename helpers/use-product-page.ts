@@ -37,9 +37,7 @@ export function useProductPage (
       return;
     }
 
-    await root.$store.dispatch('budsies/loadProductRushAddons', {
-      productId: product.id
-    });
+    await root.$store.dispatch('budsies/loadProductRushAddons');
 
     product = updateProductProductionTimeCustomizationData(
       product,
