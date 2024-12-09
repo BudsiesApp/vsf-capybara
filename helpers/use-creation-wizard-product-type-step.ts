@@ -34,7 +34,7 @@ export function useCreationWizardProductTypeStep (
         setCurrent: false
       });
 
-      await root.$store.dispatch('budsies/loadProductRushAddons');
+      await root.$store.dispatch('budsies/loadProductsRushAddons');
 
       product = updateProductProductionTimeCustomizationData(
         product,

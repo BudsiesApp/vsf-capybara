@@ -49,7 +49,7 @@ export default {
   serverPrefetch () {
     return Promise.all([
       this.$store.dispatch('backend-settings/fetchSettings'),
-      this.$store.dispatch('budsies/loadProductRushAddons')
+      this.$store.dispatch('budsies/loadProductsRushAddons')
     ]);
   },
   provide: {
