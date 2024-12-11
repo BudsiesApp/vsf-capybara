@@ -9,29 +9,10 @@ import { once } from '@vue-storefront/core/helpers';
 import { claimsStore } from 'theme/store/claims';
 import { uiStore } from 'theme/store/ui';
 import { StorageManager } from '@vue-storefront/core/lib/storage-manager';
-import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-headers.function';
 
 once('__VUE_EXTEND_DROPPOINT_VPB__', () => {
   Vue.use(Vue2Filters);
 });
-
-const ErrorPage = () =>
-  import(/* webpackChunkName: "vsf-error" */ 'theme/pages/Error');
-
-const educationSubdomain = 'education';
-
-const educationRoutes = [
-  {
-    name: 'home',
-    path: '/',
-    component: () => import(/* webpackChunkName: "vsf-home" */ 'theme/pages/Education.vue'),
-    meta: {
-      layout: 'simple'
-    }
-  },
-  { name: 'page-not-found', path: '*', component: ErrorPage },
-  { name: 'error', path: '/error/', component: ErrorPage, meta: { layout: 'minimal' } }
-]
 
 const themeEntry = App;
 function initTheme (app, router, store, config, ssrContext) {
@@ -43,16 +24,7 @@ function initTheme (app, router, store, config, ssrContext) {
   // To do so, exclude the desired storeView from the config.storeViews.mapStoreUrlsFor, set appendStoreCode = false, and map all the urls by your own like:
   // { name: 'de-checkout', path: '/checkout', component: CheckoutCustomized }
   // The 4th parameter is the route priority - a higher number will ensure the theme routes override any module routes. The default is 0.
-  // setupMultistoreRoutes(config, router, routes, 10);
-
-  const host = ssrContext ? getHostFromHeaders(ssrContext.server.request.headers) : window.location.host;
-  const subdomain = host.split('.')[0]
-
-  if (subdomain && subdomain === educationSubdomain) {
-    setupMultistoreRoutes(config, router, educationRoutes, 10);
-  } else {
-    setupMultistoreRoutes(config, router, routes, 10);
-  }
+  setupMultistoreRoutes(config, router, routes, 10);
 
   StorageManager.init('claims');
   store.registerModule('claims', claimsStore);
