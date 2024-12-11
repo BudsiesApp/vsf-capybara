@@ -1,5 +1,6 @@
 const ErrorPage = () =>
   import(/* webpackChunkName: "vsf-error" */ 'theme/pages/Error');
+const StoryblokPage = () => import(/* webpackChunkName: "vsf-storyblok" */ 'src/modules/vsf-storyblok-module/pages/StoryblokPage.vue')
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -15,7 +16,7 @@ let routes = [
   {
     name: 'home',
     path: '/',
-    component: () => import('src/modules/vsf-storyblok-module/pages/StoryblokPage.vue')
+    component: StoryblokPage
   },
   {
     name: 'home-alias',
