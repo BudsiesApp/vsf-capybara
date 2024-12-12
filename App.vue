@@ -37,7 +37,7 @@ export default {
   },
   computed: {
     layout () {
-      return `${get(this.$route, 'meta.layout', 'default')}-layout`
+      return `${get(this.$route, 'meta.layout', 'minimal')}-layout`
     }
   },
   mounted () {

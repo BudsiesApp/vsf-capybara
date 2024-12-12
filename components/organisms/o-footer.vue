@@ -1,6 +1,11 @@
+
 <template>
   <footer class="o-footer">
-    <SfFooter :column="5" :multiple="true" class="_footer">
+    <SfFooter
+      :column="5"
+      :multiple="true"
+      class="_footer"
+    >
       <SfFooterColumn :title="$t('Industry Awards')" class="desktop-only">
         <div class="_awards-container">
           <BaseImage src="/assets/industry_awards.png" :width="262" />
@@ -9,25 +14,6 @@
             {{ $t('2017 Oppenheimer Best Toy Award') }}
           </div>
         </div>
-      </SfFooterColumn>
-
-      <SfFooterColumn
-        class="_links-column"
-        :title="$t('Quick Links')"
-      >
-        <SfList class="_links-list">
-          <SfListItem v-for="link in links" :key="link.name">
-            <router-link
-              :to="localizedRoute(link.link)"
-              :target="link.target"
-              :event="link.event ? link.event : 'click'"
-              @click.native="onLinkClick(link)"
-              exact
-            >
-              <SfMenuItem class="sf-footer__menu-item" :label="link.name" icon="" />
-            </router-link>
-          </SfListItem>
-        </SfList>
       </SfFooterColumn>
 
       <SfFooterColumn :title="$t('Industry Awards')" class="mobile-only">
@@ -64,8 +50,6 @@
         />
       </div>
 
-      <MBudsiesBrands />
-
       <div class="_contact-us">
         <div class="_title">
           {{ $t('Have Questions?') }}
@@ -95,7 +79,11 @@
 
       <template v-if="$additionalContent.footerLinks">
         <div class="_additional-links">
-          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.footerLinks" />
+          <component
+            :is="linkComponent.component"
+            :key="linkComponent.key"
+            v-for="linkComponent in $additionalContent.footerLinks"
+          />
         </div>
       </template>
     </div>
@@ -103,12 +91,7 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
 import { SfButton, SfFooter, SfList, SfMenuItem, SfHeading } from '@storefront-ui/vue';
-import { ModalList } from 'theme/store/ui/modals'
-import config from 'config';
-import { currentStoreView } from '@vue-storefront/core/lib/multistore';
-import get from 'lodash-es/get';
 
 import { BaseImage } from 'src/modules/budsies';
 import { PrivacyPolicyLink } from 'src/modules/shared';
@@ -116,7 +99,7 @@ import { PrivacyPolicyLink } from 'src/modules/shared';
 import MBudsiesBrands from '../molecules/m-budsies-brands';
 
 export default {
-  name: 'OFooter',
+  name: 'OFooterMinimal',
   components: {
     PrivacyPolicyLink,
     MBudsiesBrands,
@@ -158,151 +141,6 @@ export default {
         }
       ]
     };
-  },
-  computed: {
-    ...mapGetters('user', ['isLoggedIn']),
-    multistoreEnabled () {
-      return get(config, 'storeViews.multistore', false);
-    },
-    currentLanguage () {
-      const { i18n = config.i18n } = currentStoreView();
-      return `${i18n.defaultCountry} / ${i18n.defaultLanguage} / ${i18n.currencyCode}`;
-    },
-    links () {
-      return [
-        {
-          name: this.$t('Budsies'),
-          link: '/budsies-services/'
-        },
-        {
-          name: this.$t('Selfies'),
-          link: '/selfies-services/'
-        },
-        {
-          name: this.$t('Puppets'),
-          link: '/custom-puppets/'
-        },
-        {
-          name: this.$t('OC Commissions'),
-          link: '/commissions/'
-        },
-        {
-          name: this.$t('Buddy Pillows'),
-          link: '/buddy-pillows/'
-        },
-        {
-          name: this.$t('Photo Pillows'),
-          link: {
-            name: 'category',
-            params: {
-              slug: 'photo-pillows-designs'
-            }
-          }
-        },
-        {
-          name: this.$t('Custom Socks'),
-          link: {
-            name: 'printed-socks-creation-page'
-          }
-        },
-        {
-          name: this.$t('Cartoon Pillows'),
-          link: '/plushie/index/cartoonPillows/'
-        },
-        {
-          name: this.$t('Custom Keychains'),
-          link: {
-            name: 'printed-keychains-creation-page'
-          }
-        },
-        {
-          name: this.$t('Bobbleheads & Figurines'),
-          link: '/bobblehead-figurines/'
-        },
-        {
-          name: this.$t('Pajamas'),
-          link: '/pajamas/index/create/'
-        },
-        {
-          name: this.$t('Shirts'),
-          link: '/custom-shirts/'
-        },
-        {
-          name: this.$t('Blankets'),
-          link: {
-            name: 'cut-out-blankets'
-          }
-        },
-        // { name: this.$t('Photo Portraits'), link: { name: 'photo-portraits-creation-page' } },
-        {
-          name: this.$t('Gift Cards'),
-          link: '/purchase-gift-card/'
-        },
-        {
-          name: this.$t('Giving Back'),
-          link: '/giving-back-stuffed-toys/'
-        },
-        {
-          name: this.$t('Accessories'),
-          link: {
-            name: 'category',
-            params: {
-              slug: 'accessories-for-custom-products'
-            }
-          }
-        },
-        {
-          name: this.$t('Gallery'),
-          link: '/reviews/'
-        },
-        {
-          name: this.$t('FAQ\'s'),
-          link: '//support.budsies.com/',
-          target: '_blank'
-        },
-        {
-          name: this.$t('Drawing Templates'),
-          link: '/inspiration/',
-          target: '_blank'
-        },
-        {
-          name: this.$t('About Us'),
-          link: '/about/'
-        },
-        {
-          name: this.$t('Terms of Service'),
-          link: '/terms-of-service/'
-        },
-        {
-          name: this.$t('Blog'),
-          link: '/blog/',
-          target: '_blank'
-        },
-        {
-          name: this.$t('How It Works'),
-          link: '/how-we-create-plush-toys-from-art/'
-        },
-        {
-          name: this.$t('Newsletter'),
-          link: '/newsletter/'
-        }
-      ];
-    }
-  },
-  methods: {
-    ...mapActions('ui', {
-      openModal: 'openModal'
-    }),
-    showLanguageSwitcher () {
-      this.openModal({ name: ModalList.LanguageSwitcher })
-    },
-    onLinkClick (link) {
-      if (!link.clickHandler) {
-        return;
-      }
-
-      link.clickHandler();
-    }
   }
 };
 </script>
@@ -316,6 +154,7 @@ export default {
   background-color: var(--c-footer);
   // padding-bottom: var(--spacer-lg);
   margin-top: calc(var(--spacer-2xl) + var(--spacer-xl));
+
   &__logo {
     background-image: url(../../assets/logo-footer.png);
     height: 121px;
@@ -349,6 +188,7 @@ export default {
     --footer-column-title-background: var(--c-footer);
 
     --footer-column-title-font-size: --h4-font-size;
+
   }
   ::v-deep .sf-footer-column__content {
     padding: 0 var(--spacer-xl);
@@ -541,6 +381,13 @@ export default {
           background-size: auto;
           height: 278px;
           width: 173px;
+      }
+
+      ::v-deep {
+        .sf-footer__container {
+          justify-content: center;
+          column-gap: calc(var(--spacer-2xl) * 2);
+        }
       }
     }
 
