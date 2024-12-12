@@ -194,6 +194,14 @@ let routes = [
 
       return properties;
     }
+  },
+  {
+    name: 'home-page-alias-1',
+    path: '/home/',
+    redirect: (route) => ({
+      path: '/',
+      query: route.query
+    })
   }
 ];
 
