@@ -758,6 +758,14 @@ let routes = [
     })
   },
   {
+    name: 'home-page-alias-1',
+    path: '/home/',
+    redirect: (route) => ({
+      path: '/',
+      query: route.query
+    })
+  },
+  {
     name: 'nft-budsies-create-alias-2',
     path: '/plushie/index/create/type/nft-budsie/',
     redirect: {
