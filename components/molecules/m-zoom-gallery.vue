@@ -279,6 +279,10 @@ export default Vue.extend({
       this.getStageCarousel().slideTo(newIndex);
     },
     canCloudZoomInit (): boolean {
+      if (typeof window === 'undefined') {
+        return false;
+      }
+
       return window.innerWidth > BreakpointValue.MEDIUM;
     },
     getImageSrc (
