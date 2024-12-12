@@ -1,8 +1,8 @@
 <template>
-  <router-link
-    :to="localizedRoute('/')"
-    :title="$t('Home Page')"
+  <a
+    :href="budsiesUrl"
     :style="style"
+    target="_blank"
     class="a-logo"
   >
     <BaseImage
@@ -11,7 +11,7 @@
       :alt="$t(defaultTitle)"
       class="sf-header__logo"
     />
-  </router-link>
+  </a>
 </template>
 
 <script>
@@ -35,6 +35,9 @@ export default {
     },
     logoSrc () {
       return '/assets/logo.png';
+    },
+    budsiesUrl () {
+      return `https://${config.budsies.budsiesStoreDomain}`;
     }
   }
 };
