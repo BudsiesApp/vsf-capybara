@@ -27,17 +27,20 @@ export function useProductPage (
     isDataLoaded.value = false;
     root.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
 
-    let product = await root.$store.dispatch('product/loadProduct', {
-      parentSku: sku.value,
-      setCurrent: false
-    });
+    let [ product ] = await Promise.all(
+      [
+        root.$store.dispatch('product/loadProduct', {
+          parentSku: sku.value,
+          setCurrent: false
+        }),
+        root.$store.dispatch('budsies/loadProductsRushAddons')
+      ]
+    );
 
     if (!product) {
       isDataLoaded.value = true;
       return;
     }
-
-    await root.$store.dispatch('budsies/loadProductsRushAddons');
 
     product = updateProductProductionTimeCustomizationData(
       product,

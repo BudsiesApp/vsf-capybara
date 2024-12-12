@@ -47,10 +47,7 @@ export default {
     EventBus.$off(USER_LEAVING_WEBSITE, this.onUserLeavingWebsite);
   },
   serverPrefetch () {
-    return Promise.all([
-      this.$store.dispatch('backend-settings/fetchSettings'),
-      this.$store.dispatch('budsies/loadProductsRushAddons')
-    ]);
+    return this.$store.dispatch('backend-settings/fetchSettings');
   },
   provide: {
     ErrorConverterService: errorConverterService,
