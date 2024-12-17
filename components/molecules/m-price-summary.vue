@@ -51,18 +51,18 @@
       :class="{'sf-property--large': isLarge}"
     />
 
-    <template v-if="prices.savings">
+    <template v-if="savingsTotal">
       <SfProperty
         :name="$t('Price Savings')"
-        :value="prices.savings | price"
+        :value="savingsTotal | price"
         class="sf-property--full-width property --marked"
         :class="{'sf-property--large': isLarge}"
       />
     </template>
-    <template v-if="prices.discounts && prices.discounts">
+    <template v-if="discountsTotal">
       <SfProperty
         :name="$t('Total Discounts')"
-        :value="prices.discounts | price"
+        :value="discountsTotal | price"
         class="sf-property--full-width property --marked"
         :class="{'sf-property--large': isLarge}"
       />
@@ -133,6 +133,12 @@ export default {
     },
     isCouponCode () {
       return this.$store.state.cart.platformTotals ? this.$store.state.cart.platformTotals.coupon_code : false;
+    },
+    savingsTotal () {
+      return this.prices.savings_total || this.prices.savings;
+    },
+    discountsTotal () {
+      return this.prices.discounts_total || this.prices.discounts;
     },
     skinClass () {
       return getCurrentThemeClass();
