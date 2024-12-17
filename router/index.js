@@ -514,9 +514,12 @@ let routes = [
     })
   },
   {
-    name: 'CustomizationSystemWidgetsTestPage',
-    path: '/widgets-test/',
-    component: CustomizationSystemWidgetsTestPage
+    name: 'home-page-alias-1',
+    path: '/home/',
+    redirect: (route) => ({
+      path: '/',
+      query: route.query
+    })
   }
 ];
 
