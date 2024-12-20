@@ -28,12 +28,13 @@ export function useCreationWizardProductTypeStep (
     root.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
 
     try {
-      let [ product ] = await Promise.all(
+      let [product] = await Promise.all(
         [
           root.$store.dispatch('product/loadProduct', {
             parentSku: sku,
             childSku: null,
-            setCurrent: false
+            setCurrent: false,
+            prefetchGroupProducts: false
           }),
           root.$store.dispatch('budsies/loadProductsRushAddons')
         ]
