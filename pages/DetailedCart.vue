@@ -97,7 +97,11 @@
             </div>
           </div>
 
-          <div v-else key="empty-cart" class="empty-cart">
+          <div
+            v-else
+            key="empty-cart"
+            class="empty-cart"
+          >
             <SfHeading
               title="Your cart is empty"
               :level="2"
