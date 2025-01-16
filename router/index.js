@@ -89,17 +89,6 @@ let routes = [
   { name: 'product', path: '/p/:parentSku/:childSku/', component: Product },
   { name: 'category', path: '/c/:slug/', component: Category },
   {
-    name: 'printed-product',
-    path: '/printed/p/:sku/',
-    component: CustomizableProduct,
-    props: route => ({
-      sku: route.params.sku,
-      productDesign: route.query.product_design,
-      existingPlushieId: route.query.existingPlushieId,
-      layout: 'with-images-gallery'
-    })
-  },
-  {
     name: 'pillow-product',
     path: '/buddy-pillows/create/',
     component: CustomizableProduct,
@@ -250,52 +239,60 @@ let routes = [
     }
   },
   {
-    name: 'printed-socks-creation-page',
+    name: 'printed-socks-creation-page-alias-1',
     path: '/plushie/index/printedSocks/',
+    redirect: (route) => ({
+      name: 'printed-socks-creation-page',
+      query: route.query
+    })
+  },
+  {
+    name: 'printed-socks-creation-page',
+    path: '/custom-socks/',
     component: CustomizableProduct,
     props: route => ({
       sku: 'customPrintedSocks_bundle',
       productDesign: route.query.product_design,
+      existingPlushieId: route.query.existingPlushieId,
       layout: 'with-images-gallery'
+    })
+  },
+  {
+
+    name: 'printed-masks-creation-page-alias-1',
+    path: '/plushie/index/printedMasks/',
+    redirect: (route) => ({
+      name: 'printed-masks-creation-page',
+      query: route.query
     })
   },
   {
     name: 'printed-masks-creation-page',
-    path: '/plushie/index/printedMasks/',
+    path: '/face-masks/',
     component: CustomizableProduct,
     props: route => ({
       sku: 'customPrintedMasks_bundle',
       productDesign: route.query.product_design,
+      existingPlushieId: route.query.existingPlushieId,
       layout: 'with-images-gallery'
+    })
+  },
+  {
+    name: 'printed-keychains-creation-page-alias-1',
+    path: '/plushie/index/printedKeychains/',
+    redirect: (route) => ({
+      name: 'printed-keychains-creation-page',
+      query: route.query
     })
   },
   {
     name: 'printed-keychains-creation-page',
-    path: '/plushie/index/printedKeychains/',
+    path: '/custom-keychains/',
     component: CustomizableProduct,
     props: route => ({
       sku: 'customPrintedKeychains_bundle',
       productDesign: route.query.product_design,
-      layout: 'with-images-gallery'
-    })
-  },
-  {
-    name: 'felted-magnets-creation-page',
-    path: '/plushie/index/feltedMagnets/',
-    component: CustomizableProduct,
-    props: route => ({
-      sku: 'customFeltedMagnets_bundle',
-      productDesign: route.query.product_design,
-      layout: 'with-images-gallery'
-    })
-  },
-  {
-    name: 'felted-ornaments-creation-page',
-    path: '/plushie/index/feltedOrnaments/',
-    component: CustomizableProduct,
-    props: route => ({
-      sku: 'customFeltedOrnaments_bundle',
-      productDesign: route.query.product_design,
+      existingPlushieId: route.query.existingPlushieId,
       layout: 'with-images-gallery'
     })
   },
@@ -331,10 +328,19 @@ let routes = [
   },
   {
     path: '/phrasepillow/index/customize/',
+    name: 'phrase-pillow-customize-alias-1',
+    redirect: (route) => ({
+      name: 'phrase-pillow-customize',
+      query: route.query
+    })
+  },
+  {
+    path: '/photo-pillows/create/',
     name: 'phrase-pillow-customize',
     component: CustomizableProduct,
     props: (route) => ({
       sku: 'phrasePillow_bundle',
+      existingPlushieId: route.query.existingPlushieId,
       layout: 'phrase-pillow'
     })
   },
@@ -346,18 +352,16 @@ let routes = [
     component: CreativityKitProduct
   },
   {
-    name: 'renaissance-blankets',
-    path: '/blankets/index/create/type/renaissance-blankets/',
-    component: CustomizableProduct,
-    props: (route) => ({
-      sku: 'customRenaissanceBlankets_bundle',
-      existingPlushieId: route.query.existingPlushieId,
-      productDesign: route.query.product_design
+    name: 'cut-out-blankets-alias-1',
+    path: '/blankets/index/create/type/cut-out-blankets/',
+    redirect: (route) => ({
+      name: 'cut-out-blankets',
+      query: route.query
     })
   },
   {
     name: 'cut-out-blankets',
-    path: '/blankets/index/create/type/cut-out-blankets/',
+    path: '/custom-photo-blankets/',
     component: CustomizableProduct,
     props: (route) => ({
       sku: 'customCutOutBlankets_bundle',
@@ -372,16 +376,6 @@ let routes = [
       name: 'category',
       params: {
         slug: 'blankets-cut-out-design'
-      }
-    }
-  },
-  {
-    name: 'renaissance-blankets-category',
-    path: '/blankets/renaissance-design/',
-    redirect: {
-      name: 'category',
-      params: {
-        slug: 'blankets-renaissance-design'
       }
     }
   },
@@ -602,19 +596,16 @@ let routes = [
     })
   },
   {
-    name: 'clothes-product',
-    path: '/clothes/p/:sku/',
-    component: CustomizableProduct,
-    props: (route) => ({
-      sku: route.params.sku,
-      productDesign: route.query.product_design,
-      existingPlushieId: route.query.existingPlushieId,
-      layout: 'with-images-gallery'
+    name: 'pajamas-creation-alias-1',
+    path: '/pajamas/index/create/',
+    redirect: (route) => ({
+      name: 'pajamas-creation',
+      query: route.query
     })
   },
   {
     name: 'pajamas-creation',
-    path: '/pajamas/index/create/',
+    path: '/custom-pajamas/',
     component: CustomizableProduct,
     props: (route) => ({
       sku: 'customPajamas_bundle',
@@ -668,12 +659,21 @@ let routes = [
     })
   },
   {
-    name: 'cartoon-pillow-product',
+    name: 'cartoon-pillow-product-alias-1',
     path: '/plushie/index/cartoonPillows/',
+    redirect: (route) => ({
+      name: 'cartoon-pillow-product',
+      query: route.query
+    })
+  },
+  {
+    name: 'cartoon-pillow-product',
+    path: '/cartoon-pillows/',
     component: CustomizableProduct,
     props: route => ({
       sku: 'customCartoonPillows_bundle',
       productDesign: route.query.product_design,
+      existingPlushieId: route.query.existingPlushieId,
       layout: 'with-images-gallery'
     })
   },
@@ -688,8 +688,16 @@ let routes = [
     component: BudsiesPalsKitProduct
   },
   {
-    name: 'budsies-pals-creation',
+    name: 'budsies-pals-creation-alias-1',
     path: '/budsie/index/create/type/pals/',
+    redirect: (route) => ({
+      name: 'budsies-pals-creation',
+      query: route.query
+    })
+  },
+  {
+    name: 'budsies-pals-creation',
+    path: '/pals-kit/',
     component: CustomizableProduct,
     props: (route) => ({
       sku: 'customPals_bundle',
