@@ -167,8 +167,6 @@ export default {
     }
   },
   async asyncData ({ store, route, context }) {
-    if (context) context.output.cacheTags.add('product')
-
     const { parentSku, childSku } = getSkusFromRoute(route);
 
     const product = await store.dispatch('product/loadProduct', {
