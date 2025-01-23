@@ -44,6 +44,7 @@ import { mapGetters, mapState } from 'vuex';
 import LazyHydrate from 'vue-lazy-hydration';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { htmlDecode } from '@vue-storefront/core/filters';
+import { ProductVisibility } from '@vue-storefront/core/modules/catalog/types/product-visibility.value';
 import { onlineHelper, isServer } from '@vue-storefront/core/helpers';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import MRelatedProducts from 'theme/components/molecules/m-related-products';
@@ -175,12 +176,24 @@ export default {
       setCurrent: false
     });
 
+    if (!product || product.visibility === ProductVisibility.NOT_VISIBLE) {
+      if (context) {
+        return context.server.response.redirect('/404');
+      }
+    }
+
     if (isServer) await store.dispatch('product/setCurrent', product)
 
     catalogHooksExecutors.productPageVisited(product);
   },
   async mounted () {
     await this.setCurrentProduct();
+
+    if (!this.getCurrentProduct || this.getCurrentProduct.visibility === ProductVisibility.NOT_VISIBLE) {
+      this.$router.replace({ path: '/404' });
+      return;
+    }
+
     this.getQuantity();
     EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, this.getCurrentProduct);
   },
