@@ -115,7 +115,16 @@ export default {
       const shippingMethod = this.shippingMethods.find(
         method => this.shippingDetails.shippingMethod === method.method_code
       );
-      return shippingMethod ? shippingMethod.method_title : '';
+
+      if (!shippingMethod) {
+        return '';
+      }
+
+      if (!shippingMethod.method_name) {
+        return shippingMethod.carrier_title;
+      }
+
+      return shippingMethod.method_title;
     },
     skinClass () {
       return getCurrentThemeClass();
