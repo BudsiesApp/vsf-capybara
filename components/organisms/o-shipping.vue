@@ -339,7 +339,7 @@ export default {
     stateCodeAutocompleteOptionSearch,
     getCarrierTitle (method) {
       // It's the only way to separate M1 from M2
-      if (method.method_name) {
+      if (method.hasOwnProperty('method_name')) {
         return method.method_title;
       }
 

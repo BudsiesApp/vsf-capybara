@@ -120,7 +120,7 @@ export default {
         return '';
       }
 
-      if (!shippingMethod.method_name) {
+      if (!shippingMethod.hasOwnProperty('method_name')) {
         return shippingMethod.carrier_title;
       }
 
