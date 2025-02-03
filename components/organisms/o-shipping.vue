@@ -178,8 +178,8 @@
             </div>
           </template>
 
-          <template #details v-if="method.method_name || method.method_title">
-            <p>{{ method.method_name || method.method_title }}</p>
+          <template #details v-if="getMethodTitle(method)">
+            <p>{{ getMethodTitle(method) }}</p>
           </template>
         </SfRadio>
         <p class="shipping__note">
@@ -335,7 +335,6 @@ export default {
     }
   },
   methods: {
-
     stateCodeAutocompleteOptionSearch,
     getCarrierTitle (method) {
       // It's the only way to separate M1 from M2
@@ -344,6 +343,13 @@ export default {
       }
 
       return method.carrier_title;
+    },
+    getMethodTitle (method) {
+      if (method.hasOwnProperty('method_name')) {
+        return method.method_name;
+      }
+
+      return method.method_title;
     },
     async onChangeCountry () {
       this.changeCountry();
