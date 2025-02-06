@@ -212,7 +212,11 @@
     </div>
 
     <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      <component
+        :is="linkComponent.component"
+        :key="linkComponent.key"
+        v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks"
+      />
     </template>
   </div>
 </template>
@@ -304,7 +308,16 @@ export default {
       const shippingMethod = this.shippingMethods.find(
         method => this.shippingDetails.shippingMethod === method.method_code
       );
-      return shippingMethod ? shippingMethod.method_title : '';
+
+      if (!shippingMethod) {
+        return '';
+      }
+
+      if (!shippingMethod.hasOwnProperty('method_name')) {
+        return shippingMethod.carrier_title;
+      }
+
+      return shippingMethod.method_title;
     },
     paymentMethod () {
       const paymentMethod = this.paymentMethods.find(

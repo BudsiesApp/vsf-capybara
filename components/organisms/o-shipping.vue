@@ -171,14 +171,15 @@
         >
           <template #label>
             <div class="sf-radio__label shipping__label">
-              <div>{{ method.method_title }}</div>
+              <div>{{ getCarrierTitle(method) }}</div>
               <div class="shipping__label-price">
                 {{ method.amount | price }}
               </div>
             </div>
           </template>
-          <template #details v-if="method.method_name">
-            <p>{{ method.method_name }}</p>
+
+          <template #details v-if="getMethodTitle(method)">
+            <p>{{ getMethodTitle(method) }}</p>
           </template>
         </SfRadio>
         <p class="shipping__note">
@@ -203,7 +204,11 @@
       </div>
 
       <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+        <component
+          :is="linkComponent.component"
+          :key="linkComponent.key"
+          v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks"
+        />
       </template>
     </div>
   </div>
@@ -331,6 +336,21 @@ export default {
   },
   methods: {
     stateCodeAutocompleteOptionSearch,
+    getCarrierTitle (method) {
+      // It's the only way to separate M1 from M2
+      if (method.hasOwnProperty('method_name')) {
+        return method.method_title;
+      }
+
+      return method.carrier_title;
+    },
+    getMethodTitle (method) {
+      if (method.hasOwnProperty('method_name')) {
+        return method.method_name;
+      }
+
+      return method.method_title;
+    },
     async onChangeCountry () {
       this.changeCountry();
 
