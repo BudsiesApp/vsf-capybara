@@ -159,6 +159,8 @@ export default defineComponent({
         }
 
         this.isSuccessSubscribed = true;
+      } catch (_) {
+        this.submitError = i18n.t('Something went wrong.').toString();
       } finally {
         this.isSubmitting = false;
       }
