@@ -24,8 +24,9 @@
             :name="emailInputName"
             :label="$t('E-mail address')"
             :disabled="isSubmitting"
-            :valid="!errors.length"
-            :error-message="errors[0]"
+            :valid="!errors.length && !submitError"
+            :error-message="errors[0] || submitError"
+            @input="onEmailInput"
           />
         </validation-provider>
 
@@ -35,7 +36,11 @@
       </form>
 
       <template v-if="$additionalContent.financialIncentivesLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.financialIncentivesLinks" />
+        <component
+          :is="linkComponent.component"
+          :key="linkComponent.key"
+          v-for="linkComponent in $additionalContent.financialIncentivesLinks"
+        />
       </template>
 
       <div class="_success-message" v-if="!displayForm">
@@ -97,9 +102,26 @@ export default defineComponent({
   },
   setup () {
     const email = ref<string | undefined>(undefined);
+    const submitError = ref<string | undefined>(undefined);
+
+    function handleError (task: Task): void {
+      if (task.result.errorMessage) {
+        submitError.value = task.result.errorMessage;
+        return;
+      }
+
+      submitError.value = i18n.t('Something went wrong.').toString();
+    }
+
+    function onEmailInput (): void {
+      submitError.value = undefined;
+    }
 
     return {
       email,
+      handleError,
+      onEmailInput,
+      submitError,
       ...usePersistedEmail(email)
     }
   },
@@ -124,26 +146,21 @@ export default defineComponent({
       }
 
       this.isSubmitting = true;
+      this.submitError = undefined;
 
       this.persistLastUsedCustomerEmail(this.email);
 
       try {
         const response = await this.subscribeAction(this.email);
 
-        if (response.result.errorMessage) {
-          const validationObserver = this.$refs.validationObserver as InstanceType<typeof ValidationObserver>;
-
-          validationObserver.setErrors({
-            [this.emailInputName]: response.result.errorMessage
-          })
-          return;
-        }
-
         if (response.resultCode !== 200) {
+          this.handleError(response);
           return;
         }
 
         this.isSuccessSubscribed = true;
+      } catch (_) {
+        this.submitError = i18n.t('Something went wrong.').toString();
       } finally {
         this.isSubmitting = false;
       }
