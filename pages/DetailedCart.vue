@@ -85,36 +85,6 @@
                 </template>
               </SfCollectedProduct>
             </transition-group>
-            <div
-              class="_dropdown-container"
-              :class="{ '-open': isDropdownOpen }"
-            >
-              <SfButton
-                class="color-secondary"
-                @click.prevent.self="isDropdownOpen = !isDropdownOpen"
-              >
-                Order More
-              </SfButton>
-
-              <MDropdown
-                :is-open="isDropdownOpen"
-                @click:close="isDropdownOpen = false"
-              >
-                <SfList>
-                  <SfListItem
-                    v-for="action in dropdownActions"
-                    :key="action.label"
-                  >
-                    <router-link
-                      :to="action.url"
-                      @click.native="onDropdownActionClick(action)"
-                    >
-                      {{ action.label }}
-                    </router-link>
-                  </SfListItem>
-                </SfList>
-              </MDropdown>
-            </div>
           </div>
 
           <div

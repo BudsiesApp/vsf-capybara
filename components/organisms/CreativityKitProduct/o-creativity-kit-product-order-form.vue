@@ -216,7 +216,9 @@ export default Vue.extend({
           Logger.error(error, 'budsies')();
         }
 
-        this.goToCrossSells();
+        this.$router.push({
+          name: 'detailed-cart'
+        });
       } catch (error) {
         Logger.error(error, 'budsies')();
 

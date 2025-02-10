@@ -18,38 +18,11 @@
         <ALogo />
       </template>
       <template #navigation>
-        <SfHeaderNavigationItem
-          @mouseover="onMainMenuMouseOver"
-          @mouseleave="isHoveredMenu = false"
-        >
-          <div class="o-header__submenu">
-            Products
-          </div>
-          <MMenu
-            :visible="isHoveredMenu && !isSearchPanelVisible"
-            @transitionend.native="onMainMenuTransitionEnd"
-            @close="onMainMenuClose"
-          />
-        </SfHeaderNavigationItem>
         <SfHeaderNavigationItem>
           <router-link
-            :to="{ name: 'gift-cards' }"
+            :to="{ name: 'giftbox' }"
           >
-            Gift Cards
-          </router-link>
-        </SfHeaderNavigationItem>
-        <SfHeaderNavigationItem>
-          <router-link
-            to="/reviews/"
-          >
-            Gallery
-          </router-link>
-        </SfHeaderNavigationItem>
-        <SfHeaderNavigationItem>
-          <router-link
-            to="/pricing/"
-          >
-            Pricing
+            {{ $t('Gift Boxes') }}
           </router-link>
         </SfHeaderNavigationItem>
 
@@ -74,7 +47,6 @@ import ALogo from 'theme/components/atoms/a-logo';
 import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
 import { mapState, mapGetters } from 'vuex';
-import MMenu from 'theme/components/molecules/m-menu';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
 export default {
@@ -84,7 +56,6 @@ export default {
     ALogo,
     AAccountIcon,
     ADetailedCartIcon,
-    MMenu,
     SfOverlay,
     MCtaButton
   },
@@ -166,6 +137,8 @@ export default {
   }
 
   .sf-header-navigation-item {
+    flex: unset;
+
     &::after {
       bottom: 0;
       width: 0;
@@ -200,7 +173,7 @@ export default {
 
     &__navigation {
       --header-navigation-margin: 0 var(--spacer-base);
-      justify-content: space-evenly;
+      justify-content: space-between;
       flex-grow: 2;
     }
 
