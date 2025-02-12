@@ -26,6 +26,7 @@
               class="_item-link"
               :to="item.url"
               :class="{'-active': item.isActive && item.isActive()}"
+              exact
               @click.native="$emit('close')"
             >
               <SfMenuItem :label="item.label" icon="" />
@@ -126,6 +127,12 @@ export default Vue.extend({
         }
       ],
       otherProductsItems: [
+        {
+          label: this.$t('Home'),
+          url: {
+            name: 'home'
+          }
+        },
         {
           label: this.$t('Gift Boxes'),
           url: {

@@ -18,13 +18,23 @@
         <ALogo />
       </template>
       <template #navigation>
-        <SfHeaderNavigationItem>
-          <router-link
-            :to="{ name: 'giftbox' }"
-          >
-            {{ $t('Gift Boxes') }}
-          </router-link>
-        </SfHeaderNavigationItem>
+        <div class="_links">
+          <SfHeaderNavigationItem>
+            <router-link
+              :to="{ name: 'home' }"
+            >
+              {{ $t('Home') }}
+            </router-link>
+          </SfHeaderNavigationItem>
+
+          <SfHeaderNavigationItem>
+            <router-link
+              :to="{ name: 'giftbox' }"
+            >
+              {{ $t('Gift Boxes') }}
+            </router-link>
+          </SfHeaderNavigationItem>
+        </div>
 
         <MCtaButton />
       </template>
@@ -134,6 +144,12 @@ export default {
         --menu-item-label-color: var(--c-primary);
       }
     }
+  }
+
+  ._links {
+    display: flex;
+    justify-content: flex-start;
+    column-gap: var(--spacer-lg);
   }
 
   .sf-header-navigation-item {

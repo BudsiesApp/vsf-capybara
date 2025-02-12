@@ -9,11 +9,14 @@ import { GoogleTagManagerModule } from 'src/modules/google-tag-manager';
 import { UserModule } from '@vue-storefront/core/modules/user'
 import { StoryblokModule } from 'src/modules/vsf-storyblok-module'
 import { registerModule } from '@vue-storefront/core/lib/modules'
+import { BudsiesModule } from 'src/modules/budsies'
+import { GiftCardModule } from 'src/modules/gift-card'
 import { PaymentBackendMethodsModule } from 'src/modules/payment-backend-methods'
 import { PaymentAffirm } from 'src/modules/payment-affirm';
 import { BackendSettings } from 'src/modules/backend-settings';
 import { ErrorLoggingModule } from 'src/modules/error-logging';
 import { PageLoadingIndicatorModule } from 'src/modules/page-loading-indicator';
+import { PersistedCustomerDataModule } from 'src/modules/persisted-customer-data'
 import { TrueVaultModule } from 'src/modules/true-vault';
 
 import registerStoryblokComponents from 'theme/components/storyblok'
@@ -31,11 +34,14 @@ export function registerClientModules () {
   registerModule(UserModule) // Trigger on user icon click
   registerModule(CatalogNextModule)
   registerModule(StoryblokModule)
+  registerModule(BudsiesModule)
   registerModule(GoogleTagManagerModule)
+  registerModule(GiftCardModule)
   registerModule(PaymentBackendMethodsModule)
   registerModule(PaymentAffirm)
   registerModule(BackendSettings)
   registerModule(ErrorLoggingModule)
+  registerModule(PersistedCustomerDataModule)
 }
 
 // Deprecated API, will be removed in 2.0
