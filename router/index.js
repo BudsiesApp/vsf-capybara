@@ -60,13 +60,12 @@ let routes = [
       }
     }
   },
-
-  { name: 'my-account', path: '/my-account/', component: MyAccount },
   {
     name: 'terms-of-service-alias',
     component: StoryblokPage,
     path: '/terms-of-service/'
   },
+  { name: 'my-account', path: '/my-account/', component: MyAccount },
   { name: 'page-not-found', path: '*', component: ErrorPage },
   { name: 'error', path: '/error/', component: ErrorPage }
 ];
