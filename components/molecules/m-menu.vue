@@ -14,61 +14,7 @@
       :visible="visible"
     >
       <SfMegaMenuColumn
-        :title="$t('Plush Products')"
-      >
-        <SfList>
-          <SfListItem
-            v-for="item in customProductsItems"
-            :key="item.label"
-          >
-            <router-link
-              :to="item.url"
-              @click.native="$emit('close')"
-            >
-              <SfMenuItem :label="item.label" icon="" />
-            </router-link>
-          </SfListItem>
-        </SfList>
-      </SfMegaMenuColumn>
-
-      <SfMegaMenuColumn
-        :title="$t('Apparel')"
-      >
-        <SfList>
-          <SfListItem
-            v-for="item in accessoriesItems"
-            :key="item.label"
-          >
-            <router-link
-              :to="item.url"
-              @click.native="$emit('close')"
-            >
-              <SfMenuItem :label="item.label" icon="" />
-            </router-link>
-          </SfListItem>
-        </SfList>
-      </SfMegaMenuColumn>
-
-      <SfMegaMenuColumn
-        :title="$t('Household & Accessories')"
-      >
-        <SfList>
-          <SfListItem
-            v-for="item in householdItems"
-            :key="item.label"
-          >
-            <router-link
-              :to="item.url"
-              @click.native="$emit('close')"
-            >
-              <SfMenuItem :label="item.label" icon="" />
-            </router-link>
-          </SfListItem>
-        </SfList>
-      </SfMegaMenuColumn>
-
-      <SfMegaMenuColumn
-        :title="$t('Other Products')"
+        :title="$t('Products')"
       >
         <SfList>
           <SfListItem
@@ -80,27 +26,7 @@
               class="_item-link"
               :to="item.url"
               :class="{'-active': item.isActive && item.isActive()}"
-              @click.native="$emit('close')"
-            >
-              <SfMenuItem :label="item.label" icon="" />
-            </router-link>
-          </SfListItem>
-        </SfList>
-      </SfMegaMenuColumn>
-
-      <SfMegaMenuColumn
-        :title="$t('Other Useful Links')"
-        class="mobile-only"
-      >
-        <SfList>
-          <SfListItem
-            v-for="item in usefulLinksItems"
-            :key="item.label"
-          >
-            <router-link
-              class="_item-link"
-              :to="item.url"
-              :target="item.target"
+              exact
               @click.native="$emit('close')"
             >
               <SfMenuItem :label="item.label" icon="" />
@@ -202,8 +128,10 @@ export default Vue.extend({
       ],
       otherProductsItems: [
         {
-          label: this.$t('Gift Cards'),
-          url: '/giftcards/'
+          label: this.$t('Home'),
+          url: {
+            name: 'home'
+          }
         },
         {
           label: this.$t('Gift Boxes'),
@@ -214,39 +142,6 @@ export default Vue.extend({
             return this.$route.name === 'configurable-product' &&
              this.$route.params?.parentSku === 'gift_box';
           }
-        },
-        {
-          label: this.$t('Budsies Pals'),
-          url: '/budsiespals/'
-        },
-        {
-          label: this.$t('Bulk Orders'),
-          url: '/plush-production/'
-        }
-      ],
-      usefulLinksItems: [
-        {
-          label: this.$t('Pricing'),
-          url: '/pricing/'
-        },
-        {
-          label: this.$t('About'),
-          url: '/about/'
-        },
-        {
-          label: this.$t('FAQ\'s'),
-          url: '//support.budsies.com/',
-          target: '_blank'
-        },
-
-        {
-          label: this.$t('Blog'),
-          url: '/blog/',
-          target: '_blank'
-        },
-        {
-          label: this.$t('Reviews'),
-          url: '/reviews/'
         }
       ]
     }
