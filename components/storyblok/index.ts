@@ -24,6 +24,7 @@ export default function registerComponents () {
   add('tabs', () => import(/* webpackChunkName: "vsf-storyblok" */ './Tabs.vue'))
   add('tab', () => import(/* webpackChunkName: "vsf-storyblok" */ './Tab.vue'))
   add('carousel', () => import(/* webpackChunkName: "vsf-storyblok" */ './Carousel.vue'))
+  add('images_preview', () => import(/* webpackChunkName: "vsf-storyblok" */ './ImagesPreview.vue'))
 
   // add('product', () => import('./Product.vue'))
   // add('category', () => import('./Category.vue'))
