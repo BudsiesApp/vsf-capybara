@@ -234,7 +234,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
 <style lang="scss" scoped>
 @import "theme/css/base/_breakpoints.scss";
-@import "theme/css/mixins/wave.scss";
 
 #creativity-kit-product {
   $max-section-width: 1272px;
