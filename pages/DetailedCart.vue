@@ -38,7 +38,7 @@
                 <template #input>
                   <SfQuantitySelector
                     :qty="product.qty"
-                    :disabled="isUpdatingQuantity"
+                    :disabled="isCartItemProcessing"
                     @input="changeProductQuantity(product, $event)"
                     v-if="showQuantitySelectorForProduct(product)"
                   />
@@ -63,7 +63,7 @@
 
                   <SfButton
                     class="sf-button--text sf-collected-product__remove sf-collected-product__remove--text actions__button"
-                    :disabled="isCartItemRemoving"
+                    :disabled="isCartItemProcessing"
                     @click="removeHandler(product)"
                   >
                     Remove
@@ -136,7 +136,7 @@
       </div>
 
       <div v-if="totalItems" class="detailed-cart__aside">
-        <OrderSummary :is-updating-quantity="isUpdatingQuantity" />
+        <OrderSummary :is-updating-quantity="isCartItemProcessing" />
 
         <div class="_shipping-handling-block">
           <MBlockStory story-slug="cart_shipping_handling" />
@@ -247,8 +247,7 @@ export default {
   },
   data () {
     return {
-      isCartItemRemoving: false,
-      isUpdatingQuantity: false,
+      isCartItemProcessing: false,
       isDropdownOpen: false,
       dropdownActions: [
         {
@@ -466,16 +465,16 @@ export default {
       return getCartItemPrice(product, {}).special;
     },
     async removeHandler (product) {
-      if (this.isCartItemRemoving) {
+      if (this.isCartItemProcessing) {
         return;
       }
 
-      this.isCartItemRemoving = true;
+      this.isCartItemProcessing = true;
 
       try {
         await this.$store.dispatch('cart/removeItem', { product: product });
       } finally {
-        this.isCartItemRemoving = false;
+        this.isCartItemProcessing = false;
       }
     },
     getThumbnailForProductExtend (product) {
@@ -506,18 +505,18 @@ export default {
       return getProductMaxSaleQuantity(product) > 1;
     },
     syncQuantity () {
-      if (this.isUpdatingQuantity) {
+      if (this.isCartItemProcessing) {
         return;
       }
 
-      this.isUpdatingQuantity = true;
+      this.isCartItemProcessing = true;
 
       return this.$store
         .dispatch('cart/sync', {
           forceClientState: true
         })
         .finally(() => {
-          this.isUpdatingQuantity = false;
+          this.isCartItemProcessing = false;
         });
     },
     onDropdownActionClick (action) {
