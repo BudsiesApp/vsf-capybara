@@ -1,6 +1,6 @@
 <template>
-  <div class="storyblok-images-preview">
-    <div class="_image _main-preview-image" @click="showBookPreview">
+  <div class="storyblok-lightbox-gallery">
+    <div class="_image _preview-image" @click="launchGallery">
       <BaseImage
         class="_image"
         :srcsets="imageSources"
@@ -8,7 +8,7 @@
         :title="itemData.preview_image.title"
       />
 
-      <div class="_preview">
+      <div class="_preview-badge">
         <i class="_ico-magnify" />
 
         <span class="_preview-text">
@@ -73,7 +73,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     }
   },
   methods: {
-    showBookPreview (): void {
+    launchGallery (): void {
       this.$store.dispatch('ui/openModal', {
         name: ModalList.ImagesGallery,
         payload: {
@@ -89,17 +89,17 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
-.storyblok-images-preview {
+.storyblok-lightbox-gallery {
   @include display-property-handling;
 
-  ._main-preview-image {
+  ._preview-image {
     overflow: hidden;
     position: relative;
     border-radius: 30px;
     cursor: pointer;
   }
 
-  ._preview {
+  ._preview-badge {
     position: absolute;
     box-sizing: border-box;
     bottom: -12px;
