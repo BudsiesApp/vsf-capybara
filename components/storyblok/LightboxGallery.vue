@@ -4,8 +4,8 @@
       <BaseImage
         class="_image"
         :srcsets="imageSources"
-        :alt="itemData.main_image.alt"
-        :title="itemData.main_image.title"
+        :alt="itemData.preview_image.alt"
+        :title="itemData.preview_image.title"
       />
 
       <div class="_preview">
@@ -27,7 +27,7 @@ import { BaseImage, ImageSourceItem } from 'src/modules/budsies';
 import { InjectType } from 'src/modules/shared';
 import { Blok, ComponentWidthCalculator } from 'src/modules/vsf-storyblok-module';
 
-import { ImagesPreviewData } from './interfaces/images-preview-data.interface';
+import { LightboxGalleryData } from './interfaces/lightbox-gallery-data.interface';
 import generateBreakpointsSpecs from './generate-breakpoints-specs';
 import generateImageSourcesList from './generate-image-sources-list';
 import { ModalList } from 'theme/store/ui/modals';
@@ -43,7 +43,7 @@ interface InjectedServices {
 }
 
 export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServices>).extend({
-  name: 'StoryblokImagesPreview',
+  name: 'LightboxGallery',
   components: {
     BaseImage
   },
@@ -55,11 +55,11 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     ...mapGetters({
       supportsWebp: 'storyblok/supportsWebp'
     }),
-    itemData (): ImagesPreviewData {
-      return this.item as ImagesPreviewData;
+    itemData (): LightboxGalleryData {
+      return this.item as LightboxGalleryData;
     },
     imageSrc (): string {
-      return this.itemData.main_image.filename;
+      return this.itemData.preview_image.filename;
     },
     imageSources (): ImageSourceItem[] {
       if (!this.imageSrc) {
@@ -82,7 +82,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
       this.$store.dispatch('ui/openModal', {
         name: ModalList.ImagesGallery,
         payload: {
-          images: this.itemData.preview_images_list.map((item) => item.filename)
+          images: this.itemData.images_list.map((item) => item.filename)
         }
       });
     }
