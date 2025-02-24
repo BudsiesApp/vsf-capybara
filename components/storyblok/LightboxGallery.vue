@@ -37,11 +37,6 @@ interface InjectedServices {
   window: Window
 }
 
-interface InjectedServices {
-  componentWidthCalculator: ComponentWidthCalculator,
-  window: Window
-}
-
 export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServices>).extend({
   name: 'LightboxGallery',
   components: {
