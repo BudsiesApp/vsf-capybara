@@ -63,6 +63,7 @@
 
                   <SfButton
                     class="sf-button--text sf-collected-product__remove sf-collected-product__remove--text actions__button"
+                    :disabled="isCartItemRemoving"
                     @click="removeHandler(product)"
                   >
                     Remove
@@ -246,6 +247,7 @@ export default {
   },
   data () {
     return {
+      isCartItemRemoving: false,
       isUpdatingQuantity: false,
       isDropdownOpen: false,
       dropdownActions: [
@@ -463,8 +465,18 @@ export default {
     getProductSpecialPrice (product, campaignContent) {
       return getCartItemPrice(product, {}).special;
     },
-    removeHandler (product) {
-      this.$store.dispatch('cart/removeItem', { product: product });
+    async removeHandler (product) {
+      if (this.isCartItemRemoving) {
+        return;
+      }
+
+      this.isCartItemRemoving = true;
+
+      try {
+        await this.$store.dispatch('cart/removeItem', { product: product });
+      } finally {
+        this.isCartItemRemoving = false;
+      }
     },
     getThumbnailForProductExtend (product) {
       const customizationSystemThumbnail =
@@ -494,6 +506,10 @@ export default {
       return getProductMaxSaleQuantity(product) > 1;
     },
     syncQuantity () {
+      if (this.isUpdatingQuantity) {
+        return;
+      }
+
       this.isUpdatingQuantity = true;
 
       return this.$store
