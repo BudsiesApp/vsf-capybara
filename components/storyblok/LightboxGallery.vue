@@ -1,5 +1,7 @@
 <template>
-  <div class="storyblok-lightbox-gallery">
+  <div class="storyblok-lightbox-gallery" :class="cssClasses" :style="styles">
+    <editor-block-icons :item="itemData" />
+
     <div class="_image _preview-image" @click="launchGallery">
       <BaseImage
         class="_image"
@@ -129,6 +131,12 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
       height: 25px;
       vertical-align: top;
       background: url(/assets/images/ico-magnify.png) no-repeat 0 0;
+    }
+  }
+
+  &.-editor-preview-mode {
+    ._preview-image {
+      pointer-events: none
     }
   }
 }
