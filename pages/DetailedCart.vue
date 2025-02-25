@@ -38,7 +38,7 @@
                 <template #input>
                   <SfQuantitySelector
                     :qty="product.qty"
-                    :disabled="isUpdatingQuantity"
+                    :disabled="isCartItemProcessing"
                     @input="changeProductQuantity(product, $event)"
                     v-if="showQuantitySelectorForProduct(product)"
                   />
@@ -56,6 +56,7 @@
                   <SfButton
                     v-if="showEditButton(product.sku)"
                     class="sf-button--text actions__button"
+                    :disabled="isCartItemProcessing"
                     @click="editHandler(product)"
                   >
                     Edit
@@ -63,6 +64,7 @@
 
                   <SfButton
                     class="sf-button--text sf-collected-product__remove sf-collected-product__remove--text actions__button"
+                    :disabled="isCartItemProcessing"
                     @click="removeHandler(product)"
                   >
                     Remove
@@ -136,7 +138,7 @@
 
       <div v-if="totalItems" class="detailed-cart__aside">
         <OrderSummary
-          :is-updating-quantity="isUpdatingQuantity"
+          :is-updating-quantity="isCartItemProcessing"
         />
       </div>
     </div>
@@ -243,7 +245,7 @@ export default {
   },
   data () {
     return {
-      isUpdatingQuantity: false,
+      isCartItemProcessing: false,
       isDropdownOpen: false,
       dropdownActions: [
         {
@@ -390,8 +392,18 @@ export default {
     getProductSpecialPrice (product, campaignContent) {
       return getCartItemPrice(product, {}).special;
     },
-    removeHandler (product) {
-      this.$store.dispatch('cart/removeItem', { product: product });
+    async removeHandler (product) {
+      if (this.isCartItemProcessing) {
+        return;
+      }
+
+      this.isCartItemProcessing = true;
+
+      try {
+        await this.$store.dispatch('cart/removeItem', { product: product });
+      } finally {
+        this.isCartItemProcessing = false;
+      }
     },
     getThumbnailForProductExtend (product) {
       const customizationSystemThumbnail =
@@ -421,14 +433,18 @@ export default {
       return getProductMaxSaleQuantity(product) > 1;
     },
     syncQuantity () {
-      this.isUpdatingQuantity = true;
+      if (this.isCartItemProcessing) {
+        return;
+      }
+
+      this.isCartItemProcessing = true;
 
       return this.$store
         .dispatch('cart/sync', {
           forceClientState: true
         })
         .finally(() => {
-          this.isUpdatingQuantity = false;
+          this.isCartItemProcessing = false;
         });
     },
     onDropdownActionClick (action) {
