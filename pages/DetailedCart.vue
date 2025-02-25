@@ -59,6 +59,7 @@
                   <SfButton
                     v-if="showEditButton(product.sku)"
                     class="sf-button--text actions__button"
+                    :disabled="isCartItemProcessing"
                     @click="editHandler(product)"
                   >
                     Edit
