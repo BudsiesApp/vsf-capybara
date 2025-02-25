@@ -109,6 +109,10 @@ export default Vue.extend({
     horizontalSlides: {
       type: Boolean,
       default: true
+    },
+    loop: {
+      type: Boolean,
+      default: true
     }
   },
   data () {
@@ -196,7 +200,7 @@ export default Vue.extend({
       return this.slidesPerView;
     },
     isLoopAvailable (): boolean {
-      return this.currentSlidesPerView < this.items.length;
+      return this.loop && this.currentSlidesPerView < this.items.length;
     }
   },
   mounted (): void {
