@@ -90,30 +90,33 @@
       :disabled="isFormFieldsDisabled"
     />
 
-    <validation-provider
-      slim
-      rules="required"
-      name="'State'"
-      ref="stateValidator"
-      v-slot="{errors}"
-      v-if="isSelectedCountryHasStates && canShowStateSelector"
+    <div
+      class="form__element form__element--half form__select"
+      v-else
     >
-      <MMultiselect
-        v-model="regionId"
-        class="form__element form__element--half form__select"
-        name="address-level1"
-        autocomplete="address-level1"
-        :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
-        :label="$t('State / Province')"
-        :required="true"
-        id-field="id"
-        label-field="name"
-        :options="statesForSelectedCountry"
-        :valid="!errors.length"
-        :error-message="errors[0]"
-        :disabled="isFormFieldsDisabled"
-      />
-    </validation-provider>
+      <validation-provider
+        slim
+        rules="required"
+        name="'State'"
+        ref="stateValidator"
+        v-slot="{errors}"
+      >
+        <MMultiselect
+          v-model="regionId"
+          name="address-level1"
+          autocomplete="address-level1"
+          :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
+          :label="$t('State / Province')"
+          :required="true"
+          id-field="id"
+          label-field="name"
+          :options="statesForSelectedCountry"
+          :valid="!errors.length"
+          :error-message="errors[0]"
+          :disabled="isFormFieldsDisabled"
+        />
+      </validation-provider>
+    </div>
 
     <validation-provider
       slim
@@ -167,12 +170,22 @@
         :valid="!errors.length"
         :error-message="errors[0]"
         class="form__element"
+        :class="{ 'form__element--half': showVatIdField }"
         name="phone"
         autocomplete="tel"
         :label="$t('Phone number')"
         :disabled="isFormFieldsDisabled"
       />
     </validation-provider>
+
+    <SfInput
+      v-if="showVatIdField"
+      v-model.trim="vatId"
+      class="form__element form__element--half"
+      name="vat_id"
+      :label="$t('VAT ID')"
+      :disabled="isFormFieldsDisabled"
+    />
   </div>
 </template>
 
@@ -191,6 +204,7 @@ const Countries = require('@vue-storefront/i18n/resource/countries.json');
 const States = require('@vue-storefront/i18n/resource/states.json');
 
 const phoneValidationRegex = /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/;
+const unitedStatesCountryCode = 'US';
 
 extend('required', {
   ...required,
@@ -222,17 +236,13 @@ export default Vue.extend({
   data () {
     return {
       states: States,
-      fCanShowStateSelector: true,
       fZipCodeChanged: false,
       countries: Countries
     }
   },
   computed: {
-    canShowStateSelector (): boolean {
-      return this.fCanShowStateSelector
-    },
     isPhoneNumberRequired (): boolean {
-      return !!this.country && this.country !== 'US';
+      return !!this.country && this.country !== unitedStatesCountryCode;
     },
     isSelectedCountryHasStates () {
       if (!this.value.country || !this.states) {
@@ -311,6 +321,14 @@ export default Vue.extend({
         this.updateValueField({ streetAddress: value });
       }
     },
+    vatId: {
+      get (): string {
+        return this.value.vatId;
+      },
+      set (value: string) {
+        this.updateValueField({ vatId: value });
+      }
+    },
     zipCode: {
       get (): string {
         return this.value.zipCode;
@@ -318,6 +336,9 @@ export default Vue.extend({
       set (value: string) {
         this.updateValueField({ zipCode: value });
       }
+    },
+    showVatIdField (): boolean {
+      return !!this.country && this.country !== unitedStatesCountryCode;
     },
     statesForSelectedCountry (): any[] {
       if (!this.isSelectedCountryHasStates) {
@@ -364,16 +385,10 @@ export default Vue.extend({
   watch: {
     country: {
       handler (after, before) {
-        this.fCanShowStateSelector = false;
-
         if (after && before) {
           this.state = null;
           this.regionId = null;
         }
-
-        this.$nextTick(() => {
-          this.fCanShowStateSelector = true;
-        })
       },
       immediate: true
     },
@@ -387,6 +402,11 @@ export default Vue.extend({
         (this.regionId as any) = null;
       },
       immediate: true
+    },
+    showVatIdField: (value) => {
+      if (!value) {
+        (this as any).vatId = '';
+      }
     },
     zipCode: {
       handler () {

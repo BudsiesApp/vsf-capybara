@@ -145,12 +145,24 @@
             : $t('Please, enter valid phone number')
         "
         class="form__element"
-        :class="{[vuelidateErrorClassName]: $v.shipping.phoneNumber.$error}"
+        :class="{
+          [vuelidateErrorClassName]: $v.shipping.phoneNumber.$error,
+          'form__element--half': showVatIdField
+        }"
         name="phone"
         autocomplete="tel"
         :label="$t('Phone number')"
         :disabled="isFormFieldsDisabled"
         @blur="$v.shipping.phoneNumber.$touch()"
+      />
+
+      <SfInput
+        v-if="showVatIdField"
+        v-model.trim="shipping.vat_id"
+        class="form__element form__element--half"
+        name="vat_id"
+        :label="$t('VAT ID')"
+        :disabled="isFormFieldsDisabled"
       />
     </div>
     <SfHeading
@@ -238,6 +250,7 @@ import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/help
 const States = require('@vue-storefront/i18n/resource/states.json');
 
 const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/);
+const unitedStatesCountryCode = 'US';
 
 export default {
   name: 'OShipping',
@@ -298,7 +311,7 @@ export default {
       return this.shipToMyAddress;
     },
     isPhoneNumberRequired () {
-      return this.shipping.country && this.shipping.country !== 'US';
+      return this.shipping.country && this.shipping.country !== unitedStatesCountryCode;
     },
     isSelectedCountryHasStates () {
       if (!this.shipping.country || !this.states) {
@@ -332,6 +345,9 @@ export default {
       }
 
       return false;
+    },
+    showVatIdField () {
+      return !!this.shipping.country && this.shipping.country !== unitedStatesCountryCode;
     }
   },
   methods: {
@@ -468,7 +484,15 @@ export default {
 
         this.shipping.region_id = null;
       }
+    },
+    showVatIdField: {
+      handler (val) {
+        if (!val) {
+          this.shipping.vat_id = '';
+        }
+      }
     }
+
   }
 };
 </script>
