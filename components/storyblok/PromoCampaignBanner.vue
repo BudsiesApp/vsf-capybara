@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts">
-import CampaignContent from 'src/modules/promotion-platform/types/CampaignContent.model';
+import { CampaignContent } from 'src/modules/promotion-platform/types/CampaignContent.interface';
 import { Blok } from 'src/modules/vsf-storyblok-module/components'
 import PromoCampaignBannerData from './interfaces/promo-campaign-banner-data.interface';
 
