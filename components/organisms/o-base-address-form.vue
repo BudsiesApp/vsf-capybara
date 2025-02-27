@@ -183,7 +183,7 @@
       v-model.trim="vatId"
       class="form__element form__element--half"
       name="vat_id"
-      :label="$t('VAT ID')"
+      :label="$t('Tax ID')"
       :disabled="isFormFieldsDisabled"
     />
   </div>
