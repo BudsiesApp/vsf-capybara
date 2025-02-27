@@ -85,7 +85,7 @@
                 class="color-secondary _button"
               >
                 <router-link class="_inner" :to="{name: 'bulk-quote'}">
-                  Add Another Design
+                  Get Another Quote
                 </router-link>
               </SfButton>
 
@@ -381,13 +381,17 @@ export default {
 ._buttons-container {
   ._button {
     --c-link: var(--c-primary);
-    --c-link-hover: var(--c-primary);
+    --c-link-hover: var(--c-light-variant);
     --button-padding: 0;
 
     margin-top: var(--spacer-base);
 
     ._inner {
       padding: var(--spacer-sm) calc(var(--spacer-sm) * 1.5);
+    }
+
+    &:hover {
+      --c-link: var(--c-light-variant);
     }
   }
 }
