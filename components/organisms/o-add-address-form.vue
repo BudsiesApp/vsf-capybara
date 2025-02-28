@@ -42,7 +42,7 @@ import OBaseAddressForm from './o-base-address-form.vue';
 
 type AddressData = Pick<
 BaseAddressFormValue,
-'city' | 'country' | 'state' | 'streetAddress' | 'zipCode' | 'regionId'
+'city' | 'country' | 'state' | 'streetAddress' | 'zipCode' | 'regionId' | 'vatId'
 >
 
 export default defineComponent({
@@ -63,7 +63,8 @@ export default defineComponent({
       state: null,
       streetAddress: '',
       zipCode: '',
-      regionId: null
+      regionId: null,
+      vatId: ''
     });
 
     return {
@@ -96,7 +97,8 @@ export default defineComponent({
           firstName: this.firstName,
           lastName: this.lastName,
           phoneNumber: this.phoneNumber,
-          regionId: this.addressData.regionId
+          regionId: this.addressData.regionId,
+          vatId: this.addressData.vatId
         }
       },
       set (address: BaseAddressFormValue) {
@@ -106,7 +108,8 @@ export default defineComponent({
           state: address.state,
           streetAddress: address.streetAddress,
           zipCode: address.zipCode,
-          regionId: address.regionId
+          regionId: address.regionId,
+          vatId: address.vatId
         }
         this.firstName = address.firstName;
         this.lastName = address.lastName;
@@ -131,7 +134,8 @@ export default defineComponent({
         postcode: this.address.zipCode,
         country_id: this.address.country,
         telephone: this.address.phoneNumber,
-        default_shipping: false
+        default_shipping: false,
+        vat_id: this.address.vatId
       }
 
       try {

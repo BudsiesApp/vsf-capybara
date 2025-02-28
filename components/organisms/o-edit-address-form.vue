@@ -97,7 +97,8 @@ export default Vue.extend({
         telephone: this.existingAddress.phoneNumber,
         default_shipping: this.existingAddress.defaultShipping,
         default_billing: this.existingAddress.defaultBilling,
-        customer_id: this.existingAddress.customerId
+        customer_id: this.existingAddress.customerId,
+        vat_id: this.existingAddress.vatId
       }
 
       return this.$store.dispatch('budsies/updateAddress', { address: addressToUpdate });
