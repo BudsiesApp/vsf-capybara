@@ -135,11 +135,7 @@ export default defineComponent({
         country_id: this.address.country,
         telephone: this.address.phoneNumber,
         default_shipping: false,
-        vat_id: undefined as string | undefined
-      }
-
-      if (this.address.vatId) {
-        addressToCreate.vat_id = this.address.vatId;
+        vat_id: this.address.vatId
       }
 
       try {

@@ -98,11 +98,7 @@ export default Vue.extend({
         default_shipping: this.existingAddress.defaultShipping,
         default_billing: this.existingAddress.defaultBilling,
         customer_id: this.existingAddress.customerId,
-        vat_id: undefined
-      }
-
-      if (this.existingAddress.vatId) {
-        addressToUpdate.vat_id = this.existingAddress.vatId;
+        vat_id: this.existingAddress.vatId
       }
 
       return this.$store.dispatch('budsies/updateAddress', { address: addressToUpdate });
