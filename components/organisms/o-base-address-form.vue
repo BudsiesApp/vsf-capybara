@@ -178,14 +178,23 @@
       />
     </validation-provider>
 
-    <SfInput
+    <validation-provider
+      v-slot="{ errors }"
+      :rules="vatIdValidationRules"
+      name="'Tax ID'"
       v-if="showVatIdField"
-      v-model.trim="vatId"
+      tag="div"
       class="form__element form__element--half"
-      name="vat_id"
-      :label="$t('Tax ID')"
-      :disabled="isFormFieldsDisabled"
-    />
+    >
+      <SfInput
+        v-model.trim="vatId"
+        name="vat_id"
+        :label="$t('Tax ID')"
+        :disabled="isFormFieldsDisabled"
+        :valid="!errors.length"
+        :error-message="errors[0]"
+      />
+    </validation-provider>
   </div>
 </template>
 
@@ -210,7 +219,10 @@ extend('required', {
   ...required,
   message: 'Field is required'
 });
-extend('min', min);
+extend('min', {
+  ...min,
+  message: 'Field must have at least {length} characters'
+});
 extend('regex', {
   ...regex,
   message: 'Please, enter valid phone number'
@@ -346,6 +358,15 @@ export default Vue.extend({
       }
 
       return this.states[this.country];
+    },
+    vatIdValidationRules (): any {
+      if (!this.vatId) {
+        return {};
+      }
+
+      return {
+        min: 3
+      }
     }
   },
   methods: {
@@ -385,7 +406,7 @@ export default Vue.extend({
   watch: {
     country: {
       handler (after, before) {
-        if (after && before) {
+        if (after && before && after !== before) {
           this.state = null;
           this.regionId = null;
         }
@@ -403,9 +424,9 @@ export default Vue.extend({
       },
       immediate: true
     },
-    showVatIdField: (value) => {
+    showVatIdField (value) {
       if (!value) {
-        (this as any).vatId = '';
+        this.vatId = '';
       }
     },
     zipCode: {

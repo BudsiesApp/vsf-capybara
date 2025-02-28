@@ -150,7 +150,7 @@
           :error-message="
             !$v.payment.zipCode.required
               ? $t('Field is required')
-              : $t('Name must have at least 3 letters.')
+              : $t('Zip-code must have at least {number} characters.', { number: 3 })
           "
           @blur="$v.payment.zipCode.$touch()"
         />
@@ -447,6 +447,11 @@ export default {
   },
   watch: {
     getPaymentCountry (after, before) {
+      if (after && before && after !== before) {
+        this.payment.region_id = null;
+        this.payment.state = '';
+      }
+
       if (after && before !== after) {
         this.changeCountry();
       }

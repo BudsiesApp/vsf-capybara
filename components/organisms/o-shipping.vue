@@ -130,7 +130,7 @@
         :error-message="
           !$v.shipping.zipCode.required
             ? $t('Field is required')
-            : $t('Name must have at least 3 letters.')
+            : $t('Zip-code must have at least {number} characters.', { number: 3 })
         "
         @blur="onZipCodeBlur"
       />
@@ -469,6 +469,12 @@ export default {
     EventBus.$off('user-after-loggedin', this.fillLastUsedCustomerData);
   },
   watch: {
+    'shipping.country' (after, before) {
+      if (after && before && after !== before) {
+        this.shipping.region_id = null;
+        this.shipping.state = '';
+      }
+    },
     getZipCode: {
       handler () {
         this.fZipCodeChanged = true;
