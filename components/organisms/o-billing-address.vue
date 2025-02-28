@@ -150,7 +150,7 @@
           :error-message="
             !$v.payment.zipCode.required
               ? $t('Field is required')
-              : $t('Name must have at least 3 letters.')
+              : $t('Zip-code must have at least {number} characters.', { number: 3 })
           "
           @blur="$v.payment.zipCode.$touch()"
         />
@@ -164,12 +164,24 @@
               : $t('Please, enter valid phone number')
           "
           class="form__element"
-          :class="{[vuelidateErrorClassName]: $v.payment.phoneNumber.$error}"
+          :class="{
+            [vuelidateErrorClassName]: $v.payment.phoneNumber.$error,
+            'form__element--half': showVatIdField
+          }"
           name="phone"
           autocomplete="tel"
           :label="$t('Phone number')"
           :disabled="isFormFieldsDisabled"
           @blur="$v.payment.phoneNumber.$touch()"
+        />
+
+        <SfInput
+          v-if="showVatIdField"
+          v-model.trim="payment.vat_id"
+          class="form__element form__element--half"
+          name="vat_id"
+          :label="$t('Tax ID')"
+          :disabled="isFormFieldsDisabled"
         />
       </div>
     </div>
@@ -231,6 +243,7 @@ import { stateCodeAutocompleteOptionSearch } from 'src/modules/shared';
 const States = require('@vue-storefront/i18n/resource/states.json');
 
 const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/);
+const unitedStatesCountryCode = 'US';
 
 export default {
   name: 'OBillingAddress',
@@ -300,7 +313,7 @@ export default {
       isVirtualCart: 'cart/isVirtualCart'
     }),
     isPhoneNumberRequired () {
-      return this.payment.country && this.payment.country !== 'US';
+      return this.payment.country && this.payment.country !== unitedStatesCountryCode;
     },
     isAddressFormDisabled () {
       return this.sendToShippingAddress || this.sendToBillingAddress;
@@ -351,6 +364,9 @@ export default {
     },
     showAddressFormFields () {
       return !this.sendToShippingAddress;
+    },
+    showVatIdField () {
+      return !!this.payment.country && this.payment.country !== unitedStatesCountryCode;
     }
   },
   mounted () {
@@ -431,6 +447,11 @@ export default {
   },
   watch: {
     getPaymentCountry (after, before) {
+      if (after && before && after !== before) {
+        this.payment.region_id = null;
+        this.payment.state = '';
+      }
+
       if (after && before !== after) {
         this.changeCountry();
       }
@@ -443,6 +464,13 @@ export default {
         }
 
         this.payment.region_id = null;
+      }
+    },
+    showVatIdField: {
+      handler (val) {
+        if (!val) {
+          this.payment.vat_id = '';
+        }
       }
     }
   }
