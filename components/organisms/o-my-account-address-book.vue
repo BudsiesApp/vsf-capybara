@@ -193,7 +193,8 @@ export default {
         phoneNumber: '',
         defaultShipping: false,
         defaultBilling: false,
-        customerId: undefined
+        customerId: undefined,
+        vatId: ''
       },
       countries: Countries,
       state: State.LIST
@@ -245,7 +246,8 @@ export default {
         phoneNumber: address.telephone,
         defaultBilling: address.default_billing,
         defaultShipping: address.default_shipping,
-        customerId: address.customer_id
+        customerId: address.customer_id,
+        vatId: address.vat_id
       };
       this.state = State.EDIT;
     },
@@ -262,7 +264,8 @@ export default {
         phoneNumber: '',
         defaultShipping: false,
         defaultBilling: false,
-        customerId: undefined
+        customerId: undefined,
+        vatId: ''
       }
     },
     async onAddressUpdate () {
