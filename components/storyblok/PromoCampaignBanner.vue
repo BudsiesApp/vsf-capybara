@@ -121,25 +121,23 @@ export default Blok.extend({
 
   @include image-modifiers("promotion-platform-image-banner-container ::v-deep img");
 
-  ::v-deep {
-    .show-for-medium-up {
-      display: none;
-    }
+  .show-for-medium-up {
+    display: none;
+  }
 
+  ::v-deep {
     img {
       max-width: 100%;
     }
   }
 
   @media (min-width: $tablet-min) {
-    ::v-deep {
-      .show-for-medium-up {
-        display: inherit;
-      }
+    .show-for-medium-up {
+      display: inherit;
+    }
 
-      .show-for-small-only {
-        display: none;
-      }
+    .show-for-small-only {
+      display: none;
     }
   }
 
