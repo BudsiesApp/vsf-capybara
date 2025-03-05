@@ -39,6 +39,7 @@
                   <SfQuantitySelector
                     :qty="product.qty"
                     :disabled="isCartItemProcessing"
+                    :min="1"
                     @input="changeProductQuantity(product, $event)"
                     v-if="showQuantitySelectorForProduct(product)"
                   />
@@ -496,6 +497,10 @@ export default {
       return getThumbnailForProduct(product);
     },
     async changeProductQuantity (product, qty) {
+      if (!qty || Number.isNaN(qty) || qty < 1) {
+        return;
+      }
+
       this.$store.commit(`cart/${CART_UPD_ITEM}`, { product, qty });
 
       if (this.$store.getters['cart/isCartSyncEnabled']) {
