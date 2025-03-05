@@ -39,7 +39,6 @@
                   <SfQuantitySelector
                     :qty="product.qty"
                     :disabled="isCartItemProcessing"
-                    :min="1"
                     @input="changeProductQuantity(product, $event)"
                     v-if="showQuantitySelectorForProduct(product)"
                   />
