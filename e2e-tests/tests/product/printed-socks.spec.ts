@@ -39,14 +39,14 @@ test('product added to cart successfully', async ({ page, customizableProductPag
   await fillRequiredFields(customizableProductPage);
   await customizableProductPage.addToCart();
 
-  await page.waitForSelector('#cross-sells');
+  await expect(page.locator('#cross-sells')).toBeVisible();
 });
 
 test('product display in cart correctly', async ({ page, cartPage, customizableProductPage }) => {
   await fillRequiredFields(customizableProductPage);
   await customizableProductPage.addToCart();
 
-  await page.waitForSelector('#cross-sells');
+  await expect(page.locator('#cross-sells')).toBeVisible();
 
   await cartPage.goto();
   const cartItem = cartPage.getCartItemByProductName('Custom Pet Socks');
