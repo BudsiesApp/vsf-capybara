@@ -22,9 +22,9 @@ export class CustomizableProductPage {
     return parent.locator('> ._widget').first();
   }
 
-  public fillCustomizationTextValue (label: string, value: string) {
+  public async fillCustomizationTextValue (label: string, value: string) {
     const widget = this.getCustomizationWidgetByLabel(label);
-    widget.fill(value);
+    await widget.fill(value);
   }
 
   public async getCustomizationSelectValueByLabel (label: string): Promise<string | null> {
