@@ -1,73 +1,55 @@
-import { test, expect } from '@playwright/test';
-
-import { getCustomizationWidgetByLabel } from '../../helpers/get-customization-widget-by-label';
-import { uploadImage } from '../../helpers/upload-image';
+import { testFactory, expect } from '../../fixtures/images-gallery-product-page.ts';
+import { CustomizableProductPage } from '../../page-model/product/customizable-product';
 
 const DESIGN_CUSTOMIZATION_OPTION_LABEL = 'Design';
 const UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL = 'Upload your photo';
 const ADD_MORE_PHOTOS_CUSTOMIZATION_OPTION_LABEL = 'Add more photos';
 
-test.describe('Printed Socks', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/pet-socks/');
-  });
+const test = testFactory('/pet-socks/');
 
-  test('form layout is correct', async ({ page }) => {
-    const initializedSwiper = page.locator('._stage-content .swiper-initialized');
-    await expect(initializedSwiper).toBeVisible();
+async function fillRequiredFields (customizableProductPage: CustomizableProductPage) {
+  await customizableProductPage.fillCustomizationSelectValueByIndex(DESIGN_CUSTOMIZATION_OPTION_LABEL, 1);
+  await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
+}
 
-    const headingTitle = page.locator('._product-name-desktop.sf-heading__title');
-    await expect(headingTitle).not.toBeEmpty();
+test('form layout is correct', async ({ customizableProductPage, imagesGalleryProductPage }) => {
+  await expect(imagesGalleryProductPage.initializedSwiper).toBeVisible();
+  await expect(imagesGalleryProductPage.headingTitle).not.toBeEmpty();
+  await expect(imagesGalleryProductPage.shortDescription).not.toBeEmpty();
+  await expect(imagesGalleryProductPage.agreement).toBeVisible();
 
-    const shortDescription = page.locator('._short-description:not(._placeholder-item)');
-    await expect(shortDescription).not.toBeEmpty();
+  await expect(customizableProductPage.addToCartButton).toBeVisible();
+  await expect(customizableProductPage.quantityField).toBeVisible();
 
-    const designWidget = getCustomizationWidgetByLabel(page, DESIGN_CUSTOMIZATION_OPTION_LABEL);
-    const uploadPhotoWidget = getCustomizationWidgetByLabel(page, UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
-    const addMorePhotosWidget = getCustomizationWidgetByLabel(page, ADD_MORE_PHOTOS_CUSTOMIZATION_OPTION_LABEL);
+  const designWidget = customizableProductPage.getCustomizationWidgetByLabel(DESIGN_CUSTOMIZATION_OPTION_LABEL);
+  const uploadPhotoWidget = customizableProductPage.getCustomizationWidgetByLabel(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
+  const addMorePhotosWidget = customizableProductPage.getCustomizationWidgetByLabel(ADD_MORE_PHOTOS_CUSTOMIZATION_OPTION_LABEL);
 
-    await expect(designWidget).toBeVisible();
-    await expect(uploadPhotoWidget).toBeVisible();
-    await expect(addMorePhotosWidget).toBeVisible();
+  await expect(designWidget).toBeVisible();
+  await expect(uploadPhotoWidget).toBeVisible();
+  await expect(addMorePhotosWidget).toBeVisible();
+});
 
-    const quantityField = page.locator('._quantity-field');
-    const addToCartButton = page.locator('._add-to-cart');
-    const agreement = page.locator('.m-block-story');
+test('form errors display correctly', async ({ imagesGalleryProductPage, customizableProductPage }) => {
+  await customizableProductPage.addToCart();
+  await expect(imagesGalleryProductPage.formErrors).toBeVisible();
+});
 
-    await expect(addToCartButton).toBeVisible();
-    await expect(quantityField).toBeVisible();
-    await expect(agreement).toBeVisible();
-  });
+test('product added to cart successfully', async ({ page, customizableProductPage }) => {
+  await fillRequiredFields(customizableProductPage);
+  await customizableProductPage.addToCart();
 
-  test('form errors display correctly', async ({ page }) => {
-    const addToCartButton = page.locator('._add-to-cart');
-    await expect(addToCartButton).toBeVisible();
-    await addToCartButton.click();
+  await page.waitForSelector('#cross-sells');
+});
 
-    const formErrors = page.locator('._form-errors');
-    await expect(formErrors).toBeVisible();
-  });
+test('product display in cart correctly', async ({ page, cartPage, customizableProductPage }) => {
+  await fillRequiredFields(customizableProductPage);
+  await customizableProductPage.addToCart();
 
-  test('product added to cart successfully', async ({ page }) => {
-    const designWidget = getCustomizationWidgetByLabel(page, DESIGN_CUSTOMIZATION_OPTION_LABEL);
-    const uploadPhotoWidget = getCustomizationWidgetByLabel(page, UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
-    const addToCartButton = page.locator('._add-to-cart');
+  await page.waitForSelector('#cross-sells');
 
-    await designWidget.click();
+  await cartPage.goto();
+  const cartItem = cartPage.getCartItemByProductName('Custom Pet Socks');
 
-    const designOption = designWidget.locator('li.sf-select-option').nth(1);
-    await expect(designOption).toBeVisible();
-
-    await designOption.click();
-
-    await uploadImage(page, uploadPhotoWidget);
-
-    await expect(addToCartButton).toBeDisabled();
-    await expect(addToCartButton).toBeEnabled();
-
-    await addToCartButton.click();
-
-    const crossSellsPageHeader = page.getByText('Other pet gifts you might like');
-    await expect(crossSellsPageHeader).toBeVisible();
-  });
+  await expect(cartItem).toBeVisible();
 });
