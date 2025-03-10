@@ -42,7 +42,7 @@ export class PlushieProductPage {
       return null;
     }
 
-    return typeOptionText.replace(/\\n|\$\d+(\.\d+)?/g, '').trim(); ;
+    return typeOptionText.replace(/\\n|\$\d+(\.\d+)?/g, '').trim();
   }
 
   public async waitPageToBeVisible () {

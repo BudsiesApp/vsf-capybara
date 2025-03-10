@@ -173,7 +173,6 @@ test('product added to cart successfully with uploaded image', async ({ crossSel
   await crossSellsPage.waitPageToBeVisible();
 });
 
-//
 test('product added to cart successfully without uploaded image', async ({ crossSellsPage, plushieProductPage, customizableProductPage }) => {
   await plushieProductPage.selectTypeByIndex(0);
   await fillAllStepsRequiredFields(customizableProductPage, plushieProductPage, false);

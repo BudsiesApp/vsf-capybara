@@ -1,8 +1,6 @@
 import { expect, Locator, Page } from '@playwright/test';
 import { CustomizableProductPage } from './customizable-product';
 
-const ADD_TO_CART_API_RESOURCE = '/api/cart/update';
-
 export class VerticalStepsProductPage {
   public headingTitle: Locator;
   public formErrors: Locator;
@@ -25,7 +23,7 @@ export class VerticalStepsProductPage {
 
   public async makeAnotherAndVerifyResponse () {
     const responsePromise = this.page.waitForResponse(
-      response => response.url().includes(ADD_TO_CART_API_RESOURCE) && response.status() === 200
+      response => response.url().includes(this.customizableProductPage.ADD_TO_CART_API_RESOURCE) && response.status() === 200
     );
 
     await expect(this.saveAndMakeAnotherButton).toBeVisible();
