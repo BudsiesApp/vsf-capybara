@@ -18,4 +18,8 @@ export class ImagesGalleryProductPage {
     this.agreement = this.page.locator('.m-block-story');
     this.formErrors = this.page.locator('._form-errors');
   }
+
+  public async moveFocusOutsideImagesGallery () {
+    await this.page.mouse.move(0, 0);
+  }
 }

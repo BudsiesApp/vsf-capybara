@@ -1,13 +1,15 @@
 import { test } from '@playwright/test';
 
 import { CartPage } from '../page-model/cart/cart';
+import { CrossSellsPage } from '../page-model/cross-sells';
 import { CustomizableProductPage } from '../page-model/product/customizable-product';
 import { ImagesGalleryProductPage } from '../page-model/product/images-gallery-form';
 
 interface ImagesGalleryProductPageFixture {
   customizableProductPage: CustomizableProductPage,
   imagesGalleryProductPage: ImagesGalleryProductPage,
-  cartPage: CartPage
+  cartPage: CartPage,
+  crossSellsPage: CrossSellsPage
 }
 
 export function testFactory (productPageUrl: string) {
@@ -24,6 +26,10 @@ export function testFactory (productPageUrl: string) {
     cartPage: async ({ page }, use) => {
       const cartPage = new CartPage(page);
       await use(cartPage);
+    },
+    crossSellsPage: async ({ page }, use) => {
+      const crossSellsPage = new CrossSellsPage(page);
+      await use(crossSellsPage);
     }
   });
 }
