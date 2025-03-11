@@ -1,6 +1,7 @@
 import { expect, Locator, Page } from '@playwright/test';
 
 import { uploadImage } from '../../helpers/upload-image';
+import { normalizeLabel } from 'theme/e2e-tests/helpers/normalize-label';
 
 export class CustomizableProductPage {
   public readonly ADD_TO_CART_API_RESOURCE = '/api/cart/update';
@@ -43,11 +44,12 @@ export class CustomizableProductPage {
   public async getCustomizationSelectValueByLabel (label: string): Promise<string | null> {
     const widget = this.getCustomizationWidgetByLabel(label);
     const selectedOption = await widget.locator('.sf-select__selected').textContent();
+
     if (!selectedOption) {
       return null;
     }
 
-    return selectedOption.replace(/\\n|\$\d+(\.\d+)?/g, '').trim();
+    return normalizeLabel(selectedOption);
   }
 
   public async fillCustomizationSelectValueByIndex (label: string, index: number = 0) {

@@ -1,4 +1,5 @@
 import { expect, Locator, Page } from '@playwright/test';
+import { normalizeLabel } from 'theme/e2e-tests/helpers/normalize-label';
 
 export class PlushieProductPage {
   public headingTitle: Locator;
@@ -42,7 +43,7 @@ export class PlushieProductPage {
       return null;
     }
 
-    return typeOptionText.replace(/\\n|\$\d+(\.\d+)?/g, '').trim();
+    return normalizeLabel(typeOptionText);
   }
 
   public async waitPageToBeVisible () {

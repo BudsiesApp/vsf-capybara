@@ -19,7 +19,7 @@ export class ImagesGalleryProductPage {
     this.formErrors = this.page.locator('._form-errors');
   }
 
-  public async moveFocusOutsideImagesGallery () {
-    await this.page.mouse.move(0, 0);
+  public async moveFocusOutsideImagesGallery (): Promise<void> {
+    return this.page.mouse.move(0, 0);
   }
 }

@@ -1,35 +1,18 @@
-import { test } from '@playwright/test';
+import { testFactory as baseTestFactory } from './customizable-product-page';
 
-import { CartPage } from '../page-model/cart/cart';
-import { CrossSellsPage } from '../page-model/cross-sells';
-import { CustomizableProductPage } from '../page-model/product/customizable-product';
 import { PhotoPillowProductPage } from '../page-model/product/photo-pillows-product';
 
 interface PhotoPillowProductPageFixture {
-  cartPage: CartPage,
-  customizableProductPage: CustomizableProductPage,
-  crossSellsPage: CrossSellsPage,
   photoPillowProductPage: PhotoPillowProductPage
 }
 
 export function testFactory (productPageUrl: string) {
-  return test.extend<PhotoPillowProductPageFixture>({
-    customizableProductPage: async ({ page }, use) => {
-      const customizableProductPage = new CustomizableProductPage(page, productPageUrl);
-      await customizableProductPage.goto();
-      await use(customizableProductPage);
-    },
+  const baseTest = baseTestFactory(productPageUrl);
+
+  return baseTest.extend<PhotoPillowProductPageFixture>({
     photoPillowProductPage: async ({ page, customizableProductPage }, use) => {
       const photoPillowProductPage = new PhotoPillowProductPage(page, customizableProductPage);
       await use(photoPillowProductPage);
-    },
-    cartPage: async ({ page }, use) => {
-      const cartPage = new CartPage(page);
-      await use(cartPage);
-    },
-    crossSellsPage: async ({ page }, use) => {
-      const crossSellsPage = new CrossSellsPage(page);
-      await use(crossSellsPage);
     }
   });
 }
