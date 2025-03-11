@@ -41,8 +41,8 @@ export function usePhrasePillowFormSteps (
     return dictionary;
   });
 
-  const customizationOptionsRefs = ref<CustomizationOptionComponent[]>([])
-  const validationState = ref<Record<string, boolean>>({})
+  const customizationOptionsRefs = ref<CustomizationOptionComponent[]>([]);
+  const validationState = ref<Record<string, boolean>>({});
 
   const stepsList = computed<string[]>(() => {
     const stepsNames = stepsCustomizations.value.map(({ name }) => name);
@@ -136,12 +136,13 @@ export function usePhrasePillowFormSteps (
   }
 
   function activateFirstStepWithError (): number | void {
-    stepsCustomizations.value.forEach((customization, index) => {
+    for (let index = 0; index < stepsCustomizations.value.length; index++) {
+      const customization = stepsCustomizations.value[index];
       if (!validationState.value[customization.name]) {
         formSteps.currentStep.value = index;
         return index;
       }
-    });
+    }
   }
 
   async function onChangeStep (stepIndex: number) {
@@ -153,9 +154,8 @@ export function usePhrasePillowFormSteps (
 
     formSteps.currentStep.value = stepIndex;
   }
-
-  function nextStep (): void {
-    onChangeStep(formSteps.currentStep.value + 1);
+  async function nextStep (): Promise<void> {
+    await onChangeStep(formSteps.currentStep.value + 1);
   }
 
   resetValidationState();
