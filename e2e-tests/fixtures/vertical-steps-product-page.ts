@@ -11,8 +11,8 @@ export function testFactory (productPageUrl: string) {
 
   return baseTest.extend<VerticalStepsProductPageFixture>({
     verticalStepsProductPage: async ({ page, customizableProductPage }, use) => {
-      const imagesGalleryProductPage = new VerticalStepsProductPage(page, customizableProductPage);
-      await use(imagesGalleryProductPage);
+      const verticalStepsProductPage = new VerticalStepsProductPage(page, customizableProductPage);
+      await use(verticalStepsProductPage);
     }
   });
 }
