@@ -8,6 +8,8 @@ import { useFormSteps } from './use-form-steps';
 
 const lastStepName = 'Add to Cart';
 
+type CustomizationOptionComponent = InstanceType<typeof CustomizationOption>;
+
 export function usePhrasePillowFormSteps (
   customizationRootGroups: Ref<Customization[]>,
   customizationRootGroupCustomizations: Ref<Record<string, Customization[]>>
@@ -29,33 +31,18 @@ export function usePhrasePillowFormSteps (
       (customization) => customization.name.toLowerCase() !== lastStepName.toLowerCase()
     )
   });
+  const stepsCustomizationDictionary = computed<Record<string, Customization>>(() => {
+    const dictionary: Record<string, Customization> = {};
 
-  const customizationOptionsRefs = ref<InstanceType<typeof CustomizationOption>[]>([])
-  const validationState = ref<Record<string, boolean>>({})
-
-  async function validateStepsBefore (stepIndex: number): Promise<void> {
-    const stepsValidationState: Record<string, boolean> = {};
-
-    for (const stepCustomization of stepsCustomizations.value.slice(0, stepIndex)) {
-      // TODO: temporary - current TS version don't handle `value` type right in this case
-      const relatedCustomizationOptions = (customizationOptionsRefs as any).value.filter((item) => {
-        return item.customization?.parentId && item.customization.parentId === stepCustomization.id;
-      });
-
-      stepsValidationState[stepCustomization.name] = true;
-
-      for (const customizationOption of relatedCustomizationOptions) {
-        const result = await customizationOption.validateSilent();
-        if (!result.valid) {
-          stepsValidationState[stepCustomization.name] = false;
-          break;
-        }
-      }
+    for (const customization of stepsCustomizations.value) {
+      dictionary[customization.id] = customization;
     }
 
-    // TODO: temporary - current TS version don't handle `value` type right in this case
-    validationState.value = { ...(validationState as any).value, ...stepsValidationState };
-  }
+    return dictionary;
+  });
+
+  const customizationOptionsRefs = ref<CustomizationOptionComponent[]>([])
+  const validationState = ref<Record<string, boolean>>({})
 
   const stepsList = computed<string[]>(() => {
     const stepsNames = stepsCustomizations.value.map(({ name }) => name);
@@ -64,6 +51,73 @@ export function usePhrasePillowFormSteps (
 
     return stepsNames;
   });
+
+  const stepNameCustomizationOptionsRefs = computed<Record<string, CustomizationOptionComponent[]>>(() => {
+    // TODO: temporary - current TS version don't handle `value` type right in this case
+    const _customizationOptionsRefs =
+      (customizationOptionsRefs as any).value as unknown as CustomizationOptionComponent[];
+    const customizationOptionsRefsDictionary: Record<string, CustomizationOptionComponent[]> = {};
+    const _stepsCustomizationDictionary = stepsCustomizationDictionary.value;
+
+    for (const customizationOption of _customizationOptionsRefs) {
+      if (!customizationOption.customization.parentId) {
+        continue;
+      }
+
+      const parentCustomization = _stepsCustomizationDictionary[customizationOption.customization.parentId];
+
+      if (!parentCustomization) {
+        continue;
+      }
+
+      if (!customizationOptionsRefsDictionary[parentCustomization.name]) {
+        customizationOptionsRefsDictionary[parentCustomization.name] = [];
+      }
+
+      customizationOptionsRefsDictionary[parentCustomization.name].push(customizationOption);
+    }
+
+    return customizationOptionsRefsDictionary;
+  });
+
+  async function validateStep (stepIndex: number, silent: boolean): Promise<boolean> {
+    const _stepsList = stepsList.value as string[];
+    const stepName = _stepsList[stepIndex];
+
+    if (!stepName) {
+      return true;
+    }
+
+    const stepCustomizationOptions = stepNameCustomizationOptionsRefs.value[stepName] || [];
+    let isStepValid = true;
+
+    for (const customizationOption of stepCustomizationOptions) {
+      const result = await customizationOption.validate(silent);
+
+      if (!result.valid) {
+        isStepValid = false;
+      }
+    }
+
+    return isStepValid;
+  }
+
+  async function validateStepsBefore (stepIndex: number): Promise<void> {
+    const stepsValidationState: Record<string, boolean> = {};
+
+    for (let i = 0; i < stepIndex; i++) {
+      const stepName = stepsList.value[i];
+
+      if (!stepName) {
+        continue;
+      }
+
+      stepsValidationState[stepName] = await validateStep(i, true);
+    }
+
+    // TODO: temporary - current TS version don't handle `value` type right in this case
+    validationState.value = { ...(validationState as any).value, ...stepsValidationState };
+  }
 
   function resetValidationState (): void {
     const state: Record<string, boolean> = {};
@@ -91,6 +145,10 @@ export function usePhrasePillowFormSteps (
   }
 
   async function onChangeStep (stepIndex: number) {
+    if (isStepInvalid(stepsList.value[stepIndex])) {
+      await validateStep(stepIndex, false);
+    }
+
     await validateStepsBefore(stepIndex);
 
     formSteps.currentStep.value = stepIndex;
