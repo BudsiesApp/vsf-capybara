@@ -34,10 +34,10 @@
       class="sf-property--full-width property"
       :class="{'sf-property--large': isLarge}"
     />
-    <template v-if="prices.discount && isCouponCode">
+    <template v-if="discount">
       <SfProperty
-        :name="$t('Discount') + ` (${isCouponCode})`"
-        :value="prices.discount | price"
+        :name="discount.title"
+        :value="discount.value | price"
         class="sf-property--full-width property --marked"
         :class="{'sf-property--large': isLarge}"
       />
@@ -117,6 +117,9 @@ export default {
       totals: 'cart/getTotals',
       productsInCart: 'cart/getCartItems'
     }),
+    discount () {
+      return this.totals.find((total) => total.code === 'discount');
+    },
     prices () {
       return this.totals.reduce((result, price) => {
         result[price.code] = price.value;
