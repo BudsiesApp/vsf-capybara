@@ -1,69 +1,95 @@
 <template>
   <div class="phrase-pillow-form-last-step">
-    <template v-if="!isSubmitting">
-      <customization-option
-        v-for="customization in availableCustomizations"
-        class="_customization-option"
-        ref="customizationOption"
-        :key="customization.id"
-        :customization="customization"
-        :is-disabled="isDisabled"
-        :option-values="customizationAvailableOptionValues[customization.id]"
-        :product-id="product.id"
-        :value="customizationOptionValue[customization.id]"
-        @input="$emit('input', $event)"
-        @customization-option-busy-state-changed="
-          $emit('customization-option-busy-state-changed', $event)
-        "
+    <customization-option
+      v-show="!isSubmitting"
+      v-for="customization in availableCustomizations"
+      class="_customization-option"
+      ref="customizationOption"
+      :key="customization.id"
+      :customization="customization"
+      :is-disabled="isDisabled"
+      :option-values="customizationAvailableOptionValues[customization.id]"
+      :product-id="product.id"
+      :value="customizationOptionValue[customization.id]"
+      @input="$emit('input', $event)"
+      @customization-option-busy-state-changed="
+        $emit('customization-option-busy-state-changed', $event)
+      "
+    />
+
+    <validation-provider
+      v-slot="{ errors }"
+      rules="required"
+      :name="'Quantity'"
+      slim
+    >
+      <div
+        v-show="!isSubmitting"
+        class="_quantity-field"
+      >
+        <SfHeading :level="4" class="_step-title" title="Quantity" />
+
+        <ACustomProductQuantity
+          :value="quantity"
+          class="_qty-container"
+          :disabled="isDisabled"
+          @input="$emit('update:quantity', $event)"
+        />
+
+        <div class="_error-text">
+          {{ errors[0] }}
+        </div>
+      </div>
+    </validation-provider>
+
+    <div class="_bottom-static-block">
+      <MBlockStory story-slug="petsies_phrase_pillows_bottom" />
+    </div>
+
+    <div class="_actions-row">
+      <SfButton
+        class="color-primary _submit-button _add-to-cart"
+        type="submit"
+        :disabled="isDisabled"
+        @input="$emit('update:quantity', $event)"
       />
 
-      <validation-provider
-        v-slot="{ errors }"
-        rules="required"
-        :name="'Quantity'"
-        slim
+      <div class="_error-text">
+        {{ errors[0] }}
+      </div>
+    </div>
+    </validation-provider>
+
+    <div
+      v-show="!isSubmitting"
+      class="_bottom-static-block"
+    >
+      <MBlockStory story-slug="petsies_phrase_pillows_bottom" />
+    </div>
+
+    <div
+      v-show="!isSubmitting"
+      class="_actions-row"
+    >
+      <SfButton
+        class="color-primary _submit-button"
+        type="submit"
+        :disabled="isDisabled"
+        @click.prevent.stop="onAddToCartClick"
       >
-        <div class="_quantity-field">
-          <SfHeading :level="4" class="_step-title" title="Quantity" />
+        {{ $t("Add to Cart") }}
+      </SfButton>
 
-          <ACustomProductQuantity
-            :value="quantity"
-            class="_qty-container"
-            :disabled="isDisabled"
-            @input="$emit('update:quantity', $event)"
-          />
-
-          <div class="_error-text">
-            {{ errors[0] }}
-          </div>
-        </div>
-      </validation-provider>
-
-      <div class="_bottom-static-block">
-        <MBlockStory story-slug="petsies_phrase_pillows_bottom" />
+      <div class="_submit-disclaimer _helper-text">
+        {{ $t("I have seen and approve the Live Preview of my design.") }}
       </div>
 
-      <div class="_actions-row">
-        <SfButton
-          class="color-primary _submit-button _add-to-cart"
-          type="submit"
-          :disabled="isDisabled"
-          @click.prevent.stop="onAddToCartClick"
-        >
-          {{ $t("Add to Cart") }}
-        </SfButton>
+      <m-order-submit-agreement />
 
-        <div class="_submit-disclaimer _helper-text">
-          {{ $t("I have seen and approve the Live Preview of my design.") }}
-        </div>
-
-        <m-order-submit-agreement />
-
-        <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
-        </template>
-      </div>
-    </template>
+      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      </template>
+    </div>
 
     <div class="_animation-row">
       <MSubmitAnimator
