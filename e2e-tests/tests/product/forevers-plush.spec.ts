@@ -3,7 +3,6 @@ import { CustomizableProductPage } from '../../page-model/product/customizable-p
 import { PlushieProductPage } from '../../page-model/product/plushie-product';
 
 const UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL = 'Upload Photo of Pet';
-const SEND_PHOTOS_LATER_CUSTOMIZATION_OPTION_LABEL = 'Send Photos Later';
 const EMAIL_CUSTOMIZATION_OPTION_LABEL = 'Enter your email address';
 const PET_NAME_CUSTOMIZATION_OPTION_LABEL = 'Your Pet\'s Name';
 const PET_BREED_CUSTOMIZATION_OPTION_LABEL = 'Your Pet\'s Breed';
@@ -58,13 +57,9 @@ async function fillCustomizeStepRequiredFields (customizableProductPage: Customi
   }
 }
 
-async function fillAllStepsRequiredFields (customizableProductPage: CustomizableProductPage, plushieProductPage: PlushieProductPage, uploadPhoto: boolean) {
+async function fillAllStepsRequiredFields (customizableProductPage: CustomizableProductPage, plushieProductPage: PlushieProductPage) {
   await plushieProductPage.waitStepToBeVisible(PHOTO_STEP_TITLE);
-  if (!uploadPhoto) {
-    await customizableProductPage.toggleCheckboxCustomizationValue(SEND_PHOTOS_LATER_CUSTOMIZATION_OPTION_LABEL);
-  } else {
-    await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
-  }
+  await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
   await plushieProductPage.clickContinueButton();
 
   await plushieProductPage.waitStepToBeVisible(PET_INFO_STEP_TITLE);
@@ -83,14 +78,9 @@ test('form layout is correct', async ({ customizableProductPage, plushieProductP
   await plushieProductPage.waitStepToBeVisible(PHOTO_STEP_TITLE);
 
   const uploadPhotoWidget = customizableProductPage.getCustomizationWidgetByLabel(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
-  const sendPhotosLaterWidget = customizableProductPage.getCheckboxByLabel(SEND_PHOTOS_LATER_CUSTOMIZATION_OPTION_LABEL);
-
   await expect(uploadPhotoWidget).toBeVisible();
-  await expect(sendPhotosLaterWidget).toBeVisible();
+  await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
 
-  customizableProductPage.toggleCheckboxCustomizationValue(SEND_PHOTOS_LATER_CUSTOMIZATION_OPTION_LABEL);
-
-  await expect(uploadPhotoWidget).toBeHidden();
   await plushieProductPage.clickContinueButton();
 
   await plushieProductPage.waitStepToBeVisible(PET_INFO_STEP_TITLE);
@@ -155,7 +145,7 @@ test('form errors displayed correctly', async ({ plushieProductPage, customizabl
   await plushieProductPage.clickContinueButton();
   await expect(plushieProductPage.formErrors).toBeVisible();
 
-  await customizableProductPage.toggleCheckboxCustomizationValue(SEND_PHOTOS_LATER_CUSTOMIZATION_OPTION_LABEL);
+  await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
   await expect(plushieProductPage.formErrors).toBeHidden();
   await plushieProductPage.clickContinueButton();
 
@@ -175,14 +165,14 @@ test('form errors displayed correctly', async ({ plushieProductPage, customizabl
 
 test('product added to cart successfully with uploaded image', async ({ crossSellsPage, plushieProductPage, customizableProductPage }) => {
   await plushieProductPage.selectTypeByIndex(0);
-  await fillAllStepsRequiredFields(customizableProductPage, plushieProductPage, true);
+  await fillAllStepsRequiredFields(customizableProductPage, plushieProductPage);
   await customizableProductPage.addToCartAndVerifyResponse();
   await crossSellsPage.waitPageToBeVisible();
 });
 
 test('product added to cart successfully without uploaded image', async ({ crossSellsPage, plushieProductPage, customizableProductPage }) => {
   await plushieProductPage.selectTypeByIndex(0);
-  await fillAllStepsRequiredFields(customizableProductPage, plushieProductPage, false);
+  await fillAllStepsRequiredFields(customizableProductPage, plushieProductPage);
   await customizableProductPage.addToCartAndVerifyResponse();
   await crossSellsPage.waitPageToBeVisible();
 });
@@ -191,7 +181,7 @@ test('product can be edited', async ({ cartPage, crossSellsPage, customizablePro
   const productName = await plushieProductPage.selectTypeByIndex(0);
   expect(productName).not.toBeNull();
 
-  await fillAllStepsRequiredFields(customizableProductPage, plushieProductPage, false);
+  await fillAllStepsRequiredFields(customizableProductPage, plushieProductPage);
   await customizableProductPage.addToCartAndVerifyResponse();
   await crossSellsPage.waitPageToBeVisible();
 

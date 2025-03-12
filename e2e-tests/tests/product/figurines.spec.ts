@@ -3,7 +3,6 @@ import { CustomizableProductPage } from '../../page-model/product/customizable-p
 
 const DESCRIPTION_CUSTOMIZATION_OPTION_VALUE = 'Customize Your Petsies Figurines';
 const UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL = 'Upload your photo';
-const SEND_PHOTOS_LATER_CUSTOMIZATION_OPTION_LABEL = 'Send Photos Later';
 const EYE_COLOR_TYPE_CUSTOMIZATION_OPTION_LABEL = 'Eye Color Type';
 const EYE_COLOR_CUSTOMIZATION_OPTION_LABEL = 'Eye Color';
 const FUR_COLOR_CUSTOMIZATION_OPTION_LABEL = 'Fur Color';
@@ -17,12 +16,8 @@ const TEST_EMAIL = 'test@test.test';
 
 const test = testFactory('/petsies-figurines/create/');
 
-async function fillRequiredFields (customizableProductPage: CustomizableProductPage, uploadPhoto: boolean) {
-  if (uploadPhoto) {
-    await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
-  } else {
-    await customizableProductPage.toggleCheckboxCustomizationValue(SEND_PHOTOS_LATER_CUSTOMIZATION_OPTION_LABEL);
-  }
+async function fillRequiredFields (customizableProductPage: CustomizableProductPage) {
+  await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
   await customizableProductPage.fillCustomizationTextValue(DESCRIPTION_CUSTOMIZATION_OPTION_VALUE, DESCRIPTION_TEXT);
   await customizableProductPage.fillCustomizationSelectValueByIndex(EYE_COLOR_TYPE_CUSTOMIZATION_OPTION_LABEL, 1);
   await customizableProductPage.fillCustomizationThumbnailValueByIndex(EYE_COLOR_CUSTOMIZATION_OPTION_LABEL, 1);
@@ -40,7 +35,6 @@ test('form layout is correct', async ({ customizableProductPage, verticalStepsPr
   await expect(customizableProductPage.quantityField).toBeVisible();
 
   const uploadPhotoWidget = customizableProductPage.getCustomizationWidgetByLabel(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
-  const sendPhotosLaterWidget = customizableProductPage.getCheckboxByLabel(SEND_PHOTOS_LATER_CUSTOMIZATION_OPTION_LABEL);
   const descriptionWidget = customizableProductPage.getCustomizationWidgetByLabel(DESCRIPTION_CUSTOMIZATION_OPTION_VALUE);
   const eyeColorTypeWidget = customizableProductPage.getCustomizationWidgetByLabel(EYE_COLOR_TYPE_CUSTOMIZATION_OPTION_LABEL);
   const eyeColorWidget = customizableProductPage.getCustomizationWidgetByLabel(EYE_COLOR_CUSTOMIZATION_OPTION_LABEL);
@@ -49,7 +43,6 @@ test('form layout is correct', async ({ customizableProductPage, verticalStepsPr
   const emailWidget = customizableProductPage.getCustomizationWidgetByLabel(EMAIL_CUSTOMIZATION_OPTION_LABEL);
 
   await expect(uploadPhotoWidget).toBeVisible();
-  await expect(sendPhotosLaterWidget).toBeVisible();
   await expect(descriptionWidget).toBeVisible();
   await expect(eyeColorTypeWidget).toBeVisible();
   await expect(furColorWidget).toBeVisible();
@@ -59,9 +52,6 @@ test('form layout is correct', async ({ customizableProductPage, verticalStepsPr
   await expect(eyeColorWidget).toBeHidden();
   await customizableProductPage.fillCustomizationSelectValueByIndex(EYE_COLOR_TYPE_CUSTOMIZATION_OPTION_LABEL, 1);
   await expect(eyeColorWidget).toBeVisible();
-
-  await customizableProductPage.toggleCheckboxCustomizationValue(SEND_PHOTOS_LATER_CUSTOMIZATION_OPTION_LABEL);
-  await expect(uploadPhotoWidget).toBeHidden();
 
   await verticalStepsProductPage.quantityPopupButton.click();
   await expect(verticalStepsProductPage.quantityDiscountPopup).toBeVisible();
@@ -73,19 +63,19 @@ test('form errors displayed correctly', async ({ verticalStepsProductPage, custo
 });
 
 test('product added to cart successfully with uploaded image', async ({ cartPage, customizableProductPage }) => {
-  await fillRequiredFields(customizableProductPage, true);
+  await fillRequiredFields(customizableProductPage);
   await customizableProductPage.addToCartAndVerifyResponse();
   await cartPage.waitPageToBeVisible();
 });
 
 test('product added to cart successfully without uploaded image', async ({ cartPage, customizableProductPage }) => {
-  await fillRequiredFields(customizableProductPage, false);
+  await fillRequiredFields(customizableProductPage);
   await customizableProductPage.addToCartAndVerifyResponse();
   await cartPage.waitPageToBeVisible();
 });
 
 test('product display in cart correctly', async ({ cartPage, customizableProductPage }) => {
-  await fillRequiredFields(customizableProductPage, false);
+  await fillRequiredFields(customizableProductPage);
   await customizableProductPage.addToCartAndVerifyResponse();
   await cartPage.waitPageToBeVisible();
 
@@ -96,7 +86,7 @@ test('product display in cart correctly', async ({ cartPage, customizableProduct
 });
 
 test('product can be edited', async ({ cartPage, customizableProductPage }) => {
-  await fillRequiredFields(customizableProductPage, false);
+  await fillRequiredFields(customizableProductPage);
   await customizableProductPage.addToCartAndVerifyResponse();
   await cartPage.waitPageToBeVisible();
 
@@ -117,9 +107,11 @@ test('product can be edited', async ({ cartPage, customizableProductPage }) => {
   await cartPage.expectCartItemToHaveProperties(updatedCartItem, [UPDATED_DESCRIPTION_TEXT]);
 });
 
-test('form fields are reset after save and make another', async ({ customizableProductPage, verticalStepsProductPage }) => {
-  await fillRequiredFields(customizableProductPage, false);
+test('form fields are reset after save and make another', async ({ page, customizableProductPage, verticalStepsProductPage }) => {
+  await fillRequiredFields(customizableProductPage);
   await verticalStepsProductPage.makeAnotherAndVerifyResponse();
+
+  await page.waitForFunction(() => window.scrollY === 0);
 
   const imageWidget = customizableProductPage.getCustomizationWidgetByLabel(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
 
