@@ -42,24 +42,6 @@
       </div>
     </validation-provider>
 
-    <div class="_bottom-static-block">
-      <MBlockStory story-slug="petsies_phrase_pillows_bottom" />
-    </div>
-
-    <div class="_actions-row">
-      <SfButton
-        class="color-primary _submit-button _add-to-cart"
-        type="submit"
-        :disabled="isDisabled"
-        @input="$emit('update:quantity', $event)"
-      />
-
-      <div class="_error-text">
-        {{ errors[0] }}
-      </div>
-    </div>
-    </validation-provider>
-
     <div
       v-show="!isSubmitting"
       class="_bottom-static-block"
@@ -72,7 +54,7 @@
       class="_actions-row"
     >
       <SfButton
-        class="color-primary _submit-button"
+        class="color-primary _submit-button _add-to-cart"
         type="submit"
         :disabled="isDisabled"
         @click.prevent.stop="onAddToCartClick"
