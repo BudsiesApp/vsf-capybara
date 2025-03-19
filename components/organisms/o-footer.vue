@@ -50,7 +50,7 @@
       <MBudsiesBrands />
 
       <div class="_additional-information">
-        <router-link to="//support.waggables.com/" target="_blank" exact>
+        <router-link to="https://support.waggables.com/" target="_blank" exact>
           <SfMenuItem
             class="sf-footer__menu-item"
             :label="$t('Contact Us')"
