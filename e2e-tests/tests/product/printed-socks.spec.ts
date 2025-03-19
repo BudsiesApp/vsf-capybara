@@ -1,6 +1,6 @@
 import { testFactory, expect } from '../../fixtures/printed-socks-page';
 
-const test = testFactory('/pet-socks/');
+const test = testFactory('/custom-socks/');
 
 test('form layout is correct', async ({ printedSocksPage, customizableProductPage, imagesGalleryProductPage }) => {
   await expect(imagesGalleryProductPage.initializedSwiper).toBeVisible();

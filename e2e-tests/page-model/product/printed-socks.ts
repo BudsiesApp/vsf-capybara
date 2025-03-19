@@ -5,7 +5,7 @@ import { ImagesGalleryProductPage } from './images-gallery-form';
 import { CrossSellsPage } from '../cross-sells';
 
 export class PrintedSocksPage extends ImagesGalleryProductPage {
-  public readonly PRODUCT_NAME = 'Custom Pet Socks';
+  public readonly PRODUCT_NAME = 'Custom Face Socks';
   public readonly DESIGN_CUSTOMIZATION_OPTION_LABEL = 'Design';
   public readonly UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL = 'Upload your photo';
   public readonly ADD_MORE_PHOTOS_CUSTOMIZATION_OPTION_LABEL = 'Add more photos';
@@ -43,7 +43,7 @@ export class PrintedSocksPage extends ImagesGalleryProductPage {
   }
 
   public async goto (): Promise<void> {
-    await this.page.goto('/pet-socks/');
+    await this.page.goto('/custom-socks/');
     await this.customizableProductPage.waitPageToBeVisible();
   }
 }
