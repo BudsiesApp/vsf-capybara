@@ -11,6 +11,9 @@ export class PlushieProductPage {
   public typeSelector: Locator;
   public quantityField: Locator;
 
+  public stepsContainer: Locator;
+  public stepsHeader: Locator;
+
   public constructor (public readonly page: Page) {
     this.headingTitle = this.page.locator('h1.sf-heading__title');
     this.formErrors = this.page.locator('._form-errors');
@@ -20,10 +23,13 @@ export class PlushieProductPage {
     this.activeStepContent = this.page.locator('.sf-step').filter({ hasText: /\S/ }).nth(0);
     this.typeSelector = this.page.locator('.plushie-wizard-product-type-step');
     this.quantityField = this.page.locator('._qty-container');
+
+    this.stepsContainer = this.page.locator('._steps-container');
+    this.stepsHeader = this.stepsContainer.locator('.sf-steps__header');
   }
 
   public async waitStepToBeVisible (title: string) {
-    const step = this.page.locator(`.sf-steps__step.sf-steps__step--current:has-text("${title}")`);
+    const step = this.stepsHeader.locator(`.sf-steps__step--current:has-text("${title}")`);
     await expect(step).toBeVisible();
   }
 

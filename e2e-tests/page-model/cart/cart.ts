@@ -8,8 +8,13 @@ export class CartPage {
   }
 
   public getCartItemByProductName (productName: string) {
-    const productLocator = this.page.locator(`.sf-collected-product__title-wraper:has-text("${productName}")`);
-    return productLocator.locator('..').locator('..').locator('..');
+    const productLocator = this.page.locator(
+      '.sf-collected-product',
+      {
+        has: this.page.locator(`.sf-collected-product__title-wraper:has-text("${productName}")`)
+      }
+    );
+    return productLocator;
   }
 
   public async waitPageToBeVisible () {

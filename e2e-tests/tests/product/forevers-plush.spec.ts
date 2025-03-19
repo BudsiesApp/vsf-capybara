@@ -163,14 +163,7 @@ test('form errors displayed correctly', async ({ plushieProductPage, customizabl
   await expect(plushieProductPage.formErrors).toBeHidden();
 });
 
-test('product added to cart successfully with uploaded image', async ({ crossSellsPage, plushieProductPage, customizableProductPage }) => {
-  await plushieProductPage.selectTypeByIndex(0);
-  await fillAllStepsRequiredFields(customizableProductPage, plushieProductPage);
-  await customizableProductPage.addToCartAndVerifyResponse();
-  await crossSellsPage.waitPageToBeVisible();
-});
-
-test('product added to cart successfully without uploaded image', async ({ crossSellsPage, plushieProductPage, customizableProductPage }) => {
+test('product added to cart successfully', async ({ crossSellsPage, plushieProductPage, customizableProductPage }) => {
   await plushieProductPage.selectTypeByIndex(0);
   await fillAllStepsRequiredFields(customizableProductPage, plushieProductPage);
   await customizableProductPage.addToCartAndVerifyResponse();

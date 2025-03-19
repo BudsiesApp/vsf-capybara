@@ -79,7 +79,7 @@ test('product display in cart correctly', async ({ cartPage, customizableProduct
   await expect(cartItem).toBeVisible();
 });
 
-test('product can be edited', async ({ page, cartPage, customizableProductPage, imagesGalleryProductPage }) => {
+test('product can be edited', async ({ cartPage, customizableProductPage, imagesGalleryProductPage }) => {
   await fillRequiredFields(customizableProductPage);
   const selectedSet = await customizableProductPage.getCustomizationSelectValueByLabel(SET_CUSTOMIZATION_OPTION_LABEL);
   await customizableProductPage.addToCartAndVerifyResponse();
