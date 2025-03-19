@@ -25,11 +25,11 @@ test('shipping address form has correct validation', async ({ cartPage, checkout
   await checkoutPage.personalDetailsStep.fillPersonalDetails('test first name', 'test last name', 'test@test.test');
 
   const shippingStepAddressForm = checkoutPage.shippingStep.addressForm;
-  await expect(shippingStepAddressForm.firstNameInput).toHaveValue('test first name');
-  await expect(shippingStepAddressForm.lastNameInput).toHaveValue('test last name');
-  await expect(shippingStepAddressForm.selectedCountry).toContainText('United States');
-  await expect(shippingStepAddressForm.stateSelector).toBeVisible();
-  await expect(shippingStepAddressForm.stateInput).toBeHidden();
+  await shippingStepAddressForm.firstNameFormField.expectToHaveValue('test first name');
+  await shippingStepAddressForm.lastNameFormField.expectToHaveValue('test last name');
+  await shippingStepAddressForm.countrySelectorFormField.expectOptionToBeSelected('United States');
+  await expect(shippingStepAddressForm.stateSelectorFormField.formField).toBeVisible();
+  await expect(shippingStepAddressForm.stateInputFormField.formField).toBeHidden();
 
   await shippingStepAddressForm.expectCorrectValidation();
 });

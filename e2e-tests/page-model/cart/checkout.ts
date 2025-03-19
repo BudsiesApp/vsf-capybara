@@ -1,6 +1,8 @@
 import { expect, FrameLocator, Locator, Page } from '@playwright/test';
 
 import { CartPage } from './cart';
+import { InputFormField } from '../../helpers/form/form-fields/input-form-field';
+import { MultiselectFormField } from '../../helpers/form/form-fields/multiselect-form-field';
 
 const REQUIRED_FIELD_ERROR_MESSAGE = 'Field is required';
 const COUNTRY_WITH_STATES_LIST = 'United States';
@@ -9,21 +11,19 @@ const COUNTRY_WITHOUT_STATES_LIST = 'United Kingdom';
 export class PersonalDetailsStep {
   public stepTitle: Locator;
 
+  public formFieldLocator: Locator;
+  public passwordFormFieldLocator: Locator;
+
+  public firstNameFormField: InputFormField;
+  public lastNameFormField: InputFormField;
+  public emailFormField: InputFormField;
+  public passwordFormField: InputFormField;
+  public repeatPasswordFormField: InputFormField;
+
   public continueToShippingButton: Locator;
-  public firstNameInput: Locator;
-  public lastNameInput: Locator;
-  public emailInput: Locator;
 
   public createAccountCheckbox: Locator;
-  public passwordInput: Locator;
-  public repeatPasswordInput: Locator;
   public agreeToTermsCheckbox: Locator;
-
-  public firstNameError: Locator;
-  public lastNameError: Locator;
-  public emailError: Locator;
-  public passwordError: Locator;
-  public repeatPasswordError: Locator;
 
   // TODO: currently this checkbox is not validated properly
   public agreeToTermsError: Locator;
@@ -31,20 +31,21 @@ export class PersonalDetailsStep {
   public constructor (public readonly page: Page) {
     this.stepTitle = page.locator('.sf-heading__title--h3:has-text("Contact")');
 
-    this.continueToShippingButton = page.locator('button:has-text("Continue to shipping")');
-    this.firstNameInput = page.locator('input[name="first-name"]');
-    this.lastNameInput = page.locator('input[name="last-name"]');
-    this.emailInput = page.locator('input[name="email-address"]');
-    this.createAccountCheckbox = page.locator('label:has-text("I want to create an account")');
-    this.passwordInput = page.locator('input[name="password"]');
-    this.repeatPasswordInput = page.locator('input[name="password-confirm"]');
-    this.agreeToTermsCheckbox = page.locator('input[name="acceptConditions"]');
+    this.formFieldLocator = page.locator('.form__element');
+    this.passwordFormFieldLocator = page.locator('.m-password ._input');
 
-    this.firstNameError = this.firstNameInput.locator('..').locator('..').locator('.sf-input__error-message');
-    this.lastNameError = this.lastNameInput.locator('..').locator('..').locator('.sf-input__error-message');
-    this.emailError = this.emailInput.locator('..').locator('..').locator('.sf-input__error-message');
-    this.passwordError = this.passwordInput.locator('..').locator('..').locator('.sf-input__error-message');
-    this.repeatPasswordError = this.repeatPasswordInput.locator('..').locator('..').locator('.sf-input__error-message');
+    this.continueToShippingButton = page.locator('button:has-text("Continue to shipping")');
+
+    this.firstNameFormField = new InputFormField(this.formFieldLocator, 'input[name="first-name"]', page);
+    this.lastNameFormField = new InputFormField(this.formFieldLocator, 'input[name="last-name"]', page);
+    this.emailFormField = new InputFormField(this.formFieldLocator, 'input[name="email-address"]', page);
+
+    this.createAccountCheckbox = page.locator('label:has-text("I want to create an account")');
+
+    this.passwordFormField = new InputFormField(this.passwordFormFieldLocator, 'input[name="password"]', page);
+    this.repeatPasswordFormField = new InputFormField(this.passwordFormFieldLocator, 'input[name="password-confirm"]', page);
+
+    this.agreeToTermsCheckbox = page.locator('input[name="acceptConditions"]');
   }
 
   public async fillPersonalDetails (
@@ -54,14 +55,14 @@ export class PersonalDetailsStep {
     createAccount: boolean = false,
     password: string = 'testPassword123'
   ) {
-    await this.firstNameInput.fill(firstName);
-    await this.lastNameInput.fill(lastName);
-    await this.emailInput.fill(email);
+    await this.firstNameFormField.fill(firstName);
+    await this.lastNameFormField.fill(lastName);
+    await this.emailFormField.fill(email);
 
     if (createAccount) {
       await this.createAccountCheckbox.click();
-      await this.passwordInput.fill(password);
-      await this.repeatPasswordInput.fill(password);
+      await this.passwordFormField.fill(password);
+      await this.repeatPasswordFormField.fill(password);
     }
 
     await this.continueToShippingButton.click();
@@ -70,20 +71,20 @@ export class PersonalDetailsStep {
   public async expectCorrectValidation () {
     await this.fillPersonalDetails('', '', '', true, '');
 
-    await expect(this.firstNameError).toHaveText(REQUIRED_FIELD_ERROR_MESSAGE);
-    await expect(this.lastNameError).toHaveText(REQUIRED_FIELD_ERROR_MESSAGE);
-    await expect(this.emailError).toHaveText(REQUIRED_FIELD_ERROR_MESSAGE);
-    await expect(this.passwordError).toHaveText(REQUIRED_FIELD_ERROR_MESSAGE);
-    await expect(this.repeatPasswordError).toHaveText(REQUIRED_FIELD_ERROR_MESSAGE);
+    await this.firstNameFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
+    await this.lastNameFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
+    await this.emailFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
+    await this.passwordFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
+    await this.repeatPasswordFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
 
-    await this.emailInput.fill('test');
-    await expect(this.emailError).toHaveText('Please provide valid e-mail address.');
+    await this.emailFormField.fill('test');
+    await this.emailFormField.expectToHaveErrorMessage('Please provide valid e-mail address.');
 
-    await this.passwordInput.fill('test');
-    await this.repeatPasswordInput.fill('test2');
+    await this.passwordFormField.fill('test');
+    await this.repeatPasswordFormField.fill('test2');
 
-    await expect(this.passwordError).toHaveText('Password must have at least 7 symbols.');
-    await expect(this.repeatPasswordError).toHaveText('Passwords must be identical');
+    await this.passwordFormField.expectToHaveErrorMessage('Password must have at least 7 symbols.');
+    await this.repeatPasswordFormField.expectToHaveErrorMessage('Passwords must be identical');
   }
 
   public async waitToBeVisible () {
@@ -92,89 +93,66 @@ export class PersonalDetailsStep {
 }
 
 export class AddressForm {
-  public firstNameInput: Locator;
-  public lastNameInput: Locator;
-  public streetAddressInput: Locator;
+  public formFieldLocator: Locator;
 
-  public countrySelector: Locator;
-  public selectedCountry: Locator;
-  public stateSelector: Locator;
-  public stateInput: Locator;
-  public cityInput: Locator;
-  public zipCodeInput: Locator;
-  public phoneInput: Locator;
+  public firstNameFormField: InputFormField;
+  public lastNameFormField: InputFormField;
+  public streetAddressFormField: InputFormField;
 
-  public firstNameError: Locator;
-  public lastNameError: Locator;
-  public streetAddressError: Locator;
-  public countryError: Locator;
-  public stateError: Locator;
-  public cityError: Locator;
-  public zipCodeError: Locator;
-  public phoneError: Locator;
+  public countrySelectorFormField: MultiselectFormField;
+  public stateSelectorFormField: MultiselectFormField;
+  public stateInputFormField: InputFormField;
+  public cityFormField: InputFormField;
+  public zipCodeFormField: InputFormField;
+  public phoneFormField: InputFormField;
 
   public constructor (public readonly page: Page) {
-    this.firstNameInput = page.locator('input[name="first-name"]');
-    this.lastNameInput = page.locator('input[name="last-name"]');
-    this.streetAddressInput = page.locator('input[name="street-address"]');
-    this.countrySelector = page.locator('label:has-text("Country")');
-    this.selectedCountry = page.locator('.multiselect__single');
-    this.stateSelector = page.locator('.m-multiselect > label:has-text("State / Province")');
-    this.stateInput = page.locator('input[name="address-level1"]');
-    this.cityInput = page.locator('input[name="city"]');
-    this.zipCodeInput = page.locator('input[name="zipCode"]');
-    this.phoneInput = page.locator('input[name="phone"]');
+    this.formFieldLocator = page.locator('.form__element');
 
-    this.firstNameError = this.firstNameInput.locator('..').locator('..').locator('.sf-input__error-message');
-    this.lastNameError = this.lastNameInput.locator('..').locator('..').locator('.sf-input__error-message');
-    this.streetAddressError = this.streetAddressInput.locator('..').locator('..').locator('.sf-input__error-message');
-    this.countryError = this.countrySelector.locator('..').locator('.m-multiselect__error-message');
-    this.stateError = this.stateSelector.locator('..').locator('.m-multiselect__error-message');
-    this.cityError = this.cityInput.locator('..').locator('..').locator('.sf-input__error-message');
-    this.zipCodeError = this.zipCodeInput.locator('..').locator('..').locator('.sf-input__error-message');
-    this.phoneError = this.phoneInput.locator('..').locator('..').locator('.sf-input__error-message');
+    this.firstNameFormField = new InputFormField(this.formFieldLocator, 'input[name="first-name"]', page);
+    this.lastNameFormField = new InputFormField(this.formFieldLocator, 'input[name="last-name"]', page);
+    this.streetAddressFormField = new InputFormField(this.formFieldLocator, 'input[name="street-address"]', page);
+
+    this.countrySelectorFormField = new MultiselectFormField(this.formFieldLocator, 'label:has-text("Country")', page);
+    this.stateSelectorFormField = new MultiselectFormField(this.formFieldLocator, 'label:has-text("State / Province")', page);
+    this.stateInputFormField = new InputFormField(this.formFieldLocator, 'input[name="address-level1"]', page);
+
+    this.cityFormField = new InputFormField(this.formFieldLocator, 'input[name="city"]', page);
+    this.zipCodeFormField = new InputFormField(this.formFieldLocator, 'input[name="zipCode"]', page);
+    this.phoneFormField = new InputFormField(this.formFieldLocator, 'input[name="phone"]', page);
   }
 
   public async fillAddress (address: string, country: string, state: string, city: string, zipCode: string, phone: string) {
-    await this.streetAddressInput.fill(address);
-    await this.selectCountryByName(country);
+    await this.streetAddressFormField.fill(address);
+    await this.countrySelectorFormField.selectByOptionTitle(country);
 
     if (state) {
-      await this.selectStateByName(state);
+      await this.stateSelectorFormField.selectByOptionTitle(state);
     }
 
-    await this.cityInput.fill(city);
-    await this.zipCodeInput.fill(zipCode);
-    await this.phoneInput.fill(phone);
-  }
-
-  public async selectCountryByName (country: string) {
-    await this.countrySelector.click();
-    await this.page.locator('li').getByText(country).click();
-  }
-
-  public async selectStateByName (state: string) {
-    await this.stateSelector.click();
-    await this.page.locator('li').getByText(state).click();
+    await this.cityFormField.fill(city);
+    await this.zipCodeFormField.fill(zipCode);
+    await this.phoneFormField.fill(phone);
   }
 
   public async expectCorrectValidation () {
-    await this.firstNameInput.fill('');
-    await this.lastNameInput.fill('');
+    await this.firstNameFormField.fill('');
+    await this.lastNameFormField.fill('');
 
     await this.fillAddress('', COUNTRY_WITHOUT_STATES_LIST, '', '', '', '');
     await this.fillAddress('', COUNTRY_WITH_STATES_LIST, '', '', '', '');
 
-    await expect(this.firstNameError).toHaveText(REQUIRED_FIELD_ERROR_MESSAGE);
-    await expect(this.lastNameError).toHaveText(REQUIRED_FIELD_ERROR_MESSAGE);
-    await expect(this.streetAddressError).toHaveText(REQUIRED_FIELD_ERROR_MESSAGE);
-    await expect(this.stateError).toHaveText(REQUIRED_FIELD_ERROR_MESSAGE);
-    await expect(this.cityError).toHaveText(REQUIRED_FIELD_ERROR_MESSAGE);
-    await expect(this.zipCodeError).toHaveText(REQUIRED_FIELD_ERROR_MESSAGE);
+    await this.firstNameFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
+    await this.lastNameFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
+    await this.streetAddressFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
+    await this.stateSelectorFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
+    await this.cityFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
+    await this.zipCodeFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
 
-    await this.selectCountryByName(COUNTRY_WITHOUT_STATES_LIST);
-    await expect(this.stateSelector).toBeHidden();
-    await expect(this.phoneError).toHaveText(REQUIRED_FIELD_ERROR_MESSAGE);
+    await this.countrySelectorFormField.selectByOptionTitle(COUNTRY_WITHOUT_STATES_LIST);
+    await expect(this.stateInputFormField.formField).toBeVisible();
+    await expect(this.stateSelectorFormField.formField).toBeHidden();
+    await this.phoneFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
   }
 }
 
