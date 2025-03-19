@@ -62,7 +62,7 @@
       <MBudsiesBrands />
 
       <div class="_additional-information">
-        <router-link to="//support.mypetsies.com/support/home" target="_blank" exact>
+        <router-link to="https://support.mypetsies.com/support/home" target="_blank" exact>
           <SfMenuItem
             class="sf-footer__menu-item"
             :label="$t('Contact Us')"
