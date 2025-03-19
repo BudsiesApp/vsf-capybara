@@ -235,7 +235,7 @@ export default Vue.extend({
         },
         {
           label: this.$t('FAQ\'s'),
-          url: '//support.budsies.com/',
+          url: 'https://support.budsies.com/',
           target: '_blank'
         },
 

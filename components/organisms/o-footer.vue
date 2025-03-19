@@ -60,7 +60,7 @@
         </div>
 
         <SfButton class="color-secondary _contact-button">
-          <a href="http://support.budsies.com/" target="_blank">
+          <a href="https://support.budsies.com/" target="_blank">
             {{ $t('Contact Us') }}
           </a>
         </SfButton>
@@ -125,7 +125,7 @@ export default {
         },
         {
           name: 'twitter',
-          url: 'http://twitter.com/budsiestoys'
+          url: 'https://twitter.com/budsiestoys'
         },
         {
           name: 'linkedin',
@@ -133,7 +133,7 @@ export default {
         },
         {
           name: 'instagram',
-          url: 'http://instagram.com/budsies'
+          url: 'https://instagram.com/budsies'
         },
         {
           name: 'tiktok',

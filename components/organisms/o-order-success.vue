@@ -199,7 +199,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
       sharingUrl: baseUrl,
       sharingDescription: `${this.$t('Just brought a drawing to life by making a custom stuffed toy!')} ${baseUrl}`,
       eMailSubject: this.$t('Check out Budsies!').toString(),
-      twitterDescription: `${this.$t('Just brought a drawing to life by making a custom stuffed toy!')} ${baseUrl} 'http://pic.twitter.com/H0WOKFdc4l'`,
+      twitterDescription: `${this.$t('Just brought a drawing to life by making a custom stuffed toy!')} ${baseUrl} 'https://pic.twitter.com/H0WOKFdc4l'`,
       image: baseUrl + '/assets/images/order_success_pinterest_share.jpg'
     };
   },
