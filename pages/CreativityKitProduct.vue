@@ -147,7 +147,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         sharingUrl: this.window.location ? this.window.location.href : '',
         sharingDescription: this.$t('Budsies Gift Box is the perfect gift and includes everything to unlock a child\'s creativity and turn their drawings into custom stuffed animals').toString(),
         eMailSubject: this.$t('Check out Budsies!').toString(),
-        twitterDescription: this.$t('The @BudsiesToys Gift Box lets your kids draw art and turn it into a real stuffed animal!') + ' http://pic.twitter.com/61tLGc5aeB',
+        twitterDescription: this.$t('The @BudsiesToys Gift Box lets your kids draw art and turn it into a real stuffed animal!') + ' https://pic.twitter.com/61tLGc5aeB',
         image: '/assets/images/creativityKit/creativity-kit.png'
       }
     },

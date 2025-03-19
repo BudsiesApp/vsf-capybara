@@ -55,7 +55,7 @@ export default Vue.extend({
         return;
       }
 
-      return `http://pinterest.com/pin/create/button/?media=${this.image}` +
+      return `https://pinterest.com/pin/create/button/?media=${this.image}` +
       `&description=${this.sharingDescription}&url=${this.sharingUrl}`;
     },
     shareTwitterHref (): string {

@@ -142,7 +142,7 @@ export default {
         },
         {
           name: 'twitter',
-          url: 'http://twitter.com/budsiestoys'
+          url: 'https://twitter.com/budsiestoys'
         },
         {
           name: 'linkedin',
@@ -150,7 +150,7 @@ export default {
         },
         {
           name: 'instagram',
-          url: 'http://instagram.com/budsies'
+          url: 'https://instagram.com/budsies'
         },
         {
           name: 'tiktok',
