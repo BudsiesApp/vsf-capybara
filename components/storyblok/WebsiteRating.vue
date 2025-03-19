@@ -99,7 +99,7 @@ export default Blok.extend({
       const storeView = currentStoreView();
 
       const data = {
-        '@context': 'http://schema.org',
+        '@context': 'https://schema.org',
         '@type': 'Organization',
         'name': storeView.name,
         'image': this.getStoreImageUrl(),

@@ -59,10 +59,10 @@ export default Vue.extend({
       `&description=${this.sharingDescription}&url=${this.sharingUrl}`;
     },
     shareTwitterHref (): string {
-      return `http://twitter.com/share?text=${this.twitterDescription}&url=${this.sharingUrl}`;
+      return `https://twitter.com/share?text=${this.twitterDescription}&url=${this.sharingUrl}`;
     },
     shareFacebookHref (): string {
-      return `http://www.facebook.com/sharer.php?u=${this.sharingUrl}`;
+      return `https://www.facebook.com/sharer.php?u=${this.sharingUrl}`;
     },
     skinClass (): string {
       return getCurrentThemeClass();

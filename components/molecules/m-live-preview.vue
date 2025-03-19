@@ -16,7 +16,7 @@ import { isServer } from '@vue-storefront/core/helpers';
 
 import { InjectType } from 'src/modules/shared';
 
-const SVG_NAMESPACE_URI = 'http://www.w3.org/2000/svg';
+const SVG_NAMESPACE_URI = 'https://www.w3.org/2000/svg';
 
 interface InjectedServices {
   window: Window
@@ -101,7 +101,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       );
 
       imageElement.setAttributeNS(
-        'http://www.w3.org/1999/xlink',
+        'https://www.w3.org/1999/xlink',
         'xlink:href',
         backgroundImage
       );
