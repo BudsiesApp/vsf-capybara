@@ -140,7 +140,7 @@ export default {
             },
             {
               name: this.$t('Return Policy'),
-              link: '//support.waggables.com/support/solutions/folders/13000009748',
+              link: 'https://support.waggables.com/support/solutions/folders/13000009748',
               target: '_blank'
             },
             {
@@ -149,7 +149,7 @@ export default {
             },
             {
               name: this.$t('FAQ\'s'),
-              link: '//support.waggables.com/',
+              link: 'https://support.waggables.com/',
               target: '_blank'
             }
           ]
