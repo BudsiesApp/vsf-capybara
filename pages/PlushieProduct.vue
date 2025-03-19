@@ -165,12 +165,7 @@ export default defineComponent({
 
     const description = this.currentProduct?.meta_description;
 
-    const meta: any[] = [
-      {
-        rel: 'canonical',
-        href: getCanonicalUrl(this.$ssrContext, this.$router)
-      }
-    ];
+    const meta: any[] = [];
 
     if (description) {
       meta.push(
@@ -184,7 +179,13 @@ export default defineComponent({
 
     return {
       title: htmlDecode(productName),
-      meta
+      meta,
+      link: [
+        {
+          rel: 'canonical',
+          href: getCanonicalUrl(this.$ssrContext, this.$router)
+        }
+      ]
     };
   }
 });

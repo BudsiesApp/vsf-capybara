@@ -688,12 +688,7 @@ export default {
       content: htmlDecode(meta_description)
     } : undefined;
 
-    const meta = [
-      {
-        rel: 'canonical',
-        href: this.getCanonicalUrl()
-      }
-    ]
+    const meta = []
 
     if (description) {
       meta.push(description);
@@ -701,7 +696,13 @@ export default {
 
     return {
       title: htmlDecode(meta_title || name),
-      meta
+      meta,
+      link: [
+        {
+          rel: 'canonical',
+          href: this.getCanonicalUrl()
+        }
+      ]
     };
   }
 };

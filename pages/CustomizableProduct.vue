@@ -167,12 +167,7 @@ export default defineComponent({
       this.currentProduct?.meta_description ||
       this.currentProduct?.short_description;
 
-    const meta: any[] = [
-      {
-        rel: 'canonical',
-        href: getCanonicalUrl(this.$ssrContext, this.$router)
-      }
-    ];
+    const meta: any[] = [];
 
     if (description) {
       meta.push(
@@ -186,9 +181,15 @@ export default defineComponent({
 
     return {
       title: htmlDecode(
-        this.currentProduct?.meta_title || this.currentProduct?.name
+        this.currentProduct?.meta_title || this.currentProduct?.name || ''
       ),
-      meta
+      meta,
+      link: [
+        {
+          rel: 'canonical',
+          href: getCanonicalUrl(this.$ssrContext, this.$router)
+        }
+      ]
     };
   }
 });

@@ -58,7 +58,7 @@
       class="_actions-row"
     >
       <SfButton
-        class="color-primary _submit-button"
+        class="color-primary _submit-button _add-to-cart"
         type="submit"
         :disabled="isDisabled"
         @click.prevent.stop="onAddToCartClick"
