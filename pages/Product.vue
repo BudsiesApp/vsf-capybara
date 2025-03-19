@@ -283,13 +283,6 @@ export default {
 
     const meta = [];
 
-    if (canonicalUrl) {
-      meta.push({
-        rel: 'canonical',
-        href: canonicalUrl
-      });
-    }
-
     const descriptionMeta = {
       vmid: 'description',
       name: 'description',
@@ -304,7 +297,13 @@ export default {
       title: htmlDecode(
         `${this.getCurrentProduct?.meta_title || this.getCurrentProduct?.name}${categoryName}`
       ),
-      meta
+      meta,
+      link: [
+        {
+          rel: 'canonical',
+          href: canonicalUrl
+        }
+      ]
     };
   }
 };

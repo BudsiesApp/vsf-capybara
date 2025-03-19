@@ -91,7 +91,12 @@ test('form errors displayed correctly', async ({ photoPillowProductPage, customi
   await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
   await expect(uploadPhotoError).toBeEmpty();
   await photoPillowProductPage.goToStep(ADD_TO_CART_TITLE_STEP);
-  // TODO: check for email customization error. (currently not working, #34123)
+
+  const emailWidget = customizableProductPage.getCustomizationWidgetByLabel(EMAIL_CUSTOMIZATION_OPTION_LABEL);
+  const emailError = emailWidget.locator('.sf-input__error-message');
+
+  await customizableProductPage.addToCart();
+  await expect(emailError).not.toBeEmpty();
 });
 
 test('product added to cart successfully', async ({ cartPage, crossSellsPage, photoPillowProductPage, customizableProductPage }) => {

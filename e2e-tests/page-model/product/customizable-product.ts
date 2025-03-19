@@ -1,7 +1,7 @@
 import { expect, Locator, Page } from '@playwright/test';
 
 import { uploadImage } from '../../helpers/upload-image';
-import { normalizeLabel } from 'theme/e2e-tests/helpers/normalize-label';
+import { normalizeLabel } from '../../helpers/normalize-label';
 
 export class CustomizableProductPage {
   public readonly ADD_TO_CART_API_RESOURCE = '/api/cart/update';
@@ -18,10 +18,14 @@ export class CustomizableProductPage {
   }
 
   public getCustomizationWidgetByLabel (label: string): Locator {
-    const labelElement = this.page.locator(`text="${label}"`);
-    const parent = labelElement.locator('..');
+    const customizationOption = this.page.locator(
+      '.customization-option',
+      {
+        has: this.page.locator(`text="${label}"`)
+      }
+    );
 
-    return parent.locator('> ._widget').first();
+    return customizationOption.locator('> ._widget');
   }
 
   public getCheckboxByLabel (label: string): Locator {
