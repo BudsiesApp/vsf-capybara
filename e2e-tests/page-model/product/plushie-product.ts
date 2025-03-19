@@ -1,5 +1,5 @@
 import { expect, Locator, Page } from '@playwright/test';
-import { normalizeLabel } from 'theme/e2e-tests/helpers/normalize-label';
+import { normalizeLabel } from '../../helpers/normalize-label';
 
 export class PlushieProductPage {
   public headingTitle: Locator;
