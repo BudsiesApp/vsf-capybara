@@ -173,7 +173,7 @@ export default {
             },
             {
               name: this.$t('Media'),
-              link: '//support.mypetsies.com/support/solutions/folders/13000003990',
+              link: 'https://support.mypetsies.com/support/solutions/folders/13000003990',
               target: '_blank'
             },
             {
@@ -257,8 +257,8 @@ export default {
             { name: this.$t('Resellers'), link: '/partners/' },
             { name: this.$t('Affiliates'), link: '/affiliate-home/' },
             { name: this.$t('Corporate Buying'), link: '/partners/' },
-            { name: this.$t('FAQ'), link: '//support.mypetsies.com/support/home', target: '_blank' },
-            { name: this.$t('Referral Rewards'), link: '//referrals.mypetsies.com/', target: '_blank' }
+            { name: this.$t('FAQ'), link: 'https://support.mypetsies.com/support/home', target: '_blank' },
+            { name: this.$t('Referral Rewards'), link: 'https://referrals.mypetsies.com/', target: '_blank' }
           ]
         }
       };
