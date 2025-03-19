@@ -1,28 +1,17 @@
-import { Page } from '@playwright/test';
-import { testFactory, expect } from '../../fixtures/images-gallery-product-page.ts';
+import { testFactory, expect } from '../../fixtures/images-gallery-product-page';
 import { CustomizableProductPage } from '../../page-model/product/customizable-product';
 
 const DESIGN_CUSTOMIZATION_OPTION_LABEL = 'Design';
 const UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL = 'Upload your photo';
 const ADD_MORE_PHOTOS_CUSTOMIZATION_OPTION_LABEL = 'Add more photos';
-const ADD_TO_CART_API_RESOURCE = '/api/cart/update';
+
+const PRODUCT_NAME = 'Custom Pet Socks';
 
 const test = testFactory('/pet-socks/');
 
 async function fillRequiredFields (customizableProductPage: CustomizableProductPage) {
   await customizableProductPage.fillCustomizationSelectValueByIndex(DESIGN_CUSTOMIZATION_OPTION_LABEL, 1);
   await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
-}
-
-async function addToCartAndVerifyResponse(page: Page, customizableProductPage: CustomizableProductPage) {
-  const responsePromise = page.waitForResponse(
-    response => response.url().includes(ADD_TO_CART_API_RESOURCE) && response.status() === 200
-  );
-
-  await customizableProductPage.addToCart();
-
-  const response = await responsePromise;
-  expect(response.ok()).toBeTruthy();
 }
 
 test('form layout is correct', async ({ customizableProductPage, imagesGalleryProductPage }) => {
@@ -48,19 +37,46 @@ test('form errors displayed correctly', async ({ imagesGalleryProductPage, custo
   await expect(imagesGalleryProductPage.formErrors).toBeVisible();
 });
 
-test('product added to cart successfully', async ({ page, customizableProductPage }) => {
+test('product added to cart successfully', async ({ crossSellsPage, customizableProductPage }) => {
   await fillRequiredFields(customizableProductPage);
-  await addToCartAndVerifyResponse(page, customizableProductPage);
-  await expect(page.locator('#cross-sells')).toBeVisible();
+  await customizableProductPage.addToCartAndVerifyResponse();
+  await crossSellsPage.waitPageToBeVisible();
 });
 
-test('product display in cart correctly', async ({ page, cartPage, customizableProductPage }) => {
+test('product display in cart correctly', async ({ crossSellsPage, cartPage, customizableProductPage }) => {
   await fillRequiredFields(customizableProductPage);
-  await addToCartAndVerifyResponse(page, customizableProductPage);
-  await expect(page.locator('#cross-sells')).toBeVisible();
+  await customizableProductPage.addToCartAndVerifyResponse();
+  await crossSellsPage.waitPageToBeVisible();
 
   await cartPage.goto();
-  const cartItem = cartPage.getCartItemByProductName('Custom Pet Socks');
+  const cartItem = cartPage.getCartItemByProductName(PRODUCT_NAME);
 
   await expect(cartItem).toBeVisible();
+});
+
+test('product can be edited', async ({ cartPage, crossSellsPage, customizableProductPage, imagesGalleryProductPage }) => {
+  await fillRequiredFields(customizableProductPage);
+  const selectedDesign = await customizableProductPage.getCustomizationSelectValueByLabel(DESIGN_CUSTOMIZATION_OPTION_LABEL);
+  await customizableProductPage.addToCartAndVerifyResponse();
+  await crossSellsPage.waitPageToBeVisible();
+
+  await cartPage.goto();
+  await cartPage.editCartItemByProductName(PRODUCT_NAME);
+  await imagesGalleryProductPage.moveFocusOutsideImagesGallery();
+
+  await customizableProductPage.waitPageToBeVisible();
+
+  const filledSelectedDesign = await customizableProductPage.getCustomizationSelectValueByLabel(DESIGN_CUSTOMIZATION_OPTION_LABEL);
+
+  expect(selectedDesign).toEqual(filledSelectedDesign);
+  await customizableProductPage.fillCustomizationSelectValueByIndex(DESIGN_CUSTOMIZATION_OPTION_LABEL, 2);
+  const newSelectedDesign = await customizableProductPage.getCustomizationSelectValueByLabel(DESIGN_CUSTOMIZATION_OPTION_LABEL);
+
+  expect(newSelectedDesign).toBeTruthy();
+  await customizableProductPage.addToCartAndVerifyResponse();
+  await crossSellsPage.waitPageToBeVisible();
+
+  await cartPage.goto();
+  const updatedCartItem = cartPage.getCartItemByProductName(PRODUCT_NAME);
+  await cartPage.expectCartItemToHaveProperties(updatedCartItem, [newSelectedDesign]);
 });
