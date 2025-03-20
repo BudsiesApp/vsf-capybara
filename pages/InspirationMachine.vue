@@ -118,6 +118,7 @@ import Vue from 'vue';
 import { SfHeading, SfSteps } from '@storefront-ui/vue';
 
 import { InspirationMachineCharacterStep, InspirationMachineDownloadGuideStep, InspirationMachineDownloadKit, InspirationMachineExtrasStep, InspirationMachineThemeStep, SN_INSPIRATION_MACHINE, SelectableItem, Theme, actions, getters } from 'src/modules/inspiration-machine';
+import { getCanonicalUrl } from 'src/modules/shared';
 
 export default Vue.extend({
   name: 'InspirationMachine',
@@ -234,6 +235,19 @@ export default Vue.extend({
       }
 
       this.nextStep();
+    }
+  },
+  metaInfo () {
+    const canonicalUrl = getCanonicalUrl(this.$ssrContext, this.$router);
+
+    return {
+      title: this.$t('Inspiration Machine').toString(),
+      link: [
+        {
+          rel: 'canonical',
+          href: canonicalUrl
+        }
+      ]
     }
   }
 });
