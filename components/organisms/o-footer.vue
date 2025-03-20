@@ -50,13 +50,13 @@
       <MBudsiesBrands />
 
       <div class="_additional-information">
-        <router-link to="https://support.waggables.com/" target="_blank" exact>
+        <a href="https://support.waggables.com/" target="_blank">
           <SfMenuItem
             class="sf-footer__menu-item"
             :label="$t('Contact Us')"
             icon=""
           />
-        </router-link>
+        </a>
 
         <div class="_legal-information">
           ©{{ new Date().getFullYear() }} Budsies PR LLC. All Rights Reserved.
@@ -140,7 +140,7 @@ export default {
             },
             {
               name: this.$t('Return Policy'),
-              link: 'https://support.waggables.com/support/solutions/folders/13000009748',
+              link: '//support.waggables.com/support/solutions/folders/13000009748',
               target: '_blank'
             },
             {
@@ -149,7 +149,7 @@ export default {
             },
             {
               name: this.$t('FAQ\'s'),
-              link: 'https://support.waggables.com/',
+              link: '//support.waggables.com/',
               target: '_blank'
             }
           ]
