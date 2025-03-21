@@ -52,6 +52,11 @@ export class CartPage {
     await removeButton.click();
   }
 
+  public async expectCartItemRegularPriceToBe (cartItem: Locator, price: string) {
+    const priceLocator = cartItem.locator('.sf-price__regular');
+    await expect(priceLocator).toHaveText(price);
+  }
+
   public async removeCartItemWithDelay (cartItem: Locator, delay: number = 100) {
     await this.page.route(`*/**${this.DELETE_CART_ITEM_RESOURCE}?*`, async (route) => {
       await this.page.waitForTimeout(delay);

@@ -42,8 +42,8 @@ test('billing address form has correct validation', async ({ cartPage, checkoutP
   await cartPage.goto();
   await checkoutPage.goto();
 
-  await checkoutPage.personalDetailsStep.fillPersonalDetails('test first name', 'test last name', 'test@test.test');
-  await checkoutPage.fillShippingAddress('test address', 'United States', 'California', 'City', '12345', '1234567890');
+  await checkoutPage.personalDetailsStep.fillPersonalDetails();
+  await checkoutPage.fillShippingAddress();
 
   await checkoutPage.billingStep.useShippingAddressCheckbox.click();
   await checkoutPage.billingStep.addressForm.expectCorrectValidation();
@@ -80,4 +80,50 @@ test('order can be placed and user account created', async ({ page, simpleProduc
   await checkoutPage.fillBillingAddress();
   await checkoutPage.selectPaymentMethodAndPlaceOrder(true);
   await expect(page.locator('._header .a-account-icon .sf-header__icon--is-active')).toBeVisible();
+});
+
+test('shipping step is hidden if cart contains only virtual gift card', async ({ giftCardProductPage, checkoutPage }) => {
+  await giftCardProductPage.goto();
+  await giftCardProductPage.fillFormData();
+  await giftCardProductPage.addToCartButton.click();
+
+  await checkoutPage.goto();
+
+  await checkoutPage.personalDetailsStep.waitToBeVisible();
+  await checkoutPage.expectStepToBeHidden(checkoutPage.stepsName.shipping);
+});
+
+test('shipping step is visible if cart contains virtual gift card and other product', async ({ giftCardProductPage, page, cartPage, checkoutPage, simpleProductPage }) => {
+  await giftCardProductPage.goto();
+  await giftCardProductPage.fillFormData();
+  await giftCardProductPage.addToCartButton.click();
+
+  await page.goto(simpleProductUrl);
+  await simpleProductPage.waitPageToBeVisible();
+  await simpleProductPage.addToCartAndVerifyResponse();
+
+  await cartPage.goto();
+  await checkoutPage.goto();
+  await checkoutPage.expectStepToBeVisible(checkoutPage.stepsName.shipping);
+});
+
+test('shipping step is visible if cart contains only gift card with "Send physical" option enabled', async ({ giftCardProductPage, checkoutPage }) => {
+  await giftCardProductPage.goto();
+  await giftCardProductPage.fillFormData(undefined, undefined, undefined, true);
+  await giftCardProductPage.addToCartButton.click();
+
+  await checkoutPage.goto();
+  await checkoutPage.expectStepToBeVisible(checkoutPage.stepsName.shipping);
+});
+
+test('Gift Cards payment is not available if cart contains Gift Card', async ({ giftCardProductPage, checkoutPage }) => {
+  await giftCardProductPage.goto();
+  await giftCardProductPage.fillFormData();
+  await giftCardProductPage.addToCartButton.click();
+
+  await checkoutPage.goto();
+  await checkoutPage.personalDetailsStep.fillPersonalDetails('test first name', 'test last name', 'test@test.test');
+  await checkoutPage.fillBillingAddress(false);
+
+  await checkoutPage.orderReviewStep.expectGiftCardPaymentToBeNotAvailable();
 });
