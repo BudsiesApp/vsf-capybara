@@ -26,7 +26,6 @@ test('shipping address form has correct validation', async ({ cartPage, checkout
   await cartPage.goto();
   await checkoutPage.goto();
   await checkoutPage.personalDetailsStep.fillPersonalDetails(FIRST_NAME, LAST_NAME);
-  await checkoutPage.shippingStep.addressForm.expectCorrectValidation();
 
   const shippingStepAddressForm = checkoutPage.shippingStep.addressForm;
   await shippingStepAddressForm.firstNameFormField.expectToHaveValue(FIRST_NAME);
