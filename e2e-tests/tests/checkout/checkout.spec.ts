@@ -3,6 +3,9 @@ import { getRandomEmail } from '../../helpers/get-random-email';
 
 const simpleProductUrl = '/p/voice-recorder/';
 
+const FIRST_NAME = 'First name';
+const LAST_NAME = 'Last name';
+
 test('personal details form has correct validation', async ({ page, cartPage, checkoutPage, simpleProductPage }) => {
   await page.goto(simpleProductUrl);
   await simpleProductPage.waitPageToBeVisible();
@@ -22,12 +25,14 @@ test('shipping address form has correct validation', async ({ cartPage, checkout
 
   await cartPage.goto();
   await checkoutPage.goto();
-  await checkoutPage.personalDetailsStep.fillPersonalDetails('test first name', 'test last name', 'test@test.test');
+  await checkoutPage.personalDetailsStep.fillPersonalDetails(FIRST_NAME, LAST_NAME);
+  await checkoutPage.shippingStep.addressForm.expectCorrectValidation();
 
   const shippingStepAddressForm = checkoutPage.shippingStep.addressForm;
-  await shippingStepAddressForm.firstNameFormField.expectToHaveValue('test first name');
-  await shippingStepAddressForm.lastNameFormField.expectToHaveValue('test last name');
+  await shippingStepAddressForm.firstNameFormField.expectToHaveValue(FIRST_NAME);
+  await shippingStepAddressForm.lastNameFormField.expectToHaveValue(LAST_NAME);
   await shippingStepAddressForm.countrySelectorFormField.expectOptionToBeSelected('United States');
+
   await expect(shippingStepAddressForm.stateSelectorFormField.formField).toBeVisible();
   await expect(shippingStepAddressForm.stateInputFormField.formField).toBeHidden();
 
@@ -59,8 +64,8 @@ test('order can be placed', async ({ page, printedSocksPage, simpleProductPage, 
   await cartPage.goto();
 
   await checkoutPage.goto();
-  await checkoutPage.personalDetailsStep.fillPersonalDetails('test first name', 'test last name', 'test@test.test');
-  await checkoutPage.fillShippingAddress('test address', 'United States', 'California', 'City', '12345', '1234567890');
+  await checkoutPage.personalDetailsStep.fillPersonalDetails();
+  await checkoutPage.fillShippingAddress();
   await checkoutPage.fillBillingAddress();
   await checkoutPage.selectPaymentMethodAndPlaceOrder();
 });
@@ -74,9 +79,9 @@ test('order can be placed and user account created', async ({ page, simpleProduc
   await checkoutPage.goto();
 
   const email = getRandomEmail();
-  await checkoutPage.personalDetailsStep.fillPersonalDetails('test first name', 'test last name', email, true);
+  await checkoutPage.personalDetailsStep.fillPersonalDetails(undefined, undefined, email, true);
 
-  await checkoutPage.fillShippingAddress('test address', 'United States', 'California', 'City', '12345', '1234567890');
+  await checkoutPage.fillShippingAddress();
   await checkoutPage.fillBillingAddress();
   await checkoutPage.selectPaymentMethodAndPlaceOrder(true);
   await expect(page.locator('._header .a-account-icon .sf-header__icon--is-active')).toBeVisible();
@@ -122,7 +127,7 @@ test('Gift Cards payment is not available if cart contains Gift Card', async ({ 
   await giftCardProductPage.addToCartButton.click();
 
   await checkoutPage.goto();
-  await checkoutPage.personalDetailsStep.fillPersonalDetails('test first name', 'test last name', 'test@test.test');
+  await checkoutPage.personalDetailsStep.fillPersonalDetails();
   await checkoutPage.fillBillingAddress(false);
 
   await checkoutPage.orderReviewStep.expectGiftCardPaymentToBeNotAvailable();
