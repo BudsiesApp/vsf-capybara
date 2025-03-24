@@ -5,13 +5,15 @@ import { PrintedSocksPage } from '../page-model/product/printed-socks';
 import { CrossSellsPage } from '../page-model/cross-sells';
 import { CustomizableProductPage } from '../page-model/product/customizable-product';
 import { SimpleProductPage } from '../page-model/product/simple-product';
+import { GiftCardProductPage } from '../page-model/product/gift-card-product';
 
 interface CartPageFixture {
   cartPage: CartPage,
   printedSocksPage: PrintedSocksPage,
   crossSellsPage: CrossSellsPage,
   customizableProductPage: CustomizableProductPage,
-  simpleProductPage: SimpleProductPage
+  simpleProductPage: SimpleProductPage,
+  giftCardProductPage: GiftCardProductPage
 }
 
 export const test = baseTest.extend<CartPageFixture>({
@@ -34,6 +36,10 @@ export const test = baseTest.extend<CartPageFixture>({
   simpleProductPage: async ({ page }, use) => {
     const simpleProductPage = new SimpleProductPage(page);
     await use(simpleProductPage);
+  },
+  giftCardProductPage: async ({ page }, use) => {
+    const giftCardProductPage = new GiftCardProductPage(page);
+    await use(giftCardProductPage);
   }
 });
 
