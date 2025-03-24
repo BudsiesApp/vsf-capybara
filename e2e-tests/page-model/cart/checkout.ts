@@ -1,12 +1,22 @@
 import { expect, FrameLocator, Locator, Page } from '@playwright/test';
 
 import { CartPage } from './cart';
-import { InputFormField } from '../../helpers/form/form-fields/input-form-field';
-import { MultiselectFormField } from '../../helpers/form/form-fields/multiselect-form-field';
+import { MultiselectFormField, InputFormField } from '../../helpers/form/form-fields';
 
 const REQUIRED_FIELD_ERROR_MESSAGE = 'Field is required';
 const COUNTRY_WITH_STATES_LIST = 'United States';
 const COUNTRY_WITHOUT_STATES_LIST = 'United Kingdom';
+
+const DEFAULT_FIRST_NAME = 'Test first name';
+const DEFAULT_LAST_NAME = 'Test last name';
+const DEFAULT_EMAIL = 'test@test.test';
+const DEFAULT_PASSWORD = 'testPassword123';
+const DEFAULT_ADDRESS = 'Test Address';
+const DEFAULT_COUNTRY = COUNTRY_WITH_STATES_LIST;
+const DEFAULT_STATE = 'California';
+const DEFAULT_CITY = 'Test City';
+const DEFAULT_ZIP_CODE = '12345';
+const DEFAULT_PHONE = '1234567890';
 
 export class PersonalDetailsStep {
   public stepTitle: Locator;
@@ -20,7 +30,7 @@ export class PersonalDetailsStep {
   public passwordFormField: InputFormField;
   public repeatPasswordFormField: InputFormField;
 
-  public continueToShippingButton: Locator;
+  public continueButton: Locator;
 
   public createAccountCheckbox: Locator;
   public agreeToTermsCheckbox: Locator;
@@ -34,7 +44,7 @@ export class PersonalDetailsStep {
     this.formFieldLocator = page.locator('.form__element');
     this.passwordFormFieldLocator = page.locator('.m-password ._input');
 
-    this.continueToShippingButton = page.locator('button:has-text("Continue to shipping")');
+    this.continueButton = page.locator('.sf-button._continue-button');
 
     this.firstNameFormField = new InputFormField(this.formFieldLocator, 'input[name="first-name"]', page);
     this.lastNameFormField = new InputFormField(this.formFieldLocator, 'input[name="last-name"]', page);
@@ -49,11 +59,11 @@ export class PersonalDetailsStep {
   }
 
   public async fillPersonalDetails (
-    firstName: string,
-    lastName: string,
-    email: string,
+    firstName: string = DEFAULT_FIRST_NAME,
+    lastName: string = DEFAULT_LAST_NAME,
+    email: string = DEFAULT_EMAIL,
     createAccount: boolean = false,
-    password: string = 'testPassword123'
+    password: string = DEFAULT_PASSWORD
   ) {
     await this.firstNameFormField.fill(firstName);
     await this.lastNameFormField.fill(lastName);
@@ -65,7 +75,7 @@ export class PersonalDetailsStep {
       await this.repeatPasswordFormField.fill(password);
     }
 
-    await this.continueToShippingButton.click();
+    await this.continueButton.click();
   }
 
   public async expectCorrectValidation () {
@@ -94,6 +104,7 @@ export class PersonalDetailsStep {
 
 export class AddressForm {
   public formFieldLocator: Locator;
+  public multiselectFieldLocator: Locator;
 
   public firstNameFormField: InputFormField;
   public lastNameFormField: InputFormField;
@@ -108,13 +119,14 @@ export class AddressForm {
 
   public constructor (public readonly page: Page) {
     this.formFieldLocator = page.locator('.form__element');
+    this.multiselectFieldLocator = page.locator('.form__element.m-multiselect');
 
     this.firstNameFormField = new InputFormField(this.formFieldLocator, 'input[name="first-name"]', page);
     this.lastNameFormField = new InputFormField(this.formFieldLocator, 'input[name="last-name"]', page);
     this.streetAddressFormField = new InputFormField(this.formFieldLocator, 'input[name="street-address"]', page);
 
-    this.countrySelectorFormField = new MultiselectFormField(this.formFieldLocator, 'label:has-text("Country")', page);
-    this.stateSelectorFormField = new MultiselectFormField(this.formFieldLocator, 'label:has-text("State / Province")', page);
+    this.countrySelectorFormField = new MultiselectFormField(this.multiselectFieldLocator, 'label:has-text("Country")', page);
+    this.stateSelectorFormField = new MultiselectFormField(this.multiselectFieldLocator, 'label:has-text("State / Province")', page);
     this.stateInputFormField = new InputFormField(this.formFieldLocator, 'input[name="address-level1"]', page);
 
     this.cityFormField = new InputFormField(this.formFieldLocator, 'input[name="city"]', page);
@@ -122,7 +134,14 @@ export class AddressForm {
     this.phoneFormField = new InputFormField(this.formFieldLocator, 'input[name="phone"]', page);
   }
 
-  public async fillAddress (address: string, country: string, state: string, city: string, zipCode: string, phone: string) {
+  public async fillAddress (
+    address: string = DEFAULT_ADDRESS,
+    country: string = DEFAULT_COUNTRY,
+    state: string = DEFAULT_STATE,
+    city: string = DEFAULT_CITY,
+    zipCode: string = DEFAULT_ZIP_CODE,
+    phone: string = DEFAULT_PHONE
+  ) {
     await this.streetAddressFormField.fill(address);
     await this.countrySelectorFormField.selectByOptionTitle(country);
 
@@ -185,6 +204,7 @@ export class ReviewStep {
   private readonly creditCardExpiration = '12/29';
   private readonly creditCardCvv = '123';
 
+  public giftCardPayment: Locator;
   public paymentMethodSelector: Locator;
 
   public creditCardNumberInput: FrameLocator;
@@ -204,6 +224,7 @@ export class ReviewStep {
     this.creditCardCvvInput = page.frameLocator('#cvv iframe');
     this.orderProcessingLoader = page.locator('.m-loader--message:has-text("Processing order...")');
     this.accountCreatingLoader = page.locator('.m-loader--message:has-text("Registering the account ...")');
+    this.giftCardPayment = page.locator('.gift-card-payment');
   }
 
   public async selectCreditCardPaymentMethodAndFillCardData () {
@@ -214,9 +235,23 @@ export class ReviewStep {
     await this.creditCardExpirationInput.locator('input#expiration').fill(this.creditCardExpiration);
     await this.creditCardCvvInput.locator('input#cvv').fill(this.creditCardCvv);
   }
+
+  public async expectGiftCardPaymentToBeNotAvailable (): Promise<void> {
+    const message = this.giftCardPayment.locator('._notice-message');
+    await expect(message).toHaveText('Gift Cards cannot be used to purchase Gift Card products');
+  }
 }
 
 export class CheckoutPage {
+  public readonly stepsName = {
+    personalDetails: 'Contact',
+    shipping: 'Shipping',
+    billing: 'Billing address',
+    orderReview: 'Review'
+  };
+
+  public steps: Locator;
+
   public personalDetailsStep: PersonalDetailsStep;
   public shippingStep: ShippingStep;
   public billingStep: BillingStep;
@@ -225,6 +260,8 @@ export class CheckoutPage {
   public orderSuccessPage: Locator;
 
   public constructor (public readonly page: Page, public readonly cartPage: CartPage) {
+    this.steps = page.locator('.sf-steps__header');
+
     this.personalDetailsStep = new PersonalDetailsStep(page);
     this.shippingStep = new ShippingStep(page);
     this.billingStep = new BillingStep(page);
@@ -232,12 +269,31 @@ export class CheckoutPage {
     this.orderSuccessPage = page.locator('.o-order-success');
   }
 
-  public async fillShippingAddress (address: string, country: string, state: string, city: string, zipCode: string, phone: string) {
+  public async fillShippingAddress (
+    address?: string,
+    country?: string,
+    state?: string,
+    city?: string,
+    zipCode?: string,
+    phone?: string
+  ) {
     await this.shippingStep.addressForm.fillAddress(address, country, state, city, zipCode, phone);
     await this.shippingStep.continueToPaymentButton.click();
   }
 
-  public async fillBillingAddress () {
+  public async fillBillingAddress (
+    useShippingAddress: boolean = true,
+    address?: string,
+    country?: string,
+    state?: string,
+    city?: string,
+    zipCode?: string,
+    phone?: string
+  ) {
+    if (!useShippingAddress) {
+      await this.billingStep.addressForm.fillAddress(address, country, state, city, zipCode, phone);
+    }
+
     await this.billingStep.goToReviewButton.click();
   }
 
@@ -253,6 +309,21 @@ export class CheckoutPage {
     }
 
     await expect(this.orderSuccessPage).toBeVisible({ timeout: 30000 });
+  }
+
+  public isStepVisible (stepName: string): Promise<boolean> {
+    const step = this.steps.locator(`.sf-steps__title:has-text("${stepName}")`);
+    return step.isVisible();
+  }
+
+  public async expectStepToBeHidden (stepName: string): Promise<void> {
+    const step = this.steps.locator(`.sf-steps__title:has-text("${stepName}")`);
+    await expect(step).toBeHidden();
+  }
+
+  public async expectStepToBeVisible (stepName: string): Promise<void> {
+    const step = this.steps.locator(`.sf-steps__title:has-text("${stepName}")`);
+    await expect(step).toBeVisible();
   }
 
   public async goto () {
