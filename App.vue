@@ -46,8 +46,13 @@ export default {
   beforeDestroy () {
     EventBus.$off(USER_LEAVING_WEBSITE, this.onUserLeavingWebsite);
   },
-  serverPrefetch () {
-    return this.$store.dispatch('backend-settings/fetchSettings');
+  async serverPrefetch () {
+    try {
+      await this.$store.dispatch('backend-settings/fetchSettings');
+    } catch (error) {
+      this.$ssrContext.output.cacheTags.add(`no-cache`);
+      await this.$router.push({ name: 'error' });
+    }
   },
   provide: {
     ErrorConverterService: errorConverterService,
