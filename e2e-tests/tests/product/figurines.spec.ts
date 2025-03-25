@@ -16,7 +16,7 @@ const TEST_EMAIL = 'test@test.test';
 
 const test = testFactory('/petsies-figurines/create/');
 
-async function fillRequiredFields(customizableProductPage: CustomizableProductPage) {
+async function fillRequiredFields (customizableProductPage: CustomizableProductPage) {
   await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
   await customizableProductPage.fillCustomizationTextValue(DESCRIPTION_CUSTOMIZATION_OPTION_VALUE, DESCRIPTION_TEXT);
   await customizableProductPage.fillCustomizationSelectValueByIndex(EYE_COLOR_TYPE_CUSTOMIZATION_OPTION_LABEL, 1);
