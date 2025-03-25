@@ -109,7 +109,7 @@
       </APromoCode>
       <div class="form__action">
         <SfButton
-          class="sf-button--full-width form__action-button"
+          class="_continue-button sf-button--full-width form__action-button"
           @click="onContinueButtonClick"
         >
           {{

@@ -38,8 +38,13 @@ export default {
       return `${get(this.$route, 'meta.layout', 'default')}-layout`
     }
   },
-  serverPrefetch () {
-    return this.$store.dispatch('backend-settings/fetchSettings');
+  async serverPrefetch () {
+    try {
+      await this.$store.dispatch('backend-settings/fetchSettings');
+    } catch (error) {
+      this.$ssrContext.output.cacheTags.add(`no-cache`);
+      await this.$router.push({ name: 'error' });
+    }
   },
   provide: {
     ErrorConverterService: errorConverterService,
