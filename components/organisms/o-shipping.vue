@@ -370,6 +370,7 @@ export default {
       await this.$nextTick();
 
       this.shipping.state = '';
+      this.shipping.region_id = null;
 
       this.validateCountryRelatedFields();
     },
@@ -466,12 +467,6 @@ export default {
     EventBus.$off('user-after-loggedin', this.fillLastUsedCustomerData);
   },
   watch: {
-    'shipping.country' (after, before) {
-      if (after && before && after !== before) {
-        this.shipping.region_id = null;
-        this.shipping.state = '';
-      }
-    },
     getZipCode: {
       handler () {
         this.fZipCodeChanged = true;
