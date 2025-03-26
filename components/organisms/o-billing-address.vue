@@ -89,7 +89,7 @@
           :valid="!$v.payment.country.$error"
           :error-message="$t('Field is required')"
           :disabled="isFormFieldsDisabled"
-          @change="changeCountry"
+          @change="onChangeCountry"
         />
 
         <SfInput
@@ -287,9 +287,6 @@ export default {
         required,
         unicodeAlpha
       },
-      paymentMethod: {
-        required
-      },
       phoneNumber: {
         required: requiredIf(function () { return this.isPhoneNumberRequired }),
         phoneValidator
@@ -383,11 +380,16 @@ export default {
   },
   methods: {
     stateCodeAutocompleteOptionSearch,
-    async changeCountry () {
+    async onChangeCountry () {
+      await this.changeCountry();
       await this.$nextTick();
-      this.payment.state = '';
-      this.validateCountryRelatedFields();
 
+      this.payment.state = '';
+      this.payment.region_id = null;
+
+      this.validateCountryRelatedFields();
+    },
+    async changeCountry () {
       await Promise.all([
         this.$store.dispatch('checkout/updatePaymentDetails', { country: this.payment.country }),
         this.$store.dispatch('cart/syncPaymentMethods', { forceServerSync: true })
@@ -447,11 +449,6 @@ export default {
   },
   watch: {
     getPaymentCountry (after, before) {
-      if (after && before && after !== before) {
-        this.payment.region_id = null;
-        this.payment.state = '';
-      }
-
       if (after && before !== after) {
         this.changeCountry();
       }
