@@ -287,9 +287,6 @@ export default {
         required,
         unicodeAlpha
       },
-      paymentMethod: {
-        required
-      },
       phoneNumber: {
         required: requiredIf(function () { return this.isPhoneNumberRequired }),
         phoneValidator
