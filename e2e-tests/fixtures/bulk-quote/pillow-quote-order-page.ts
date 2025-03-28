@@ -1,4 +1,4 @@
-import { PillowQuoteOrderPage } from '../../page-model/bulk-qoute/pillow-order';
+import { PillowQuoteOrderPage } from '../../page-model/bulk-quote/pillow-order';
 import { testFactory as baseTestFactory } from './quote-order-page';
 
 interface PillowQuoteOrderPageFixture {

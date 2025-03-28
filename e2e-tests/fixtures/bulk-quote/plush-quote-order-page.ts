@@ -1,4 +1,4 @@
-import { PlushQuoteOrderPage } from '../../page-model/bulk-qoute/plush-order';
+import { PlushQuoteOrderPage } from '../../page-model/bulk-quote/plush-order';
 import { testFactory as baseTestFactory } from './quote-order-page';
 
 interface PlushQuoteOrderPageFixture {
@@ -12,8 +12,8 @@ export const test = baseTestFactory(
   PAGE_SELECTOR
 ).extend<PlushQuoteOrderPageFixture>({
   plushQuoteOrderPage: async ({ page }, use) => {
-    const pillowQuoteOrderPage = new PlushQuoteOrderPage(page, PAGE_SELECTOR);
-    await use(pillowQuoteOrderPage);
+    const plushQuoteOrderPage = new PlushQuoteOrderPage(page, PAGE_SELECTOR);
+    await use(plushQuoteOrderPage);
   }
 });
 

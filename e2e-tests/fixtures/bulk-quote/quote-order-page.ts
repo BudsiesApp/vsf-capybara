@@ -1,8 +1,8 @@
 import { test as baseTest } from '@playwright/test';
 
-import { BulkQuotationPage } from '../../page-model/bulk-qoute/bulk-quotation';
+import { BulkQuotationPage } from '../../page-model/bulk-quote/bulk-quotation';
 import { CartPage } from '../../page-model/cart/cart';
-import { QuoteOrderPage } from '../../page-model/bulk-qoute/quote-order';
+import { QuoteOrderPage } from '../../page-model/bulk-quote/quote-order';
 
 interface QuoteOrderPageFixture {
   bulkQuotationPage: BulkQuotationPage,
