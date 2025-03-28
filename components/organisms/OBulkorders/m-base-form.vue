@@ -205,18 +205,20 @@
       >
         <SfRadio
           value="0"
+          name="deadline-radio"
           :label="$t('No firm deadline - the sooner the better!')"
           v-model="deadline"
         />
 
         <SfRadio
           value="1"
+          name="deadline-radio"
           :label="$t('I need them for a specific date')"
           v-model="deadline"
         />
 
         <div
-          class="_error-text"
+          class="_error-text _deadline-input-error"
           v-if="errors.length"
         >
           {{ errors[0] }}
@@ -272,6 +274,7 @@
       </div>
 
       <MMultiselect
+        class="_coutry-select"
         v-model="country"
         name="countries"
         :label="$t('Country')"
@@ -368,7 +371,7 @@
       <SfSelect
         v-model="customerType"
         :should-lock-scroll-on-open="isMobile"
-        class="sf-select--underlined"
+        class="sf-select--underlined _customer-type-selector"
       >
         <SfSelectOption
           v-for="item in customerTypeOptions"
@@ -388,6 +391,7 @@
     >
       <MCheckbox
         v-model="agreement"
+        class="_agreement-checkbox"
         :disabled="isDisabled"
         :ref="getFieldAnchorName('Agreement')"
       >
@@ -403,7 +407,7 @@
       </MCheckbox>
 
       <div
-        class="_error-text"
+        class="_error-text _agreement-error"
         v-if="errors.length"
       >
         {{ errors[0] }}

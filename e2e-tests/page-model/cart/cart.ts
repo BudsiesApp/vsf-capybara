@@ -31,7 +31,7 @@ export class CartPage {
 
   public async expectCartItemToHaveProperties (cartItem: Locator, properties: string[]) {
     for (const property of properties) {
-      const propertyLocator = cartItem.locator(`.collected-product__properties:has-text("${property}")`);
+      const propertyLocator = cartItem.locator(`.collected-product__properties:has-text('${property}')`);
       await expect(propertyLocator).toBeVisible();
     }
   }
