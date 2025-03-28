@@ -62,13 +62,13 @@
       <MBudsiesBrands />
 
       <div class="_additional-information">
-        <router-link to="//support.mypetsies.com/support/home" target="_blank" exact>
+        <a href="https://support.mypetsies.com/support/home" target="_blank">
           <SfMenuItem
             class="sf-footer__menu-item"
             :label="$t('Contact Us')"
             icon=""
           />
-        </router-link>
+        </a>
 
         <div class="_legal-information">
           ©{{ new Date().getFullYear() }} Budsies PR LLC. All Rights Reserved.

@@ -47,18 +47,23 @@ export default {
   beforeDestroy () {
     EventBus.$off(USER_LEAVING_WEBSITE, this.onUserLeavingWebsite);
   },
-  serverPrefetch () {
-    const loadingPromises = [
-      this.$store.dispatch('backend-settings/fetchSettings')
-    ];
+  async serverPrefetch () {
+    try {
+      const loadingPromises = [
+        this.$store.dispatch('backend-settings/fetchSettings')
+      ];
 
-    if (this.$store.hasModule(SN_PROMOTION_PLATFORM)) {
-      loadingPromises.push(
-        this.$store.dispatch(`${SN_PROMOTION_PLATFORM}/fetchDefaultActiveCampaignData`)
-      );
+      if (this.$store.hasModule(SN_PROMOTION_PLATFORM)) {
+        loadingPromises.push(
+          this.$store.dispatch(`${SN_PROMOTION_PLATFORM}/fetchDefaultActiveCampaignData`)
+        );
+      }
+
+      await Promise.all(loadingPromises);
+    } catch (error) {
+      this.$ssrContext.output.cacheTags.add(`no-cache`);
+      await this.$router.push({ name: 'error' });
     }
-
-    return Promise.all(loadingPromises);
   },
   provide: {
     ErrorConverterService: errorConverterService,

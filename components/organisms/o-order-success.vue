@@ -208,7 +208,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
       sharingDescription: `${this.$t('Woah! @Petsies makes a custom plush lookalike of your pet (just send them a photo!). Check out')} ${baseUrl}`,
       eMailSubject: this.$t('Check out Petsies - they make a custom plush lookalike of your pet!') as string,
       twitterDescription: this.$t('Now you can get a custom plush lookalike of your pet from @PetsiesOfficial. Check it out! https://t.co/YxtXW7CYJQ') as string,
-      image: 'http://pbs.twimg.com/media/CqFVJ8bVYAI2fK0.jpg'
+      image: 'https://pbs.twimg.com/media/CqFVJ8bVYAI2fK0.jpg'
     };
   },
   destroyed () {
