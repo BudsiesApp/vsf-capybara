@@ -10,7 +10,7 @@ export class InputFormField {
   }
 
   public get error (): Locator {
-    return this.formField.locator(SF_INPUT_ERROR_MESSAGE);
+    return this.formField.locator(this.errorMessageSelector);
   }
 
   public async expectToHaveErrorMessage (errorMessage: string): Promise<void> {
@@ -28,7 +28,8 @@ export class InputFormField {
   public constructor (
     public readonly formFieldLocator: Locator,
     public readonly inputSelector: string,
-    public page: Page
+    public page: Page,
+    public readonly errorMessageSelector: string = SF_INPUT_ERROR_MESSAGE
   ) {
     this.formField = formFieldLocator.filter({
       has: page.locator(inputSelector)

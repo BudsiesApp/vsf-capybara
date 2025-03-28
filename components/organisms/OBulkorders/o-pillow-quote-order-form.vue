@@ -44,7 +44,7 @@
             <SfSelect
               v-model="pillowSize"
               :disabled="isDisabled"
-              class="sf-select--underlined"
+              class="sf-select--underlined _size-select"
             >
               <SfSelectOption
                 v-for="sizeOption in pillowSizeOptions"
