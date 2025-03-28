@@ -29,7 +29,7 @@ test(
 
     await expect(cartPage.cartItems).toHaveCount(2);
     const deleteResponse = cartPage.waitForDeleteResponse();
-    await cartPage.removeCartItemWithDelay(cartPage.cartItems.first(), 500);
+    await cartPage.removeCartItemWithDelay(cartPage.cartItems.first(), 1000);
     await expect(cartPage.cartItems).toHaveCount(1);
 
     for (const cartItem of await cartPage.cartItems.all()) {
