@@ -1,26 +1,38 @@
 <template>
-  <div class="promotion-platform-image-banner-wrapper layout-regular-component"
-       :class="cssClasses"
-       :style="styles"
+  <div
+    class="promotion-platform-image-banner-wrapper layout-regular-component"
+    :class="cssClasses"
+    :style="styles"
   >
     <editor-block-icons :item="itemData" />
 
     <div
       class="promotion-platform-image-banner-container"
       v-if="shouldShowImageBanner"
-      :data-campaign-id="itemData.campaign_id"
-      v-html="imageBannerContent"
-    />
+    >
+      <component class="_wrapper" :is="wrapperComponent" v-bind="wrapperAttributes">
+        <BaseImage :src="desktopImage" class="show-for-medium-up" />
+
+        <BaseImage :src="mobileImage" class="show-for-small-only" />
+      </component>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import CampaignContent from 'src/modules/promotion-platform/types/CampaignContent.model';
+import { CampaignContent } from 'src/modules/promotion-platform/types/CampaignContent.interface';
 import { Blok } from 'src/modules/vsf-storyblok-module/components'
+
+import { BaseImage } from 'src/modules/budsies';
+import { ImageBanner } from 'src/modules/promotion-platform/types/ImageBanner.interface';
+
 import PromoCampaignBannerData from './interfaces/promo-campaign-banner-data.interface';
 
 export default Blok.extend({
   name: 'StoryblokPromoCampaignBannerRenderer',
+  components: {
+    BaseImage
+  },
   data () {
     return {
       isMounted: false
@@ -34,18 +46,14 @@ export default Blok.extend({
       return this.$store.getters['promotionPlatform/campaignContent'];
     },
     promoCampaignId (): string | undefined {
-      if (!this.campaignContent || !this.campaignContent.imageBanner) {
+      if (!this.campaignContent || !this.campaignContent.image_banner) {
         return;
       }
 
-      return this.campaignContent.imageBanner.campaignId;
+      return this.campaignContent.image_banner.campaign_id;
     },
-    imageBannerContent (): string | undefined {
-      if (!this.campaignContent || !this.campaignContent.imageBanner) {
-        return;
-      }
-
-      return this.campaignContent.imageBanner.content;
+    imageBannerContent (): ImageBanner | undefined {
+      return this.campaignContent?.image_banner;
     },
     shouldShowImageBanner (): boolean {
       if (!this.imageBannerContent || !this.isMounted) {
@@ -60,6 +68,29 @@ export default Blok.extend({
       }
 
       return true;
+    },
+    wrapperAttributes (): Record<string, string> {
+      if (!this.imageBannerContent?.link_url) {
+        return {};
+      }
+
+      return {
+        to: this.imageBannerContent.link_url,
+        target: this.imageBannerContent.target_blank ? '_blank' : '_self'
+      };
+    },
+    wrapperComponent (): string {
+      if (!this.imageBannerContent?.link_url) {
+        return 'div';
+      }
+
+      return 'router-link';
+    },
+    desktopImage (): string {
+      return this.imageBannerContent?.desktop_img_url || '';
+    },
+    mobileImage (): string {
+      return this.imageBannerContent?.mobile_img_url || '';
     }
   },
   async mounted () {
@@ -90,25 +121,23 @@ export default Blok.extend({
 
   @include image-modifiers("promotion-platform-image-banner-container ::v-deep img");
 
-::v-deep {
-    .show-for-medium-up {
-      display: none;
-    }
+  .show-for-medium-up {
+    display: none;
+  }
 
+  ::v-deep {
     img {
       max-width: 100%;
     }
   }
 
   @media (min-width: $tablet-min) {
-    ::v-deep {
-      .show-for-medium-up {
-        display: inherit;
-      }
+    .show-for-medium-up {
+      display: inherit;
+    }
 
-      .show-for-small-only {
-        display: none;
-      }
+    .show-for-small-only {
+      display: none;
     }
   }
 
