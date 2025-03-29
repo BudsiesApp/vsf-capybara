@@ -17,6 +17,7 @@ import { ModalList } from './store/ui/modals';
 import { FileProcessingRepositoryFactory, ImageHandlerService, itemFactory } from 'src/modules/file-storage'
 import { ErrorConverterService } from 'src/modules/budsies'
 import { isServer } from '@vue-storefront/core/helpers'
+import { SN_PROMOTION_PLATFORM } from 'src/modules/promotion-platform/types/StoreMutations';
 
 const windowObject = isServer ? {} : window;
 const errorConverterService = new ErrorConverterService();
@@ -39,7 +40,17 @@ export default {
   },
   async serverPrefetch () {
     try {
-      await this.$store.dispatch('backend-settings/fetchSettings');
+      const loadingPromises = [
+        this.$store.dispatch('backend-settings/fetchSettings')
+      ];
+
+      if (this.$store.hasModule(SN_PROMOTION_PLATFORM)) {
+        loadingPromises.push(
+          this.$store.dispatch(`${SN_PROMOTION_PLATFORM}/fetchDefaultActiveCampaignData`)
+        );
+      }
+
+      await Promise.all(loadingPromises);
     } catch (error) {
       this.$ssrContext.output.cacheTags.add(`no-cache`);
       await this.$router.push({ name: 'error' });
