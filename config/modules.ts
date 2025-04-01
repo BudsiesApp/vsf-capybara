@@ -28,6 +28,7 @@ import { PersistedCustomerDataModule } from 'src/modules/persisted-customer-data
 import { TrueVaultModule } from 'src/modules/true-vault';
 
 import registerStoryblokComponents from 'theme/components/storyblok'
+import { ABTesting } from 'src/modules/a-b-testing'
 
 const extendUrlVuex = {
   actions: {
@@ -53,6 +54,7 @@ const extendUrlModule: StorefrontModule = function ({ store }) {
 // TODO:distributed across proper pages BEFORE 1.11
 export function registerClientModules () {
   registerStoryblokComponents()
+  registerModule(ABTesting)
   registerModule(TrueVaultModule)
   registerModule(PageLoadingIndicatorModule)
   registerModule(UrlModule)
