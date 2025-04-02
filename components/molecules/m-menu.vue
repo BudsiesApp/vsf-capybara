@@ -192,6 +192,7 @@ export default Vue.extend({
             name: 'photo-portraits-creation-page'
           }
         }
+
       ],
       accessoriesItems: [
         {
@@ -228,6 +229,12 @@ export default Vue.extend({
           label: this.$t('Pet Keychains'),
           url: {
             name: 'printed-keychains-creation-page'
+          }
+        },
+        {
+          label: this.$t('Tumblers'),
+          url: {
+            name: 'tumblers-creation'
           }
         }
       ],
