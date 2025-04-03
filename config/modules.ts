@@ -4,6 +4,7 @@ import { NotificationModule } from '@vue-storefront/core/modules/notification'
 import { UrlModule } from '@vue-storefront/core/modules/url'
 import { StoryblokModule } from 'src/modules/vsf-storyblok-module'
 import { registerModule } from '@vue-storefront/core/lib/modules'
+import { ABTesting } from 'src/modules/a-b-testing'
 import { BackendSettings } from 'src/modules/backend-settings';
 import { ErrorLoggingModule } from 'src/modules/error-logging';
 import { PageLoadingIndicatorModule } from 'src/modules/page-loading-indicator';
@@ -18,6 +19,7 @@ export function registerClientModules () {
   registerModule(NotificationModule)
   registerModule(CatalogNextModule)
   registerModule(StoryblokModule)
+  registerModule(ABTesting)
   registerModule(BackendSettings)
   registerModule(ErrorLoggingModule)
 }
