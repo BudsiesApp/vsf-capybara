@@ -131,6 +131,7 @@ import config from 'config';
 import CartItem from 'core/modules/cart/types/CartItem';
 import Product from 'core/modules/catalog/types/Product';
 import i18n from '@vue-storefront/core/i18n';
+import { useABTestingCustomizationsFilter } from 'src/modules/a-b-testing';
 import {
   Customization,
   useCustomizationState,
@@ -296,10 +297,14 @@ export default defineComponent({
         updateCustomizationOptionValue
       );
 
+    const { customizationFilter } = useABTestingCustomizationsFilter(
+      context.ssrContext
+    );
+
     const { filteredCustomizations } = useCustomizationsFilter(
       availableCustomizations,
       customizationAvailableOptionValues,
-      [emailCustomizationFilter, requiredCustomizationsFilter]
+      [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter]
     );
 
     const customizationGroups = useCustomizationsGroups(

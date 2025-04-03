@@ -126,6 +126,7 @@ import {
 import { SfButton } from '@storefront-ui/vue';
 import { ValidationObserver, ValidationProvider } from 'vee-validate';
 
+import { useABTestingCustomizationsFilter } from 'src/modules/a-b-testing';
 import {
   Customization,
   CustomizationOptionValue,
@@ -370,11 +371,15 @@ export default defineComponent({
       return isSomeCustomizationOptionBusy.value || isDisabled.value;
     });
 
+    const { customizationFilter } = useABTestingCustomizationsFilter(
+      context.ssrContext
+    );
+
     return {
       ...useCustomizationsFilter(
         availableOptionCustomizations,
         customizationAvailableOptionValues,
-        [emailCustomizationFilter, requiredCustomizationsFilter]
+        [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter]
       ),
       ...useProductGallery(
         product,
