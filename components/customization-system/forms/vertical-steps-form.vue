@@ -137,6 +137,7 @@ import {
 } from '@storefront-ui/vue';
 import { ValidationObserver, ValidationProvider } from 'vee-validate';
 
+import { useABTestingCustomizationsFilter } from 'src/modules/a-b-testing';
 import {
   Customization,
   CustomizationOptionValue,
@@ -433,10 +434,14 @@ export default defineComponent({
       ).toString();
     });
 
+    const { customizationFilter } = useABTestingCustomizationsFilter(
+      context.ssrContext
+    );
+
     const { filteredCustomizations } = useCustomizationsFilter(
       availableCustomizations,
       customizationAvailableOptionValues,
-      [emailCustomizationFilter, requiredCustomizationsFilter]
+      [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter]
     );
 
     return {

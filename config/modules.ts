@@ -14,6 +14,7 @@ import { StoryblokModule } from 'src/modules/vsf-storyblok-module'
 import { forStoryblok } from 'src/modules/vsf-storyblok-module/mappingFallback'
 import { extendStore } from '@vue-storefront/core/helpers'
 import { StorefrontModule, registerModule } from '@vue-storefront/core/lib/modules'
+import { ABTesting } from 'src/modules/a-b-testing'
 import { BudsiesModule } from 'src/modules/budsies'
 import { PromotionPlatformModule } from 'src/modules/promotion-platform'
 import { PaymentBackendMethodsModule } from 'src/modules/payment-backend-methods'
@@ -67,6 +68,7 @@ export function registerClientModules () {
   registerModule(extendUrlModule)
   registerModule(BudsiesModule)
   registerModule(GoogleTagManagerModule)
+  registerModule(ABTesting)
   registerModule(PromotionPlatformModule)
   registerModule(PaymentBackendMethodsModule)
   registerModule(PaymentAffirm)
