@@ -303,10 +303,9 @@ export class CheckoutPage {
 
     if (createAccount) {
       await expect(this.orderReviewStep.accountCreatingLoader).toBeVisible();
-    } else {
-      // TODO: this modal should be also visible after account creation
-      await expect(this.orderReviewStep.orderProcessingLoader).toBeVisible();
     }
+
+    await expect(this.orderReviewStep.orderProcessingLoader).toBeVisible();
 
     await expect(this.orderSuccessPage).toBeVisible({ timeout: 30000 });
   }
