@@ -35,7 +35,6 @@ export class PersonalDetailsStep {
   public createAccountCheckbox: Locator;
   public agreeToTermsCheckbox: Locator;
 
-  // TODO: currently this checkbox is not validated properly
   public agreeToTermsError: Locator;
 
   public constructor (public readonly page: Page) {
@@ -55,7 +54,15 @@ export class PersonalDetailsStep {
     this.passwordFormField = new InputFormField(this.passwordFormFieldLocator, 'input[name="password"]', page);
     this.repeatPasswordFormField = new InputFormField(this.passwordFormFieldLocator, 'input[name="password-confirm"]', page);
 
-    this.agreeToTermsCheckbox = page.locator('input[name="acceptConditions"]');
+    const checkboxInputLocator = page.locator('input[name="acceptConditions"]');
+
+    this.agreeToTermsCheckbox = page.locator(
+      '.sf-checkbox',
+      {
+        has: checkboxInputLocator
+      }
+    );
+    this.agreeToTermsError = this.agreeToTermsCheckbox.and(page.locator('.sf-checkbox--has-error'));
   }
 
   public async fillPersonalDetails (
@@ -73,19 +80,24 @@ export class PersonalDetailsStep {
       await this.createAccountCheckbox.click();
       await this.passwordFormField.fill(password);
       await this.repeatPasswordFormField.fill(password);
+      await this.agreeToTermsCheckbox.click();
     }
 
     await this.continueButton.click();
   }
 
   public async expectCorrectValidation () {
-    await this.fillPersonalDetails('', '', '', true, '');
+    await this.fillPersonalDetails('', '', '', false, '');
+    await this.createAccountCheckbox.click();
+    await this.continueButton.click();
 
     await this.firstNameFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
     await this.lastNameFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
     await this.emailFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
     await this.passwordFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
     await this.repeatPasswordFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
+
+    await expect(this.agreeToTermsError).toBeVisible();
 
     await this.emailFormField.fill('test');
     await this.emailFormField.expectToHaveErrorMessage('Please provide valid e-mail address.');
