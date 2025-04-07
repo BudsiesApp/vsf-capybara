@@ -43,14 +43,14 @@ export default Vue.extend({
       return `mailto:?subject=${this.eMailSubject}&body=${emailText}`;
     },
     sharePinterestHref (): string {
-      return `http://pinterest.com/pin/create/button/?media=${this.image}` +
+      return `https://pinterest.com/pin/create/button/?media=${this.image}` +
       `&description=${this.sharingDescription}&url=${this.sharingUrl}`;
     },
     shareTwitterHref (): string {
-      return `http://twitter.com/share?text=${this.twitterDescription}&url=${this.sharingUrl}`;
+      return `https://twitter.com/share?text=${this.twitterDescription}&url=${this.sharingUrl}`;
     },
     shareFacebookHref (): string {
-      return `http://www.facebook.com/sharer.php?u=${this.sharingUrl}`;
+      return `https://www.facebook.com/sharer.php?u=${this.sharingUrl}`;
     }
   }
 })

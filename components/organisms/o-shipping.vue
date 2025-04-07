@@ -130,7 +130,7 @@
         :error-message="
           !$v.shipping.zipCode.required
             ? $t('Field is required')
-            : $t('Name must have at least 3 letters.')
+            : $t('Zip-code must have at least {number} characters.', { number: 3 })
         "
         @blur="onZipCodeBlur"
       />
@@ -145,12 +145,24 @@
             : $t('Please, enter valid phone number')
         "
         class="form__element"
-        :class="{[vuelidateErrorClassName]: $v.shipping.phoneNumber.$error}"
+        :class="{
+          [vuelidateErrorClassName]: $v.shipping.phoneNumber.$error,
+          'form__element--half': showVatIdField
+        }"
         name="phone"
         autocomplete="tel"
         :label="$t('Phone number')"
         :disabled="isFormFieldsDisabled"
         @blur="$v.shipping.phoneNumber.$touch()"
+      />
+
+      <SfInput
+        v-if="showVatIdField"
+        v-model.trim="shipping.vat_id"
+        class="form__element form__element--half"
+        name="vat_id"
+        :label="$t('Tax ID')"
+        :disabled="isFormFieldsDisabled"
       />
     </div>
     <SfHeading
@@ -171,14 +183,15 @@
         >
           <template #label>
             <div class="sf-radio__label shipping__label">
-              <div>{{ method.method_title }}</div>
+              <div>{{ getCarrierTitle(method) }}</div>
               <div class="shipping__label-price">
                 {{ method.amount | price }}
               </div>
             </div>
           </template>
-          <template #details v-if="method.method_name">
-            <p>{{ method.method_name }}</p>
+
+          <template #details v-if="getMethodTitle(method)">
+            <p>{{ getMethodTitle(method) }}</p>
           </template>
         </SfRadio>
         <p class="shipping__note">
@@ -203,7 +216,11 @@
       </div>
 
       <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+        <component
+          :is="linkComponent.component"
+          :key="linkComponent.key"
+          v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks"
+        />
       </template>
     </div>
   </div>
@@ -233,6 +250,7 @@ import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/help
 const States = require('@vue-storefront/i18n/resource/states.json');
 
 const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/);
+const unitedStatesCountryCode = 'US';
 
 export default {
   name: 'OShipping',
@@ -324,16 +342,35 @@ export default {
       }
 
       return false;
+    },
+    showVatIdField () {
+      return !!this.shipping.country && this.shipping.country !== unitedStatesCountryCode;
     }
   },
   methods: {
     stateCodeAutocompleteOptionSearch,
+    getCarrierTitle (method) {
+      // It's the only way to separate M1 from M2
+      if (method.hasOwnProperty('method_name')) {
+        return method.method_title;
+      }
+
+      return method.carrier_title;
+    },
+    getMethodTitle (method) {
+      if (method.hasOwnProperty('method_name')) {
+        return method.method_name;
+      }
+
+      return method.method_title;
+    },
     async onChangeCountry () {
       this.changeCountry();
 
       await this.$nextTick();
 
       this.shipping.state = '';
+      this.shipping.region_id = null;
 
       this.validateCountryRelatedFields();
     },
@@ -445,7 +482,15 @@ export default {
 
         this.shipping.region_id = null;
       }
+    },
+    showVatIdField: {
+      handler (val) {
+        if (!val) {
+          this.shipping.vat_id = '';
+        }
+      }
     }
+
   }
 };
 </script>

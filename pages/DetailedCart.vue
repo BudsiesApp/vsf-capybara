@@ -33,7 +33,7 @@
                 <template #input>
                   <SfQuantitySelector
                     :qty="product.qty"
-                    :disabled="isUpdatingQuantity"
+                    :disabled="isCartItemProcessing"
                     @input="changeProductQuantity(product, $event)"
                     v-if="showQuantitySelectorForProduct(product)"
                   />
@@ -51,6 +51,7 @@
                   <SfButton
                     v-if="showEditButton(product.sku)"
                     class="sf-button--text actions__button"
+                    :disabled="isCartItemProcessing"
                     @click="editHandler(product)"
                   >
                     Edit
@@ -58,6 +59,7 @@
 
                   <SfButton
                     class="sf-button--text sf-collected-product__remove sf-collected-product__remove--text actions__button"
+                    :disabled="isCartItemProcessing"
                     @click="removeHandler(product)"
                   >
                     Remove
@@ -83,7 +85,7 @@
                 class="color-secondary _button"
               >
                 <router-link class="_inner" :to="{name: 'bulk-quote'}">
-                  Add Another Design
+                  Get Another Quote
                 </router-link>
               </SfButton>
 
@@ -97,7 +99,11 @@
             </div>
           </div>
 
-          <div v-else key="empty-cart" class="empty-cart">
+          <div
+            v-else
+            key="empty-cart"
+            class="empty-cart"
+          >
             <SfHeading
               title="Your cart is empty"
               :level="2"
@@ -117,7 +123,7 @@
 
       <div v-if="totalItems" class="detailed-cart__aside">
         <OrderSummary
-          :is-updating-quantity="isUpdatingQuantity"
+          :is-updating-quantity="isCartItemProcessing"
         />
       </div>
     </div>
@@ -180,7 +186,7 @@ export default {
   },
   data () {
     return {
-      isUpdatingQuantity: false,
+      isCartItemProcessing: false,
       isDropdownOpen: false,
       isMounted: false,
       syncQuantityDebounced: undefined
@@ -249,8 +255,18 @@ export default {
     getProductSpecialPrice (product, campaignContent) {
       return getCartItemPrice(product, {}).special;
     },
-    removeHandler (product) {
-      this.$store.dispatch('cart/removeItem', { product: product });
+    async removeHandler (product) {
+      if (this.isCartItemProcessing) {
+        return;
+      }
+
+      this.isCartItemProcessing = true;
+
+      try {
+        await this.$store.dispatch('cart/removeItem', { product: product });
+      } finally {
+        this.isCartItemProcessing = false;
+      }
     },
     getThumbnailForProductExtend (product) {
       const customizationSystemThumbnail =
@@ -270,6 +286,10 @@ export default {
       return getThumbnailForProduct(product);
     },
     async changeProductQuantity (product, qty) {
+      if (!qty || Number.isNaN(qty) || qty < 1) {
+        return;
+      }
+
       this.$store.commit(`cart/${CART_UPD_ITEM}`, { product, qty });
 
       if (this.$store.getters['cart/isCartSyncEnabled']) {
@@ -280,14 +300,18 @@ export default {
       return getProductMaxSaleQuantity(product) > 1;
     },
     syncQuantity () {
-      this.isUpdatingQuantity = true;
+      if (this.isCartItemProcessing) {
+        return;
+      }
+
+      this.isCartItemProcessing = true;
 
       return this.$store
         .dispatch('cart/sync', {
           forceClientState: true
         })
         .finally(() => {
-          this.isUpdatingQuantity = false;
+          this.isCartItemProcessing = false;
         });
     },
     onDropdownActionClick (action) {
@@ -361,13 +385,17 @@ export default {
 ._buttons-container {
   ._button {
     --c-link: var(--c-primary);
-    --c-link-hover: var(--c-primary);
+    --c-link-hover: var(--c-light-variant);
     --button-padding: 0;
 
     margin-top: var(--spacer-base);
 
     ._inner {
       padding: var(--spacer-sm) calc(var(--spacer-sm) * 1.5);
+    }
+
+    &:hover {
+      --c-link: var(--c-light-variant);
     }
   }
 }

@@ -109,13 +109,18 @@ export default Vue.extend({
     horizontalSlides: {
       type: Boolean,
       default: true
+    },
+    loop: {
+      type: Boolean,
+      default: true
     }
   },
   data () {
     return {
       currentSlideIndex: 0,
       swiper: undefined as Swiper | undefined,
-      isSwiperInitialized: false
+      isSwiperInitialized: false,
+      fCurrentSlidesPerView: undefined as number | undefined
     };
   },
   computed: {
@@ -139,6 +144,9 @@ export default Vue.extend({
         }
       };
     },
+    itemsJson (): string {
+      return JSON.stringify(this.items);
+    },
     swiperOptions (): SwiperOptions {
       const direction = this.horizontalSlides ? 'horizontal' : 'vertical';
 
@@ -161,6 +169,13 @@ export default Vue.extend({
         ? this.slidesPerViewMobile
         : this.slidesPerView;
       return Math.min(defaultSlidesPerView, this.maxSlidesPerView);
+    },
+    currentSlidesPerView (): number {
+      if (this.fCurrentSlidesPerView !== undefined) {
+        return this.fCurrentSlidesPerView;
+      }
+
+      return this.defaultSlidesPerView;
     },
     style (): Record<string, string> {
       const style: Record<string, string> = {};
@@ -188,7 +203,7 @@ export default Vue.extend({
       return this.slidesPerView;
     },
     isLoopAvailable (): boolean {
-      return this.defaultSlidesPerView <= this.items.length;
+      return this.loop && this.currentSlidesPerView < this.items.length;
     }
   },
   mounted (): void {
@@ -226,6 +241,13 @@ export default Vue.extend({
           this.currentSlideIndex
         );
       };
+      const onBreakpoint = (swiper: Swiper) => {
+        if (swiper.params.slidesPerView === undefined || swiper.params.slidesPerView === 'auto') {
+          return;
+        }
+
+        this.fCurrentSlidesPerView = swiper.params.slidesPerView;
+      };
       const onSlideClick = (swiper: Swiper) => {
         if (swiper.clickedIndex === undefined) {
           return;
@@ -252,6 +274,7 @@ export default Vue.extend({
       this.swiper.on('init', onInit);
       this.swiper.on('realIndexChange', onRealIndexChange);
       this.swiper.on('click', onSlideClick);
+      this.swiper.on('breakpoint', onBreakpoint);
 
       this.swiper.init();
     },
@@ -327,7 +350,11 @@ export default Vue.extend({
     spaceBetween (val) {
       this.updateSwiper({ spaceBetween: val });
     },
-    'items.length' () {
+    itemsJson (newValue: string, oldValue: string) {
+      if (newValue === oldValue) {
+        return;
+      }
+
       this.reInitSwiper();
     },
     isMobile () {
@@ -337,6 +364,9 @@ export default Vue.extend({
       this.updateSwiper({ centeredSlides: val });
     },
     horizontalSlides () {
+      this.reInitSwiper();
+    },
+    isLoopAvailable () {
       this.reInitSwiper();
     }
   }
@@ -405,6 +435,9 @@ export default Vue.extend({
   }
 
   .swiper-button-lock {
+    --next-arrow-display: none;
+    --previous-arrow-display: none;
+
     + ._counter {
       display: none;
     }
