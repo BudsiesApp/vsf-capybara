@@ -7,8 +7,17 @@
       :is="formComponent"
       :product="currentProduct"
       :existing-cart-item="existingCartItem"
+      @hook:mounted="onFormMounted"
       v-if="showForm"
     />
+
+    <template v-if="formPlaceholderComponent">
+      <component
+        :is="formPlaceholderComponent"
+        class="_placeholder"
+        v-show="showPlaceholder"
+      />
+    </template>
   </div>
 </template>
 
@@ -18,16 +27,23 @@ import {
   defineComponent,
   PropType,
   ref,
-  toRefs
+  toRefs,
+  watch
 } from '@vue/composition-api';
 
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { htmlDecode } from '@vue-storefront/core/filters';
+import { isServer } from '@vue-storefront/core/helpers';
 
 import { ProductStructuredData } from 'src/modules/budsies';
+import { getCanonicalUrl } from 'src/modules/shared';
 
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 import { useProductPage } from 'theme/helpers/use-product-page';
+
+import FormWithImagesGalleryPlaceholder from 'theme/components/customization-system/forms/placeholders/form-with-images-gallery-placeholder.vue';
+import VerticalStepsFormPlaceholder from 'theme/components/customization-system/forms/placeholders/vertical-steps-form-placeholder.vue';
+import PhrasePillowFormPlaceholder from 'theme/components/customization-system/forms/placeholders/phrase-pillow-form-placeholder.vue';
 
 enum LayoutType {
   WITH_IMAGES_GALLERY = 'with-images-gallery',
@@ -38,6 +54,7 @@ enum LayoutType {
 export default defineComponent({
   name: 'CustomizableProduct',
   components: {
+    FormWithImagesGalleryPlaceholder,
     FormWithImagesGallery: () =>
       import(
         /* webpackChunkName: "vsf-images-gallery-form" */ 'theme/components/customization-system/forms/form-with-images-gallery.vue'
@@ -47,10 +64,12 @@ export default defineComponent({
       import(
         /* webpackChunkName: "vsf-phrase-pillow-form" */ 'theme/components/customization-system/forms/phrase-pillow-form.vue'
       ),
+    PhrasePillowFormPlaceholder,
     VerticalStepsForm: () =>
       import(
         /* webpackChunkName: "vsf-vertical-form" */ 'theme/components/customization-system/forms/vertical-steps-form.vue'
-      )
+      ),
+    VerticalStepsFormPlaceholder
   },
   props: {
     sku: {
@@ -85,13 +104,52 @@ export default defineComponent({
           return 'phrase-pillow-form';
       }
     });
+    const formPlaceholderComponent = computed<string | undefined>(() => {
+      switch (props.layout) {
+        case LayoutType.WITH_IMAGES_GALLERY:
+          return 'form-with-images-gallery-placeholder';
+        case LayoutType.VERTICAL:
+          return 'vertical-steps-form-placeholder';
+        case LayoutType.PHRASE_PILLOW:
+          return 'phrase-pillow-form-placeholder';
+        default:
+          return undefined;
+      }
+    });
+
+    const isFormMounted = ref(isServer);
+    const isLeavePage = ref(false);
+
+    function onFormMounted () {
+      isFormMounted.value = true;
+    }
+
+    const showPlaceholder = computed<boolean>(() => {
+      return !isLeavePage.value && (!showForm.value || !isFormMounted.value);
+    });
+
+    watch(
+      sku,
+      (newValue, oldValue) => {
+        if (newValue === oldValue) {
+          return;
+        }
+
+        isFormMounted.value = false;
+        isLeavePage.value = false;
+      }
+    );
 
     return {
       ...useExistingCartItem(existingPlushieId, context),
       canUsePersistedCustomizationState,
       currentProduct,
       formComponent,
-      showForm
+      formPlaceholderComponent,
+      isLeavePage,
+      onFormMounted,
+      showForm,
+      showPlaceholder
     };
   },
   beforeRouteEnter (to, from, next) {
@@ -101,6 +159,7 @@ export default defineComponent({
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
+    this.isLeavePage = true;
     next();
   },
   metaInfo () {
@@ -108,19 +167,29 @@ export default defineComponent({
       this.currentProduct?.meta_description ||
       this.currentProduct?.short_description;
 
+    const meta: any[] = [];
+
+    if (description) {
+      meta.push(
+        {
+          vmid: 'description',
+          name: 'description',
+          content: htmlDecode(description)
+        }
+      );
+    }
+
     return {
       title: htmlDecode(
-        this.currentProduct?.meta_title || this.currentProduct?.name
+        this.currentProduct?.meta_title || this.currentProduct?.name || ''
       ),
-      meta: description
-        ? [
-          {
-            vmid: 'description',
-            name: 'description',
-            content: htmlDecode(description)
-          }
-        ]
-        : []
+      meta,
+      link: [
+        {
+          rel: 'canonical',
+          href: getCanonicalUrl(this.$ssrContext, this.$router)
+        }
+      ]
     };
   }
 });
@@ -133,7 +202,8 @@ export default defineComponent({
   box-sizing: border-box;
   padding: 0 1rem;
 
-  .form-with-images-gallery {
+  .form-with-images-gallery,
+  .form-with-images-gallery-placeholder {
     margin-top: var(--spacer-lg);
   }
 

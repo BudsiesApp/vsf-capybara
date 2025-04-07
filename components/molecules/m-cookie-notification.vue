@@ -91,13 +91,12 @@ export default {
   color: var(--c-light-darken);
   .cookie {
     box-sizing: border-box;
-    padding: 0 calc(var(--spacer-2xl) + var(--spacer-2xs)) 0 var(--spacer-sm);
+    padding: var(--spacer-xs) calc(var(--spacer-2xl) + var(--spacer-2xs)) var(--spacer-xs) var(--spacer-sm);
     margin: auto;
     display: flex;
     align-items: center;
     width: 1272px;
     max-width: 100%;
-    height: 4.5rem;
 
     &__icon {
       cursor: pointer;
@@ -114,14 +113,20 @@ export default {
 
   @media (min-width: 390px) {
     .cookie {
-      height: 3rem;
       padding-left: var(--spacer-base);
+    }
+  }
+
+  @media (min-width: $tablet-min) {
+    .cookie {
+      padding-top: var(--spacer-sm);
+      padding-bottom: var(--spacer-sm);
     }
   }
 
   @media (min-width: $desktop-xl-min) {
     .cookie {
-      padding: 0 var(--spacer-base);
+      padding: var(--spacer-sm) var(--spacer-base);
     }
   }
 }

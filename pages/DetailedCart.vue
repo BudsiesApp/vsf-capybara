@@ -31,13 +31,14 @@
                     :customizations="product.customizations"
                     :customization-state="(product.extension_attributes || {}).customization_state"
                     :product-options="getCartItemOptions(product)"
+                    :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
                   />
                 </template>
 
                 <template #input>
                   <SfQuantitySelector
                     :qty="product.qty"
-                    :disabled="isUpdatingQuantity"
+                    :disabled="isCartItemProcessing"
                     @input="changeProductQuantity(product, $event)"
                     v-if="showQuantitySelectorForProduct(product)"
                   />
@@ -55,6 +56,7 @@
                   <SfButton
                     v-if="showEditButton(product.sku)"
                     class="sf-button--text actions__button"
+                    :disabled="isCartItemProcessing"
                     @click="editHandler(product)"
                   >
                     Edit
@@ -62,6 +64,7 @@
 
                   <SfButton
                     class="sf-button--text sf-collected-product__remove sf-collected-product__remove--text actions__button"
+                    :disabled="isCartItemProcessing"
                     @click="removeHandler(product)"
                   >
                     Remove
@@ -111,7 +114,11 @@
             </div>
           </div>
 
-          <div v-else key="empty-cart" class="empty-cart">
+          <div
+            v-else
+            key="empty-cart"
+            class="empty-cart"
+          >
             <SfHeading
               title="Your cart is empty"
               :level="2"
@@ -130,7 +137,7 @@
       </div>
 
       <div v-if="totalItems" class="detailed-cart__aside">
-        <OrderSummary :is-updating-quantity="isUpdatingQuantity" />
+        <OrderSummary :is-updating-quantity="isCartItemProcessing" />
 
         <div class="_shipping-handling-block">
           <MBlockStory story-slug="cart_shipping_handling" />
@@ -184,13 +191,13 @@ const golfHeadCoversProductsSkus = [
   'golfHeadCoversOther_bundle'
 ];
 
-const printedProductSkus = [
-  'petsiesCustomPrintedSocks_bundle',
-  'customPrintedMasks_bundle',
-  'customPrintedKeychains_bundle',
-  'customFeltedMagnets_bundle',
-  'customFeltedOrnaments_bundle'
-];
+const printedProductSkuRouteNameDictionary = {
+  'petsiesCustomPrintedSocks_bundle': 'printed-socks-creation-page',
+  'customPrintedMasks_bundle': 'printed-masks-creation-page',
+  'customPrintedKeychains_bundle': 'printed-keychains-creation-page',
+  'customFeltedMagnets_bundle': 'felted-magnets-creation-page',
+  'customFeltedOrnaments_bundle': 'felted-ornaments-creation-page'
+}
 
 const blanketProductsSkus = [
   'customRenaissanceBlankets_bundle',
@@ -202,22 +209,22 @@ const clayPlushieProductSkus = [
   'petsiesBobbleheads_bundle'
 ];
 
-const clothesProductSkus = [
-  'customPajamas_bundle',
-  'customHawaiianShirts_bundle',
-  'customGolfShirts_bundle'
-];
+const clothesProductSkuRouteNameDictionary = {
+  'customPajamas_bundle': 'pajamas-creation',
+  'customHawaiianShirts_bundle': 'hawaiian-shirts-creation',
+  'customGolfShirts_bundle': 'golf-shirts-creation'
+};
 
 const customPillowSku = 'customPillow_bundle';
 const customPhotoPortraitsSku = 'customPhotoPortraits_bundle';
 
 const editableProductsSkus = [
   ...foreversProductsSkus,
-  ...printedProductSkus,
+  ...Object.keys(printedProductSkuRouteNameDictionary),
   ...blanketProductsSkus,
   ...clayPlushieProductSkus,
   ...golfHeadCoversProductsSkus,
-  ...clothesProductSkus,
+  ...Object.keys(clothesProductSkuRouteNameDictionary),
   customPillowSku,
   customPhotoPortraitsSku
 ];
@@ -242,7 +249,7 @@ export default {
   },
   data () {
     return {
-      isUpdatingQuantity: false,
+      isCartItemProcessing: false,
       isDropdownOpen: false,
       dropdownActions: [
         {
@@ -399,9 +406,9 @@ export default {
             existingPlushieId: product.extension_attributes?.plushie_id
           }
         });
-      } else if (clothesProductSkus.includes(product.sku)) {
+      } else if (Object.keys(clothesProductSkuRouteNameDictionary).includes(product.sku)) {
         this.$router.push({
-          name: 'clothes-product',
+          name: clothesProductSkuRouteNameDictionary[product.sku],
           params: { sku: product.sku },
           query: {
             existingPlushieId: product.extension_attributes?.plushie_id
@@ -417,9 +424,9 @@ export default {
           name: 'forevers-create',
           query: { id: product.extension_attributes?.plushie_id }
         });
-      } else if (printedProductSkus.includes(product.sku)) {
+      } else if (Object.keys(printedProductSkuRouteNameDictionary).includes(product.sku)) {
         this.$router.push({
-          name: 'printed-product',
+          name: printedProductSkuRouteNameDictionary[product.sku],
           params: { sku: product.sku },
           query: {
             existingPlushieId: product.extension_attributes?.plushie_id
@@ -454,8 +461,18 @@ export default {
     formatPrice (price) {
       return PriceHelper.formatProductPrice(price);
     },
-    removeHandler (product) {
-      this.$store.dispatch('cart/removeItem', { product: product });
+    async removeHandler (product) {
+      if (this.isCartItemProcessing) {
+        return;
+      }
+
+      this.isCartItemProcessing = true;
+
+      try {
+        await this.$store.dispatch('cart/removeItem', { product: product });
+      } finally {
+        this.isCartItemProcessing = false;
+      }
     },
     getThumbnailForProductExtend (product) {
       const customizationSystemThumbnail =
@@ -475,6 +492,10 @@ export default {
       return getThumbnailForProduct(product);
     },
     async changeProductQuantity (product, qty) {
+      if (!qty || Number.isNaN(qty) || qty < 1) {
+        return;
+      }
+
       this.$store.commit(`cart/${CART_UPD_ITEM}`, { product, qty });
 
       if (this.$store.getters['cart/isCartSyncEnabled']) {
@@ -485,14 +506,18 @@ export default {
       return getProductMaxSaleQuantity(product) > 1;
     },
     syncQuantity () {
-      this.isUpdatingQuantity = true;
+      if (this.isCartItemProcessing) {
+        return;
+      }
+
+      this.isCartItemProcessing = true;
 
       return this.$store
         .dispatch('cart/sync', {
           forceClientState: true
         })
         .finally(() => {
-          this.isUpdatingQuantity = false;
+          this.isCartItemProcessing = false;
         });
     },
     onDropdownActionClick (action) {

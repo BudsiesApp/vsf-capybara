@@ -28,13 +28,19 @@ export function useCreationWizardProductTypeStep (
     root.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
 
     try {
-      let product = await root.$store.dispatch('product/loadProduct', {
-        parentSku: sku,
-        childSku: null,
-        setCurrent: false
-      });
-
-      await root.$store.dispatch('budsies/loadProductRushAddons', { productId: product.id });
+      let [product] = await Promise.all(
+        [
+          root.$store.dispatch('product/loadProduct', {
+            parentSku: sku,
+            childSku: null,
+            setCurrent: false
+          }),
+          root.$store.dispatch(
+            'budsies/loadProductsRushAddons',
+            { productSku: sku }
+          )
+        ]
+      );
 
       product = updateProductProductionTimeCustomizationData(
         product,

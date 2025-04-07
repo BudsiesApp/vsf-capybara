@@ -22,7 +22,9 @@
           :aspect-ratio="1"
         />
 
-        {{ item.title }}
+        <span class="_title">
+          {{ item.title }}
+        </span>
       </SfButton>
     </div>
   </div>

@@ -28,7 +28,9 @@
         <slot />
       </div>
 
-      <LazyHydrate when-visible>
+      <LazyHydrate
+        when-visible
+      >
         <OFooter
           class="default-layout_footer"
           :class="{ '-show-for-medium-up': hideFooterOnMobile }"

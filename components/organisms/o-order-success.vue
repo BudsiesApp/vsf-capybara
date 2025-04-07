@@ -127,7 +127,9 @@
               {{ $t('Rewards dollars may be applied onto existing orders within 7 days of checkout.') }}
             </p>
 
-            <notice-of-financial-incentive-link />
+            <template v-if="$additionalContent.financialIncentivesLinks">
+              <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.financialIncentivesLinks" />
+            </template>
           </div>
         </div>
       </div>
@@ -141,7 +143,6 @@ import { SfButton, SfHeading } from '@storefront-ui/vue';
 
 import { Order } from 'core/modules/order/types/Order';
 import { InjectType } from 'src/modules/shared';
-import { NoticeOfFinancialIncentiveLink } from 'src/modules/true-vault'
 
 import MSocialSharing from 'theme/components/molecules/m-social-sharing.vue';
 
@@ -183,7 +184,6 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
     MShareSpecialStoryForm,
     MShareBirthdayForm,
     MSocialSharing,
-    NoticeOfFinancialIncentiveLink,
     SfButton,
     SfHeading
   },
@@ -208,7 +208,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
       sharingDescription: `${this.$t('Woah! @Petsies makes a custom plush lookalike of your pet (just send them a photo!). Check out')} ${baseUrl}`,
       eMailSubject: this.$t('Check out Petsies - they make a custom plush lookalike of your pet!') as string,
       twitterDescription: this.$t('Now you can get a custom plush lookalike of your pet from @PetsiesOfficial. Check it out! https://t.co/YxtXW7CYJQ') as string,
-      image: 'http://pbs.twimg.com/media/CqFVJ8bVYAI2fK0.jpg'
+      image: 'https://pbs.twimg.com/media/CqFVJ8bVYAI2fK0.jpg'
     };
   },
   destroyed () {

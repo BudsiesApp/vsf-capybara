@@ -114,8 +114,6 @@
 import {
   computed,
   defineComponent,
-  nextTick,
-  onMounted,
   PropType,
   Ref,
   ref,
@@ -129,6 +127,7 @@ import config from 'config';
 import CartItem from 'core/modules/cart/types/CartItem';
 import Product from 'core/modules/catalog/types/Product';
 import i18n from '@vue-storefront/core/i18n';
+import { useABTestingCustomizationsFilter } from 'src/modules/a-b-testing';
 import {
   Customization,
   useCustomizationState,
@@ -147,6 +146,7 @@ import {
 } from 'src/modules/customization-system';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
+import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import { usePhrasePillowFormSteps } from 'theme/helpers/use-phrase-pillow-form-steps';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 
@@ -187,7 +187,7 @@ export default defineComponent({
     ValidationObserver
   },
   setup (props, context) {
-    const { existingCartItem, product } = toRefs(props);
+    const { canUsePersistedCustomizationState, existingCartItem, product } = toRefs(props);
 
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
@@ -217,15 +217,15 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
-      replaceCustomizationState,
       selectedOptionValuesIds,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      mergeCustomizationState
     } = useCustomizationState(existingCartItem);
     const {
-      availableCustomization,
       availableCustomizations,
       availableOptionValues,
-      customizationAvailableOptionValues
+      customizationAvailableOptionValues,
+      removeUnavailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
       selectedOptionValuesIds,
@@ -265,32 +265,26 @@ export default defineComponent({
       onCustomizationOptionInput
     );
 
-    const { getPreservedData, removePreservedState } =
+    const { unhandledCustomizationsFilter } = useSelectedOptionValueUrlQuery(
+      productCustomizations,
+      availableOptionValues,
+      customizationOptionValue,
+      product,
+      mergeCustomizationState,
+      removeUnavailableOptionValues,
+      context
+    );
+
+    const { removePreservedState } =
       useCustomizationStatePreservation(
         productSku,
         customizationState,
-        existingCartItem
+        existingCartItem,
+        [unhandledCustomizationsFilter],
+        canUsePersistedCustomizationState,
+        mergeCustomizationState,
+        removeUnavailableOptionValues
       );
-
-    onMounted(async () => {
-      await nextTick();
-
-      if (
-        existingCartItem.value ||
-        !props.canUsePersistedCustomizationState
-      ) {
-        removePreservedState();
-        return;
-      }
-
-      const preservedState = await getPreservedData();
-
-      if (!preservedState) {
-        return;
-      }
-
-      replaceCustomizationState(preservedState.customizationState);
-    });
 
     const { emailCustomizationFilter, persistCustomerEmail } =
       useEmailCustomization(
@@ -299,10 +293,14 @@ export default defineComponent({
         updateCustomizationOptionValue
       );
 
+    const { customizationFilter } = useABTestingCustomizationsFilter(
+      context.ssrContext
+    );
+
     const { filteredCustomizations } = useCustomizationsFilter(
       availableCustomizations,
       customizationAvailableOptionValues,
-      [emailCustomizationFilter, requiredCustomizationsFilter]
+      [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter]
     );
 
     const customizationGroups = useCustomizationsGroups(
@@ -323,6 +321,8 @@ export default defineComponent({
       existingCartItem,
       context
     );
+
+    const { isUnmounted } = useComponentUnmountedChecker();
 
     async function onFormSubmit (): Promise<void> {
       if (!validationObserver.value) {
@@ -346,11 +346,19 @@ export default defineComponent({
         processedImageUploadCustomizationStateItem
       );
 
+      if (isUnmounted.value) {
+        return;
+      }
+
       try {
         await addToCartHandler();
 
         persistCustomerEmail();
         removePreservedState();
+
+        if (isUnmounted.value) {
+          return;
+        }
 
         context.root.$router.push({
           name: 'cross-sells',
@@ -400,15 +408,6 @@ export default defineComponent({
         currentStep?.name.toLowerCase() === BACK_DESIGN_STEP_NAME
       );
     });
-
-    useSelectedOptionValueUrlQuery(
-      availableCustomization,
-      availableOptionValues,
-      customizationOptionValue,
-      product,
-      updateCustomizationOptionValue,
-      context
-    );
 
     return {
       ...customizationGroups,

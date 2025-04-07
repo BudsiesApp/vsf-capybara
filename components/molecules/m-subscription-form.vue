@@ -24,8 +24,9 @@
             :name="emailInputName"
             :label="$t('E-mail address')"
             :disabled="isSubmitting"
-            :valid="!errors.length"
-            :error-message="errors[0]"
+            :valid="!errors.length && !submitError"
+            :error-message="errors[0] || submitError"
+            @input="onEmailInput"
           />
         </validation-provider>
 
@@ -34,9 +35,13 @@
         </MSpinnerButton>
       </form>
 
-      <california-privacy-notice-link />
-
-      <notice-of-financial-incentive-link />
+      <template v-if="$additionalContent.financialIncentivesLinks">
+        <component
+          :is="linkComponent.component"
+          :key="linkComponent.key"
+          v-for="linkComponent in $additionalContent.financialIncentivesLinks"
+        />
+      </template>
 
       <div class="_success-message" v-if="!displayForm">
         {{ successMessage }}
@@ -55,7 +60,6 @@ import Task from '@vue-storefront/core/lib/sync/types/Task';
 import i18n from '@vue-storefront/i18n';
 
 import { usePersistedEmail } from 'src/modules/persisted-customer-data';
-import { CaliforniaPrivacyNoticeLink, NoticeOfFinancialIncentiveLink } from 'src/modules/true-vault';
 
 import MSpinnerButton from 'theme/components/molecules/m-spinner-button.vue';
 
@@ -69,9 +73,7 @@ extend('email', email);
 export default defineComponent({
   name: 'MSubscriptionForm',
   components: {
-    CaliforniaPrivacyNoticeLink,
     MSpinnerButton,
-    NoticeOfFinancialIncentiveLink,
     SfInput,
     ValidationProvider,
     ValidationObserver
@@ -100,9 +102,26 @@ export default defineComponent({
   },
   setup () {
     const email = ref<string | undefined>(undefined);
+    const submitError = ref<string | undefined>(undefined);
+
+    function handleError (task: Task): void {
+      if (task.result.errorMessage) {
+        submitError.value = task.result.errorMessage;
+        return;
+      }
+
+      submitError.value = i18n.t('Something went wrong.').toString();
+    }
+
+    function onEmailInput (): void {
+      submitError.value = undefined;
+    }
 
     return {
       email,
+      handleError,
+      onEmailInput,
+      submitError,
       ...usePersistedEmail(email)
     }
   },
@@ -127,26 +146,21 @@ export default defineComponent({
       }
 
       this.isSubmitting = true;
+      this.submitError = undefined;
 
       this.persistLastUsedCustomerEmail(this.email);
 
       try {
         const response = await this.subscribeAction(this.email);
 
-        if (response.result.errorMessage) {
-          const validationObserver = this.$refs.validationObserver as InstanceType<typeof ValidationObserver>;
-
-          validationObserver.setErrors({
-            [this.emailInputName]: response.result.errorMessage
-          })
-          return;
-        }
-
         if (response.resultCode !== 200) {
+          this.handleError(response);
           return;
         }
 
         this.isSuccessSubscribed = true;
+      } catch (_) {
+        this.submitError = i18n.t('Something went wrong.').toString();
       } finally {
         this.isSubmitting = false;
       }

@@ -89,7 +89,7 @@
           :valid="!$v.payment.country.$error"
           :error-message="$t('Field is required')"
           :disabled="isFormFieldsDisabled"
-          @change="changeCountry"
+          @change="onChangeCountry"
         />
 
         <SfInput
@@ -107,6 +107,7 @@
           v-model="payment.region_id"
           name="address-level1"
           autocomplete="address-level1"
+          :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
           class="
           form__element
           form__element--half
@@ -149,7 +150,7 @@
           :error-message="
             !$v.payment.zipCode.required
               ? $t('Field is required')
-              : $t('Name must have at least 3 letters.')
+              : $t('Zip-code must have at least {number} characters.', { number: 3 })
           "
           @blur="$v.payment.zipCode.$touch()"
         />
@@ -163,12 +164,24 @@
               : $t('Please, enter valid phone number')
           "
           class="form__element"
-          :class="{[vuelidateErrorClassName]: $v.payment.phoneNumber.$error}"
+          :class="{
+            [vuelidateErrorClassName]: $v.payment.phoneNumber.$error,
+            'form__element--half': showVatIdField
+          }"
           name="phone"
           autocomplete="tel"
           :label="$t('Phone number')"
           :disabled="isFormFieldsDisabled"
           @blur="$v.payment.phoneNumber.$touch()"
+        />
+
+        <SfInput
+          v-if="showVatIdField"
+          v-model.trim="payment.vat_id"
+          class="form__element form__element--half"
+          name="vat_id"
+          :label="$t('Tax ID')"
+          :disabled="isFormFieldsDisabled"
         />
       </div>
     </div>
@@ -193,7 +206,9 @@
       </div>
     </div>
 
-    <california-privacy-notice-link />
+    <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+    </template>
     <!-- This dummy container below is needed because src\modules\payment-cash-on-delivery\index.ts
          tries to inject here a component with payment description -->
     <div v-show="false" id="checkout-order-review-additional-container" />
@@ -223,16 +238,16 @@ import {
   METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
 } from 'src/modules/vsf-amazon-pay/index';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
-import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
+import { stateCodeAutocompleteOptionSearch } from 'src/modules/shared';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
 const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/);
+const unitedStatesCountryCode = 'US';
 
 export default {
   name: 'OBillingAddress',
   components: {
-    CaliforniaPrivacyNoticeLink,
     SfInput,
     SfButton,
     SfHeading,
@@ -272,9 +287,6 @@ export default {
         required,
         unicodeAlpha
       },
-      paymentMethod: {
-        required
-      },
       phoneNumber: {
         required: requiredIf(function () { return this.isPhoneNumberRequired }),
         phoneValidator
@@ -298,7 +310,7 @@ export default {
       isVirtualCart: 'cart/isVirtualCart'
     }),
     isPhoneNumberRequired () {
-      return this.payment.country && this.payment.country !== 'US';
+      return this.payment.country && this.payment.country !== unitedStatesCountryCode;
     },
     isAddressFormDisabled () {
       return this.sendToShippingAddress || this.sendToBillingAddress;
@@ -349,6 +361,9 @@ export default {
     },
     showAddressFormFields () {
       return !this.sendToShippingAddress;
+    },
+    showVatIdField () {
+      return !!this.payment.country && this.payment.country !== unitedStatesCountryCode;
     }
   },
   mounted () {
@@ -364,11 +379,17 @@ export default {
     EventBus.$off('user-after-loggedin', this.fillLastUsedCustomerData);
   },
   methods: {
-    async changeCountry () {
+    stateCodeAutocompleteOptionSearch,
+    async onChangeCountry () {
+      await this.changeCountry();
       await this.$nextTick();
-      this.payment.state = '';
-      this.validateCountryRelatedFields();
 
+      this.payment.state = '';
+      this.payment.region_id = null;
+
+      this.validateCountryRelatedFields();
+    },
+    async changeCountry () {
       await Promise.all([
         this.$store.dispatch('checkout/updatePaymentDetails', { country: this.payment.country }),
         this.$store.dispatch('cart/syncPaymentMethods', { forceServerSync: true })
@@ -440,6 +461,13 @@ export default {
         }
 
         this.payment.region_id = null;
+      }
+    },
+    showVatIdField: {
+      handler (val) {
+        if (!val) {
+          this.payment.vat_id = '';
+        }
       }
     }
   }

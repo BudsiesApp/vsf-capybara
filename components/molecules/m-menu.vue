@@ -74,6 +74,7 @@
           <SfListItem
             v-for="item in otherProductsItems"
             :key="item.label"
+            :class="item.class ? item.class : ''"
           >
             <router-link
               class="_item-link"
@@ -231,6 +232,13 @@ export default Vue.extend({
         }
       ],
       otherProductsItems: [
+        {
+          label: this.$t('Gift Cards'),
+          url: {
+            name: 'gift-cards'
+          },
+          class: 'mobile-only'
+        },
         {
           label: this.$t('Gift Boxes'),
           url: {

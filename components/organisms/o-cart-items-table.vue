@@ -68,7 +68,8 @@ export default {
           customizationState: cartItem.extension_attributes?.customization_state,
           specialPrice: formattedPrice.special,
           regularPrice: formattedPrice.regular,
-          customOptions: getCartItemOptions(cartItem)
+          customOptions: getCartItemOptions(cartItem),
+          estimatedShipment: cartItem.extension_attributes?.estimated_shipment
         }
       });
     }
