@@ -1,5 +1,7 @@
 import { expect, Locator, Page } from '@playwright/test';
 
+import { normalizeLabel } from '../../normalize-label';
+
 export class DropdownFormFieldBase {
   public formField: Locator;
 
@@ -22,6 +24,21 @@ export class DropdownFormFieldBase {
   public async selectByOptionTitle (title: string): Promise<void> {
     await this.selector.click();
     await this.optionsList.locator('li').getByText(title).click();
+  }
+
+  public async selectByOptionIndex (index: number): Promise<void> {
+    await this.selector.click();
+    await this.optionsList.locator('li').nth(index).click();
+  }
+
+  public async getSelectedOptionTitle (): Promise<string | null> {
+    const selectedOptionText = await this.selectedOption.textContent();
+
+    if (!selectedOptionText) {
+      return null;
+    }
+
+    return normalizeLabel(selectedOptionText);
   }
 
   public async expectOptionToBeSelected (title: string): Promise<void> {

@@ -1,12 +1,13 @@
 import { Locator, Page } from '@playwright/test';
 
 import { QuoteOrderPage } from './quote-order';
-import { InputFormField } from '../../helpers/form/form-fields';
+import { SelectFormField } from '../../helpers/form/form-fields';
 
 export class PlushQuoteOrderPage extends QuoteOrderPage {
   public static readonly PLUSH_QUOTE_ORDER_PAGE_URL = '/bulk-quote/';
+  private readonly SIZE_FIELD_LABEL = 'Size in inches';
 
-  public sizeInputField: InputFormField;
+  public sizeInputField: SelectFormField;
 
   public colorSelectorField: Locator;
   public colorSelectorError: Locator;
@@ -14,9 +15,14 @@ export class PlushQuoteOrderPage extends QuoteOrderPage {
   public constructor (public page: Page, public readonly pageIdSelector: string) {
     super(page, pageIdSelector);
 
-    this.sizeInputField = new InputFormField(
-      page.locator('._section .sf-input'),
-      'input[name="size"]',
+    this.sizeInputField = new SelectFormField(
+      page.locator(
+        '.customization-option',
+        {
+          has: this.page.locator(`text="${this.SIZE_FIELD_LABEL}"`)
+        }
+      ),
+      '.sf-select',
       page
     );
     this.colorSelectorField = page.locator('.colors-list-widget');
@@ -32,7 +38,7 @@ export class PlushQuoteOrderPage extends QuoteOrderPage {
   }
 
   public async fillPlushData () {
-    await this.sizeInputField.fill('12');
+    await this.sizeInputField.selectByOptionIndex(1);
     await this.selectColorByIndex(1);
   }
 }
