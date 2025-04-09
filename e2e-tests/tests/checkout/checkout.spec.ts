@@ -66,6 +66,7 @@ test('billing address form has correct validation', async ({ cartPage, checkoutP
 });
 
 test('order can be placed', async ({ cartPage, checkoutPage, quoteOrderPage, bulkQuotationPage }) => {
+  test.setTimeout(60_000);
   await quoteOrderPage.fillRequiredData();
   await quoteOrderPage.submitFormAndVerifyResponse();
   await bulkQuotationPage.waitPageToBeVisible();

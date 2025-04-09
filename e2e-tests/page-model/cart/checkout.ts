@@ -80,7 +80,7 @@ export class PersonalDetailsStep {
       await this.createAccountCheckbox.click();
       await this.passwordFormField.fill(password);
       await this.repeatPasswordFormField.fill(password);
-      await this.agreeToTermsCheckbox.click();
+      await this.agreeToTermsCheckbox.locator('.sf-checkbox__label').click();
     }
 
     await this.continueButton.click();
