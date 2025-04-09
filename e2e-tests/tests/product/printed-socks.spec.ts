@@ -36,7 +36,7 @@ test('product display in cart correctly', async ({ cartPage, printedSocksPage })
 
 test('product can be edited', async ({ cartPage, crossSellsPage, customizableProductPage, imagesGalleryProductPage, printedSocksPage }) => {
   await printedSocksPage.fillRequiredFields();
-  const selectedDesign = await customizableProductPage.getCustomizationSelectValueByLabel(
+  const selectedDesign = await customizableProductPage.getCustomizationThumbnailValueByLabel(
     printedSocksPage.DESIGN_CUSTOMIZATION_OPTION_LABEL
   );
   await customizableProductPage.addToCartAndVerifyResponse();
@@ -48,16 +48,16 @@ test('product can be edited', async ({ cartPage, crossSellsPage, customizablePro
 
   await customizableProductPage.waitPageToBeVisible();
 
-  const filledSelectedDesign = await customizableProductPage.getCustomizationSelectValueByLabel(
+  const filledSelectedDesign = await customizableProductPage.getCustomizationThumbnailValueByLabel(
     printedSocksPage.DESIGN_CUSTOMIZATION_OPTION_LABEL
   );
 
   expect(selectedDesign).toEqual(filledSelectedDesign);
-  await customizableProductPage.fillCustomizationSelectValueByIndex(
+  await customizableProductPage.fillCustomizationThumbnailValueByIndex(
     printedSocksPage.DESIGN_CUSTOMIZATION_OPTION_LABEL,
     2
   );
-  const newSelectedDesign = await customizableProductPage.getCustomizationSelectValueByLabel(
+  const newSelectedDesign = await customizableProductPage.getCustomizationThumbnailValueByLabel(
     printedSocksPage.DESIGN_CUSTOMIZATION_OPTION_LABEL
   );
 
