@@ -1,6 +1,10 @@
 <template>
   <div class="o-bulk-quote-order-form">
-    <SfHeading :level="1" :title="$t('Bulk Order Quote')" class="_title" />
+    <SfHeading
+      :level="1"
+      :title="$t('Bulk Order Quote')"
+      class="_title"
+    />
 
     <validation-observer
       ref="validationObserver"
@@ -28,56 +32,46 @@
               :is-disabled="isDisabled"
               :option-values="colorPaletteCustomizationOptionValues"
               :product-id="product.id"
-              :value="
-                customizationOptionValue[colorPaletteCustomization.id]
+              :value="customizationOptionValue[colorPaletteCustomization.id]
               "
               @input="onCustomizationOptionInput"
             >
-              <template #label="{ label }">
+              <template #label="{ label, isFieldRequired }">
                 <AOrderedHeading
                   :order="4"
                   :level="3"
                   :title="label"
-                  class="_title -required"
+                  class="_title"
+                  :class="{'-required': isFieldRequired}"
                 />
               </template>
             </customization-option>
           </div>
         </template>
 
-        <template #size>
+        <template #size v-if="sizeCustomization">
           <div class="_section">
-            <AOrderedHeading
-              :order="7"
-              :level="3"
-              :title="$t('What’s your preferred size?')"
-              class="_title"
-              :ref="getFieldAnchorName('Size')"
-            />
-
-            <div class="_helper">
-              {{
-                $t(
-                  'Typical sizes are 6" (small), 8" (regular), 12" (large), and 16" (maximum). It\'s OK if you’re not sure.'
-                )
-              }}
-            </div>
-
-            <validation-provider
-              v-slot="{ errors }"
-              :name="$t('\'Size\'')"
-              rules="required|between:6,16"
-              slim
+            <customization-option
+              class="_customization-option"
+              ref="customizationOption"
+              :customization="sizeCustomization"
+              :is-disabled="isDisabled"
+              :option-values="sizeCustomizationOptionValues"
+              :product-id="product.id"
+              :value="customizationOptionValue[sizeCustomization.id]
+              "
+              @input="onCustomizationOptionInput"
             >
-              <SfInput
-                :label="$t('Size')"
-                :valid="!errors.length"
-                :error-message="errors[0]"
-                name="size"
-                class="sf-input--required"
-                v-model="bulkSize"
-              />
-            </validation-provider>
+              <template #label="{ label, isFieldRequired }">
+                <AOrderedHeading
+                  :order="7"
+                  :level="3"
+                  :title="label"
+                  class="_title"
+                  :class="{'-required': isFieldRequired}"
+                />
+              </template>
+            </customization-option>
           </div>
         </template>
 
@@ -110,7 +104,11 @@
 
       <div class="_notice-link-container">
         <template v-if="$additionalContent.formLinks">
-          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.formLinks" />
+          <component
+            :is="linkComponent.component"
+            :key="linkComponent.key"
+            v-for="linkComponent in $additionalContent.formLinks"
+          />
         </template>
       </div>
     </validation-observer>
@@ -186,6 +184,7 @@ function getFormAllRefs (
 }
 
 const COLOR_PALETTE_CUSTOMIZATION_SKU = 'bulk_sample_color_palette';
+const SIZE_CUSTOMIZATION_NAME = 'size';
 
 export default defineComponent({
   name: 'OBulkQuoteOrderForm',
@@ -225,7 +224,29 @@ export default defineComponent({
 
     const colorPaletteCustomizationOptionValues = computed<OptionValue[]>(
       () => {
-        return colorPaletteCustomization.value?.optionData?.values || [];
+        if (!colorPaletteCustomization.value) {
+          return [];
+        }
+
+        return customizationAvailableOptionValues.value[colorPaletteCustomization.value.id] || [];
+      }
+    );
+
+    const sizeCustomization = computed<Customization | undefined>(
+      () => {
+        return availableCustomizations.value.find(
+          (item) => item.name?.toLowerCase() === SIZE_CUSTOMIZATION_NAME
+        );
+      }
+    );
+
+    const sizeCustomizationOptionValues = computed<OptionValue[]>(
+      () => {
+        if (!sizeCustomization.value) {
+          return [];
+        }
+
+        return customizationAvailableOptionValues.value[sizeCustomization.value.id] || [];
       }
     );
 
@@ -236,13 +257,36 @@ export default defineComponent({
       updateCustomizationOptionValue(payload);
     }
 
+    function getSizeNumber (): number | undefined {
+      const sizeCustomizationId = sizeCustomization.value?.id;
+
+      if (!sizeCustomizationId) {
+        return;
+      }
+
+      const selectedSizeOptionValue = sizeCustomizationOptionValues.value.find(
+        (optionValue) => optionValue.id === customizationOptionValue.value[sizeCustomizationId]
+      );
+
+      if (!selectedSizeOptionValue || !selectedSizeOptionValue.name) {
+        return;
+      }
+
+      const sizeNumber = /(\d+)/.exec(selectedSizeOptionValue.name);
+
+      return sizeNumber ? parseInt(sizeNumber[0], 10) : undefined;
+    }
+
     return {
       colorPaletteCustomization,
       colorPaletteCustomizationOptionValues,
       customizationAvailableOptionValues,
       customizationOptionValue,
       customizationState,
+      getSizeNumber,
       onCustomizationOptionInput,
+      sizeCustomization,
+      sizeCustomizationOptionValues,
       validationObserver,
       ...useBulkOrdersBaseForm(),
       ...useFormValidation(validationObserver, () =>
@@ -275,7 +319,6 @@ export default defineComponent({
   data () {
     return {
       isSubmitting: false,
-      bulkSize: undefined as string | undefined,
       showCalculationAnimation: false,
       onCalculationAnimationFinished: () => {}
     };
@@ -332,7 +375,7 @@ export default defineComponent({
           'budsies/createBulkorder',
           {
             product_id: BulkorderQuoteProductId.PLUSHIE,
-            size: this.bulkSize,
+            size: this.getSizeNumber()?.toString(),
             qty: this.bulkordersBaseFormData.quantity,
             project_name: this.bulkordersBaseFormData.name,
             description: this.bulkordersBaseFormData.description,
@@ -402,16 +445,22 @@ export default defineComponent({
   padding: var(--spacer-lg);
 
   ._customization-option {
-    --customization-option-align-items: center;
-    --customization-option-hint-align: center;
-    --widget-error-message-font: var(--font-normal) var(--font-xs) var(--font-family-primary);
+    --dropdown-widget-max-width: 100%;
 
-    width: 100%;
-    text-align: center;
+    &.-widget-ColorsListWidget {
+      --customization-option-align-items: center;
+      --customization-option-hint-align: center;
+      --customization-option-description-align: center;
+      --widget-error-message-font: var(--font-normal) var(--font-xs) var(--font-family-primary);
+
+      width: 100%;
+      text-align: center;
+    }
   }
 
   ._title {
     margin-bottom: var(--spacer-2xl);
+    align-self: center;
   }
 
   ._form-errors {

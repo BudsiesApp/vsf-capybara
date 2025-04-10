@@ -15,13 +15,12 @@ const NAME_TEXT = 'Test name';
 const DESCRIPTION_TEXT = 'Test description';
 const UPDATED_DESCRIPTION_TEXT = 'Updated description';
 const TEST_EMAIL = 'test@test.test';
-const SIZE_VALUE = '12';
 
 const test = testFactory('/bulk-samples/create/');
 
 async function fillRequiredFields (customizableProductPage: CustomizableProductPage) {
   await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
-  await customizableProductPage.fillCustomizationTextValue(SIZE_CUSTOMIZATION_OPTION_LABEL, SIZE_VALUE);
+  await customizableProductPage.fillCustomizationSelectValueByIndex(SIZE_CUSTOMIZATION_OPTION_LABEL, 2);
   await customizableProductPage.fillCustomizationTextValue(NAME_CUSTOMIZATION_OPTION_LABEL, NAME_TEXT);
   await customizableProductPage.fillCustomizationThumbnailValueByIndex(COLOR_PALETTE_CUSTOMIZATION_OPTION_LABEL, 1);
   await customizableProductPage.fillCustomizationSelectValueByIndex(CUSTOMER_TYPE_CUSTOMIZATION_OPTION_LABEL, 1);
