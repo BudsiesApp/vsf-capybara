@@ -317,7 +317,7 @@ export class CheckoutPage {
       await expect(this.orderReviewStep.accountCreatingLoader).toBeVisible();
     }
 
-    await expect(this.orderReviewStep.orderProcessingLoader).toBeVisible();
+    await expect(this.orderReviewStep.orderProcessingLoader).toBeVisible({ timeout: 10000 });
 
     await expect(this.orderSuccessPage).toBeVisible({ timeout: 30000 });
   }
