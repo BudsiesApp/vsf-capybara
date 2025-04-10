@@ -27,7 +27,6 @@ import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { getProductGallery } from '@vue-storefront/core/modules/catalog/helpers';
 import { PriceHelper } from 'src/modules/shared';
-import { getFinalPrice } from 'src/modules/shared/helpers/price';
 
 import { CROSS_SELL, useRelatedProducts } from 'theme/helpers/use-related-products';
 import { getFieldAnchorName } from 'theme/helpers/use-form-validation';
@@ -47,7 +46,7 @@ function getAddonOptionFromProduct (
     sku: product.sku,
     name: product.name,
     description: product.short_description || '',
-    price: getFinalPrice(price),
+    price: PriceHelper.getFinalPrice(price),
     specialPrice: price.special,
     regularPrice: price.regular,
     images: getProductGallery(product).map((item: any) => item.src),
