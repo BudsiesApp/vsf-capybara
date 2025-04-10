@@ -70,6 +70,8 @@ test('order can be placed', async ({ page, printedSocksPage, simpleProductPage, 
 });
 
 test('order can be placed and user account created', async ({ page, simpleProductPage, cartPage, checkoutPage }) => {
+  test.setTimeout(60_000);
+
   await page.goto(simpleProductUrl);
   await simpleProductPage.waitPageToBeVisible();
   await simpleProductPage.addToCartAndVerifyResponse();

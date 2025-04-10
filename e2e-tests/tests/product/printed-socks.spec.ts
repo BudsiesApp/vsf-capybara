@@ -48,6 +48,7 @@ test('product can be edited', async ({ cartPage, crossSellsPage, customizablePro
 
   await customizableProductPage.waitPageToBeVisible();
 
+  await expect(printedSocksPage.designWidget.locator(' ._option.-selected')).toBeVisible();
   const filledSelectedDesign = await customizableProductPage.getCustomizationThumbnailValueByLabel(
     printedSocksPage.DESIGN_CUSTOMIZATION_OPTION_LABEL
   );
@@ -55,7 +56,7 @@ test('product can be edited', async ({ cartPage, crossSellsPage, customizablePro
   expect(selectedDesign).toEqual(filledSelectedDesign);
   await customizableProductPage.fillCustomizationThumbnailValueByIndex(
     printedSocksPage.DESIGN_CUSTOMIZATION_OPTION_LABEL,
-    2
+    3
   );
   const newSelectedDesign = await customizableProductPage.getCustomizationThumbnailValueByLabel(
     printedSocksPage.DESIGN_CUSTOMIZATION_OPTION_LABEL
