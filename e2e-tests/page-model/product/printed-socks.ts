@@ -27,7 +27,7 @@ export class PrintedSocksPage extends ImagesGalleryProductPage {
   }
 
   public async fillRequiredFields () {
-    await this.customizableProductPage.fillCustomizationSelectValueByIndex(
+    await this.customizableProductPage.fillCustomizationThumbnailValueByIndex(
       this.DESIGN_CUSTOMIZATION_OPTION_LABEL,
       1
     );

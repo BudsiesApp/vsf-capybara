@@ -4,13 +4,22 @@
     :class="'-widget-' + widget.component"
     :ref="validationRef"
   >
-    <label
-      class="_option-label"
-      :class="{ '-required': isFieldRequired }"
+    <template
       v-if="showLabel"
     >
-      {{ optionLabel }}
-    </label>
+      <slot
+        name="label"
+        :label="optionLabel"
+        :is-field-required="isFieldRequired"
+      >
+        <label
+          class="_option-label"
+          :class="{ '-required': isFieldRequired }"
+        >
+          {{ optionLabel }}
+        </label>
+      </slot>
+    </template>
 
     <div
       class="_option-description"
@@ -36,7 +45,11 @@
       />
     </validation-provider>
 
-    <div class="_option-hint" v-if="optionHint" v-html="optionHint" />
+    <div
+      class="_option-hint"
+      v-if="optionHint"
+      v-html="optionHint"
+    />
   </div>
 </template>
 
