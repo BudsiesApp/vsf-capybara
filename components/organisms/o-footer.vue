@@ -76,7 +76,7 @@
         </div>
 
         <SfButton class="color-secondary _contact-button">
-          <a href="http://support.budsies.com/" target="_blank">
+          <a href="https://support.budsies.com/" target="_blank">
             {{ $t('Contact Us') }}
           </a>
         </SfButton>
@@ -91,11 +91,13 @@
       <p class="_copyright">
         ©{{ new Date().getFullYear() }} {{ $t('Budsies PR LLC. All Rights Reserved') }}. |
         <privacy-policy-link />
-
-        <california-privacy-notice-link text="| California Privacy Notice" />
       </p>
 
-      <opt-out-link />
+      <template v-if="$additionalContent.footerLinks">
+        <div class="_additional-links">
+          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.footerLinks" />
+        </div>
+      </template>
     </div>
   </footer>
 </template>
@@ -109,15 +111,13 @@ import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import get from 'lodash-es/get';
 
 import { BaseImage } from 'src/modules/budsies';
-import { CaliforniaPrivacyNoticeLink, OptOutLink, PrivacyPolicyLink } from 'src/modules/true-vault';
+import { PrivacyPolicyLink } from 'src/modules/shared';
 
 import MBudsiesBrands from '../molecules/m-budsies-brands';
 
 export default {
   name: 'OFooter',
   components: {
-    CaliforniaPrivacyNoticeLink,
-    OptOutLink,
     PrivacyPolicyLink,
     MBudsiesBrands,
     SfButton,
@@ -142,7 +142,7 @@ export default {
         },
         {
           name: 'twitter',
-          url: 'http://twitter.com/budsiestoys'
+          url: 'https://twitter.com/budsiestoys'
         },
         {
           name: 'linkedin',
@@ -150,7 +150,7 @@ export default {
         },
         {
           name: 'instagram',
-          url: 'http://instagram.com/budsies'
+          url: 'https://instagram.com/budsies'
         },
         {
           name: 'tiktok',
@@ -428,9 +428,16 @@ export default {
     flex-basis: auto;
   }
 
-  ._copyright,
-  .opt-out-link,
-  .california-privacy-notice-link {
+  ._copyright {
+    color: var(--c-footer-gray);
+    font-size: var(--font-2xs);
+
+    a {
+      color: inherit;
+    }
+  }
+
+  ._additional-links {
     --privacy-notice-link-font-size: var(--font-2xs);
     --privacy-notice-link-color: var(--c-footer-gray);
     --privacy-notice-link-margin: 0;
@@ -439,12 +446,10 @@ export default {
     --opt-out-link-font-size: var(--font-2xs);
     --opt-out-link-color: var(--c-footer-gray);
 
-    color: var(--c-footer-gray);
-    font-size: var(--font-2xs);
-
-    a {
-      color: inherit;
-    }
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--spacer-sm);
+    row-gap: var(--spacer-xs);
   }
 
   .social-icon {

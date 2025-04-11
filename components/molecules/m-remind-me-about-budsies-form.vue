@@ -51,7 +51,9 @@
         </SfButton>
       </div>
 
-      <california-privacy-notice-link />
+      <template v-if="$additionalContent.formLinks">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.formLinks" />
+      </template>
     </validation-observer>
 
     <div class="_success-message" v-else>
@@ -70,7 +72,6 @@ import { defineComponent, ref } from '@vue/composition-api';
 import { SfButton, SfInput, SfHeading } from '@storefront-ui/vue';
 
 import { usePersistedEmail } from 'src/modules/persisted-customer-data';
-import { CaliforniaPrivacyNoticeLink } from 'src/modules/true-vault';
 
 import toIsoDateString from 'theme/helpers/to-iso-date-string.function';
 
@@ -105,7 +106,6 @@ export default defineComponent({
     }
   },
   components: {
-    CaliforniaPrivacyNoticeLink,
     DatePicker: DatePicker as VueConstructor<Vue>,
     SfInput,
     SfHeading,

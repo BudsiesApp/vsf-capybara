@@ -98,6 +98,9 @@ export default defineComponent({
     );
 
     const dropdownOptions = computed<DropdownOption[]>(() => {
+      const _optionValuePriceDictionary = optionValuePriceDictionary.value;
+      const _isOptionValuesSamePrice = isOptionValuesSamePrice.value;
+
       const options: DropdownOption[] = [
         {
           id: '',
@@ -106,9 +109,9 @@ export default defineComponent({
       ];
 
       sortedValues.value.forEach((optionValue) => {
-        const optionValuePrice = optionValuePriceDictionary.value[optionValue.id];
+        const optionValuePrice = _optionValuePriceDictionary[optionValue.id];
         const finalPrice = optionValuePrice ? PriceHelper.getFinalPrice(optionValuePrice) : null;
-        const canShowPrice = !isOptionValuesSamePrice.value || sortedValues.value.length === 1;
+        const canShowPrice = !_isOptionValuesSamePrice || sortedValues.value.length === 1;
         let label = optionValue.name || '';
 
         if (canShowPrice && finalPrice) {
@@ -150,7 +153,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .dropdown-widget {
   width: 100%;
-  max-width: 610px;
+  max-width: var(--dropdown-widget-max-width, 610px);
 
   &.sf-select {
     --select-padding: 0;

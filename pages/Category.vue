@@ -1,7 +1,11 @@
 <template>
   <div id="category" :class="skinClass">
     <div class="page-header">
-      <SfHeading :level="1" :title="getCurrentCategory.name" class="navbar__title" />
+      <SfHeading
+        :level="1"
+        :title="getCurrentCategory.name"
+        class="navbar__title"
+      />
     </div>
 
     <div
@@ -11,7 +15,11 @@
 
     <div class="navbar section" v-if="false">
       <div class="navbar__aside desktop-only">
-        <SfHeading :level="3" :title="$t('Categories')" class="navbar__title" />
+        <SfHeading
+          :level="3"
+          :title="$t('Categories')"
+          class="navbar__title"
+        />
       </div>
       <div class="navbar__main">
         <div class="navbar__filter">
@@ -19,7 +27,12 @@
             class="sf-button--text navbar__filters-button"
             @click="isFilterSidebarOpen = true"
           >
-            <SfIcon size="18px" class="navbar__filters-icon" color="#BEBFC4" icon="filter" />
+            <SfIcon
+              size="18px"
+              class="navbar__filters-icon"
+              color="#BEBFC4"
+              icon="filter"
+            />
             {{ $t('Filters') }}
           </SfButton>
           <template v-if="activeFiltersCount">
@@ -76,7 +89,11 @@
             :header="category.name"
           >
             <SfList class="list">
-              <SfListItem v-for="item in category.items" :key="item.id" class="list__item">
+              <SfListItem
+                v-for="item in category.items"
+                :key="item.id"
+                class="list__item"
+              >
                 <router-link :to="item.link" :class="{'sf-menu-item--active': isCategoryActive(item)}">
                   <SfMenuItem :label="item.name" :count="item.count" />
                 </router-link>
@@ -146,7 +163,12 @@
     >
       <div class="filters">
         <template v-for="(filters, filterType) in availableFilters">
-          <SfHeading :level="4" :title="$t(filterType)" :key="filterType" class="filters__title sf-heading--left" />
+          <SfHeading
+            :level="4"
+            :title="$t(filterType)"
+            :key="filterType"
+            class="filters__title sf-heading--left"
+          />
           <template v-if="filterType === 'color_filter'">
             <div class="filters__colors" :key="filterType + 'filter'">
               <SfColor
@@ -490,8 +512,6 @@ export default {
     }
   },
   async serverPrefetch () {
-    if (this.$ssrContext) this.$ssrContext.output.cacheTags.add('category');
-
     await this.onCategoryChangedHandler(this.$route);
 
     return checkForRewriteRoute(this.$route, this.$ssrContext);
@@ -676,12 +696,7 @@ export default {
       content: htmlDecode(meta_description)
     } : undefined;
 
-    const meta = [
-      {
-        rel: 'canonical',
-        href: this.getCanonicalUrl()
-      }
-    ]
+    const meta = []
 
     if (description) {
       meta.push(description);
@@ -689,7 +704,13 @@ export default {
 
     return {
       title: htmlDecode(meta_title || name),
-      meta
+      meta,
+      link: [
+        {
+          rel: 'canonical',
+          href: this.getCanonicalUrl()
+        }
+      ]
     };
   }
 };

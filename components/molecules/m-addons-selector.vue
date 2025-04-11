@@ -83,7 +83,7 @@ import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 import AddonOption from '../interfaces/addon-option.interface';
 
 import MCheckbox from './m-checkbox.vue';
-import { formatPrice } from 'src/modules/shared/helpers/price';
+import { PriceHelper } from '@vue-storefront/core/helpers';
 
 let instanceId = 0;
 
@@ -202,7 +202,7 @@ export default Vue.extend({
       Vue.set(this.showVideoFlags, addon.id, true);
     },
     formatPrice (price: number | null): void {
-      return formatPrice(price);
+      return PriceHelper.formatPrice(price);
     }
   },
   created (): void {

@@ -206,6 +206,10 @@ export default {
         return customizationSystemThumbnail;
       }
 
+      if (!product.thumbnail) {
+        return undefined;
+      }
+
       if (product.thumbnail.includes('https://')) {
         return product.thumbnail;
       }

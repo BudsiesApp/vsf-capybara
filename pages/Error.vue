@@ -49,7 +49,7 @@ export default {
         context.output.cacheTags.add(`page-not-found`);
         context.server.response.statusCode = 404;
       } else {
-        context.output.cacheTags.add(`error`);
+        context.output.cacheTags.add(`no-cache`);
         context.server.response.statusCode = 500;
       }
 
