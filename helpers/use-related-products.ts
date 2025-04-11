@@ -3,6 +3,7 @@ import config from 'config';
 import { SearchQuery } from 'storefront-query-builder';
 
 import rootStore from '@vue-storefront/core/store';
+import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
 import { Dictionary } from 'src/modules/budsies';
@@ -55,10 +56,12 @@ export function useRelatedProducts (
     return dictionary;
   });
   const preparedRelatedProducts = computed(() => {
+    const productPriceDictionary = rootStore.getters[PRODUCT_PRICE_DICTIONARY];
+
     return relatedProducts.value.map(
       (item: Product) => (
         {
-          ...prepareCategoryProduct(item),
+          ...prepareCategoryProduct(item, productPriceDictionary),
           landing_page_url: item.landing_page_url
         }
       )

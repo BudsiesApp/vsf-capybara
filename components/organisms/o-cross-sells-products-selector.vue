@@ -23,10 +23,10 @@
 import { PropType, defineComponent, onBeforeMount, onServerPrefetch, toRefs } from '@vue/composition-api';
 import { SfHeading } from '@storefront-ui/vue';
 
+import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { getProductGallery } from '@vue-storefront/core/modules/catalog/helpers';
-import { getProductDefaultPrice } from 'src/modules/shared';
-import { getFinalPrice } from 'src/modules/shared/helpers/price';
+import { PriceHelper } from 'src/modules/shared';
 
 import { CROSS_SELL, useRelatedProducts } from 'theme/helpers/use-related-products';
 import { getFieldAnchorName } from 'theme/helpers/use-form-validation';
@@ -35,15 +35,18 @@ import AddonOption from '../interfaces/addon-option.interface';
 
 import MAddonsSelector from '../molecules/m-addons-selector.vue';
 
-function getAddonOptionFromProduct (product: Product): AddonOption {
-  const price = getProductDefaultPrice(product, {}, false);
+function getAddonOptionFromProduct (
+  product: Product,
+  productPriceDictionary: Record<string, PriceHelper.ProductPrice>
+): AddonOption {
+  const price = productPriceDictionary[product.id];
 
   return {
     id: product.id as number,
     sku: product.sku,
     name: product.name,
     description: product.short_description || '',
-    price: getFinalPrice(price),
+    price: PriceHelper.getFinalPrice(price),
     specialPrice: price.special,
     regularPrice: price.regular,
     images: getProductGallery(product).map((item: any) => item.src),
@@ -97,8 +100,16 @@ export default defineComponent({
     isDisabled (): boolean {
       return this.$store.getters['cart/getIsAdding'];
     },
+    productPriceDictionary (): Record<string, PriceHelper.ProductPrice> {
+      return this.$store.getters[PRODUCT_PRICE_DICTIONARY];
+    },
     productOptions (): AddonOption[] {
-      return this.relatedProducts.map(getAddonOptionFromProduct);
+      return this.relatedProducts.map(
+        (product) => getAddonOptionFromProduct(
+          product,
+          this.productPriceDictionary
+        )
+      );
     },
     selectedProducts: {
       get (): number[] {

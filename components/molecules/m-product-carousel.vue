@@ -35,13 +35,10 @@
 </template>
 <script>
 import { SfCarousel } from '@storefront-ui/vue';
-import { htmlDecode } from '@vue-storefront/core/filters';
-import config from 'config';
-import { currentStoreView } from '@vue-storefront/core/lib/multistore';
-import { formatProductLink } from '@vue-storefront/core/modules/url/helpers';
-import { productThumbnailPath } from '@vue-storefront/core/helpers';
-import { prepareCategoryProduct } from 'theme/helpers';
 
+import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
+
+import { prepareCategoryProduct } from 'theme/helpers';
 import OProductCard from 'theme/components/organisms/o-product-card';
 
 export default {
@@ -57,8 +54,16 @@ export default {
     }
   },
   computed: {
+    productPriceDictionary () {
+      return this.$store.getters[PRODUCT_PRICE_DICTIONARY];
+    },
     carouselProducts () {
-      return this.products.map(prepareCategoryProduct);
+      return this.products.map(
+        (product) => prepareCategoryProduct(
+          product,
+          this.productPriceDictionary
+        )
+      );
     }
   }
 };
