@@ -45,16 +45,6 @@ let routes = [
     }
   },
   {
-    name: 'products',
-    path: '/c/products/',
-    redirect: {
-      name: 'category',
-      params: {
-        slug: 'products'
-      }
-    }
-  },
-  {
     name: 'products-alias-1',
     path: '/products/',
     redirect: {
