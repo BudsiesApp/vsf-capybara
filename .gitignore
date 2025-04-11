@@ -1,2 +1,5 @@
 node_modules/
 .vscode/
+
+#e2e testing
+/e2e-tests/test-results

@@ -14,6 +14,7 @@ import { StoryblokModule } from 'src/modules/vsf-storyblok-module'
 import { forStoryblok } from 'src/modules/vsf-storyblok-module/mappingFallback'
 import { extendStore } from '@vue-storefront/core/helpers'
 import { StorefrontModule, registerModule } from '@vue-storefront/core/lib/modules'
+import { ABTesting } from 'src/modules/a-b-testing'
 import { BudsiesModule } from 'src/modules/budsies'
 import { PromotionPlatformModule } from 'src/modules/promotion-platform'
 import { PaymentBackendMethodsModule } from 'src/modules/payment-backend-methods'
@@ -24,6 +25,7 @@ import { ErrorLoggingModule } from 'src/modules/error-logging';
 import { PageLoadingIndicatorModule } from 'src/modules/page-loading-indicator';
 import { MailchimpModule } from 'src/modules/mailchimp'
 import { PersistedCustomerDataModule } from 'src/modules/persisted-customer-data'
+import { TrueVaultModule } from 'src/modules/true-vault';
 
 import registerStoryblokComponents from 'theme/components/storyblok'
 
@@ -51,7 +53,7 @@ const extendUrlModule: StorefrontModule = function ({ store }) {
 // TODO:distributed across proper pages BEFORE 1.11
 export function registerClientModules () {
   registerStoryblokComponents()
-
+  registerModule(TrueVaultModule)
   registerModule(PageLoadingIndicatorModule)
   registerModule(UrlModule)
   registerModule(CatalogModule)
@@ -66,6 +68,7 @@ export function registerClientModules () {
   registerModule(extendUrlModule)
   registerModule(BudsiesModule)
   registerModule(GoogleTagManagerModule)
+  registerModule(ABTesting)
   registerModule(PromotionPlatformModule)
   registerModule(PaymentBackendMethodsModule)
   registerModule(PaymentAffirm)

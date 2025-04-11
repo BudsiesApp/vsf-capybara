@@ -90,29 +90,33 @@
       :disabled="isFormFieldsDisabled"
     />
 
-    <validation-provider
-      slim
-      rules="required"
-      name="'State'"
-      ref="stateValidator"
-      v-slot="{errors}"
-      v-if="isSelectedCountryHasStates && canShowStateSelector"
+    <div
+      class="form__element form__element--half form__select"
+      v-else
     >
-      <MMultiselect
-        v-model="regionId"
-        class="form__element form__element--half form__select"
-        name="address-level1"
-        autocomplete="address-level1"
-        :label="$t('State / Province')"
-        :required="true"
-        id-field="id"
-        label-field="name"
-        :options="statesForSelectedCountry"
-        :valid="!errors.length"
-        :error-message="errors[0]"
-        :disabled="isFormFieldsDisabled"
-      />
-    </validation-provider>
+      <validation-provider
+        slim
+        rules="required"
+        name="'State'"
+        ref="stateValidator"
+        v-slot="{errors}"
+      >
+        <MMultiselect
+          v-model="regionId"
+          name="address-level1"
+          autocomplete="address-level1"
+          :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
+          :label="$t('State / Province')"
+          :required="true"
+          id-field="id"
+          label-field="name"
+          :options="statesForSelectedCountry"
+          :valid="!errors.length"
+          :error-message="errors[0]"
+          :disabled="isFormFieldsDisabled"
+        />
+      </validation-provider>
+    </div>
 
     <validation-provider
       slim
@@ -166,10 +170,29 @@
         :valid="!errors.length"
         :error-message="errors[0]"
         class="form__element"
+        :class="{ 'form__element--half': showVatIdField }"
         name="phone"
         autocomplete="tel"
         :label="$t('Phone number')"
         :disabled="isFormFieldsDisabled"
+      />
+    </validation-provider>
+
+    <validation-provider
+      v-slot="{ errors }"
+      :rules="vatIdValidationRules"
+      name="'Tax ID'"
+      v-if="showVatIdField"
+      tag="div"
+      class="form__element form__element--half"
+    >
+      <SfInput
+        v-model.trim="vatId"
+        name="vat_id"
+        :label="$t('Tax ID')"
+        :disabled="isFormFieldsDisabled"
+        :valid="!errors.length"
+        :error-message="errors[0]"
       />
     </validation-provider>
   </div>
@@ -181,6 +204,7 @@ import { min, regex, required } from 'vee-validate/dist/rules';
 import Vue, { PropType } from 'vue';
 import { SfInput } from '@storefront-ui/vue';
 
+import { stateCodeAutocompleteOptionSearch } from 'src/modules/shared';
 import { BaseAddressFormValue } from 'theme/components/interfaces/base-address-form-value.interface';
 
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
@@ -189,12 +213,16 @@ const Countries = require('@vue-storefront/i18n/resource/countries.json');
 const States = require('@vue-storefront/i18n/resource/states.json');
 
 const phoneValidationRegex = /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/;
+const unitedStatesCountryCode = 'US';
 
 extend('required', {
   ...required,
   message: 'Field is required'
 });
-extend('min', min);
+extend('min', {
+  ...min,
+  message: 'Field must have at least {length} characters'
+});
 extend('regex', {
   ...regex,
   message: 'Please, enter valid phone number'
@@ -220,17 +248,13 @@ export default Vue.extend({
   data () {
     return {
       states: States,
-      fCanShowStateSelector: true,
       fZipCodeChanged: false,
       countries: Countries
     }
   },
   computed: {
-    canShowStateSelector (): boolean {
-      return this.fCanShowStateSelector
-    },
     isPhoneNumberRequired (): boolean {
-      return !!this.country && this.country !== 'US';
+      return !!this.country && this.country !== unitedStatesCountryCode;
     },
     isSelectedCountryHasStates () {
       if (!this.value.country || !this.states) {
@@ -309,6 +333,14 @@ export default Vue.extend({
         this.updateValueField({ streetAddress: value });
       }
     },
+    vatId: {
+      get (): string {
+        return this.value.vatId;
+      },
+      set (value: string) {
+        this.updateValueField({ vatId: value });
+      }
+    },
     zipCode: {
       get (): string {
         return this.value.zipCode;
@@ -317,15 +349,28 @@ export default Vue.extend({
         this.updateValueField({ zipCode: value });
       }
     },
+    showVatIdField (): boolean {
+      return !!this.country && this.country !== unitedStatesCountryCode;
+    },
     statesForSelectedCountry (): any[] {
       if (!this.isSelectedCountryHasStates) {
         return [];
       }
 
       return this.states[this.country];
+    },
+    vatIdValidationRules (): any {
+      if (!this.vatId) {
+        return {};
+      }
+
+      return {
+        min: 3
+      }
     }
   },
   methods: {
+    stateCodeAutocompleteOptionSearch,
     async onChangeCountry (): Promise<void> {
       await this.$nextTick();
       this.validateCountryRelatedFields();
@@ -361,16 +406,10 @@ export default Vue.extend({
   watch: {
     country: {
       handler (after, before) {
-        this.fCanShowStateSelector = false;
-
-        if (after && before) {
+        if (after && before && after !== before) {
           this.state = null;
           this.regionId = null;
         }
-
-        this.$nextTick(() => {
-          this.fCanShowStateSelector = true;
-        })
       },
       immediate: true
     },
@@ -384,6 +423,11 @@ export default Vue.extend({
         (this.regionId as any) = null;
       },
       immediate: true
+    },
+    showVatIdField (value) {
+      if (!value) {
+        this.vatId = '';
+      }
     },
     zipCode: {
       handler () {

@@ -7,5 +7,6 @@ export interface BaseAddressFormValue {
   state: string | null,
   streetAddress: string,
   zipCode: string,
-  regionId: number | null
+  regionId: number | null,
+  vatId: string
 }

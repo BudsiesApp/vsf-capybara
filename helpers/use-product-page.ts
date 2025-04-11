@@ -27,19 +27,23 @@ export function useProductPage (
     isDataLoaded.value = false;
     root.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
 
-    let product = await root.$store.dispatch('product/loadProduct', {
-      parentSku: sku.value,
-      setCurrent: false
-    });
+    let [product] = await Promise.all(
+      [
+        root.$store.dispatch('product/loadProduct', {
+          parentSku: sku.value,
+          setCurrent: false
+        }),
+        root.$store.dispatch(
+          'budsies/loadProductsRushAddons',
+          { productSku: sku.value }
+        )
+      ]
+    );
 
     if (!product) {
       isDataLoaded.value = true;
       return;
     }
-
-    await root.$store.dispatch('budsies/loadProductRushAddons', {
-      productId: product.id
-    });
 
     product = updateProductProductionTimeCustomizationData(
       product,
@@ -54,8 +58,6 @@ export function useProductPage (
   }
 
   onServerPrefetch(async () => {
-    if (root.$ssrContext) root.$ssrContext.output.cacheTags.add('product');
-
     await loadData();
   });
 
