@@ -16,7 +16,7 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 import { SfPrice } from '@storefront-ui/vue';
-import { formatPrice } from 'src/modules/shared/helpers/price';
+import { PriceHelper } from '@vue-storefront/core/helpers';
 
 export default Vue.extend({
   name: 'ACustomPrice',
@@ -35,10 +35,10 @@ export default Vue.extend({
   },
   computed: {
     formattedRegularPrice (): string {
-      return formatPrice(this.regular);
+      return PriceHelper.formatPrice(this.regular);
     },
     formattedSpecialPrice (): string {
-      return formatPrice(this.specialPrice);
+      return PriceHelper.formatPrice(this.specialPrice);
     },
     saveAmount (): number {
       if (this.specialPrice === null) {

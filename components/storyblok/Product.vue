@@ -36,13 +36,13 @@ import { formatProductLink } from '@vue-storefront/core/modules/url/helpers';
 import ProductImage from '../core/ProductImage.vue';
 import { LocalizedRoute, StoreView } from 'core/lib/types';
 import config from 'config';
+import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import Product from 'core/modules/catalog/types/Product';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
-import { getProductDefaultPrice } from 'src/modules/shared';
+import { PriceHelper } from 'src/modules/shared';
 
 import ProductData from './interfaces/product-data.interface';
 import getProductImagePlaceholder from '@vue-storefront/core/modules/cart/helpers/getProductImagePlaceholder';
-import { formatPrice, getFinalPrice } from 'src/modules/shared/helpers/price';
 
 export default Blok.extend({
   name: 'StoryblokProductBlock',
@@ -56,6 +56,9 @@ export default Blok.extend({
     }
   },
   computed: {
+    productPriceDictionary (): Record<string, PriceHelper.ProductPrice> {
+      return this.$store.getters[PRODUCT_PRICE_DICTIONARY];
+    },
     itemData (): ProductData {
       return this.item as ProductData;
     },
@@ -67,16 +70,16 @@ export default Blok.extend({
         return undefined;
       }
 
-      const price = getProductDefaultPrice(this.product, {}, false);
+      const price = this.productPriceDictionary[this.product.id];
 
-      return getFinalPrice(price);
+      return PriceHelper.getFinalPrice(price);
     },
     formattedPrice (): string {
       if (!this.price) {
         return '';
       }
 
-      return formatPrice(this.price);
+      return PriceHelper.formatPrice(this.price);
     },
     name (): string {
       if (!this.product) {
