@@ -45,7 +45,7 @@ let routes = [
     }
   },
   {
-    name: 'products-alias-1',
+    name: 'products',
     path: '/products/',
     redirect: {
       name: 'category',
