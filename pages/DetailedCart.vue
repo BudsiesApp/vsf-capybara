@@ -259,12 +259,6 @@ export default {
           url: {
             name: 'gift-cards'
           }
-        },
-        {
-          label: 'Pet Portraits',
-          url: {
-            name: 'photo-portraits-creation-page'
-          }
         }
       ],
       isMounted: false,
