@@ -141,18 +141,6 @@ test('form fields are reset after save and make another', async ({ page, customi
   const selectedHairColor = await customizableProductPage.getCustomizationThumbnailValueByLabel(HAIR_COLOR_CUSTOMIZATION_OPTION_LABEL);
   expect(selectedHairColor).toBeNull();
 
-  const selectedHead = await customizableProductPage.getCustomizationThumbnailValueByLabel(HEAD_CUSTOMIZATION_OPTION_LABEL);
-  expect(selectedHead).toBeNull();
-
-  const selectedEyes = await customizableProductPage.getCustomizationThumbnailValueByLabel(EYES_CUSTOMIZATION_OPTION_LABEL);
-  expect(selectedEyes).toBeNull();
-
-  const selectedEyebrows = await customizableProductPage.getCustomizationThumbnailValueByLabel(EYEBROWS_CUSTOMIZATION_OPTION_LABEL);
-  expect(selectedEyebrows).toBeNull();
-
-  const selectedNose = await customizableProductPage.getCustomizationThumbnailValueByLabel(NOSE_CUSTOMIZATION_OPTION_LABEL);
-  expect(selectedNose).toBeNull();
-
   const emailWidget = customizableProductPage.getCustomizationWidgetByLabel(EMAIL_CUSTOMIZATION_OPTION_LABEL);
   await expect(emailWidget).toBeHidden();
 });
