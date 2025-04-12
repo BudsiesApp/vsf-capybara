@@ -79,7 +79,7 @@ export class CustomizableProductPage {
 
   public async getCustomizationThumbnailValueByLabel (label: string): Promise<string | null> {
     const widget = this.getCustomizationWidgetByLabel(label);
-    const selectedThumbnail = widget.locator('._option._selected ._option-label');
+    const selectedThumbnail = widget.locator('._option.-selected ._content-wrapper ._name');
 
     if (await selectedThumbnail.count() === 0) {
       return null;
@@ -91,7 +91,7 @@ export class CustomizableProductPage {
       return null;
     }
 
-    return text;
+    return normalizeLabel(text);
   }
 
   public toggleCheckboxCustomizationValue (label: string) {
