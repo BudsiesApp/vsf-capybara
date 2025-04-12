@@ -85,8 +85,8 @@
                 v-model="product.qty"
                 :image="getThumbnailForProduct(product)"
                 :title="product.name | htmlDecode"
-                :regular-price="formatPrice(cartItemPriceDictionary[product.checksum].regular)"
-                :special-price="formatPrice(cartItemPriceDictionary[product.checksum].special)"
+                :regular-price="formatPrice(cartItemPriceDictionary[getCartItemKey(product)].regular)"
+                :special-price="formatPrice(cartItemPriceDictionary[getCartItemKey(product)].special)"
                 class="collected-product"
               >
                 <template #configuration>
@@ -242,7 +242,7 @@ import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { OrderReview } from '@vue-storefront/core/modules/checkout/components/OrderReview';
 import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
 import { CART_ITEM_PRICE_DICTIONARY } from '@vue-storefront/core/modules/cart';
-import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
+import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-item-key.function';
 import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
 import { AFFIRM_MODAL_CLOSED } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';
 import { getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
