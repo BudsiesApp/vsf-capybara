@@ -73,9 +73,9 @@
 
                 <template #remove>
                   <SfPrice
-                    v-if="cartItemPriceDictionary[product.checksum]"
-                    :regular="formatPrice(cartItemPriceDictionary[product.checksum]).regular"
-                    :special="formatPrice(cartItemPriceDictionary[product.checksum]).special"
+                    v-if="cartItemPriceDictionary[getCartItemKey(product)]"
+                    :regular="formatPrice(cartItemPriceDictionary[getCartItemKey(product)]).regular"
+                    :special="formatPrice(cartItemPriceDictionary[getCartItemKey(product)]).special"
                   />
                 </template>
 
@@ -162,7 +162,7 @@ import { PriceHelper } from 'src/modules/shared';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
 import { CART_ITEM_PRICE_DICTIONARY } from '@vue-storefront/core/modules/cart';
-import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
+import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-item-key.function';
 import CartEvents from 'src/modules/shared/types/cart-events';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
