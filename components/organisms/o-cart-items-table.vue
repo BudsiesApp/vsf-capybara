@@ -12,7 +12,7 @@ import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helper
 
 import { CART_ITEM_PRICE_DICTIONARY, GET_CART_ITEM_PRICE } from '@vue-storefront/core/modules/cart';
 import CartItem from 'core/modules/cart/types/CartItem';
-import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
+import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-item-key.function';
 import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
 import { PriceHelper } from 'src/modules/shared';
 
@@ -54,9 +54,7 @@ export default {
     },
     tableItems (): OrderContentItem[] {
       return this.cartItems.map((cartItem) => {
-        const price: PriceHelper.ProductPrice = cartItem.checksum
-          ? this.cartItemPriceDictionary[cartItem.checksum]
-          : this.$store.getters[GET_CART_ITEM_PRICE](cartItem);
+        const price: PriceHelper.ProductPrice = this.$store.getters[GET_CART_ITEM_PRICE](cartItem);
         const formattedPrice = PriceHelper.formatProductPrice(price);
 
         return {
