@@ -12,13 +12,11 @@
 
         <div class="cookie__message">
           {{ message }}
-          <router-link
-            :to="localizedRoute(detailsLink)"
-            :title="detailsLinkText"
+
+          <privacy-policy-link
             class="cookie__message-link"
-          >
-            {{ detailsLinkText }}
-          </router-link>
+            :text="detailsLinkText"
+          />
         </div>
       </div>
     </div>
@@ -28,17 +26,15 @@
 <script>
 import i18n from '@vue-storefront/i18n';
 import { SfIcon } from '@storefront-ui/vue';
+import { PrivacyPolicyLink } from 'src/modules/shared';
+
 export default {
   name: 'MCookieNotification',
-  components: { SfIcon },
+  components: { SfIcon, PrivacyPolicyLink },
   props: {
     detailsLinkText: {
       type: String,
-      default: i18n.t('See details')
-    },
-    detailsLink: {
-      type: String,
-      default: '/privacy'
+      default: i18n.t('See details').toString()
     },
     message: {
       type: String,
