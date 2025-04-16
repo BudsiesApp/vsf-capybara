@@ -1,7 +1,8 @@
 import { ImageSourceItem } from 'src/modules/budsies';
+import { BreakpointValue } from 'src/modules/shared';
+
 import BreakpointSpec from './interfaces/breakpoint-spec.interface';
 import parseImageDimensions from './parse-image-dimensions';
-import { BreakpointValue } from 'src/modules/shared';
 
 export default function generateImageSourcesList (
   breakpointsSpecs: BreakpointSpec[],
