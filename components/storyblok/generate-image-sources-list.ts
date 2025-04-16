@@ -1,6 +1,7 @@
 import { ImageSourceItem } from 'src/modules/budsies';
 import BreakpointSpec from './interfaces/breakpoint-spec.interface';
 import parseImageDimensions from './parse-image-dimensions';
+import { BreakpointValue } from 'src/modules/shared';
 
 export default function generateImageSourcesList (
   breakpointsSpecs: BreakpointSpec[],
@@ -24,7 +25,14 @@ export default function generateImageSourcesList (
       srcset: []
     };
 
-    for (const density of [1, 1.5, 2, 3]) {
+    const mobileDensityList = [1, 1.5, 2];
+    const desktopDensityList = [1, 1.5, 2, 3];
+
+    const densityList = spec.breakpoint <= BreakpointValue.SMALL
+      ? mobileDensityList
+      : desktopDensityList;
+
+    for (const density of densityList) {
       const adjustedWidth = Math.round(spec.width * density / 10) * 10;
       const adjustedHeight = Math.round(adjustedWidth * ratio);
 
