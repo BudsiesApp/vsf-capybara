@@ -526,7 +526,7 @@ let routes = [
     path: '/custom-tumblers/',
     component: CustomizableProduct,
     props: (route) => ({
-      sku: 'tumblers_bundle',
+      sku: 'customTumblers_bundle',
       productDesign: route.query.product_design,
       existingPlushieId: route.query.existingPlushieId
     })
