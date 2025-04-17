@@ -73,9 +73,9 @@
 
                 <template #remove>
                   <SfPrice
-                    v-if="getProductRegularPrice(product, campaignContent)"
-                    :regular="getProductRegularPrice(product, campaignContent)"
-                    :special="getProductSpecialPrice(product, campaignContent)"
+                    v-if="cartItemPriceDictionary[getCartItemKey(product)]"
+                    :regular="formatPrice(cartItemPriceDictionary[getCartItemKey(product)]).regular"
+                    :special="formatPrice(cartItemPriceDictionary[getCartItemKey(product)]).special"
                   />
                 </template>
 
@@ -158,10 +158,11 @@ import {
 } from '@storefront-ui/vue';
 import { OrderSummary } from './DetailedCart/index.js';
 import { mapGetters, mapState } from 'vuex';
-import { getCartItemPrice } from 'src/modules/shared';
+import { PriceHelper } from 'src/modules/shared';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
-import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
+import { CART_ITEM_PRICE_DICTIONARY } from '@vue-storefront/core/modules/cart';
+import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-item-key.function';
 import CartEvents from 'src/modules/shared/types/cart-events';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
@@ -369,6 +370,9 @@ export default {
       products: 'cart/getCartItems'
     }),
     ...mapMobileObserver(),
+    cartItemPriceDictionary () {
+      return this.$store.getters[CART_ITEM_PRICE_DICTIONARY];
+    },
     totalItems () {
       return this.products.reduce(
         (totalItems, product) => totalItems + parseInt(product.qty, 10),
@@ -380,9 +384,6 @@ export default {
     },
     canShowProductionSpotCountdown () {
       return this.products.some((product) => isCustomProduct(product.id));
-    },
-    campaignContent () {
-      return this.$store.getters['promotionPlatform/campaignContent'];
     }
   },
   async mounted () {
@@ -472,13 +473,8 @@ export default {
         });
       }
     },
-    // TODO: campaignContent param is quick fix, need to refactor
-    getProductRegularPrice (product, campaignContent) {
-      return getCartItemPrice(product, {}).regular;
-    },
-    // TODO: campaignContent param is quick fix, need to refactor
-    getProductSpecialPrice (product, campaignContent) {
-      return getCartItemPrice(product, {}).special;
+    formatPrice (price) {
+      return PriceHelper.formatProductPrice(price);
     },
     async removeHandler (product) {
       if (this.isCartItemProcessing) {

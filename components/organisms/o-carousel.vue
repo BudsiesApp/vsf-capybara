@@ -144,6 +144,9 @@ export default Vue.extend({
         }
       };
     },
+    itemsJson (): string {
+      return JSON.stringify(this.items);
+    },
     swiperOptions (): SwiperOptions {
       const direction = this.horizontalSlides ? 'horizontal' : 'vertical';
 
@@ -347,7 +350,11 @@ export default Vue.extend({
     spaceBetween (val) {
       this.updateSwiper({ spaceBetween: val });
     },
-    'items.length' () {
+    itemsJson (newValue: string, oldValue: string) {
+      if (newValue === oldValue) {
+        return;
+      }
+
       this.reInitSwiper();
     },
     isMobile () {
