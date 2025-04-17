@@ -509,6 +509,23 @@ export default {
       if (this.currentPage > 1) {
         this.changePage();
       }
+    },
+    getCurrentCategory (newValue, oldValue) {
+      if (!newValue) {
+        return;
+      }
+
+      if (newValue.id === oldValue?.id) {
+        return;
+      }
+
+      EventBus.$emit(
+        ProductEvent.PRODUCT_LIST_SHOW,
+        {
+          products: this.products,
+          categoryName: newValue.name || '',
+          categoryId: newValue.id || ''
+        });
     }
   },
   async serverPrefetch () {
