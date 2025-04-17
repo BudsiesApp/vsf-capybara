@@ -165,6 +165,17 @@ export default {
 
       await this.setCurrentProduct();
       this.getQuantity();
+    },
+    getCurrentProduct (newValue, oldValue) {
+      if (!newValue) {
+        return;
+      }
+
+      if (newValue.sku === oldValue?.sku) {
+        return;
+      }
+
+      EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, newValue);
     }
   },
   async asyncData ({ store, route, context }) {

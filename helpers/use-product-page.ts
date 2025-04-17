@@ -75,8 +75,14 @@ export function useProductPage (
     EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, currentProduct.value);
   });
 
-  watch(sku, () => {
-    void loadData();
+  watch(sku, async () => {
+    await loadData();
+
+    if (!currentProduct.value) {
+      return;
+    }
+
+    EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, currentProduct.value);
   });
 
   return {
