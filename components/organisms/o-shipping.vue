@@ -177,6 +177,7 @@
           :key="method.method_code"
           v-model="shipping.shippingMethod"
           :value="method.method_code"
+          :disabled="isShippingMethodsSyncing"
           name="shipping-method"
           class="form__radio shipping"
           @input="changeShippingMethod()"
@@ -201,7 +202,7 @@
       <div class="form__action">
         <SfButton
           class="sf-button--full-width form__action-button"
-          :disabled="!shippingMethods.length"
+          :disabled="isContinueButtonDisabled"
           @click="saveDataToCheckout"
         >
           {{ $t('Continue to payment') }}
@@ -228,7 +229,6 @@
 <script>
 import { required, requiredIf, minLength, helpers } from 'vuelidate/lib/validators';
 import { unicodeAlpha, unicodeAlphaNum } from '@vue-storefront/core/helpers/validators';
-import { Shipping } from '@vue-storefront/core/modules/checkout/components/Shipping';
 import {
   SfInput,
   SfRadio,
@@ -236,6 +236,11 @@ import {
   SfHeading,
   SfCheckbox
 } from '@storefront-ui/vue';
+
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
+import { IS_SHIPPING_METHODS_SYNCING } from '@vue-storefront/core/modules/cart';
+import { Shipping } from '@vue-storefront/core/modules/checkout/components/Shipping';
+
 import { createSmoothscroll } from 'theme/helpers';
 import MMultiselect from 'theme/components/molecules/m-multiselect';
 import {
@@ -243,7 +248,6 @@ import {
   METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
 } from 'src/modules/vsf-amazon-pay/index';
 import { LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, LAST_USED_CUSTOMER_PHONE_NUMBER, LAST_USED_CUSTOMER_SHIPPING_COUNTRY, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_PHONE_NUMBER, SET_LAST_USED_CUSTOMER_SHIPPING_COUNTRY } from 'src/modules/persisted-customer-data';
-import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { stateCodeAutocompleteOptionSearch } from 'src/modules/shared';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
 
@@ -307,6 +311,12 @@ export default {
     };
   },
   computed: {
+    isShippingMethodsSyncing () {
+      return this.$store.getters[IS_SHIPPING_METHODS_SYNCING];
+    },
+    isContinueButtonDisabled () {
+      return !this.shippingMethods.length || this.isShippingMethodsSyncing;
+    },
     isAddressFormDisabled () {
       return this.shipToMyAddress;
     },
