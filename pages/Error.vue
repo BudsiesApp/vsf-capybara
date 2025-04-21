@@ -45,11 +45,11 @@ export default {
         return;
       }
 
+      context.output.cacheTags.add(`no-cache`);
+
       if (route.name === 'page-not-found') {
-        context.output.cacheTags.add(`page-not-found`);
         context.server.response.statusCode = 404;
       } else {
-        context.output.cacheTags.add(`no-cache`);
         context.server.response.statusCode = 500;
       }
 
