@@ -192,7 +192,6 @@ export default Vue.extend({
             name: 'photo-portraits-creation-page'
           }
         }
-
       ],
       accessoriesItems: [
         {
