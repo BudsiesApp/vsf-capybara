@@ -255,6 +255,7 @@ import {
   mapMobileObserver,
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
+import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-headers.function';
 
@@ -434,7 +435,14 @@ export default {
         : this.getCurrentPageProducts;
     },
     preparedProducts () {
-      return this.products.map(prepareCategoryProduct);
+      const productPriceDictionary = this.$store.getters[PRODUCT_PRICE_DICTIONARY];
+
+      return this.products.map(
+        (product) => prepareCategoryProduct(
+          product,
+          productPriceDictionary
+        )
+      );
     },
     totalPages () {
       return Math.ceil(this.getCategoryProductsTotal / THEME_PAGE_SIZE);
@@ -501,6 +509,23 @@ export default {
       if (this.currentPage > 1) {
         this.changePage();
       }
+    },
+    getCurrentCategory (newValue, oldValue) {
+      if (!newValue) {
+        return;
+      }
+
+      if (newValue.id === oldValue?.id) {
+        return;
+      }
+
+      EventBus.$emit(
+        ProductEvent.PRODUCT_LIST_SHOW,
+        {
+          products: this.products,
+          categoryName: newValue.name || '',
+          categoryId: newValue.id || ''
+        });
     }
   },
   async serverPrefetch () {

@@ -153,7 +153,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .dropdown-widget {
   width: 100%;
-  max-width: 610px;
+  max-width: var(--dropdown-widget-max-width, 610px);
 
   &.sf-select {
     --select-padding: 0;

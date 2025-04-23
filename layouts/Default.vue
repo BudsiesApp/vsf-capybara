@@ -42,7 +42,7 @@
       </LazyHydrate>
 
       <ONotification />
-      <MCookieNotification details-link="/privacy-policy" />
+      <MCookieNotification />
       <MOfflineBadge />
     </div>
     <vue-progress-bar />
