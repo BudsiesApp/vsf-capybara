@@ -251,7 +251,9 @@ export class BillingStep {
       return;
     }
 
-    await this.useShippingAddressCheckbox.locator('.sf-checkbox__label').click();
+    if (await this.useShippingAddressCheckbox.isVisible()) {
+      await this.useShippingAddressCheckbox.locator('.sf-checkbox__label').click();
+    }
 
     await this.addressForm.fillAddress(
       address,
