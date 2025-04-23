@@ -242,7 +242,7 @@ import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { OrderReview } from '@vue-storefront/core/modules/checkout/components/OrderReview';
 import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
 import getCartItemKey from 'src/modules/budsies/helpers/get-cart-item-key.function';
-import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
+import { CartItemConfiguration, getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
 import { AFFIRM_MODAL_CLOSED } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';
 import { getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
 import { getCartItemPrice, PAYMENT_ERROR_EVENT } from 'src/modules/shared';
@@ -251,7 +251,6 @@ import { createSmoothscroll } from 'theme/helpers';
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
 
 import APromoCode from 'theme/components/atoms/a-promo-code';
-import CartItemConfiguration from 'theme/components/customization-system/cart-item-configuration.vue';
 import MPriceSummary from 'theme/components/molecules/m-price-summary';
 import OCartItemsTable from 'theme/components/organisms/o-cart-items-table';
 import OGiftCardPayment from 'theme/components/organisms/o-gift-card-payment.vue';

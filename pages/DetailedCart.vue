@@ -167,13 +167,13 @@ import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 import { CART_UPD_ITEM } from '@vue-storefront/core/modules/cart/store/mutation-types';
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
-import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
+import { CartItemConfiguration, getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MDropdown from 'theme/components/molecules/m-dropdown.vue';
-import CartItemConfiguration from 'theme/components/customization-system/cart-item-configuration.vue';
+
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
 
 const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
