@@ -218,7 +218,7 @@ export default {
             { name: this.$t('Custom Keychains'), link: { name: 'printed-keychains-creation-page' } },
             { name: this.$t('Custom Magnets'), link: { name: 'felted-magnets-creation-page' } },
             { name: this.$t('Custom Ornaments'), link: { name: 'felted-ornaments-creation-page' } },
-            { name: this.$t('Custom Tumblers'), link: { name: 'tumblers-creation' } },
+            // { name: this.$t('Custom Tumblers'), link: { name: 'tumblers-creation' } },
             { name: this.$t('Custom Bulk'), link: '/bulk-custom-stuffed-animal-manufacture/' },
             { name: this.$t('Gift Cards'), link: { name: 'gift-cards' } },
             { name: this.$t('Gift Box'), link: { name: 'giftbox' } },

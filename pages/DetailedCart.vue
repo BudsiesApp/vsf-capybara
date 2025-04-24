@@ -321,12 +321,12 @@ export default {
             name: 'golf-shirts-creation'
           }
         },
-        {
-          label: this.$t('Tumblers'),
-          url: {
-            name: 'tumblers-creation'
-          }
-        },
+        // {
+        //   label: this.$t('Tumblers'),
+        //   url: {
+        //     name: 'tumblers-creation'
+        //   }
+        // },
         {
           label: 'Pet Keychains',
           url: {
