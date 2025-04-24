@@ -295,3 +295,65 @@ test('continue button is disabled if no shipping methods available', async ({ ca
   await checkoutPage.shippingStep.expectShippingMethodsCountToBe(0);
   await expect(checkoutPage.shippingStep.continueToPaymentButton).toBeDisabled();
 });
+
+test('billing address is correct after "use shipping address" option is selected', async ({ cartPage, checkoutPage, printedSocksPage }) => {
+  test.slow();
+
+  await printedSocksPage.goto();
+  await printedSocksPage.addProductToCart();
+
+  await cartPage.goto();
+  await checkoutPage.goto();
+  await checkoutPage.personalDetailsStep.fillPersonalDetails(
+    fedexAvailableAddress.firstName,
+    fedexAvailableAddress.lastName
+  );
+
+  await checkoutPage.shippingStep.addressForm.fillAddress(
+    fedexAvailableAddress.address,
+    fedexAvailableAddress.country,
+    '',
+    fedexAvailableAddress.city,
+    fedexAvailableAddress.zipCode,
+    fedexAvailableAddress.phoneNumber
+  );
+  await expect(checkoutPage.shippingStep.continueToPaymentButton).toBeDisabled();
+  await checkoutPage.shippingStep.expectShippingMethodToBeSelected(FEDEX_LABEL);
+  await expect(checkoutPage.shippingStep.continueToPaymentButton).not.toBeDisabled();
+
+  await checkoutPage.shippingStep.continueToPaymentButton.click();
+
+  await checkoutPage.billingStep.fillAddress(
+    false,
+    billingAddress.address,
+    billingAddress.country,
+    billingAddress.state,
+    billingAddress.city,
+    billingAddress.zipCode,
+    billingAddress.phoneNumber
+  );
+  await checkoutPage.billingStep.addressForm.firstNameFormField.fill(billingAddress.firstName);
+  await checkoutPage.billingStep.addressForm.lastNameFormField.fill(billingAddress.lastName);
+  await checkoutPage.billingStep.goToReviewButton.click();
+
+  await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.orderReview);
+  await checkoutPage.goToStepByName(checkoutPage.stepsName.billing);
+
+  await checkoutPage.billingStep.useShippingAddress();
+  await checkoutPage.billingStep.goToReviewButton.click();
+
+  const placeOrderRequestPromise = checkoutPage.waitForPlaceOrderRequest();
+  await checkoutPage.selectPaymentMethodAndPlaceOrder();
+
+  const placeOrderRequest = await placeOrderRequestPromise;
+  const postData = JSON.parse(placeOrderRequest.postData());
+
+  const addressInformation = postData.addressInformation;
+  const shippingAddress = addressInformation.shippingAddress;
+  const payloadBillingAddress = addressInformation.billingAddress;
+
+  expect(addressInformation.shipping_carrier_code).toEqual('fedex');
+
+  checkoutPage.expectAddressInPlaceOrderPayloadToBeEqual(shippingAddress, fedexAvailableAddress);
+  checkoutPage.expectAddressInPlaceOrderPayloadToBeEqual(payloadBillingAddress, fedexAvailableAddress);
+});

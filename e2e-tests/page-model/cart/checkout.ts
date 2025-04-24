@@ -238,6 +238,17 @@ export class BillingStep {
     this.goToReviewButton = page.locator('button:has-text("Go review the order")');
   }
 
+  public async useShippingAddress (): Promise<void> {
+    const isChecked = await this.useShippingAddressCheckbox.isChecked();
+
+    if (isChecked) {
+      return;
+    }
+
+    await this.useShippingAddressCheckbox.locator('.sf-checkbox__label').click();
+    await expect(this.useShippingAddressCheckbox).toBeChecked();
+  }
+
   public async fillAddress (
     useShippingAddress: boolean = true,
     address?: string,
@@ -412,6 +423,18 @@ export class CheckoutPage {
   public async expectStepToBeVisible (stepName: string): Promise<void> {
     const step = this.steps.locator(`.sf-steps__title:has-text("${stepName}")`);
     await expect(step).toBeVisible();
+  }
+
+  public async waitStepToBeActive (stepName: string): Promise<void> {
+    const activeStep = this.steps.locator(`.sf-steps__step--current .sf-steps__title:has-text("${stepName}")`);
+    await expect(activeStep).toBeVisible();
+  }
+
+  public async goToStepByName (stepName: string): Promise<void> {
+    const step = this.steps.locator(`.sf-steps__title:has-text("${stepName}")`);
+    await step.click();
+
+    await this.waitStepToBeActive(stepName);
   }
 
   public async goto () {
