@@ -1,11 +1,14 @@
-import { expect, FrameLocator, Locator, Page } from '@playwright/test';
+import { expect, FrameLocator, Locator, Page, Request } from '@playwright/test';
 
 import { CartPage } from './cart';
 import { MultiselectFormField, InputFormField } from '../../helpers/form/form-fields';
 
+export const COUNTRY_WITH_STATES_LIST = 'United States';
+export const COUNTRY_WITH_STATES_LIST_CODE = 'US';
+export const COUNTRY_WITH_STATES_DEFAULT_STATE = 'California';
+export const COUNTRY_WITHOUT_STATES_LIST = 'United Kingdom';
+
 const REQUIRED_FIELD_ERROR_MESSAGE = 'Field is required';
-const COUNTRY_WITH_STATES_LIST = 'United States';
-const COUNTRY_WITHOUT_STATES_LIST = 'United Kingdom';
 
 const DEFAULT_FIRST_NAME = 'Test first name';
 const DEFAULT_LAST_NAME = 'Test last name';
@@ -13,10 +16,23 @@ const DEFAULT_EMAIL = 'test@test.test';
 const DEFAULT_PASSWORD = 'testPassword123';
 const DEFAULT_ADDRESS = 'Test Address';
 const DEFAULT_COUNTRY = COUNTRY_WITH_STATES_LIST;
-const DEFAULT_STATE = 'California';
+const DEFAULT_STATE = COUNTRY_WITH_STATES_DEFAULT_STATE;
 const DEFAULT_CITY = 'Test City';
 const DEFAULT_ZIP_CODE = '12345';
 const DEFAULT_PHONE = '1234567890';
+
+export interface AddressData {
+  firstName: string,
+  lastName: string,
+  address: string,
+  country: string,
+  countryId: string,
+  state: string,
+  regionId: null | number,
+  city: string,
+  zipCode: string,
+  phoneNumber: string
+}
 
 export class PersonalDetailsStep {
   public stepTitle: Locator;
@@ -197,6 +213,18 @@ export class ShippingStep {
     this.shippingMethodSelector = page.locator('input.form__radio.shipping input[type="radio"]');
     this.continueToPaymentButton = page.locator('button:has-text("Continue to payment")');
   }
+
+  public async expectShippingMethodsCountToBe (count: number): Promise<void> {
+    await expect(this.shippingMethodSelector).toHaveCount(count);
+  }
+
+  public async expectShippingMethodToBeSelected (label: string): Promise<void> {
+    const selectedShippingMethod = this.page.locator('.shipping.sf-radio--is-active', {
+      has: this.page.locator(`.shipping__label:has-text("${label}")`)
+    });
+
+    await expect(selectedShippingMethod).toBeVisible({ timeout: 10000 });
+  }
 }
 
 export class BillingStep {
@@ -208,6 +236,44 @@ export class BillingStep {
     this.addressForm = new AddressForm(page);
     this.useShippingAddressCheckbox = page.locator('input[name="sendToShippingAddress"]').locator('..');
     this.goToReviewButton = page.locator('button:has-text("Go review the order")');
+  }
+
+  public async useShippingAddress (): Promise<void> {
+    const isChecked = await this.useShippingAddressCheckbox.isChecked();
+
+    if (isChecked) {
+      return;
+    }
+
+    await this.useShippingAddressCheckbox.locator('.sf-checkbox__label').click();
+    await expect(this.useShippingAddressCheckbox).toBeChecked();
+  }
+
+  public async fillAddress (
+    useShippingAddress: boolean = true,
+    address?: string,
+    country?: string,
+    state?: string,
+    city?: string,
+    zipCode?: string,
+    phone?: string
+  ) {
+    if (useShippingAddress) {
+      return;
+    }
+
+    if (await this.useShippingAddressCheckbox.isVisible()) {
+      await this.useShippingAddressCheckbox.locator('.sf-checkbox__label').click();
+    }
+
+    await this.addressForm.fillAddress(
+      address,
+      country,
+      state,
+      city,
+      zipCode,
+      phone
+    );
   }
 }
 
@@ -255,6 +321,7 @@ export class ReviewStep {
 }
 
 export class CheckoutPage {
+  public readonly PLACE_ORDER_API_RESOURCE = '/api/order';
   public readonly stepsName = {
     personalDetails: 'Contact',
     shipping: 'Shipping',
@@ -302,11 +369,32 @@ export class CheckoutPage {
     zipCode?: string,
     phone?: string
   ) {
-    if (!useShippingAddress) {
-      await this.billingStep.addressForm.fillAddress(address, country, state, city, zipCode, phone);
-    }
+    await this.billingStep.fillAddress(useShippingAddress, address, country, state, city, zipCode, phone);
 
     await this.billingStep.goToReviewButton.click();
+  }
+
+  public async waitForPlaceOrderRequest (): Promise<Request> {
+    return this.page.waitForRequest((request) => request.url().includes(this.PLACE_ORDER_API_RESOURCE));
+  }
+
+  public expectAddressInPlaceOrderPayloadToBeEqual (payloadAddress: any, addressData: AddressData): void {
+    expect(payloadAddress.city).toEqual(addressData.city);
+
+    if (addressData.regionId) {
+      expect(payloadAddress.region_id).toEqual(addressData.regionId);
+      expect(payloadAddress.region).toEqual('');
+    } else {
+      expect(payloadAddress.region_id).toBeNull();
+      expect(payloadAddress.region).toEqual(addressData.state);
+    }
+
+    expect(payloadAddress.country_id).toEqual(addressData.countryId);
+    expect(payloadAddress.firstname).toEqual(addressData.firstName);
+    expect(payloadAddress.lastname).toEqual(addressData.lastName);
+    expect(payloadAddress.postcode).toEqual(addressData.zipCode);
+    expect(payloadAddress.telephone).toEqual(addressData.phoneNumber);
+    expect(payloadAddress.street[0]).toEqual(addressData.address);
   }
 
   public async selectPaymentMethodAndPlaceOrder (createAccount: boolean = false) {
@@ -335,6 +423,18 @@ export class CheckoutPage {
   public async expectStepToBeVisible (stepName: string): Promise<void> {
     const step = this.steps.locator(`.sf-steps__title:has-text("${stepName}")`);
     await expect(step).toBeVisible();
+  }
+
+  public async waitStepToBeActive (stepName: string): Promise<void> {
+    const activeStep = this.steps.locator(`.sf-steps__step--current .sf-steps__title:has-text("${stepName}")`);
+    await expect(activeStep).toBeVisible();
+  }
+
+  public async goToStepByName (stepName: string): Promise<void> {
+    const step = this.steps.locator(`.sf-steps__title:has-text("${stepName}")`);
+    await step.click();
+
+    await this.waitStepToBeActive(stepName);
   }
 
   public async goto () {
