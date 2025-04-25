@@ -1,10 +1,59 @@
 import { test, expect } from '../../fixtures/checkout-page';
 import { getRandomEmail } from '../../helpers/get-random-email';
+import { AddressData, COUNTRY_WITH_STATES_DEFAULT_STATE, COUNTRY_WITH_STATES_LIST, COUNTRY_WITH_STATES_LIST_CODE } from '../../page-model/cart/checkout';
 
 const simpleProductUrl = '/p/voice-recorder/';
 
 const FIRST_NAME = 'First name';
 const LAST_NAME = 'Last name';
+
+const FEDEX_SHIPPING_COUNTRY_CODE = 'AR';
+const FEDEX_SHIPPING_COUNTRY_LABEL = 'Argentina';
+const FEDEX_LABEL = 'Fedex';
+const fedexAvailableAddress: AddressData = {
+  firstName: FIRST_NAME,
+  lastName: LAST_NAME,
+  address: 'Street name, 256, 4',
+  country: FEDEX_SHIPPING_COUNTRY_LABEL,
+  countryId: FEDEX_SHIPPING_COUNTRY_CODE,
+  state: '',
+  regionId: null,
+  city: 'Buenos Aires',
+  zipCode: 'C1420',
+  phoneNumber: '1111111111'
+};
+
+const USPS_SHIPPING_COUNTRY_CODE = 'US';
+const USPS_SHIPPING_COUNTRY_LABEL = 'United States';
+const USPS_SHIPPING_STATE_LABEL = 'California';
+const USPS_LABEL = 'USPS Priority';
+const uspsAvailableAddress: AddressData = {
+  firstName: FIRST_NAME,
+  lastName: LAST_NAME,
+  address: 'Street name, 128, 2',
+  country: USPS_SHIPPING_COUNTRY_LABEL,
+  countryId: USPS_SHIPPING_COUNTRY_CODE,
+  state: USPS_SHIPPING_STATE_LABEL,
+  regionId: 12,
+  city: 'Test city',
+  zipCode: '12345',
+  phoneNumber: '2222222222'
+};
+
+const billingAddress: AddressData = {
+  firstName: `Billing ${FIRST_NAME}`,
+  lastName: `Billing ${LAST_NAME}`,
+  address: 'Street name, 128, 2',
+  country: COUNTRY_WITH_STATES_LIST,
+  countryId: COUNTRY_WITH_STATES_LIST_CODE,
+  state: COUNTRY_WITH_STATES_DEFAULT_STATE,
+  regionId: 12,
+  city: 'Test city',
+  zipCode: '12345',
+  phoneNumber: '2222222222'
+}
+
+const COUNTRY_WITHOUT_SHIPPING_METHODS = 'Curaçao';
 
 test('personal details form has correct validation', async ({ page, cartPage, checkoutPage, simpleProductPage }) => {
   await page.goto(simpleProductUrl);
@@ -132,4 +181,179 @@ test('Gift Cards payment is not available if cart contains Gift Card', async ({ 
   await checkoutPage.fillBillingAddress(false);
 
   await checkoutPage.orderReviewStep.expectGiftCardPaymentToBeNotAvailable();
+});
+
+test('shipping address and shipping method are correct while placing order', async ({ cartPage, checkoutPage, printedSocksPage }) => {
+  test.slow();
+
+  await printedSocksPage.goto();
+  await printedSocksPage.addProductToCart();
+
+  await cartPage.goto();
+  await checkoutPage.goto();
+  await checkoutPage.personalDetailsStep.fillPersonalDetails(
+    fedexAvailableAddress.firstName,
+    fedexAvailableAddress.lastName
+  );
+
+  await checkoutPage.shippingStep.addressForm.fillAddress(
+    fedexAvailableAddress.address,
+    fedexAvailableAddress.country,
+    '',
+    fedexAvailableAddress.city,
+    fedexAvailableAddress.zipCode,
+    fedexAvailableAddress.phoneNumber
+  );
+  await expect(checkoutPage.shippingStep.continueToPaymentButton).toBeDisabled();
+  await checkoutPage.shippingStep.expectShippingMethodToBeSelected(FEDEX_LABEL);
+  await expect(checkoutPage.shippingStep.continueToPaymentButton).not.toBeDisabled();
+
+  await checkoutPage.shippingStep.continueToPaymentButton.click();
+
+  await checkoutPage.billingStep.fillAddress(
+    false,
+    billingAddress.address,
+    billingAddress.country,
+    billingAddress.state,
+    billingAddress.city,
+    billingAddress.zipCode,
+    billingAddress.phoneNumber
+  );
+  await checkoutPage.billingStep.addressForm.firstNameFormField.fill(billingAddress.firstName);
+  await checkoutPage.billingStep.addressForm.lastNameFormField.fill(billingAddress.lastName);
+  await checkoutPage.billingStep.goToReviewButton.click();
+
+  const placeOrderRequestPromise = checkoutPage.waitForPlaceOrderRequest();
+  await checkoutPage.selectPaymentMethodAndPlaceOrder();
+
+  const placeOrderRequest = await placeOrderRequestPromise;
+  const postData = JSON.parse(placeOrderRequest.postData());
+  const addressInformation = postData.addressInformation;
+
+  expect(addressInformation.shipping_carrier_code).toEqual('fedex');
+  const shippingAddress = addressInformation.shippingAddress;
+  const payloadBillingAddress = addressInformation.billingAddress;
+
+  checkoutPage.expectAddressInPlaceOrderPayloadToBeEqual(shippingAddress, fedexAvailableAddress);
+  checkoutPage.expectAddressInPlaceOrderPayloadToBeEqual(payloadBillingAddress, billingAddress);
+});
+
+test('usps shipping method available and address data is correct while placing order', async ({ cartPage, checkoutPage, printedSocksPage }) => {
+  await printedSocksPage.goto();
+  await printedSocksPage.addProductToCart();
+
+  await cartPage.goto();
+  await checkoutPage.goto();
+  await checkoutPage.personalDetailsStep.fillPersonalDetails(
+    uspsAvailableAddress.firstName,
+    uspsAvailableAddress.lastName
+  );
+
+  await checkoutPage.shippingStep.addressForm.fillAddress(
+    uspsAvailableAddress.address,
+    uspsAvailableAddress.country,
+    uspsAvailableAddress.state,
+    uspsAvailableAddress.city,
+    uspsAvailableAddress.zipCode,
+    uspsAvailableAddress.phoneNumber
+  );
+
+  await checkoutPage.shippingStep.expectShippingMethodToBeSelected(USPS_LABEL);
+  await checkoutPage.shippingStep.continueToPaymentButton.click();
+
+  await checkoutPage.billingStep.fillAddress(true);
+  await checkoutPage.billingStep.goToReviewButton.click();
+
+  const placeOrderRequestPromise = checkoutPage.waitForPlaceOrderRequest();
+  await checkoutPage.selectPaymentMethodAndPlaceOrder();
+
+  const placeOrderRequest = await placeOrderRequestPromise;
+  const postData = JSON.parse(placeOrderRequest.postData());
+
+  const addressInformation = postData.addressInformation;
+  const shippingAddress = addressInformation.shippingAddress;
+  const payloadBillingAddress = addressInformation.billingAddress;
+
+  expect(addressInformation.shipping_carrier_code).toEqual('tablerate');
+
+  checkoutPage.expectAddressInPlaceOrderPayloadToBeEqual(shippingAddress, uspsAvailableAddress);
+  checkoutPage.expectAddressInPlaceOrderPayloadToBeEqual(payloadBillingAddress, uspsAvailableAddress);
+});
+
+test('continue button is disabled if no shipping methods available', async ({ cartPage, checkoutPage, printedSocksPage }) => {
+  await printedSocksPage.goto();
+  await printedSocksPage.addProductToCart();
+
+  await cartPage.goto();
+  await checkoutPage.goto();
+  await checkoutPage.personalDetailsStep.fillPersonalDetails(
+    uspsAvailableAddress.firstName,
+    uspsAvailableAddress.lastName
+  );
+
+  await checkoutPage.shippingStep.addressForm.countrySelectorFormField.selectByOptionTitle(COUNTRY_WITHOUT_SHIPPING_METHODS);
+  await checkoutPage.shippingStep.expectShippingMethodsCountToBe(0);
+  await expect(checkoutPage.shippingStep.continueToPaymentButton).toBeDisabled();
+});
+
+test('billing address is correct after "use shipping address" option is selected', async ({ cartPage, checkoutPage, printedSocksPage }) => {
+  test.slow();
+
+  await printedSocksPage.goto();
+  await printedSocksPage.addProductToCart();
+
+  await cartPage.goto();
+  await checkoutPage.goto();
+  await checkoutPage.personalDetailsStep.fillPersonalDetails(
+    fedexAvailableAddress.firstName,
+    fedexAvailableAddress.lastName
+  );
+
+  await checkoutPage.shippingStep.addressForm.fillAddress(
+    fedexAvailableAddress.address,
+    fedexAvailableAddress.country,
+    '',
+    fedexAvailableAddress.city,
+    fedexAvailableAddress.zipCode,
+    fedexAvailableAddress.phoneNumber
+  );
+  await expect(checkoutPage.shippingStep.continueToPaymentButton).toBeDisabled();
+  await checkoutPage.shippingStep.expectShippingMethodToBeSelected(FEDEX_LABEL);
+  await expect(checkoutPage.shippingStep.continueToPaymentButton).not.toBeDisabled();
+
+  await checkoutPage.shippingStep.continueToPaymentButton.click();
+
+  await checkoutPage.billingStep.fillAddress(
+    false,
+    billingAddress.address,
+    billingAddress.country,
+    billingAddress.state,
+    billingAddress.city,
+    billingAddress.zipCode,
+    billingAddress.phoneNumber
+  );
+  await checkoutPage.billingStep.addressForm.firstNameFormField.fill(billingAddress.firstName);
+  await checkoutPage.billingStep.addressForm.lastNameFormField.fill(billingAddress.lastName);
+  await checkoutPage.billingStep.goToReviewButton.click();
+
+  await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.orderReview);
+  await checkoutPage.goToStepByName(checkoutPage.stepsName.billing);
+
+  await checkoutPage.billingStep.useShippingAddress();
+  await checkoutPage.billingStep.goToReviewButton.click();
+
+  const placeOrderRequestPromise = checkoutPage.waitForPlaceOrderRequest();
+  await checkoutPage.selectPaymentMethodAndPlaceOrder();
+
+  const placeOrderRequest = await placeOrderRequestPromise;
+  const postData = JSON.parse(placeOrderRequest.postData());
+
+  const addressInformation = postData.addressInformation;
+  const shippingAddress = addressInformation.shippingAddress;
+  const payloadBillingAddress = addressInformation.billingAddress;
+
+  expect(addressInformation.shipping_carrier_code).toEqual('fedex');
+
+  checkoutPage.expectAddressInPlaceOrderPayloadToBeEqual(shippingAddress, fedexAvailableAddress);
+  checkoutPage.expectAddressInPlaceOrderPayloadToBeEqual(payloadBillingAddress, fedexAvailableAddress);
 });
