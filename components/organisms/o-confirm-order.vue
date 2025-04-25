@@ -379,7 +379,8 @@ export default {
     getThumbnailForProduct (product) {
       const customizationSystemThumbnail =
         getCustomizationSystemCartItemThumbnail(
-          product,
+          product.customizations,
+          product.extension_attributes?.customization_state,
           this.imageHandlerService
         );
 

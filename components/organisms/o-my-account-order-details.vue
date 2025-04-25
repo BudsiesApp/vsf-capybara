@@ -200,7 +200,11 @@ export default {
   },
   methods: {
     getThumbnailForProduct (product) {
-      const customizationSystemThumbnail = getCustomizationSystemCartItemThumbnail(product, this.imageHandlerService);
+      const customizationSystemThumbnail = getCustomizationSystemCartItemThumbnail(
+        product.customizations,
+        product.extension_attributes?.customization_state,
+        this.imageHandlerService
+      );
 
       if (customizationSystemThumbnail) {
         return customizationSystemThumbnail;
