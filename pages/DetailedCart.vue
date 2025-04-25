@@ -237,6 +237,7 @@ const budsiesPalsSku = 'customPals_bundle';
 const buddyPillowSku = 'customBuddyPillow_bundle';
 const nftBudsieSku = 'budsieNft_bundle';
 const customPhotoPortraitsSku = 'customPhotoPortraits_bundle';
+const customTumblersSku = 'customTumblers_bundle';
 
 const editableProductsSkus = [
   ...foreversProductsSkus,
@@ -252,7 +253,8 @@ const editableProductsSkus = [
   buddyPillowSku,
   nftBudsieSku,
   customPillowSku,
-  customPhotoPortraitsSku
+  customPhotoPortraitsSku,
+  customTumblersSku
 ];
 
 export default {
@@ -370,6 +372,12 @@ export default {
             }
           }
         },
+        // {
+        //   label: this.$t('Tumblers'),
+        //   url: {
+        //     name: 'tumblers-creation'
+        //   }
+        // },
         {
           label: 'Gift Boxes',
           url: {
@@ -432,7 +440,14 @@ export default {
   methods: {
     getCartItemOptions,
     editHandler (product) {
-      if (product.sku === customPhotoPortraitsSku) {
+      if (product.sku === customTumblersSku) {
+        this.$router.push({
+          name: 'tumblers-creation',
+          query: {
+            existingPlushieId: product.extension_attributes?.plushie_id
+          }
+        });
+      } else if (product.sku === customPhotoPortraitsSku) {
         this.$router.push({
           name: 'photo-portraits-creation-page',
           query: {
