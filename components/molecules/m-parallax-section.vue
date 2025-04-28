@@ -12,7 +12,8 @@
     >
       <div class="_image-container">
         <BaseImage
-          :srcsets="imageSources"
+          :srcsets="imageSources.sourceItems"
+          :fallback-srcset="imageSources.fallbackSourceItem"
           :alt="imageAlt"
           :title="imageTitle"
           class="_image"
@@ -25,7 +26,6 @@
 
 <script lang="ts">
 import Vue, { PropType, VueConstructor } from 'vue';
-import { mapGetters } from 'vuex';
 
 import { ComponentWidthCalculator } from 'src/modules/vsf-storyblok-module';
 import { BaseImage, ImageSourceItem } from 'src/modules/budsies';
@@ -72,18 +72,21 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
   },
   computed: {
-    ...mapGetters({
-      supportsWebp: 'storyblok/supportsWebp'
-    }),
     directionValue (): number {
       return this.direction === 'down' ? +1 : -1
     },
     initialValue (): number {
       return this.direction === 'down' ? 0 : -100
     },
-    imageSources (): ImageSourceItem[] {
+    imageSources (): {
+      sourceItems: ImageSourceItem[],
+      fallbackSourceItem: ImageSourceItem | undefined
+    } {
       if (!this.imageSrc) {
-        return [];
+        return {
+          sourceItems: [],
+          fallbackSourceItem: undefined
+        };
       };
 
       const breakpointsSpecs = generateBreakpointsSpecs(
@@ -92,8 +95,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       )
 
       return generateImageSourcesList(
-        breakpointsSpecs,
-        this.supportsWebp
+        breakpointsSpecs
       )
     }
   },

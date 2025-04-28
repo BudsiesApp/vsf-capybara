@@ -2,10 +2,9 @@ import parseImageDimensions from './parse-image-dimensions';
 
 export default function getResizedImageUrl (
   imageUrl: string,
-  width: number,
-  doesSupportWebp = true
+  width: number
 ): string {
-  const filters = doesSupportWebp ? '/filters:format(webp)' : '';
+  const filters = '/filters:format(webp)';
 
   // "https://s3.amazonaws.com/a.storyblok.com/f/109999/500x500/c01cfb137f/pet_socks.png"
   // "https://a.storyblok.com/f/109999/1080x1080/485ba42bde/petsies_homepage_images_1_.png"

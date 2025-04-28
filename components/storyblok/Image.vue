@@ -15,7 +15,8 @@
     <BaseImage
       class="_image"
       :lazy="itemData.delay_image_load"
-      :srcsets="imageSources"
+      :srcsets="imageSources.sourceItems"
+      :fallback-srcset="imageSources.fallbackSourceItem"
       :alt="itemData.alt_tag"
       :title="itemData.title_tag"
       @click="launchLightbox"
@@ -26,7 +27,6 @@
 
 <script lang="ts">
 import { VueConstructor } from 'vue';
-import { mapGetters } from 'vuex';
 import { isServer } from '@vue-storefront/core/helpers';
 import CoolLightBox from 'vue-cool-lightbox';
 import 'vue-cool-lightbox/dist/vue-cool-lightbox.min.css';
@@ -64,9 +64,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     }
   },
   computed: {
-    ...mapGetters({
-      supportsWebp: 'storyblok/supportsWebp'
-    }),
     itemData (): ImageData {
       return this.item as ImageData;
     },
@@ -79,9 +76,15 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 
       return styles;
     },
-    imageSources (): ImageSourceItem[] {
+    imageSources (): {
+      sourceItems: ImageSourceItem[],
+      fallbackSourceItem: ImageSourceItem | undefined
+    } {
       if (!this.itemData.image.filename) {
-        return [];
+        return {
+          sourceItems: [],
+          fallbackSourceItem: undefined
+        };
       };
 
       let widthCalculator = this.componentWidthCalculator;
@@ -103,8 +106,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
       )
 
       return generateImageSourcesList(
-        breakpointsSpecs,
-        this.supportsWebp
+        breakpointsSpecs
       )
     }
   },
