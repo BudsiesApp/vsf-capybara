@@ -3,15 +3,14 @@ import { mergeTests } from '@playwright/test';
 import { test as checkoutTest, expect } from '../../fixtures/checkout-page';
 import { test as pillowQuoteTest } from '../../fixtures/bulk-quote/pillow-quote-order-page';
 import { test as plushQuoteTest } from '../../fixtures/bulk-quote/plush-quote-order-page';
-import { testFactory } from '../../fixtures/bulk-quote/quote-order-page';
+import { test as plushSampleTest } from '../../fixtures/plush-sample-page';
 import { getRandomEmail } from '../../helpers/get-random-email';
 import { AddressData, COUNTRY_WITH_STATES_DEFAULT_STATE, COUNTRY_WITH_STATES_LIST, COUNTRY_WITH_STATES_LIST_CODE } from '../../page-model/cart/checkout';
 
 const keychainQuoteUrl = '/keychain-quote/';
 
-const quoteTest = testFactory(keychainQuoteUrl, '#keychain-quote');
-const test = mergeTests(quoteTest, checkoutTest);
-const allQoutesTest = mergeTests(test, pillowQuoteTest, plushQuoteTest);
+const test = mergeTests(checkoutTest, plushSampleTest);
+const allQuotesTest = mergeTests(test, pillowQuoteTest, plushQuoteTest);
 
 const FIRST_NAME = 'First name';
 const LAST_NAME = 'Last name';
@@ -64,11 +63,10 @@ const billingAddress: AddressData = {
 
 const COUNTRY_WITHOUT_SHIPPING_METHODS = 'Curaçao';
 
-test('personal details form has correct validation', async ({ cartPage, checkoutPage, quoteOrderPage, bulkQuotationPage }) => {
-  await quoteOrderPage.fillRequiredData();
-  await quoteOrderPage.submitFormAndVerifyResponse();
-  await bulkQuotationPage.waitPageToBeVisible();
-  await bulkQuotationPage.submitQuoteAndVerifyResponse();
+test('personal details form has correct validation', async ({ cartPage, checkoutPage, plushSamplePage }) => {
+  await plushSamplePage.goto();
+  await plushSamplePage.fillRequiredFields();
+  await plushSamplePage.customizableProductPage.addToCartAndVerifyResponse();
 
   await cartPage.goto();
   await checkoutPage.goto();
@@ -77,11 +75,10 @@ test('personal details form has correct validation', async ({ cartPage, checkout
   await checkoutPage.personalDetailsStep.expectCorrectValidation();
 });
 
-test('shipping address form has correct validation', async ({ cartPage, checkoutPage, quoteOrderPage, bulkQuotationPage }) => {
-  await quoteOrderPage.fillRequiredData();
-  await quoteOrderPage.submitFormAndVerifyResponse();
-  await bulkQuotationPage.waitPageToBeVisible();
-  await bulkQuotationPage.submitQuoteAndVerifyResponse();
+test('shipping address form has correct validation', async ({ cartPage, checkoutPage, plushSamplePage }) => {
+  await plushSamplePage.goto();
+  await plushSamplePage.fillRequiredFields();
+  await plushSamplePage.customizableProductPage.addToCartAndVerifyResponse();
 
   await cartPage.goto();
   await checkoutPage.goto();
@@ -98,11 +95,10 @@ test('shipping address form has correct validation', async ({ cartPage, checkout
   await shippingStepAddressForm.expectCorrectValidation();
 });
 
-test('billing address form has correct validation', async ({ cartPage, checkoutPage, quoteOrderPage, bulkQuotationPage }) => {
-  await quoteOrderPage.fillRequiredData();
-  await quoteOrderPage.submitFormAndVerifyResponse();
-  await bulkQuotationPage.waitPageToBeVisible();
-  await bulkQuotationPage.submitQuoteAndVerifyResponse();
+test('billing address form has correct validation', async ({ cartPage, checkoutPage, plushSamplePage }) => {
+  await plushSamplePage.goto();
+  await plushSamplePage.fillRequiredFields();
+  await plushSamplePage.customizableProductPage.addToCartAndVerifyResponse();
 
   await cartPage.goto();
   await checkoutPage.goto();
@@ -114,12 +110,12 @@ test('billing address form has correct validation', async ({ cartPage, checkoutP
   await checkoutPage.billingStep.addressForm.expectCorrectValidation();
 });
 
-test('order can be placed', async ({ cartPage, checkoutPage, quoteOrderPage, bulkQuotationPage }) => {
+test('order can be placed', async ({ cartPage, checkoutPage, plushSamplePage }) => {
   test.setTimeout(60_000);
-  await quoteOrderPage.fillRequiredData();
-  await quoteOrderPage.submitFormAndVerifyResponse();
-  await bulkQuotationPage.waitPageToBeVisible();
-  await bulkQuotationPage.submitQuoteAndVerifyResponse();
+
+  await plushSamplePage.goto();
+  await plushSamplePage.fillRequiredFields();
+  await plushSamplePage.customizableProductPage.addToCartAndVerifyResponse();
 
   await cartPage.goto();
 
@@ -130,13 +126,12 @@ test('order can be placed', async ({ cartPage, checkoutPage, quoteOrderPage, bul
   await checkoutPage.selectPaymentMethodAndPlaceOrder();
 });
 
-test('order can be placed and user account created', async ({ cartPage, checkoutPage, quoteOrderPage, bulkQuotationPage }) => {
+test('order can be placed and user account created', async ({ cartPage, checkoutPage, plushSamplePage }) => {
   test.setTimeout(60_000);
 
-  await quoteOrderPage.fillRequiredData();
-  await quoteOrderPage.submitFormAndVerifyResponse();
-  await bulkQuotationPage.waitPageToBeVisible();
-  await bulkQuotationPage.submitQuoteAndVerifyResponse();
+  await plushSamplePage.goto();
+  await plushSamplePage.fillRequiredFields();
+  await plushSamplePage.customizableProductPage.addToCartAndVerifyResponse();
 
   await cartPage.goto();
   await checkoutPage.goto();
@@ -150,8 +145,8 @@ test('order can be placed and user account created', async ({ cartPage, checkout
   await expect(cartPage.page.locator('._header .a-account-icon .sf-header__icon--is-active')).toBeVisible();
 });
 
-allQoutesTest('order can be placed with all type of samples', async ({ cartPage, checkoutPage, quoteOrderPage, bulkQuotationPage, pillowQuoteOrderPage, plushQuoteOrderPage }) => {
-  allQoutesTest.slow();
+allQuotesTest('order can be placed with all type of samples', async ({ cartPage, checkoutPage, quoteOrderPage, bulkQuotationPage, pillowQuoteOrderPage, plushQuoteOrderPage }) => {
+  allQuotesTest.slow();
 
   await quoteOrderPage.page.goto(keychainQuoteUrl);
   await quoteOrderPage.fillRequiredData();
@@ -182,11 +177,12 @@ allQoutesTest('order can be placed with all type of samples', async ({ cartPage,
   await checkoutPage.selectPaymentMethodAndPlaceOrder();
 });
 
-test('shipping address and shipping method are correct while placing order', async ({ cartPage, checkoutPage, printedSocksPage }) => {
+test('shipping address and shipping method are correct while placing order', async ({ cartPage, checkoutPage, plushSamplePage }) => {
   test.slow();
 
-  await printedSocksPage.goto();
-  await printedSocksPage.addProductToCart();
+  await plushSamplePage.goto();
+  await plushSamplePage.fillRequiredFields();
+  await plushSamplePage.customizableProductPage.addToCartAndVerifyResponse();
 
   await cartPage.goto();
   await checkoutPage.goto();
@@ -237,9 +233,10 @@ test('shipping address and shipping method are correct while placing order', asy
   checkoutPage.expectAddressInPlaceOrderPayloadToBeEqual(payloadBillingAddress, billingAddress);
 });
 
-test('usps shipping method available and address data is correct while placing order', async ({ cartPage, checkoutPage, printedSocksPage }) => {
-  await printedSocksPage.goto();
-  await printedSocksPage.addProductToCart();
+test('usps shipping method available and address data is correct while placing order', async ({ cartPage, checkoutPage, plushSamplePage }) => {
+  await plushSamplePage.goto();
+  await plushSamplePage.fillRequiredFields();
+  await plushSamplePage.customizableProductPage.addToCartAndVerifyResponse();
 
   await cartPage.goto();
   await checkoutPage.goto();
@@ -279,9 +276,10 @@ test('usps shipping method available and address data is correct while placing o
   checkoutPage.expectAddressInPlaceOrderPayloadToBeEqual(payloadBillingAddress, uspsAvailableAddress);
 });
 
-test('continue button is disabled if no shipping methods available', async ({ cartPage, checkoutPage, printedSocksPage }) => {
-  await printedSocksPage.goto();
-  await printedSocksPage.addProductToCart();
+test('continue button is disabled if no shipping methods available', async ({ cartPage, checkoutPage, plushSamplePage }) => {
+  await plushSamplePage.goto();
+  await plushSamplePage.fillRequiredFields();
+  await plushSamplePage.customizableProductPage.addToCartAndVerifyResponse();
 
   await cartPage.goto();
   await checkoutPage.goto();
@@ -295,11 +293,12 @@ test('continue button is disabled if no shipping methods available', async ({ ca
   await expect(checkoutPage.shippingStep.continueToPaymentButton).toBeDisabled();
 });
 
-test('billing address is correct after "use shipping address" option is selected', async ({ cartPage, checkoutPage, printedSocksPage }) => {
+test('billing address is correct after "use shipping address" option is selected', async ({ cartPage, checkoutPage, plushSamplePage }) => {
   test.slow();
 
-  await printedSocksPage.goto();
-  await printedSocksPage.addProductToCart();
+  await plushSamplePage.goto();
+  await plushSamplePage.fillRequiredFields();
+  await plushSamplePage.customizableProductPage.addToCartAndVerifyResponse();
 
   await cartPage.goto();
   await checkoutPage.goto();
@@ -356,4 +355,3 @@ test('billing address is correct after "use shipping address" option is selected
   checkoutPage.expectAddressInPlaceOrderPayloadToBeEqual(shippingAddress, fedexAvailableAddress);
   checkoutPage.expectAddressInPlaceOrderPayloadToBeEqual(payloadBillingAddress, fedexAvailableAddress);
 });
-
