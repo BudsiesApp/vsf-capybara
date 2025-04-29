@@ -14,7 +14,8 @@
       <BaseImage
         class="_image"
         :lazy="itemData.delay_image_load"
-        :srcsets="imageSources"
+        :srcsets="imageSources.sourceItems"
+        :fallback-srcset="imageSources.fallbackSourceItem"
         :alt="itemData.alt_tag"
         :title="itemData.title_tag"
         :width="itemData.width"
@@ -29,7 +30,6 @@
 
 <script lang="ts">
 import { VueConstructor } from 'vue';
-import { mapGetters } from 'vuex';
 
 import { InjectType } from 'src/modules/shared';
 import {
@@ -56,9 +56,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     componentWidthCalculator: { }
   } as unknown as InjectType<InjectedServices>,
   computed: {
-    ...mapGetters({
-      supportsWebp: 'storyblok/supportsWebp'
-    }),
     itemData (): DriverData {
       return this.item as DriverData;
     },
@@ -71,9 +68,15 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 
       return result;
     },
-    imageSources (): ImageSourceItem[] {
+    imageSources (): {
+      sourceItems: ImageSourceItem[],
+      fallbackSourceItem: ImageSourceItem | undefined
+    } {
       if (!this.itemData.image.filename) {
-        return [];
+        return {
+          sourceItems: [],
+          fallbackSourceItem: undefined
+        };
       };
 
       const breakpointsSpecs = generateBreakpointsSpecs(
@@ -83,8 +86,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
       )
 
       return generateImageSourcesList(
-        breakpointsSpecs,
-        this.supportsWebp
+        breakpointsSpecs
       )
     }
   },

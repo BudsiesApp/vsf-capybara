@@ -27,6 +27,7 @@
                 object-fit="cover"
                 :src="getImageSrc(image, 'thumb')"
                 :srcsets="getImageSrcSets(image, 'thumb')"
+                :fallback-srcset="getImageFallbackSrcSet(image, 'thumbFallback')"
                 :alt="image.alt"
                 :title="image.title"
                 :aspect-ratio="1.0"
@@ -55,6 +56,7 @@
               class="_image"
               :src="getImageSrc(stageImage, 'stage')"
               :srcsets="getImageSrcSets(stageImage, 'stage')"
+              :fallback-srcset="getImageFallbackSrcSet(stageImage, 'stageFallback')"
               :alt="stageImage.alt"
               :title="stageImage.title"
               :aspect-ratio="1.0"
@@ -74,13 +76,13 @@
           <template #default="{ item: image }">
             <div
               class="_image-wrapper"
-              :href="image.big"
               v-if="image"
             >
               <BaseImage
                 class="_image"
                 :src="getImageSrc(image, 'stage')"
                 :srcsets="getImageSrcSets(image, 'stage')"
+                :fallback-srcset="getImageFallbackSrcSet(image, 'stageFallback')"
                 :alt="image.alt"
                 :title="image.title"
                 :aspect-ratio="1.0"
@@ -157,7 +159,7 @@ export default Vue.extend({
     return {
       fCurrentIndex: undefined as number | undefined,
       fShouldInitThumbnailsSlider: false,
-      fWindowResizeHandler: undefined as () => void | undefined,
+      fWindowResizeHandler: undefined as unknown as () => void | undefined,
       fIsCloudZoomInitialized: false,
       slidesToShow: 5,
       STAGE_SLIDES_PER_VIEW
@@ -302,6 +304,18 @@ export default Vue.extend({
     ): ImageSourceItem[] | undefined {
       const value = image[variant];
       if (!Array.isArray(value)) {
+        return undefined;
+      }
+
+      return value;
+    },
+    getImageFallbackSrcSet (
+      image: ZoomGalleryImage,
+      variant: ImageKeys
+    ): ImageSourceItem | undefined {
+      const value = image[variant];
+
+      if (Array.isArray(value) || typeof value === 'string') {
         return undefined;
       }
 
