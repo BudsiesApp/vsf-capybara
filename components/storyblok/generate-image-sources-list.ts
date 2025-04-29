@@ -3,9 +3,7 @@ import { BreakpointValue } from 'src/modules/shared';
 
 import BreakpointSpec from './interfaces/breakpoint-spec.interface';
 import parseImageDimensions from './parse-image-dimensions';
-
-const WebpQuality = 75;
-const AvifQuality = 55;
+import { WebpQuality, AvifQuality } from './images-quality';
 
 export default function generateImageSourcesList (
   breakpointsSpecs: BreakpointSpec[],
