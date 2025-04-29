@@ -5,7 +5,8 @@
     <div class="_image _preview-image" @click="launchGallery">
       <BaseImage
         class="_image"
-        :srcsets="imageSources"
+        :srcsets="imageSources.sourceItems"
+        :fallback-srcset="imageSources.fallbackSourceItem"
         :alt="itemData.preview_image.alt"
         :title="itemData.preview_image.title"
       />
@@ -23,7 +24,6 @@
 
 <script lang="ts">
 import { VueConstructor } from 'vue';
-import { mapGetters } from 'vuex';
 
 import { BaseImage, ImageSourceItem } from 'src/modules/budsies';
 import { InjectType } from 'src/modules/shared';
@@ -49,18 +49,21 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     window: { from: 'WindowObject' }
   } as unknown as InjectType<InjectedServices>,
   computed: {
-    ...mapGetters({
-      supportsWebp: 'storyblok/supportsWebp'
-    }),
     itemData (): LightboxGalleryData {
       return this.item as LightboxGalleryData;
     },
     imageSrc (): string {
       return this.itemData.preview_image.filename;
     },
-    imageSources (): ImageSourceItem[] {
+    imageSources (): {
+      sourceItems: ImageSourceItem[],
+      fallbackSourceItem: ImageSourceItem | undefined
+    } {
       if (!this.imageSrc) {
-        return [];
+        return {
+          sourceItems: [],
+          fallbackSourceItem: undefined
+        };
       };
 
       const breakpointsSpecs = generateBreakpointsSpecs(
@@ -69,8 +72,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
       )
 
       return generateImageSourcesList(
-        breakpointsSpecs,
-        this.supportsWebp
+        breakpointsSpecs
       )
     }
   },
