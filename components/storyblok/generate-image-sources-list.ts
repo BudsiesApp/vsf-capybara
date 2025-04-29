@@ -12,7 +12,7 @@ export default function generateImageSourcesList (
     sourceItems: ImageSourceItem[],
     fallbackSourceItem: ImageSourceItem | undefined
   } {
-  const result: ImageSourceItem[] = [];
+  const webpResult: ImageSourceItem[] = [];
   const avifResult: ImageSourceItem[] = [];
   const webpFilter = `/filters:format(webp):quality(${WebpQuality})`;
   const avifFilter = `/filters:format(avif):quality(${AvifQuality})`;
@@ -74,11 +74,11 @@ export default function generateImageSourcesList (
       fallbackSourceItem.srcset.push(`${defaultResizedUrl}${density > 1 ? ' ' + density + 'x' : ''}`)
     }
 
-    result.push(webpSourceItem);
+    webpResult.push(webpSourceItem);
     avifResult.push(avifSourceItem);
   }
 
-  result.unshift(...avifResult);
+  const result = [...avifResult, ...webpResult];
 
   return {
     sourceItems: result,
