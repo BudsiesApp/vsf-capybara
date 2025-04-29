@@ -15,7 +15,6 @@
 
 <script lang="ts">
 import { VueConstructor } from 'vue';
-import { mapGetters } from 'vuex';
 
 import { InjectType } from 'src/modules/shared';
 import { ComponentWidthCalculator, SizeValue } from 'src/modules/vsf-storyblok-module';
@@ -43,9 +42,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     componentWidthCalculator: { }
   } as unknown as InjectType<InjectedServices>,
   computed: {
-    ...mapGetters({
-      supportsWebp: 'storyblok/supportsWebp'
-    }),
     itemData (): SliderData {
       return this.item as SliderData;
     },
@@ -64,7 +60,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 
         const stage = generateImageSourcesList(
           breakpointsSpecs,
-          this.supportsWebp,
           1
         );
 
@@ -78,7 +73,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 
         const thumb = generateImageSourcesList(
           breakpointsSpecs,
-          this.supportsWebp,
           1
         );
 
@@ -86,13 +80,14 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 
         const big = getResizedImageUrl(
           sliderItem.image.filename,
-          brakpointsList[SizeValue.xlarge],
-          this.supportsWebp
+          brakpointsList[SizeValue.xlarge]
         )
 
         const slide: ZoomGalleryImage = {
-          thumb,
-          stage,
+          thumb: thumb.sourceItems,
+          thumbFallback: thumb.fallbackSourceItem,
+          stage: stage.sourceItems,
+          stageFallback: stage.fallbackSourceItem,
           big,
           alt: sliderItem.alt_tag,
           title: sliderItem.title_tag
