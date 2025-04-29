@@ -159,12 +159,14 @@ const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
 
 const pillowSampleProductSku = 'pillowBulkSample_bundle';
 const keychainSampleProductSku = 'keychainBulkSample_bundle';
+const plushKeychainSampleProductSku = 'plushKeychainBulkSample_bundle';
 const plushSampleProductSku = 'CustomBulkSample_bundle';
 
 const bulkSampleProductSkus = [
   plushSampleProductSku,
   pillowSampleProductSku,
-  keychainSampleProductSku
+  keychainSampleProductSku,
+  plushKeychainSampleProductSku
 ];
 
 const editableProductsSkus = [
@@ -241,6 +243,8 @@ export default {
           routeName = 'pillow-sample';
         } else if (product.sku === keychainSampleProductSku) {
           routeName = 'keychain-sample'
+        } else if (product.sku === plushKeychainSampleProductSku) {
+          routeName = 'plush-keychain-sample'
         } else {
           routeName = 'plush-sample';
         }

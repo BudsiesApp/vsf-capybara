@@ -89,6 +89,18 @@ let routes = [
     }
   },
   {
+    name: 'plush-keychain-sample',
+    path: '/bulk-plush-keychain-samples/create/',
+    component: CustomizableProduct,
+    props: (route) => {
+      return {
+        sku: 'plushKeychainBulkSample_bundle',
+        existingPlushieId: route.query.existingPlushieId,
+        layout: 'vertical'
+      }
+    }
+  },
+  {
     name: 'plush-sample-alias-1',
     path: '/plushie/index/create/id/:plushieId/type/bulk-sample/',
     redirect: (route) => {
@@ -137,7 +149,18 @@ let routes = [
   {
     name: 'bulk-quote',
     path: '/bulk-quote/',
-    component: BulkQuote
+    component: BulkQuote,
+    props: {
+      bundleProductSku: 'CustomBulkSample_bundle'
+    }
+  },
+  {
+    name: 'plush-keychain-quote',
+    path: '/plush-keychain-quote/',
+    component: BulkQuote,
+    props: {
+      bundleProductSku: 'plushKeychainBulkSample_bundle'
+    }
   },
   {
     name: 'bulkorder-confirmation',
