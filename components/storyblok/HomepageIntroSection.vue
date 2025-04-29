@@ -8,7 +8,8 @@
 
     <div class="_intro-column _image-column">
       <BaseImage
-        :srcsets="imageSources"
+        :srcsets="imageSources.sourceItems"
+        :fallback-srcset="imageSources.fallbackSourceItem"
         :alt="itemData.title"
         :title="itemData.title"
         class="_image"
@@ -57,7 +58,6 @@
 
 <script lang="ts">
 import { VueConstructor } from 'vue';
-import { mapGetters } from 'vuex';
 import { nl2br, BaseImage, ImageSourceItem } from 'src/modules/budsies';
 
 import { InjectType } from 'src/modules/shared';
@@ -92,9 +92,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     window: { from: 'WindowObject' }
   } as unknown as InjectType<InjectedServices>,
   computed: {
-    ...mapGetters({
-      supportsWebp: 'storyblok/supportsWebp'
-    }),
     itemData (): HomepageIntroSectionData {
       return this.item as HomepageIntroSectionData;
     },
@@ -119,9 +116,15 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 
       return styles;
     },
-    imageSources (): ImageSourceItem[] {
+    imageSources (): {
+      sourceItems: ImageSourceItem[],
+      fallbackSourceItem: ImageSourceItem | undefined
+    } {
       if (!this.itemData.image.filename) {
-        return [];
+        return {
+          sourceItems: [],
+          fallbackSourceItem: undefined
+        };
       };
 
       const breakpointsSpecs = generateBreakpointsSpecs(
@@ -131,8 +134,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
       )
 
       return generateImageSourcesList(
-        breakpointsSpecs,
-        this.supportsWebp
+        breakpointsSpecs
       )
     }
   },
