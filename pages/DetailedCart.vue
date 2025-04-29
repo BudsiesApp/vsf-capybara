@@ -217,6 +217,7 @@ const clothesProductSkuRouteNameDictionary = {
 
 const customPillowSku = 'customPillow_bundle';
 const customPhotoPortraitsSku = 'customPhotoPortraits_bundle';
+const customTumblersSku = 'customTumblers_bundle';
 
 const editableProductsSkus = [
   ...foreversProductsSkus,
@@ -226,7 +227,8 @@ const editableProductsSkus = [
   ...golfHeadCoversProductsSkus,
   ...Object.keys(clothesProductSkuRouteNameDictionary),
   customPillowSku,
-  customPhotoPortraitsSku
+  customPhotoPortraitsSku,
+  customTumblersSku
 ];
 
 export default {
@@ -319,6 +321,12 @@ export default {
             name: 'golf-shirts-creation'
           }
         },
+        // {
+        //   label: this.$t('Tumblers'),
+        //   url: {
+        //     name: 'tumblers-creation'
+        //   }
+        // },
         {
           label: 'Pet Keychains',
           url: {
@@ -392,7 +400,14 @@ export default {
   methods: {
     getCartItemOptions,
     editHandler (product) {
-      if (product.sku === customPhotoPortraitsSku) {
+      if (product.sku === customTumblersSku) {
+        this.$router.push({
+          name: 'tumblers-creation',
+          query: {
+            existingPlushieId: product.extension_attributes?.plushie_id
+          }
+        });
+      } else if (product.sku === customPhotoPortraitsSku) {
         this.$router.push({
           name: 'photo-portraits-creation-page',
           query: {

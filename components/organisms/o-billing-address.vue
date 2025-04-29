@@ -381,7 +381,6 @@ export default {
   methods: {
     stateCodeAutocompleteOptionSearch,
     async onChangeCountry () {
-      await this.changeCountry();
       await this.$nextTick();
 
       this.payment.state = '';

@@ -850,8 +850,10 @@
 "Zip-code must have at least {number} characters.","Zip-code must have at least {number} characters."
 "I have seen and approve the Live Preview of my design.","I have seen and approve the Live Preview of my design."
 "Estimated shipment date: {date}","Estimated shipment date: {date}"
-
 "Error loading orders","Error loading orders"
 "More Info","More Info"
 "Order is Cancelled","Order is Cancelled"
 "Progress Tracker","Progress Tracker"
+"Custom Tumblers","Custom Tumblers"
+"More Info","More Info"
+"Tumblers","Tumblers"
