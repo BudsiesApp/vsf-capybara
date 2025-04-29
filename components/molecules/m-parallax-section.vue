@@ -87,7 +87,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           sourceItems: [],
           fallbackSourceItem: undefined
         };
-      };
+      }
 
       const breakpointsSpecs = generateBreakpointsSpecs(
         this.imageSrc,

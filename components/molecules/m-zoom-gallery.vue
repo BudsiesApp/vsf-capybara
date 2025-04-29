@@ -159,7 +159,7 @@ export default Vue.extend({
     return {
       fCurrentIndex: undefined as number | undefined,
       fShouldInitThumbnailsSlider: false,
-      fWindowResizeHandler: undefined as () => void | undefined,
+      fWindowResizeHandler: undefined as unknown as () => void | undefined,
       fIsCloudZoomInitialized: false,
       slidesToShow: 5,
       STAGE_SLIDES_PER_VIEW
