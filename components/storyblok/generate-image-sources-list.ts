@@ -1,5 +1,5 @@
 import { ImageSourceItem } from 'src/modules/budsies';
-import { BreakpointValue } from 'src/modules/shared';
+import { BreakpointValue, MimeTypeValue } from 'src/modules/shared';
 
 import BreakpointSpec from './interfaces/breakpoint-spec.interface';
 import parseImageDimensions from './parse-image-dimensions';
@@ -29,13 +29,13 @@ export default function generateImageSourcesList (
       breakpoint: spec.breakpoint,
       aspectRatio: 1 / ratio,
       srcset: [],
-      type: 'image/webp'
+      type: MimeTypeValue.IMAGE_WEBP
     };
     const avifSourceItem: ImageSourceItem = {
       breakpoint: spec.breakpoint,
       aspectRatio: 1 / ratio,
       srcset: [],
-      type: 'image/avif'
+      type: MimeTypeValue.IMAGE_AVIF
     }
 
     const mobileDensityList = [1, 1.5, 2];
