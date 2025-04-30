@@ -2,7 +2,7 @@
   <div class="o-bulk-quote-order-form">
     <SfHeading
       :level="1"
-      :title="$t('Bulk Order Quote')"
+      :title="formTitle"
       class="_title"
     />
 
@@ -300,6 +300,10 @@ export default defineComponent({
       required: true
     },
     artworkUploadUrl: {
+      type: String,
+      required: true
+    },
+    formTitle: {
       type: String,
       required: true
     }
