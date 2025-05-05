@@ -13,7 +13,7 @@ import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helper
 import { CART_ITEM_PRICE_DICTIONARY, GET_CART_ITEM_PRICE } from '@vue-storefront/core/modules/cart';
 import CartItem from 'core/modules/cart/types/CartItem';
 import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-item-key.function';
-import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
+import { getCustomizationSystemThumbnail } from 'src/modules/customization-system';
 import { PriceHelper } from 'src/modules/shared';
 
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
@@ -74,7 +74,7 @@ export default {
   },
   methods: {
     getThumbnailForProduct (product: CartItem): string {
-      const customizationSystemThumbnail = getCustomizationSystemCartItemThumbnail(
+      const customizationSystemThumbnail = getCustomizationSystemThumbnail(
         product.customizations,
         product.extension_attributes?.customization_state,
         this.imageHandlerService

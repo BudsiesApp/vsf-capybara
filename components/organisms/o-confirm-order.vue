@@ -241,7 +241,7 @@ import { OrderModule, ORDER_CONFLICT_EVENT } from '@vue-storefront/core/modules/
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { OrderReview } from '@vue-storefront/core/modules/checkout/components/OrderReview';
 import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
-import { CartItemConfiguration, getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
+import { CartItemConfiguration, getCustomizationSystemThumbnail } from 'src/modules/customization-system';
 import { CART_ITEM_PRICE_DICTIONARY } from '@vue-storefront/core/modules/cart';
 import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-item-key.function';
 
@@ -378,7 +378,7 @@ export default {
     getCartItemOptions,
     getThumbnailForProduct (product) {
       const customizationSystemThumbnail =
-        getCustomizationSystemCartItemThumbnail(
+        getCustomizationSystemThumbnail(
           product.customizations,
           product.extension_attributes?.customization_state,
           this.imageHandlerService

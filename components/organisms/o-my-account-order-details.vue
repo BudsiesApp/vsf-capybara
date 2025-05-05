@@ -142,7 +142,7 @@ import {
   SfProperty
 } from '@storefront-ui/vue';
 
-import { getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
+import { getCustomizationSystemThumbnail } from 'src/modules/customization-system';
 
 import OOrderContent from './o-order-content';
 
@@ -200,7 +200,7 @@ export default {
   },
   methods: {
     getThumbnailForProduct (product) {
-      const customizationSystemThumbnail = getCustomizationSystemCartItemThumbnail(
+      const customizationSystemThumbnail = getCustomizationSystemThumbnail(
         product.customizations,
         product.extension_attributes?.customization_state,
         this.imageHandlerService
