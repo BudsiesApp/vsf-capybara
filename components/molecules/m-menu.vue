@@ -198,13 +198,13 @@ export default Vue.extend({
         {
           label: this.$t('Shirts'),
           url: '/custom-shirts/'
+        },
+        {
+          label: this.$t('Tumblers'),
+          url: {
+            name: 'tumblers-creation'
+          }
         }
-        // {
-        //   label: this.$t('Tumblers'),
-        //   url: {
-        //     name: 'tumblers-creation'
-        //   }
-        // }
       ],
       otherProductsItems: [
         {

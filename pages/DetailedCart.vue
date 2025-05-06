@@ -364,6 +364,12 @@ export default {
         //   }
         // },
         {
+          label: this.$t('Tumblers'),
+          url: {
+            name: 'tumblers-creation'
+          }
+        },
+        {
           label: 'Accessories',
           url: {
             name: 'category',
@@ -372,12 +378,6 @@ export default {
             }
           }
         },
-        // {
-        //   label: this.$t('Tumblers'),
-        //   url: {
-        //     name: 'tumblers-creation'
-        //   }
-        // },
         {
           label: 'Gift Boxes',
           url: {
