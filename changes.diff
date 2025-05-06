@@ -1,0 +1,1204 @@
+diff --git a/components/customization-system/forms/phrase-pillow-form-last-step.vue b/components/customization-system/forms/phrase-pillow-form-last-step.vue
+index dcef3a10..3f6e0189 100644
+--- a/components/customization-system/forms/phrase-pillow-form-last-step.vue
++++ b/components/customization-system/forms/phrase-pillow-form-last-step.vue
+@@ -54,7 +54,7 @@
+       class="_actions-row"
+     >
+       <SfButton
+-        class="color-primary _submit-button"
++        class="color-primary _submit-button _add-to-cart"
+         type="submit"
+         :disabled="isDisabled"
+         @click.prevent.stop="onAddToCartClick"
+diff --git a/components/organisms/OPlushieCreationWizard/m-product-type-choose-step.vue b/components/organisms/OPlushieCreationWizard/m-product-type-choose-step.vue
+index d47c9bc8..38eadc5e 100644
+--- a/components/organisms/OPlushieCreationWizard/m-product-type-choose-step.vue
++++ b/components/organisms/OPlushieCreationWizard/m-product-type-choose-step.vue
+@@ -22,7 +22,9 @@
+           :aspect-ratio="1"
+         />
+ 
+-        {{ item.title }}
++        <span class="_title">
++          {{ item.title }}
++        </span>
+       </SfButton>
+     </div>
+   </div>
+diff --git a/e2e-tests/fixtures/customizable-product-page.ts b/e2e-tests/fixtures/customizable-product-page.ts
+new file mode 100644
+index 00000000..7f3363c1
+--- /dev/null
++++ b/e2e-tests/fixtures/customizable-product-page.ts
+@@ -0,0 +1,31 @@
++import { test } from '@playwright/test';
++
++import { CartPage } from '../page-model/cart/cart';
++import { CrossSellsPage } from '../page-model/cross-sells';
++import { CustomizableProductPage } from '../page-model/product/customizable-product';
++
++interface CustomizableProductPageFixture {
++  cartPage: CartPage,
++  customizableProductPage: CustomizableProductPage,
++  crossSellsPage: CrossSellsPage
++}
++
++export function testFactory (productPageUrl: string) {
++  return test.extend<CustomizableProductPageFixture>({
++    customizableProductPage: async ({ page }, use) => {
++      const customizableProductPage = new CustomizableProductPage(page, productPageUrl);
++      await customizableProductPage.goto();
++      await use(customizableProductPage);
++    },
++    cartPage: async ({ page }, use) => {
++      const cartPage = new CartPage(page);
++      await use(cartPage);
++    },
++    crossSellsPage: async ({ page }, use) => {
++      const crossSellsPage = new CrossSellsPage(page);
++      await use(crossSellsPage);
++    }
++  });
++}
++
++export { expect } from '@playwright/test';
+diff --git a/e2e-tests/fixtures/images-gallery-product-page.ts b/e2e-tests/fixtures/images-gallery-product-page.ts
+index e8ccfae1..8ca6f2d3 100644
+--- a/e2e-tests/fixtures/images-gallery-product-page.ts
++++ b/e2e-tests/fixtures/images-gallery-product-page.ts
+@@ -1,29 +1,18 @@
+-import { test } from '@playwright/test';
++import { testFactory as baseTestFactory } from './customizable-product-page';
+ 
+-import { CartPage } from '../page-model/cart/cart';
+-import { CustomizableProductPage } from '../page-model/product/customizable-product';
+ import { ImagesGalleryProductPage } from '../page-model/product/images-gallery-form';
+ 
+ interface ImagesGalleryProductPageFixture {
+-  customizableProductPage: CustomizableProductPage,
+-  imagesGalleryProductPage: ImagesGalleryProductPage,
+-  cartPage: CartPage
++  imagesGalleryProductPage: ImagesGalleryProductPage
+ }
+ 
+ export function testFactory (productPageUrl: string) {
+-  return test.extend<ImagesGalleryProductPageFixture>({
+-    customizableProductPage: async ({ page }, use) => {
+-      const customizableProductPage = new CustomizableProductPage(page, productPageUrl);
+-      await customizableProductPage.goto();
+-      await use(customizableProductPage);
+-    },
++  const baseTest = baseTestFactory(productPageUrl);
++
++  return baseTest.extend<ImagesGalleryProductPageFixture>({
+     imagesGalleryProductPage: async ({ page, customizableProductPage }, use) => {
+       const imagesGalleryProductPage = new ImagesGalleryProductPage(page, customizableProductPage);
+       await use(imagesGalleryProductPage);
+-    },
+-    cartPage: async ({ page }, use) => {
+-      const cartPage = new CartPage(page);
+-      await use(cartPage);
+     }
+   });
+ }
+diff --git a/e2e-tests/fixtures/photo-pillow-product-page.ts b/e2e-tests/fixtures/photo-pillow-product-page.ts
+new file mode 100644
+index 00000000..84d62ff2
+--- /dev/null
++++ b/e2e-tests/fixtures/photo-pillow-product-page.ts
+@@ -0,0 +1,20 @@
++import { testFactory as baseTestFactory } from './customizable-product-page';
++
++import { PhotoPillowProductPage } from '../page-model/product/photo-pillows-product';
++
++interface PhotoPillowProductPageFixture {
++  photoPillowProductPage: PhotoPillowProductPage
++}
++
++export function testFactory (productPageUrl: string) {
++  const baseTest = baseTestFactory(productPageUrl);
++
++  return baseTest.extend<PhotoPillowProductPageFixture>({
++    photoPillowProductPage: async ({ page, customizableProductPage }, use) => {
++      const photoPillowProductPage = new PhotoPillowProductPage(page, customizableProductPage);
++      await use(photoPillowProductPage);
++    }
++  });
++}
++
++export { expect } from '@playwright/test';
+diff --git a/e2e-tests/fixtures/plushie-product-page.ts b/e2e-tests/fixtures/plushie-product-page.ts
+new file mode 100644
+index 00000000..be2ab6fb
+--- /dev/null
++++ b/e2e-tests/fixtures/plushie-product-page.ts
+@@ -0,0 +1,20 @@
++import { testFactory as baseTestFactory } from './customizable-product-page';
++
++import { PlushieProductPage } from '../page-model/product/plushie-product';
++
++interface PlushieProductPageFixture {
++  plushieProductPage: PlushieProductPage
++}
++
++export function testFactory (productPageUrl: string) {
++  const baseTest = baseTestFactory(productPageUrl);
++
++  return baseTest.extend<PlushieProductPageFixture>({
++    plushieProductPage: async ({ page }, use) => {
++      const plushieProductPage = new PlushieProductPage(page);
++      await use(plushieProductPage);
++    }
++  });
++}
++
++export { expect } from '@playwright/test';
+diff --git a/e2e-tests/fixtures/vertical-steps-product-page.ts b/e2e-tests/fixtures/vertical-steps-product-page.ts
+new file mode 100644
+index 00000000..363a123a
+--- /dev/null
++++ b/e2e-tests/fixtures/vertical-steps-product-page.ts
+@@ -0,0 +1,20 @@
++import { testFactory as baseTestFactory } from './customizable-product-page';
++
++import { VerticalStepsProductPage } from '../page-model/product/vertical-steps-form';
++
++interface VerticalStepsProductPageFixture {
++  verticalStepsProductPage: VerticalStepsProductPage
++}
++
++export function testFactory (productPageUrl: string) {
++  const baseTest = baseTestFactory(productPageUrl);
++
++  return baseTest.extend<VerticalStepsProductPageFixture>({
++    verticalStepsProductPage: async ({ page, customizableProductPage }, use) => {
++      const verticalStepsProductPage = new VerticalStepsProductPage(page, customizableProductPage);
++      await use(verticalStepsProductPage);
++    }
++  });
++}
++
++export { expect } from '@playwright/test';
+diff --git a/e2e-tests/helpers/normalize-label.ts b/e2e-tests/helpers/normalize-label.ts
+new file mode 100644
+index 00000000..019817d6
+--- /dev/null
++++ b/e2e-tests/helpers/normalize-label.ts
+@@ -0,0 +1,3 @@
++export function normalizeLabel (text: string): string {
++  return text.replace(/\\n|\$\d+(\.\d+)?/g, '').trim();
++}
+diff --git a/e2e-tests/page-model/cart/cart.ts b/e2e-tests/page-model/cart/cart.ts
+index 4fa8ca0c..2c7b64e5 100644
+--- a/e2e-tests/page-model/cart/cart.ts
++++ b/e2e-tests/page-model/cart/cart.ts
+@@ -1,4 +1,4 @@
+-import { Page } from '@playwright/test';
++import { expect, Locator, Page } from '@playwright/test';
+ 
+ export class CartPage {
+   public constructor (public readonly page: Page) { }
+@@ -9,6 +9,23 @@ export class CartPage {
+ 
+   public getCartItemByProductName (productName: string) {
+     const productLocator = this.page.locator(`.sf-collected-product__title-wraper:has-text("${productName}")`);
+-    return productLocator;
++    return productLocator.locator('..').locator('..').locator('..');
++  }
++
++  public async waitPageToBeVisible () {
++    await expect(this.page.locator('#detailed-cart')).toBeVisible();
++  }
++
++  public async expectCartItemToHaveProperties (cartItem: Locator, properties: string[]) {
++    for (const property of properties) {
++      const propertyLocator = cartItem.locator(`.collected-product__properties:has-text("${property}")`);
++      await expect(propertyLocator).toBeVisible();
++    }
++  }
++
++  public async editCartItemByProductName (productName: string) {
++    const productLocator = this.getCartItemByProductName(productName);
++    const editButton = productLocator.getByRole('button', { name: 'Edit' });
++    await editButton.click();
+   }
+ }
+diff --git a/e2e-tests/page-model/cross-sells.ts b/e2e-tests/page-model/cross-sells.ts
+new file mode 100644
+index 00000000..4f22623d
+--- /dev/null
++++ b/e2e-tests/page-model/cross-sells.ts
+@@ -0,0 +1,9 @@
++import { expect, Page } from '@playwright/test';
++
++export class CrossSellsPage {
++  public constructor (public readonly page: Page) { }
++
++  public async waitPageToBeVisible () {
++    await expect(this.page.locator('#cross-sells')).toBeVisible();
++  }
++}
+diff --git a/e2e-tests/page-model/product/customizable-product.ts b/e2e-tests/page-model/product/customizable-product.ts
+index a997f3b8..d722a157 100644
+--- a/e2e-tests/page-model/product/customizable-product.ts
++++ b/e2e-tests/page-model/product/customizable-product.ts
+@@ -1,8 +1,10 @@
+ import { expect, Locator, Page } from '@playwright/test';
+ 
+ import { uploadImage } from '../../helpers/upload-image';
++import { normalizeLabel } from 'theme/e2e-tests/helpers/normalize-label';
+ 
+ export class CustomizableProductPage {
++  public readonly ADD_TO_CART_API_RESOURCE = '/api/cart/update';
+   public quantityField: Locator;
+   public addToCartButton: Locator;
+ 
+@@ -16,21 +18,38 @@ export class CustomizableProductPage {
+   }
+ 
+   public getCustomizationWidgetByLabel (label: string): Locator {
+-    const labelElement = this.page.getByText(label);
++    const labelElement = this.page.locator(`text="${label}"`);
+     const parent = labelElement.locator('..');
+ 
+     return parent.locator('> ._widget').first();
+   }
+ 
++  public getCheckboxByLabel (label: string): Locator {
++    return this.page.locator(`.sf-checkbox__label:text("${label}")`);
++  }
++
+   public async fillCustomizationTextValue (label: string, value: string) {
+     const widget = this.getCustomizationWidgetByLabel(label);
+-    await widget.fill(value);
++    const input = widget.locator('input,textarea');
++    await input.fill(value);
++  }
++
++  public async getCustomizationTextValueByLabel (label: string): Promise<string | null> {
++    const widget = this.getCustomizationWidgetByLabel(label);
++    const input = widget.locator('input,textarea');
++    const value = await input.inputValue();
++    return value || null;
+   }
+ 
+   public async getCustomizationSelectValueByLabel (label: string): Promise<string | null> {
+     const widget = this.getCustomizationWidgetByLabel(label);
+     const selectedOption = await widget.locator('.sf-select__selected').textContent();
+-    return selectedOption;
++
++    if (!selectedOption) {
++      return null;
++    }
++
++    return normalizeLabel(selectedOption);
+   }
+ 
+   public async fillCustomizationSelectValueByIndex (label: string, index: number = 0) {
+@@ -48,6 +67,34 @@ export class CustomizableProductPage {
+     await expect(uploadStatus).toHaveText('Upload complete');
+   }
+ 
++  public fillCustomizationThumbnailValueByIndex (label: string, index: number = 0) {
++    const widget = this.getCustomizationWidgetByLabel(label);
++    const thumbnail = widget.locator('._option').nth(index);
++    return thumbnail.click();
++  }
++
++  public async getCustomizationThumbnailValueByLabel (label: string): Promise<string | null> {
++    const widget = this.getCustomizationWidgetByLabel(label);
++    const selectedThumbnail = widget.locator('._option._selected ._option-label');
++
++    if (await selectedThumbnail.count() === 0) {
++      return null;
++    }
++
++    const text = await selectedThumbnail.textContent();
++
++    if (!text) {
++      return null;
++    }
++
++    return text;
++  }
++
++  public toggleCheckboxCustomizationValue (label: string) {
++    const widget = this.getCheckboxByLabel(label);
++    return widget.click();
++  }
++
+   public async updateQuantity (quantity: number) {
+     await this.quantityField.fill(String(quantity));
+   }
+@@ -56,4 +103,19 @@ export class CustomizableProductPage {
+     await expect(this.addToCartButton).toBeEnabled();
+     await this.addToCartButton.click();
+   }
++
++  public async addToCartAndVerifyResponse () {
++    const responsePromise = this.page.waitForResponse(
++      response => response.url().includes(this.ADD_TO_CART_API_RESOURCE) && response.status() === 200
++    );
++
++    await this.addToCart();
++
++    const response = await responsePromise;
++    expect(response.ok()).toBeTruthy();
++  }
++
++  public async waitPageToBeVisible () {
++    await expect(this.page.locator('#customizable-product')).toBeVisible();
++  }
+ }
+diff --git a/e2e-tests/page-model/product/images-gallery-form.ts b/e2e-tests/page-model/product/images-gallery-form.ts
+index fe975c5c..672fd730 100644
+--- a/e2e-tests/page-model/product/images-gallery-form.ts
++++ b/e2e-tests/page-model/product/images-gallery-form.ts
+@@ -18,4 +18,8 @@ export class ImagesGalleryProductPage {
+     this.agreement = this.page.locator('.m-block-story');
+     this.formErrors = this.page.locator('._form-errors');
+   }
++
++  public async moveFocusOutsideImagesGallery (): Promise<void> {
++    return this.page.mouse.move(0, 0);
++  }
+ }
+diff --git a/e2e-tests/page-model/product/photo-pillows-product.ts b/e2e-tests/page-model/product/photo-pillows-product.ts
+new file mode 100644
+index 00000000..04ce618f
+--- /dev/null
++++ b/e2e-tests/page-model/product/photo-pillows-product.ts
+@@ -0,0 +1,51 @@
++import { expect, Locator, Page } from '@playwright/test';
++import { CustomizableProductPage } from './customizable-product';
++
++export class PhotoPillowProductPage {
++  public headingTitle: Locator;
++  public subtitle: Locator;
++  public formPreview: Locator;
++  public designImages: Locator;
++  public agreement: Locator;
++  public quantityField: Locator;
++  public submitAnimator: Locator;
++
++  public constructor (public readonly page: Page, public readonly customizableProductPage: CustomizableProductPage) {
++    this.headingTitle = this.page.locator('h1.sf-heading__title');
++    this.subtitle = this.page.locator('._subtitle .sf-heading__title');
++    this.formPreview = this.page.locator('.phrase-pillow-form-preview');
++    this.designImages = this.page.locator('._design-images-container');
++    this.agreement = this.page.locator('._actions-row .m-block-story');
++    this.quantityField = this.page.locator('._qty-container');
++    this.submitAnimator = this.page.locator('.m-submit-animator');
++  }
++
++  public async waitStepToBeVisible (title: string) {
++    const step = this.page.locator(`._customizer-step.-active:has-text("${title}")`);
++    await expect(step).toBeVisible();
++  }
++
++  public async goToStep (title: string) {
++    const step = this.page.locator(`._customizer-step:has-text("${title}")`);
++    await step.click();
++    await this.waitStepToBeVisible(title);
++  }
++
++  public async clickNextButton () {
++    const continueButton = this.page.locator('._next-step-button-container button:has-text("Next"):visible');
++    await continueButton.click();
++  }
++
++  public async addToCartAndVerifyResponse () {
++    const responsePromise = this.page.waitForResponse(
++      response => response.url().includes(this.customizableProductPage.ADD_TO_CART_API_RESOURCE) && response.status() === 200
++    );
++
++    await this.customizableProductPage.addToCart();
++
++    await expect(this.submitAnimator).toBeVisible();
++
++    const response = await responsePromise;
++    expect(response.ok()).toBeTruthy();
++  }
++}
+diff --git a/e2e-tests/page-model/product/plushie-product.ts b/e2e-tests/page-model/product/plushie-product.ts
+new file mode 100644
+index 00000000..c84a6d8a
+--- /dev/null
++++ b/e2e-tests/page-model/product/plushie-product.ts
+@@ -0,0 +1,52 @@
++import { expect, Locator, Page } from '@playwright/test';
++import { normalizeLabel } from 'theme/e2e-tests/helpers/normalize-label';
++
++export class PlushieProductPage {
++  public headingTitle: Locator;
++  public formErrors: Locator;
++  public quantityPopupButton: Locator;
++  public quantityDiscountPopup: Locator;
++  public agreement: Locator;
++  public activeStepContent: Locator;
++  public typeSelector: Locator;
++  public quantityField: Locator;
++
++  public constructor (public readonly page: Page) {
++    this.headingTitle = this.page.locator('h1.sf-heading__title');
++    this.formErrors = this.page.locator('._form-errors');
++    this.quantityPopupButton = this.page.locator('._popup-link');
++    this.quantityDiscountPopup = this.page.locator('._popup-content');
++    this.agreement = this.page.locator('._actions .m-block-story');
++    this.activeStepContent = this.page.locator('.sf-step').filter({ hasText: /\S/ }).nth(0);
++    this.typeSelector = this.page.locator('.plushie-wizard-product-type-step');
++    this.quantityField = this.page.locator('._qty-container');
++  }
++
++  public async waitStepToBeVisible (title: string) {
++    const step = this.page.locator(`.sf-steps__step.sf-steps__step--current:has-text("${title}")`);
++    await expect(step).toBeVisible();
++  }
++
++  public async clickContinueButton () {
++    const continueButton = this.activeStepContent.locator('button:has-text("Continue")');
++    await continueButton.click();
++  }
++
++  public async selectTypeByIndex (index: number): Promise<string | null> {
++    const typeOption = this.typeSelector.locator('._button').nth(index);
++    const title = typeOption.locator('._title');
++
++    const typeOptionText = await title.textContent();
++    await typeOption.click();
++
++    if (!typeOptionText) {
++      return null;
++    }
++
++    return normalizeLabel(typeOptionText);
++  }
++
++  public async waitPageToBeVisible () {
++    await expect(this.page.locator('#plushie-product')).toBeVisible();
++  }
++}
+diff --git a/e2e-tests/page-model/product/vertical-steps-form.ts b/e2e-tests/page-model/product/vertical-steps-form.ts
+new file mode 100644
+index 00000000..72b8fafd
+--- /dev/null
++++ b/e2e-tests/page-model/product/vertical-steps-form.ts
+@@ -0,0 +1,35 @@
++import { expect, Locator, Page } from '@playwright/test';
++import { CustomizableProductPage } from './customizable-product';
++
++export class VerticalStepsProductPage {
++  public headingTitle: Locator;
++  public formErrors: Locator;
++  public saveAndMakeAnotherButton: Locator;
++  public quantityPopupButton: Locator;
++  public quantityDiscountPopup: Locator;
++  public agreement: Locator;
++
++  public constructor (
++    public readonly page: Page,
++    public readonly customizableProductPage: CustomizableProductPage
++  ) {
++    this.headingTitle = this.page.locator('h1.sf-heading__title');
++    this.formErrors = this.page.locator('._form-errors');
++    this.saveAndMakeAnotherButton = this.page.locator('._add-to-cart-and-make-another');
++    this.quantityPopupButton = this.page.locator('._popup-link');
++    this.quantityDiscountPopup = this.page.locator('._popup-content');
++    this.agreement = this.page.locator('._agreement');
++  }
++
++  public async makeAnotherAndVerifyResponse () {
++    const responsePromise = this.page.waitForResponse(
++      response => response.url().includes(this.customizableProductPage.ADD_TO_CART_API_RESOURCE) && response.status() === 200
++    );
++
++    await expect(this.saveAndMakeAnotherButton).toBeVisible();
++    await this.saveAndMakeAnotherButton.click();
++
++    const response = await responsePromise;
++    expect(response.ok()).toBeTruthy();
++  }
++}
+diff --git a/e2e-tests/tests/product/figurines.spec.ts b/e2e-tests/tests/product/figurines.spec.ts
+new file mode 100644
+index 00000000..fc64e3e3
+--- /dev/null
++++ b/e2e-tests/tests/product/figurines.spec.ts
+@@ -0,0 +1,134 @@
++import { expect, testFactory } from '../../fixtures/vertical-steps-product-page';
++import { CustomizableProductPage } from '../../page-model/product/customizable-product';
++
++const DESCRIPTION_CUSTOMIZATION_OPTION_VALUE = 'Customize Your Petsies Figurines';
++const UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL = 'Upload your photo';
++const EYE_COLOR_TYPE_CUSTOMIZATION_OPTION_LABEL = 'Eye Color Type';
++const EYE_COLOR_CUSTOMIZATION_OPTION_LABEL = 'Eye Color';
++const FUR_COLOR_CUSTOMIZATION_OPTION_LABEL = 'Fur Color';
++const UPGRADES_CUSTOMIZATION_OPTION_LABEL = 'Upgrade Your Plush (optional)';
++const EMAIL_CUSTOMIZATION_OPTION_LABEL = 'Enter your email address';
++
++const PRODUCT_NAME = 'Petsies Figurines';
++const DESCRIPTION_TEXT = 'Test description';
++const UPDATED_DESCRIPTION_TEXT = 'Updated description';
++const TEST_EMAIL = 'test@test.test';
++
++const test = testFactory('/petsies-figurines/create/');
++
++async function fillRequiredFields (customizableProductPage: CustomizableProductPage) {
++  await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
++  await customizableProductPage.fillCustomizationTextValue(DESCRIPTION_CUSTOMIZATION_OPTION_VALUE, DESCRIPTION_TEXT);
++  await customizableProductPage.fillCustomizationSelectValueByIndex(EYE_COLOR_TYPE_CUSTOMIZATION_OPTION_LABEL, 1);
++  await customizableProductPage.fillCustomizationThumbnailValueByIndex(EYE_COLOR_CUSTOMIZATION_OPTION_LABEL, 1);
++  await customizableProductPage.fillCustomizationThumbnailValueByIndex(FUR_COLOR_CUSTOMIZATION_OPTION_LABEL, 1);
++  await customizableProductPage.fillCustomizationTextValue(EMAIL_CUSTOMIZATION_OPTION_LABEL, TEST_EMAIL);
++}
++
++test('form layout is correct', async ({ customizableProductPage, verticalStepsProductPage }) => {
++  await expect(verticalStepsProductPage.headingTitle).not.toBeEmpty();
++  await expect(verticalStepsProductPage.saveAndMakeAnotherButton).toBeVisible();
++  await expect(verticalStepsProductPage.agreement).toBeVisible();
++  await expect(verticalStepsProductPage.quantityPopupButton).toBeVisible();
++
++  await expect(customizableProductPage.addToCartButton).toBeVisible();
++  await expect(customizableProductPage.quantityField).toBeVisible();
++
++  const uploadPhotoWidget = customizableProductPage.getCustomizationWidgetByLabel(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
++  const descriptionWidget = customizableProductPage.getCustomizationWidgetByLabel(DESCRIPTION_CUSTOMIZATION_OPTION_VALUE);
++  const eyeColorTypeWidget = customizableProductPage.getCustomizationWidgetByLabel(EYE_COLOR_TYPE_CUSTOMIZATION_OPTION_LABEL);
++  const eyeColorWidget = customizableProductPage.getCustomizationWidgetByLabel(EYE_COLOR_CUSTOMIZATION_OPTION_LABEL);
++  const furColorWidget = customizableProductPage.getCustomizationWidgetByLabel(FUR_COLOR_CUSTOMIZATION_OPTION_LABEL);
++  const upgradesWidget = customizableProductPage.getCustomizationWidgetByLabel(UPGRADES_CUSTOMIZATION_OPTION_LABEL);
++  const emailWidget = customizableProductPage.getCustomizationWidgetByLabel(EMAIL_CUSTOMIZATION_OPTION_LABEL);
++
++  await expect(uploadPhotoWidget).toBeVisible();
++  await expect(descriptionWidget).toBeVisible();
++  await expect(eyeColorTypeWidget).toBeVisible();
++  await expect(furColorWidget).toBeVisible();
++  await expect(upgradesWidget).toBeVisible();
++  await expect(emailWidget).toBeVisible();
++
++  await expect(eyeColorWidget).toBeHidden();
++  await customizableProductPage.fillCustomizationSelectValueByIndex(EYE_COLOR_TYPE_CUSTOMIZATION_OPTION_LABEL, 1);
++  await expect(eyeColorWidget).toBeVisible();
++
++  await verticalStepsProductPage.quantityPopupButton.click();
++  await expect(verticalStepsProductPage.quantityDiscountPopup).toBeVisible();
++});
++
++test('form errors displayed correctly', async ({ verticalStepsProductPage, customizableProductPage }) => {
++  await customizableProductPage.addToCart();
++  await expect(verticalStepsProductPage.formErrors).toBeVisible();
++});
++
++test('product added to cart successfully with uploaded image', async ({ cartPage, customizableProductPage }) => {
++  await fillRequiredFields(customizableProductPage);
++  await customizableProductPage.addToCartAndVerifyResponse();
++  await cartPage.waitPageToBeVisible();
++});
++
++test('product added to cart successfully without uploaded image', async ({ cartPage, customizableProductPage }) => {
++  await fillRequiredFields(customizableProductPage);
++  await customizableProductPage.addToCartAndVerifyResponse();
++  await cartPage.waitPageToBeVisible();
++});
++
++test('product display in cart correctly', async ({ cartPage, customizableProductPage }) => {
++  await fillRequiredFields(customizableProductPage);
++  await customizableProductPage.addToCartAndVerifyResponse();
++  await cartPage.waitPageToBeVisible();
++
++  const cartItem = cartPage.getCartItemByProductName(PRODUCT_NAME);
++
++  await expect(cartItem).toBeVisible();
++  await cartPage.expectCartItemToHaveProperties(cartItem, [DESCRIPTION_TEXT]);
++});
++
++test('product can be edited', async ({ cartPage, customizableProductPage }) => {
++  await fillRequiredFields(customizableProductPage);
++  await customizableProductPage.addToCartAndVerifyResponse();
++  await cartPage.waitPageToBeVisible();
++
++  await cartPage.editCartItemByProductName(PRODUCT_NAME);
++
++  await customizableProductPage.waitPageToBeVisible();
++
++  const filledDescription = await customizableProductPage.getCustomizationTextValueByLabel(DESCRIPTION_CUSTOMIZATION_OPTION_VALUE);
++
++  expect(DESCRIPTION_TEXT).toEqual(filledDescription);
++  await customizableProductPage.fillCustomizationTextValue(DESCRIPTION_CUSTOMIZATION_OPTION_VALUE, UPDATED_DESCRIPTION_TEXT);
++
++  await customizableProductPage.addToCartAndVerifyResponse();
++  await cartPage.waitPageToBeVisible();
++
++  await cartPage.goto();
++  const updatedCartItem = cartPage.getCartItemByProductName(PRODUCT_NAME);
++  await cartPage.expectCartItemToHaveProperties(updatedCartItem, [UPDATED_DESCRIPTION_TEXT]);
++});
++
++test('form fields are reset after save and make another', async ({ page, customizableProductPage, verticalStepsProductPage }) => {
++  await fillRequiredFields(customizableProductPage);
++  await verticalStepsProductPage.makeAnotherAndVerifyResponse();
++
++  await page.waitForFunction(() => window.scrollY === 0);
++
++  const imageWidget = customizableProductPage.getCustomizationWidgetByLabel(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
++
++  await expect(imageWidget).toBeVisible();
++
++  const filledDescription = await customizableProductPage.getCustomizationTextValueByLabel(DESCRIPTION_CUSTOMIZATION_OPTION_VALUE);
++  expect(filledDescription).toBeNull();
++
++  const filledEyeColorType = await customizableProductPage.getCustomizationSelectValueByLabel(EYE_COLOR_TYPE_CUSTOMIZATION_OPTION_LABEL);
++  expect(filledEyeColorType).toBe('Select Option');
++
++  const eyeColorWidget = customizableProductPage.getCustomizationWidgetByLabel(EYE_COLOR_CUSTOMIZATION_OPTION_LABEL);
++  await expect(eyeColorWidget).toBeHidden();
++
++  const filledFurColor = await customizableProductPage.getCustomizationThumbnailValueByLabel(FUR_COLOR_CUSTOMIZATION_OPTION_LABEL);
++  expect(filledFurColor).toBeNull();
++
++  const emailWidget = customizableProductPage.getCustomizationWidgetByLabel(EMAIL_CUSTOMIZATION_OPTION_LABEL);
++  await expect(emailWidget).toBeHidden();
++});
+diff --git a/e2e-tests/tests/product/forevers-plush.spec.ts b/e2e-tests/tests/product/forevers-plush.spec.ts
+new file mode 100644
+index 00000000..5fd6cfc5
+--- /dev/null
++++ b/e2e-tests/tests/product/forevers-plush.spec.ts
+@@ -0,0 +1,221 @@
++import { expect, testFactory } from '../../fixtures/plushie-product-page';
++import { CustomizableProductPage } from '../../page-model/product/customizable-product';
++import { PlushieProductPage } from '../../page-model/product/plushie-product';
++
++const UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL = 'Upload Photo of Pet';
++const EMAIL_CUSTOMIZATION_OPTION_LABEL = 'Enter your email address';
++const PET_NAME_CUSTOMIZATION_OPTION_LABEL = 'Your Pet\'s Name';
++const PET_BREED_CUSTOMIZATION_OPTION_LABEL = 'Your Pet\'s Breed';
++
++const SIZE_CUSTOMIZATION_OPTION_LABEL = 'Size';
++const POSTURE_CUSTOMIZATION_OPTION_LABEL = 'Posture';
++const MOUTH_SHAPE_CUSTOMIZATION_OPTION_LABEL = 'Mouth Shape';
++const EAR_SHAPE_CUSTOMIZATION_OPTION_LABEL = 'Ear Shape';
++const TAIL_SHAPE_CUSTOMIZATION_OPTION_LABEL = 'Tail';
++const DIFFERENT_EYE_COLOR_CUSTOMIZATION_OPTION_LABEL = 'My pet has two different colored eyes';
++const EYE_COLOR_CUSTOMIZATION_OPTION_LABEL = 'Eye Color';
++const LEFT_EYE_COLOR_CUSTOMIZATION_OPTION_LABEL = 'Left Eye';
++const RIGHT_EYE_COLOR_CUSTOMIZATION_OPTION_LABEL = 'Right Eye';
++const FUR_COLOR_CUSTOMIZATION_OPTION_LABEL = 'Fur';
++const COLOR_PALLETE_CUSTOMIZATION_OPTION_LABEL = 'Optional: Color Palette';
++const DESCRIPTION_CUSTOMIZATION_OPTION_LABEL = 'Describe Your Pet\'s Physical Features';
++const UPGRADES_CUSTOMIZATION_OPTION_LABEL = 'Upgrade Your Plush (optional)';
++const PRODUCTION_TIME_CUSTOMIZATION_OPTION_LABEL = 'Production Time';
++
++const DESCRIPTION_TEXT = 'Test description';
++const UPDATED_DESCRIPTION_TEXT = 'Updated description';
++const TEST_EMAIL = 'test@test.test';
++const PET_NAME = 'Test Pet Name';
++const UPDATED_PET_NAME = 'Updated Pet Name';
++
++const TYPE_STEP_TITLE = 'Type';
++const PHOTO_STEP_TITLE = 'Photo';
++const PET_INFO_STEP_TITLE = 'Pet Info';
++const CUSTOMIZATION_STEP_TITLE = 'Customize';
++
++const test = testFactory('/forevers/create/');
++
++async function fillPetInfoStepRequiredFields (customizableProductPage: CustomizableProductPage) {
++  await customizableProductPage.fillCustomizationTextValue(PET_NAME_CUSTOMIZATION_OPTION_LABEL, PET_NAME);
++  await customizableProductPage.fillCustomizationTextValue(EMAIL_CUSTOMIZATION_OPTION_LABEL, TEST_EMAIL);
++}
++
++async function fillCustomizeStepRequiredFields (customizableProductPage: CustomizableProductPage) {
++  await customizableProductPage.fillCustomizationThumbnailValueByIndex(SIZE_CUSTOMIZATION_OPTION_LABEL, 0);
++  await customizableProductPage.fillCustomizationThumbnailValueByIndex(POSTURE_CUSTOMIZATION_OPTION_LABEL, 0);
++  await customizableProductPage.fillCustomizationThumbnailValueByIndex(MOUTH_SHAPE_CUSTOMIZATION_OPTION_LABEL, 0);
++  await customizableProductPage.fillCustomizationThumbnailValueByIndex(EAR_SHAPE_CUSTOMIZATION_OPTION_LABEL, 0);
++  await customizableProductPage.fillCustomizationThumbnailValueByIndex(TAIL_SHAPE_CUSTOMIZATION_OPTION_LABEL, 0);
++  await customizableProductPage.fillCustomizationThumbnailValueByIndex(EYE_COLOR_CUSTOMIZATION_OPTION_LABEL, 0);
++  await customizableProductPage.fillCustomizationThumbnailValueByIndex(FUR_COLOR_CUSTOMIZATION_OPTION_LABEL, 0);
++  await customizableProductPage.fillCustomizationTextValue(DESCRIPTION_CUSTOMIZATION_OPTION_LABEL, DESCRIPTION_TEXT);
++
++  const productionTimeWidget = customizableProductPage.getCustomizationWidgetByLabel(PRODUCTION_TIME_CUSTOMIZATION_OPTION_LABEL);
++
++  if (await productionTimeWidget.isVisible()) {
++    await customizableProductPage.fillCustomizationSelectValueByIndex(PRODUCTION_TIME_CUSTOMIZATION_OPTION_LABEL, 1);
++  }
++}
++
++async function fillAllStepsRequiredFields (customizableProductPage: CustomizableProductPage, plushieProductPage: PlushieProductPage) {
++  await plushieProductPage.waitStepToBeVisible(PHOTO_STEP_TITLE);
++  await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
++  await plushieProductPage.clickContinueButton();
++
++  await plushieProductPage.waitStepToBeVisible(PET_INFO_STEP_TITLE);
++  await fillPetInfoStepRequiredFields(customizableProductPage);
++  await plushieProductPage.clickContinueButton();
++
++  await plushieProductPage.waitStepToBeVisible(CUSTOMIZATION_STEP_TITLE);
++  await fillCustomizeStepRequiredFields(customizableProductPage);
++}
++
++test('form layout is correct', async ({ customizableProductPage, plushieProductPage }) => {
++  await expect(plushieProductPage.headingTitle).not.toBeEmpty();
++  await expect(plushieProductPage.typeSelector).toBeVisible();
++
++  await plushieProductPage.selectTypeByIndex(0);
++  await plushieProductPage.waitStepToBeVisible(PHOTO_STEP_TITLE);
++
++  const uploadPhotoWidget = customizableProductPage.getCustomizationWidgetByLabel(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
++  await expect(uploadPhotoWidget).toBeVisible();
++  await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
++
++  await plushieProductPage.clickContinueButton();
++
++  await plushieProductPage.waitStepToBeVisible(PET_INFO_STEP_TITLE);
++
++  const petNameWidget = customizableProductPage.getCustomizationWidgetByLabel(PET_NAME_CUSTOMIZATION_OPTION_LABEL);
++  await expect(petNameWidget).toBeVisible();
++
++  const petBreedWidget = customizableProductPage.getCustomizationWidgetByLabel(PET_BREED_CUSTOMIZATION_OPTION_LABEL);
++  await expect(petBreedWidget).toBeVisible();
++
++  const emailWidget = customizableProductPage.getCustomizationWidgetByLabel(EMAIL_CUSTOMIZATION_OPTION_LABEL);
++  await expect(emailWidget).toBeVisible();
++  await fillPetInfoStepRequiredFields(customizableProductPage);
++
++  await plushieProductPage.clickContinueButton();
++  await plushieProductPage.waitStepToBeVisible(CUSTOMIZATION_STEP_TITLE);
++
++  const sizeWidget = customizableProductPage.getCustomizationWidgetByLabel(SIZE_CUSTOMIZATION_OPTION_LABEL);
++  const postureWidget = customizableProductPage.getCustomizationWidgetByLabel(POSTURE_CUSTOMIZATION_OPTION_LABEL);
++  const mouthShapeWidget = customizableProductPage.getCustomizationWidgetByLabel(MOUTH_SHAPE_CUSTOMIZATION_OPTION_LABEL);
++  const earShapeWidget = customizableProductPage.getCustomizationWidgetByLabel(EAR_SHAPE_CUSTOMIZATION_OPTION_LABEL);
++  const tailShapeWidget = customizableProductPage.getCustomizationWidgetByLabel(TAIL_SHAPE_CUSTOMIZATION_OPTION_LABEL);
++  const differentEyeColorWidget = customizableProductPage.getCheckboxByLabel(DIFFERENT_EYE_COLOR_CUSTOMIZATION_OPTION_LABEL);
++  const eyeColorWidget = customizableProductPage.getCustomizationWidgetByLabel(EYE_COLOR_CUSTOMIZATION_OPTION_LABEL);
++  const leftEyeColorWidget = customizableProductPage.getCustomizationWidgetByLabel(LEFT_EYE_COLOR_CUSTOMIZATION_OPTION_LABEL);
++  const rightEyeColorWidget = customizableProductPage.getCustomizationWidgetByLabel(RIGHT_EYE_COLOR_CUSTOMIZATION_OPTION_LABEL);
++  const furColorWidget = customizableProductPage.getCustomizationWidgetByLabel(FUR_COLOR_CUSTOMIZATION_OPTION_LABEL);
++  const colorPalleteWidget = customizableProductPage.getCustomizationWidgetByLabel(COLOR_PALLETE_CUSTOMIZATION_OPTION_LABEL);
++  const descriptionWidget = customizableProductPage.getCustomizationWidgetByLabel(DESCRIPTION_CUSTOMIZATION_OPTION_LABEL);
++  const upgradesWidget = customizableProductPage.getCustomizationWidgetByLabel(UPGRADES_CUSTOMIZATION_OPTION_LABEL);
++
++  await expect(sizeWidget).toBeVisible();
++  await expect(postureWidget).toBeVisible();
++  await expect(mouthShapeWidget).toBeVisible();
++  await expect(earShapeWidget).toBeVisible();
++  await expect(tailShapeWidget).toBeVisible();
++  await expect(differentEyeColorWidget).toBeVisible();
++  await expect(eyeColorWidget).toBeVisible();
++  await expect(furColorWidget).toBeVisible();
++  await expect(colorPalleteWidget).toBeVisible();
++  await expect(descriptionWidget).toBeVisible();
++  await expect(upgradesWidget).toBeVisible();
++
++  await expect(leftEyeColorWidget).toBeHidden();
++  await expect(rightEyeColorWidget).toBeHidden();
++
++  await customizableProductPage.toggleCheckboxCustomizationValue(DIFFERENT_EYE_COLOR_CUSTOMIZATION_OPTION_LABEL);
++  await expect(leftEyeColorWidget).toBeVisible();
++  await expect(rightEyeColorWidget).toBeVisible();
++  await expect(plushieProductPage.agreement).toBeVisible();
++  await expect(customizableProductPage.addToCartButton).toBeVisible();
++  await expect(plushieProductPage.quantityField).toBeVisible();
++  await expect(plushieProductPage.quantityPopupButton).toBeVisible();
++
++  await plushieProductPage.quantityPopupButton.click();
++  await expect(plushieProductPage.quantityDiscountPopup).toBeVisible();
++});
++
++test('form errors displayed correctly', async ({ plushieProductPage, customizableProductPage }) => {
++  await plushieProductPage.selectTypeByIndex(0);
++  await plushieProductPage.waitStepToBeVisible(PHOTO_STEP_TITLE);
++  await plushieProductPage.clickContinueButton();
++  await expect(plushieProductPage.formErrors).toBeVisible();
++
++  await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
++  await expect(plushieProductPage.formErrors).toBeHidden();
++  await plushieProductPage.clickContinueButton();
++
++  await plushieProductPage.waitStepToBeVisible(PET_INFO_STEP_TITLE);
++  await plushieProductPage.clickContinueButton();
++  await expect(plushieProductPage.formErrors).toBeVisible();
++  await fillPetInfoStepRequiredFields(customizableProductPage);
++  await expect(plushieProductPage.formErrors).toBeHidden();
++  await plushieProductPage.clickContinueButton();
++
++  await plushieProductPage.waitStepToBeVisible(CUSTOMIZATION_STEP_TITLE);
++  await customizableProductPage.addToCart();
++  await expect(plushieProductPage.formErrors).toBeVisible();
++  await fillCustomizeStepRequiredFields(customizableProductPage);
++  await expect(plushieProductPage.formErrors).toBeHidden();
++});
++
++test('product added to cart successfully with uploaded image', async ({ crossSellsPage, plushieProductPage, customizableProductPage }) => {
++  await plushieProductPage.selectTypeByIndex(0);
++  await fillAllStepsRequiredFields(customizableProductPage, plushieProductPage);
++  await customizableProductPage.addToCartAndVerifyResponse();
++  await crossSellsPage.waitPageToBeVisible();
++});
++
++test('product added to cart successfully without uploaded image', async ({ crossSellsPage, plushieProductPage, customizableProductPage }) => {
++  await plushieProductPage.selectTypeByIndex(0);
++  await fillAllStepsRequiredFields(customizableProductPage, plushieProductPage);
++  await customizableProductPage.addToCartAndVerifyResponse();
++  await crossSellsPage.waitPageToBeVisible();
++});
++
++test('product can be edited', async ({ cartPage, crossSellsPage, customizableProductPage, plushieProductPage }) => {
++  const productName = await plushieProductPage.selectTypeByIndex(0);
++  expect(productName).not.toBeNull();
++
++  await fillAllStepsRequiredFields(customizableProductPage, plushieProductPage);
++  await customizableProductPage.addToCartAndVerifyResponse();
++  await crossSellsPage.waitPageToBeVisible();
++
++  await cartPage.goto();
++  await cartPage.editCartItemByProductName(productName);
++
++  await plushieProductPage.waitPageToBeVisible();
++  await plushieProductPage.waitStepToBeVisible(PHOTO_STEP_TITLE);
++
++  // make sure ability to change product type is disabled on edit
++  const typeStepButton = plushieProductPage.page.locator(`.sf-steps__step--disabled:has-text("${TYPE_STEP_TITLE}")`);
++  await expect(typeStepButton).toBeVisible();
++
++  await plushieProductPage.clickContinueButton();
++  await plushieProductPage.waitStepToBeVisible(PET_INFO_STEP_TITLE);
++  const filledPetName = await customizableProductPage.getCustomizationTextValueByLabel(PET_NAME_CUSTOMIZATION_OPTION_LABEL);
++  expect(PET_NAME).toEqual(filledPetName);
++  await customizableProductPage.fillCustomizationTextValue(PET_NAME_CUSTOMIZATION_OPTION_LABEL, UPDATED_PET_NAME);
++
++  await plushieProductPage.clickContinueButton();
++  await plushieProductPage.waitStepToBeVisible(CUSTOMIZATION_STEP_TITLE);
++
++  const filledDescription = await customizableProductPage.getCustomizationTextValueByLabel(DESCRIPTION_CUSTOMIZATION_OPTION_LABEL);
++  expect(DESCRIPTION_TEXT).toEqual(filledDescription);
++
++  await customizableProductPage.fillCustomizationTextValue(
++    DESCRIPTION_CUSTOMIZATION_OPTION_LABEL,
++    UPDATED_DESCRIPTION_TEXT
++  );
++
++  await customizableProductPage.addToCartAndVerifyResponse();
++  await crossSellsPage.waitPageToBeVisible();
++
++  await cartPage.goto();
++  const updatedCartItem = cartPage.getCartItemByProductName(productName);
++  await cartPage.expectCartItemToHaveProperties(updatedCartItem, [UPDATED_DESCRIPTION_TEXT, UPDATED_PET_NAME]);
++});
+diff --git a/e2e-tests/tests/product/pajamas.spec.ts b/e2e-tests/tests/product/pajamas.spec.ts
+new file mode 100644
+index 00000000..7694a369
+--- /dev/null
++++ b/e2e-tests/tests/product/pajamas.spec.ts
+@@ -0,0 +1,106 @@
++import { expect, testFactory } from '../../fixtures/images-gallery-product-page';
++import { CustomizableProductPage } from '../../page-model/product/customizable-product';
++
++const DESIGN_CUSTOMIZATION_OPTION_LABEL = 'Select design';
++const UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL = 'Upload your photo';
++const STYLE_CUSTOMIZATION_OPTION_LABEL = 'Select style';
++const SET_CUSTOMIZATION_OPTION_LABEL = 'Select set';
++const SIZE_CUSTOMIZATION_OPTION_LABEL = 'Select size';
++const SHORTS_STYLE_CUSTOMIZATION_OPTION_LABEL = 'Short\'s Style';
++const ADD_MORE_PHOTOS_CUSTOMIZATION_OPTION_LABEL = 'Add more photos';
++
++const PRODUCT_NAME = 'Custom Pajamas';
++
++const test = testFactory('/custom-pajamas/');
++
++async function fillRequiredFields (customizableProductPage: CustomizableProductPage) {
++  await customizableProductPage.fillCustomizationThumbnailValueByIndex(DESIGN_CUSTOMIZATION_OPTION_LABEL, 1);
++  await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
++  await customizableProductPage.fillCustomizationThumbnailValueByIndex(STYLE_CUSTOMIZATION_OPTION_LABEL, 1);
++  await customizableProductPage.fillCustomizationSelectValueByIndex(SET_CUSTOMIZATION_OPTION_LABEL, 1);
++  await customizableProductPage.fillCustomizationSelectValueByIndex(SIZE_CUSTOMIZATION_OPTION_LABEL, 1);
++}
++
++test('form layout is correct', async ({ customizableProductPage, imagesGalleryProductPage }) => {
++  await expect(imagesGalleryProductPage.initializedSwiper).toBeVisible();
++  await expect(imagesGalleryProductPage.headingTitle).not.toBeEmpty();
++  await expect(imagesGalleryProductPage.shortDescription).not.toBeEmpty();
++  await expect(imagesGalleryProductPage.agreement).toBeVisible();
++
++  await expect(customizableProductPage.addToCartButton).toBeVisible();
++  await expect(customizableProductPage.quantityField).toBeVisible();
++
++  const designWidget = customizableProductPage.getCustomizationWidgetByLabel(DESIGN_CUSTOMIZATION_OPTION_LABEL);
++  const uploadPhotoWidget = customizableProductPage.getCustomizationWidgetByLabel(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
++  const addMorePhotosWidget = customizableProductPage.getCustomizationWidgetByLabel(ADD_MORE_PHOTOS_CUSTOMIZATION_OPTION_LABEL);
++  const styleWidget = customizableProductPage.getCustomizationWidgetByLabel(STYLE_CUSTOMIZATION_OPTION_LABEL);
++  const setWidget = customizableProductPage.getCustomizationWidgetByLabel(SET_CUSTOMIZATION_OPTION_LABEL);
++  const sizeWidget = customizableProductPage.getCustomizationWidgetByLabel(SIZE_CUSTOMIZATION_OPTION_LABEL);
++  const shortsStyleWidget = customizableProductPage.getCustomizationWidgetByLabel(SHORTS_STYLE_CUSTOMIZATION_OPTION_LABEL);
++
++  await expect(designWidget).toBeVisible();
++  await expect(uploadPhotoWidget).toBeVisible();
++  await expect(addMorePhotosWidget).toBeVisible();
++  await expect(styleWidget).toBeVisible();
++
++  await expect(setWidget).toBeHidden();
++  await expect(shortsStyleWidget).toBeHidden();
++  await expect(sizeWidget).toBeHidden();
++
++  await customizableProductPage.fillCustomizationThumbnailValueByIndex(STYLE_CUSTOMIZATION_OPTION_LABEL, 1);
++
++  await expect(setWidget).toBeVisible();
++  await expect(sizeWidget).toBeVisible();
++
++  await customizableProductPage.fillCustomizationThumbnailValueByIndex(STYLE_CUSTOMIZATION_OPTION_LABEL, 0);
++  await customizableProductPage.fillCustomizationSelectValueByIndex(SET_CUSTOMIZATION_OPTION_LABEL, 1);
++
++  await expect(shortsStyleWidget).toBeVisible();
++});
++
++test('form errors displayed correctly', async ({ imagesGalleryProductPage, customizableProductPage }) => {
++  await customizableProductPage.addToCart();
++  await expect(imagesGalleryProductPage.formErrors).toBeVisible();
++});
++
++test('product added to cart successfully', async ({ cartPage, customizableProductPage }) => {
++  await fillRequiredFields(customizableProductPage);
++  await customizableProductPage.addToCartAndVerifyResponse();
++  await cartPage.waitPageToBeVisible();
++});
++
++test('product display in cart correctly', async ({ cartPage, customizableProductPage }) => {
++  await fillRequiredFields(customizableProductPage);
++  await customizableProductPage.addToCartAndVerifyResponse();
++  await cartPage.waitPageToBeVisible();
++
++  const cartItem = cartPage.getCartItemByProductName(PRODUCT_NAME);
++
++  await expect(cartItem).toBeVisible();
++});
++
++test('product can be edited', async ({ page, cartPage, customizableProductPage, imagesGalleryProductPage }) => {
++  await fillRequiredFields(customizableProductPage);
++  const selectedSet = await customizableProductPage.getCustomizationSelectValueByLabel(SET_CUSTOMIZATION_OPTION_LABEL);
++  await customizableProductPage.addToCartAndVerifyResponse();
++  await cartPage.waitPageToBeVisible();
++
++  await cartPage.editCartItemByProductName(PRODUCT_NAME);
++  await imagesGalleryProductPage.moveFocusOutsideImagesGallery();
++
++  await customizableProductPage.waitPageToBeVisible();
++
++  const filledSelectedSet = await customizableProductPage.getCustomizationSelectValueByLabel(SET_CUSTOMIZATION_OPTION_LABEL);
++
++  expect(selectedSet).toEqual(filledSelectedSet);
++  await customizableProductPage.fillCustomizationSelectValueByIndex(SET_CUSTOMIZATION_OPTION_LABEL, 2);
++  const newSelectedSet = await customizableProductPage.getCustomizationSelectValueByLabel(SET_CUSTOMIZATION_OPTION_LABEL);
++
++  expect(newSelectedSet).toBeTruthy();
++  await customizableProductPage.addToCartAndVerifyResponse();
++  await cartPage.waitPageToBeVisible();
++
++  await cartPage.goto();
++  const updatedCartItem = cartPage.getCartItemByProductName(PRODUCT_NAME);
++  await cartPage.expectCartItemToHaveProperties(updatedCartItem, [newSelectedSet]);
++});
+diff --git a/e2e-tests/tests/product/photo-pillows.spec.ts b/e2e-tests/tests/product/photo-pillows.spec.ts
+new file mode 100644
+index 00000000..04c28788
+--- /dev/null
++++ b/e2e-tests/tests/product/photo-pillows.spec.ts
+@@ -0,0 +1,106 @@
++import { expect, testFactory } from '../../fixtures/photo-pillow-product-page';
++import { CustomizableProductPage } from '../../page-model/product/customizable-product';
++import { PhotoPillowProductPage } from '../../page-model/product/photo-pillows-product';
++
++const PRODUCT_NAME = 'Phrase Pillow';
++
++const UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL = 'Upload your photo';
++const EMAIL_CUSTOMIZATION_OPTION_LABEL = 'Enter your email address';
++const PET_NAME_CUSTOMIZATION_OPTION_LABEL = 'Pet Name';
++const FRONT_DESIGN_CUSTOMIZATION_OPTION_LABEL = 'Try a different design for the front';
++const BACK_DESIGN_CUSTOMIZATION_OPTION_LABEL = 'Select design for the back of pillow';
++const ACCENT_COLOR_CUSTOMIZATION_OPTION_LABEL = 'Accent Color';
++
++const TEST_EMAIL = 'test@test.test';
++const PET_NAME = 'Test Pet Name';
++
++const FRONT_DESIGN_TITLE_STEP = 'Front Design';
++const PHOTO_STEP_TITLE = 'Upload Photo';
++const BACK_DESIGN_TITLE_STEP = 'Back Design';
++const CUSTOM_OPTIONS_TITLE_STEP = 'Custom Options';
++const ADD_TO_CART_TITLE_STEP = 'Add to Cart';
++
++const test = testFactory('/photo-pillows/create/');
++
++async function fillAllStepsRequiredFields (customizableProductPage: CustomizableProductPage, photoPillowProductPage: PhotoPillowProductPage) {
++  await photoPillowProductPage.goToStep(FRONT_DESIGN_TITLE_STEP);
++  await customizableProductPage.fillCustomizationThumbnailValueByIndex(FRONT_DESIGN_CUSTOMIZATION_OPTION_LABEL, 0);
++  await photoPillowProductPage.clickNextButton();
++
++  await photoPillowProductPage.waitStepToBeVisible(PHOTO_STEP_TITLE);
++  await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
++  await photoPillowProductPage.clickNextButton();
++
++  await photoPillowProductPage.waitStepToBeVisible(BACK_DESIGN_TITLE_STEP);
++  await customizableProductPage.fillCustomizationThumbnailValueByIndex(BACK_DESIGN_CUSTOMIZATION_OPTION_LABEL, 0);
++  await photoPillowProductPage.clickNextButton();
++
++  await photoPillowProductPage.waitStepToBeVisible(CUSTOM_OPTIONS_TITLE_STEP);
++  await customizableProductPage.fillCustomizationTextValue(PET_NAME_CUSTOMIZATION_OPTION_LABEL, PET_NAME);
++  await customizableProductPage.fillCustomizationThumbnailValueByIndex(ACCENT_COLOR_CUSTOMIZATION_OPTION_LABEL, 0);
++  await photoPillowProductPage.clickNextButton();
++
++  await photoPillowProductPage.waitStepToBeVisible(ADD_TO_CART_TITLE_STEP);
++  await customizableProductPage.fillCustomizationTextValue(EMAIL_CUSTOMIZATION_OPTION_LABEL, TEST_EMAIL);
++}
++
++test('form layout is correct', async ({ customizableProductPage, photoPillowProductPage }) => {
++  await expect(photoPillowProductPage.headingTitle).not.toBeEmpty();
++  await expect(photoPillowProductPage.subtitle).not.toBeEmpty();
++  await expect(photoPillowProductPage.formPreview).toBeVisible();
++  await expect(photoPillowProductPage.designImages).toBeVisible();
++
++  const frontDesignWidget = customizableProductPage.getCustomizationWidgetByLabel(FRONT_DESIGN_CUSTOMIZATION_OPTION_LABEL);
++  const photoUploadWidget = customizableProductPage.getCustomizationWidgetByLabel(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
++  const backDesignWidget = customizableProductPage.getCustomizationWidgetByLabel(BACK_DESIGN_CUSTOMIZATION_OPTION_LABEL);
++  const petNameWidget = customizableProductPage.getCustomizationWidgetByLabel(PET_NAME_CUSTOMIZATION_OPTION_LABEL);
++  const accentColorWidget = customizableProductPage.getCustomizationWidgetByLabel(ACCENT_COLOR_CUSTOMIZATION_OPTION_LABEL);
++  const emailWidget = customizableProductPage.getCustomizationWidgetByLabel(EMAIL_CUSTOMIZATION_OPTION_LABEL);
++
++  await expect(frontDesignWidget).toBeVisible();
++  await photoPillowProductPage.clickNextButton();
++
++  await photoPillowProductPage.waitStepToBeVisible(PHOTO_STEP_TITLE);
++  await expect(photoUploadWidget).toBeVisible();
++  await photoPillowProductPage.clickNextButton();
++
++  await photoPillowProductPage.waitStepToBeVisible(BACK_DESIGN_TITLE_STEP);
++  await expect(backDesignWidget).toBeVisible();
++  await photoPillowProductPage.clickNextButton();
++
++  await photoPillowProductPage.waitStepToBeVisible(CUSTOM_OPTIONS_TITLE_STEP);
++  await expect(petNameWidget).toBeVisible();
++  await expect(accentColorWidget).toBeVisible();
++  await photoPillowProductPage.clickNextButton();
++
++  await photoPillowProductPage.waitStepToBeVisible(ADD_TO_CART_TITLE_STEP);
++  await expect(emailWidget).toBeVisible();
++  await expect(photoPillowProductPage.quantityField).toBeVisible();
++  await expect(customizableProductPage.addToCartButton).toBeVisible();
++  await expect(photoPillowProductPage.agreement).toBeVisible();
++});
++
++test('form errors displayed correctly', async ({ photoPillowProductPage, customizableProductPage }) => {
++  await photoPillowProductPage.goToStep(ADD_TO_CART_TITLE_STEP);
++  await customizableProductPage.addToCart();
++
++  await photoPillowProductPage.waitStepToBeVisible(PHOTO_STEP_TITLE);
++  const uploadPhotoWidget = customizableProductPage.getCustomizationWidgetByLabel(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
++  const uploadPhotoError = uploadPhotoWidget.locator('._error-message');
++  await expect(uploadPhotoError).toBeVisible();
++  await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
++  await expect(uploadPhotoError).toBeEmpty();
++  await photoPillowProductPage.goToStep(ADD_TO_CART_TITLE_STEP);
++  // TODO: check for email customization error. (currently not working, #34123)
++});
++
++test('product added to cart successfully', async ({ cartPage, crossSellsPage, photoPillowProductPage, customizableProductPage }) => {
++  await fillAllStepsRequiredFields(customizableProductPage, photoPillowProductPage);
++  await photoPillowProductPage.addToCartAndVerifyResponse();
++  await crossSellsPage.waitPageToBeVisible();
++
++  await cartPage.goto();
++  await cartPage.waitPageToBeVisible();
++  const cartItem = cartPage.getCartItemByProductName(PRODUCT_NAME);
++  await expect(cartItem).toBeVisible();
++});
+diff --git a/e2e-tests/tests/product/printed-socks.spec.ts b/e2e-tests/tests/product/printed-socks.spec.ts
+index d15fcc39..a4a6cee9 100644
+--- a/e2e-tests/tests/product/printed-socks.spec.ts
++++ b/e2e-tests/tests/product/printed-socks.spec.ts
+@@ -1,11 +1,11 @@
+-import { Page } from '@playwright/test';
+-import { testFactory, expect } from '../../fixtures/images-gallery-product-page.ts';
++import { testFactory, expect } from '../../fixtures/images-gallery-product-page';
+ import { CustomizableProductPage } from '../../page-model/product/customizable-product';
+ 
+ const DESIGN_CUSTOMIZATION_OPTION_LABEL = 'Design';
+ const UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL = 'Upload your photo';
+ const ADD_MORE_PHOTOS_CUSTOMIZATION_OPTION_LABEL = 'Add more photos';
+-const ADD_TO_CART_API_RESOURCE = '/api/cart/update';
++
++const PRODUCT_NAME = 'Custom Pet Socks';
+ 
+ const test = testFactory('/pet-socks/');
+ 
+@@ -14,17 +14,6 @@ async function fillRequiredFields (customizableProductPage: CustomizableProductP
+   await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
+ }
+ 
+-async function addToCartAndVerifyResponse(page: Page, customizableProductPage: CustomizableProductPage) {
+-  const responsePromise = page.waitForResponse(
+-    response => response.url().includes(ADD_TO_CART_API_RESOURCE) && response.status() === 200
+-  );
+-
+-  await customizableProductPage.addToCart();
+-
+-  const response = await responsePromise;
+-  expect(response.ok()).toBeTruthy();
+-}
+-
+ test('form layout is correct', async ({ customizableProductPage, imagesGalleryProductPage }) => {
+   await expect(imagesGalleryProductPage.initializedSwiper).toBeVisible();
+   await expect(imagesGalleryProductPage.headingTitle).not.toBeEmpty();
+@@ -48,19 +37,46 @@ test('form errors displayed correctly', async ({ imagesGalleryProductPage, custo
+   await expect(imagesGalleryProductPage.formErrors).toBeVisible();
+ });
+ 
+-test('product added to cart successfully', async ({ page, customizableProductPage }) => {
++test('product added to cart successfully', async ({ crossSellsPage, customizableProductPage }) => {
+   await fillRequiredFields(customizableProductPage);
+-  await addToCartAndVerifyResponse(page, customizableProductPage);
+-  await expect(page.locator('#cross-sells')).toBeVisible();
++  await customizableProductPage.addToCartAndVerifyResponse();
++  await crossSellsPage.waitPageToBeVisible();
+ });
+ 
+-test('product display in cart correctly', async ({ page, cartPage, customizableProductPage }) => {
++test('product display in cart correctly', async ({ crossSellsPage, cartPage, customizableProductPage }) => {
+   await fillRequiredFields(customizableProductPage);
+-  await addToCartAndVerifyResponse(page, customizableProductPage);
+-  await expect(page.locator('#cross-sells')).toBeVisible();
++  await customizableProductPage.addToCartAndVerifyResponse();
++  await crossSellsPage.waitPageToBeVisible();
+ 
+   await cartPage.goto();
+-  const cartItem = cartPage.getCartItemByProductName('Custom Pet Socks');
++  const cartItem = cartPage.getCartItemByProductName(PRODUCT_NAME);
+ 
+   await expect(cartItem).toBeVisible();
+ });
++
++test('product can be edited', async ({ cartPage, crossSellsPage, customizableProductPage, imagesGalleryProductPage }) => {
++  await fillRequiredFields(customizableProductPage);
++  const selectedDesign = await customizableProductPage.getCustomizationSelectValueByLabel(DESIGN_CUSTOMIZATION_OPTION_LABEL);
++  await customizableProductPage.addToCartAndVerifyResponse();
++  await crossSellsPage.waitPageToBeVisible();
++
++  await cartPage.goto();
++  await cartPage.editCartItemByProductName(PRODUCT_NAME);
++  await imagesGalleryProductPage.moveFocusOutsideImagesGallery();
++
++  await customizableProductPage.waitPageToBeVisible();
++
++  const filledSelectedDesign = await customizableProductPage.getCustomizationSelectValueByLabel(DESIGN_CUSTOMIZATION_OPTION_LABEL);
++
++  expect(selectedDesign).toEqual(filledSelectedDesign);
++  await customizableProductPage.fillCustomizationSelectValueByIndex(DESIGN_CUSTOMIZATION_OPTION_LABEL, 2);
++  const newSelectedDesign = await customizableProductPage.getCustomizationSelectValueByLabel(DESIGN_CUSTOMIZATION_OPTION_LABEL);
++
++  expect(newSelectedDesign).toBeTruthy();
++  await customizableProductPage.addToCartAndVerifyResponse();
++  await crossSellsPage.waitPageToBeVisible();
++
++  await cartPage.goto();
++  const updatedCartItem = cartPage.getCartItemByProductName(PRODUCT_NAME);
++  await cartPage.expectCartItemToHaveProperties(updatedCartItem, [newSelectedDesign]);
++});
