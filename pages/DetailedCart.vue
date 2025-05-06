@@ -357,12 +357,18 @@ export default {
         //     name: 'golf-shirts-creation'
         //   }
         // },
-        // {
-        //   label: 'Photo Portraits',
-        //   url: {
-        //     name: 'photo-portraits-creation-page'
-        //   }
-        // },
+        {
+          label: 'Photo Portraits',
+          url: {
+            name: 'photo-portraits-creation-page'
+          }
+        },
+        {
+          label: this.$t('Tumblers'),
+          url: {
+            name: 'tumblers-creation'
+          }
+        },
         {
           label: 'Accessories',
           url: {
@@ -372,12 +378,6 @@ export default {
             }
           }
         },
-        // {
-        //   label: this.$t('Tumblers'),
-        //   url: {
-        //     name: 'tumblers-creation'
-        //   }
-        // },
         {
           label: 'Gift Boxes',
           url: {
