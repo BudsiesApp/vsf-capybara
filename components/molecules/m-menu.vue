@@ -229,13 +229,13 @@ export default Vue.extend({
           url: {
             name: 'printed-keychains-creation-page'
           }
+        },
+        {
+          label: this.$t('Tumblers'),
+          url: {
+            name: 'tumblers-creation'
+          }
         }
-        // {
-        //   label: this.$t('Tumblers'),
-        //   url: {
-        //     name: 'tumblers-creation'
-        //   }
-        // }
       ],
       otherProductsItems: [
         {
