@@ -233,7 +233,7 @@ export default {
             name: 'cut-out-blankets'
           }
         },
-        // { name: this.$t('Photo Portraits'), link: { name: 'photo-portraits-creation-page' } },
+        { name: this.$t('Photo Portraits'), link: { name: 'photo-portraits-creation-page' } },
         { name: this.$t('Custom Tumblers'), link: { name: 'tumblers-creation' } },
         {
           name: this.$t('Gift Cards'),

@@ -357,12 +357,12 @@ export default {
         //     name: 'golf-shirts-creation'
         //   }
         // },
-        // {
-        //   label: 'Photo Portraits',
-        //   url: {
-        //     name: 'photo-portraits-creation-page'
-        //   }
-        // },
+        {
+          label: 'Photo Portraits',
+          url: {
+            name: 'photo-portraits-creation-page'
+          }
+        },
         {
           label: this.$t('Tumblers'),
           url: {

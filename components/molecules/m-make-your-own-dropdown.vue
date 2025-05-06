@@ -145,6 +145,12 @@ export default Vue.extend({
           }
         },
         {
+          label: this.$t('Photo Portraits'),
+          url: {
+            name: 'photo-portraits-creation-page'
+          }
+        },
+        {
           label: 'Accessories',
           url: {
             name: 'category',
@@ -159,12 +165,6 @@ export default Vue.extend({
             name: 'giftbox'
           }
         },
-        // {
-        //   label: this.$t('Photo Portraits'),
-        //   url: {
-        //     name: 'photo-portraits-creation-page'
-        //   }
-        // },
         {
           label: this.$t('Gift Cards'),
           url: '/purchase-gift-card/'
