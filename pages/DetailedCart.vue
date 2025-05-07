@@ -168,7 +168,7 @@ import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 import { CART_UPD_ITEM } from '@vue-storefront/core/modules/cart/store/mutation-types';
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
-import { CartItemConfiguration, getCustomizationSystemCartItemThumbnail } from 'src/modules/customization-system';
+import { CartItemConfiguration, getCustomizationSystemThumbnail } from 'src/modules/customization-system';
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
@@ -491,7 +491,7 @@ export default {
     },
     getThumbnailForProductExtend (product) {
       const customizationSystemThumbnail =
-        getCustomizationSystemCartItemThumbnail(
+        getCustomizationSystemThumbnail(
           product.customizations,
           product.extension_attributes?.customization_state,
           this.imageHandlerService
