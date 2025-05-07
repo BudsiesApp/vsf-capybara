@@ -23,7 +23,7 @@ import Product from 'core/modules/catalog/types/Product';
 import ALoadingSpinner from 'theme/components/atoms/a-loading-spinner.vue';
 import OBulkQuoteOrderForm from 'theme/components/organisms/OBulkorders/o-bulk-quote-order-form.vue';
 
-const plushKeychainProductSku = 'plushKeychainBulkSample_bundle';
+const plushKeychainProductSku = 'keychainPlushBulkSample_bundle';
 
 export default {
   name: 'BulkQuote',

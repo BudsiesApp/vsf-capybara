@@ -159,7 +159,7 @@ const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
 
 const pillowSampleProductSku = 'pillowBulkSample_bundle';
 const keychainSampleProductSku = 'keychainBulkSample_bundle';
-const plushKeychainSampleProductSku = 'plushKeychainBulkSample_bundle';
+const plushKeychainSampleProductSku = 'keychainPlushBulkSample_bundle';
 const plushSampleProductSku = 'CustomBulkSample_bundle';
 
 const bulkSampleProductSkus = [

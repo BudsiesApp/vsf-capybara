@@ -15,9 +15,9 @@ const PillowQuote = () =>
 const BulkQuote = () =>
   import(/* webpackChunkName: "vsf-bulk-quote" */ 'theme/pages/BulkQuote');
 const BulkorderConfirmation = () =>
-import(/* webpackChunkName: "vsf-bulkorder-confirmation" */ 'theme/pages/BulkorderConfirmation');
+  import(/* webpackChunkName: "vsf-bulkorder-confirmation" */ 'theme/pages/BulkorderConfirmation');
 const BulkorderQuotation = () =>
-import(/* webpackChunkName: "vsf-bulkorder-quotation" */ 'theme/pages/BulkorderQuotation');
+  import(/* webpackChunkName: "vsf-bulkorder-quotation" */ 'theme/pages/BulkorderQuotation');
 const CustomizableProduct = () =>
   import(/* webpackChunkName: "vsf-customizable-product" */ 'theme/pages/CustomizableProduct');
 const PasswordReset = () =>
@@ -94,7 +94,7 @@ let routes = [
     component: CustomizableProduct,
     props: (route) => {
       return {
-        sku: 'plushKeychainBulkSample_bundle',
+        sku: 'keychainPlushBulkSample_bundle',
         existingPlushieId: route.query.existingPlushieId,
         layout: 'vertical'
       }
@@ -159,7 +159,7 @@ let routes = [
     path: '/plush-keychain-quote/',
     component: BulkQuote,
     props: {
-      bundleProductSku: 'plushKeychainBulkSample_bundle'
+      bundleProductSku: 'keychainPlushBulkSample_bundle'
     }
   },
   {

@@ -97,8 +97,7 @@ function getBaseFormRefs (
   return baseForm.$refs;
 }
 
-// TODO: update
-const STYLE_CUSTOMIZATION_SKU = 'style';
+const STYLE_CUSTOMIZATION_SKU = 'keychain_style';
 
 export default defineComponent({
   name: 'OKeychainQuoteOrderForm',
