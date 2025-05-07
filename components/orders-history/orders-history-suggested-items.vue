@@ -1,8 +1,21 @@
 <template>
   <div class="orders-history-suggested-items" v-if="showSuggestedItems">
-    <SfHeading :level="4" :title="$t('Related products')" class="_heading" />
+    <div class="_heading-container">
+      <SfHeading :level="4" :title="$t('Related products')" class="_heading" />
 
-    <div class="_products">
+      <SfButton
+        v-if="showToggleMoreButton"
+        class="sf-button--text"
+        @click="onToggleMoreButtonClicked"
+      >
+        {{ toggleMoreButtonText }}
+      </SfButton>
+    </div>
+
+    <div
+      class="_products"
+      :class="{'-minimized': !isListExpanded}"
+    >
       <o-product-card
         v-for="product in products"
         :key="product.id"
@@ -21,7 +34,7 @@
 
 <script lang="ts">
 import { defineComponent, computed, ref, onBeforeMount } from '@vue/composition-api';
-import { SfHeading } from '@storefront-ui/vue';
+import { SfButton, SfHeading } from '@storefront-ui/vue';
 import { SearchQuery } from 'storefront-query-builder';
 
 import config from 'config';
@@ -30,7 +43,7 @@ import { PriceHelper } from '@vue-storefront/core/helpers';
 import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog/types/ProductGetters';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { FETCH_SUGGESTED_PRODUCTS_ACTION, SUGGESTED_PRODUCTS_IDS_GETTER } from 'src/modules/orders-history';
-import { ProductEvent } from 'src/modules/shared';
+import { ProductEvent, useMobileObserver } from 'src/modules/shared';
 
 import { prepareCategoryProduct } from 'theme/helpers';
 
@@ -51,10 +64,14 @@ function getSearchQuery (ids: number[]) {
 
 const CATEGORY_ID = 'Related Products';
 
+const MOBILE_PRODUCTS_COUNT = 4;
+const DESKTOP_PRODUCTS_COUNT = 5;
+
 export default defineComponent({
   name: 'OrdersHistorySuggestedItems',
   components: {
     OProductCard,
+    SfButton,
     SfHeading
   },
   setup (_, { root }) {
@@ -119,9 +136,32 @@ export default defineComponent({
       isDataLoading.value = false;
     }
 
+    const { isMobile } = useMobileObserver();
+
     const showSuggestedItems = computed<boolean>(() => {
       return !isDataLoading.value && products.value.length > 0;
     });
+
+    const showExpandedView = ref<boolean>(false);
+    const showToggleMoreButton = computed<boolean>(() => {
+      const maxProductsCount = isMobile.value ? MOBILE_PRODUCTS_COUNT : DESKTOP_PRODUCTS_COUNT
+
+      return products.value.length > maxProductsCount;
+    });
+
+    const isListExpanded = computed<boolean>(() => {
+      return showToggleMoreButton.value && showExpandedView.value;
+    });
+
+    const toggleMoreButtonText = computed<string>(() => {
+      return isListExpanded.value
+        ? root.$t('Show less').toString()
+        : root.$t('Show more').toString();
+    });
+
+    function onToggleMoreButtonClicked () {
+      showExpandedView.value = !showExpandedView.value;
+    }
 
     function onProductCardClicked (
       product: Product
@@ -142,9 +182,13 @@ export default defineComponent({
 
     return {
       isDataLoading,
+      isListExpanded,
       onProductCardClicked,
+      onToggleMoreButtonClicked,
       products,
-      showSuggestedItems
+      showSuggestedItems,
+      showToggleMoreButton,
+      toggleMoreButtonText
     }
   }
 });
@@ -161,6 +205,19 @@ $desktop-max-products-count: 5;
     display: grid;
     grid-template-columns: repeat($desktop-max-products-count, 1fr);
     margin-top: var(--spacer-sm);
+
+    &.-minimized {
+      ._product {
+        &:nth-child(n+#{$desktop-max-products-count + 1}) {
+          display: none;
+        }
+      }
+    }
+  }
+
+  ._heading-container {
+    display: flex;
+    justify-content: space-between;
   }
 
   ._heading {
@@ -173,10 +230,6 @@ $desktop-max-products-count: 5;
     --o-product-card-badge-size: 48px;
 
     max-width: 160px;
-
-    &:nth-child(n+#{$desktop-max-products-count + 1}) {
-      display: none;
-    }
 
     ::v-deep {
       .sf-badge {
@@ -196,11 +249,27 @@ $desktop-max-products-count: 5;
   @media (max-width: $mobile-max) {
     ._products {
       grid-template-columns: repeat($mobile-max-products-count, 1fr);
-    }
 
-    ._product {
-      &:nth-child(n+#{$mobile-max-products-count + 1}) {
-        display: none;
+      &.-minimized {
+        ._product {
+          &:nth-child(n+#{$mobile-max-products-count + 1}) {
+            display: none;
+          }
+        }
+      }
+    }
+  }
+
+  @media (max-width: 512px) {
+    ._products {
+      grid-template-columns: repeat($mobile-max-products-count - 1, 1fr);
+
+      &.-minimized {
+        ._product {
+          &:nth-child(n+#{$mobile-max-products-count}) {
+            display: none;
+          }
+        }
       }
     }
   }
