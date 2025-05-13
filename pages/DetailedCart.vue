@@ -321,12 +321,6 @@ export default {
             name: 'golf-shirts-creation'
           }
         },
-        // {
-        //   label: this.$t('Tumblers'),
-        //   url: {
-        //     name: 'tumblers-creation'
-        //   }
-        // },
         {
           label: 'Pet Keychains',
           url: {
@@ -349,6 +343,12 @@ export default {
           label: 'Pet Portraits',
           url: {
             name: 'photo-portraits-creation-page'
+          }
+        },
+        {
+          label: this.$t('Tumblers'),
+          url: {
+            name: 'tumblers-creation'
           }
         }
       ],
