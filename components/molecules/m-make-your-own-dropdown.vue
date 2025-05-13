@@ -136,6 +136,12 @@ export default Vue.extend({
           }
         },
         {
+          label: this.$t('Tumblers'),
+          url: {
+            name: 'tumblers-creation'
+          }
+        },
+        {
           label: 'Gift Box',
           url: { name: 'giftbox' }
         }
