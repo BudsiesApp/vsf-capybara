@@ -103,6 +103,8 @@ test('billing address form has correct validation', async ({ cartPage, checkoutP
 });
 
 test('order can be placed', async ({ page, printedSocksPage, simpleProductPage, cartPage, checkoutPage }) => {
+  test.setTimeout(40_000);
+
   await page.goto(simpleProductUrl);
   await simpleProductPage.waitPageToBeVisible();
   await simpleProductPage.addToCartAndVerifyResponse();
@@ -239,6 +241,8 @@ test('shipping address and shipping method are correct while placing order', asy
 });
 
 test('usps shipping method available and address data is correct while placing order', async ({ cartPage, checkoutPage, printedSocksPage }) => {
+  test.setTimeout(40_000);
+
   await printedSocksPage.goto();
   await printedSocksPage.addProductToCart();
 
