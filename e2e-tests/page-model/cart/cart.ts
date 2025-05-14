@@ -1,5 +1,7 @@
 import { expect, Locator, Page } from '@playwright/test';
 
+import { normalizeLabel } from '../../helpers/normalize-label';
+
 export class CartPage {
   public cartItems: Locator;
   public orderSummary: Locator;
@@ -34,6 +36,18 @@ export class CartPage {
       const propertyLocator = cartItem.locator(`.collected-product__properties:has-text("${property}")`);
       await expect(propertyLocator).toBeVisible();
     }
+  }
+
+  public async getCartItemProperties (cartItem: Locator): Promise<string[]> {
+    const properties: string[] = [];
+
+    const propertyLocators = await cartItem.locator('.collected-product__properties').all();
+
+    for (const locator of propertyLocators) {
+      properties.push(normalizeLabel(await locator.textContent()));
+    }
+
+    return properties;
   }
 
   public async editCartItemByProductName (productName: string) {
