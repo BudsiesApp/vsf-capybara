@@ -216,7 +216,7 @@ $desktop-max-products-count: 5;
   ._products {
     display: grid;
     grid-template-columns: repeat($desktop-max-products-count, 1fr);
-    margin-top: var(--spacer-sm);
+    margin-top: var(--spacer-lg);
     column-gap: var(--spacer-sm);
 
     &.-minimized {
