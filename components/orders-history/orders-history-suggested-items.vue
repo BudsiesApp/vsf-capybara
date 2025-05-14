@@ -1,7 +1,7 @@
 <template>
   <div class="orders-history-suggested-items" v-if="showSuggestedItems">
     <div class="_heading-container">
-      <SfHeading :level="4" :title="$t('Related products')" class="_heading" />
+      <SfHeading :level="4" :title="$t('Enjoy a little something while perfection is crafted')" class="_heading" />
 
       <SfButton
         v-if="showToggleMoreButton"
@@ -20,7 +20,7 @@
         v-for="product in products"
         :key="product.id"
         :product="product"
-        :link="product.landing_page_url ? product.landing_page_url : undefined"
+        :link="product.landing_page_url"
         link-tag="router-link"
         :wishlist-icon="false"
         :image-width="128"
@@ -43,7 +43,7 @@ import { PriceHelper } from '@vue-storefront/core/helpers';
 import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog/types/ProductGetters';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { FETCH_SUGGESTED_PRODUCTS_ACTION, SUGGESTED_PRODUCTS_IDS_GETTER } from 'src/modules/orders-history';
-import { ProductEvent, useMobileObserver } from 'src/modules/shared';
+import { isCustomProduct, ProductEvent, useMobileObserver } from 'src/modules/shared';
 
 import { prepareCategoryProduct } from 'theme/helpers';
 
@@ -55,7 +55,7 @@ function getSearchQuery (ids: number[]) {
     .applyFilter({ key: 'id', value: { 'in': ids } })
     .applyFilter({ key: 'status', value: { 'in': [1] } });
 
-  if (config.products.listOutOfStockProducts === false) {
+  if (!config.products.listOutOfStockProducts) {
     productsQuery = productsQuery.applyFilter({ key: 'stock.is_in_stock', value: { 'eq': true } });
   }
 
@@ -63,6 +63,8 @@ function getSearchQuery (ids: number[]) {
 }
 
 const CATEGORY_ID = 'Related Products';
+
+const SUGGESTED_PRODUCTS_TO_FETCH_COUNT = 20;
 
 const MOBILE_PRODUCTS_COUNT = 4;
 const DESKTOP_PRODUCTS_COUNT = 5;
@@ -97,6 +99,12 @@ export default defineComponent({
           continue;
         }
 
+        const hasLandingPage = !!product.landing_page_url || !isCustomProduct(+product.id);
+
+        if (!hasLandingPage) {
+          continue;
+        }
+
         const preparedProduct = {
           ...prepareCategoryProduct(product, _productPriceDictionary),
           landing_page_url: product.landing_page_url
@@ -111,7 +119,11 @@ export default defineComponent({
     async function loadData (): Promise<void> {
       isDataLoading.value = true;
 
-      const productsIds: number[] = await root.$store.dispatch(FETCH_SUGGESTED_PRODUCTS_ACTION);
+      const productsIds: number[] = await root.$store.dispatch(
+        FETCH_SUGGESTED_PRODUCTS_ACTION,
+        { pageSize: SUGGESTED_PRODUCTS_TO_FETCH_COUNT }
+      );
+
       let notExistingProductsIds: number[] = [];
 
       for (const id of productsIds) {
@@ -205,6 +217,7 @@ $desktop-max-products-count: 5;
     display: grid;
     grid-template-columns: repeat($desktop-max-products-count, 1fr);
     margin-top: var(--spacer-sm);
+    column-gap: var(--spacer-sm);
 
     &.-minimized {
       ._product {
@@ -218,6 +231,7 @@ $desktop-max-products-count: 5;
   ._heading-container {
     display: flex;
     justify-content: space-between;
+    column-gap: var(--spacer-sm);
   }
 
   ._heading {
@@ -232,6 +246,10 @@ $desktop-max-products-count: 5;
     max-width: 160px;
 
     ::v-deep {
+      .sf-product-card {
+        --product-card-padding: var(--spacer-xs);
+      }
+
       .sf-badge {
         z-index: 2;
       }
@@ -263,6 +281,7 @@ $desktop-max-products-count: 5;
   @media (max-width: 512px) {
     ._products {
       grid-template-columns: repeat($mobile-max-products-count - 1, 1fr);
+      column-gap: var(--spacer-xs);
 
       &.-minimized {
         ._product {
