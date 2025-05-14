@@ -336,6 +336,16 @@ export default defineComponent({
     },
     budsiesStoreDomain (): string {
       return `https://${config.budsies.budsiesStoreDomain}`;
+    },
+    bulkorderQuoteProductId (): number {
+      switch (this.product.sku) {
+        case 'keychainPlushBulkSample_bundle':
+          return BulkorderQuoteProductId.PLUSH_KEYCHAIN;
+        case 'CustomBulkSample_bundle':
+          return BulkorderQuoteProductId.PLUSHIE;
+        default:
+          throw new Error('Unexpected product sku');
+      }
     }
   },
   methods: {
@@ -378,7 +388,7 @@ export default defineComponent({
         const bulkOrderId = await this.$store.dispatch(
           'budsies/createBulkorder',
           {
-            product_id: BulkorderQuoteProductId.PLUSHIE,
+            product_id: this.bulkorderQuoteProductId,
             size: this.getSizeNumber()?.toString(),
             qty: this.bulkordersBaseFormData.quantity,
             project_name: this.bulkordersBaseFormData.name,
