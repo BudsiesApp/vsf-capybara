@@ -24,7 +24,7 @@ class OrderItem {
   public reorderButton: Locator;
 
   public constructor (orderItemLocator: Locator) {
-    this.reorderButton = orderItemLocator.locator('._available-action ._action-name:has-text("Re-order item")');
+    this.reorderButton = orderItemLocator.locator('._available-action ._action-name:has-text("Re-order")');
   }
 
   public async reorderItem (): Promise<void> {
