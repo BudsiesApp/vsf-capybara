@@ -2,80 +2,9 @@
   <div class="o-my-account-orders-history">
     <SfTabs :open-tab="1">
       <SfTab :title="$t('My orders')" class="_orders-tab">
-        <template v-if="!activeOrder">
-          <div v-if="ordersHistory.length === 0" class="no-orders">
-            <p class="no-orders__title">
-              {{ $t('You currently have no orders') }}
-            </p>
+        <orders-history-suggested-items class="_suggested-items" />
 
-            <SfButton @click="onStartShoppingButtonClick" class="no-orders__button">
-              {{ $t('Start shopping') }}
-            </SfButton>
-          </div>
-
-          <SfTable v-else class="orders">
-            <SfTableHeading>
-              <SfTableHeader
-                v-for="tableHeader in tableHeaders"
-                :key="tableHeader.title"
-                :class="tableHeader.class"
-              >
-                {{ tableHeader.title }}
-              </SfTableHeader>
-
-              <SfTableHeader class="orders__element--right _view-button" />
-            </SfTableHeading>
-
-            <SfTableRow
-              v-for="row in tableRows"
-              :key="row.order_id.value"
-              @click.native="setActiveOrderById(row.order_id.value)"
-            >
-              <SfTableData v-for="(data, key) in row" :key="key" :class="data.columnClass">
-                <template v-if="key === 'status'">
-                  <span
-                    :class="{
-                      'text-success': data.value === 'Complete',
-                      'text-danger': data.value === 'Canceled' || data.value === 'Closed',
-                      'text-warning': data.value !== 'Complete' && data.value !== 'Canceled' && data.value !== 'Closed'
-                    }"
-                  >{{ data.value }}</span>
-                </template>
-
-                <template v-else>
-                  {{ data.value }}
-                </template>
-              </SfTableData>
-
-              <SfTableData class="orders__view orders__element--right _view-button">
-                <SfButton
-                  class="sf-button--text color-secondary"
-                  @click.native="setActiveOrderById(row.order_id.value)"
-                >
-                  {{ $t('VIEW') }}
-                </SfButton>
-
-                <m-spinner-button
-                  button-class="sf-button--text color-secondary"
-                  :show-spinner="isReorderInProgressFor(row.order_id.value)"
-                  :disabled="isReorderButtonDisabled"
-                  @click.native.stop="reorder(row.order_id.value)"
-                >
-                  {{ $t('REORDER') }}
-                </m-spinner-button>
-              </SfTableData>
-            </SfTableRow>
-          </SfTable>
-        </template>
-
-        <template v-else>
-          <OMyAccountOrderDetails
-            :order="activeOrder"
-            :is-reorder-in-progress="isReorderInProgressFor(activeOrder.increment_id)"
-            @close="setActiveOrderById(null)"
-            @reorder-button-clicked="reorder"
-          />
-        </template>
+        <orders-history-list />
       </SfTab>
     </SfTabs>
   </div>
@@ -84,11 +13,12 @@
 <script>
 import i18n from '@vue-storefront/i18n';
 import UserOrder from '@vue-storefront/core/modules/order/components/UserOrdersHistory';
-import OMyAccountOrderDetails from 'theme/components/organisms/o-my-account-order-details';
-import { SfTabs, SfTable, SfButton } from '@storefront-ui/vue';
+import { SfTabs } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals';
 
-import MSpinnerButton from '../molecules/m-spinner-button.vue';
+import { OrdersHistoryList } from 'src/modules/orders-history';
+
+import OrdersHistorySuggestedItems from 'src/themes/petsies-capybara/components/orders-history/orders-history-suggested-items.vue';
 
 const ColumnClass = {
   ORDER_ID: '_order-id',
@@ -103,21 +33,11 @@ export default {
   mixins: [UserOrder],
   components: {
     SfTabs,
-    SfTable,
-    SfButton,
-    MSpinnerButton,
-    OMyAccountOrderDetails
+    OrdersHistoryList,
+    OrdersHistorySuggestedItems
   },
   data () {
     return {
-      tableHeaders: [
-        { title: this.$t('Order ID'), class: ColumnClass.ORDER_ID },
-        { title: this.$t('Order date'), class: ColumnClass.ORDER_DATE },
-        { title: this.$t('Payment method'), class: ColumnClass.PAYMENT_METHOD },
-        { title: this.$t('Amount'), class: ColumnClass.AMOUNT },
-        { title: this.$t('Status'), class: ColumnClass.STATUS }
-      ],
-      activeOrder: null,
       reorderingOrderIncrementId: undefined
     };
   },
@@ -159,13 +79,6 @@ export default {
   methods: {
     downloadAll () {
       this.$store.dispatch('ui/openModal', { name: ModalList.FeatureNotImplemented })
-    },
-    setActiveOrderById (orderId) {
-      this.activeOrder = orderId
-        ? this.ordersHistory.find(item => {
-          return orderId.toString() === item.increment_id.toString()
-        })
-        : null
     },
     onStartShoppingButtonClick () {
       this.$router.push('/');
@@ -270,6 +183,10 @@ export default {
     .sf-tabs__title {
       display: none;
     }
+  }
+
+  ._suggested-items {
+    margin-bottom: var(--spacer-base);
   }
 
   @media screen and (min-width: 400px) {
