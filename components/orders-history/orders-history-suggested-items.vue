@@ -234,7 +234,6 @@ $desktop-max-products-count: 5;
     display: flex;
     justify-content: space-between;
     column-gap: var(--spacer-sm);
-    margin-bottom: var(--spacer-base);
   }
 
   ._heading {
