@@ -245,6 +245,9 @@ $desktop-max-products-count: 5;
   ._product {
     --o-product-card-badge-size: 48px;
     --product-card-title-font-size: var(--font-size-base);
+    --price-regular-font-size: var(--font-size-base);
+    --price-special-font-size: var(--font-size-base);
+    --price-old-font-size: var(--font-size-base);
 
     max-width: 160px;
 
