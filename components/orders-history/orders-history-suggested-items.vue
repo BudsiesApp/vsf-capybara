@@ -23,8 +23,9 @@
         :link="product.landing_page_url"
         link-tag="router-link"
         :wishlist-icon="false"
-        :image-width="128"
-        :image-height="128"
+        :image-width="144"
+        :image-height="144"
+        :turnaround-time="product.turnaroundTime"
         class="products__product-card _product"
         @click.native.capture="() => onProductCardClicked(product)"
       />
@@ -107,7 +108,8 @@ export default defineComponent({
 
         const preparedProduct = {
           ...prepareCategoryProduct(product, _productPriceDictionary),
-          landing_page_url: product.landing_page_url
+          landing_page_url: product.landing_page_url,
+          turnaroundTime: product.turnaround_time
         }
 
         list.push(preparedProduct);
@@ -232,6 +234,7 @@ $desktop-max-products-count: 5;
     display: flex;
     justify-content: space-between;
     column-gap: var(--spacer-sm);
+    margin-bottom: var(--spacer-base);
   }
 
   ._heading {
@@ -242,6 +245,7 @@ $desktop-max-products-count: 5;
 
   ._product {
     --o-product-card-badge-size: 48px;
+    --product-card-title-font-size: var(--font-size-base);
 
     max-width: 160px;
 
@@ -286,6 +290,20 @@ $desktop-max-products-count: 5;
       &.-minimized {
         ._product {
           &:nth-child(n+#{$mobile-max-products-count}) {
+            display: none;
+          }
+        }
+      }
+    }
+  }
+
+  @media (max-width: 400px) {
+    ._products {
+      grid-template-columns: repeat($mobile-max-products-count - 2, 1fr);
+
+      &.-minimized {
+        ._product {
+          &:nth-child(n+#{$mobile-max-products-count - 1}) {
             display: none;
           }
         }
