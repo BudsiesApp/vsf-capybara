@@ -26,7 +26,7 @@
           {{ title }}
 
           <span class="_turnaround-time">
-            ({{ $t('Turnaround time: {days} days', {days: turnaroundTime}) }})
+            {{ $t('Ships in approx. {weeks} weeks', {weeks: turnaroundWeeks}) }}
           </span>
         </h3>
       </template>
@@ -81,6 +81,9 @@ export default {
     },
     imageAspectRatio (): number {
       return this.imageWidth / this.imageHeight;
+    },
+    turnaroundWeeks (): number {
+      return Math.ceil(this.turnaroundTime / 7);
     }
   }
 }
@@ -108,6 +111,7 @@ $border-width: 2px;
   ._turnaround-time {
     font-size: var(--font-xs);
     line-height: var(--font-sm);
+    margin-top: var(--spacer-xs);
     display: inline-block;
   }
 
