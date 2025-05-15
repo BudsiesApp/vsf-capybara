@@ -147,6 +147,7 @@ export default {
 
   @include for-desktop {
     --content-pages-sidebar-category-title-margin: var(--spacer-xl) 0 0 0;
+    --content-pages-sidebar-flex: 0 0 22.875rem;
   }
 }
 .breadcrumbs {

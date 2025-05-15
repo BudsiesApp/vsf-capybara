@@ -2,6 +2,8 @@
   <div class="o-my-account-orders-history">
     <SfTabs :open-tab="1">
       <SfTab :title="$t('My orders')" class="_orders-tab">
+        <orders-history-suggested-items class="_suggested-items" />
+
         <orders-history-list />
       </SfTab>
     </SfTabs>
@@ -16,6 +18,8 @@ import { ModalList } from 'theme/store/ui/modals';
 
 import { OrdersHistoryList } from 'src/modules/orders-history';
 
+import OrdersHistorySuggestedItems from 'src/themes/petsies-capybara/components/orders-history/orders-history-suggested-items.vue';
+
 const ColumnClass = {
   ORDER_ID: '_order-id',
   ORDER_DATE: '_order-date',
@@ -29,7 +33,8 @@ export default {
   mixins: [UserOrder],
   components: {
     SfTabs,
-    OrdersHistoryList
+    OrdersHistoryList,
+    OrdersHistorySuggestedItems
   },
   data () {
     return {
@@ -178,6 +183,10 @@ export default {
     .sf-tabs__title {
       display: none;
     }
+  }
+
+  ._suggested-items {
+    margin-bottom: var(--spacer-base);
   }
 
   @media screen and (min-width: 400px) {
