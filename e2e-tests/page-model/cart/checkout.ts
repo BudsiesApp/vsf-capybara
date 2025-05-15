@@ -307,6 +307,12 @@ export class ReviewStep {
 
   public async selectCreditCardPaymentMethodAndFillCardData () {
     const creditCardOption = this.paymentMethodSelector.locator('.checkout-card');
+    const creditCardOptionInput = creditCardOption.locator('input');
+
+    if (await creditCardOptionInput.isDisabled()) {
+      await expect(creditCardOptionInput).toBeEnabled();
+    }
+
     await creditCardOption.click();
 
     await this.creditCardNumberInput.locator('input#credit-card-number').fill(this.creditCardNumber);
