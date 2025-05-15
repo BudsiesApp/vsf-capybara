@@ -61,7 +61,7 @@ import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-obser
 
 import { OrderContentItem } from '../interfaces/order-content-item.interface';
 
-import CartItemConfiguration from 'theme/components/customization-system/cart-item-configuration.vue';
+import { CartItemConfiguration } from 'src/modules/customization-system';
 
 export default {
   name: 'OOrderContent',
