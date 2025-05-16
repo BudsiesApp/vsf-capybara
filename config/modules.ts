@@ -8,6 +8,7 @@ import { ABTesting } from 'src/modules/a-b-testing'
 import { BackendSettings } from 'src/modules/backend-settings';
 import { ErrorLoggingModule } from 'src/modules/error-logging';
 import { PageLoadingIndicatorModule } from 'src/modules/page-loading-indicator';
+import { OrdersHistoryModule } from 'src/modules/orders-history';
 
 import registerStoryblokComponents from 'theme/components/storyblok'
 
@@ -22,6 +23,7 @@ export function registerClientModules () {
   registerModule(ABTesting)
   registerModule(BackendSettings)
   registerModule(ErrorLoggingModule)
+  registerModule(OrdersHistoryModule)
 }
 
 // Deprecated API, will be removed in 2.0

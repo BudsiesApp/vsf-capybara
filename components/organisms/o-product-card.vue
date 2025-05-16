@@ -20,6 +20,16 @@
           :aspect-ratio="imageAspectRatio"
         />
       </template>
+
+      <template #title="{title}" v-if="turnaroundTime">
+        <h3 class="sf-product-card__title">
+          {{ title }}
+
+          <span class="_turnaround-time">
+            {{ $t('Ships in approx. {weeks} weeks', {weeks: turnaroundWeeks}) }}
+          </span>
+        </h3>
+      </template>
     </SfProductCard>
   </div>
 </template>
@@ -59,6 +69,10 @@ export default {
     wishlistIcon: {
       type: [String, Array, Boolean],
       default: 'heart'
+    },
+    turnaroundTime: {
+      type: Number,
+      default: undefined
     }
   },
   computed: {
@@ -67,6 +81,9 @@ export default {
     },
     imageAspectRatio (): number {
       return this.imageWidth / this.imageHeight;
+    },
+    turnaroundWeeks (): number {
+      return Math.ceil(this.turnaroundTime / 7);
     }
   }
 }
@@ -90,6 +107,13 @@ $border-width: 2px;
   --badge-font-weight: 800;
   --badge-background: var(--c-white);
   --badge-font-size: var(--font-sm);
+
+  ._turnaround-time {
+    font-size: var(--font-xs);
+    line-height: var(--font-sm);
+    margin-top: var(--spacer-xs);
+    display: inline-block;
+  }
 
   ::v-deep .sf-badge {
     color: var(--c-accent);
