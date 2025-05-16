@@ -72,7 +72,7 @@ $font-family-secondary: "Gotham-Rounded-Medium";
     --c-blockquote-border: var(--_c-gray-primary);
     --c-divider: var(--_c-gray-accent);
     --c-accent: var(--_c-light-primary);
-    --c-gray-light: var(--_c-gray-light); 
+    --c-gray-light: var(--_c-gray-light);
 
     --widget-error-message-font: var(--font-normal) var(--font-xs) var(--font-family-primary);
     --widget-error-message-color: var(--c-danger-variant);
@@ -82,6 +82,8 @@ $font-family-secondary: "Gotham-Rounded-Medium";
     --ios-select-dropdown-background: #4e4e4e;
     --ios-select-option-active-background: #636465;
     --ios-select-option-border-color: #606060;
+
+    --cart-item-configuration-checkmark-color: var(--_c-blue-primary);
 
     @include assign-color-variants(--c-primary, --_c-yellow-primary);
     --c-primary-variant: var(--_c-yellow-secondary);
