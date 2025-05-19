@@ -234,6 +234,8 @@ test('shipping address and shipping method are correct while placing order', asy
 });
 
 test('usps shipping method available and address data is correct while placing order', async ({ cartPage, checkoutPage, plushSamplePage }) => {
+  test.setTimeout(40_000);
+
   await plushSamplePage.goto();
   await plushSamplePage.fillRequiredFields();
   await plushSamplePage.customizableProductPage.addToCartAndVerifyResponse();

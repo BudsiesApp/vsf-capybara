@@ -14,23 +14,19 @@
       class="my-account"
       @click:change="changeActivePage"
     >
-      <SfContentCategory :title="$t('Personal Details')">
-        <SfContentPage class="_personal-details" :title="$t('My profile')">
-          <OMyAccountProfile />
-        </SfContentPage>
+      <SfContentPage class="_personal-details" :title="$t('My profile')">
+        <OMyAccountProfile />
+      </SfContentPage>
 
-        <SfContentPage class="_tab-content" :title="$t('Address Book')">
-          <OMyAccountAddressBook />
-        </SfContentPage>
+      <SfContentPage class="_tab-content" :title="$t('Address Book')">
+        <OMyAccountAddressBook />
+      </SfContentPage>
 
-        <SfContentPage :title="$t('Log out')" />
-      </SfContentCategory>
+      <SfContentPage class="_tab-content" :title="$t('Order history')">
+        <OMyAccountOrdersHistory />
+      </SfContentPage>
 
-      <SfContentCategory :title="$t('Order details')">
-        <SfContentPage class="_tab-content" :title="$t('Order history')">
-          <OMyAccountOrdersHistory />
-        </SfContentPage>
-      </SfContentCategory>
+      <SfContentPage :title="$t('Log out')" />
     </SfContentPages>
   </div>
 </template>
@@ -151,6 +147,7 @@ export default {
 
   @include for-desktop {
     --content-pages-sidebar-category-title-margin: var(--spacer-xl) 0 0 0;
+    --content-pages-sidebar-flex: 0 0 22.875rem;
   }
 }
 .breadcrumbs {
