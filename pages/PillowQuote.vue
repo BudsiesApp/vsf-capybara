@@ -25,7 +25,7 @@ import OPillowQuoteOrderForm from 'theme/components/organisms/OBulkorders/o-pill
 const pillowQuoteProductSku = 'pillowBulkSample_bundle';
 
 export default {
-  name: 'KeychainQuote',
+  name: 'PillowQuote',
   components: {
     ALoadingSpinner,
     OPillowQuoteOrderForm

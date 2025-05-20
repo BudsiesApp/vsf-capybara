@@ -13,6 +13,8 @@ export function useBackendProductId (productId: Ref<string | number>) {
         return ProductValue.KEYCHAIN_BULK_SAMPLE;
       case ProductId.BULK_PLUSH_KEYCHAIN_SAMPLE:
         return ProductValue.BULK_PLUSH_KEYCHAIN_SAMPLE;
+      case ProductId.BULK_ACRYLIC_KEYCHAIN_SAMPLE:
+        return ProductValue.BULK_ACRYLIC_KEYCHAIN_SAMPLE;
       case ProductId.BOBBLEHEADS:
         return ProductValue.BOBBLEHEADS;
       case ProductId.BUDSIES:

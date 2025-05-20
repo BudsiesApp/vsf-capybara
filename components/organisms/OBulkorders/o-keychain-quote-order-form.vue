@@ -1,6 +1,6 @@
 <template>
   <div class="o-keychain-quote-order-form">
-    <SfHeading :level="1" :title="$t('Keychain Bulk Order Quote')" class="_title" />
+    <SfHeading :level="1" :title="formTitle" class="_title" />
 
     <validation-observer
       ref="validationObserver"
@@ -12,38 +12,11 @@
         :product="product"
         :is-disabled="isDisabled"
         :artwork-upload-url="artworkUploadUrl"
-        :has-bodyparts="styleCustomization"
         v-model="bulkordersBaseFormData"
         :show-calculation-animation="showCalculationAnimation"
         :get-field-anchor-name="getFieldAnchorName"
         @calculation-animation-finished="onCalculationAnimationFinished"
-      >
-        <template #bodyparts v-if="styleCustomization">
-          <div class="_section">
-            <customization-option
-              class="_customization-option"
-              ref="customizationOption"
-              :customization="styleCustomization"
-              :is-disabled="isDisabled"
-              :option-values="styleCustomizationOptionValues"
-              :product-id="product.id"
-              :value="customizationOptionValue[styleCustomization.id]
-              "
-              @input="onCustomizationOptionInput"
-            >
-              <template #label="{ label, isFieldRequired }">
-                <AOrderedHeading
-                  :order="4"
-                  :level="3"
-                  :title="label"
-                  class="_title"
-                  :class="{'-required': isFieldRequired}"
-                />
-              </template>
-            </customization-option>
-          </div>
-        </template>
-      </m-base-form>
+      />
 
       <m-form-errors
         class="_form-errors"
@@ -76,7 +49,6 @@ import i18n from '@vue-storefront/i18n';
 import { computed, defineComponent, PropType, Ref, ref, toRefs } from '@vue/composition-api';
 
 import Product from 'core/modules/catalog/types/Product';
-import { Customization, CustomizationOptionValue, OptionValue, useAvailableCustomizations, useCustomizationState } from 'src/modules/customization-system';
 import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo } from 'src/modules/budsies';
 
 import { useFormValidation } from 'theme/helpers/use-form-validation';
@@ -100,64 +72,12 @@ function getBaseFormRefs (
   return baseForm.$refs;
 }
 
-const STYLE_CUSTOMIZATION_SKU = 'keychain_style';
-
 export default defineComponent({
   name: 'OKeychainQuoteOrderForm',
-  setup (props, setupContext) {
+  setup (_, setupContext) {
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
-    const { product } = toRefs(props);
-
-    const productCustomizations = computed<Customization[]>(() => {
-      return product.value.customizations || [];
-    });
-
-    const {
-      customizationOptionValue,
-      customizationState,
-      selectedOptionValuesIds,
-      updateCustomizationOptionValue
-    } = useCustomizationState();
-
-    const { availableCustomizations, customizationAvailableOptionValues } =
-      useAvailableCustomizations(
-        productCustomizations,
-        selectedOptionValuesIds,
-        customizationOptionValue,
-        updateCustomizationOptionValue
-      );
-
-    const styleCustomization = computed<Customization | undefined>(
-      () => {
-        return availableCustomizations.value.find(
-          (item) => item.optionData?.sku?.toLowerCase() === STYLE_CUSTOMIZATION_SKU
-        );
-      }
-    );
-
-    const styleCustomizationOptionValues = computed<OptionValue[]>(
-      () => {
-        if (!styleCustomization.value) {
-          return [];
-        }
-
-        return customizationAvailableOptionValues.value[styleCustomization.value.id] || [];
-      }
-    );
-
-    function onCustomizationOptionInput (payload: {
-      customizationId: string,
-      value: CustomizationOptionValue
-    }) {
-      updateCustomizationOptionValue(payload);
-    }
 
     return {
-      customizationOptionValue,
-      customizationState,
-      onCustomizationOptionInput,
-      styleCustomization,
-      styleCustomizationOptionValues,
       validationObserver,
       ...useBulkOrdersBaseForm(),
       ...useFormValidation(
@@ -172,6 +92,10 @@ export default defineComponent({
       required: true
     },
     artworkUploadUrl: {
+      type: String,
+      required: true
+    },
+    formTitle: {
       type: String,
       required: true
     }

@@ -137,9 +137,32 @@ let routes = [
     }
   },
   {
+    name: 'acrylic-keychain-sample',
+    path: '/bulk-acrylic-keychain-samples/create/',
+    component: CustomizableProduct,
+    props: (route) => {
+      return {
+        sku: 'keychainAcrylicBulkSample_bundle',
+        existingPlushieId: route.query.existingPlushieId,
+        layout: 'vertical'
+      }
+    }
+  },
+  {
     name: 'keychain-quote',
     path: '/keychain-quote/',
-    component: KeychainQuote
+    component: KeychainQuote,
+    props: {
+      bundleProductSku: 'keychainBulkSample_bundle'
+    }
+  },
+  {
+    name: 'acrylic-keychain-quote',
+    path: '/acrylic-keychain-quote/',
+    component: KeychainQuote,
+    props: {
+      bundleProductSku: 'keychainAcrylicBulkSample_bundle'
+    }
   },
   {
     name: 'pillow-quote',

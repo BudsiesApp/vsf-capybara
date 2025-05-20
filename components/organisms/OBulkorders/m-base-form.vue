@@ -631,6 +631,8 @@ export default defineComponent({
           return ProductValue.KEYCHAIN_BULK_SAMPLE;
         case ProductId.BULK_PLUSH_KEYCHAIN_SAMPLE:
           return ProductValue.BULK_PLUSH_KEYCHAIN_SAMPLE;
+        case ProductId.BULK_ACRYLIC_KEYCHAIN_SAMPLE:
+          return ProductValue.BULK_ACRYLIC_KEYCHAIN_SAMPLE;
         default:
           throw new Error(
             `Can't resolve Backend product ID for Magento '${this.product.id}' product ID`

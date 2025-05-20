@@ -23,7 +23,7 @@ import Product from 'core/modules/catalog/types/Product';
 import ALoadingSpinner from 'theme/components/atoms/a-loading-spinner.vue';
 import OBulkQuoteOrderForm from 'theme/components/organisms/OBulkorders/o-bulk-quote-order-form.vue';
 
-const plushKeychainProductSku = 'keychainPlushBulkSample_bundle';
+const PLUSH_KEYCHAIN_PRODUCT_SKU = 'keychainPlushBulkSample_bundle';
 
 export default {
   name: 'BulkQuote',
@@ -45,7 +45,7 @@ export default {
   computed: {
     formTitle (): string {
       switch (this.bundleProductSku) {
-        case plushKeychainProductSku:
+        case PLUSH_KEYCHAIN_PRODUCT_SKU:
           return this.$t('Plush Keychain Order Quote').toString();
         default:
           return this.$t('Bulk Order Quote').toString();
@@ -98,6 +98,13 @@ export default {
 
       this.isDataLoading = false;
       catalogHooksExecutors.productPageVisited(product);
+    }
+  },
+  watch: {
+    bundleProductSku (newValue: string, oldValue?: string) {
+      if (newValue !== oldValue) {
+        void this.loadData();
+      }
     }
   },
   metaInfo () {
