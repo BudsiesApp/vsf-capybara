@@ -139,14 +139,8 @@
 
 <script>
 import { SfButton, SfHeading } from '@storefront-ui/vue';
-import {
-  mapMobileObserver,
-  unMapMobileObserver
-} from '@storefront-ui/vue/src/utilities/mobile-observer';
 
 import MAddressItem from 'theme/components/molecules/m-address-item.vue';
-
-const Countries = require('@vue-storefront/i18n/resource/countries.json');
 
 export default {
   name: 'AddressesList',
@@ -155,13 +149,7 @@ export default {
     SfHeading,
     MAddressItem
   },
-  data () {
-    return {
-      countries: Countries
-    }
-  },
   computed: {
-    ...mapMobileObserver(),
     currentUser () {
       return this.$store.state.user.current;
     },
@@ -206,9 +194,6 @@ export default {
         }
       );
     }
-  },
-  beforeDestroy () {
-    unMapMobileObserver();
   }
 }
 </script>

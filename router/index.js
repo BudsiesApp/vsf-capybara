@@ -13,6 +13,7 @@ const Checkout = () =>
   import(/* webpackChunkName: "vsf-checkout" */ 'theme/pages/Checkout');
 const DetailedCart = () =>
   import(/* webpackChunkName: "vsf-detailed-cart" */ 'theme/pages/DetailedCart');
+
 const MyAccount = () =>
   import(/* webpackChunkName: "vsf-my-account" */ 'theme/pages/MyAccount');
 const OMyAccountOrdersHistory = () =>
@@ -46,11 +47,7 @@ function makeRoutesStrict (routes) {
     }
 
     if (route.children) {
-      for (const child of route.children) {
-        child.pathToRegexpOptions = {
-          strict: true
-        }
-      }
+      route.children = makeRoutesStrict(route.children);
     }
 
     return route;
@@ -115,7 +112,9 @@ let routes = [
             name: 'address-book-edit',
             path: 'edit/:addressId/',
             component: AddressEdit,
-            props: true
+            props: (route) => ({
+              addressId: route.params.addressId.toString()
+            })
           },
           {
             name: 'address-book-add',

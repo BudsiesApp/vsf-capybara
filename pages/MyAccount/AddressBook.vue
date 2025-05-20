@@ -15,7 +15,7 @@ export default defineComponent({
   props: {
     tabTitle: {
       type: String,
-      default: 'Address Book'
+      default: 'Address book'
     }
   },
   components: {

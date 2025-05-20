@@ -42,7 +42,7 @@
         <SfList class="_items-list">
           <SfListItem class="_menu-item -profile">
             <router-link
-              :to="{name: 'my-account'}"
+              :to="{name: RouteNames.MY_ACCOUNT}"
               @click.native="showMobileNavigation = false"
             >
               {{ $t('My profile') }}
@@ -57,10 +57,10 @@
 
           <SfListItem class="_menu-item -address-book">
             <router-link
-              :to="{name: 'address-book-list'}"
+              :to="{name: RouteNames.ADDRESS_BOOK_LIST}"
               @click.native="showMobileNavigation = false"
             >
-              {{ $t('Address Book') }}
+              {{ $t('Address book') }}
             </router-link>
 
             <SfIcon
@@ -72,10 +72,10 @@
 
           <SfListItem class="_menu-item -orders-history">
             <router-link
-              :to="{name: 'orders-history'}"
+              :to="{name: RouteNames.ORDERS_HISTORY}"
               @click.native="showMobileNavigation = false"
             >
-              {{ $t('Order History') }}
+              {{ $t('Order history') }}
             </router-link>
 
             <SfIcon
@@ -117,6 +117,14 @@ import MyAccount from '@vue-storefront/core/pages/MyAccount';
 
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 
+const RouteNames = {
+  ADDRESS_BOOK_LIST: 'address-book-list',
+  ADDRESS_BOOK_EDIT: 'address-book-edit',
+  ADDRESS_BOOK_ADD: 'address-book-add',
+  ORDERS_HISTORY: 'orders-history',
+  MY_ACCOUNT: 'my-account'
+}
+
 export default {
   components: {
     SfBar,
@@ -128,7 +136,8 @@ export default {
   mixins: [MyAccount],
   data () {
     return {
-      showMobileNavigation: false
+      showMobileNavigation: false,
+      RouteNames
     };
   },
   computed: {
@@ -144,53 +153,53 @@ export default {
           text: this.$t('My account'),
           route: {
             link: {
-              name: 'my-account'
+              name: RouteNames.MY_ACCOUNT
             }
           }
         }
       ];
 
-      if (this.$route.name === 'orders-history') {
+      if (this.$route.name === RouteNames.ORDERS_HISTORY) {
         breadcrumbs.push({
-          text: this.$t('Order History'),
+          text: this.$t('Order history'),
           route: {
             link: {
-              name: 'orders-history'
+              name: RouteNames.ORDERS_HISTORY
             }
           }
         });
       }
 
       if (
-        ['address-book-list', 'address-book-edit', 'address-book-add'].includes(this.$route.name)
+        [RouteNames.ADDRESS_BOOK_LIST, RouteNames.ADDRESS_BOOK_EDIT, RouteNames.ADDRESS_BOOK_ADD].includes(this.$route.name)
       ) {
         breadcrumbs.push({
-          text: this.$t('Address Book'),
+          text: this.$t('Address book'),
           route: {
             link: {
-              name: 'address-book-list'
+              name: RouteNames.ADDRESS_BOOK_LIST
             }
           }
         });
       }
 
-      if (this.$route.name === 'address-book-edit') {
+      if (this.$route.name === RouteNames.ADDRESS_BOOK_EDIT) {
         breadcrumbs.push({
           text: this.$t('Edit address'),
           route: {
             link: {
-              name: 'address-book-edit'
+              name: RouteNames.ADDRESS_BOOK_EDIT
             }
           }
         });
       }
 
-      if (this.$route.name === 'address-book-add') {
+      if (this.$route.name === RouteNames.ADDRESS_BOOK_ADD) {
         breadcrumbs.push({
           text: this.$t('Add new address'),
           route: {
             link: {
-              name: 'address-book-add'
+              name: RouteNames.ADDRESS_BOOK_ADD
             }
           }
         });
@@ -204,15 +213,15 @@ export default {
       }
 
       switch (this.$route.name) {
-        case 'address-book-list':
-          return this.$t('Address Book');
-        case 'orders-history':
-          return this.$t('Order History');
-        case 'my-account':
-          return this.$t('My Profile');
-        case 'address-book-add':
+        case RouteNames.ADDRESS_BOOK_LIST:
+          return this.$t('Address book');
+        case RouteNames.ORDERS_HISTORY:
+          return this.$t('Order history');
+        case RouteNames.MY_ACCOUNT:
+          return this.$t('My profile');
+        case RouteNames.ADDRESS_BOOK_ADD:
           return this.$t('Add new address');
-        case 'address-book-edit':
+        case RouteNames.ADDRESS_BOOK_EDIT:
           return this.$t('Edit address');
         default:
           return this.$t('My Account');
