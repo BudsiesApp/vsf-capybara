@@ -1,5 +1,4 @@
 import { PlushieType } from 'theme/interfaces/plushie.type';
-import AddressBook from 'theme/pages/MyAccount/AddressBook.vue';
 
 const ErrorPage = () =>
   import(/* webpackChunkName: "vsf-error" */ 'theme/pages/Error');
@@ -16,10 +15,12 @@ const DetailedCart = () =>
 
 const MyAccount = () =>
   import(/* webpackChunkName: "vsf-my-account" */ 'theme/pages/MyAccount');
-const OMyAccountOrdersHistory = () =>
+const AccountOrdersHistory = () =>
   import(/* webpackChunkName: "vsf-my-account-orders-history" */ 'theme/components/organisms/o-my-account-orders-history');
-const OMyAccountProfile = () =>
+const AccountProfile = () =>
   import(/* webpackChunkName: "vsf-my-account-profile" */ 'theme/components/organisms/o-my-account-profile');
+const AddressBook = () =>
+  import(/* webpackChunkName: "vsf-my-account-address-book" */ 'theme/pages/MyAccount/AddressBook.vue');
 const AddressEdit = () =>
   import(/* webpackChunkName: "vsf-my-account-address-edit" */'theme/pages/MyAccount/AddressEdit.vue');
 const AddressAdd = () =>
@@ -91,12 +92,12 @@ let routes = [
       {
         name: 'my-account',
         path: '',
-        component: OMyAccountProfile
+        component: AccountProfile
       },
       {
         name: 'orders-history',
         path: 'orders-history/',
-        component: OMyAccountOrdersHistory
+        component: AccountOrdersHistory
       },
       {
         name: 'address-book',
