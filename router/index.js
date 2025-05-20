@@ -1,4 +1,5 @@
 import { PlushieType } from 'theme/interfaces/plushie.type';
+import AddressBook from 'theme/pages/MyAccount/AddressBook.vue';
 
 const ErrorPage = () =>
   import(/* webpackChunkName: "vsf-error" */ 'theme/pages/Error');
@@ -14,6 +15,17 @@ const DetailedCart = () =>
   import(/* webpackChunkName: "vsf-detailed-cart" */ 'theme/pages/DetailedCart');
 const MyAccount = () =>
   import(/* webpackChunkName: "vsf-my-account" */ 'theme/pages/MyAccount');
+const OMyAccountOrdersHistory = () =>
+  import(/* webpackChunkName: "vsf-my-account-orders-history" */ 'theme/components/organisms/o-my-account-orders-history');
+const OMyAccountProfile = () =>
+  import(/* webpackChunkName: "vsf-my-account-profile" */ 'theme/components/organisms/o-my-account-profile');
+const AddressEdit = () =>
+  import(/* webpackChunkName: "vsf-my-account-address-edit" */'theme/pages/MyAccount/AddressEdit.vue');
+const AddressAdd = () =>
+  import(/* webpackChunkName: "vsf-my-account-address-add" */'theme/pages/MyAccount/AddressAdd.vue');
+const AddressesList = () =>
+  import(/* webpackChunkName: "vsf-my-account-addresses-list" */'theme/pages/MyAccount/AddressesList.vue');
+
 const CartRecovery = () =>
   import(/* webpackChunkName: "vsf-cart-recovery" */ 'theme/pages/CartRecovery');
 const CrossSells = () =>
@@ -31,6 +43,14 @@ function makeRoutesStrict (routes) {
   return routes.map((route) => {
     route.pathToRegexpOptions = {
       strict: true
+    }
+
+    if (route.children) {
+      for (const child of route.children) {
+        child.pathToRegexpOptions = {
+          strict: true
+        }
+      }
     }
 
     return route;
@@ -63,7 +83,49 @@ let routes = [
       }
     })
   },
-  { name: 'my-account', path: '/my-account/', component: MyAccount },
+  {
+    path: '/my-account/',
+    name: 'my-account-root',
+    component: MyAccount,
+    meta: {
+      auth: true
+    },
+    children: [
+      {
+        name: 'my-account',
+        path: '',
+        component: OMyAccountProfile
+      },
+      {
+        name: 'orders-history',
+        path: 'orders-history/',
+        component: OMyAccountOrdersHistory
+      },
+      {
+        name: 'address-book',
+        path: 'address-book/',
+        component: AddressBook,
+        children: [
+          {
+            name: 'address-book-list',
+            path: '',
+            component: AddressesList
+          },
+          {
+            name: 'address-book-edit',
+            path: 'edit/:addressId/',
+            component: AddressEdit,
+            props: true
+          },
+          {
+            name: 'address-book-add',
+            path: 'add/',
+            component: AddressAdd
+          }
+        ]
+      }
+    ]
+  },
   { name: 'page-not-found', path: '*', component: ErrorPage },
   { name: 'error', path: '/error/', component: ErrorPage, meta: { layout: 'minimal' } },
   { name: 'virtual-product', path: '/p/:parentSku/', component: Product },
