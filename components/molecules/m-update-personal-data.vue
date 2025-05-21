@@ -36,7 +36,11 @@
         "
         class="form__element"
       />
-      <SfButton class="form__button" @click.native="updatePersonalData">
+      <SfButton
+        :disabled="isDataUpdating"
+        class="form__button"
+        @click.native="updatePersonalData"
+      >
         {{ $t('Update personal data') }}
       </SfButton>
     </div>
@@ -70,7 +74,8 @@ export default {
     return {
       firstName: '',
       lastName: '',
-      email: ''
+      email: '',
+      isDataUpdating: false
     }
   },
   methods: {
@@ -89,6 +94,12 @@ export default {
       updatedProfile.lastname = this.lastName
       updatedProfile.email = this.email
       this.$bus.$emit('myAccount-before-updateUser', updatedProfile)
+    },
+    onBeforeUpdateUser () {
+      this.isDataUpdating = true;
+    },
+    onAfterUpdateUser () {
+      this.isDataUpdating = false;
     }
   },
   beforeMount () {
@@ -105,6 +116,12 @@ export default {
       { immediate: true });
 
     this.$once('hook:beforeDestroy', unsubscribeFromStoreWatch)
+    this.$bus.$on('myAccount-before-updateUser', this.onBeforeUpdateUser)
+    this.$bus.$on('myAccount-after-updateUser', this.onAfterUpdateUser)
+  },
+  beforeDestroy () {
+    this.$bus.$off('myAccount-before-updateUser', this.onBeforeUpdateUser)
+    this.$bus.$off('myAccount-after-updateUser', this.onAfterUpdateUser)
   },
   validations: {
     firstName: {

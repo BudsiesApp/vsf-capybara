@@ -2,61 +2,147 @@
   <div id="my-account">
     <SfBreadcrumbs class="breadcrumbs desktop-only" :breadcrumbs="breadcrumbs">
       <template #link="{breadcrumb}">
-        <router-link :to="breadcrumb.route.link" class="sf-breadcrumbs__breadcrumb">
+        <router-link
+          :to="breadcrumb.route.link"
+          class="sf-breadcrumbs__breadcrumb"
+        >
+          {{ breadcrumb.text }}
+        </router-link>
+      </template>
+
+      <template #current="{breadcrumb}">
+        <router-link
+          :to="breadcrumb.route.link"
+          class="sf-breadcrumbs__breadcrumb sf-breadcrumbs__breadcrumb--current"
+        >
           {{ breadcrumb.text }}
         </router-link>
       </template>
     </SfBreadcrumbs>
 
-    <SfContentPages
-      :title="$t('My Account')"
-      :active="activePage"
-      class="my-account"
-      @click:change="changeActivePage"
+    <div
+      class="_content"
+      :class="{'-show-mobile': showMobileNavigation}"
     >
-      <SfContentPage class="_personal-details" :title="$t('My profile')">
-        <OMyAccountProfile />
-      </SfContentPage>
+      <div class="_mobile-header mobile-only">
+        <SfBar
+          :title="mobileTitle"
+          :back="!showMobileNavigation"
+          @click:back="showMobileNavigation = !showMobileNavigation"
+        />
+      </div>
 
-      <SfContentPage class="_tab-content" :title="$t('Address Book')">
-        <OMyAccountAddressBook />
-      </SfContentPage>
+      <nav class="_navigation">
+        <SfHeading
+          :title="$t('My Account')"
+          :level="1"
+          class="_title desktop-only"
+        />
 
-      <SfContentPage class="_tab-content" :title="$t('Order history')">
-        <OMyAccountOrdersHistory />
-      </SfContentPage>
+        <SfList class="_items-list">
+          <SfListItem class="_menu-item -profile">
+            <router-link
+              :to="{name: RouteNames.MY_ACCOUNT}"
+              @click.native="showMobileNavigation = false"
+            >
+              {{ $t('My profile') }}
+            </router-link>
 
-      <SfContentPage :title="$t('Log out')" />
-    </SfContentPages>
+            <SfIcon
+              class="mobile-only"
+              icon="chevron_right"
+              size="0.875rem"
+            />
+          </SfListItem>
+
+          <SfListItem class="_menu-item -address-book">
+            <router-link
+              :to="{name: RouteNames.ADDRESS_BOOK_LIST}"
+              @click.native="showMobileNavigation = false"
+            >
+              {{ $t('Address book') }}
+            </router-link>
+
+            <SfIcon
+              class="mobile-only"
+              icon="chevron_right"
+              size="0.875rem"
+            />
+          </SfListItem>
+
+          <SfListItem class="_menu-item -orders-history">
+            <router-link
+              :to="{name: RouteNames.ORDERS_HISTORY}"
+              @click.native="showMobileNavigation = false"
+            >
+              {{ $t('Order history') }}
+            </router-link>
+
+            <SfIcon
+              class="mobile-only"
+              icon="chevron_right"
+              size="0.875rem"
+            />
+          </SfListItem>
+
+          <SfListItem class="_menu-item">
+            <router-link
+              to="/"
+              @click.native="logout"
+            >
+              {{ $t('Log out') }}
+            </router-link>
+
+            <SfIcon
+              class="mobile-only"
+              icon="chevron_right"
+              size="0.875rem"
+            />
+          </SfListItem>
+        </SfList>
+      </nav>
+
+      <router-view
+        class="_page"
+        :tab-title="mobileTitle"
+      />
+    </div>
   </div>
 </template>
 
 <script>
-import { SfBreadcrumbs, SfContentPages } from '@storefront-ui/vue';
-import { mapMobileObserver, unMapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
+import { SfBar, SfBreadcrumbs, SfIcon, SfHeading, SfList } from '@storefront-ui/vue';
 
 import MyAccount from '@vue-storefront/core/pages/MyAccount';
 
-import OMyAccountProfile from 'theme/components/organisms/o-my-account-profile';
-import OMyAccountAddressBook from 'theme/components/organisms/o-my-account-address-book';
-import OMyAccountOrdersHistory from 'theme/components/organisms/o-my-account-orders-history';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 
-const DEFAULT_ACTIVE_PAGE = 'My profile';
+const RouteNames = {
+  ADDRESS_BOOK_LIST: 'address-book-list',
+  ADDRESS_BOOK_EDIT: 'address-book-edit',
+  ADDRESS_BOOK_ADD: 'address-book-add',
+  ORDERS_HISTORY: 'orders-history',
+  MY_ACCOUNT: 'my-account'
+}
 
 export default {
   components: {
+    SfBar,
     SfBreadcrumbs,
-    SfContentPages,
-    OMyAccountProfile,
-    OMyAccountAddressBook,
-    OMyAccountOrdersHistory
+    SfIcon,
+    SfHeading,
+    SfList
   },
   mixins: [MyAccount],
   data () {
     return {
-      activePage: '',
-      breadcrumbs: [
+      showMobileNavigation: false,
+      RouteNames
+    };
+  },
+  computed: {
+    breadcrumbs () {
+      const breadcrumbs = [
         {
           text: this.$t('Home'),
           route: {
@@ -66,43 +152,85 @@ export default {
         {
           text: this.$t('My account'),
           route: {
-            link: localizedRoute('/my-account')
+            link: {
+              name: RouteNames.MY_ACCOUNT
+            }
           }
         }
-      ]
-    };
-  },
-  mounted () {
-    if (this.isMobile) {
-      return;
-    }
+      ];
 
-    this.activePage = this.$t(DEFAULT_ACTIVE_PAGE).toString();
-  },
-  computed: {
-    ...mapMobileObserver()
-  },
-  beforeDestroy () {
-    unMapMobileObserver();
+      if (this.$route.name === RouteNames.ORDERS_HISTORY) {
+        breadcrumbs.push({
+          text: this.$t('Order history'),
+          route: {
+            link: {
+              name: RouteNames.ORDERS_HISTORY
+            }
+          }
+        });
+      }
+
+      if (
+        [RouteNames.ADDRESS_BOOK_LIST, RouteNames.ADDRESS_BOOK_EDIT, RouteNames.ADDRESS_BOOK_ADD].includes(this.$route.name)
+      ) {
+        breadcrumbs.push({
+          text: this.$t('Address book'),
+          route: {
+            link: {
+              name: RouteNames.ADDRESS_BOOK_LIST
+            }
+          }
+        });
+      }
+
+      if (this.$route.name === RouteNames.ADDRESS_BOOK_EDIT) {
+        breadcrumbs.push({
+          text: this.$t('Edit address'),
+          route: {
+            link: {
+              name: RouteNames.ADDRESS_BOOK_EDIT
+            }
+          }
+        });
+      }
+
+      if (this.$route.name === RouteNames.ADDRESS_BOOK_ADD) {
+        breadcrumbs.push({
+          text: this.$t('Add new address'),
+          route: {
+            link: {
+              name: RouteNames.ADDRESS_BOOK_ADD
+            }
+          }
+        });
+      }
+
+      return breadcrumbs;
+    },
+    mobileTitle () {
+      if (this.showMobileNavigation) {
+        return this.$t('My Account');
+      }
+
+      switch (this.$route.name) {
+        case RouteNames.ADDRESS_BOOK_LIST:
+          return this.$t('Address book');
+        case RouteNames.ORDERS_HISTORY:
+          return this.$t('Order history');
+        case RouteNames.MY_ACCOUNT:
+          return this.$t('My profile');
+        case RouteNames.ADDRESS_BOOK_ADD:
+          return this.$t('Add new address');
+        case RouteNames.ADDRESS_BOOK_EDIT:
+          return this.$t('Edit address');
+        default:
+          return this.$t('My Account');
+      }
+    }
   },
   methods: {
-    changeActivePage (title) {
-      if (title === 'Log out') {
-        this.logout();
-        return;
-      }
-      this.activePage = title;
-    },
     async logout () {
       await this.$store.dispatch('user/logout', {});
-      this.$router.push(this.localizedRoute('/'));
-    }
-  },
-  watch: {
-    isMobile () {
-      if (!this.isMobile && !this.activePage) {
-        this.activePage = this.$t(DEFAULT_ACTIVE_PAGE).toString();
-      }
     }
   }
 };
@@ -114,21 +242,74 @@ export default {
 #my-account {
   box-sizing: border-box;
 
-  @include for-desktop {
-    max-width: 1272px;
-    width: 100%;
-    padding: 0 var(--spacer-sm);
-    margin: 0 auto;
+  ._content {
+    display: flex;
+    column-gap: var(--spacer-lg);
   }
-}
-.my-account {
-  --content-pages-height: auto;
 
-  ::v-deep {
-    .sf-content-pages__content,
-    .sf-content-pages__sidebar {
-      height: min-content;
+  ._navigation {
+    flex: 0 0 18.875rem;
+    align-self: flex-start;
+    padding: var(--spacer-lg);
+    background-color: var(--c-light);
+
+    ._title {
+      --heading-text-align: start;
+      --heading-title-margin: 0 0 var(--spacer-xl) 0;
+      --heading-title-font-weight: var(--font-medium);
+      --heading-title-font-size: var(--h3-font-size);
     }
+
+    ._items-list {
+      padding: 0;
+    }
+
+    ._menu-item {
+      list-style: none;
+      font-size: var(--font-base);
+      margin-top: var(--spacer-base);
+
+      a {
+        color: var(--c-dark-variant);
+        width: 100%;
+
+        &.router-link-exact-active {
+          color: var(--c-primary);
+        }
+      }
+
+      &.-address-book {
+        a {
+          &.router-link-active {
+            color: var(--c-primary);
+          }
+        }
+      }
+
+      &:hover {
+        cursor: pointer;
+
+        a {
+          color: var(--c-black);
+        }
+      }
+    }
+  }
+
+  .breadcrumbs {
+    padding: var(--spacer-base) 0;
+
+    ::v-deep .sf-breadcrumbs__breadcrumb {
+      color: var(--c-link);
+
+      &--current {
+        color: var(--c-text);
+      }
+    }
+  }
+
+  ._page {
+    flex: 1;
   }
 
   @include for-mobile {
@@ -136,21 +317,51 @@ export default {
     --content-pages-sidebar-category-title-font-weight: var(--font-normal);
     --content-pages-sidebar-category-title-margin: var(--spacer-xl) var(--spacer-sm) 0 var(--spacer-base);
 
-    ._tab-content {
-      --tabs-content-tab-padding: var(--spacer-base) var(--spacer-sm);
+    --tabs-content-tab-padding: var(--spacer-base) var(--spacer-sm);
+
+    .o-my-account-profile {
+      --tabs-content-tab-padding: 0 var(--spacer-sm);
     }
 
-    ._personal-details {
-      --tabs-content-tab-padding: 0 var(--spacer-sm);
+    ._navigation {
+      --list-item-padding: var(--spacer-sm) var(--spacer-sm) var(--spacer-sm);
+      --list-item-border-width: 0 0 1px 0;
+
+      display: none;
+      width: 100%;
+      background-color: var(--c-white);
+      flex-basis: 100%;
+      padding-left: 0;
+      padding-right: 0;
+
+      ._menu-item {
+        display: flex;
+        align-items: center;
+        margin-top: 0;
+      }
+    }
+
+    ._content {
+      flex-direction: column;
+
+      &.-show-mobile {
+        ._navigation {
+          display: block;
+        }
+
+        ._page {
+          display: none;
+        }
+      }
     }
   }
 
   @include for-desktop {
-    --content-pages-sidebar-category-title-margin: var(--spacer-xl) 0 0 0;
-    --content-pages-sidebar-flex: 0 0 22.875rem;
+    max-width: 1272px;
+    width: 100%;
+    padding: 0 var(--spacer-sm);
+    margin: 0 auto;
   }
 }
-.breadcrumbs {
-  padding: var(--spacer-base) 0;
-}
+
 </style>
