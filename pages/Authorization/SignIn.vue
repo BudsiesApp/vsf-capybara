@@ -32,11 +32,12 @@ export default defineComponent({
       onFormSwitched,
       onLoginSuccess
     }
+  },
+  metaInfo (): any {
+    return {
+      title: this.$t('Sign In')
+    };
   }
-  // metaInfo (): any {
-  //  // TODO
-  //  return {};
-  // }
 });
 </script>
 

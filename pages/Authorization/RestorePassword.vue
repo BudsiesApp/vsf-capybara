@@ -1,7 +1,7 @@
 <template>
   <div class="restore-password-page">
     <div class="_content">
-      <SfHeading :level="1" :title="$t('Restore Password')" />
+      <SfHeading :level="1" :title="$t('Reset Password')" />
 
       <m-reset-password
         class="_form"
@@ -38,11 +38,12 @@ export default defineComponent({
       onFormSwitched,
       onPasswordRestoreSuccess
     }
+  },
+  metaInfo (): any {
+    return {
+      title: this.$t('Reset Password')
+    };
   }
-  // metaInfo (): any {
-  //  // TODO
-  //  return {};
-  // }
 });
 </script>
 
