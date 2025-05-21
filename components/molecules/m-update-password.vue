@@ -42,7 +42,11 @@
         "
         class="form__element form__element--half form__element--half-even"
       />
-      <SfButton class="form__button" @click.native="updatePassword">
+      <SfButton
+        :disabled="isDataUpdating"
+        class="form__button"
+        @click.native="updatePassword"
+      >
         {{ $t('Update password') }}
       </SfButton>
     </div>
@@ -63,7 +67,8 @@ export default {
     return {
       oldPassword: '',
       password: '',
-      rPassword: ''
+      rPassword: '',
+      isDataUpdating: false
     }
   },
   computed: {
@@ -86,7 +91,33 @@ export default {
         currentPassword: this.oldPassword,
         newPassword: this.password
       })
+    },
+    onBeforeUpdatePassword () {
+      this.isDataUpdating = true;
+    },
+    onAfterUpdatePassword () {
+      this.isDataUpdating = false;
     }
+  },
+  beforeMount () {
+    this.$bus.$on(
+      'myAccount-before-changePassword',
+      this.onBeforeUpdatePassword
+    );
+    this.$bus.$on(
+      'myAccount-after-changePassword',
+      this.onAfterUpdatePassword
+    );
+  },
+  beforeDestroy () {
+    this.$bus.$off(
+      'myAccount-before-changePassword',
+      this.onBeforeUpdatePassword
+    );
+    this.$bus.$off(
+      'myAccount-after-changePassword',
+      this.onAfterUpdatePassword
+    );
   },
   validations: {
     oldPassword: {
