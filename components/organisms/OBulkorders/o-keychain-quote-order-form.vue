@@ -46,7 +46,7 @@
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
-import { computed, defineComponent, PropType, Ref, ref, toRefs } from '@vue/composition-api';
+import { defineComponent, PropType, Ref, ref } from '@vue/composition-api';
 
 import Product from 'core/modules/catalog/types/Product';
 import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo } from 'src/modules/budsies';
@@ -122,6 +122,16 @@ export default defineComponent({
     },
     isDisabled (): boolean {
       return this.isSubmitting;
+    },
+    bulkorderQuoteProductId (): number {
+      switch (this.product.sku) {
+        case 'keychainBulkSample_bundle':
+          return BulkorderQuoteProductId.KEYCHAIN;
+        case 'keychainAcrylicBulkSample_bundle':
+          return BulkorderQuoteProductId.ACRYLIC_KEYCHAIN;
+        default:
+          throw new Error('Unexpected product sku');
+      }
     }
   },
   methods: {
@@ -164,7 +174,7 @@ export default defineComponent({
         const bulkOrderId = await this.$store.dispatch(
           'budsies/createBulkorder',
           {
-            product_id: BulkorderQuoteProductId.KEYCHAIN,
+            product_id: this.bulkorderQuoteProductId,
             qty: this.bulkordersBaseFormData.quantity,
             project_name: this.bulkordersBaseFormData.name,
             description: this.bulkordersBaseFormData.description,

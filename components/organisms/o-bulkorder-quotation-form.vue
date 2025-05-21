@@ -295,7 +295,11 @@ export default defineComponent({
         sampleProductPart = '_pillow_';
       }
 
-      if (this.bulkorderInfo.bulkorderProductId === BulkorderQuoteProductId.KEYCHAIN) {
+      if ([
+        BulkorderQuoteProductId.KEYCHAIN,
+        BulkorderQuoteProductId.PLUSH_KEYCHAIN,
+        BulkorderQuoteProductId.ACRYLIC_KEYCHAIN
+      ].includes(this.bulkorderInfo.bulkorderProductId)) {
         sampleProductPart = '_keychain_';
       }
 
@@ -327,6 +331,8 @@ export default defineComponent({
       switch (this.bulkorderInfo.bulkorderProductId) {
         case BulkorderQuoteProductId.PLUSHIE:
         case BulkorderQuoteProductId.KEYCHAIN:
+        case BulkorderQuoteProductId.PLUSH_KEYCHAIN:
+        case BulkorderQuoteProductId.ACRYLIC_KEYCHAIN:
           return 'stuffed animal';
         case BulkorderQuoteProductId.PILLOW:
           return 'pillow';
@@ -338,6 +344,8 @@ export default defineComponent({
       switch (this.bulkorderInfo.bulkorderProductId) {
         case BulkorderQuoteProductId.PLUSHIE:
         case BulkorderQuoteProductId.KEYCHAIN:
+        case BulkorderQuoteProductId.PLUSH_KEYCHAIN:
+        case BulkorderQuoteProductId.ACRYLIC_KEYCHAIN:
           return true;
         default:
           return false;
@@ -357,6 +365,10 @@ export default defineComponent({
           return 'Pillow';
         case BulkorderQuoteProductId.KEYCHAIN:
           return 'Keychain';
+        case BulkorderQuoteProductId.PLUSH_KEYCHAIN:
+          return 'Plush Keychain';
+        case BulkorderQuoteProductId.ACRYLIC_KEYCHAIN:
+          return 'Acrylic Keychain';
         default:
           return '';
       }

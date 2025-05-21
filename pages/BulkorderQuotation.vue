@@ -47,6 +47,10 @@ export default Vue.extend({
           return 'pillowBulkSample_bundle';
         case BulkorderQuoteProductId.KEYCHAIN:
           return 'keychainBulkSample_bundle';
+        case BulkorderQuoteProductId.PLUSH_KEYCHAIN:
+          return 'keychainPlushBulkSample_bundle';
+        case BulkorderQuoteProductId.ACRYLIC_KEYCHAIN:
+          return 'keychainAcrylicBulkSample_bundle';
         default:
           return undefined;
       }
