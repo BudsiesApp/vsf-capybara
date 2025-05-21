@@ -85,7 +85,7 @@
           >
             <template #actions>
               <router-link
-                class="_action-item sf-button--text"
+                class="_action-item sf-button sf-button--text"
                 :to="{
                   name: 'address-book-edit',
                   params: {
@@ -228,6 +228,12 @@ export default {
 
   ._additional-addresses {
     margin-top: var(--spacer-xl);
+  }
+
+  .sf-button--secondary {
+    &:hover {
+      color: var(--c-white);
+    }
   }
 }
 </style>

@@ -16,17 +16,17 @@ const DetailedCart = () =>
 const MyAccount = () =>
   import(/* webpackChunkName: "vsf-my-account" */ 'theme/pages/MyAccount');
 const AccountOrdersHistory = () =>
-  import(/* webpackChunkName: "vsf-my-account-orders-history" */ 'theme/components/organisms/o-my-account-orders-history');
+  import(/* webpackChunkName: "vsf-my-account" */ 'theme/components/organisms/o-my-account-orders-history');
 const AccountProfile = () =>
-  import(/* webpackChunkName: "vsf-my-account-profile" */ 'theme/components/organisms/o-my-account-profile');
+  import(/* webpackChunkName: "vsf-my-account" */ 'theme/components/organisms/o-my-account-profile');
 const AddressBook = () =>
-  import(/* webpackChunkName: "vsf-my-account-address-book" */ 'theme/pages/MyAccount/AddressBook.vue');
+  import(/* webpackChunkName: "vsf-my-account" */ 'theme/pages/MyAccount/AddressBook.vue');
 const AddressEdit = () =>
-  import(/* webpackChunkName: "vsf-my-account-address-edit" */'theme/pages/MyAccount/AddressEdit.vue');
+  import(/* webpackChunkName: "vsf-my-account" */'theme/pages/MyAccount/AddressEdit.vue');
 const AddressAdd = () =>
-  import(/* webpackChunkName: "vsf-my-account-address-add" */'theme/pages/MyAccount/AddressAdd.vue');
+  import(/* webpackChunkName: "vsf-my-account" */'theme/pages/MyAccount/AddressAdd.vue');
 const AddressesList = () =>
-  import(/* webpackChunkName: "vsf-my-account-addresses-list" */'theme/pages/MyAccount/AddressesList.vue');
+  import(/* webpackChunkName: "vsf-my-account" */'theme/pages/MyAccount/AddressesList.vue');
 
 const CartRecovery = () =>
   import(/* webpackChunkName: "vsf-cart-recovery" */ 'theme/pages/CartRecovery');
