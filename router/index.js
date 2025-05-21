@@ -13,6 +13,13 @@ const Checkout = () =>
 const DetailedCart = () =>
   import(/* webpackChunkName: "vsf-detailed-cart" */ 'theme/pages/DetailedCart');
 
+const SignIn = () =>
+  import(/* webpackChunkName: "vsf-authorization" */ 'theme/pages/Authorization/SignIn');
+const SignUp = () =>
+  import(/* webpackChunkName: "vsf-authorization" */ 'theme/pages/Authorization/SignUp');
+const RestorePassword = () =>
+  import(/* webpackChunkName: "vsf-authorization" */ 'theme/pages/Authorization/RestorePassword');
+
 const MyAccount = () =>
   import(/* webpackChunkName: "vsf-my-account" */ 'theme/pages/MyAccount');
 const AccountOrdersHistory = () =>
@@ -80,6 +87,21 @@ let routes = [
         front_design: 'phrasePetsies' + route.params.parentSku
       }
     })
+  },
+  {
+    path: '/sign-in/',
+    name: 'sign-in',
+    component: SignIn
+  },
+  {
+    path: '/sign-up/',
+    name: 'sign-up',
+    component: SignUp
+  },
+  {
+    path: '/restore-password',
+    name: 'restore-password',
+    component: RestorePassword
   },
   {
     path: '/my-account/',
