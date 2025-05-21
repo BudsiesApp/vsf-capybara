@@ -8,6 +8,10 @@ function makeRoutesStrict (routes) {
       strict: true
     }
 
+    if (route.children) {
+      route.children = makeRoutesStrict(route.children);
+    }
+
     return route;
   })
 }
