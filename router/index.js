@@ -4,8 +4,22 @@ const Checkout = () =>
   import(/* webpackChunkName: "vsf-checkout" */ 'theme/pages/Checkout');
 const DetailedCart = () =>
   import(/* webpackChunkName: "vsf-detailed-cart" */ 'theme/pages/DetailedCart');
+
 const MyAccount = () =>
   import(/* webpackChunkName: "vsf-my-account" */ 'theme/pages/MyAccount');
+const AccountOrdersHistory = () =>
+  import(/* webpackChunkName: "vsf-my-account" */ 'theme/components/organisms/o-my-account-orders-history');
+const AccountProfile = () =>
+  import(/* webpackChunkName: "vsf-my-account" */ 'theme/components/organisms/o-my-account-profile');
+const AddressBook = () =>
+  import(/* webpackChunkName: "vsf-my-account" */ 'theme/pages/MyAccount/AddressBook.vue');
+const AddressEdit = () =>
+  import(/* webpackChunkName: "vsf-my-account" */'theme/pages/MyAccount/AddressEdit.vue');
+const AddressAdd = () =>
+  import(/* webpackChunkName: "vsf-my-account" */'theme/pages/MyAccount/AddressAdd.vue');
+const AddressesList = () =>
+  import(/* webpackChunkName: "vsf-my-account" */'theme/pages/MyAccount/AddressesList.vue');
+
 const CartRecovery = () =>
   import(/* webpackChunkName: "vsf-cart-recovery" */ 'theme/pages/CartRecovery');
 const KeychainQuote = () =>
@@ -29,6 +43,10 @@ function makeRoutesStrict (routes) {
       strict: true
     }
 
+    if (route.children) {
+      route.children = makeRoutesStrict(route.children);
+    }
+
     return route;
   })
 }
@@ -48,7 +66,63 @@ let routes = [
       next(to.params.targetPath);
     }
   },
-  { name: 'my-account', path: '/my-account/', component: MyAccount },
+  {
+    path: '/my-account/',
+    name: 'my-account-root',
+    component: MyAccount,
+    meta: {
+      auth: true
+    },
+    children: [
+      {
+        name: 'my-account',
+        path: '',
+        component: AccountProfile
+      },
+      {
+        name: 'orders-history',
+        path: 'orders-history/',
+        component: AccountOrdersHistory,
+        meta: {
+          title: 'Order history'
+        }
+      },
+      {
+        name: 'address-book',
+        path: 'address-book/',
+        component: AddressBook,
+        children: [
+          {
+            name: 'address-book-list',
+            path: '',
+            component: AddressesList,
+            meta: {
+              title: 'Address book'
+            }
+          },
+          {
+            name: 'address-book-edit',
+            path: 'edit/:addressId/',
+            component: AddressEdit,
+            props: (route) => ({
+              addressId: route.params.addressId.toString()
+            }),
+            meta: {
+              title: 'Edit address'
+            }
+          },
+          {
+            name: 'address-book-add',
+            path: 'add/',
+            component: AddressAdd,
+            meta: {
+              title: 'Add new address'
+            }
+          }
+        ]
+      }
+    ]
+  },
   { name: 'page-not-found', path: '*', component: ErrorPage },
   { name: 'error', path: '/error/', component: ErrorPage, meta: { layout: 'minimal' } },
   { name: 'recover-cart', path: '/alerts/recover/cart/id/:id/code/:code/', component: CartRecovery },
