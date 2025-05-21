@@ -50,12 +50,11 @@
 </template>
 
 <script>
+import { SfInput, SfButton, SfCheckbox, SfHeading } from '@storefront-ui/vue';
+import { required, email } from 'vuelidate/lib/validators';
+
 import i18n from '@vue-storefront/i18n';
 import { Logger } from '@vue-storefront/core/lib/logger';
-import { required, email } from 'vuelidate/lib/validators';
-import { SfInput, SfButton, SfCheckbox, SfHeading } from '@storefront-ui/vue';
-import { mapActions } from 'vuex';
-import { ModalList } from 'theme/store/ui/modals'
 
 export default {
   name: 'MLogin',
@@ -68,13 +67,9 @@ export default {
     };
   },
   methods: {
-    ...mapActions('ui', {
-      openModal: 'openModal',
-      closeModal: 'closeModal'
-    }),
     switchElem (to) {
       this.$v.$reset();
-      this.openModal({ name: ModalList.Auth, payload: to })
+      this.$emit('form-switched', to);
     },
     login () {
       this.$v.$touch();
@@ -102,7 +97,7 @@ export default {
             this.onFailure(result);
           } else {
             this.onSuccess(i18n.t('You are logged in!'));
-            this.closeModal({ name: ModalList.Auth });
+            this.emit('login-success');
           }
         })
         .catch(err => {

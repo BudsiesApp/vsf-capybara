@@ -37,13 +37,13 @@ export function useAuthorizationPage (
     });
   };
 
-  async function onLoginSuccessed () {
+  async function onLoginSuccess () {
     await root.$router.push(redirectTarget.value);
   }
 
   return {
     onFormSwitched,
-    onLoginSuccessed,
+    onLoginSuccess,
     redirectTarget
   }
 }

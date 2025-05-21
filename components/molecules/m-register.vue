@@ -59,12 +59,11 @@
 </template>
 
 <script>
-import i18n from '@vue-storefront/i18n';
-import { Logger } from '@vue-storefront/core/lib/logger';
-import { required, email } from 'vuelidate/lib/validators';
 import { SfInput, SfButton } from '@storefront-ui/vue';
-import { ModalList } from 'theme/store/ui/modals'
-import { mapActions } from 'vuex';
+import { required, email } from 'vuelidate/lib/validators';
+
+import { Logger } from '@vue-storefront/core/lib/logger';
+import i18n from '@vue-storefront/i18n';
 
 import MPassword from 'theme/components/molecules/m-password.vue';
 
@@ -88,13 +87,9 @@ export default {
     };
   },
   methods: {
-    ...mapActions('ui', {
-      openModal: 'openModal',
-      closeModal: 'closeModal'
-    }),
     switchElem (to) {
       this.$v.$reset();
-      this.openModal({ name: ModalList.Auth, payload: to })
+      this.$emit('form-switched', to);
     },
     async register () {
       this.serverErrorFields = [];
@@ -129,8 +124,8 @@ export default {
               username: this.email,
               password: this.passwordData.password
             });
+            this.$emit('login-success');
             this.onSuccess(i18n.t('You are logged in!'));
-            this.closeModal({ name: ModalList.Auth });
           }
         })
         .catch(err => {

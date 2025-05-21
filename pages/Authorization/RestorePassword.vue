@@ -2,7 +2,7 @@
   <div class="restore-password-page">
     <m-reset-password
       @form-switched="onFormSwitched"
-      @restore-successed="onPasswordRestoreSuccessed"
+      @restore-success="onPasswordRestoreSuccess"
     />
   </div>
 </template>
@@ -22,13 +22,13 @@ export default defineComponent({
   setup (_, setupContext) {
     const { onFormSwitched, redirectTarget } = useAuthorizationPage(setupContext);
 
-    function onPasswordRestoreSuccessed () {
+    function onPasswordRestoreSuccess () {
       localStorage.setItem('passwordResetRedirectTarget', redirectTarget.value);
     }
 
     return {
       onFormSwitched,
-      onPasswordRestoreSuccessed
+      onPasswordRestoreSuccess
     }
   }
   // metaInfo (): any {

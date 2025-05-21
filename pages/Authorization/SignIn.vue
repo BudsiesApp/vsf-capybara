@@ -2,7 +2,7 @@
   <div class="sign-in-page">
     <m-login
       @form-switched="onFormSwitched"
-      @login-successed="onLoginSuccessed"
+      @login-success="onLoginSuccess"
     />
   </div>
 </template>
@@ -20,11 +20,11 @@ export default defineComponent({
     MLogin
   },
   setup (_, setupContext) {
-    const { onFormSwitched, onLoginSuccessed } = useAuthorizationPage(setupContext);
+    const { onFormSwitched, onLoginSuccess } = useAuthorizationPage(setupContext);
 
     return {
       onFormSwitched,
-      onLoginSuccessed
+      onLoginSuccess
     }
   }
   // metaInfo (): any {

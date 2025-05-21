@@ -40,11 +40,10 @@
 </template>
 
 <script>
-import i18n from '@vue-storefront/i18n';
-import { required, email } from 'vuelidate/lib/validators';
 import { SfInput, SfButton } from '@storefront-ui/vue';
-import { ModalList } from 'theme/store/ui/modals'
-import { mapActions } from 'vuex';
+import { required, email } from 'vuelidate/lib/validators';
+
+import i18n from '@vue-storefront/i18n';
 
 export default {
   name: 'MResetPassword',
@@ -59,12 +58,9 @@ export default {
     };
   },
   methods: {
-    ...mapActions('ui', {
-      openModal: 'openModal'
-    }),
     switchElem (to) {
       this.$v.$reset();
-      this.openModal({ name: ModalList.Auth, payload: to })
+      this.$emit('form-switched', to);
     },
     resetPassword () {
       this.$v.$touch();
@@ -86,6 +82,7 @@ export default {
           this.$bus.$emit('notification-progress-stop');
           if (response.code === 200) {
             this.passwordSent = true;
+            this.$emit('restore-success');
           } else {
             this.onFailure(response);
           }
