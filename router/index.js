@@ -94,12 +94,19 @@ let routes = [
     component: SignIn
   },
   {
+    path: '/stub',
+    name: 'sign-in-redirect',
+    redirect: {
+      name: 'sign-in'
+    }
+  },
+  {
     path: '/sign-up/',
     name: 'sign-up',
     component: SignUp
   },
   {
-    path: '/restore-password',
+    path: '/restore-password/',
     name: 'restore-password',
     component: RestorePassword
   },
@@ -114,22 +121,38 @@ let routes = [
       {
         name: 'my-account',
         path: '',
-        component: AccountProfile
+        component: AccountProfile,
+
+        meta: {
+          auth: true
+        }
       },
       {
         name: 'orders-history',
         path: 'orders-history/',
-        component: AccountOrdersHistory
+        component: AccountOrdersHistory,
+        meta: {
+          auth: true
+        }
+
       },
       {
         name: 'address-book',
         path: 'address-book/',
         component: AddressBook,
+        meta: {
+          auth: true
+        },
+
         children: [
           {
             name: 'address-book-list',
             path: '',
-            component: AddressesList
+            component: AddressesList,
+            meta: {
+              auth: true
+            }
+
           },
           {
             name: 'address-book-edit',
@@ -137,12 +160,20 @@ let routes = [
             component: AddressEdit,
             props: (route) => ({
               addressId: route.params.addressId.toString()
-            })
+            }),
+            meta: {
+              auth: true
+            }
+
           },
           {
             name: 'address-book-add',
             path: 'add/',
-            component: AddressAdd
+            component: AddressAdd,
+            meta: {
+              auth: true
+            }
+
           }
         ]
       }

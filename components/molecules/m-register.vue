@@ -123,8 +123,9 @@ export default {
             this.$store.dispatch('user/login', {
               username: this.email,
               password: this.passwordData.password
+            }).then(() => {
+              this.$emit('login-success');
             });
-            this.$emit('login-success');
             this.onSuccess(i18n.t('You are logged in!'));
           }
         })

@@ -1,5 +1,7 @@
 import { SetupContext, onBeforeMount, computed } from '@vue/composition-api';
 
+import { StorageManager } from '@vue-storefront/core/lib/storage-manager'
+
 import { AuthorizationFormCode } from 'theme/interfaces/authorization-form-code';
 
 const ROUTE_NAME = {
@@ -14,15 +16,16 @@ export function useAuthorizationPage (
   const isUserLoggedIn = computed<boolean>(() => {
     return root.$store.getters['user/isLoggedIn'];
   });
+
   const redirectTarget = computed<string>(() => {
     if (root.$route.query['redirect-target']) {
-      return root.$route.query.redirect as string;
+      return root.$route.query['redirect-target'] as string;
     }
 
     return '/';
   });
 
-  onBeforeMount(() => {
+  onBeforeMount(async () => {
     if (isUserLoggedIn.value) {
       return root.$router.push(redirectTarget.value);
     }

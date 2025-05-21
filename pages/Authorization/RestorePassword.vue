@@ -1,14 +1,20 @@
 <template>
   <div class="restore-password-page">
-    <m-reset-password
-      @form-switched="onFormSwitched"
-      @restore-success="onPasswordRestoreSuccess"
-    />
+    <div class="_content">
+      <SfHeading :level="1" :title="$t('Restore Password')" />
+
+      <m-reset-password
+        class="_form"
+        @form-switched="onFormSwitched"
+        @restore-success="onPasswordRestoreSuccess"
+      />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from '@vue/composition-api';
+import { SfHeading } from '@storefront-ui/vue';
 
 import { useAuthorizationPage } from 'theme/helpers/use-authorization-page';
 
@@ -17,7 +23,9 @@ import MResetPassword from '../../components/molecules/m-reset-password.vue';
 export default defineComponent({
   name: 'ResetPasswordPage',
   components: {
-    MResetPassword
+    MResetPassword,
+    SfHeading
+
   },
   setup (_, setupContext) {
     const { onFormSwitched, redirectTarget } = useAuthorizationPage(setupContext);
@@ -37,3 +45,18 @@ export default defineComponent({
   // }
 });
 </script>
+
+<style lang="scss" scoped>
+.restore-password-page {
+  ._content {
+    padding-top: var(--spacer-lg);
+    margin: 0 auto;
+    max-width: 28rem;
+    width: 100%;
+  }
+
+  ._form {
+    margin-top: var(--spacer-base);
+  }
+}
+</style>

@@ -1,14 +1,19 @@
 <template>
   <div class="sign-up-page">
-    <m-register
-      @form-switched="onFormSwitched"
-      @login-success="onLoginSuccess"
-    />
+    <div class="_content">
+      <SfHeading :level="1" :title="$t('Sign Up')" />
+
+      <m-register
+        @form-switched="onFormSwitched"
+        @login-success="onLoginSuccess"
+      />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from '@vue/composition-api';
+import { SfHeading } from '@storefront-ui/vue';
 
 import { useAuthorizationPage } from 'theme/helpers/use-authorization-page';
 
@@ -17,7 +22,8 @@ import MRegister from '../../components/molecules/m-register.vue';
 export default defineComponent({
   name: 'SignUpPage',
   components: {
-    MRegister
+    MRegister,
+    SfHeading
   },
   setup (_, setupContext) {
     const { onFormSwitched, onLoginSuccess } = useAuthorizationPage(setupContext);
@@ -33,3 +39,14 @@ export default defineComponent({
   // }
 });
 </script>
+
+<style lang="scss" scoped>
+.sign-up-page {
+  ._content {
+    padding-top: var(--spacer-lg);
+    margin: 0 auto;
+    max-width: 28rem;
+    width: 100%;
+  }
+}
+</style>

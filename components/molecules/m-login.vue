@@ -97,7 +97,7 @@ export default {
             this.onFailure(result);
           } else {
             this.onSuccess(i18n.t('You are logged in!'));
-            this.emit('login-success');
+            this.$emit('login-success');
           }
         })
         .catch(err => {
