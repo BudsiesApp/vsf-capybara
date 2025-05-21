@@ -39,6 +39,8 @@ import Vue from 'vue';
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 
+import { PASSWORD_RESET_REDIRECT_TARGET_LOCAL_STORAGE_KEY } from 'theme/interfaces/password-reset-redirect-target-local-storage-key';
+import { REDIRECT_TARGET_QUERY_KEY } from 'theme/interfaces/redirect-target-query-key';
 import { ModalList } from 'theme/store/ui/modals';
 
 import MPassword from 'theme/components/molecules/m-password.vue';
@@ -109,7 +111,11 @@ export default Vue.extend({
         });
 
         this.isSuccess = true;
-        this.$store.dispatch('ui/openModal', { name: ModalList.Auth, payload: 'login' });
+        this.$router.push({
+          name: 'sign-in',
+          query: { [REDIRECT_TARGET_QUERY_KEY]: localStorage.getItem(PASSWORD_RESET_REDIRECT_TARGET_LOCAL_STORAGE_KEY) }
+        });
+        localStorage.removeItem(PASSWORD_RESET_REDIRECT_TARGET_LOCAL_STORAGE_KEY);
       } catch (error) {
         this.apiError = (error as Error).message;
       } finally {

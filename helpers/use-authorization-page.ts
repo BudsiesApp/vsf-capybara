@@ -1,8 +1,7 @@
 import { SetupContext, onBeforeMount, computed } from '@vue/composition-api';
 
-import { StorageManager } from '@vue-storefront/core/lib/storage-manager'
-
 import { AuthorizationFormCode } from 'theme/interfaces/authorization-form-code';
+import { REDIRECT_TARGET_QUERY_KEY } from 'theme/interfaces/redirect-target-query-key';
 
 const ROUTE_NAME = {
   [AuthorizationFormCode.LOGIN]: 'sign-in',
@@ -18,8 +17,8 @@ export function useAuthorizationPage (
   });
 
   const redirectTarget = computed<string>(() => {
-    if (root.$route.query['redirect-target']) {
-      return root.$route.query['redirect-target'] as string;
+    if (root.$route.query[REDIRECT_TARGET_QUERY_KEY]) {
+      return root.$route.query[REDIRECT_TARGET_QUERY_KEY] as string;
     }
 
     return '/';
