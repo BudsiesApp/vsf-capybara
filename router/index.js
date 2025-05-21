@@ -97,7 +97,10 @@ let routes = [
       {
         name: 'orders-history',
         path: 'orders-history/',
-        component: AccountOrdersHistory
+        component: AccountOrdersHistory,
+        meta: {
+          title: 'Order history'
+        }
       },
       {
         name: 'address-book',
@@ -107,7 +110,10 @@ let routes = [
           {
             name: 'address-book-list',
             path: '',
-            component: AddressesList
+            component: AddressesList,
+            meta: {
+              title: 'Address book'
+            }
           },
           {
             name: 'address-book-edit',
@@ -115,12 +121,18 @@ let routes = [
             component: AddressEdit,
             props: (route) => ({
               addressId: route.params.addressId.toString()
-            })
+            }),
+            meta: {
+              title: 'Edit address'
+            }
           },
           {
             name: 'address-book-add',
             path: 'add/',
-            component: AddressAdd
+            component: AddressAdd,
+            meta: {
+              title: 'Add new address'
+            }
           }
         ]
       }
