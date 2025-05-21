@@ -132,9 +132,9 @@ let routes = [
         path: 'orders-history/',
         component: AccountOrdersHistory,
         meta: {
-          auth: true
+          auth: true,
+          title: 'Order history'
         }
-
       },
       {
         name: 'address-book',
@@ -150,9 +150,9 @@ let routes = [
             path: '',
             component: AddressesList,
             meta: {
-              auth: true
+              auth: true,
+              title: 'Address book'
             }
-
           },
           {
             name: 'address-book-edit',
@@ -162,18 +162,18 @@ let routes = [
               addressId: route.params.addressId.toString()
             }),
             meta: {
-              auth: true
+              auth: true,
+              title: 'Edit address'
             }
-
           },
           {
             name: 'address-book-add',
             path: 'add/',
             component: AddressAdd,
             meta: {
-              auth: true
+              auth: true,
+              title: 'Add new address'
             }
-
           }
         ]
       }
