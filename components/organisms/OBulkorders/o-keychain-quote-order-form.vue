@@ -254,21 +254,5 @@ export default defineComponent({
   ._notice-link-container {
     text-align: center;
   }
-
-  ._section {
-    ._title {
-      margin-bottom: var(--spacer-base);
-
-      &.-required {
-        ::v-deep .sf-heading__title {
-          &::after {
-            content: "*";
-            color: var(--c-warning);
-            margin-left: -0.3em;
-          }
-        }
-      }
-    }
-  }
 }
 </style>
