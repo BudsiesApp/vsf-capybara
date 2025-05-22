@@ -16,6 +16,7 @@
 import { defineComponent } from '@vue/composition-api';
 import { SfHeading } from '@storefront-ui/vue';
 
+import { PASSWORD_RESET_REDIRECT_TARGET_LOCAL_STORAGE_KEY } from 'theme/interfaces/password-reset-redirect-target-local-storage-key';
 import { useAuthorizationPage } from 'theme/helpers/use-authorization-page';
 
 import MResetPassword from '../../components/molecules/m-reset-password.vue';
@@ -31,7 +32,11 @@ export default defineComponent({
     const { onFormSwitched, redirectTarget } = useAuthorizationPage(setupContext);
 
     function onPasswordRestoreSuccess () {
-      localStorage.setItem('passwordResetRedirectTarget', redirectTarget.value);
+      if (!redirectTarget.value) {
+        return;
+      }
+
+      localStorage.setItem(PASSWORD_RESET_REDIRECT_TARGET_LOCAL_STORAGE_KEY, redirectTarget.value);
     }
 
     return {

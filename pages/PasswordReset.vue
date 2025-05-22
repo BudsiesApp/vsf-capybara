@@ -44,6 +44,7 @@ import { REDIRECT_TARGET_QUERY_KEY } from 'theme/interfaces/redirect-target-quer
 import { ModalList } from 'theme/store/ui/modals';
 
 import MPassword from 'theme/components/molecules/m-password.vue';
+import { RawLocation } from 'vue-router';
 
 export default Vue.extend({
   name: 'PasswordReset',
@@ -111,11 +112,19 @@ export default Vue.extend({
         });
 
         this.isSuccess = true;
-        this.$router.push({
-          name: 'sign-in',
-          query: { [REDIRECT_TARGET_QUERY_KEY]: localStorage.getItem(PASSWORD_RESET_REDIRECT_TARGET_LOCAL_STORAGE_KEY) }
-        });
+
+        const targetUrl = localStorage.getItem(PASSWORD_RESET_REDIRECT_TARGET_LOCAL_STORAGE_KEY);
         localStorage.removeItem(PASSWORD_RESET_REDIRECT_TARGET_LOCAL_STORAGE_KEY);
+
+        const route: RawLocation = {
+          name: 'sign-in'
+        }
+
+        if (targetUrl) {
+          route.query = { [REDIRECT_TARGET_QUERY_KEY]: targetUrl };
+        }
+
+        this.$router.push(route);
       } catch (error) {
         this.apiError = (error as Error).message;
       } finally {
