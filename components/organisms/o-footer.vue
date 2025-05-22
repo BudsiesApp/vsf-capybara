@@ -242,6 +242,10 @@ export default {
               event: this.isLoggedIn ? 'click' : 'false',
               clickHandler: () => {
                 if (!this.isLoggedIn) {
+                  if (['sign-in', 'sign-up', 'restore-password'].includes(this.$route.name)) {
+                    return;
+                  }
+
                   this.openModal({ name: ModalList.Auth, payload: 'login' })
                 }
               }

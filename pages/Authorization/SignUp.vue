@@ -44,7 +44,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 .sign-up-page {
   ._content {
-    padding-top: var(--spacer-lg);
+    padding: var(--spacer-lg) var(--spacer-sm) var(--spacer-base);
+    box-sizing: border-box;
     margin: 0 auto;
     max-width: 28rem;
     width: 100%;

@@ -32,6 +32,10 @@ export default {
       if (this.isLoggedIn) {
         this.$router.push(this.localizedRoute({ name: 'my-account' }))
       } else {
+        if (['sign-in', 'sign-up', 'restore-password'].includes(this.$route.name)) {
+          return;
+        }
+
         this.openModal({ name: ModalList.Auth, payload: 'login' })
       }
     }
