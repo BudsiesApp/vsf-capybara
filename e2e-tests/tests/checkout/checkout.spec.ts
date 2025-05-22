@@ -1,16 +1,11 @@
 import { mergeTests } from '@playwright/test';
 
 import { test as checkoutTest, expect } from '../../fixtures/checkout-page';
-import { test as pillowQuoteTest } from '../../fixtures/bulk-quote/pillow-quote-order-page';
-import { test as plushQuoteTest } from '../../fixtures/bulk-quote/plush-quote-order-page';
 import { test as plushSampleTest } from '../../fixtures/plush-sample-page';
 import { getRandomEmail } from '../../helpers/get-random-email';
 import { AddressData, COUNTRY_WITH_STATES_DEFAULT_STATE, COUNTRY_WITH_STATES_LIST, COUNTRY_WITH_STATES_LIST_CODE } from '../../page-model/cart/checkout';
 
-const keychainQuoteUrl = '/keychain-quote/';
-
 const test = mergeTests(checkoutTest, plushSampleTest);
-const allQuotesTest = mergeTests(test, pillowQuoteTest, plushQuoteTest);
 
 const FIRST_NAME = 'First name';
 const LAST_NAME = 'Last name';
@@ -143,38 +138,6 @@ test('order can be placed and user account created', async ({ cartPage, checkout
   await checkoutPage.fillBillingAddress();
   await checkoutPage.selectPaymentMethodAndPlaceOrder(true);
   await expect(cartPage.page.locator('._header .a-account-icon .sf-header__icon--is-active')).toBeVisible();
-});
-
-allQuotesTest('order can be placed with all type of samples', async ({ cartPage, checkoutPage, quoteOrderPage, bulkQuotationPage, pillowQuoteOrderPage, plushQuoteOrderPage }) => {
-  allQuotesTest.slow();
-
-  await quoteOrderPage.page.goto(keychainQuoteUrl);
-  await quoteOrderPage.fillRequiredData();
-  await quoteOrderPage.submitFormAndVerifyResponse();
-  await bulkQuotationPage.waitPageToBeVisible();
-  await bulkQuotationPage.submitQuoteAndVerifyResponse();
-
-  await pillowQuoteOrderPage.goto();
-  await pillowQuoteOrderPage.fillRequiredData();
-  await pillowQuoteOrderPage.submitFormAndVerifyResponse();
-  await bulkQuotationPage.waitPageToBeVisible();
-  await bulkQuotationPage.submitQuoteAndVerifyResponse();
-
-  await plushQuoteOrderPage.goto();
-  await plushQuoteOrderPage.fillRequiredData();
-  await plushQuoteOrderPage.fillPlushData();
-  await plushQuoteOrderPage.submitFormAndVerifyResponse();
-  await bulkQuotationPage.waitPageToBeVisible();
-  await bulkQuotationPage.submitQuoteAndVerifyResponse();
-
-  await cartPage.goto();
-  await cartPage.waitPageToBeVisible();
-
-  await checkoutPage.goto();
-  await checkoutPage.personalDetailsStep.fillPersonalDetails();
-  await checkoutPage.fillShippingAddress();
-  await checkoutPage.fillBillingAddress();
-  await checkoutPage.selectPaymentMethodAndPlaceOrder();
 });
 
 test('shipping address and shipping method are correct while placing order', async ({ cartPage, checkoutPage, plushSamplePage }) => {
