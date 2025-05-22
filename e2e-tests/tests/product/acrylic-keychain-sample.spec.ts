@@ -3,18 +3,18 @@ import { CustomizableProductPage } from '../../page-model/product/customizable-p
 
 const UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL = 'Please upload your awesome design';
 const NAME_CUSTOMIZATION_OPTION_LABEL = 'Name';
-const DESCRIPTION_CUSTOMIZATION_OPTION_VALUE = 'Describe Your Bulk Keychain Sample';
+const DESCRIPTION_CUSTOMIZATION_OPTION_VALUE = 'Describe Your Bulk Acrylic Keychain Sample';
 const CUSTOMER_TYPE_CUSTOMIZATION_OPTION_LABEL = 'Which of the following best describes you?';
 const EMAIL_CUSTOMIZATION_OPTION_LABEL = 'Enter your email address';
 const AGREEMENT_CHECKBOX_SELECTOR = '.sf-checkbox._agreement label';
 
-const PRODUCT_NAME = 'Bulk Pillow Keychain Sample';
+const PRODUCT_NAME = 'Bulk Acrylic Keychain Sample';
 const NAME_TEXT = 'Test name';
 const DESCRIPTION_TEXT = 'Test description';
 const UPDATED_DESCRIPTION_TEXT = 'Updated description';
 const TEST_EMAIL = 'test@test.test';
 
-const test = testFactory('/bulk-keychain-samples/create/');
+const test = testFactory('/bulk-acrylic-keychain-samples/create/');
 
 async function fillRequiredFields (customizableProductPage: CustomizableProductPage) {
   await customizableProductPage.fillCustomizationImageValue(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
@@ -51,28 +51,15 @@ test('form errors displayed correctly', async ({ verticalStepsProductPage, custo
   await expect(verticalStepsProductPage.formErrors).toBeVisible();
 });
 
-test('product added to cart successfully', async ({ cartPage, customizableProductPage }) => {
-  await fillRequiredFields(customizableProductPage);
-  await customizableProductPage.addToCartAndVerifyResponse();
-  await cartPage.waitPageToBeVisible();
-});
-
-test('product display in cart correctly', async ({ cartPage, customizableProductPage }) => {
-  await fillRequiredFields(customizableProductPage);
-  await customizableProductPage.addToCartAndVerifyResponse();
-  await cartPage.waitPageToBeVisible();
-
-  const cartItem = cartPage.getCartItemByProductName(PRODUCT_NAME);
-
-  await expect(cartItem).toBeVisible();
-  await cartPage.expectCartItemToHaveProperties(cartItem, [DESCRIPTION_TEXT]);
-});
-
 test('product can be edited', async ({ cartPage, customizableProductPage }) => {
   await fillRequiredFields(customizableProductPage);
   await customizableProductPage.addToCartAndVerifyResponse();
 
   await cartPage.waitPageToBeVisible();
+
+  const cartItem = cartPage.getCartItemByProductName(PRODUCT_NAME);
+  await cartPage.expectCartItemToHaveProperties(cartItem, [DESCRIPTION_TEXT]);
+
   await cartPage.editCartItemByProductName(PRODUCT_NAME);
 
   await customizableProductPage.waitPageToBeVisible();

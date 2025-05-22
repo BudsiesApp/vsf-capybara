@@ -8,7 +8,7 @@ test('form layout is correct', async ({ customizableProductPage, page, verticalS
   await expect(customizableProductPage.addToCartButton).toBeVisible();
 
   const uploadPhotoWidget = customizableProductPage.getCustomizationWidgetByLabel(plushSamplePage.UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
-  const descriptionWidget = customizableProductPage.getCustomizationWidgetByLabel(plushSamplePage.DESCRIPTION_CUSTOMIZATION_OPTION_VALUE);
+  const descriptionWidget = customizableProductPage.getCustomizationWidgetByLabel(plushSamplePage.descriptionCustomizationOptionValue);
   const sizeWidget = customizableProductPage.getCustomizationWidgetByLabel(plushSamplePage.SIZE_CUSTOMIZATION_OPTION_LABEL);
   const nameWidget = customizableProductPage.getCustomizationWidgetByLabel(plushSamplePage.NAME_CUSTOMIZATION_OPTION_LABEL);
   const colorPaletteWidget = customizableProductPage.getCustomizationWidgetByLabel(plushSamplePage.COLOR_PALETTE_CUSTOMIZATION_OPTION_LABEL);
@@ -44,7 +44,7 @@ test('product display in cart correctly', async ({ cartPage, customizableProduct
   await customizableProductPage.addToCartAndVerifyResponse();
   await cartPage.waitPageToBeVisible();
 
-  const cartItem = cartPage.getCartItemByProductName(plushSamplePage.PRODUCT_NAME);
+  const cartItem = cartPage.getCartItemByProductName(plushSamplePage.productName);
 
   await expect(cartItem).toBeVisible();
   await cartPage.expectCartItemToHaveProperties(cartItem, [DESCRIPTION_TEXT]);
@@ -55,20 +55,20 @@ test('product can be edited', async ({ cartPage, customizableProductPage, plushS
   await customizableProductPage.addToCartAndVerifyResponse();
 
   await cartPage.waitPageToBeVisible();
-  await cartPage.editCartItemByProductName(plushSamplePage.PRODUCT_NAME);
+  await cartPage.editCartItemByProductName(plushSamplePage.productName);
 
   await customizableProductPage.waitPageToBeVisible();
 
-  const filledDescription = await customizableProductPage.getCustomizationTextValueByLabel(plushSamplePage.DESCRIPTION_CUSTOMIZATION_OPTION_VALUE);
+  const filledDescription = await customizableProductPage.getCustomizationTextValueByLabel(plushSamplePage.descriptionCustomizationOptionValue);
 
   expect(DESCRIPTION_TEXT).toEqual(filledDescription);
-  await customizableProductPage.fillCustomizationTextValue(plushSamplePage.DESCRIPTION_CUSTOMIZATION_OPTION_VALUE, UPDATED_DESCRIPTION_TEXT);
+  await customizableProductPage.fillCustomizationTextValue(plushSamplePage.descriptionCustomizationOptionValue, UPDATED_DESCRIPTION_TEXT);
 
   await customizableProductPage.page.locator(plushSamplePage.AGREEMENT_CHECKBOX_SELECTOR).click();
 
   await customizableProductPage.addToCartAndVerifyResponse();
   await cartPage.waitPageToBeVisible();
 
-  const updatedCartItem = cartPage.getCartItemByProductName(plushSamplePage.PRODUCT_NAME);
+  const updatedCartItem = cartPage.getCartItemByProductName(plushSamplePage.productName);
   await cartPage.expectCartItemToHaveProperties(updatedCartItem, [UPDATED_DESCRIPTION_TEXT]);
 });

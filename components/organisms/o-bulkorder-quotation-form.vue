@@ -291,16 +291,19 @@ export default defineComponent({
     productionTimeStorySlug (): string {
       let sampleProductPart = '_';
 
-      if (this.bulkorderInfo.bulkorderProductId === BulkorderQuoteProductId.PILLOW) {
-        sampleProductPart = '_pillow_';
-      }
-
-      if ([
-        BulkorderQuoteProductId.KEYCHAIN,
-        BulkorderQuoteProductId.PLUSH_KEYCHAIN,
-        BulkorderQuoteProductId.ACRYLIC_KEYCHAIN
-      ].includes(this.bulkorderInfo.bulkorderProductId)) {
-        sampleProductPart = '_keychain_';
+      switch (this.bulkorderInfo.bulkorderProductId) {
+        case BulkorderQuoteProductId.PILLOW:
+          sampleProductPart = '_pillow_';
+          break;
+        case BulkorderQuoteProductId.KEYCHAIN:
+          sampleProductPart = '_keychain_';
+          break;
+        case BulkorderQuoteProductId.ACRYLIC_KEYCHAIN:
+          sampleProductPart = '_keychain_acrylic_';
+          break;
+        case BulkorderQuoteProductId.PLUSH_KEYCHAIN:
+          sampleProductPart = '_keychain_plush_';
+          break;
       }
 
       return `blocks/bulk${sampleProductPart}quote_production_time_text`;

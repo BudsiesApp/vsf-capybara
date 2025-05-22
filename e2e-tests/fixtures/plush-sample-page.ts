@@ -5,9 +5,19 @@ interface PlushSamplePageFixture {
   plushSamplePage: PlushSamplePage
 }
 
-export const test = baseTestFactory(PlushSamplePage.PAGE_URL).extend<PlushSamplePageFixture>({
+const PRODUCT_NAME = 'Bulk Plush Sample';
+const DESCRIPTION_CUSTOMIZATION_OPTION_VALUE = 'Describe Your Bulk Plush Sample';
+const PAGE_URL = '/bulk-samples/create/';
+
+export const test = baseTestFactory(PAGE_URL).extend<PlushSamplePageFixture>({
   plushSamplePage: async ({ customizableProductPage, page }, use) => {
-    const plushSamplePage = new PlushSamplePage(page, customizableProductPage);
+    const plushSamplePage = new PlushSamplePage(
+      page,
+      customizableProductPage,
+      PRODUCT_NAME,
+      DESCRIPTION_CUSTOMIZATION_OPTION_VALUE,
+      true
+    );
     await use(plushSamplePage);
   }
 });
