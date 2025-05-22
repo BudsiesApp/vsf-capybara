@@ -54,8 +54,6 @@ import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo } from 'src/mod
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
 
-import AOrderedHeading from 'theme/components/atoms/a-ordered-heading.vue';
-import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 
 import MBaseForm from './m-base-form.vue';
@@ -101,8 +99,6 @@ export default defineComponent({
     }
   },
   components: {
-    AOrderedHeading,
-    CustomizationOption,
     MBaseForm,
     MFormErrors,
     SfButton,
@@ -257,10 +253,6 @@ export default defineComponent({
 
   ._notice-link-container {
     text-align: center;
-  }
-
-  ._customization-option {
-    --dropdown-widget-max-width: 100%;
   }
 
   ._section {
