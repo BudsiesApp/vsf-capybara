@@ -1,4 +1,5 @@
 import { PlushieType } from 'theme/interfaces/plushie.type';
+import { PageName } from 'theme/pages/page-name';
 
 const ErrorPage = () =>
   import(/* webpackChunkName: "vsf-error" */ 'theme/pages/Error');
@@ -90,24 +91,24 @@ let routes = [
   },
   {
     path: '/sign-in/',
-    name: 'sign-in',
+    name: PageName.SIGN_IN,
     component: SignIn
   },
   {
     path: '/stub',
-    name: 'sign-in-redirect',
+    name: PageName.SIGN_IN_REDIRECT,
     redirect: {
-      name: 'sign-in'
+      name: PageName.SIGN_IN
     }
   },
   {
     path: '/sign-up/',
-    name: 'sign-up',
+    name: PageName.SIGN_UP,
     component: SignUp
   },
   {
     path: '/restore-password/',
-    name: 'restore-password',
+    name: PageName.RESTORE_PASSWORD,
     component: RestorePassword
   },
   {

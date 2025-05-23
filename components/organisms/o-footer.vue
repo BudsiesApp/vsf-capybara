@@ -99,6 +99,7 @@ import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import get from 'lodash-es/get';
 
 import { PrivacyPolicyLink } from 'src/modules/shared';
+import { PageName } from 'theme/pages/page-name';
 
 import MBudsiesBrands from '../molecules/m-budsies-brands.vue';
 
@@ -242,7 +243,11 @@ export default {
               event: this.isLoggedIn ? 'click' : 'false',
               clickHandler: () => {
                 if (!this.isLoggedIn) {
-                  if (['sign-in', 'sign-up', 'restore-password'].includes(this.$route.name)) {
+                  if ([
+                    PageName.SIGN_IN,
+                    PageName.SIGN_UP,
+                    PageName.RESTORE_PASSWORD
+                  ].includes(this.$route.name)) {
                     return;
                   }
 

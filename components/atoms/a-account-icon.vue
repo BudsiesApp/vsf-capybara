@@ -17,6 +17,8 @@
 <script>
 import { SfIcon, SfButton } from '@storefront-ui/vue';
 import { mapGetters, mapActions } from 'vuex';
+
+import { PageName } from 'theme/pages/page-name';
 import { ModalList } from 'theme/store/ui/modals'
 
 export default {
@@ -32,7 +34,11 @@ export default {
       if (this.isLoggedIn) {
         this.$router.push(this.localizedRoute({ name: 'my-account' }))
       } else {
-        if (['sign-in', 'sign-up', 'restore-password'].includes(this.$route.name)) {
+        if ([
+          PageName.SIGN_IN,
+          PageName.SIGN_UP,
+          PageName.RESTORE_PASSWORD
+        ].includes(this.$route.name)) {
           return;
         }
 

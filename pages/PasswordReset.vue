@@ -38,13 +38,15 @@
 import Vue from 'vue';
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
+import { RawLocation } from 'vue-router';
 
 import { PASSWORD_RESET_REDIRECT_TARGET_LOCAL_STORAGE_KEY } from 'theme/interfaces/password-reset-redirect-target-local-storage-key';
 import { REDIRECT_TARGET_QUERY_KEY } from 'theme/interfaces/redirect-target-query-key';
 import { ModalList } from 'theme/store/ui/modals';
 
 import MPassword from 'theme/components/molecules/m-password.vue';
-import { RawLocation } from 'vue-router';
+
+import { PageName } from './page-name';
 
 export default Vue.extend({
   name: 'PasswordReset',
@@ -117,7 +119,7 @@ export default Vue.extend({
         localStorage.removeItem(PASSWORD_RESET_REDIRECT_TARGET_LOCAL_STORAGE_KEY);
 
         const route: RawLocation = {
-          name: 'sign-in'
+          name: PageName.SIGN_IN
         }
 
         if (targetUrl) {

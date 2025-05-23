@@ -2,11 +2,12 @@ import { SetupContext, onBeforeMount, computed } from '@vue/composition-api';
 
 import { AuthorizationFormCode } from 'theme/interfaces/authorization-form-code';
 import { REDIRECT_TARGET_QUERY_KEY } from 'theme/interfaces/redirect-target-query-key';
+import { PageName } from 'theme/pages/page-name';
 
 const ROUTE_NAME = {
-  [AuthorizationFormCode.LOGIN]: 'sign-in',
-  [AuthorizationFormCode.REGISTER]: 'sign-up',
-  [AuthorizationFormCode.FORGOT_PASSWORD]: 'restore-password'
+  [AuthorizationFormCode.LOGIN]: PageName.SIGN_IN,
+  [AuthorizationFormCode.REGISTER]: PageName.SIGN_UP,
+  [AuthorizationFormCode.FORGOT_PASSWORD]: PageName.RESTORE_PASSWORD
 };
 
 export function useAuthorizationPage (
