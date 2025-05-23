@@ -17,7 +17,9 @@
 <script>
 import { SfIcon, SfButton } from '@storefront-ui/vue';
 import { mapGetters, mapActions } from 'vuex';
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
+import { AccountIconClickedEvent } from 'theme/interfaces/account-icon-clicked.event';
 import { PageName } from 'theme/pages/page-name';
 import { ModalList } from 'theme/store/ui/modals'
 
@@ -33,6 +35,7 @@ export default {
     goToAccount () {
       if (this.isLoggedIn) {
         this.$router.push(this.localizedRoute({ name: 'my-account' }))
+        EventBus.$emit(AccountIconClickedEvent);
       } else {
         if ([
           PageName.SIGN_IN,
