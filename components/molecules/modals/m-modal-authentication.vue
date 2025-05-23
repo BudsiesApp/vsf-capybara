@@ -6,9 +6,22 @@
         mode="out-in"
         @after-enter="onTransitionAfterEnter"
       >
-        <MLogin v-if="modalData.payload === 'login'" />
-        <MRegister v-if="modalData.payload === 'register'" />
-        <MResetPassword v-if="modalData.payload === 'forgot-pass'" />
+        <MLogin
+          v-if="modalData.payload === 'login'"
+          @form-switched="onFormSwitched"
+          @login-success="closeModal"
+        />
+
+        <MRegister
+          v-if="modalData.payload === 'register'"
+          @form-switched="onFormSwitched"
+          @login-success="closeModal"
+        />
+
+        <MResetPassword
+          v-if="modalData.payload === 'forgot-pass'"
+          @form-switched="onFormSwitched"
+        />
       </transition>
     </SfModal>
   </div>
@@ -16,6 +29,10 @@
 
 <script>
 import { SfModal } from '@storefront-ui/vue';
+import { mapActions } from 'vuex';
+
+import { ModalList } from 'theme/store/ui/modals'
+
 import MLogin from 'theme/components/molecules/m-login'
 import MRegister from 'theme/components/molecules/m-register'
 import MResetPassword from 'theme/components/molecules/m-reset-password'
@@ -35,6 +52,9 @@ export default {
     }
   },
   methods: {
+    ...mapActions('ui', {
+      openModal: 'openModal'
+    }),
     closeModal () {
       this.$emit('close', this.modalData.name)
     },
@@ -46,6 +66,9 @@ export default {
       }
 
       modalComponent.updateDirectivesData();
+    },
+    onFormSwitched (to) {
+      this.openModal({ name: ModalList.Auth, payload: to })
     }
   }
 };
