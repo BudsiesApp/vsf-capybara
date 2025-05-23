@@ -5,6 +5,7 @@
 
       <m-reset-password
         class="_form"
+        :prefilled-email="prefilledEmail"
         @form-switched="onFormSwitched"
         @restore-success="onPasswordRestoreSuccess"
       />
@@ -29,7 +30,11 @@ export default defineComponent({
 
   },
   setup (_, setupContext) {
-    const { onFormSwitched, redirectTarget } = useAuthorizationPage(setupContext);
+    const {
+      onFormSwitched,
+      prefilledEmail,
+      redirectTarget
+    } = useAuthorizationPage(setupContext);
 
     function onPasswordRestoreSuccess () {
       if (!redirectTarget.value) {
@@ -41,7 +46,8 @@ export default defineComponent({
 
     return {
       onFormSwitched,
-      onPasswordRestoreSuccess
+      onPasswordRestoreSuccess,
+      prefilledEmail
     }
   },
   metaInfo (): any {

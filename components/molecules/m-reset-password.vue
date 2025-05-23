@@ -51,6 +51,12 @@ export default {
     SfInput,
     SfButton
   },
+  props: {
+    prefilledEmail: {
+      type: String,
+      default: ''
+    }
+  },
   data () {
     return {
       email: '',
@@ -97,6 +103,11 @@ export default {
         message: i18n.t(result.result),
         action1: { label: i18n.t('OK') }
       });
+    }
+  },
+  beforeMount () {
+    if (this.prefilledEmail) {
+      this.email = this.prefilledEmail;
     }
   },
   validations: {

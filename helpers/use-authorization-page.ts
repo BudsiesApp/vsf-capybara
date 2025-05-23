@@ -25,6 +25,14 @@ export function useAuthorizationPage (
     return '/';
   });
 
+  const prefilledEmail = computed<string | undefined>(() => {
+    if (typeof root.$route.query?.email !== 'string') {
+      return;
+    }
+
+    return root.$route.query.email;
+  });
+
   onBeforeMount(async () => {
     if (isUserLoggedIn.value) {
       return root.$router.push(redirectTarget.value);
@@ -47,6 +55,7 @@ export function useAuthorizationPage (
   return {
     onFormSwitched,
     onLoginSuccess,
+    prefilledEmail,
     redirectTarget
   }
 }

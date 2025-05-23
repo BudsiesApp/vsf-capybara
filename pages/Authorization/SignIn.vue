@@ -4,6 +4,7 @@
       <SfHeading :level="1" :title="$t('Sign In')" />
 
       <m-login
+        :prefilled-email="prefilledEmail"
         @form-switched="onFormSwitched"
         @login-success="onLoginSuccess"
       />
@@ -26,11 +27,16 @@ export default defineComponent({
     SfHeading
   },
   setup (_, setupContext) {
-    const { onFormSwitched, onLoginSuccess } = useAuthorizationPage(setupContext);
+    const {
+      onFormSwitched,
+      onLoginSuccess,
+      prefilledEmail
+    } = useAuthorizationPage(setupContext);
 
     return {
       onFormSwitched,
-      onLoginSuccess
+      onLoginSuccess,
+      prefilledEmail
     }
   },
   metaInfo (): any {

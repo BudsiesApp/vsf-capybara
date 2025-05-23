@@ -59,6 +59,12 @@ import { Logger } from '@vue-storefront/core/lib/logger';
 export default {
   name: 'MLogin',
   components: { SfInput, SfButton, SfCheckbox, SfHeading },
+  props: {
+    prefilledEmail: {
+      type: String,
+      default: ''
+    }
+  },
   data () {
     return {
       email: '',
@@ -122,6 +128,11 @@ export default {
         message: i18n.t(result.result),
         action1: { label: i18n.t('OK') }
       });
+    }
+  },
+  beforeMount () {
+    if (this.prefilledEmail) {
+      this.email = this.prefilledEmail;
     }
   },
   validations: {

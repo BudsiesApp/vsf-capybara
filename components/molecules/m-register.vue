@@ -74,6 +74,12 @@ export default {
     SfButton,
     MPassword
   },
+  props: {
+    prefilledEmail: {
+      type: String,
+      default: ''
+    }
+  },
   data () {
     return {
       email: '',
@@ -182,6 +188,11 @@ export default {
     },
     serverErrorsValidator (fieldName) {
       return !this.serverErrorFields.find((field) => fieldName === field);
+    }
+  },
+  beforeMount () {
+    if (this.prefilledEmail) {
+      this.email = this.prefilledEmail;
     }
   },
   validations () {
