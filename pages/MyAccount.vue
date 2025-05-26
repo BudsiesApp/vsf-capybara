@@ -113,9 +113,11 @@
 <script>
 import { SfBar, SfBreadcrumbs, SfIcon, SfHeading, SfList } from '@storefront-ui/vue';
 
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import MyAccount from '@vue-storefront/core/pages/MyAccount';
-
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
+
+import { AccountIconClickedEvent } from 'theme/interfaces/account-icon-clicked.event';
 
 const RouteNames = {
   ADDRESS_BOOK_LIST: 'address-book-list',
@@ -136,7 +138,7 @@ export default {
   mixins: [MyAccount],
   data () {
     return {
-      showMobileNavigation: false,
+      showMobileNavigation: true,
       RouteNames
     };
   },
@@ -228,9 +230,18 @@ export default {
       }
     }
   },
+  beforeMount () {
+    EventBus.$on(AccountIconClickedEvent, this.onAccountButtonClicked);
+  },
+  beforeDestroy () {
+    EventBus.$off(AccountIconClickedEvent, this.onAccountButtonClicked);
+  },
   methods: {
     async logout () {
       await this.$store.dispatch('user/logout', {});
+    },
+    onAccountButtonClicked () {
+      this.showMobileNavigation = true;
     }
   }
 };

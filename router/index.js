@@ -1,3 +1,5 @@
+import { PageName } from 'theme/pages/page-name';
+
 const ErrorPage = () =>
   import(/* webpackChunkName: "vsf-error" */ 'theme/pages/Error');
 const Product = () =>
@@ -8,6 +10,13 @@ const Checkout = () =>
   import(/* webpackChunkName: "vsf-checkout" */ 'theme/pages/Checkout');
 const DetailedCart = () =>
   import(/* webpackChunkName: "vsf-detailed-cart" */ 'theme/pages/DetailedCart');
+
+const SignIn = () =>
+  import(/* webpackChunkName: "vsf-authorization" */ 'theme/pages/Authorization/SignIn');
+const SignUp = () =>
+  import(/* webpackChunkName: "vsf-authorization" */ 'theme/pages/Authorization/SignUp');
+const RestorePassword = () =>
+  import(/* webpackChunkName: "vsf-authorization" */ 'theme/pages/Authorization/RestorePassword');
 
 const MyAccount = () =>
   import(/* webpackChunkName: "vsf-my-account" */ 'theme/pages/MyAccount');
@@ -81,6 +90,28 @@ let routes = [
         slug: 'products'
       }
     }
+  },
+  {
+    path: '/sign-in/',
+    name: PageName.SIGN_IN,
+    component: SignIn
+  },
+  {
+    path: '/stub',
+    name: PageName.SIGN_IN_REDIRECT,
+    redirect: {
+      name: PageName.SIGN_IN
+    }
+  },
+  {
+    path: '/sign-up/',
+    name: PageName.SIGN_UP,
+    component: SignUp
+  },
+  {
+    path: '/restore-password/',
+    name: PageName.RESTORE_PASSWORD,
+    component: RestorePassword
   },
   {
     path: '/my-account/',
