@@ -95,6 +95,7 @@ import { SfButton, SfFooter, SfList, SfMenuItem, SfHeading } from '@storefront-u
 
 import { BaseImage } from 'src/modules/budsies';
 import { PrivacyPolicyLink } from 'src/modules/shared';
+import { PageName } from 'theme/pages/page-name';
 
 import MBudsiesBrands from '../molecules/m-budsies-brands';
 
