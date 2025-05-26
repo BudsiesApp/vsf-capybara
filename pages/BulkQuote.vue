@@ -4,6 +4,7 @@
     <o-bulk-quote-order-form
       :artwork-upload-url="artworkUploadUrl"
       :product="getCurrentProduct"
+      :form-title="formTitle"
       v-if="getCurrentProduct && !isDataLoading"
     />
 
@@ -22,7 +23,7 @@ import Product from 'core/modules/catalog/types/Product';
 import ALoadingSpinner from 'theme/components/atoms/a-loading-spinner.vue';
 import OBulkQuoteOrderForm from 'theme/components/organisms/OBulkorders/o-bulk-quote-order-form.vue';
 
-const bulkQuoteProductSku = 'CustomBulkSample_bundle';
+const PLUSH_KEYCHAIN_PRODUCT_SKU = 'keychainPlushBulkSample_bundle';
 
 export default {
   name: 'BulkQuote',
@@ -30,16 +31,30 @@ export default {
     ALoadingSpinner,
     OBulkQuoteOrderForm
   },
+  props: {
+    bundleProductSku: {
+      type: String,
+      required: true
+    }
+  },
   data () {
     return {
       isDataLoading: false
     };
   },
   computed: {
+    formTitle (): string {
+      switch (this.bundleProductSku) {
+        case PLUSH_KEYCHAIN_PRODUCT_SKU:
+          return this.$t('Plush Keychain Order Quote').toString();
+        default:
+          return this.$t('Bulk Order Quote').toString();
+      }
+    },
     getCurrentProduct (): Product | null {
       const product = this.$store.getters['product/getCurrentProduct'];
 
-      if (product?.sku !== bulkQuoteProductSku) {
+      if (product?.sku !== this.bundleProductSku) {
         return null;
       }
 
@@ -74,7 +89,7 @@ export default {
       const [product] = await Promise.all([
         this.$store.dispatch('product/loadProduct',
           {
-            parentSku: bulkQuoteProductSku,
+            parentSku: this.bundleProductSku,
             setCurrent: true
           }
         ),
@@ -83,6 +98,13 @@ export default {
 
       this.isDataLoading = false;
       catalogHooksExecutors.productPageVisited(product);
+    }
+  },
+  watch: {
+    bundleProductSku (newValue: string, oldValue?: string) {
+      if (newValue !== oldValue) {
+        void this.loadData();
+      }
     }
   },
   metaInfo () {

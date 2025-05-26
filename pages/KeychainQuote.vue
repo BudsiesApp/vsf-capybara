@@ -3,6 +3,7 @@
     <o-keychain-quote-order-form
       :artwork-upload-url="artworkUploadUrl"
       :product="getCurrentProduct"
+      :form-title="formTitle"
       v-if="getCurrentProduct && !isDataLoading"
     />
 
@@ -21,10 +22,16 @@ import Product from 'core/modules/catalog/types/Product';
 import ALoadingSpinner from 'theme/components/atoms/a-loading-spinner.vue';
 import OKeychainQuoteOrderForm from 'theme/components/organisms/OBulkorders/o-keychain-quote-order-form.vue';
 
-const keychainQuoteProductSku = 'keychainBulkSample_bundle';
+const ACRYLIC_KEYCHAIN_PRODUCT_SKU = 'keychainAcrylicBulkSample_bundle';
 
 export default {
   name: 'KeychainQuote',
+  props: {
+    bundleProductSku: {
+      type: String,
+      required: true
+    }
+  },
   components: {
     ALoadingSpinner,
     OKeychainQuoteOrderForm
@@ -35,10 +42,17 @@ export default {
     };
   },
   computed: {
+    formTitle (): string {
+      if (this.bundleProductSku === ACRYLIC_KEYCHAIN_PRODUCT_SKU) {
+        return this.$t('Acrylic Keychain Bulk Order Quote').toString();
+      }
+
+      return this.$t('Keychain Bulk Order Quote').toString();
+    },
     getCurrentProduct (): Product | null {
       const product = this.$store.getters['product/getCurrentProduct'];
 
-      if (product?.sku !== keychainQuoteProductSku) {
+      if (product?.sku !== this.bundleProductSku) {
         return null;
       }
 
@@ -73,7 +87,7 @@ export default {
 
       const dataLoadingPromises = [this.$store.dispatch('product/loadProduct',
         {
-          parentSku: keychainQuoteProductSku,
+          parentSku: this.bundleProductSku,
           setCurrent: true
         }
       )];
@@ -88,6 +102,13 @@ export default {
       this.isDataLoading = false;
 
       catalogHooksExecutors.productPageVisited(product);
+    }
+  },
+  watch: {
+    bundleProductSku (newValue: string, oldValue?: string) {
+      if (newValue !== oldValue) {
+        void this.loadData();
+      }
     }
   },
   metaInfo () {

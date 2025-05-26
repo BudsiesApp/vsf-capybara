@@ -2,18 +2,20 @@ import { mergeTests } from '@playwright/test';
 
 import { test as checkoutPageTest } from '../../fixtures/checkout-page';
 import { test as accountPageTest, expect } from '../../fixtures/account-page';
+import { test as plushSampleTest } from '../../fixtures/plush-sample-page';
 import { getRandomEmail } from '../../helpers/get-random-email';
 
-const test = mergeTests(checkoutPageTest, accountPageTest);
+const test = mergeTests(checkoutPageTest, accountPageTest, plushSampleTest);
 
-test('item can be reordered', async ({ accountPage, page, printedSocksPage, cartPage, checkoutPage }) => {
+test('item can be reordered', async ({ accountPage, page, plushSamplePage, cartPage, checkoutPage }) => {
   test.slow();
 
-  await printedSocksPage.goto();
-  await printedSocksPage.addProductToCart();
+  await plushSamplePage.goto();
+  await plushSamplePage.fillRequiredFields();
+  await plushSamplePage.customizableProductPage.addToCartAndVerifyResponse();
 
   await cartPage.goto();
-  const cartItem = cartPage.getCartItemByProductName(printedSocksPage.PRODUCT_NAME);
+  const cartItem = cartPage.getCartItemByProductName(plushSamplePage.productName);
   const properties = await cartPage.getCartItemProperties(cartItem);
 
   await checkoutPage.goto();

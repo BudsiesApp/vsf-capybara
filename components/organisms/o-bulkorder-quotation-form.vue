@@ -291,12 +291,19 @@ export default defineComponent({
     productionTimeStorySlug (): string {
       let sampleProductPart = '_';
 
-      if (this.bulkorderInfo.bulkorderProductId === BulkorderQuoteProductId.PILLOW) {
-        sampleProductPart = '_pillow_';
-      }
-
-      if (this.bulkorderInfo.bulkorderProductId === BulkorderQuoteProductId.KEYCHAIN) {
-        sampleProductPart = '_keychain_';
+      switch (this.bulkorderInfo.bulkorderProductId) {
+        case BulkorderQuoteProductId.PILLOW:
+          sampleProductPart = '_pillow_';
+          break;
+        case BulkorderQuoteProductId.KEYCHAIN:
+          sampleProductPart = '_keychain_';
+          break;
+        case BulkorderQuoteProductId.ACRYLIC_KEYCHAIN:
+          sampleProductPart = '_keychain_acrylic_';
+          break;
+        case BulkorderQuoteProductId.PLUSH_KEYCHAIN:
+          sampleProductPart = '_keychain_plush_';
+          break;
       }
 
       return `blocks/bulk${sampleProductPart}quote_production_time_text`;
@@ -327,6 +334,8 @@ export default defineComponent({
       switch (this.bulkorderInfo.bulkorderProductId) {
         case BulkorderQuoteProductId.PLUSHIE:
         case BulkorderQuoteProductId.KEYCHAIN:
+        case BulkorderQuoteProductId.PLUSH_KEYCHAIN:
+        case BulkorderQuoteProductId.ACRYLIC_KEYCHAIN:
           return 'stuffed animal';
         case BulkorderQuoteProductId.PILLOW:
           return 'pillow';
@@ -338,6 +347,8 @@ export default defineComponent({
       switch (this.bulkorderInfo.bulkorderProductId) {
         case BulkorderQuoteProductId.PLUSHIE:
         case BulkorderQuoteProductId.KEYCHAIN:
+        case BulkorderQuoteProductId.PLUSH_KEYCHAIN:
+        case BulkorderQuoteProductId.ACRYLIC_KEYCHAIN:
           return true;
         default:
           return false;
@@ -357,6 +368,10 @@ export default defineComponent({
           return 'Pillow';
         case BulkorderQuoteProductId.KEYCHAIN:
           return 'Keychain';
+        case BulkorderQuoteProductId.PLUSH_KEYCHAIN:
+          return 'Plush Keychain';
+        case BulkorderQuoteProductId.ACRYLIC_KEYCHAIN:
+          return 'Acrylic Keychain';
         default:
           return '';
       }

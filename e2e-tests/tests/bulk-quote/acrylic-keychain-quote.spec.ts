@@ -1,8 +1,8 @@
 import { testFactory, expect } from '../../fixtures/bulk-quote/quote-order-page';
 
-const test = testFactory('/keychain-quote/', '#keychain-quote');
+const test = testFactory('/acrylic-keychain-quote/', '#keychain-quote');
 
-const PRODUCT_NAME = 'Bulk Pillow Keychain Sample';
+const PRODUCT_NAME = 'Bulk Acrylic Keychain Sample';
 const PROJECT_NAME = 'Test Project';
 const PROJECT_DESCRIPTION = 'Test Description';
 

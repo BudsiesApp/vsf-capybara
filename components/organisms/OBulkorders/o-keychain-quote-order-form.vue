@@ -1,6 +1,6 @@
 <template>
   <div class="o-keychain-quote-order-form">
-    <SfHeading :level="1" :title="$t('Keychain Bulk Order Quote')" class="_title" />
+    <SfHeading :level="1" :title="formTitle" class="_title" />
 
     <validation-observer
       ref="validationObserver"
@@ -92,6 +92,10 @@ export default defineComponent({
     artworkUploadUrl: {
       type: String,
       required: true
+    },
+    formTitle: {
+      type: String,
+      required: true
     }
   },
   components: {
@@ -114,6 +118,16 @@ export default defineComponent({
     },
     isDisabled (): boolean {
       return this.isSubmitting;
+    },
+    bulkorderQuoteProductId (): number {
+      switch (this.product.sku) {
+        case 'keychainBulkSample_bundle':
+          return BulkorderQuoteProductId.KEYCHAIN;
+        case 'keychainAcrylicBulkSample_bundle':
+          return BulkorderQuoteProductId.ACRYLIC_KEYCHAIN;
+        default:
+          throw new Error('Unexpected product sku');
+      }
     }
   },
   methods: {
@@ -156,7 +170,7 @@ export default defineComponent({
         const bulkOrderId = await this.$store.dispatch(
           'budsies/createBulkorder',
           {
-            product_id: BulkorderQuoteProductId.KEYCHAIN,
+            product_id: this.bulkorderQuoteProductId,
             qty: this.bulkordersBaseFormData.quantity,
             project_name: this.bulkordersBaseFormData.name,
             description: this.bulkordersBaseFormData.description,
@@ -169,7 +183,8 @@ export default defineComponent({
             alternative_qty: this.bulkordersBaseFormData.additionalQuantity || '',
             deadline_date: this.bulkordersBaseFormData.deadlineDate,
             client_type_id: this.bulkordersBaseFormData.customerType || '',
-            agreement: this.bulkordersBaseFormData.agreement
+            agreement: this.bulkordersBaseFormData.agreement,
+            customization_state: this.customizationState
           }
         );
 
@@ -223,6 +238,7 @@ export default defineComponent({
 
   ._title {
     margin-bottom: var(--spacer-2xl);
+    align-self: center;
   }
 
   ._form-errors {
