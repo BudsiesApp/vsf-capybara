@@ -26,11 +26,9 @@
 
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
-import { SfBottomNavigation } from '@storefront-ui/vue'
-
-import { ModalList } from 'theme/store/ui/modals'
 import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
+import { SfBottomNavigation } from '@storefront-ui/vue';
 import ALogo from 'theme/components/atoms/a-logo.vue';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
@@ -47,7 +45,6 @@ export default {
     return {
       navigationItems: [
         { icon: 'list', label: '', onClick: this.goToMenu }
-        // { icon: 'account', label: '', onClick: this.goToAccount }
       ]
     }
   },
@@ -103,14 +100,6 @@ export default {
       this.$store.commit('ui/closeMenu')
 
       this.$store.commit('ui/setSearchpanel', !this.isSearchPanelVisible)
-    },
-    goToAccount () {
-      this.$store.commit('ui/closeMenu')
-      if (this.isLoggedIn) {
-        this.$router.push(this.localizedRoute({ name: 'my-account' }))
-      } else {
-        this.openModal({ name: ModalList.Auth, payload: 'login' })
-      }
     }
   }
 }

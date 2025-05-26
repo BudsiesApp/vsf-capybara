@@ -1,9 +1,18 @@
+import { PageName } from 'theme/pages/page-name';
+
 const ErrorPage = () =>
   import(/* webpackChunkName: "vsf-error" */ 'theme/pages/Error');
 const Checkout = () =>
   import(/* webpackChunkName: "vsf-checkout" */ 'theme/pages/Checkout');
 const DetailedCart = () =>
   import(/* webpackChunkName: "vsf-detailed-cart" */ 'theme/pages/DetailedCart');
+
+const SignIn = () =>
+  import(/* webpackChunkName: "vsf-authorization" */ 'theme/pages/Authorization/SignIn');
+const SignUp = () =>
+  import(/* webpackChunkName: "vsf-authorization" */ 'theme/pages/Authorization/SignUp');
+const RestorePassword = () =>
+  import(/* webpackChunkName: "vsf-authorization" */ 'theme/pages/Authorization/RestorePassword');
 
 const MyAccount = () =>
   import(/* webpackChunkName: "vsf-my-account" */ 'theme/pages/MyAccount');
@@ -67,6 +76,28 @@ let routes = [
     }
   },
   {
+    path: '/sign-in/',
+    name: PageName.SIGN_IN,
+    component: SignIn
+  },
+  {
+    path: '/stub',
+    name: PageName.SIGN_IN_REDIRECT,
+    redirect: {
+      name: PageName.SIGN_IN
+    }
+  },
+  {
+    path: '/sign-up/',
+    name: PageName.SIGN_UP,
+    component: SignUp
+  },
+  {
+    path: '/restore-password/',
+    name: PageName.RESTORE_PASSWORD,
+    component: RestorePassword
+  },
+  {
     path: '/my-account/',
     name: 'my-account-root',
     component: MyAccount,
@@ -77,13 +108,18 @@ let routes = [
       {
         name: 'my-account',
         path: '',
-        component: AccountProfile
+        component: AccountProfile,
+
+        meta: {
+          auth: true
+        }
       },
       {
         name: 'orders-history',
         path: 'orders-history/',
         component: AccountOrdersHistory,
         meta: {
+          auth: true,
           title: 'Order history'
         }
       },
@@ -91,12 +127,17 @@ let routes = [
         name: 'address-book',
         path: 'address-book/',
         component: AddressBook,
+        meta: {
+          auth: true
+        },
+
         children: [
           {
             name: 'address-book-list',
             path: '',
             component: AddressesList,
             meta: {
+              auth: true,
               title: 'Address book'
             }
           },
@@ -108,6 +149,7 @@ let routes = [
               addressId: route.params.addressId.toString()
             }),
             meta: {
+              auth: true,
               title: 'Edit address'
             }
           },
@@ -116,6 +158,7 @@ let routes = [
             path: 'add/',
             component: AddressAdd,
             meta: {
+              auth: true,
               title: 'Add new address'
             }
           }
