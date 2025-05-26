@@ -112,6 +112,7 @@ import get from 'lodash-es/get';
 
 import { BaseImage } from 'src/modules/budsies';
 import { PrivacyPolicyLink } from 'src/modules/shared';
+import { PageName } from 'theme/pages/page-name';
 
 import MBudsiesBrands from '../molecules/m-budsies-brands';
 
