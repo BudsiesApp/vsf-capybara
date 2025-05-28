@@ -8,14 +8,6 @@ import { Customization } from 'src/modules/customization-system';
 
 import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
 
-function getZoomGalleryImage (imageObject: any): ZoomGalleryImage {
-  return {
-    stage: imageObject.imageUrl || imageObject.src,
-    thumb: imageObject.imageUrl || imageObject.src,
-    big: imageObject.imageUrl || imageObject.src
-  }
-}
-
 export function useProductGallery (
   product: Ref<Product>,
   customizations: Ref<Customization[]>,
@@ -45,7 +37,7 @@ export function useProductGallery (
         }
 
         result[value.id] = value.galleryImages
-          .sort((a, b) => a.sn > b.sn ? 1 : -1)
+          .sort((a, b) => a.sn - b.sn)
           .map(image => {
             return {
               stage: getThumbnailPath(image.imageUrl, config.products.gallery.width, config.products.gallery.height, ''),
