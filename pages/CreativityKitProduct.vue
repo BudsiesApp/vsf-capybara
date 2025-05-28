@@ -277,9 +277,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     align-items: flex-start;
 
     .base-image {
-      // max-width: 100%;
       border-radius: 27px;
-      // object-fit: contain;
     }
   }
 
