@@ -10,7 +10,7 @@ class AccountSection {
     public readonly menuItemLabel: string,
     public readonly pageContentSelector: string
   ) {
-    this.menuItem = this.menuItems.locator(`.sf-menu-item__label:has-text("${menuItemLabel}")`);
+    this.menuItem = this.menuItems.locator(`._menu-item:has-text("${menuItemLabel}")`);
     this.pageContent = this.pageContentContainer.locator(pageContentSelector);
   }
 
@@ -36,7 +36,7 @@ class OrderItem {
 }
 
 class OrderView {
-  public constructor (public readonly orderViewLocator: Locator) {}
+  public constructor (public readonly orderViewLocator: Locator) { }
 
   public getOrderItemByIndex (index: number): OrderItem {
     return new OrderItem(this.orderViewLocator.locator('._order-item').nth(index));
@@ -67,8 +67,8 @@ export class AccountPage {
   public ordersHistorySection: OrdersHistorySection;
 
   public constructor (public readonly page: Page) {
-    this.pageContent = page.locator('.sf-content-pages__content');
-    this.menuItems = page.locator('.sf-content-pages__menu');
+    this.pageContent = page.locator('#my-account ._content');
+    this.menuItems = page.locator('#my-account ._navigation ._items-list');
     this.ordersHistorySection = new OrdersHistorySection(this.pageContent, this.menuItems);
   }
 
