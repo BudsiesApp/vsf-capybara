@@ -13,7 +13,13 @@
     <div class="_form-wrapper">
       <div class="_image">
         <div class="_image-container">
-          <img src="/assets/images/creativityKit/creativity-kit.png">
+          <BaseImage
+            :alt="getCurrentProduct ? getCurrentProduct.name : ''"
+            :lazy="false"
+            width="457px"
+            :aspect-ratio="1"
+            :src="productImageSrc"
+          />
 
           <div class="_image-caption">
             {{ $t('Recommended for ages 4+') }}
@@ -70,10 +76,10 @@ import { htmlDecode } from '@vue-storefront/core/filters';
 import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
-import Product from 'core/modules/catalog/types/Product';
-import { PriceHelper, ProductEvent } from 'src/modules/shared';
+import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
-import { ProductStructuredData } from 'src/modules/budsies';
+import { PriceHelper, ProductEvent } from 'src/modules/shared';
+import { BaseImage, ProductStructuredData } from 'src/modules/budsies';
 
 import OCreativityKitProductOrderForm from 'theme/components/organisms/CreativityKitProduct/o-creativity-kit-product-order-form.vue';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
@@ -91,6 +97,7 @@ interface InjectedServices {
 export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   name: 'CreativityKitProduct',
   components: {
+    BaseImage,
     MBlockStory,
     MSocialSharing,
     OCreativityKitProductOrderForm,
@@ -113,6 +120,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       }
 
       return product;
+    },
+    productImageSrc (): string {
+      const productGallery = this.$store.getters['product/getProductGallery'];
+
+      return productGallery[0]?.src || '';
     },
     getBudsieProduct (): Product | null {
       const productBySku = this.$store.getters['product/getProductBySkuDictionary'];
@@ -264,10 +276,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     justify-content: center;
     align-items: flex-start;
 
-    img {
-      max-width: 100%;
+    .base-image {
       border-radius: 27px;
-      object-fit: contain;
     }
   }
 

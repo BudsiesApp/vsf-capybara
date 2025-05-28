@@ -123,7 +123,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       }
 
       availableOptionValues.sort((a, b) => {
-        return a.sn < b.sn ? -1 : 1
+        return a.sn - b.sn;
       });
 
       return availableOptionValues.map((value) => {
