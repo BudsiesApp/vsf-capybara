@@ -283,6 +283,7 @@ export default {
       a {
         color: var(--c-dark-variant);
         width: 100%;
+        display: inline-block;
 
         &.router-link-exact-active {
           color: var(--c-primary);
