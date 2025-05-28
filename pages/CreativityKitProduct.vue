@@ -77,7 +77,6 @@ import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
-import getProductImagePlaceholder from '@vue-storefront/core/modules/cart/helpers/getProductImagePlaceholder';
 
 import { PriceHelper, ProductEvent } from 'src/modules/shared';
 import { BaseImage, ProductStructuredData } from 'src/modules/budsies';
@@ -125,7 +124,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     productImageSrc (): string {
       const productGallery = this.$store.getters['product/getProductGallery'];
 
-      return productGallery[0]?.src || getProductImagePlaceholder();
+      return productGallery[0]?.src || '';
     },
     getBudsieProduct (): Product | null {
       const productBySku = this.$store.getters['product/getProductBySkuDictionary'];
