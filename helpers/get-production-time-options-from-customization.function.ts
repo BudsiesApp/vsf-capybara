@@ -61,6 +61,6 @@ export function getProductionTimeOptionsFromCustomization (
       return 1;
     }
 
-    return optionValueA.sn > optionValueB.sn ? 1 : -1;
+    return optionValueA.sn - optionValueB.sn;
   });
 }
