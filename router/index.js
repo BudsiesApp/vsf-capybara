@@ -128,10 +128,16 @@ let routes = [
       },
       {
         name: 'orders-history',
-        path: 'orders-history/',
+        path: 'order-history/',
         component: AccountOrdersHistory,
         meta: {
           title: 'Order history'
+        }
+      },
+      {
+        path: 'orders-history/',
+        redirect: {
+          name: 'orders-history'
         }
       },
       {
