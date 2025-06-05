@@ -17,6 +17,8 @@
       <MCtaButton size="small" class="_item" />
 
       <div class="_action-icons">
+        <CurrencySelector />
+
         <AAccountIcon class="sf-header__action _item" />
         <ADetailedCartIcon class="sf-header__action _item" />
       </div>
@@ -26,15 +28,19 @@
 
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
+import { SfBottomNavigation } from '@storefront-ui/vue';
+
+import { CurrencySelector } from 'src/modules/currency';
+
 import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
-import { SfBottomNavigation } from '@storefront-ui/vue';
 import ALogo from 'theme/components/atoms/a-logo.vue';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
 export default {
   name: 'OTopNavigation',
   components: {
+    CurrencySelector,
     SfBottomNavigation,
     ALogo,
     ADetailedCartIcon,
@@ -125,9 +131,11 @@ export default {
   ._item {
     margin-left: var(--spacer-sm);
 
+    &.a-account-icon,
     &:first-child {
       margin-left: 0;
     }
+
   }
 
   .a-microcart-icon {
