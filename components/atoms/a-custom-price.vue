@@ -6,7 +6,7 @@
     <template #special="{ special }">
       <ins v-if="special" class="sf-price__special">{{ special }}</ins>
       <ins v-if="special" class="sf-price__saved-value">
-        (Save {{ saveAmount | price() }} |
+        (Save {{ formatPrice(saveAmount) }} |
         {{ savePercent }}%)
       </ins>
     </template>
@@ -17,6 +17,8 @@
 import Vue, { PropType } from 'vue';
 import { SfPrice } from '@storefront-ui/vue';
 import { PriceHelper } from '@vue-storefront/core/helpers';
+
+import { Currency, GET_SELECTED_CURRENCY } from 'src/modules/currency';
 
 export default Vue.extend({
   name: 'ACustomPrice',
@@ -34,11 +36,14 @@ export default Vue.extend({
     }
   },
   computed: {
+    selectedCurrency (): Currency {
+      return this.$store.getters[GET_SELECTED_CURRENCY];
+    },
     formattedRegularPrice (): string {
-      return PriceHelper.formatPrice(this.regular);
+      return PriceHelper.formatPrice(this.regular, this.selectedCurrency.symbol);
     },
     formattedSpecialPrice (): string {
-      return PriceHelper.formatPrice(this.specialPrice);
+      return PriceHelper.formatPrice(this.specialPrice, this.selectedCurrency.symbol);
     },
     saveAmount (): number {
       if (this.specialPrice === null) {
@@ -51,6 +56,11 @@ export default Vue.extend({
       return Math.round(
         (this.saveAmount / this.regular) * 100
       );
+    }
+  },
+  methods: {
+    formatPrice (value: number): string {
+      return PriceHelper.formatPrice(value, this.selectedCurrency.symbol);
     }
   }
 })

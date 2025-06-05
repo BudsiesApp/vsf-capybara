@@ -41,6 +41,7 @@ import {
   useValuesSort
 } from 'src/modules/customization-system';
 import { PriceHelper } from 'src/modules/shared';
+import { Currency, GET_SELECTED_CURRENCY } from 'src/modules/currency';
 
 const defaultPlaceholder = 'Select Option';
 
@@ -97,6 +98,10 @@ export default defineComponent({
       context
     );
 
+    const selectedCurrency = computed<Currency>(() => {
+      return context.root.$store.getters[GET_SELECTED_CURRENCY];
+    });
+
     const dropdownOptions = computed<DropdownOption[]>(() => {
       const _optionValuePriceDictionary = optionValuePriceDictionary.value;
       const _isOptionValuesSamePrice = isOptionValuesSamePrice.value;
@@ -115,7 +120,7 @@ export default defineComponent({
         let label = optionValue.name || '';
 
         if (canShowPrice && finalPrice) {
-          label += ` ${PriceHelper.formatPrice(finalPrice)}`;
+          label += ` ${PriceHelper.formatPrice(finalPrice, selectedCurrency.value.symbol)}`;
         }
 
         options.push({

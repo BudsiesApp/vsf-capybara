@@ -62,7 +62,10 @@
             class="_custom-price-amount"
             v-if="showCustomPriceAmountInput"
           >
-            <label class="_price-label">$</label>
+            <label class="_price-label">
+              {{ selectedCurrency.symbol }}
+            </label>
+
             <SfInput
               name="custom_price_amount"
               v-model.number="customPriceAmount"
@@ -232,6 +235,8 @@ import GiftCardOrderFormData from 'theme/components/interfaces/gift-card-order-f
 import GiftCardTemplate from 'src/modules/gift-card/types/GiftCardTemplate.interface';
 
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
+import { Currency, GET_SELECTED_CURRENCY, GET_CURRENCY_EXCHANGE_RATE } from 'src/modules/currency';
+import { PriceHelper } from 'src/modules/shared';
 
 const maxCharactersRemaining = 240;
 const DEFAULT_CUSTOM_PRICE_AMOUNT = 200;
@@ -324,12 +329,16 @@ export default Vue.extend({
     },
     customPriceAmount: {
       get (): number {
-        return this.giftCardOrderFormData.customPriceAmount;
+        return Number(
+          (this.giftCardOrderFormData.customPriceAmount * this.currencyExchangeRate).toFixed(0)
+        );
       },
       set (value: number) {
         this.updateGiftCardOrderFormData({
           ...this.giftCardOrderFormData,
-          customPriceAmount: value || 0
+          customPriceAmount: value
+            ? Number((value / this.currencyExchangeRate).toFixed(0))
+            : 0
         });
       }
     },
@@ -345,14 +354,27 @@ export default Vue.extend({
     isSelectedPriceAmountSlim () {
       return this.selectedPriceAmount === 0;
     },
+    selectedCurrency (): Currency {
+      return this.$store.getters[GET_SELECTED_CURRENCY];
+    },
+    currencyExchangeRate (): number {
+      return this.$store.getters[GET_CURRENCY_EXCHANGE_RATE];
+    },
     priceAmountOptionsList (): {
       id: number,
       value: string
     }[] {
-      const options = this.priceAmountList.map((price) => ({
-        id: price,
-        value: `$${price} Petsies Gift Card`
-      }));
+      const options = this.priceAmountList.map((price) => {
+        const localizedPrice = PriceHelper.formatPrice(
+          price * this.currencyExchangeRate,
+          this.selectedCurrency.symbol
+        );
+
+        return {
+          id: price,
+          value: `${localizedPrice} Petsies Gift Card`
+        }
+      });
 
       options.push({
         id: 0,

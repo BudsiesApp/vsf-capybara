@@ -77,13 +77,14 @@ import Vue, { PropType } from 'vue';
 import urlParser from 'js-video-url-parser';
 import { SfPrice } from '@storefront-ui/vue';
 
+import { PriceHelper } from '@vue-storefront/core/helpers';
+import { Currency, GET_SELECTED_CURRENCY } from 'src/modules/currency';
 import { StreamingVideo } from 'src/modules/shared';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
 import AddonOption from '../interfaces/addon-option.interface';
 
 import MCheckbox from './m-checkbox.vue';
-import { PriceHelper } from '@vue-storefront/core/helpers';
 
 let instanceId = 0;
 
@@ -132,6 +133,9 @@ export default Vue.extend({
     },
     selectedValues (): number[] {
       return this.value;
+    },
+    selectedCurrency (): Currency {
+      return this.$store.getters[GET_SELECTED_CURRENCY];
     }
   },
   methods: {
@@ -202,7 +206,7 @@ export default Vue.extend({
       Vue.set(this.showVideoFlags, addon.id, true);
     },
     formatPrice (price: number | null): void {
-      return PriceHelper.formatPrice(price);
+      return PriceHelper.formatPrice(price, this.selectedCurrency.symbol);
     }
   },
   created (): void {

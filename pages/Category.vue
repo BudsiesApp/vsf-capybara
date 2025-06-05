@@ -255,7 +255,7 @@ import {
   mapMobileObserver,
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
-import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
+import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-headers.function';
 
@@ -269,6 +269,7 @@ import { useInfinityScroll } from 'theme/helpers/use-infinity-scroll';
 import ASortIcon from 'theme/components/atoms/a-sort-icon';
 import MCategoryDescriptionStory from 'theme/components/molecules/m-category-description-story.vue';
 import OProductCard from 'theme/components/organisms/o-product-card';
+import { GET_SELECTED_CURRENCY } from 'src/modules/currency';
 
 const THEME_PAGE_SIZE = 15;
 
@@ -434,13 +435,17 @@ export default {
           })
         : this.getCurrentPageProducts;
     },
+    selectedCurrency () {
+      return this.$store.getters[GET_SELECTED_CURRENCY];
+    },
     preparedProducts () {
-      const productPriceDictionary = this.$store.getters[PRODUCT_PRICE_DICTIONARY];
+      const productPriceDictionary = this.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY];
 
       return this.products.map(
         (product) => prepareCategoryProduct(
           product,
-          productPriceDictionary
+          productPriceDictionary,
+          this.selectedCurrency
         )
       );
     },

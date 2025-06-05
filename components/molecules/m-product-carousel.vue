@@ -36,7 +36,8 @@
 <script>
 import { SfCarousel } from '@storefront-ui/vue';
 
-import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
+import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
+import { GET_SELECTED_CURRENCY } from 'src/modules/currency';
 
 import { prepareCategoryProduct } from 'theme/helpers';
 import OProductCard from 'theme/components/organisms/o-product-card';
@@ -55,13 +56,17 @@ export default {
   },
   computed: {
     productPriceDictionary () {
-      return this.$store.getters[PRODUCT_PRICE_DICTIONARY];
+      return this.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY];
+    },
+    selectedCurrency () {
+      return this.$store.getters[GET_SELECTED_CURRENCY];
     },
     carouselProducts () {
       return this.products.map(
         (product) => prepareCategoryProduct(
           product,
-          this.productPriceDictionary
+          this.productPriceDictionary,
+          this.selectedCurrency.symbol
         )
       );
     }
