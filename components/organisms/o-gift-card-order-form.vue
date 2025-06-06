@@ -343,11 +343,14 @@ export default Vue.extend({
       }
     },
     customPriceAmountRules () {
+      const min = this.customAmountValues.min || DEFAULT_MINIMUM_CUSTOM_PRICE_AMOUNT;
+      const max = this.customAmountValues.max || DEFAULT_MAXIMUM_CUSTOM_PRICE_AMOUNT;
+
       return {
         required,
         between: {
-          min: this.customAmountValues.min || DEFAULT_MINIMUM_CUSTOM_PRICE_AMOUNT,
-          max: this.customAmountValues.max || DEFAULT_MAXIMUM_CUSTOM_PRICE_AMOUNT
+          min: Math.floor(min * this.currencyExchangeRate),
+          max: Math.floor(max * this.currencyExchangeRate)
         }
       }
     },
