@@ -17,14 +17,15 @@
       <MSpinnerButton
         :show-spinner="isSubmitting"
         :disabled="disabled"
+        :title="$t('Apply coupon')"
         class="_circle-button"
-        button-class="sf-button--text -icon-button"
+        button-class="sf-button -icon-button"
         @click="applyCoupon"
       >
-        <SfCircleIcon
-          class="a-promo-code__circle-icon"
+        <SfIcon
           icon="check"
-          :disabled="isSubmitting"
+          size="12px"
+          color="white"
         />
       </MSpinnerButton>
     </div>
@@ -52,7 +53,7 @@
 </template>
 
 <script>
-import { SfInput, SfCircleIcon } from '@storefront-ui/vue';
+import { SfIcon, SfInput, SfCircleIcon } from '@storefront-ui/vue';
 
 import MSpinnerButton from 'theme/components/molecules/m-spinner-button.vue';
 
@@ -61,7 +62,7 @@ export default {
   components: {
     MSpinnerButton,
     SfInput,
-    SfCircleIcon
+    SfIcon
   },
   props: {
     allowPromoCodeRemoval: {
@@ -144,6 +145,10 @@ export default {
     --spinner-button-height: var(--font-base);
     --spinner-button-background: var(--c-primary);
     --spinner-button-border-radius: 50%;
+
+    --button-size: 2rem;
+    --icon-size: 0.6875rem;
+    --button-padding: 0;
   }
 
   &__form {
@@ -151,10 +156,6 @@ export default {
     justify-content: space-between;
     align-items: flex-start;
     margin-top: var(--spacer-sm);
-  }
-  &__circle-icon {
-    --button-size: 2rem;
-    --icon-size: 0.6875rem;
   }
   &__input {
     --input-background: var(--c-white);

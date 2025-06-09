@@ -3,6 +3,7 @@
     <SfButton
       :class="buttonClass"
       :disabled="isDisabled"
+      :title="title"
       @click="$emit('click')"
     >
       <ALoadingSpinner v-show="showSpinner" />
@@ -32,6 +33,10 @@ export default Vue.extend({
     disabled: {
       type: Boolean,
       default: false
+    },
+    title: {
+      type: String,
+      default: ''
     }
   },
   components: {
