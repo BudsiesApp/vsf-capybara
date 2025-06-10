@@ -3,15 +3,31 @@
     class="sharing-buttons"
     :class="skinClass"
   >
-    <a class="sharing-button -email" :href="shareEmailHref" target="_blank" />
+    <a
+      class="sharing-button -email"
+      :href="shareEmailHref"
+      target="_blank"
+      :title="$t('Share via {service}', {service: 'Email'})"
+    />
     <a
       class="sharing-button -pinterest"
       :href="sharePinterestHref"
       target="_blank"
+      :title="$t('Share via {service}', {service: 'Pinterest'})"
       v-if="sharePinterestHref"
     />
-    <a class="sharing-button -twitter" :href="shareTwitterHref" target="_blank" />
-    <a class="sharing-button -facebook" :href="shareFacebookHref" target="_blank" />
+    <a
+      class="sharing-button -twitter"
+      :href="shareTwitterHref"
+      target="_blank"
+      :title="$t('Share via {service}', {service: 'Twitter'})"
+    />
+    <a
+      class="sharing-button -facebook"
+      :href="shareFacebookHref"
+      target="_blank"
+      :title="$t('Share via {service}', {service: 'Facebook'})"
+    />
   </div>
 </template>
 

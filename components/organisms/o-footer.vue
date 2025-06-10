@@ -46,6 +46,7 @@
             :href="item.url"
             v-for="item in social"
             :key="item.name + ';' + item.url"
+            :aria-label="item.label"
             class="social-icon__link"
             :class="'-' + item.name"
             target="_blank"
@@ -58,6 +59,7 @@
           :href="item.url"
           v-for="item in social"
           :key="item.name + ';' + item.url"
+          :aria-label="item.label"
           class="social-icon__link"
           :class="'-' + item.name"
           target="_blank"
@@ -136,32 +138,41 @@ export default {
   },
   data () {
     return {
-      social: [
-        {
-          name: 'facebook',
-          url: 'https://www.facebook.com/budsies/'
-        },
-        {
-          name: 'twitter',
-          url: 'https://twitter.com/budsiestoys'
-        },
-        {
-          name: 'linkedin',
-          url: 'https://www.linkedin.com/company/budsies'
-        },
-        {
-          name: 'instagram',
-          url: 'https://instagram.com/budsies'
-        },
-        {
-          name: 'tiktok',
-          url: 'https://www.tiktok.com/@budsies'
-        }
-      ]
     };
   },
   computed: {
     ...mapGetters('user', ['isLoggedIn']),
+    social () {
+      const { name } = currentStoreView();
+
+      return [
+        {
+          name: 'facebook',
+          url: 'https://www.facebook.com/budsies/',
+          label: this.$t('{brand} {service} page', { brand: name, service: 'Facebook' })
+        },
+        {
+          name: 'twitter',
+          url: 'https://twitter.com/budsiestoys',
+          label: this.$t('{brand} {service} page', { brand: name, service: 'Twitter' })
+        },
+        {
+          name: 'linkedin',
+          url: 'https://www.linkedin.com/company/budsies',
+          label: this.$t('{brand} {service} page', { brand: name, service: 'LinkedIn' })
+        },
+        {
+          name: 'instagram',
+          url: 'https://instagram.com/budsies',
+          label: this.$t('{brand} {service} page', { brand: name, service: 'Instagram' })
+        },
+        {
+          name: 'tiktok',
+          url: 'https://www.tiktok.com/@budsies',
+          label: this.$t('{brand} {service} page', { brand: name, service: 'TikTok' })
+        }
+      ]
+    },
     multistoreEnabled () {
       return get(config, 'storeViews.multistore', false);
     },
