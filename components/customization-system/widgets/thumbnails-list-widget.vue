@@ -14,6 +14,7 @@
           class="_image"
           :src="getItemImage(option)"
           :aspect-ratio="1"
+          alt=""
           v-if="getItemImage(option)"
         />
       </div>
