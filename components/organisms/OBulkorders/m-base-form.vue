@@ -239,6 +239,7 @@
           <input
             v-model="deadlineDate"
             type="date"
+            aria-label="Deadline Date"
             :disabled="!deadline || deadline === '0'"
           >
 

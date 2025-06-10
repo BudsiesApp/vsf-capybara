@@ -4,11 +4,13 @@
     :class="{ '-small': size === 'small' }"
     v-show="showCtaButtonContainer"
   >
-    <SfButton class="_bulk-quote-button" v-show="showDefaultButton">
-      <router-link class="_inner" :to="{name: 'bulk-quote'}">
-        {{ $t('Instant Quote') }}
-      </router-link>
-    </SfButton>
+    <router-link
+      class="_bulk-quote-button sf-button"
+      :to="{name: 'bulk-quote'}"
+      v-show="showDefaultButton"
+    >
+      {{ $t('Instant Quote') }}
+    </router-link>
 
     <SfButton class="_checkout-button" v-show="showGoToCheckoutButton" @click="goToCheckout">
       {{ $t('Go to Checkout') }}
@@ -88,11 +90,6 @@ $small-button-padding: calc(var(--spacer-2xs) * 3);
   ._bulk-quote-button {
     --c-link: var(--c-white);
     --c-link-hover: var(--c-white);
-    --button-padding: 0;
-
-    ._inner {
-      padding: var(--spacer-sm) calc(var(--spacer-sm) * 2);
-    }
   }
 
   &.-small {
@@ -100,14 +97,6 @@ $small-button-padding: calc(var(--spacer-2xs) * 3);
       --button-font-size: var(--font-2xs);
       --button-font-line-height: 1;
       --button-padding: #{$small-button-padding};
-    }
-
-    ._bulk-quote-button {
-      --button-padding: 0;
-
-      ._inner {
-        padding: $small-button-padding;
-      }
     }
   }
 }
