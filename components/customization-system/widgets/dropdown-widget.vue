@@ -133,7 +133,7 @@ export default defineComponent({
     });
 
     const showSelect = ref<boolean>(true);
-    watch(values, async () => {
+    watch([values, selectedCurrency], async () => {
       showSelect.value = false;
       await nextTick();
       showSelect.value = true;
