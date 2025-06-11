@@ -28,7 +28,7 @@
                 :src="getImageSrc(image, 'thumb')"
                 :srcsets="getImageSrcSets(image, 'thumb')"
                 :fallback-srcset="getImageFallbackSrcSet(image, 'thumbFallback')"
-                :alt="image.alt"
+                :alt="$t('Select to view ') + image.alt"
                 :title="image.title"
                 :aspect-ratio="1.0"
               />
