@@ -11,9 +11,17 @@
       v-if="shouldShowImageBanner"
     >
       <component class="_wrapper" :is="wrapperComponent" v-bind="wrapperAttributes">
-        <BaseImage :src="desktopImage" class="show-for-medium-up" />
+        <BaseImage
+          :src="desktopImage"
+          :alt="$t('Promotional campaign banner')"
+          class="show-for-medium-up"
+        />
 
-        <BaseImage :src="mobileImage" class="show-for-small-only" />
+        <BaseImage
+          :src="mobileImage"
+          :alt="$t('Promotional campaign banner')"
+          class="show-for-small-only"
+        />
       </component>
     </div>
   </div>

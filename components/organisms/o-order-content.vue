@@ -23,7 +23,7 @@
 
     <SfTableRow v-for="item in tableItems" :key="item.key" class="table__row">
       <SfTableData class="table__image">
-        <SfImage :src="item.thumbnail" />
+        <SfImage alt="" :src="item.thumbnail" />
       </SfTableData>
 
       <SfTableData class="table__description">
