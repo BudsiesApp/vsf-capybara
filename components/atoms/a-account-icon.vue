@@ -1,6 +1,7 @@
 <template>
   <SfButton
     class="sf-button--pure a-account-icon"
+    :title="goToAccountText"
     @click="goToAccount"
   >
     <SfIcon
@@ -27,7 +28,10 @@ import { ModalList } from 'theme/store/ui/modals'
 export default {
   components: { SfIcon, SfButton },
   computed: {
-    ...mapGetters('user', ['isLoggedIn'])
+    ...mapGetters('user', ['isLoggedIn']),
+    goToAccountText () {
+      return this.isLoggedIn ? this.$t('Go to Account') : this.$t('Login');
+    }
   },
   methods: {
     ...mapActions('ui', {

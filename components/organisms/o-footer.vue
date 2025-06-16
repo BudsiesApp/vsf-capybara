@@ -30,7 +30,7 @@
       <SfFooterColumn :title="$t('Contact')" class="contact-column">
         <SfList>
           <SfListItem>
-            <a href="mailto:info@stuffedanimalpros.com">
+            <a href="mailto:info@stuffedanimalpros.com" aria-label="Contact us via email">
               <SfMenuItem
                 class="sf-footer__menu-item"
                 :label="$t('info@stuffedanimalpros.com')"

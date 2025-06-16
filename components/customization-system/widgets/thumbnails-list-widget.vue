@@ -13,6 +13,7 @@
         <base-image
           class="_image"
           :src="getItemImage(option)"
+          :alt="`Select ${option.name}`"
           :aspect-ratio="1"
           v-if="getItemImage(option)"
         />
