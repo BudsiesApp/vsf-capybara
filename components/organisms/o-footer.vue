@@ -149,19 +149,19 @@ export default {
           label: this.$t('{brand} {service} page', { brand: name, service: 'Facebook' })
         },
         {
+          name: 'instagram',
+          url: 'https://instagram.com/budsies',
+          label: this.$t('{brand} {service} page', { brand: name, service: 'Instagram' })
+        },
+        {
           name: 'twitter',
           url: 'https://twitter.com/budsiestoys',
-          label: this.$t('{brand} {service} page', { brand: name, service: 'Instagram' })
+          label: this.$t('{brand} {service} page', { brand: name, service: 'Twitter' })
         },
         {
           name: 'linkedin',
           url: 'https://www.linkedin.com/company/budsies',
-          label: this.$t('{brand} {service} page', { brand: name, service: 'Twitter' })
-        },
-        {
-          name: 'instagram',
-          url: 'https://instagram.com/budsies',
-          label: this.$t('{brand} {service} page', { brand: name, service: 'Pinterest' })
+          label: this.$t('{brand} {service} page', { brand: name, service: 'LinkedIn' })
         },
         {
           name: 'tiktok',
