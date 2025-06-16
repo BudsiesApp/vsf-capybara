@@ -17,8 +17,6 @@ import { ModalList } from './store/ui/modals';
 import { FileProcessingRepositoryFactory, ImageHandlerService, itemFactory } from 'src/modules/file-storage'
 import { ErrorConverterService } from 'src/modules/budsies'
 import { isServer } from '@vue-storefront/core/helpers'
-import { CART_SET_EXCHANGE_RATE_MUTATION } from '@vue-storefront/core/modules/cart';
-import { SET_EXCHANGE_RATE_MUTATION } from '@vue-storefront/core/modules/catalog';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { USER_LEAVING_WEBSITE } from 'src/modules/promotion-platform';
 import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
@@ -42,9 +40,6 @@ export default {
   computed: {
     layout () {
       return `${get(this.$route, 'meta.layout', 'default')}-layout`
-    },
-    currencyExchangeRate () {
-      return this.$store.getters[GET_CURRENCY_EXCHANGE_RATE];
     }
   },
   mounted () {
@@ -86,15 +81,6 @@ export default {
       }
 
       this.$store.dispatch('ui/openModal', { name: ModalList.WebsiteLeaving })
-    }
-  },
-  watch: {
-    currencyExchangeRate: {
-      handler (exchangeRate) {
-        this.$store.commit(CART_SET_EXCHANGE_RATE_MUTATION, exchangeRate);
-        this.$store.commit(SET_EXCHANGE_RATE_MUTATION, exchangeRate);
-      },
-      immediate: true
     }
   }
 };
