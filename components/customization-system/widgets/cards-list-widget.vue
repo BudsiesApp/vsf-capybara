@@ -64,6 +64,7 @@
                     v-if="getItemImage(optionValue)"
                     :aspect-ratio="1"
                     :src="getItemImage(optionValue)"
+                    alt=""
                   />
                 </div>
               </div>

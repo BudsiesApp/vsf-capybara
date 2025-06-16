@@ -29,6 +29,7 @@
             :href="item.url"
             v-for="item in social"
             :key="item.name + ';' + item.url"
+            :aria-label="item.label"
             class="social-icon__link"
             :class="'-' + item.name"
             target="_blank"
@@ -41,6 +42,7 @@
           :href="item.url"
           v-for="item in social"
           :key="item.name + ';' + item.url"
+          :aria-label="item.label"
           class="social-icon__link"
           :class="'-' + item.name"
           target="_blank"
@@ -107,22 +109,25 @@ export default {
       default: ''
     }
   },
-  data () {
-    return {
-      social: [
+  computed: {
+
+    ...mapGetters('user', ['isLoggedIn']),
+    social () {
+      const { name } = currentStoreView();
+
+      return [
         {
           name: 'facebook',
-          url: 'https://www.facebook.com/waggables/'
+          url: 'https://www.facebook.com/waggables/',
+          label: this.$t('{brand} {service} page', { brand: name, service: 'Facebook' })
         },
         {
           name: 'instagram',
-          url: 'https://www.instagram.com/waggables/'
+          url: 'https://www.instagram.com/waggables/',
+          label: this.$t('{brand} {service} page', { brand: name, service: 'Instagram' })
         }
       ]
-    };
-  },
-  computed: {
-    ...mapGetters('user', ['isLoggedIn']),
+    },
     multistoreEnabled () {
       return get(config, 'storeViews.multistore', false);
     },

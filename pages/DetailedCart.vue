@@ -26,6 +26,16 @@
                 :title="product.name"
                 class="sf-collected-product--detailed collected-product"
               >
+                <template #image="{image}">
+                  <SfImage
+                    :src="image"
+                    alt=""
+                    width="140"
+                    height="140"
+                    class="sf-collected-product__image"
+                  />
+                </template>
+
                 <template #configuration>
                   <cart-item-configuration
                     :customizations="product.customizations"
@@ -39,6 +49,7 @@
                   <SfQuantitySelector
                     :qty="product.qty"
                     :disabled="isCartItemProcessing"
+                    :title="$t('Quantity')"
                     @input="changeProductQuantity(product, $event)"
                     v-if="showQuantitySelectorForProduct(product)"
                   />
@@ -147,6 +158,7 @@
 <script>
 import debounce from 'lodash-es/debounce';
 import {
+  SfImage,
   SfPrice,
   SfList,
   SfCollectedProduct,
@@ -237,6 +249,7 @@ export default {
   components: {
     CartItemConfiguration,
     MDropdown,
+    SfImage,
     SfPrice,
     SfList,
     SfCollectedProduct,

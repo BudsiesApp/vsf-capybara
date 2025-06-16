@@ -2,10 +2,30 @@
   <div
     class="sharing-buttons"
   >
-    <a class="sharing-button -email" :href="shareEmailHref" target="_blank" />
-    <a class="sharing-button -pinterest" :href="sharePinterestHref" target="_blank" />
-    <a class="sharing-button -twitter" :href="shareTwitterHref" target="_blank" />
-    <a class="sharing-button -facebook" :href="shareFacebookHref" target="_blank" />
+    <a
+      class="sharing-button -email"
+      :href="shareEmailHref"
+      target="_blank"
+      :title="$t('Share via {service}', {service: 'Email'})"
+    />
+    <a
+      class="sharing-button -pinterest"
+      :href="sharePinterestHref"
+      :title="$t('Share on {service}', {service: 'Pinterest'})"
+      target="_blank"
+    />
+    <a
+      class="sharing-button -twitter"
+      :href="shareTwitterHref"
+      :title="$t('Share on {service}', {service: 'Twitter'})"
+      target="_blank"
+    />
+    <a
+      class="sharing-button -facebook"
+      :href="shareFacebookHref"
+      :title="$t('Share on {service}', {service: 'Facebook'})"
+      target="_blank"
+    />
   </div>
 </template>
 
