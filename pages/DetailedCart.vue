@@ -167,7 +167,7 @@ import CartEvents from 'src/modules/shared/types/cart-events';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 import { CART_UPD_ITEM } from '@vue-storefront/core/modules/cart/store/mutation-types';
-import { GET_SELECTED_CURRENCY } from 'src/modules/currency';
+import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
 import { CartItemConfiguration, getCustomizationSystemThumbnail } from 'src/modules/customization-system';
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
@@ -387,7 +387,7 @@ export default {
       return this.products.some((product) => isCustomProduct(product.id));
     },
     selectedCurrency () {
-      return this.$store.getters[GET_SELECTED_CURRENCY];
+      return this.$store.getters[GET_ACTIVE_CURRENCY];
     }
   },
   async mounted () {

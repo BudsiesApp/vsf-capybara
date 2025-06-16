@@ -246,7 +246,7 @@ import { CartItemConfiguration, getCustomizationSystemThumbnail } from 'src/modu
 import { IS_COUPON_PROCESSING, IS_TOTALS_SYNCING, IS_PAYMENT_METHODS_SYNCING, CART_ITEM_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/cart';
 import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-item-key.function';
 
-import { GET_SELECTED_CURRENCY } from 'src/modules/currency';
+import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { AFFIRM_MODAL_CLOSED } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';
 import { getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
 import { PAYMENT_ERROR_EVENT, PriceHelper } from 'src/modules/shared';
@@ -362,7 +362,7 @@ export default {
       return this.isCheckoutInProgress || this.$store.getters[IS_PAYMENT_METHODS_SYNCING];
     },
     selectedCurrency () {
-      return this.$store.getters[GET_SELECTED_CURRENCY];
+      return this.$store.getters[GET_ACTIVE_CURRENCY];
     }
   },
   beforeCreate () {

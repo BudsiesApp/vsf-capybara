@@ -247,7 +247,7 @@ import {
   KEY as AMAZON_PAY_MODULE_KEY,
   METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
 } from 'src/modules/vsf-amazon-pay/index';
-import { GET_SELECTED_CURRENCY, GET_CURRENCY_EXCHANGE_RATE } from 'src/modules/currency';
+import { GET_ACTIVE_CURRENCY, GET_CURRENCY_EXCHANGE_RATE } from 'src/modules/currency';
 import { LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, LAST_USED_CUSTOMER_PHONE_NUMBER, LAST_USED_CUSTOMER_SHIPPING_COUNTRY, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_PHONE_NUMBER, SET_LAST_USED_CUSTOMER_SHIPPING_COUNTRY } from 'src/modules/persisted-customer-data';
 import { stateCodeAutocompleteOptionSearch, PriceHelper } from 'src/modules/shared';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
@@ -361,7 +361,7 @@ export default {
       return !!this.shipping.country && this.shipping.country !== unitedStatesCountryCode;
     },
     selectedCurrency () {
-      return this.$store.getters[GET_SELECTED_CURRENCY];
+      return this.$store.getters[GET_ACTIVE_CURRENCY];
     },
     currencyExchangeRate () {
       return this.$store.getters[GET_CURRENCY_EXCHANGE_RATE];

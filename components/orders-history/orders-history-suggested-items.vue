@@ -43,7 +43,7 @@ import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { PriceHelper } from '@vue-storefront/core/helpers';
 import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog/types/ProductGetters';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
-import { Currency, GET_SELECTED_CURRENCY } from 'src/modules/currency';
+import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { FETCH_SUGGESTED_PRODUCTS_ACTION, SUGGESTED_PRODUCTS_IDS_GETTER } from 'src/modules/orders-history';
 import { isCustomProduct, ProductEvent, useMobileObserver } from 'src/modules/shared';
 
@@ -90,7 +90,7 @@ export default defineComponent({
       return root.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY]
     });
     const selectedCurrency = computed<Currency>(() => {
-      return root.$store.getters[GET_SELECTED_CURRENCY];
+      return root.$store.getters[GET_ACTIVE_CURRENCY];
     });
 
     const products = computed<any[]>(() => {

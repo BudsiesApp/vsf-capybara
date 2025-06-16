@@ -13,7 +13,7 @@ import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helper
 import { CART_ITEM_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/cart';
 import CartItem from 'core/modules/cart/types/CartItem';
 import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-item-key.function';
-import { Currency, GET_SELECTED_CURRENCY } from 'src/modules/currency';
+import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { getCustomizationSystemThumbnail } from 'src/modules/customization-system';
 import { PriceHelper } from 'src/modules/shared';
 
@@ -51,7 +51,7 @@ export default {
   },
   computed: {
     selectedCurrency (): Currency {
-      return this.$store.getters[GET_SELECTED_CURRENCY];
+      return this.$store.getters[GET_ACTIVE_CURRENCY];
     },
     tableItems (): OrderContentItem[] {
       return this.cartItems.map((cartItem) => {

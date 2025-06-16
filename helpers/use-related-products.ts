@@ -10,7 +10,7 @@ import { Dictionary } from 'src/modules/budsies';
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 
 import { prepareCategoryProduct } from 'theme/helpers';
-import { Currency, GET_SELECTED_CURRENCY } from 'src/modules/currency';
+import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 
 export const CROSS_SELL = 'crosssell';
 export const UP_SELL = 'upsell';
@@ -59,7 +59,7 @@ export function useRelatedProducts (
   });
   const preparedRelatedProducts = computed(() => {
     const productPriceDictionary = rootStore.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY];
-    const selectedCurrency = rootStore.getters[GET_SELECTED_CURRENCY];
+    const selectedCurrency = rootStore.getters[GET_ACTIVE_CURRENCY];
 
     return relatedProducts.value.map(
       (item: Product) => (

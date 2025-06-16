@@ -34,7 +34,7 @@ import {
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
-import { Currency, GET_CURRENCY_EXCHANGE_RATE, GET_SELECTED_CURRENCY } from 'src/modules/currency';
+import { Currency, GET_CURRENCY_EXCHANGE_RATE, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { OptionValue } from 'src/modules/customization-system';
 
 import { getProductionTimeOptionsFromCustomization } from '../../helpers/get-production-time-options-from-customization.function';
@@ -88,7 +88,7 @@ export default defineComponent({
       return !props.error;
     });
     const selectedCurrency = computed<Currency>(() => {
-      return root.$store.getters[GET_SELECTED_CURRENCY]
+      return root.$store.getters[GET_ACTIVE_CURRENCY]
     });
 
     const productionTimeOptions = computed<ProductionTimeOption[]>(() => {

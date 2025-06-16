@@ -43,7 +43,7 @@ import { PriceHelper } from 'src/modules/shared';
 
 import ProductData from './interfaces/product-data.interface';
 import getProductImagePlaceholder from '@vue-storefront/core/modules/cart/helpers/getProductImagePlaceholder';
-import { Currency, GET_SELECTED_CURRENCY } from 'src/modules/currency';
+import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 
 export default Blok.extend({
   name: 'StoryblokProductBlock',
@@ -116,7 +116,7 @@ export default Blok.extend({
       }
     },
     selectedCurrency (): Currency {
-      return this.$store.getters[GET_SELECTED_CURRENCY];
+      return this.$store.getters[GET_ACTIVE_CURRENCY];
     }
   },
   created: async function (): Promise<void> {
