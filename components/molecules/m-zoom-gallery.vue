@@ -28,7 +28,7 @@
                 :src="getImageSrc(image, 'thumb')"
                 :srcsets="getImageSrcSets(image, 'thumb')"
                 :fallback-srcset="getImageFallbackSrcSet(image, 'thumbFallback')"
-                :alt="image.alt"
+                :alt="getThumbnailAlt(image)"
                 :title="image.title"
                 :aspect-ratio="1.0"
               />
@@ -239,6 +239,15 @@ export default Vue.extend({
     window.removeEventListener('resize', this.fWindowResizeHandler);
   },
   methods: {
+    getThumbnailAlt (image: ZoomGalleryImage): string {
+      if (!image.alt) {
+        return this.$t('Select to view image').toString();
+      }
+
+      return this.$t("Select to view '{alt}' image", {
+        alt: image.alt
+      }).toString();
+    },
     onStageActiveIndexChanged (realIndex: number): void {
       this.setCurrentIndex(realIndex);
       this.getCarousel().slideTo(realIndex);

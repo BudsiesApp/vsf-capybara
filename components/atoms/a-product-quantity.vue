@@ -6,6 +6,7 @@
     :min="1"
     :max="maxQuantity"
     :disabled="disabled"
+    :title="$t('Quantity')"
     @input="$emit('input', $event)"
     @blur="$v.$touch()"
   />

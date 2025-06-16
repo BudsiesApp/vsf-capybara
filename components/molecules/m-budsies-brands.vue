@@ -9,6 +9,7 @@
         v-for="item in brandItems"
         :key="item.code"
         :class="item.className"
+        :aria-label="item.label"
         class="_brand-item"
         target="_blank"
         :href="item.link"
@@ -32,6 +33,7 @@ enum BrandCode {
 
 interface Item {
   code: BrandCode,
+  label: string,
   className: string,
   link: string
 }
@@ -58,6 +60,7 @@ export default Vue.extend({
 
         items.push({
           code: item,
+          label: this.$t('{brand} website', { brand: item }).toString(),
           className: `-${item}`,
           link: this.brandLinks[item]
         })
