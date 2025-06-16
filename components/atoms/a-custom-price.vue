@@ -18,7 +18,7 @@ import Vue, { PropType } from 'vue';
 import { SfPrice } from '@storefront-ui/vue';
 import { PriceHelper } from '@vue-storefront/core/helpers';
 
-import { Currency, GET_SELECTED_CURRENCY } from 'src/modules/currency';
+import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 
 export default Vue.extend({
   name: 'ACustomPrice',
@@ -37,7 +37,7 @@ export default Vue.extend({
   },
   computed: {
     selectedCurrency (): Currency {
-      return this.$store.getters[GET_SELECTED_CURRENCY];
+      return this.$store.getters[GET_ACTIVE_CURRENCY];
     },
     formattedRegularPrice (): string {
       return PriceHelper.formatPrice(this.regular, this.selectedCurrency.symbol);

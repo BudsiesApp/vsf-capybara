@@ -78,7 +78,7 @@ import urlParser from 'js-video-url-parser';
 import { SfPrice } from '@storefront-ui/vue';
 
 import { PriceHelper } from '@vue-storefront/core/helpers';
-import { Currency, GET_SELECTED_CURRENCY } from 'src/modules/currency';
+import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { StreamingVideo } from 'src/modules/shared';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 
@@ -135,7 +135,7 @@ export default Vue.extend({
       return this.value;
     },
     selectedCurrency (): Currency {
-      return this.$store.getters[GET_SELECTED_CURRENCY];
+      return this.$store.getters[GET_ACTIVE_CURRENCY];
     }
   },
   methods: {

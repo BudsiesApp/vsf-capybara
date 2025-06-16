@@ -104,7 +104,7 @@ import { mapGetters } from 'vuex';
 import { SfProperty, SfDivider } from '@storefront-ui/vue';
 
 import { PriceHelper } from '@vue-storefront/core/helpers';
-import { DEFAULT_CURRENCY, GET_CURRENCY_EXCHANGE_RATE, GET_SELECTED_CURRENCY } from 'src/modules/currency';
+import { DEFAULT_CURRENCY, GET_CURRENCY_EXCHANGE_RATE, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 
 import MSpinnerButton from 'theme/components/molecules/m-spinner-button.vue';
 
@@ -158,7 +158,7 @@ export default {
       return this.prices.discounts_total || this.prices.discounts;
     },
     selectedCurrency () {
-      return this.$store.getters[GET_SELECTED_CURRENCY];
+      return this.$store.getters[GET_ACTIVE_CURRENCY];
     },
     showDefaultCurrencyGrandTotal () {
       return this.selectedCurrency.code !== DEFAULT_CURRENCY.code;

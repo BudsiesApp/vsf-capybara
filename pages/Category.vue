@@ -269,7 +269,7 @@ import { useInfinityScroll } from 'theme/helpers/use-infinity-scroll';
 import ASortIcon from 'theme/components/atoms/a-sort-icon';
 import MCategoryDescriptionStory from 'theme/components/molecules/m-category-description-story.vue';
 import OProductCard from 'theme/components/organisms/o-product-card';
-import { GET_SELECTED_CURRENCY } from 'src/modules/currency';
+import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 
 const THEME_PAGE_SIZE = 15;
 
@@ -436,7 +436,7 @@ export default {
         : this.getCurrentPageProducts;
     },
     selectedCurrency () {
-      return this.$store.getters[GET_SELECTED_CURRENCY];
+      return this.$store.getters[GET_ACTIVE_CURRENCY];
     },
     preparedProducts () {
       const productPriceDictionary = this.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY];

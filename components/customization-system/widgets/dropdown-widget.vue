@@ -41,7 +41,7 @@ import {
   useValuesSort
 } from 'src/modules/customization-system';
 import { PriceHelper } from 'src/modules/shared';
-import { Currency, GET_SELECTED_CURRENCY } from 'src/modules/currency';
+import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 
 const defaultPlaceholder = 'Select Option';
 
@@ -99,7 +99,7 @@ export default defineComponent({
     );
 
     const selectedCurrency = computed<Currency>(() => {
-      return context.root.$store.getters[GET_SELECTED_CURRENCY];
+      return context.root.$store.getters[GET_ACTIVE_CURRENCY];
     });
 
     const dropdownOptions = computed<DropdownOption[]>(() => {

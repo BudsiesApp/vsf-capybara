@@ -235,7 +235,7 @@ import GiftCardOrderFormData from 'theme/components/interfaces/gift-card-order-f
 import GiftCardTemplate from 'src/modules/gift-card/types/GiftCardTemplate.interface';
 
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
-import { Currency, GET_SELECTED_CURRENCY, GET_CURRENCY_EXCHANGE_RATE } from 'src/modules/currency';
+import { Currency, GET_ACTIVE_CURRENCY, GET_CURRENCY_EXCHANGE_RATE } from 'src/modules/currency';
 import { PriceHelper } from 'src/modules/shared';
 
 const maxCharactersRemaining = 240;
@@ -358,7 +358,7 @@ export default Vue.extend({
       return this.selectedPriceAmount === 0;
     },
     selectedCurrency (): Currency {
-      return this.$store.getters[GET_SELECTED_CURRENCY];
+      return this.$store.getters[GET_ACTIVE_CURRENCY];
     },
     currencyExchangeRate (): number {
       return this.$store.getters[GET_CURRENCY_EXCHANGE_RATE];
