@@ -21,7 +21,7 @@
         />
 
         <div class="_content-wrapper">
-          <label class="_name" :for="option.id">
+          <label class="_name" :for="getOptionId(option.id)">
             {{ option.name }}
           </label>
 
@@ -49,7 +49,7 @@
           :disabled="isDisabled"
           :type="inputType"
           :value="option.id"
-          :id="option.id"
+          :id="getOptionId(option.id)"
           v-model="selectedOption"
         >
       </li>
@@ -125,8 +125,13 @@ export default defineComponent({
 
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
 
+    function getOptionId (optionId: string): string {
+      return `base-list-widget-option-${optionId}`;
+    }
+
     return {
       isRound,
+      getOptionId,
       ...listWidgetFields,
       ...useOptionValuesPrice(values, context, true),
       ...useValuesSort(values)
