@@ -8,7 +8,7 @@
     <BaseImage
       :src="logoSrc"
       :aspect-ratio="aspectRatio"
-      :alt="$t(defaultTitle)"
+      :alt="$t(`{name} Homepage`, { name: defaultTitle })"
       class="sf-header__logo"
     />
   </router-link>
