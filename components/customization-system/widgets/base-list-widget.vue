@@ -21,9 +21,9 @@
         />
 
         <div class="_content-wrapper">
-          <div class="_name">
+          <label class="_name" :for="getOptionId(option.id)">
             {{ option.name }}
-          </div>
+          </label>
 
           <template v-if="!isOptionValuesSamePrice">
             <div
@@ -44,15 +44,14 @@
           </template>
         </div>
 
-        <label class="_option-label">
-          <input
-            class="_input"
-            :disabled="isDisabled"
-            :type="inputType"
-            :value="option.id"
-            v-model="selectedOption"
-          >
-        </label>
+        <input
+          class="_input"
+          :disabled="isDisabled"
+          :type="inputType"
+          :value="option.id"
+          :id="getOptionId(option.id)"
+          v-model="selectedOption"
+        >
       </li>
     </ul>
 
@@ -126,8 +125,13 @@ export default defineComponent({
 
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
 
+    function getOptionId (optionId: string): string {
+      return `base-list-widget-option-${optionId}`;
+    }
+
     return {
       isRound,
+      getOptionId,
       ...listWidgetFields,
       ...useOptionValuesPrice(values, context, true),
       ...useValuesSort(values)
@@ -196,19 +200,14 @@ export default defineComponent({
 
   ._input {
     opacity: 0;
-    height: 0;
-    width: 0;
-    position: absolute;
-  }
-
-  ._option-label {
-    position: absolute;
-    cursor: pointer;
-    width: 100%;
     height: 100%;
+    width: 100%;
     top: 0;
     left: 0;
-    z-index: 2;
+    margin: 0;
+    z-index: 1;
+    cursor: pointer;
+    position: absolute;
   }
 
   ._name,
