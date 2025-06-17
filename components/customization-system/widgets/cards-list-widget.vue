@@ -64,6 +64,7 @@
                     v-if="getItemImage(optionValue)"
                     :aspect-ratio="1"
                     :src="getItemImage(optionValue)"
+                    alt=""
                   />
                 </div>
               </div>
@@ -239,12 +240,12 @@ export default defineComponent({
     flex-grow: 1;
     gap: var(--spacer-sm);
     margin-top: var(--spacer-xs);
+    width: 100%;
   }
 
   ._media {
     width: 30%;
     flex-shrink: 0;
-    flex-grow: 1;
 
     ._image-container {
       position: relative;

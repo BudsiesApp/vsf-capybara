@@ -6,11 +6,21 @@
         :key="item.icon"
         :icon="item.icon"
         :label="item.label"
+        :title="item.title"
         :is-floating="item.isFloating"
         :is-active="isActive(item.icon)"
         class="_item"
         @click.native="item.onClick"
-      />
+      >
+        <template #icon="{ icon, iconSize }">
+          <SfButton
+            class="sf-button--pure sf-bottom-navigation-item__icon"
+            :title="item.title"
+          >
+            <SfIcon :icon="icon" :size="iconSize" />
+          </SfButton>
+        </template>
+      </SfBottomNavigationItem>
 
       <ALogo class="_item" />
 
@@ -28,7 +38,7 @@
 
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
-import { SfBottomNavigation } from '@storefront-ui/vue';
+import { SfBottomNavigation, SfButton, SfIcon } from '@storefront-ui/vue';
 
 import { CurrencySelector } from 'src/modules/currency';
 
@@ -42,6 +52,8 @@ export default {
   components: {
     CurrencySelector,
     SfBottomNavigation,
+    SfButton,
+    SfIcon,
     ALogo,
     ADetailedCartIcon,
     MCtaButton,
@@ -50,7 +62,7 @@ export default {
   data () {
     return {
       navigationItems: [
-        { icon: 'list', label: '', onClick: this.goToMenu }
+        { icon: 'list', label: '', title: 'Menu', onClick: this.goToMenu }
       ]
     }
   },

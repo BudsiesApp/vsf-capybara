@@ -89,6 +89,16 @@
                 :special-price="formatPrice(cartItemPriceDictionary[getCartItemKey(product)].special)"
                 class="collected-product"
               >
+                <template #image="{image}">
+                  <SfImage
+                    :src="image"
+                    alt=""
+                    width="140"
+                    height="140"
+                    class="sf-collected-product__image"
+                  />
+                </template>
+
                 <template #configuration>
                   <cart-item-configuration
                     :customizations="product.customizations"
@@ -184,7 +194,11 @@
             >
               <template v-if="method.icon" #label>
                 <div class="_method-label">
-                  <img :src="method.icon" class="_method-icon">
+                  <img
+                    alt=""
+                    :src="method.icon"
+                    class="_method-icon"
+                  >
 
                   <div class="sf-radio__label">
                     {{ method.title }}
