@@ -20,6 +20,7 @@
           class="_story-textarea"
           :class="classes"
           v-model="story"
+          :title="$t('Story')"
           :disabled="isDisabled"
           :required="true"
           :valid="!errors.length"

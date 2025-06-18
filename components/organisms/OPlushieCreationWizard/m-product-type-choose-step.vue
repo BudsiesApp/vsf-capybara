@@ -17,7 +17,7 @@
           class="_image"
           :class="{ '-hidden': !item.imageSrc }"
           :src="item.imageSrc"
-          :alt="item.title"
+          alt=""
           width="76px"
           :aspect-ratio="1"
         />

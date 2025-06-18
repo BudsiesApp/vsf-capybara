@@ -129,7 +129,7 @@ export default {
         stage: imageObject.src,
         thumb: imageObject.src,
         big: imageObject.src,
-        alt: this.product.name,
+        alt: imageObject.alt || this.product.name,
         title: this.product.name
       }));
 

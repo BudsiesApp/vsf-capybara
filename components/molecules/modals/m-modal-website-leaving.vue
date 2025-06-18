@@ -19,7 +19,11 @@
 
       <div class="_content">
         <div class="_column">
-          <img src="/assets/images/hilariously-surprised-dogs.jpg" class="_image">
+          <img
+            src="/assets/images/hilariously-surprised-dogs.jpg"
+            class="_image"
+            alt=""
+          >
         </div>
 
         <div class="_column">

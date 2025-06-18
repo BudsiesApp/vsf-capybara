@@ -51,6 +51,7 @@
               v-model="birthMonth"
               :required="true"
               :disabled="isDisabled"
+              :title="$t('Month')"
               class="_select sf-select--underlined"
               :class="classes"
             >
@@ -78,6 +79,7 @@
             <SfSelect
               v-model="birthDay"
               :required="true"
+              :title="$t('Day')"
               :disabled="isDisabled"
               class="_select sf-select--underlined"
               :class="classes"

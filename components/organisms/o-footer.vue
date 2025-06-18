@@ -41,6 +41,7 @@
             :href="item.url"
             v-for="item in social"
             :key="item.name + ';' + item.url"
+            :aria-label="item.label"
             class="social-icon__link"
             :class="'-' + item.name"
             target="_blank"
@@ -53,6 +54,7 @@
           :href="item.url"
           v-for="item in social"
           :key="item.name + ';' + item.url"
+          :aria-label="item.label"
           class="social-icon__link"
           :class="'-' + item.name"
           target="_blank"
@@ -119,34 +121,40 @@ export default {
       default: ''
     }
   },
-  data () {
-    return {
-      social: [
+  computed: {
+
+    ...mapGetters('user', ['isLoggedIn']),
+    social () {
+      const { name } = currentStoreView();
+
+      return [
         {
           name: 'facebook',
-          url: 'https://www.facebook.com/petsies/'
+          url: 'https://www.facebook.com/petsies/',
+          label: this.$t('{brand} {service} page', { brand: name, service: 'Facebook' })
         },
         {
           name: 'instagram',
-          url: 'https://www.instagram.com/petsies/'
+          url: 'https://www.instagram.com/petsies/',
+          label: this.$t('{brand} {service} page', { brand: name, service: 'Instagram' })
         },
         {
           name: 'twitter',
-          url: 'https://twitter.com/petsiesofficial/'
+          url: 'https://twitter.com/petsiesofficial/',
+          label: this.$t('{brand} {service} page', { brand: name, service: 'Twitter' })
         },
         {
           name: 'pinterest',
-          url: 'https://www.pinterest.com/petsies/'
+          url: 'https://www.pinterest.com/petsies/',
+          label: this.$t('{brand} {service} page', { brand: name, service: 'Pinterest' })
         },
         {
           name: 'tiktok',
-          url: 'https://www.tiktok.com/@mypetsies'
+          url: 'https://www.tiktok.com/@mypetsies',
+          label: this.$t('{brand} {service} page', { brand: name, service: 'TikTok' })
         }
       ]
-    };
-  },
-  computed: {
-    ...mapGetters('user', ['isLoggedIn']),
+    },
     multistoreEnabled () {
       return get(config, 'storeViews.multistore', false);
     },
