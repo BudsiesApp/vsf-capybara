@@ -257,9 +257,10 @@ import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { OrderReview } from '@vue-storefront/core/modules/checkout/components/OrderReview';
 import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
 import { CartItemConfiguration, getCustomizationSystemThumbnail } from 'src/modules/customization-system';
-import { CART_ITEM_PRICE_DICTIONARY, IS_COUPON_PROCESSING, IS_TOTALS_SYNCING, IS_PAYMENT_METHODS_SYNCING } from '@vue-storefront/core/modules/cart';
+import { IS_COUPON_PROCESSING, IS_TOTALS_SYNCING, IS_PAYMENT_METHODS_SYNCING, CART_ITEM_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/cart';
 import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-item-key.function';
 
+import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { AFFIRM_MODAL_CLOSED } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';
 import { getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
 import { PAYMENT_ERROR_EVENT, PriceHelper } from 'src/modules/shared';
@@ -318,7 +319,7 @@ export default {
     }),
     ...mapMobileObserver(),
     cartItemPriceDictionary () {
-      return this.$store.getters[CART_ITEM_PRICE_DICTIONARY]
+      return this.$store.getters[CART_ITEM_LOCALIZED_PRICE_DICTIONARY]
     },
     cartItems () {
       return this.$store.getters['cart/getCartItems'];
@@ -373,6 +374,9 @@ export default {
     },
     isPaymentMethodSelectorDisabled () {
       return this.isCheckoutInProgress || this.$store.getters[IS_PAYMENT_METHODS_SYNCING];
+    },
+    selectedCurrency () {
+      return this.$store.getters[GET_ACTIVE_CURRENCY];
     }
   },
   beforeCreate () {
@@ -397,7 +401,7 @@ export default {
       openModal: 'openModal'
     }),
     formatPrice (price) {
-      return PriceHelper.formatPrice(price);
+      return PriceHelper.formatPrice(price, this.selectedCurrency.symbol);
     },
     getCartItemOptions,
     getThumbnailForProduct (product) {
