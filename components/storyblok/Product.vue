@@ -36,13 +36,14 @@ import { formatProductLink } from '@vue-storefront/core/modules/url/helpers';
 import ProductImage from '../core/ProductImage.vue';
 import { LocalizedRoute, StoreView } from 'core/lib/types';
 import config from 'config';
-import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
+import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import Product from 'core/modules/catalog/types/Product';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
 import { PriceHelper } from 'src/modules/shared';
 
 import ProductData from './interfaces/product-data.interface';
 import getProductImagePlaceholder from '@vue-storefront/core/modules/cart/helpers/getProductImagePlaceholder';
+import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 
 export default Blok.extend({
   name: 'StoryblokProductBlock',
@@ -57,7 +58,7 @@ export default Blok.extend({
   },
   computed: {
     productPriceDictionary (): Record<string, PriceHelper.ProductPrice> {
-      return this.$store.getters[PRODUCT_PRICE_DICTIONARY];
+      return this.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY];
     },
     itemData (): ProductData {
       return this.item as ProductData;
@@ -79,7 +80,7 @@ export default Blok.extend({
         return '';
       }
 
-      return PriceHelper.formatPrice(this.price);
+      return PriceHelper.formatPrice(this.price, this.selectedCurrency.symbol);
     },
     name (): string {
       if (!this.product) {
@@ -113,6 +114,9 @@ export default Blok.extend({
         loading: this.placeholder,
         error: this.placeholder
       }
+    },
+    selectedCurrency (): Currency {
+      return this.$store.getters[GET_ACTIVE_CURRENCY];
     }
   },
   created: async function (): Promise<void> {

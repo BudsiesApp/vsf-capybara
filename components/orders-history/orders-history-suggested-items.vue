@@ -41,8 +41,9 @@ import { SearchQuery } from 'storefront-query-builder';
 import config from 'config';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { PriceHelper } from '@vue-storefront/core/helpers';
-import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog/types/ProductGetters';
+import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog/types/ProductGetters';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
+import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { FETCH_SUGGESTED_PRODUCTS_ACTION, SUGGESTED_PRODUCTS_IDS_GETTER } from 'src/modules/orders-history';
 import { isCustomProduct, ProductEvent, useMobileObserver } from 'src/modules/shared';
 
@@ -86,12 +87,16 @@ export default defineComponent({
       return root.$store.getters[SUGGESTED_PRODUCTS_IDS_GETTER];
     });
     const productPriceDictionary = computed<Record<string, PriceHelper.ProductPrice>>(() => {
-      return root.$store.getters[PRODUCT_PRICE_DICTIONARY]
+      return root.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY]
+    });
+    const selectedCurrency = computed<Currency>(() => {
+      return root.$store.getters[GET_ACTIVE_CURRENCY];
     });
 
     const products = computed<any[]>(() => {
       const list: any[] = [];
       const _productPriceDictionary = productPriceDictionary.value;
+      const _selectedCurrency = selectedCurrency.value;
 
       for (const id of suggestedProductsIds.value) {
         const product = Object.values(productBySkuDictionary.value).find((product) => product.id === id);
@@ -107,7 +112,7 @@ export default defineComponent({
         }
 
         const preparedProduct = {
-          ...prepareCategoryProduct(product, _productPriceDictionary),
+          ...prepareCategoryProduct(product, _productPriceDictionary, _selectedCurrency),
           landing_page_url: product.landing_page_url,
           turnaroundTime: product.turnaround_time
         }

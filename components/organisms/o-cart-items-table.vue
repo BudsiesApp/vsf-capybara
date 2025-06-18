@@ -10,9 +10,10 @@
 import { PropType } from 'vue';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
 
-import { CART_ITEM_PRICE_DICTIONARY, GET_CART_ITEM_PRICE } from '@vue-storefront/core/modules/cart';
+import { CART_ITEM_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/cart';
 import CartItem from 'core/modules/cart/types/CartItem';
 import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-item-key.function';
+import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { getCustomizationSystemThumbnail } from 'src/modules/customization-system';
 import { PriceHelper } from 'src/modules/shared';
 
@@ -49,16 +50,17 @@ export default {
     }
   },
   computed: {
-    cartItemPriceDictionary (): Record<string, PriceHelper.ProductPrice> {
-      return this.$store.getters[CART_ITEM_PRICE_DICTIONARY];
+    selectedCurrency (): Currency {
+      return this.$store.getters[GET_ACTIVE_CURRENCY];
     },
     tableItems (): OrderContentItem[] {
       return this.cartItems.map((cartItem) => {
-        const price: PriceHelper.ProductPrice = this.$store.getters[GET_CART_ITEM_PRICE](cartItem);
-        const formattedPrice = PriceHelper.formatProductPrice(price);
+        const cartItemKey = this.getCartItemKey(cartItem);
+        const price: PriceHelper.ProductPrice = this.$store.getters[CART_ITEM_LOCALIZED_PRICE_DICTIONARY][cartItemKey];
+        const formattedPrice = PriceHelper.formatProductPrice(price, this.selectedCurrency.symbol);
 
         return {
-          key: this.getCartItemKey(cartItem),
+          key: cartItemKey,
           thumbnail: this.getThumbnailForProduct(cartItem),
           name: cartItem.name,
           qty: cartItem.qty,

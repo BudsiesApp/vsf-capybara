@@ -9,35 +9,35 @@
     <SfProperty
       v-if="regularSubtotalPrice"
       :name="$t('Subtotal')"
-      :value="regularSubtotalPrice | price"
+      :value="formatPrice(regularSubtotalPrice)"
       class="sf-property--full-width property"
       :class="{'sf-property--large': isLarge}"
     />
     <SfProperty
       v-if="prices.subtotal_incl_tax"
       :name="$t('Subtotal Incl Tax')"
-      :value="prices.subtotal_incl_tax | price"
+      :value="formatPrice(prices.subtotal_incl_tax)"
       class="sf-property--full-width property"
       :class="{'sf-property--large': isLarge}"
     />
     <SfProperty
       v-if="prices.tax"
       :name="$t('Tax')"
-      :value="prices.tax | price"
+      :value="formatPrice(prices.tax)"
       class="sf-property--full-width property"
       :class="{'sf-property--large': isLarge}"
     />
     <SfProperty
       v-if="prices.shipping || prices.shipping === 0"
       :name="$t('Shipping')"
-      :value="prices.shipping | price"
+      :value="formatPrice(prices.shipping)"
       class="sf-property--full-width property"
       :class="{'sf-property--large': isLarge}"
     />
     <template v-if="discount">
       <SfProperty
         :name="discount.title"
-        :value="discount.value | price"
+        :value="formatPrice(discount.value)"
         class="sf-property--full-width property --marked"
         :class="{'sf-property--large': isLarge}"
       />
@@ -46,7 +46,7 @@
     <SfProperty
       v-if="prices.amgiftcard"
       :name="$t('Gift Cards Applied')"
-      :value="prices.amgiftcard | price"
+      :value="formatPrice(prices.amgiftcard)"
       class="sf-property--full-width property --marked"
       :class="{'sf-property--large': isLarge}"
     />
@@ -54,7 +54,7 @@
     <template v-if="savingsTotal">
       <SfProperty
         :name="$t('Price Savings')"
-        :value="savingsTotal | price"
+        :value="formatPrice(savingsTotal)"
         class="sf-property--full-width property --marked"
         :class="{'sf-property--large': isLarge}"
       />
@@ -62,7 +62,7 @@
     <template v-if="discountsTotal">
       <SfProperty
         :name="$t('Total Discounts')"
-        :value="discountsTotal | price"
+        :value="formatPrice(discountsTotal)"
         class="sf-property--full-width property --marked"
         :class="{'sf-property--large': isLarge}"
       />
@@ -79,16 +79,32 @@
     <SfDivider class="divider" />
     <SfProperty
       :name="$t('Grand Total')"
-      :value="prices.grand_total | price"
+      :value="formatPrice(prices.grand_total)"
       class="sf-property--full-width property"
       :class="{'sf-property--large': isLarge}"
     />
+
+    <template v-if="showDefaultCurrencyGrandTotal">
+      <SfProperty
+        :name="$t('Grand Total(in USD)')"
+        :value="prices.grand_total | price"
+        class="sf-property--full-width property"
+        :class="{'sf-property--large': isLarge}"
+      />
+
+      <div class="_note">
+        {{ $t(`Note: You will be charged in USD. The amount shown in your selected currency is an estimate based on the current exchange rate and may vary slightly depending on your payment provider.`) }}
+      </div>
+    </template>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
 import { SfProperty, SfDivider } from '@storefront-ui/vue';
+
+import { PriceHelper } from '@vue-storefront/core/helpers';
+import { DEFAULT_CURRENCY, GET_CURRENCY_EXCHANGE_RATE, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 
 import MSpinnerButton from 'theme/components/molecules/m-spinner-button.vue';
 
@@ -140,6 +156,15 @@ export default {
     },
     discountsTotal () {
       return this.prices.discounts_total || this.prices.discounts;
+    },
+    selectedCurrency () {
+      return this.$store.getters[GET_ACTIVE_CURRENCY];
+    },
+    showDefaultCurrencyGrandTotal () {
+      return this.selectedCurrency.code !== DEFAULT_CURRENCY.code;
+    },
+    exchangeRate () {
+      return this.$store.getters[GET_CURRENCY_EXCHANGE_RATE];
     }
   },
   methods: {
@@ -155,6 +180,12 @@ export default {
       } finally {
         this.isCouponRemoving = false;
       }
+    },
+    formatPrice (price) {
+      return PriceHelper.formatPrice(
+        price * this.exchangeRate,
+        this.selectedCurrency.symbol
+      );
     }
   }
 };
@@ -172,6 +203,10 @@ export default {
     --divider-border-color: var(--c-white);
     --divider-width: 100%;
     --divider-margin: 0 0 var(--spacer-base) 0;
+  }
+
+  ._note {
+    font-size: var(--font-xs);
   }
 }
 
