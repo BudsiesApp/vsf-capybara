@@ -22,10 +22,12 @@ import {
   defineComponent,
   onMounted,
   ref,
-  PropType
+  PropType,
+  onBeforeUnmount
 } from '@vue/composition-api';
 import { SfLoader } from '@storefront-ui/vue';
 
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { Logger } from '@vue-storefront/core/lib/logger';
 
 export default defineComponent({
@@ -72,7 +74,16 @@ export default defineComponent({
     };
 
     onMounted(() => {
+      if (!root.$store.getters['user/getIsSessionStarted']) {
+        EventBus.$once('session-after-started', authenticate);
+        return;
+      }
+
       authenticate();
+    });
+
+    onBeforeUnmount(() => {
+      EventBus.$off('session-after-started', authenticate);
     });
 
     return {
