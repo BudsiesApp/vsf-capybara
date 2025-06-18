@@ -30,6 +30,7 @@ import { MailchimpModule } from 'src/modules/mailchimp'
 import { PersistedCustomerDataModule } from 'src/modules/persisted-customer-data'
 import { TrueVaultModule } from 'src/modules/true-vault';
 import { OrdersHistoryModule } from 'src/modules/orders-history';
+import { CurrencyModule } from 'src/modules/currency';
 
 import registerStoryblokComponents from 'theme/components/storyblok'
 
@@ -85,6 +86,7 @@ export function registerClientModules () {
   registerModule(MailchimpModule)
   registerModule(PersistedCustomerDataModule)
   registerModule(OrdersHistoryModule)
+  registerModule(CurrencyModule)
 }
 
 // Deprecated API, will be removed in 2.0
