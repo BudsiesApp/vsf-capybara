@@ -1,20 +1,20 @@
-import { Store } from 'vuex';
 import { Logger } from '@vue-storefront/core/lib/logger';
 
-import { RushAddon } from 'src/modules/budsies';
+import { Currency } from 'src/modules/currency';
 import { OptionValue, PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID } from 'src/modules/customization-system';
+import { RushAddon } from 'src/modules/budsies';
 
 import ProductionTimeOption from '../components/interfaces/production-time-option.interface';
+import { PriceHelper } from 'src/modules/shared';
 
 export function getProductionTimeOptionsFromCustomization (
-  productId: number,
   bundleOptionId: number,
   customizationOptionValues: OptionValue[],
-  store: Store<any>
+  productRushAddons: RushAddon[],
+  currencyExchangeRate: number,
+  selectedCurrency: Currency
 ): ProductionTimeOption[] {
-  const addons: RushAddon[] = store.getters['budsies/getProductRushAddons'](productId);
-
-  if (!addons.length) {
+  if (!productRushAddons.length) {
     return [];
   }
 
@@ -30,7 +30,7 @@ export function getProductionTimeOptionsFromCustomization (
     addonOptions[optionValue.sku] = optionValue;
   }
 
-  for (const addon of addons) {
+  for (const addon of productRushAddons) {
     const addonOption = addonOptions[addon.id];
 
     if (!addonOption && addon.id) {
@@ -38,10 +38,13 @@ export function getProductionTimeOptionsFromCustomization (
       continue;
     }
 
+    const price = addon.price * currencyExchangeRate;
+    const text = `${addon.text}: +${PriceHelper.formatPrice(price, selectedCurrency.symbol)}`;
+
     result.push({
       // TODO: get rid of hardcoded id
       id: addonOption?.id || PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID,
-      text: addon.text,
+      text,
       isDomestic: addon.isDomestic,
       optionId: bundleOptionId,
       optionValueId: addonOption?.bundleOptionItemId || 0,

@@ -19,6 +19,7 @@ import { ErrorConverterService } from 'src/modules/budsies'
 import { isServer } from '@vue-storefront/core/helpers'
 import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
 import { SN_PROMOTION_PLATFORM } from 'src/modules/promotion-platform/types/StoreMutations';
+import { FETCH_AVAILABLE_CURRENCIES_ACTION, FETCH_CURRENCY_RATES_ACTION, GET_CURRENCY_EXCHANGE_RATE } from 'src/modules/currency';
 
 const windowObject = isServer ? {} : window;
 const errorConverterService = new ErrorConverterService();
@@ -42,7 +43,9 @@ export default {
   async serverPrefetch () {
     try {
       const loadingPromises = [
-        this.$store.dispatch('backend-settings/fetchSettings')
+        this.$store.dispatch('backend-settings/fetchSettings'),
+        this.$store.dispatch(FETCH_AVAILABLE_CURRENCIES_ACTION),
+        this.$store.dispatch(FETCH_CURRENCY_RATES_ACTION)
       ];
 
       if (this.$store.hasModule(SN_PROMOTION_PLATFORM)) {

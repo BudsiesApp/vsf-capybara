@@ -6,9 +6,7 @@
       class="sf-heading--left sf-heading--no-underline title"
     />
     <MPriceSummary :is-large="true" />
-    <div class="_total-notes">
-      {{ $t('All pricing in USD') }}
-    </div>
+
     <div class="actions">
       <APromoCode :allow-promo-code-removal="false">
         <template #bottom-helper-text="{ isCouponApplied }">

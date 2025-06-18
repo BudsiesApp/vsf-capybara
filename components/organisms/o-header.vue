@@ -65,6 +65,8 @@
       </template>
       <template #header-icons>
         <div class="sf-header__icons">
+          <CurrencySelector />
+
           <AAccountIcon class="sf-header__action" />
           <ADetailedCartIcon class="sf-header__action" />
         </div>
@@ -76,6 +78,9 @@
 <script>
 import { SfButton, SfHeader, SfOverlay } from '@storefront-ui/vue';
 import { mapState, mapGetters } from 'vuex';
+
+
+import { CurrencySelector } from 'src/modules/currency';
 
 import ALogo from 'theme/components/atoms/a-logo';
 import AAccountIcon from 'theme/components/atoms/a-account-icon';
@@ -93,7 +98,8 @@ export default {
     SfOverlay,
     SfButton,
     MMenu,
-    MCtaButton
+    MCtaButton,
+    CurrencySelector
   },
   data () {
     return {
