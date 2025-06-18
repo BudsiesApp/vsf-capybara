@@ -108,12 +108,12 @@ function useRateLimit ({ root }: SetupContext) {
   const RATE_LIMIT_ERROR_CODE = 429;
 
   const rateLimitCountdown = ref(0);
-  const rateLimitTimer = ref<number | null>(null);
+  const rateLimitTimer = ref<number | undefined>(undefined);
 
   const clearRateLimitTimer = (): void => {
     if (rateLimitTimer.value) {
-      clearInterval(rateLimitTimer.value);
-      rateLimitTimer.value = null;
+      window.clearInterval(rateLimitTimer.value);
+      rateLimitTimer.value = undefined;
     }
 
     rateLimitCountdown.value = 0;
@@ -126,13 +126,13 @@ function useRateLimit ({ root }: SetupContext) {
 
     rateLimitCountdown.value = RATE_LIMIT_TIMEOUT;
 
-    rateLimitTimer.value = setInterval(() => {
+    rateLimitTimer.value = window.setInterval(() => {
       rateLimitCountdown.value--;
 
       if (rateLimitCountdown.value <= 0) {
         clearRateLimitTimer();
       }
-    }, 1000) as any;
+    }, 1000);
   };
 
   const isRateLimitError = (task: Task): boolean => {
