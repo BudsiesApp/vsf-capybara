@@ -512,6 +512,12 @@ export default defineComponent({
     --customization-option-hint-align: center;
 
     margin-top: var(--spacer-base);
+
+    ::v-deep {
+      .cards-list-widget {
+        width: 100%;
+      }
+    }
   }
 
   ._step-divider {
