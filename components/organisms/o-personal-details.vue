@@ -190,7 +190,7 @@ export default {
 
       const loginForm = this.$refs['login-form'];
 
-      if (loginForm) {
+      if (loginForm?.validateForm) {
         const isLoginFormValid = await loginForm.validateForm();
 
         if (!isLoginFormValid) {
