@@ -86,7 +86,7 @@
 
     <template v-if="showDefaultCurrencyGrandTotal">
       <SfProperty
-        :name="$t('Grand Total(in USD)')"
+        :name="$t('Grand Total(USD)')"
         :value="prices.grand_total | price"
         class="sf-property--full-width property"
         :class="{'sf-property--large': isLarge}"
