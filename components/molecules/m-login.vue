@@ -16,12 +16,12 @@
             email: true
           }"
           slim
-          name="email"
+          name="Email"
           mode="eager"
         >
           <SfInput
             v-model.trim="emailValue"
-            name="email"
+            name="email-address"
             type="email"
             :label="$t('Email address')"
             :valid="!errors.length"
@@ -39,7 +39,7 @@
           v-slot="{ errors }"
           slim
           :rules="{ required: true }"
-          name="otp"
+          name="OTP"
           mode="eager"
         >
           <SfInput
