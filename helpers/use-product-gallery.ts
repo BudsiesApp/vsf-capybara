@@ -19,7 +19,8 @@ export function useProductGallery (
         return {
           stage: image.src,
           thumb: image.src,
-          big: image.src
+          big: image.src,
+          alt: image.alt || product.value.name
         };
       });
   });
@@ -42,7 +43,8 @@ export function useProductGallery (
             return {
               stage: getThumbnailPath(image.imageUrl, config.products.gallery.width, config.products.gallery.height, ''),
               thumb: getThumbnailPath(image.imageUrl, config.products.gallery.width, config.products.gallery.height, ''),
-              big: getThumbnailPath(image.imageUrl, config.products.gallery.width, config.products.gallery.height, '')
+              big: getThumbnailPath(image.imageUrl, config.products.gallery.width, config.products.gallery.height, ''),
+              alt: image.alt || value.name
             }
           });
       }
