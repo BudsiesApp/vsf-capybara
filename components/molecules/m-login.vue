@@ -95,7 +95,8 @@ import {
   ref,
   SetupContext,
   nextTick,
-  PropType
+  PropType,
+  Ref
 } from '@vue/composition-api';
 import { ValidationProvider, ValidationObserver } from 'vee-validate';
 import { SfInput, SfButton } from '@storefront-ui/vue';
@@ -161,6 +162,9 @@ function useRateLimit ({ root }: SetupContext) {
   }
 }
 
+type ValidationObserverInstance = InstanceType<typeof ValidationObserver>;
+type SfInputInstance = InstanceType<typeof SfInput>;
+
 export default defineComponent({
   name: 'MLogin',
   props: {
@@ -182,8 +186,8 @@ export default defineComponent({
   setup (props, context) {
     const root = context.root;
 
-    const otpInput = ref<InstanceType<typeof SfInput> | null>(null);
-    const validationObserver = ref<InstanceType<typeof ValidationObserver> | null>(null);
+    const otpInput = ref<SfInputInstance | null>(null);
+    const validationObserver = ref<ValidationObserverInstance | null>(null);
 
     const emailValue = computed<string>({
       get: () => {
@@ -196,7 +200,7 @@ export default defineComponent({
 
     const otpCode = ref<string>('');
 
-    const isSubmitting = ref<boolean>(false);
+    const isSubmitting = ref(false);
 
     const isCodeSent = ref(false);
 
@@ -216,7 +220,8 @@ export default defineComponent({
     } = useRateLimit(context);
 
     function focusOtpInput (): void {
-      const otpInputRootElement = otpInput.value?.$el;
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      const otpInputRootElement = (otpInput as Ref<SfInputInstance | null>).value?.$el;
 
       if (!otpInputRootElement) {
         return;
@@ -312,7 +317,8 @@ export default defineComponent({
         return;
       }
 
-      validationObserver.value?.reset();
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      (validationObserver as Ref<ValidationObserverInstance | null>).value?.reset();
 
       await requestOtp();
     };
@@ -326,11 +332,14 @@ export default defineComponent({
     };
 
     const validateForm = async (): Promise<boolean> => {
-      if (!validationObserver.value) {
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      const _validationObserver = (validationObserver as Ref<ValidationObserverInstance | null>);
+
+      if (!_validationObserver.value) {
         return false;
       }
 
-      return validationObserver.value.validate();
+      return _validationObserver.value.validate();
     }
 
     return {

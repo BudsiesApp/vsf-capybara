@@ -47,6 +47,11 @@ export default defineComponent({
     const errorMessage = ref<string>('');
 
     const authenticate = async (): Promise<void> => {
+      if (root.$store.getters['user/isLoggedIn']) {
+        root.$router.push('/');
+        return;
+      }
+
       if (!props.token) {
         errorMessage.value = root.$t('No authentication token provided') as string;
         isLoading.value = false;
@@ -91,6 +96,9 @@ export default defineComponent({
       isSuccess,
       errorMessage
     };
+  },
+  async serverPrefetch (): Promise<void> {
+    this.$ssrContext.output.cacheTags.add('no-cache');
   },
   metaInfo (): any {
     return {
