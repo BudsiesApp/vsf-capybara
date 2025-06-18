@@ -6,15 +6,46 @@
       class="sf-heading--left sf-heading--no-underline title"
     />
 
-    <div v-if="!currentUser" class="log-in desktop-only">
-      <SfButton class="log-in__button color-secondary" @click="login">
-        {{ $t('Log in to your account') }}
-      </SfButton>
-      <p class="log-in__info">
-        {{ $t('or fill the details below') }}:
-      </p>
-    </div>
     <div class="form">
+      <div
+        v-if="!currentUser"
+        class="log-in form__element"
+      >
+        <m-login
+          ref="login-form"
+          :email.sync="personalDetails.emailAddress"
+          :email-submit-button-text="$t('Log In/Create account')"
+        >
+          <template #submit-button="{ isDisabled, submitButtonText }">
+            <SfButton
+              type="submit"
+              :disabled="isDisabled"
+              class="log-in__button color-secondary"
+            >
+              {{ submitButtonText }}
+            </SfButton>
+          </template>
+        </m-login>
+      </div>
+
+      <SfInput
+        v-else
+        v-model.trim="personalDetails.emailAddress"
+        class="form__element"
+        :class="{[vuelidateErrorClassName]: $v.personalDetails.emailAddress.$error}"
+        name="email-address"
+        :disabled="true"
+        :label="$t('Email address')"
+        :required="true"
+        :valid="!$v.personalDetails.emailAddress.$error"
+        :error-message="
+          !$v.personalDetails.emailAddress.required
+            ? $t('Field is required')
+            : $t('Please provide valid e-mail address.')
+        "
+        @blur="$v.personalDetails.emailAddress.$touch()"
+      />
+
       <SfInput
         v-model.trim="personalDetails.firstName"
         class="form__element form__element--half"
@@ -37,67 +68,7 @@
         :error-message="$t('Field is required')"
         @blur="$v.personalDetails.lastName.$touch()"
       />
-      <SfInput
-        v-model.trim="personalDetails.emailAddress"
-        class="form__element"
-        :class="{[vuelidateErrorClassName]: $v.personalDetails.emailAddress.$error}"
-        name="email-address"
-        :label="$t('Email address')"
-        :required="true"
-        :valid="!$v.personalDetails.emailAddress.$error"
-        :error-message="
-          !$v.personalDetails.emailAddress.required
-            ? $t('Field is required')
-            : $t('Please provide valid e-mail address.')
-        "
-        @blur="$v.personalDetails.emailAddress.$touch()"
-      />
-      <template v-if="!currentUser">
-        <div class="form__element">
-          <SfCheckbox
-            v-model="createAccount"
-            :label="$t('I want to create an account')"
-            class="form__checkbox"
-            name="createAccount"
-          />
-        </div>
-        <template v-if="createAccount">
-          <m-password
-            ref="password"
-            v-model="passwordData"
-            :error-class-name="vuelidateErrorClassName"
-          />
 
-          <div class="form__element form__group">
-            <SfCheckbox
-              v-model="acceptConditions"
-              class="form__checkbox"
-              name="acceptConditions"
-              :required="true"
-              :valid="!$v.acceptConditions.$error"
-            >
-              <template #label>
-                <span class="sf-checkbox__label">
-                  {{ $t('I accept') }}
-
-                  <router-link
-                    target="_blank"
-                    to="/terms-of-service/"
-                  >
-                    {{ $t('Terms of Service') }}
-                  </router-link>
-
-                  <span>
-                    {{ $t('and') }}
-                  </span>
-
-                  <privacy-policy-link />
-                </span>
-              </template>
-            </SfCheckbox>
-          </div>
-        </template>
-      </template>
       <APromoCode :allow-promo-code-removal="false" class="mobile-only">
         <template #title>
           <SfHeading
@@ -146,6 +117,7 @@ import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/help
 
 import APromoCode from 'theme/components/atoms/a-promo-code'
 import MPassword from 'theme/components/molecules/m-password'
+import MLogin from 'theme/components/molecules/m-login';
 
 export default {
   name: 'OPersonalDetails',
@@ -156,7 +128,8 @@ export default {
     SfButton,
     SfHeading,
     SfCheckbox,
-    MPassword
+    MPassword,
+    MLogin
   },
   mixins: [PersonalDetails],
   validations: {
@@ -213,6 +186,16 @@ export default {
       } else {
         this.$v.personalDetails.$touch();
         isInvalid = this.$v.personalDetails.$invalid;
+      }
+
+      const loginForm = this.$refs['login-form'];
+
+      if (loginForm) {
+        const isLoginFormValid = await loginForm.validateForm();
+
+        if (!isLoginFormValid) {
+          isInvalid = true;
+        }
       }
 
       if (isInvalid) {
