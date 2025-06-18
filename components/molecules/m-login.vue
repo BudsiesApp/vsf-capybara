@@ -229,7 +229,6 @@ export default defineComponent({
       }
 
       inputElement.focus();
-      debugger;
     }
 
     const resendOtpButtonText = computed<string>(() => {
