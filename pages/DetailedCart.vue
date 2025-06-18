@@ -171,12 +171,13 @@ import { mapGetters, mapState } from 'vuex';
 import { PriceHelper } from 'src/modules/shared';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
-import { CART_ITEM_PRICE_DICTIONARY } from '@vue-storefront/core/modules/cart';
+import { CART_ITEM_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/cart';
 import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-item-key.function';
 import CartEvents from 'src/modules/shared/types/cart-events';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 import { CART_UPD_ITEM } from '@vue-storefront/core/modules/cart/store/mutation-types';
+import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
 import { CartItemConfiguration, getCustomizationSystemThumbnail } from 'src/modules/customization-system';
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
@@ -296,7 +297,7 @@ export default {
     }),
     ...mapMobileObserver(),
     cartItemPriceDictionary () {
-      return this.$store.getters[CART_ITEM_PRICE_DICTIONARY];
+      return this.$store.getters[CART_ITEM_LOCALIZED_PRICE_DICTIONARY];
     },
     totalItems () {
       return this.products.reduce(
@@ -309,6 +310,9 @@ export default {
     },
     canShowProductionSpotCountdown () {
       return this.products.some((product) => isCustomProduct(product.id));
+    },
+    selectedCurrency () {
+      return this.$store.getters[GET_ACTIVE_CURRENCY];
     },
     skinClass () {
       return getCurrentThemeClass();
@@ -402,7 +406,7 @@ export default {
       }
     },
     formatPrice (price) {
-      return PriceHelper.formatProductPrice(price);
+      return PriceHelper.formatProductPrice(price, this.selectedCurrency.symbol);
     },
     async removeHandler (product) {
       if (this.isCartItemProcessing) {

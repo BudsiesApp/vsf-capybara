@@ -7,7 +7,7 @@ import { htmlDecode } from '@vue-storefront/core/filters'
 import { PriceHelper } from 'src/modules/shared';
 
 import getProductImagePlaceholder from '@vue-storefront/core/modules/cart/helpers/getProductImagePlaceholder';
-import Product from 'core/modules/catalog/types/Product';
+import { Currency } from 'src/modules/currency';
 
 export function getPathForStaticPage (path: string) {
   const { storeCode } = currentStoreView()
@@ -56,7 +56,8 @@ export function getTopLevelCategories (categoryList) {
 
 export function prepareCategoryProduct (
   product,
-  productPriceDictionary: Record<string, PriceHelper.ProductPrice>
+  productPriceDictionary: Record<string, PriceHelper.ProductPrice>,
+  selectedCurrency: Currency
 ) {
   const imagePath = productThumbnailPath(product);
   const thumbnailPath = !imagePath ? getProductImagePlaceholder() : getThumbnailPath(
@@ -68,13 +69,13 @@ export function prepareCategoryProduct (
   const discount = PriceHelper.getProductDiscount(price);
 
   return {
-    discount: PriceHelper.formatProductDiscount(discount).discountPercent,
+    discount: PriceHelper.formatProductDiscount(discount, selectedCurrency.symbol).discountPercent,
     id: product.id,
     sku: product.sku,
     title: htmlDecode(product.name),
     image: thumbnailPath,
     link: formatProductLink(product, currentStoreView().storeCode),
-    price: PriceHelper.formatProductPrice(price),
+    price: PriceHelper.formatProductPrice(price, selectedCurrency.symbol),
     rating: {
       max: 5,
       score: 5

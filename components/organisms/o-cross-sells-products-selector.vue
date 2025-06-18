@@ -23,7 +23,7 @@
 import { PropType, defineComponent, onBeforeMount, onServerPrefetch, toRefs } from '@vue/composition-api';
 import { SfHeading } from '@storefront-ui/vue';
 
-import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
+import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { getProductGallery } from '@vue-storefront/core/modules/catalog/helpers';
 import { PriceHelper } from 'src/modules/shared';
@@ -101,7 +101,7 @@ export default defineComponent({
       return this.$store.getters['cart/getIsAdding'];
     },
     productPriceDictionary (): Record<string, PriceHelper.ProductPrice> {
-      return this.$store.getters[PRODUCT_PRICE_DICTIONARY];
+      return this.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY];
     },
     productOptions (): AddonOption[] {
       return this.relatedProducts.map(
