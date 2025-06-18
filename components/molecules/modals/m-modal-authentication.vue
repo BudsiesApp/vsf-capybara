@@ -6,22 +6,7 @@
         mode="out-in"
         @after-enter="onTransitionAfterEnter"
       >
-        <MLogin
-          v-if="modalData.payload === 'login'"
-          @form-switched="onFormSwitched"
-          @login-success="closeModal"
-        />
-
-        <MRegister
-          v-if="modalData.payload === 'register'"
-          @form-switched="onFormSwitched"
-          @login-success="closeModal"
-        />
-
-        <MResetPassword
-          v-if="modalData.payload === 'forgot-pass'"
-          @form-switched="onFormSwitched"
-        />
+        <MLogin :email.sync="email" />
       </transition>
     </SfModal>
   </div>
@@ -31,15 +16,11 @@
 import { SfModal } from '@storefront-ui/vue';
 import { mapActions } from 'vuex';
 
-import { ModalList } from 'theme/store/ui/modals'
-
 import MLogin from 'theme/components/molecules/m-login'
-import MRegister from 'theme/components/molecules/m-register'
-import MResetPassword from 'theme/components/molecules/m-reset-password'
 
 export default {
   name: 'MModalAuthentication',
-  components: { SfModal, MLogin, MRegister, MResetPassword },
+  components: { SfModal, MLogin },
   props: {
     isVisible: {
       type: Boolean,
@@ -49,6 +30,16 @@ export default {
       type: Object,
       default: () => ({}),
       required: true
+    }
+  },
+  data () {
+    return {
+      email: ''
+    };
+  },
+  computed: {
+    isUserLoggedIn () {
+      return this.$store.getters['user/isLoggedIn'];
     }
   },
   methods: {
@@ -66,9 +57,13 @@ export default {
       }
 
       modalComponent.updateDirectivesData();
-    },
-    onFormSwitched (to) {
-      this.openModal({ name: ModalList.Auth, payload: to })
+    }
+  },
+  watch: {
+    isUserLoggedIn (newValue) {
+      if (newValue) {
+        this.closeModal();
+      }
     }
   }
 };

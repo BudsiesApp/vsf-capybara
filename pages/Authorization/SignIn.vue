@@ -4,16 +4,14 @@
       <SfHeading :level="1" :title="$t('Sign In')" />
 
       <m-login
-        :prefilled-email="prefilledEmail"
-        @form-switched="onFormSwitched"
-        @login-success="onLoginSuccess"
+        :email.sync="email"
       />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent, ref, onBeforeMount } from '@vue/composition-api';
 import { SfHeading } from '@storefront-ui/vue';
 
 import { useAuthorizationPage } from 'theme/helpers/use-authorization-page';
@@ -27,16 +25,20 @@ export default defineComponent({
     SfHeading
   },
   setup (_, setupContext) {
+    const email = ref<string>('')
+
     const {
-      onFormSwitched,
-      onLoginSuccess,
       prefilledEmail
     } = useAuthorizationPage(setupContext);
 
+    onBeforeMount(() => {
+      if (prefilledEmail.value) {
+        email.value = prefilledEmail.value;
+      }
+    });
+
     return {
-      onFormSwitched,
-      onLoginSuccess,
-      prefilledEmail
+      email
     }
   },
   metaInfo (): any {

@@ -1,14 +1,6 @@
-import { SetupContext, onBeforeMount, computed } from '@vue/composition-api';
+import { SetupContext, onBeforeMount, computed, watch } from '@vue/composition-api';
 
-import { AuthorizationFormCode } from 'theme/interfaces/authorization-form-code';
 import { REDIRECT_TARGET_QUERY_KEY } from 'theme/interfaces/redirect-target-query-key';
-import { PageName } from 'theme/pages/page-name';
-
-const ROUTE_NAME = {
-  [AuthorizationFormCode.LOGIN]: PageName.SIGN_IN,
-  [AuthorizationFormCode.REGISTER]: PageName.SIGN_UP,
-  [AuthorizationFormCode.FORGOT_PASSWORD]: PageName.RESTORE_PASSWORD
-};
 
 export function useAuthorizationPage (
   { root }: SetupContext
@@ -39,22 +31,13 @@ export function useAuthorizationPage (
     }
   });
 
-  async function onFormSwitched (formCode: AuthorizationFormCode) {
-    const routeName = ROUTE_NAME[formCode];
-
-    await root.$router.push({
-      name: routeName,
-      query: root.$route.query
-    });
-  };
-
-  async function onLoginSuccess () {
-    await root.$router.push(redirectTarget.value);
-  }
+  watch(isUserLoggedIn, (isLoggedIn) => {
+    if (isLoggedIn) {
+      root.$router.push(redirectTarget.value);
+    }
+  });
 
   return {
-    onFormSwitched,
-    onLoginSuccess,
     prefilledEmail,
     redirectTarget
   }

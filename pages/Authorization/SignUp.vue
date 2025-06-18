@@ -3,40 +3,43 @@
     <div class="_content">
       <SfHeading :level="1" :title="$t('Sign Up')" />
 
-      <m-register
-        :prefilled-email="prefilledEmail"
-        @form-switched="onFormSwitched"
-        @login-success="onLoginSuccess"
+      <m-login
+        :email.sync="email"
+        :email-submit-button-text="$t('Sign Up')"
       />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent, onBeforeMount, ref } from '@vue/composition-api';
 import { SfHeading } from '@storefront-ui/vue';
 
 import { useAuthorizationPage } from 'theme/helpers/use-authorization-page';
 
-import MRegister from '../../components/molecules/m-register.vue';
+import MLogin from '../../components/molecules/m-login.vue';
 
 export default defineComponent({
   name: 'SignUpPage',
   components: {
-    MRegister,
+    MLogin,
     SfHeading
   },
   setup (_, setupContext) {
+    const email = ref<string>('')
+
     const {
-      onFormSwitched,
-      onLoginSuccess,
       prefilledEmail
     } = useAuthorizationPage(setupContext);
 
+    onBeforeMount(() => {
+      if (prefilledEmail.value) {
+        email.value = prefilledEmail.value;
+      }
+    });
+
     return {
-      onFormSwitched,
-      onLoginSuccess,
-      prefilledEmail
+      email
     }
   },
   metaInfo (): any {
