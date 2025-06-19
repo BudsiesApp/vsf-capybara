@@ -93,7 +93,9 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import { SfButton, SfFooter, SfList, SfMenuItem, SfHeading } from '@storefront-ui/vue';
+import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 
 import { BaseImage } from 'src/modules/budsies';
 import { PrivacyPolicyLink } from 'src/modules/shared';
