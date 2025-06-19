@@ -148,6 +148,10 @@ export default Vue.extend({
           url: '/pet-bobblehead-figurines/'
         },
         {
+          name: this.$t('Petsies Huggables'),
+          link: { name: 'huggables-creation-page' }
+        },
+        {
           label: this.$t('Magnets'),
           url: {
             name: 'felted-magnets-creation-page'
