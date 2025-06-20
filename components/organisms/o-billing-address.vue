@@ -230,7 +230,7 @@ import {
 } from '@storefront-ui/vue';
 import { createSmoothscroll } from 'theme/helpers';
 import MMultiselect from 'theme/components/molecules/m-multiselect';
-import { LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, LAST_USED_CUSTOMER_PHONE_NUMBER, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_PHONE_NUMBER } from 'src/modules/persisted-customer-data';
+import { LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, LAST_USED_CUSTOMER_PHONE_NUMBER, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_PHONE_NUMBER, SET_LAST_USED_CUSTOMER_BILLING_ADDRESS } from 'src/modules/persisted-customer-data';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
 import {
@@ -364,6 +364,17 @@ export default {
     },
     showVatIdField () {
       return !!this.payment.country && this.payment.country !== unitedStatesCountryCode;
+    },
+    selectedRegionName () {
+      if (!this.isSelectedCountryHasStates || !this.payment.region_id) {
+        return '';
+      }
+
+      const state = this.getStatesForSelectedCountry.find(
+        ({ id }) => this.payment.region_id === id
+      );
+
+      return state ? state.name : '';
     }
   },
   mounted () {
@@ -416,6 +427,19 @@ export default {
       this.$store.commit(
         SET_LAST_USED_CUSTOMER_PHONE_NUMBER,
         this.payment.phoneNumber
+      );
+
+      this.$store.commit(
+        SET_LAST_USED_CUSTOMER_BILLING_ADDRESS,
+        {
+          firstName: this.payment.firstName,
+          lastName: this.payment.lastName,
+          phoneNumber: this.payment.phoneNumber,
+          city: this.payment.city,
+          state: this.selectedRegionName || this.payment.state,
+          zipCode: this.payment.zipCode,
+          country: this.payment.country
+        }
       );
 
       this.sendDataToCheckout();

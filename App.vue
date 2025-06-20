@@ -22,7 +22,7 @@ import { USER_LEAVING_WEBSITE } from 'src/modules/promotion-platform';
 import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
 import { SN_PROMOTION_PLATFORM } from 'src/modules/promotion-platform/types/StoreMutations';
 import { FETCH_AVAILABLE_CURRENCIES_ACTION, FETCH_CURRENCY_RATES_ACTION, GET_CURRENCY_EXCHANGE_RATE } from 'src/modules/currency';
-import { notifyCustomerDataChanged, CUSTOMER_DATA, CUSTOMER_DATA_HASH } from 'src/modules/persisted-customer-data';
+import { notifyCustomerDataChanged, PERSISTED_CUSTOMER_DATA, CUSTOMER_DATA_HASH } from 'src/modules/persisted-customer-data';
 
 const windowObject = isServer ? {} : window;
 const errorConverterService = new ErrorConverterService();
@@ -42,8 +42,8 @@ export default {
     layout () {
       return `${get(this.$route, 'meta.layout', 'default')}-layout`
     },
-    customerData () {
-      return this.$store.getters[CUSTOMER_DATA];
+    persistedCustomerData () {
+      return this.$store.getters[PERSISTED_CUSTOMER_DATA];
     },
     customerDataHash () {
       return this.$store.getters[CUSTOMER_DATA_HASH];
@@ -97,9 +97,11 @@ export default {
           return;
         }
 
-        notifyCustomerDataChanged(this.customerData);
-      },
-      immediate: true
+        notifyCustomerDataChanged(
+          this.persistedCustomerData,
+          newHash
+        );
+      }
     }
   }
 };
