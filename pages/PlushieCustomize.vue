@@ -32,7 +32,6 @@ import {
   ref,
   toRefs
 } from '@vue/composition-api';
-import { useStore } from '@vue-storefront/core/lib/vsf-composables';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 
 import { useProductPage } from 'theme/helpers/use-product-page';
@@ -45,6 +44,7 @@ import VerticalStepsFormPlaceholder from 'theme/components/customization-system/
 import PhrasePillowFormPlaceholder from 'theme/components/customization-system/forms/placeholders/phrase-pillow-form-placeholder.vue';
 // import CreationWizardFormPlaceholder from 'theme/components/customization-system/forms/placeholders/creation-wizard-form-placeholder.vue';
 import { Logger } from '@vue-storefront/core/lib/logger';
+import { DraftPlushie } from 'src/modules/customization-system';
 
 export default defineComponent({
   name: 'PlushieCustomize',
@@ -85,17 +85,20 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const root = context.root;
     const { sku, draftPlushieId, layout } = toRefs(props);
-    const { dispatch, getters } = useStore();
 
     const { currentProduct, isDataLoaded: isProductLoaded } = useProductPage(
       sku,
       context
     );
+
     const isDraftPlushieLoaded = ref(false);
     const errorMessage = ref<string | null>(null);
 
-    const draftPlushie = computed(() => getters['customization-system/getDraftPlushie']);
+    const draftPlushie = computed<DraftPlushie>(
+      () => root.$store.getters['customization-system/getDraftPlushie']
+    );
 
     const showForm = computed<boolean>(() => {
       return (
@@ -118,7 +121,7 @@ export default defineComponent({
 
     onMounted(async () => {
       try {
-        await dispatch('customization-system/loadDraftPlushie', draftPlushieId.value);
+        await root.$store.dispatch('customization-system/loadDraftPlushie', draftPlushieId.value);
         isDraftPlushieLoaded.value = true;
       } catch (e) {
         Logger.error('PlushieCustomize', e)();
@@ -177,5 +180,4 @@ export default defineComponent({
     }
   }
 }
-
 </style>
