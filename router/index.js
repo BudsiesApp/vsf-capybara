@@ -1,5 +1,6 @@
 import { PlushieType } from 'theme/interfaces/plushie.type';
 import { PageName } from 'theme/pages/page-name';
+import { LayoutType } from 'theme/helpers/use-product-form-layout';
 
 const ErrorPage = () =>
   import(/* webpackChunkName: "vsf-error" */ 'theme/pages/Error');
@@ -48,6 +49,8 @@ const CustomizationSystemWidgetsTestPage = () =>
   import(/* webpackChunkName: "vsf-widgets-test" */ 'theme/pages/CustomizationSystemWidgetsTest');
 const CustomizableProduct = () =>
   import(/* webpackChunkName: "vsf-customizable-product" */ 'theme/pages/CustomizableProduct');
+const PlushieCustomize = () =>
+  import(/* webpackChunkName: "vsf-plushie-customize" */ 'theme/pages/PlushieCustomize');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -708,6 +711,16 @@ let routes = [
     redirect: (route) => ({
       path: '/',
       query: route.query
+    })
+  },
+  {
+    name: 'forevers-customize',
+    path: '/forevers/customize',
+    props: (route) => ({
+      draftPlushieId: route.query.draftPlushieId,
+      layout: LayoutType.CREATION_WIZARD,
+      // TODO
+      sku: 'ForeversDog_bundle'
     })
   }
 ];
