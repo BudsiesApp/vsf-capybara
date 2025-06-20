@@ -98,8 +98,7 @@ export default {
         }
 
         notifyCustomerDataChanged(
-          this.persistedCustomerData,
-          newHash
+          this.persistedCustomerData
         );
       }
     }
