@@ -57,12 +57,12 @@ export default function generateImageSourcesList (
       const adjustedWidth = Math.round(spec.width * density / 10) * 10;
       const adjustedHeight = Math.round(adjustedWidth * ratio);
 
-      let mod = '/fit-in';
+      let mod = '/m/fit-in';
       mod += `/${adjustedWidth}x${adjustedHeight}`;
 
-      const webpResizedUrl = 'https://img2.storyblok.com' + mod + webpFilter + resource;
-      const avifResizedUrl = 'https://img2.storyblok.com' + mod + avifFilter + resource;
-      const defaultResizedUrl = 'https://img2.storyblok.com' + mod + resource;
+      const webpResizedUrl = 'https://a.storyblok.com' + resource + mod + webpFilter;
+      const avifResizedUrl = 'https://a.storyblok.com' + resource + mod + avifFilter;
+      const defaultResizedUrl = 'https://a.storyblok.com' + resource + mod;
 
       webpSourceItem.srcset.push(`${webpResizedUrl}${density > 1 ? ' ' + density + 'x' : ''}`);
       avifSourceItem.srcset.push(`${avifResizedUrl}${density > 1 ? ' ' + density + 'x' : ''}`);
