@@ -6,6 +6,7 @@
     :should-lock-scroll-on-open="isMobile"
     :valid="isValid"
     v-model="selectedOption"
+    v-if="showSelect"
   >
     <sf-select-option
       v-for="option in productionTimeOptions"
@@ -24,13 +25,16 @@ import {
   computed,
   defineComponent,
   PropType,
-  toRefs
+  ref,
+  watch,
+  nextTick
 } from '@vue/composition-api';
 import {
   mapMobileObserver,
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
+import { Currency, GET_CURRENCY_EXCHANGE_RATE, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { OptionValue } from 'src/modules/customization-system';
 
 import { getProductionTimeOptionsFromCustomization } from '../../helpers/get-production-time-options-from-customization.function';
@@ -83,12 +87,21 @@ export default defineComponent({
     const isValid = computed<boolean>(() => {
       return !props.error;
     });
+    const selectedCurrency = computed<Currency>(() => {
+      return root.$store.getters[GET_ACTIVE_CURRENCY]
+    });
+
     const productionTimeOptions = computed<ProductionTimeOption[]>(() => {
+      const rushUpgrades = root.$store.getters['budsies/getProductRushAddons'](props.productId);
+      const currencyExchangeRate = root.$store.getters[GET_CURRENCY_EXCHANGE_RATE];
+      const _selectedCurrency = selectedCurrency.value;
+
       const options = getProductionTimeOptionsFromCustomization(
-        props.productId,
         props.bundleOptionId,
         props.values,
-        root.$store
+        rushUpgrades,
+        currencyExchangeRate,
+        _selectedCurrency
       );
 
       options.unshift({
@@ -101,9 +114,17 @@ export default defineComponent({
       return options;
     });
 
+    const showSelect = ref<boolean>(true);
+    watch(selectedCurrency, async () => {
+      showSelect.value = false;
+      await nextTick();
+      showSelect.value = true;
+    });
+
     return {
       isValid,
       productionTimeOptions,
+      showSelect,
       selectedOption
     };
   },

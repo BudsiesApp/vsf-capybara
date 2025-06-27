@@ -3,13 +3,14 @@ import config from 'config';
 import { SearchQuery } from 'storefront-query-builder';
 
 import rootStore from '@vue-storefront/core/store';
-import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
+import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
 import { Dictionary } from 'src/modules/budsies';
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 
 import { prepareCategoryProduct } from 'theme/helpers';
+import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 
 export const CROSS_SELL = 'crosssell';
 export const UP_SELL = 'upsell';
@@ -37,6 +38,7 @@ export function useRelatedProducts (
   const productBySkuDictionary = computed<Record<string, Product>>(() => {
     return rootStore.getters['product/getProductBySkuDictionary'];
   });
+
   const relatedProducts = computed(() => {
     if (!currentProduct.value) {
       return [];
@@ -56,12 +58,13 @@ export function useRelatedProducts (
     return dictionary;
   });
   const preparedRelatedProducts = computed(() => {
-    const productPriceDictionary = rootStore.getters[PRODUCT_PRICE_DICTIONARY];
+    const productPriceDictionary = rootStore.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY];
+    const selectedCurrency = rootStore.getters[GET_ACTIVE_CURRENCY];
 
     return relatedProducts.value.map(
       (item: Product) => (
         {
-          ...prepareCategoryProduct(item, productPriceDictionary),
+          ...prepareCategoryProduct(item, productPriceDictionary, selectedCurrency),
           landing_page_url: item.landing_page_url
         }
       )

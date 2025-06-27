@@ -60,6 +60,8 @@
       </template>
       <template #header-icons>
         <div class="sf-header__icons">
+          <CurrencySelector />
+
           <AAccountIcon class="sf-header__action" />
           <ADetailedCartIcon class="sf-header__action" />
         </div>
@@ -70,6 +72,9 @@
 
 <script>
 import { SfHeader, SfOverlay } from '@storefront-ui/vue';
+
+import { CurrencySelector } from 'src/modules/currency';
+
 import ALogo from 'theme/components/atoms/a-logo';
 import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
@@ -86,7 +91,8 @@ export default {
     ADetailedCartIcon,
     MMenu,
     SfOverlay,
-    MCtaButton
+    MCtaButton,
+    CurrencySelector
   },
   data () {
     return {

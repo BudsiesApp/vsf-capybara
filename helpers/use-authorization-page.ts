@@ -10,11 +10,16 @@ export function useAuthorizationPage (
   });
 
   const redirectTarget = computed<string>(() => {
-    if (root.$route.query[REDIRECT_TARGET_QUERY_KEY]) {
-      return root.$route.query[REDIRECT_TARGET_QUERY_KEY] as string;
+    const query = { ...root.$route.query };
+
+    let target = '/';
+
+    if (query[REDIRECT_TARGET_QUERY_KEY]) {
+      target = query[REDIRECT_TARGET_QUERY_KEY] as string;
+      delete query[REDIRECT_TARGET_QUERY_KEY];
     }
 
-    return '/';
+    return `${target}?${new URLSearchParams(query).toString()}`;
   });
 
   const prefilledEmail = computed<string | undefined>(() => {
