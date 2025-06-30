@@ -248,7 +248,7 @@ import {
   METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
 } from 'src/modules/vsf-amazon-pay/index';
 import { GET_ACTIVE_CURRENCY, GET_CURRENCY_EXCHANGE_RATE } from 'src/modules/currency';
-import { LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, LAST_USED_CUSTOMER_PHONE_NUMBER, LAST_USED_CUSTOMER_SHIPPING_COUNTRY, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_PHONE_NUMBER, SET_LAST_USED_CUSTOMER_SHIPPING_COUNTRY } from 'src/modules/persisted-customer-data';
+import { PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, PERSISTED_CUSTOMER_PHONE_NUMBER, PERSISTED_CUSTOMER_SHIPPING_COUNTRY, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_SHIPPING_COUNTRY } from 'src/modules/persisted-customer-data';
 import { stateCodeAutocompleteOptionSearch, PriceHelper } from 'src/modules/shared';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
 
@@ -420,22 +420,22 @@ export default {
       }
 
       this.$store.commit(
-        SET_LAST_USED_CUSTOMER_FIRST_NAME,
+        SET_PERSISTED_CUSTOMER_FIRST_NAME,
         this.shipping.firstName
       );
 
       this.$store.commit(
-        SET_LAST_USED_CUSTOMER_LAST_NAME,
+        SET_PERSISTED_CUSTOMER_LAST_NAME,
         this.shipping.lastName
       );
 
       this.$store.commit(
-        SET_LAST_USED_CUSTOMER_PHONE_NUMBER,
+        SET_PERSISTED_CUSTOMER_PHONE_NUMBER,
         this.shipping.phoneNumber
       );
 
       this.$store.commit(
-        SET_LAST_USED_CUSTOMER_SHIPPING_COUNTRY,
+        SET_PERSISTED_CUSTOMER_SHIPPING_COUNTRY,
         this.shipping.country
       );
 
@@ -449,13 +449,13 @@ export default {
     },
     fillLastUsedCustomerData () {
       const customerFirstName = this.$store
-        .getters[LAST_USED_CUSTOMER_FIRST_NAME];
+        .getters[PERSISTED_CUSTOMER_FIRST_NAME];
       const customerLastName = this.$store
-        .getters[LAST_USED_CUSTOMER_LAST_NAME];
+        .getters[PERSISTED_CUSTOMER_LAST_NAME];
       const customerPhoneNumber = this.$store
-        .getters[LAST_USED_CUSTOMER_PHONE_NUMBER];
+        .getters[PERSISTED_CUSTOMER_PHONE_NUMBER];
       const customerShippingCountry = this.$store
-        .getters[LAST_USED_CUSTOMER_SHIPPING_COUNTRY];
+        .getters[PERSISTED_CUSTOMER_SHIPPING_COUNTRY];
 
       if (customerFirstName && !this.shipping.firstName) {
         this.shipping.firstName = customerFirstName;
