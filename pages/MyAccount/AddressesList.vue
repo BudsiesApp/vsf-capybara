@@ -154,10 +154,10 @@ export default {
       return this.$store.state.user.current;
     },
     defaultBillingAddress () {
-      return this.addresses.find((address) => String(address.id) === String(this.currentUser.default_billing));
+      return this.$store.getters['user/defaultBillingAddress'];
     },
     defaultShippingAddress () {
-      return this.addresses.find((address) => String(address.id) === String(this.currentUser.default_shipping));
+      return this.$store.getters['user/defaultShippingAddress'];
     },
     addresses () {
       return this.currentUser?.addresses || [];
