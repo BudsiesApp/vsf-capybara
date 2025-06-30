@@ -89,8 +89,8 @@ import ServerError from 'src/modules/shared/types/server-error';
 
 import { ProductStructuredData } from 'src/modules/budsies';
 import {
-  LAST_USED_CUSTOMER_FIRST_NAME,
-  LAST_USED_CUSTOMER_LAST_NAME
+  PERSISTED_CUSTOMER_FIRST_NAME,
+  PERSISTED_CUSTOMER_LAST_NAME
 } from 'src/modules/persisted-customer-data';
 
 import GiftCardOrderFormData from 'theme/components/interfaces/gift-card-order-form-data.interface';
@@ -163,8 +163,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return this.$store.getters['giftCard/currentStoreGiftCardTemplates'];
     },
     loggedUserFullName (): string {
-      const firstName = this.$store.getters[LAST_USED_CUSTOMER_FIRST_NAME];
-      const lastName = this.$store.getters[LAST_USED_CUSTOMER_LAST_NAME];
+      const firstName = this.$store.getters[PERSISTED_CUSTOMER_FIRST_NAME];
+      const lastName = this.$store.getters[PERSISTED_CUSTOMER_LAST_NAME];
 
       let fullName = '';
 
