@@ -149,7 +149,7 @@ export default Vue.extend({
         },
         {
           name: this.$t('Petsies Huggables'),
-          link: { name: 'huggables-creation-page' }
+          url: { name: 'huggables-creation-page' }
         },
         {
           label: this.$t('Magnets'),
