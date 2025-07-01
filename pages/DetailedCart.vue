@@ -231,7 +231,7 @@ const clothesProductSkuRouteNameDictionary = {
 const customPillowSku = 'customPillow_bundle';
 const customPhotoPortraitsSku = 'customPhotoPortraits_bundle';
 const customTumblersSku = 'customTumblers_bundle';
-const customPetsiesHuggablesSku = 'customPetsiesHuggables_bundle';
+const customPetsiesHuggablesSku = 'petsiesHuggables_bundle';
 
 const editableProductsSkus = [
   ...foreversProductsSkus,

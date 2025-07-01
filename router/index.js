@@ -707,7 +707,7 @@ let routes = [
     path: '/petsies-huggables/create/',
     component: CustomizableProduct,
     props: (route) => ({
-      sku: 'customPetsiesHuggables_bundle',
+      sku: 'petsiesHuggables_bundle',
       existingPlushieId: route.query.existingPlushieId,
       layout: 'vertical'
     })
