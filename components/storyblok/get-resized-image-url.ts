@@ -15,11 +15,11 @@ export default function getResizedImageUrl (
 
   const height = Math.round(width * ratio);
 
-  let mod = '/fit-in';
+  let mod = '/m/fit-in';
   mod += `/${width}x${height}`;
   mod += filters;
 
-  const resizedUrl = 'https://img2.storyblok.com' + mod + resource;
+  const resizedUrl = 'https://a.storyblok.com' + resource + mod;
 
   return resizedUrl;
 }
