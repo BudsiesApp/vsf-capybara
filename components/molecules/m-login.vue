@@ -102,6 +102,7 @@ import { ValidationProvider, ValidationObserver } from 'vee-validate';
 import { SfInput, SfButton } from '@storefront-ui/vue';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
+import { AuthenticateRequestResponse } from '@vue-storefront/core/modules/user';
 import Task from 'core/lib/sync/types/Task';
 
 function useRateLimit ({ root }: SetupContext) {
@@ -185,6 +186,7 @@ export default defineComponent({
   },
   setup (props, context) {
     const root = context.root;
+    const emit = context.emit;
 
     const otpInput = ref<SfInputInstance | null>(null);
     const validationObserver = ref<ValidationObserverInstance | null>(null);
@@ -282,23 +284,33 @@ export default defineComponent({
       isSubmitting.value = true;
 
       try {
-        const response = await root.$store.dispatch('user/authenticate', {
-          token: otpCode.value
+        const response: Task = await root.$store.dispatch('user/authenticate', {
+          token: otpCode.value,
+          email: emailValue.value
         });
+        const result: AuthenticateRequestResponse = response.result;
 
-        if (response.code === 200) {
-          root.$store.dispatch('notification/spawnNotification', {
-            type: 'success',
-            message: root.$t('Successfully logged in!'),
-            action1: { label: root.$t('OK') }
-          });
-        } else {
+        if (response.code !== 200) {
           root.$store.dispatch('notification/spawnNotification', {
             type: 'danger',
             message: root.$t('Invalid verification code. Please try again.'),
             action1: { label: root.$t('OK') }
           });
+          return;
         }
+
+        if (!result.isNewCustomer) {
+          root.$store.dispatch('notification/spawnNotification', {
+            type: 'success',
+            message: root.$t('Successfully logged in!'),
+            action1: { label: root.$t('OK') }
+          });
+          return;
+        }
+
+        emit('registration-required', {
+          registrationToken: result.token
+        });
       } catch (error) {
         Logger.error(error, 'user-authenticate')();
 

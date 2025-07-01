@@ -6,7 +6,23 @@
         mode="out-in"
         @after-enter="onTransitionAfterEnter"
       >
-        <MLogin :email.sync="email" />
+        <MLogin
+          v-if="!showRegisterForm"
+          :email.sync="email"
+          @registration-required="onRegistrationRequired"
+        />
+      </transition>
+
+      <transition
+        name="fade"
+        mode="out-in"
+        @after-enter="onTransitionAfterEnter"
+      >
+        <MRegister
+          v-if="showRegisterForm"
+          :email="email"
+          :registration-token="registrationToken"
+        />
       </transition>
     </SfModal>
   </div>
@@ -17,10 +33,15 @@ import { SfModal } from '@storefront-ui/vue';
 import { mapActions } from 'vuex';
 
 import MLogin from 'theme/components/molecules/m-login'
+import MRegister from 'theme/components/molecules/m-register'
 
 export default {
   name: 'MModalAuthentication',
-  components: { SfModal, MLogin },
+  components: {
+    MLogin,
+    MRegister,
+    SfModal
+  },
   props: {
     isVisible: {
       type: Boolean,
@@ -34,7 +55,9 @@ export default {
   },
   data () {
     return {
-      email: ''
+      email: '',
+      registrationToken: '',
+      showRegisterForm: false
     };
   },
   computed: {
@@ -48,6 +71,10 @@ export default {
     }),
     closeModal () {
       this.$emit('close', this.modalData.name)
+    },
+    onRegistrationRequired ({ registrationToken }) {
+      this.registrationToken = registrationToken;
+      this.showRegisterForm = true;
     },
     onTransitionAfterEnter () {
       const modalComponent = this.$refs.modal;

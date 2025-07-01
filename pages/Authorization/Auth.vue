@@ -5,6 +5,13 @@
       <p>{{ $t('Authenticating...') }}</p>
     </div>
 
+    <div v-else-if="showRegisterForm" class="registration-form">
+      <MRegister
+        :email="email"
+        :registration-token="registrationToken"
+      />
+    </div>
+
     <div v-else-if="errorMessage" class="error-message">
       <h2>{{ $t('Authentication Failed') }}</h2>
       <p>{{ errorMessage }}</p>
@@ -29,22 +36,36 @@ import { SfLoader } from '@storefront-ui/vue';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { Logger } from '@vue-storefront/core/lib/logger';
+import { AuthenticateRequestResponse } from '@vue-storefront/core/modules/user';
+
+import { useRegistrationForm } from 'theme/helpers/use-registration-form';
+
+import MRegister from 'theme/components/molecules/m-register.vue';
 
 export default defineComponent({
   name: 'Auth',
   components: {
+    MRegister,
     SfLoader
   },
   props: {
     token: {
       type: String as PropType<string | undefined>,
       default: undefined
+    },
+    email: {
+      type: String,
+      required: true
     }
   },
   setup (props, { root }) {
     const isLoading = ref<boolean>(true);
     const isSuccess = ref<boolean>(false);
     const errorMessage = ref<string>('');
+    const {
+      showRegistrationForm,
+      onRegistrationRequired
+    } = useRegistrationForm();
 
     const authenticate = async (): Promise<void> => {
       if (root.$store.getters['user/isLoggedIn']) {
@@ -60,16 +81,25 @@ export default defineComponent({
 
       try {
         const response = await root.$store.dispatch('user/authenticate', {
+          email: props.email,
           token: props.token
         });
 
-        if (response.code === 200) {
-          isSuccess.value = true;
-          Logger.info('Authentication successful', 'auth-page')();
-        } else {
+        if (response.code !== 200) {
           errorMessage.value = root.$t('Invalid authentication token') as string;
           Logger.error('Authentication failed with response:', response, 'auth-page')();
+          return;
         }
+
+        const result: AuthenticateRequestResponse = response.result;
+
+        if (result.isNewCustomer) {
+          onRegistrationRequired(result.token);
+          return;
+        }
+
+        isSuccess.value = true;
+        Logger.info('Authentication successful', 'auth-page')();
       } catch (error) {
         Logger.error(error, 'auth-page')();
         errorMessage.value = root.$t('Authentication failed. Please try again.') as string;
@@ -94,7 +124,8 @@ export default defineComponent({
     return {
       isLoading,
       isSuccess,
-      errorMessage
+      errorMessage,
+      showRegistrationForm
     };
   },
   async serverPrefetch (): Promise<void> {

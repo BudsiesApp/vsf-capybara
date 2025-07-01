@@ -4,7 +4,15 @@
       <SfHeading :level="1" :title="$t('Sign In')" />
 
       <m-login
+        v-if="!showRegistrationForm"
         :email.sync="email"
+        @registration-required="onRegistrationRequired"
+      />
+
+      <MRegister
+        v-else
+        :email="email"
+        :registration-token="registrationToken"
       />
     </div>
   </div>
@@ -15,13 +23,16 @@ import { defineComponent, ref, onBeforeMount } from '@vue/composition-api';
 import { SfHeading } from '@storefront-ui/vue';
 
 import { useAuthorizationPage } from 'theme/helpers/use-authorization-page';
+import { useRegistrationForm } from 'theme/helpers/use-registration-form';
 
 import MLogin from '../../components/molecules/m-login.vue';
+import MRegister from '../../components/molecules/m-register.vue';
 
 export default defineComponent({
   name: 'SignInPage',
   components: {
     MLogin,
+    MRegister,
     SfHeading
   },
   setup (_, setupContext) {
@@ -38,6 +49,7 @@ export default defineComponent({
     });
 
     return {
+      ...useRegistrationForm(),
       email
     }
   },

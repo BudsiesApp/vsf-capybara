@@ -8,13 +8,14 @@
 
     <div class="form">
       <div
-        v-if="!currentUser"
+        v-if="showLoginForm"
         class="log-in form__element"
       >
         <m-login
           ref="login-form"
           :email.sync="personalDetails.emailAddress"
           :email-submit-button-text="$t('Log In/Create account')"
+          @registration-required="onRegistrationRequired"
         >
           <template #submit-button="{ isDisabled, submitButtonText }">
             <SfButton
@@ -109,6 +110,7 @@ import { SfInput, SfButton, SfHeading, SfCheckbox } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
 import { mapActions } from 'vuex';
 
+import i18n from '@vue-storefront/i18n';
 import { PERSISTED_CUSTOMER_EMAIL, PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_EMAIL, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME } from 'src/modules/persisted-customer-data';
 import { PrivacyPolicyLink } from 'src/modules/shared';
 
@@ -152,7 +154,14 @@ export default {
   },
   data () {
     return {
-      vuelidateErrorClassName
+      vuelidateErrorClassName,
+      isRegistrationRequired: false,
+      registrationToken: ''
+    }
+  },
+  computed: {
+    showLoginForm () {
+      return !this.currentUser && !this.isRegistrationRequired;
     }
   },
   beforeMount () {
@@ -173,6 +182,10 @@ export default {
     ...mapActions('ui', {
       openModal: 'openModal'
     }),
+    onRegistrationRequired (token) {
+      this.isRegistrationRequired = true;
+      this.registrationToken = token;
+    },
     login () {
       this.openModal({ name: ModalList.Auth, payload: 'login' })
     },
@@ -202,6 +215,30 @@ export default {
         await this.$nextTick();
         vuelidateScrollToFirstError(this.$el);
         return;
+      }
+
+      if (this.isRegistrationRequired) {
+        try {
+          const response = await this.$store.dispatch('user/register', {
+            email: this.email,
+            token: this.registrationToken,
+            firstname: this.personalDetails.firstName,
+            lastname: this.personalDetails.lastName
+          });
+
+          if (response.code !== 200) {
+            throw new Error('Registration failed');
+          } else {
+            this.onSuccess(i18n.t('You are logged in!').toString());
+          }
+        } catch (error) {
+          this.$store.dispatch('notification/spawnNotification', {
+            type: 'danger',
+            message: i18n.t(error),
+            action1: { label: i18n.t('OK') }
+          });
+          return;
+        }
       }
 
       this.$store.commit(

@@ -94,7 +94,8 @@ let routes = [
     name: 'auth',
     component: Auth,
     props: (route) => ({
-      token: route.query.token
+      token: route.query.token,
+      email: route.query.email
     })
   },
   {
