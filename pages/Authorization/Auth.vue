@@ -93,7 +93,7 @@ export default defineComponent({
 
         const result: AuthenticateRequestResponse = response.result;
 
-        if (result.isNewCustomer) {
+        if (result.is_new_customer) {
           onRegistrationRequired(result.token);
           return;
         }

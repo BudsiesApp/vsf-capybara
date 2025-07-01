@@ -299,7 +299,7 @@ export default defineComponent({
           return;
         }
 
-        if (!result.isNewCustomer) {
+        if (!result.is_new_customer) {
           root.$store.dispatch('notification/spawnNotification', {
             type: 'success',
             message: root.$t('Successfully logged in!'),
