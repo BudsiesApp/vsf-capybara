@@ -138,7 +138,7 @@ import { SfInput, SfButton, SfHeading, SfCheckbox } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
 import { mapActions } from 'vuex';
 
-import { LAST_USED_CUSTOMER_EMAIL, LAST_USED_CUSTOMER_FIRST_NAME, LAST_USED_CUSTOMER_LAST_NAME, SET_LAST_USED_CUSTOMER_EMAIL, SET_LAST_USED_CUSTOMER_FIRST_NAME, SET_LAST_USED_CUSTOMER_LAST_NAME } from 'src/modules/persisted-customer-data';
+import { PERSISTED_CUSTOMER_EMAIL, PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_EMAIL, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME } from 'src/modules/persisted-customer-data';
 import { PrivacyPolicyLink } from 'src/modules/shared';
 
 import { createSmoothscroll } from 'theme/helpers';
@@ -222,17 +222,17 @@ export default {
       }
 
       this.$store.commit(
-        SET_LAST_USED_CUSTOMER_EMAIL,
+        SET_PERSISTED_CUSTOMER_EMAIL,
         this.personalDetails.emailAddress
       );
 
       this.$store.commit(
-        SET_LAST_USED_CUSTOMER_FIRST_NAME,
+        SET_PERSISTED_CUSTOMER_FIRST_NAME,
         this.personalDetails.firstName
       );
 
       this.$store.commit(
-        SET_LAST_USED_CUSTOMER_LAST_NAME,
+        SET_PERSISTED_CUSTOMER_LAST_NAME,
         this.personalDetails.lastName
       );
 
@@ -240,11 +240,11 @@ export default {
     },
     fillLastUsedCustomerData () {
       const customerEmail = this.$store
-        .getters[LAST_USED_CUSTOMER_EMAIL];
+        .getters[PERSISTED_CUSTOMER_EMAIL];
       const customerFirstName = this.$store
-        .getters[LAST_USED_CUSTOMER_FIRST_NAME];
+        .getters[PERSISTED_CUSTOMER_FIRST_NAME];
       const customerLastName = this.$store
-        .getters[LAST_USED_CUSTOMER_LAST_NAME];
+        .getters[PERSISTED_CUSTOMER_LAST_NAME];
 
       if (customerEmail && !this.personalDetails.emailAddress) {
         this.personalDetails.emailAddress = customerEmail;
