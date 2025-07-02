@@ -311,7 +311,7 @@ export default {
   }
 
   .login-form {
-    --m-login-buttons-justify-content: flex-start;
+    --m-login-buttons-justify-content: flex-end;
     --m-login-buttons-resend-justify-content: flex-end;
     --m-login-buttons-direction: row-reverse;
   }
