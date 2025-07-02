@@ -375,10 +375,12 @@ export default defineComponent({
   ._buttons-container {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: var(--m-login-buttons-justify-content, flex-end);
+    flex-direction: var(--m-login-buttons-direction, row);
+    column-gap: var(--spacer-sm);
 
     &.-resend {
-      justify-content: space-between;
+      justify-content: var(--m-login-buttons-resend-justify-content, space-between);
     }
   }
 

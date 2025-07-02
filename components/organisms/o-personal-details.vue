@@ -13,6 +13,7 @@
       >
         <m-login
           ref="login-form"
+          class="login-form"
           :email.sync="personalDetails.emailAddress"
           :email-submit-button-text="$t('Log In/Create account')"
           @registration-required="onRegistrationRequired"
@@ -307,6 +308,12 @@ export default {
 
     --privacy-notice-link-text-align: start;
     --privacy-notice-link-margin: 0;
+  }
+
+  .login-form {
+    --m-login-buttons-justify-content: flex-start;
+    --m-login-buttons-resend-justify-content: flex-end;
+    --m-login-buttons-direction: row-reverse;
   }
 }
 
