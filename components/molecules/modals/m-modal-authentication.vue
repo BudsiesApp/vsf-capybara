@@ -1,29 +1,19 @@
 <template>
   <div class="m-modal-authentication">
     <SfModal :visible="isVisible" @close="closeModal" ref="modal">
-      <transition
-        name="fade"
-        mode="out-in"
-        @after-enter="onTransitionAfterEnter"
-      >
-        <MLogin
-          v-if="!showRegisterForm"
-          :email.sync="email"
-          @registration-required="onRegistrationRequired"
-        />
-      </transition>
+      <MLogin
+        v-if="!showRegisterForm"
+        :email.sync="email"
+        @registration-required="onRegistrationRequired"
+        @hook:mounted="onTransitionAfterEnter"
+      />
 
-      <transition
-        name="fade"
-        mode="out-in"
-        @after-enter="onTransitionAfterEnter"
-      >
-        <MRegister
-          v-if="showRegisterForm"
-          :email="email"
-          :registration-token="registrationToken"
-        />
-      </transition>
+      <MRegister
+        v-if="showRegisterForm"
+        :email="email"
+        :registration-token="registrationToken"
+        @hook:mounted="onTransitionAfterEnter"
+      />
     </SfModal>
   </div>
 </template>
@@ -69,10 +59,16 @@ export default {
     ...mapActions('ui', {
       openModal: 'openModal'
     }),
+    reset () {
+      this.email = '';
+      this.registrationToken = '';
+      this.showRegisterForm = false;
+    },
     closeModal () {
       this.$emit('close', this.modalData.name)
+      this.reset();
     },
-    onRegistrationRequired ({ registrationToken }) {
+    onRegistrationRequired (registrationToken) {
       this.registrationToken = registrationToken;
       this.showRegisterForm = true;
     },

@@ -308,9 +308,7 @@ export default defineComponent({
           return;
         }
 
-        emit('registration-required', {
-          registrationToken: result.token
-        });
+        emit('registration-required', result.token);
       } catch (error) {
         Logger.error(error, 'user-authenticate')();
 

@@ -90,7 +90,7 @@ let routes = [
     })
   },
   {
-    path: '/auth/',
+    path: '/authenticate/',
     name: 'auth',
     component: Auth,
     props: (route) => ({

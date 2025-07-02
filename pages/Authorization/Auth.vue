@@ -5,13 +5,6 @@
       <p>{{ $t('Authenticating...') }}</p>
     </div>
 
-    <div v-else-if="showRegisterForm" class="registration-form">
-      <MRegister
-        :email="email"
-        :registration-token="registrationToken"
-      />
-    </div>
-
     <div v-else-if="errorMessage" class="error-message">
       <h2>{{ $t('Authentication Failed') }}</h2>
       <p>{{ errorMessage }}</p>
@@ -20,6 +13,13 @@
     <div v-else-if="isSuccess" class="success-message">
       <h2>{{ $t('Authentication Successful') }}</h2>
       <p>{{ $t('The authentication was successful, you can close this tab now!') }}</p>
+    </div>
+
+    <div v-else-if="showRegistrationForm" class="registration-form">
+      <MRegister
+        :email="email"
+        :registration-token="registrationToken"
+      />
     </div>
   </div>
 </template>
@@ -30,7 +30,9 @@ import {
   onMounted,
   ref,
   PropType,
-  onBeforeUnmount
+  onBeforeUnmount,
+  watch,
+  computed
 } from '@vue/composition-api';
 import { SfLoader } from '@storefront-ui/vue';
 
@@ -64,11 +66,16 @@ export default defineComponent({
     const errorMessage = ref<string>('');
     const {
       showRegistrationForm,
-      onRegistrationRequired
+      onRegistrationRequired,
+      registrationToken
     } = useRegistrationForm();
 
+    const isUserLoggedIn = computed<boolean>(() => {
+      return root.$store.getters['user/isLoggedIn'];
+    });
+
     const authenticate = async (): Promise<void> => {
-      if (root.$store.getters['user/isLoggedIn']) {
+      if (isUserLoggedIn.value) {
         root.$router.push('/');
         return;
       }
@@ -98,7 +105,6 @@ export default defineComponent({
           return;
         }
 
-        isSuccess.value = true;
         Logger.info('Authentication successful', 'auth-page')();
       } catch (error) {
         Logger.error(error, 'auth-page')();
@@ -121,11 +127,21 @@ export default defineComponent({
       EventBus.$off('session-after-started', authenticate);
     });
 
+    watch(
+      isUserLoggedIn,
+      (newValue) => {
+        if (newValue) {
+          isSuccess.value = true;
+        }
+      }
+    );
+
     return {
       isLoading,
       isSuccess,
       errorMessage,
-      showRegistrationForm
+      showRegistrationForm,
+      registrationToken
     };
   },
   async serverPrefetch (): Promise<void> {

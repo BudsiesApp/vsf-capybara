@@ -6,6 +6,7 @@
         name="first-name"
         :label="$t('First name')"
         :valid="!$v.firstName.$error"
+        :disabled="isSubmitting"
         :error-message="
           !$v.firstName.required
             ? $t('Field is required.')
@@ -19,6 +20,7 @@
         name="last-name"
         :label="$t('Last name')"
         :valid="!$v.lastName.$error"
+        :disabled="isSubmitting"
         :error-message="
           !$v.lastName.required
             ? $t('Field is required.')
@@ -27,7 +29,10 @@
         class="form__element"
       />
 
-      <SfButton class="sf-button--full-width form__submit">
+      <SfButton
+        :disabled="isSubmitting"
+        class="sf-button--full-width form__submit"
+      >
         {{ $t('Create an account') }}
       </SfButton>
     </form>

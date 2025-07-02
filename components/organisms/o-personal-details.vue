@@ -56,6 +56,7 @@
         :required="true"
         :valid="!$v.personalDetails.firstName.$error"
         :error-message="$t('Field is required')"
+        :disabled="isFormDisabled"
         @blur="$v.personalDetails.firstName.$touch()"
       />
       <SfInput
@@ -67,6 +68,7 @@
         :required="true"
         :valid="!$v.personalDetails.lastName.$error"
         :error-message="$t('Field is required')"
+        :disabled="isFormDisabled"
         @blur="$v.personalDetails.lastName.$touch()"
       />
 
@@ -82,18 +84,12 @@
       <div class="form__action">
         <SfButton
           class="_continue-button sf-button--full-width form__action-button"
+          :disabled="isFormDisabled"
           @click="onContinueButtonClick"
         >
           {{
             $t(isVirtualCart ? "Continue to payment" : "Continue to shipping")
           }}
-        </SfButton>
-        <SfButton
-          v-if="!currentUser"
-          class="sf-button--full-width sf-button--text form__action-button form__action-button--secondary mobile-only"
-          @click="login"
-        >
-          {{ $t('or login to your account') }}
         </SfButton>
       </div>
 
@@ -156,12 +152,16 @@ export default {
     return {
       vuelidateErrorClassName,
       isRegistrationRequired: false,
-      registrationToken: ''
+      registrationToken: '',
+      isRegistraionInProgress: false
     }
   },
   computed: {
     showLoginForm () {
       return !this.currentUser && !this.isRegistrationRequired;
+    },
+    isFormDisabled () {
+      return this.isRegistraionInProgress;
     }
   },
   beforeMount () {
@@ -218,9 +218,14 @@ export default {
       }
 
       if (this.isRegistrationRequired) {
+        if (this.isRegistraionInProgress) {
+          return;
+        }
+
         try {
+          this.isRegistraionInProgress = true;
           const response = await this.$store.dispatch('user/register', {
-            email: this.email,
+            email: this.personalDetails.emailAddress,
             token: this.registrationToken,
             firstname: this.personalDetails.firstName,
             lastname: this.personalDetails.lastName
@@ -229,7 +234,11 @@ export default {
           if (response.code !== 200) {
             throw new Error('Registration failed');
           } else {
-            this.onSuccess(i18n.t('You are logged in!').toString());
+            this.$store.dispatch('notification/spawnNotification', {
+              type: 'success',
+              message: i18n.t('Successfully logged in!'),
+              action1: { label: i18n.t('OK') }
+            });
           }
         } catch (error) {
           this.$store.dispatch('notification/spawnNotification', {
@@ -238,6 +247,8 @@ export default {
             action1: { label: i18n.t('OK') }
           });
           return;
+        } finally {
+          this.isRegistraionInProgress = false;
         }
       }
 
