@@ -174,7 +174,7 @@ export default defineComponent({
       vuelidateErrorClassName,
       isRegistrationRequired: false,
       registrationToken: '',
-      isRegistraionInProgress: false,
+      isRegistrationInProgress: false,
       isLoginFormSubmitting: false
     }
   },
@@ -183,7 +183,7 @@ export default defineComponent({
       return !this.currentUser && !this.isRegistrationRequired;
     },
     isFormDisabled () {
-      return this.isRegistraionInProgress || this.isLoginFormSubmitting;
+      return this.isRegistrationInProgress || this.isLoginFormSubmitting;
     }
   },
   beforeMount () {
@@ -248,12 +248,12 @@ export default defineComponent({
       }
 
       if (this.isRegistrationRequired) {
-        if (this.isRegistraionInProgress) {
+        if (this.isRegistrationInProgress) {
           return;
         }
 
         try {
-          this.isRegistraionInProgress = true;
+          this.isRegistrationInProgress = true;
           const response = await this.$store.dispatch('user/register', {
             email: this.personalDetails.emailAddress,
             token: this.registrationToken,
@@ -278,7 +278,7 @@ export default defineComponent({
           });
           return;
         } finally {
-          this.isRegistraionInProgress = false;
+          this.isRegistrationInProgress = false;
         }
       }
 
