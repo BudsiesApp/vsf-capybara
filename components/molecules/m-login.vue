@@ -59,6 +59,16 @@
           :class="{ '-resend': isCodeSent }"
         >
           <SfButton
+            v-if="showCancelButton"
+            class="sf-button sf-button--text"
+            type="button"
+            :disabled="isSubmitting"
+            @click="cancelLogin"
+          >
+            {{ $t('Cancel') }}
+          </SfButton>
+
+          <SfButton
             v-if="isCodeSent"
             class="sf-button sf-button--text"
             type="button"
@@ -182,6 +192,10 @@ export default defineComponent({
     email: {
       type: String,
       default: ''
+    },
+    allowCancel: {
+      type: Boolean,
+      default: false
     }
   },
   components: {
@@ -369,7 +383,24 @@ export default defineComponent({
       return _validationObserver.value.validate();
     }
 
+    const showCancelButton = computed<boolean>(() => {
+      return props.allowCancel && isCodeSent.value;
+    });
+
+    const cancelLogin = (): void => {
+      if (!props.allowCancel) {
+        return;
+      }
+
+      isCodeSent.value = false;
+      otpCode.value = '';
+      isSubmitting.value = false;
+
+      emit('cancelled');
+    };
+
     return {
+      cancelLogin,
       emailValue,
       handleSubmit,
       isCodeSent,
@@ -378,6 +409,7 @@ export default defineComponent({
       rateLimitCountdown,
       resendOtp,
       resendOtpButtonText,
+      showCancelButton,
       submitButtonText,
       otpInput,
       validationObserver,

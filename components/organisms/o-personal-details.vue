@@ -14,12 +14,14 @@
         <m-login
           ref="login-form"
           class="login-form"
+          :allow-cancel="true"
           :email.sync="personalDetails.emailAddress"
           :email-submit-button-text="$t('Log In/Create account')"
           @is-submitting-changed="onLoginFormIsSubmittingChanged"
           @otp-submitted="resetTargetRoute"
           @otp-requested="onOtpRequested"
           @registration-required="onRegistrationRequired"
+          @cancelled="onLoginCancelled"
         >
           <template #submit-button="{ isDisabled, submitButtonText }">
             <SfButton
@@ -209,6 +211,11 @@ export default defineComponent({
       this.isRegistrationRequired = true;
       this.registrationToken = token;
     },
+    onLoginCancelled () {
+      this.isRegistrationRequired = false;
+      this.registrationToken = '';
+      this.isLoginFormSubmitting = false;
+    },
     login () {
       this.openModal({ name: ModalList.Auth, payload: 'login' })
     },
@@ -344,6 +351,8 @@ export default defineComponent({
     --m-login-buttons-justify-content: flex-end;
     --m-login-buttons-resend-justify-content: flex-end;
     --m-login-buttons-direction: row-reverse;
+
+    margin-bottom: var(--spacer-sm);
   }
 }
 
