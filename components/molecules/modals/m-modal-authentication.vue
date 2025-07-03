@@ -4,6 +4,8 @@
       <MLogin
         v-if="!showRegisterForm"
         :email.sync="email"
+        @otp-requested="onOtpRequested"
+        @otp-submitted="resetTargetRoute"
         @registration-required="onRegistrationRequired"
         @hook:mounted="onTransitionAfterEnter"
       />
@@ -18,14 +20,17 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from '@vue/composition-api';
 import { SfModal } from '@storefront-ui/vue';
 import { mapActions } from 'vuex';
 
-import MLogin from 'theme/components/molecules/m-login'
-import MRegister from 'theme/components/molecules/m-register'
+import { useAuthorizationRouteRestoration } from 'theme/helpers/use-authorization-route-restoration';
 
-export default {
+import MLogin from 'theme/components/molecules/m-login.vue'
+import MRegister from 'theme/components/molecules/m-register.vue'
+
+export default defineComponent({
   name: 'MModalAuthentication',
   components: {
     MLogin,
@@ -42,6 +47,18 @@ export default {
       default: () => ({}),
       required: true
     }
+  },
+  setup (_, context) {
+    const { persistTargetRoute, resetTargetRoute } = useAuthorizationRouteRestoration(context);
+
+    const onOtpRequested = () => {
+      persistTargetRoute(context.root.$route.fullPath);
+    };
+
+    return {
+      onOtpRequested,
+      resetTargetRoute
+    };
   },
   data () {
     return {
@@ -89,5 +106,5 @@ export default {
       }
     }
   }
-};
+});
 </script>

@@ -62,7 +62,7 @@
             v-if="isCodeSent"
             class="sf-button sf-button--text"
             type="button"
-            :disabled="rateLimitCountdown > 0"
+            :disabled="rateLimitCountdown > 0 || isSubmitting"
             @click="resendOtp"
           >
             {{ resendOtpButtonText }}
@@ -98,12 +98,18 @@ import {
   PropType,
   Ref
 } from '@vue/composition-api';
-import { ValidationProvider, ValidationObserver } from 'vee-validate';
+import { extend, ValidationProvider, ValidationObserver } from 'vee-validate';
+import { required } from 'vee-validate/dist/rules';
 import { SfInput, SfButton } from '@storefront-ui/vue';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { AuthenticateRequestResponse } from '@vue-storefront/core/modules/user';
 import Task from 'core/lib/sync/types/Task';
+
+extend('required', {
+  ...required,
+  message: 'Field is required'
+});
 
 function useRateLimit ({ root }: SetupContext) {
   const RATE_LIMIT_TIMEOUT = 60;
@@ -202,7 +208,14 @@ export default defineComponent({
 
     const otpCode = ref<string>('');
 
-    const isSubmitting = ref(false);
+    const _isSubmitting = ref(false);
+    const isSubmitting = computed<boolean>({
+      get: () => _isSubmitting.value,
+      set: (value: boolean) => {
+        _isSubmitting.value = value;
+        emit('is-submitting-changed', value);
+      }
+    });
 
     const isCodeSent = ref(false);
 
@@ -265,6 +278,8 @@ export default defineComponent({
         startRateLimitTimer();
         isSubmitting.value = false;
 
+        emit('otp-requested');
+
         await nextTick();
         focusOtpInput();
       } catch (error) {
@@ -298,6 +313,8 @@ export default defineComponent({
           });
           return;
         }
+
+        emit('otp-submitted');
 
         if (!result.is_new_customer) {
           root.$store.dispatch('notification/spawnNotification', {
@@ -391,7 +408,7 @@ export default defineComponent({
   .sf-input {
   --input-label-required: " *";
 
-    margin-top: var(--spacer-base);
+    margin: var(--spacer-base) 0 var(--spacer-xs);
   }
 }
 </style>

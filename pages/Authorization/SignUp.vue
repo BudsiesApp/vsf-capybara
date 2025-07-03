@@ -7,6 +7,8 @@
         v-if="!showRegistrationForm"
         :email.sync="email"
         :email-submit-button-text="$t('Sign Up')"
+        @otp-submitted="resetTargetRoute"
+        @otp-requested="onOtpRequested"
         @registration-required="onRegistrationRequired"
       />
 
@@ -24,6 +26,7 @@ import { defineComponent, onBeforeMount, ref } from '@vue/composition-api';
 import { SfHeading } from '@storefront-ui/vue';
 
 import { useAuthorizationPage } from 'theme/helpers/use-authorization-page';
+import { useAuthorizationRouteRestoration } from 'theme/helpers/use-authorization-route-restoration';
 import { useRegistrationForm } from 'theme/helpers/use-registration-form';
 
 import MLogin from '../../components/molecules/m-login.vue';
@@ -36,12 +39,18 @@ export default defineComponent({
     MRegister,
     SfHeading
   },
-  setup (_, setupContext) {
+  setup (_, context) {
     const email = ref<string>('')
 
     const {
-      prefilledEmail
-    } = useAuthorizationPage(setupContext);
+      prefilledEmail,
+      redirectTarget
+    } = useAuthorizationPage(context);
+    const { persistTargetRoute, resetTargetRoute } = useAuthorizationRouteRestoration(context);
+
+    function onOtpRequested () {
+      persistTargetRoute(redirectTarget.value);
+    }
 
     onBeforeMount(() => {
       if (prefilledEmail.value) {
@@ -51,7 +60,9 @@ export default defineComponent({
 
     return {
       ...useRegistrationForm(),
-      email
+      email,
+      onOtpRequested,
+      resetTargetRoute
     }
   },
   metaInfo (): any {

@@ -9,7 +9,7 @@
         :disabled="isSubmitting"
         :error-message="
           !$v.firstName.required
-            ? $t('Field is required.')
+            ? $t('Field is required')
             : $t('Field is not valid')
         "
         class="form__element"
@@ -23,7 +23,7 @@
         :disabled="isSubmitting"
         :error-message="
           !$v.lastName.required
-            ? $t('Field is required.')
+            ? $t('Field is required')
             : $t('Field is not valid')
         "
         class="form__element"

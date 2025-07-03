@@ -12,7 +12,6 @@
 
     <div v-else-if="isSuccess" class="success-message">
       <h2>{{ $t('Authentication Successful') }}</h2>
-      <p>{{ $t('The authentication was successful, you can close this tab now!') }}</p>
     </div>
 
     <div v-else-if="showRegistrationForm" class="registration-form">
@@ -43,6 +42,7 @@ import { AuthenticateRequestResponse } from '@vue-storefront/core/modules/user';
 import { useRegistrationForm } from 'theme/helpers/use-registration-form';
 
 import MRegister from 'theme/components/molecules/m-register.vue';
+import { useAuthorizationRouteRestoration } from 'theme/helpers/use-authorization-route-restoration';
 
 export default defineComponent({
   name: 'Auth',
@@ -60,7 +60,9 @@ export default defineComponent({
       required: true
     }
   },
-  setup (props, { root }) {
+  setup (props, context) {
+    const root = context.root;
+
     const isLoading = ref<boolean>(true);
     const isSuccess = ref<boolean>(false);
     const errorMessage = ref<string>('');
@@ -69,6 +71,7 @@ export default defineComponent({
       onRegistrationRequired,
       registrationToken
     } = useRegistrationForm();
+    const { navigateToTargetRoute } = useAuthorizationRouteRestoration(context);
 
     const isUserLoggedIn = computed<boolean>(() => {
       return root.$store.getters['user/isLoggedIn'];
@@ -132,6 +135,7 @@ export default defineComponent({
       (newValue) => {
         if (newValue) {
           isSuccess.value = true;
+          navigateToTargetRoute();
         }
       }
     );

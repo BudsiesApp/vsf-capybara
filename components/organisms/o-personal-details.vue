@@ -16,6 +16,9 @@
           class="login-form"
           :email.sync="personalDetails.emailAddress"
           :email-submit-button-text="$t('Log In/Create account')"
+          @is-submitting-changed="onLoginFormIsSubmittingChanged"
+          @otp-submitted="resetTargetRoute"
+          @otp-requested="onOtpRequested"
           @registration-required="onRegistrationRequired"
         >
           <template #submit-button="{ isDisabled, submitButtonText }">
@@ -100,7 +103,9 @@
     </div>
   </div>
 </template>
+
 <script>
+import { defineComponent } from '@vue/composition-api';
 import { required, minLength, email, sameAs } from 'vuelidate/lib/validators';
 import { PersonalDetails } from '@vue-storefront/core/modules/checkout/components/PersonalDetails';
 import { SfInput, SfButton, SfHeading, SfCheckbox } from '@storefront-ui/vue';
@@ -113,12 +118,13 @@ import { PrivacyPolicyLink } from 'src/modules/shared';
 
 import { createSmoothscroll } from 'theme/helpers';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
+import { useAuthorizationRouteRestoration } from 'theme/helpers/use-authorization-route-restoration';
 
 import APromoCode from 'theme/components/atoms/a-promo-code'
 import MPassword from 'theme/components/molecules/m-password'
 import MLogin from 'theme/components/molecules/m-login';
 
-export default {
+export default defineComponent({
   name: 'OPersonalDetails',
   components: {
     APromoCode,
@@ -129,6 +135,18 @@ export default {
     SfCheckbox,
     MPassword,
     MLogin
+  },
+  setup (_, context) {
+    const { persistTargetRoute, resetTargetRoute } = useAuthorizationRouteRestoration(context);
+
+    function onOtpRequested () {
+      persistTargetRoute(context.root.$route.fullPath);
+    }
+
+    return {
+      onOtpRequested,
+      resetTargetRoute
+    }
   },
   mixins: [PersonalDetails],
   validations: {
@@ -154,7 +172,8 @@ export default {
       vuelidateErrorClassName,
       isRegistrationRequired: false,
       registrationToken: '',
-      isRegistraionInProgress: false
+      isRegistraionInProgress: false,
+      isLoginFormSubmitting: false
     }
   },
   computed: {
@@ -162,7 +181,7 @@ export default {
       return !this.currentUser && !this.isRegistrationRequired;
     },
     isFormDisabled () {
-      return this.isRegistraionInProgress;
+      return this.isRegistraionInProgress || this.isLoginFormSubmitting;
     }
   },
   beforeMount () {
@@ -183,6 +202,9 @@ export default {
     ...mapActions('ui', {
       openModal: 'openModal'
     }),
+    onLoginFormIsSubmittingChanged (value) {
+      this.isLoginFormSubmitting = value;
+    },
     onRegistrationRequired (token) {
       this.isRegistrationRequired = true;
       this.registrationToken = token;
@@ -290,8 +312,16 @@ export default {
         this.personalDetails.lastName = customerLastName;
       }
     }
+  },
+  watch: {
+    currentUser (newValue) {
+      if (newValue) {
+        this.isRegistrationRequired = false;
+        this.isLoginFormSubmitting = false;
+      }
+    }
   }
-};
+});
 </script>
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
