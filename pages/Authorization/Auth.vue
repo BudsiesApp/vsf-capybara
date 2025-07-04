@@ -84,7 +84,7 @@ export default defineComponent({
       }
 
       if (!props.token) {
-        errorMessage.value = root.$t('No authentication token provided') as string;
+        errorMessage.value = root.$t('No authentication token provided').toString();
         isLoading.value = false;
         return;
       }
@@ -96,8 +96,9 @@ export default defineComponent({
         });
 
         if (response.code !== 200) {
-          errorMessage.value = root.$t('Invalid authentication token') as string;
-          Logger.error('Authentication failed with response:', response, 'auth-page')();
+          const error = response.result.errorMessage || root.$t('Authentication failed').toString();
+          errorMessage.value = error;
+          Logger.error('Authentication failed with response:', JSON.stringify(response.result), 'auth-page')();
           return;
         }
 
@@ -108,10 +109,14 @@ export default defineComponent({
           return;
         }
 
-        Logger.info('Authentication successful', 'auth-page')();
+        root.$store.dispatch('notification/spawnNotification', {
+          type: 'success',
+          message: root.$t('Successfully logged in!'),
+          action1: { label: root.$t('OK') }
+        });
       } catch (error) {
         Logger.error(error, 'auth-page')();
-        errorMessage.value = root.$t('Authentication failed. Please try again.') as string;
+        errorMessage.value = root.$t('Authentication failed. Please try again.').toString();
       } finally {
         isLoading.value = false;
       }

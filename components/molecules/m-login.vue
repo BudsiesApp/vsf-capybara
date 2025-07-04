@@ -320,9 +320,11 @@ export default defineComponent({
         const result: AuthenticateRequestResponse = response.result;
 
         if (response.code !== 200) {
+          const error = response.result.errorMessage || root.$t('Authentication failed').toString();
+
           root.$store.dispatch('notification/spawnNotification', {
             type: 'danger',
-            message: root.$t('Invalid verification code. Please try again.'),
+            message: error,
             action1: { label: root.$t('OK') }
           });
           return;
