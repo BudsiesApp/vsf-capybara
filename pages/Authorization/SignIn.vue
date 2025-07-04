@@ -6,7 +6,7 @@
       <m-login
         v-if="!showRegistrationForm"
         :email.sync="email"
-        @otp-submitted="resetTargetRoute"
+        @otp-submitted="resetPostAuthRedirectPath"
         @otp-requested="onOtpRequested"
         @registration-required="onRegistrationRequired"
       />
@@ -45,10 +45,10 @@ export default defineComponent({
       prefilledEmail,
       redirectTarget
     } = useAuthorizationPage(context);
-    const { persistTargetRoute, resetTargetRoute } = useAuthorizationRouteRestoration(context);
+    const { persistPostAuthRedirectPath, resetPostAuthRedirectPath } = useAuthorizationRouteRestoration(context);
 
     function onOtpRequested () {
-      persistTargetRoute(redirectTarget.value);
+      persistPostAuthRedirectPath(redirectTarget.value);
     }
 
     onBeforeMount(() => {
@@ -61,7 +61,7 @@ export default defineComponent({
       ...useRegistrationForm(),
       email,
       onOtpRequested,
-      resetTargetRoute
+      resetPostAuthRedirectPath
     }
   },
   metaInfo (): any {

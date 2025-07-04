@@ -71,7 +71,7 @@ export default defineComponent({
       onRegistrationRequired,
       registrationToken
     } = useRegistrationForm();
-    const { navigateToTargetRoute } = useAuthorizationRouteRestoration(context);
+    const { navigateToPostAuthRedirectPath } = useAuthorizationRouteRestoration(context);
 
     const isUserLoggedIn = computed<boolean>(() => {
       return root.$store.getters['user/isLoggedIn'];
@@ -135,7 +135,7 @@ export default defineComponent({
       (newValue) => {
         if (newValue) {
           isSuccess.value = true;
-          navigateToTargetRoute();
+          navigateToPostAuthRedirectPath();
         }
       }
     );

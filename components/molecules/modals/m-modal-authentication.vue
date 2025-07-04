@@ -5,7 +5,7 @@
         v-if="!showRegisterForm"
         :email.sync="email"
         @otp-requested="onOtpRequested"
-        @otp-submitted="resetTargetRoute"
+        @otp-submitted="resetPostAuthRedirectPath"
         @registration-required="onRegistrationRequired"
         @hook:mounted="onTransitionAfterEnter"
       />
@@ -49,15 +49,15 @@ export default defineComponent({
     }
   },
   setup (_, context) {
-    const { persistTargetRoute, resetTargetRoute } = useAuthorizationRouteRestoration(context);
+    const { persistPostAuthRedirectPath, resetPostAuthRedirectPath } = useAuthorizationRouteRestoration(context);
 
     const onOtpRequested = () => {
-      persistTargetRoute(context.root.$route.fullPath);
+      persistPostAuthRedirectPath(context.root.$route.fullPath);
     };
 
     return {
       onOtpRequested,
-      resetTargetRoute
+      resetPostAuthRedirectPath
     };
   },
   data () {
@@ -85,18 +85,19 @@ export default defineComponent({
       this.$emit('close', this.modalData.name)
       this.reset();
     },
-    onRegistrationRequired (registrationToken) {
+    onRegistrationRequired (registrationToken: string) {
       this.registrationToken = registrationToken;
       this.showRegisterForm = true;
     },
     onTransitionAfterEnter () {
-      const modalComponent = this.$refs.modal;
+      const modalComponent = this.$refs.modal as InstanceType<typeof SfModal>;
 
       if (!modalComponent) {
         return;
       }
 
-      modalComponent.updateDirectivesData();
+      // TODO: remove 'any' cast after @types/storefront-ui__vue is updated
+      (modalComponent as any).updateDirectivesData();
     }
   },
   watch: {

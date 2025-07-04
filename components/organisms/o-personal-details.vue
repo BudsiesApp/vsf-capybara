@@ -18,7 +18,7 @@
           :email.sync="personalDetails.emailAddress"
           :email-submit-button-text="$t('Log In/Create account')"
           @is-submitting-changed="onLoginFormIsSubmittingChanged"
-          @otp-submitted="resetTargetRoute"
+          @otp-submitted="resetPostAuthRedirectPath"
           @otp-requested="onOtpRequested"
           @registration-required="onRegistrationRequired"
           @cancelled="onLoginCancelled"
@@ -123,7 +123,6 @@ import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/help
 import { useAuthorizationRouteRestoration } from 'theme/helpers/use-authorization-route-restoration';
 
 import APromoCode from 'theme/components/atoms/a-promo-code'
-import MPassword from 'theme/components/molecules/m-password'
 import MLogin from 'theme/components/molecules/m-login';
 
 export default defineComponent({
@@ -135,19 +134,18 @@ export default defineComponent({
     SfButton,
     SfHeading,
     SfCheckbox,
-    MPassword,
     MLogin
   },
   setup (_, context) {
-    const { persistTargetRoute, resetTargetRoute } = useAuthorizationRouteRestoration(context);
+    const { persistPostAuthRedirectPath, resetPostAuthRedirectPath } = useAuthorizationRouteRestoration(context);
 
     function onOtpRequested () {
-      persistTargetRoute(context.root.$route.fullPath);
+      persistPostAuthRedirectPath(context.root.$route.fullPath);
     }
 
     return {
       onOtpRequested,
-      resetTargetRoute
+      resetPostAuthRedirectPath
     }
   },
   mixins: [PersonalDetails],
@@ -222,14 +220,8 @@ export default defineComponent({
     async onContinueButtonClick () {
       let isInvalid = false;
 
-      if (this.createAccount) {
-        const isPasswordValid = await this.$refs.password.getIsPasswordValid();
-        this.$v.$touch();
-        isInvalid = this.$v.$invalid || !isPasswordValid;
-      } else {
-        this.$v.personalDetails.$touch();
-        isInvalid = this.$v.personalDetails.$invalid;
-      }
+      this.$v.personalDetails.$touch();
+      isInvalid = this.$v.personalDetails.$invalid;
 
       const loginForm = this.$refs['login-form'];
 
@@ -334,12 +326,6 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .o-personal-details {
-  --password-inputs-margin: 0 0 var(--spacer-sm) 0;
-
-  .m-password {
-    flex: 0 0 100%;
-  }
-
   .california-privacy-notice-link {
     width: 100%;
 

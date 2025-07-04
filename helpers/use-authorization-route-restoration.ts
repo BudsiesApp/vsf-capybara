@@ -1,5 +1,4 @@
 import { SetupContext } from '@vue/composition-api';
-import { RawLocation } from 'vue-router';
 
 import { StorageManager } from '@vue-storefront/core/lib/storage-manager'
 
@@ -7,18 +6,18 @@ export function useAuthorizationRouteRestoration (
   { root }: SetupContext
 ) {
   const urlStorage = StorageManager.get('url');
-  const targetRouteLocalStorageKey = 'targetRoute';
+  const postAuthRedirectPathLocalStorageKey = 'postAuthRedirectPath';
 
   async function persist (route: string): Promise<void> {
-    await urlStorage.setItem(targetRouteLocalStorageKey, route);
+    await urlStorage.setItem(postAuthRedirectPathLocalStorageKey, route);
   }
 
   function reset (): void {
-    urlStorage.removeItem(targetRouteLocalStorageKey);
+    urlStorage.removeItem(postAuthRedirectPathLocalStorageKey);
   }
 
   async function restore (): Promise<void> {
-    const route = await urlStorage.getItem(targetRouteLocalStorageKey);
+    const route = await urlStorage.getItem(postAuthRedirectPathLocalStorageKey);
 
     if (!route) {
       return;
@@ -29,8 +28,8 @@ export function useAuthorizationRouteRestoration (
   }
 
   return {
-    persistTargetRoute: persist,
-    navigateToTargetRoute: restore,
-    resetTargetRoute: reset
+    persistPostAuthRedirectPath: persist,
+    navigateToPostAuthRedirectPath: restore,
+    resetPostAuthRedirectPath: reset
   };
 }
