@@ -184,30 +184,33 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.modal-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.form {
-  width: 100%;
-
-  &__element {
-    margin: var(--spacer-base) 0;
+.m-register {
+  &.modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
-  &__submit {
-    margin: var(--spacer-xl) 0 0 0;
+  .form {
+    width: 100%;
+
+    &__element,
+    &__submit {
+      margin-top: var(--spacer-base);
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
   }
-}
 
-.california-privacy-notice-link {
-  --privacy-notice-link-display: inline;
-  --privacy-notice-link-margin: 0;
-}
+  .california-privacy-notice-link {
+    --privacy-notice-link-display: inline;
+    --privacy-notice-link-margin: 0;
+  }
 
-.action-button {
-  margin: var(--spacer-xl) 0;
+  .action-button {
+    margin: var(--spacer-xl) 0;
+  }
 }
 </style>
