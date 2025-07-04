@@ -208,9 +208,5 @@ export default defineComponent({
     --privacy-notice-link-display: inline;
     --privacy-notice-link-margin: 0;
   }
-
-  .action-button {
-    margin: var(--spacer-xl) 0;
-  }
 }
 </style>

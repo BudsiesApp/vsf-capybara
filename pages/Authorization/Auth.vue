@@ -15,6 +15,8 @@
     </div>
 
     <div v-else-if="showRegistrationForm" class="registration-form">
+      <SfHeading :level="1" :title="$t('Sign Up')" />
+
       <MRegister
         :email="email"
         :registration-token="registrationToken"
@@ -33,7 +35,7 @@ import {
   watch,
   computed
 } from '@vue/composition-api';
-import { SfLoader } from '@storefront-ui/vue';
+import { SfLoader, SfHeading } from '@storefront-ui/vue';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { Logger } from '@vue-storefront/core/lib/logger';
@@ -48,6 +50,7 @@ export default defineComponent({
   name: 'Auth',
   components: {
     MRegister,
+    SfHeading,
     SfLoader
   },
   props: {
@@ -169,14 +172,19 @@ export default defineComponent({
 
 #auth-page {
   box-sizing: border-box;
+  margin: auto 0;
   padding: var(--spacer-base) var(--spacer-sm);
   display: flex;
   justify-content: center;
 
+  .m-register {
+    margin-top: var(--spacer-xl);
+  }
+
   @include for-desktop {
     max-width: 1272px;
     width: 100%;
-    margin: 0 auto;
+    margin: auto;
   }
 }
 </style>
