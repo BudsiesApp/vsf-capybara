@@ -22,7 +22,7 @@
 
 <script lang="ts">
 import { defineComponent } from '@vue/composition-api';
-import { SfModal } from '@storefront-ui/vue';
+import { SfModal, StorefrontUiInstanceType } from '@storefront-ui/vue';
 import { mapActions } from 'vuex';
 
 import { useAuthorizationRouteRestoration } from 'theme/helpers/use-authorization-route-restoration';
@@ -90,14 +90,13 @@ export default defineComponent({
       this.showRegisterForm = true;
     },
     onTransitionAfterEnter () {
-      const modalComponent = this.$refs.modal as InstanceType<typeof SfModal>;
+      const modalComponent = this.$refs.modal as StorefrontUiInstanceType<typeof SfModal> | undefined;
 
       if (!modalComponent) {
         return;
       }
 
-      // TODO: remove 'any' cast after @types/storefront-ui__vue is updated
-      (modalComponent as any).updateDirectivesData();
+      modalComponent.updateDirectivesData();
     }
   },
   watch: {
