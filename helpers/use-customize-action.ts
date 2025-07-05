@@ -1,7 +1,7 @@
 import { ref, Ref, SetupContext } from '@vue/composition-api';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
-import i18n from '@vue-storefront/core/i18n'
+import i18n from '@vue-storefront/core/i18n';
 
 import { CustomizationStateItem, DraftPlushie, saveOrderItemCustomizationsState, submitOrderItemCustomizationsState } from 'src/modules/customization-system';
 
