@@ -715,13 +715,17 @@ let routes = [
   },
   {
     name: 'forevers-customize',
-    path: '/forevers/customize',
+    path: '/forevers/customize/',
+    component: PlushieCustomize,
     props: (route) => ({
-      draftPlushieId: route.query.draftPlushieId,
+      orderItemId: route.query.orderItemId,
       layout: LayoutType.CREATION_WIZARD,
-      // TODO
-      sku: 'ForeversDog_bundle'
-    })
+      sku: route.query.sku,
+      plushieType: PlushieType.FOREVERS
+    }),
+    meta: {
+      auth: true
+    }
   }
 ];
 

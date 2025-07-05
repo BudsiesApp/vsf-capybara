@@ -1,15 +1,21 @@
 <template>
   <div id="plushie-customize" :class="`-${formComponent}`">
-    <div v-if="errorMessage" class="error-message">
-      {{ errorMessage }}
-    </div>
+    <SfHeading :level="1" :title="mainTitleText" v-if="mainTitleText" />
+
+    <MBlockStory
+      :story-slug="topStorySlug"
+      class="_top-block"
+      v-if="topStorySlug"
+    />
 
     <component
       v-if="showForm"
       :is="formComponent"
       :product="currentProduct"
+      :plushie-type="plushieType"
+      :can-use-persisted-customization-state="true"
       :flow="'customize'"
-      :initial-customization-state="draftPlushie.customization_state"
+      :draft-plushie="draftPlushie"
       @hook:mounted="onFormMounted"
     />
 
@@ -27,24 +33,27 @@
 import {
   computed,
   defineComponent,
-  onMounted,
   PropType,
   ref,
   toRefs
 } from '@vue/composition-api';
+import { SfHeading } from '@storefront-ui/vue';
+
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 
+import { PlushieType } from 'theme/interfaces/plushie.type';
+import { useDraftPlushie } from 'theme/helpers/use-draft-plushie';
 import { useProductPage } from 'theme/helpers/use-product-page';
 import {
   LayoutType,
   useProductFormLayout
 } from 'theme/helpers/use-product-form-layout';
+
 import FormWithImagesGalleryPlaceholder from 'theme/components/customization-system/forms/placeholders/form-with-images-gallery-placeholder.vue';
 import VerticalStepsFormPlaceholder from 'theme/components/customization-system/forms/placeholders/vertical-steps-form-placeholder.vue';
 import PhrasePillowFormPlaceholder from 'theme/components/customization-system/forms/placeholders/phrase-pillow-form-placeholder.vue';
-// import CreationWizardFormPlaceholder from 'theme/components/customization-system/forms/placeholders/creation-wizard-form-placeholder.vue';
-import { Logger } from '@vue-storefront/core/lib/logger';
-import { DraftPlushie } from 'src/modules/customization-system';
+import CreationWizardFormPlaceholder from 'theme/components/customization-system/forms/placeholders/creation-wizard-form-placeholder.vue';
+import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 
 export default defineComponent({
   name: 'PlushieCustomize',
@@ -53,12 +62,12 @@ export default defineComponent({
       import(
         /* webpackChunkName: "vsf-creation-wizard-form" */ 'theme/components/customization-system/forms/creation-wizard-form.vue'
       ),
-    // CreationWizardFormPlaceholder,
-    FormWithImagesGalleryPlaceholder,
+    CreationWizardFormPlaceholder,
     FormWithImagesGallery: () =>
       import(
         /* webpackChunkName: "vsf-images-gallery-form" */ 'theme/components/customization-system/forms/form-with-images-gallery.vue'
       ),
+    FormWithImagesGalleryPlaceholder,
     PhrasePillowForm: () =>
       import(
         /* webpackChunkName: "vsf-phrase-pillow-form" */ 'theme/components/customization-system/forms/phrase-pillow-form.vue'
@@ -68,43 +77,46 @@ export default defineComponent({
       import(
         /* webpackChunkName: "vsf-vertical-form" */ 'theme/components/customization-system/forms/vertical-steps-form.vue'
       ),
-    VerticalStepsFormPlaceholder
+    VerticalStepsFormPlaceholder,
+    MBlockStory,
+    SfHeading
   },
   props: {
     sku: {
       type: String,
       required: true
     },
-    draftPlushieId: {
+    orderItemId: {
       type: String,
       required: true
     },
     layout: {
       type: String as PropType<LayoutType>,
       default: () => LayoutType.WITH_IMAGES_GALLERY
+    },
+    plushieType: {
+      type: String as PropType<PlushieType | undefined>,
+      default: undefined
     }
   },
   setup (props, context) {
-    const root = context.root;
-    const { sku, draftPlushieId, layout } = toRefs(props);
+    const { sku, orderItemId, layout, plushieType } = toRefs(props);
 
     const { currentProduct, isDataLoaded: isProductLoaded } = useProductPage(
       sku,
       context
     );
-
-    const isDraftPlushieLoaded = ref(false);
-    const errorMessage = ref<string | null>(null);
-
-    const draftPlushie = computed<DraftPlushie>(
-      () => root.$store.getters['customization-system/getDraftPlushie']
+    const { draftPlushie, isDataLoaded: isDraftPlushieLoaded } = useDraftPlushie(
+      orderItemId,
+      context
     );
 
     const showForm = computed<boolean>(() => {
       return (
         isProductLoaded.value &&
         isDraftPlushieLoaded.value &&
-        !!currentProduct.value
+        !!currentProduct.value &&
+        !!draftPlushie.value
       );
     });
 
@@ -119,29 +131,39 @@ export default defineComponent({
       return !showForm.value || !isFormMounted.value;
     });
 
-    onMounted(async () => {
-      try {
-        await root.$store.dispatch('customization-system/loadDraftPlushie', draftPlushieId.value);
-        isDraftPlushieLoaded.value = true;
-      } catch (e) {
-        Logger.error('PlushieCustomize', e)();
-        if (e.message.includes('Access Denied')) {
-          errorMessage.value = 'Access Denied: You do not have permission to customize this item.';
-        } else {
-          errorMessage.value = 'There was an error loading your customization. Please try again later.';
-        }
+    const mainTitleText = computed<string | undefined>(() => {
+      if (!plushieType.value) {
+        return;
       }
+
+      const title =
+        plushieType.value === PlushieType.FOREVERS
+          ? context.root.$t('Customize Your Forevers Plush')
+          : context.root.$t('Customize Your Golf Head Covers');
+
+      return title.toString();
+    });
+
+    const topStorySlug = computed<string | undefined>(() => {
+      if (!plushieType.value) {
+        return;
+      }
+
+      return plushieType.value === PlushieType.FOREVERS
+        ? 'petsies_creation_page_top'
+        : 'golf_cover_creation_page_top';
     });
 
     return {
       currentProduct,
       draftPlushie,
-      errorMessage,
       formComponent,
       formPlaceholderComponent,
+      mainTitleText,
       onFormMounted,
       showForm,
-      showPlaceholder
+      showPlaceholder,
+      topStorySlug
     };
   },
   beforeRouteLeave (to, from, next) {
@@ -154,9 +176,20 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-#customizable-product {
+#plushie-customize {
   box-sizing: border-box;
   padding: 0 1rem;
+
+  &.-creation-wizard-form {
+    padding: var(--spacer-lg) 0 0;
+
+    ._top-block {
+      margin: var(--spacer-base) auto 0;
+      max-width: 45em;
+      text-align: center;
+      padding: 0 var(--spacer-sm);
+    }
+  }
 
   .form-with-images-gallery,
   .form-with-images-gallery-placeholder {
@@ -177,6 +210,16 @@ export default defineComponent({
 
     &.-phrase-pillow-form {
       margin-top: 60px;
+    }
+
+    &.-creation-wizard-form {
+      padding: var(--spacer-lg) 1rem 0;
+    }
+  }
+
+  @include for-desktop {
+    &.-creation-wizard-form {
+      width: 100%;
     }
   }
 }
