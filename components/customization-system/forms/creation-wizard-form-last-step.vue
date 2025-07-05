@@ -263,17 +263,6 @@ export default defineComponent({
     padding-right: var(--spacer-sm);
   }
 
-  ._pre-selected-customizations {
-    margin-bottom: var(--spacer-lg);
-    text-align: left;
-    padding: 0 var(--spacer-sm);
-
-    ul {
-      list-style: disc;
-      padding-left: var(--spacer-lg);
-    }
-  }
-
   ._customization-option {
     --customization-option-align-items: center;
 
