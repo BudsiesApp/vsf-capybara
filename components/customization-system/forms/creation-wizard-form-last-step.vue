@@ -11,6 +11,20 @@
       :title="$t('Customize your {productType}', { productType })"
     />
 
+    <div v-if="preSelectedCustomizations.length" class="_pre-selected-customizations">
+      <customization-option
+        v-for="customization in preSelectedCustomizations"
+        class="_customization-option"
+        ref="customizationOption"
+        :key="customization.id"
+        :customization="customization"
+        :is-disabled="isDisabled"
+        :option-values="customizationAvailableOptionValues[customization.id]"
+        :product-id="product.id"
+        :value="customizationOptionValue[customization.id]"
+      />
+    </div>
+
     <customization-option
       v-for="customization in availableCustomizations"
       class="_customization-option"
@@ -28,6 +42,7 @@
     />
 
     <validation-provider
+      v-if="showQuantity"
       v-slot="{ errors }"
       rules="required"
       :name="$t('Quantity')"
@@ -76,7 +91,7 @@
         class="_add-to-cart color-primary"
         type="submit"
         :disabled="isSubmitButtonDisabled"
-        @click="onAddToCartClick"
+        @click="onSubmitClick"
       >
         {{ submitButtonText }}
       </SfButton>
@@ -137,7 +152,7 @@ function getAllFormRefs (
 export default defineComponent({
   name: 'CreationWizardFormLastStep',
   props: {
-    addToCartAction: {
+    submitAction: {
       type: Function as PropType<() => Promise<void>>,
       required: true
     },
@@ -172,6 +187,14 @@ export default defineComponent({
     quantity: {
       type: Number,
       required: true
+    },
+    preSelectedCustomizations: {
+      type: Array as PropType<Customization[]>,
+      default: () => []
+    },
+    showQuantity: {
+      type: Boolean,
+      default: true
     }
   },
   components: {
@@ -211,19 +234,19 @@ export default defineComponent({
 
       return firstCategory.name;
     });
-    async function onAddToCartClick () {
+    async function onSubmitClick () {
       const isValid = await formValidation.validateAndGoToFirstError();
 
       if (!isValid) {
         return;
       }
 
-      await props.addToCartAction();
+      await props.submitAction();
     }
     return {
       ...useQuantityAndShippingDiscounts(),
       ...formValidation,
-      onAddToCartClick,
+      onSubmitClick,
       productType,
       validationObserver
     };
@@ -238,6 +261,17 @@ export default defineComponent({
   ._step-actions-container {
     padding-left: var(--spacer-sm);
     padding-right: var(--spacer-sm);
+  }
+
+  ._pre-selected-customizations {
+    margin-bottom: var(--spacer-lg);
+    text-align: left;
+    padding: 0 var(--spacer-sm);
+
+    ul {
+      list-style: disc;
+      padding-left: var(--spacer-lg);
+    }
   }
 
   ._customization-option {

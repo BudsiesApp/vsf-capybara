@@ -9,7 +9,7 @@
           @change="onStepChanged"
           class="_steps"
         >
-          <sf-step :name="productTypeChooseStepName">
+          <sf-step v-if="showProductTypeChooseStep" :name="productTypeChooseStepName">
             <m-product-type-choose-step
               :disabled="isDisabled"
               :product-type-buttons-list="productTypeButtonsList"
@@ -43,9 +43,9 @@
                   :customization="customization"
                   :is-disabled="isDisabled"
                   :option-values="
-                    customizationAvailableOptionValues[customization.id]
+                    filteredCustomizationAvailableOptionValues[customization.id]
                   "
-                  :product-id="currentProduct.id"
+                  :product-id="Number(currentProduct.id)"
                   :value="customizationOptionValue[customization.id]"
                   @input="onCustomizationOptionInput"
                   @customization-option-busy-state-changed="
@@ -73,12 +73,12 @@
 
             <sf-step :name="lastStepCustomization.name">
               <creation-wizard-form-last-step
-                :add-to-cart-action="onFormSubmit"
+                :submit-action="onFormSubmit"
                 :available-customizations="
                   customizationRootGroupCustomizations[lastStepCustomization.id]
                 "
                 :customization-available-option-values="
-                  customizationAvailableOptionValues
+                  filteredCustomizationAvailableOptionValues
                 "
                 :customization-option-value="customizationOptionValue"
                 :is-disabled="isDisabled"
@@ -87,6 +87,8 @@
                 :product-type="plushieType"
                 :submit-button-text="submitButtonText"
                 :quantity.sync="quantity"
+                :pre-selected-customizations="preSelectedCustomizations"
+                :show-quantity="!isCustomizeFlow"
                 @input="onCustomizationOptionInput"
                 @customization-option-busy-state-changed="
                   onCustomizationOptionBusyChanged
@@ -123,6 +125,7 @@ import Product from 'core/modules/catalog/types/Product';
 import i18n from '@vue-storefront/core/i18n';
 import { useABTestingCustomizationsFilter } from 'src/modules/a-b-testing';
 import {
+  CustomizableProductFlowType,
   Customization,
   useCustomizationState,
   useAvailableCustomizations,
@@ -133,11 +136,15 @@ import {
   useCustomizationsBundleOptions,
   useCustomizationsOptionsDefaultValue,
   useCustomizationStatePreservation,
+  usePreSelectedCustomizations,
   useSelectedOptionValueUrlQuery,
   useEmailCustomization,
   useCustomizationsFilter,
   requiredCustomizationsFilter,
-  PersistedData
+  PersistedData,
+  DraftPlushie,
+  CustomizationStateItem,
+  useAvailableOptionsValuesFilter
 } from 'src/modules/customization-system';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
@@ -151,6 +158,7 @@ import { useFloatingPhoto } from 'theme/helpers/use-floating-photo';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 import { PlushieType } from 'theme/interfaces/plushie.type';
+import { useCustomizeAction } from 'theme/helpers/use-customize-action';
 
 import CreationWizardFormLastStep from 'theme/components/customization-system/forms/creation-wizard-form-last-step.vue';
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
@@ -179,6 +187,14 @@ function getAllFormRefs (
 export default defineComponent({
   name: 'CreationWizardForm',
   props: {
+    draftPlushie: {
+      type: Object as PropType<DraftPlushie | undefined>,
+      default: undefined
+    },
+    flow: {
+      type: String as PropType<CustomizableProductFlowType>,
+      default: CustomizableProductFlowType.ADD_TO_CART
+    },
     canUsePersistedCustomizationState: {
       type: Boolean,
       default: false
@@ -201,7 +217,7 @@ export default defineComponent({
     },
     productTypeButtonsList: {
       type: Array as PropType<ProductTypeButton[]>,
-      required: true
+      default: () => []
     }
   },
   components: {
@@ -219,11 +235,18 @@ export default defineComponent({
   setup (props, context) {
     const {
       canUsePersistedCustomizationState,
+      draftPlushie,
+      flow,
       existingCartItem,
       plushieType,
       preselectedProductSize,
       preselectedProductType
     } = toRefs(props);
+
+    const isCustomizeFlow = computed<boolean>(() => {
+      return flow.value === CustomizableProductFlowType.CUSTOMIZE;
+    });
+
     const currentProduct = computed<Product | undefined>(() => {
       return context.root.$store.getters['product/getCurrentProduct'];
     });
@@ -255,6 +278,7 @@ export default defineComponent({
       updateCustomizationOptionValue,
       mergeCustomizationState
     } = useCustomizationState(existingCartItem);
+
     const {
       availableCustomizations,
       availableOptionValues,
@@ -285,6 +309,21 @@ export default defineComponent({
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
 
+    const initialCustomizationState = computed<CustomizationStateItem[]>(() => {
+      return draftPlushie.value?.customization_state || [];
+    });
+
+    const {
+      preSelectedCustomizations,
+      customizationsFilter: preSelectedCustomizationsFilter,
+      optionValuesFilter: preSelectedOptionValuesFilter
+    } = usePreSelectedCustomizations(
+      initialCustomizationState,
+      productCustomizations,
+      flow,
+      onCustomizationOptionInput
+    );
+
     useCustomizationsBundleOptions(
       productCustomizations,
       customizationOptionValue,
@@ -306,14 +345,19 @@ export default defineComponent({
         updateCustomizationOptionValue
       );
 
-    const { customizationFilter } = useABTestingCustomizationsFilter(
+    const { customizationFilter: abTestingCustomizationFilter } = useABTestingCustomizationsFilter(
       context.ssrContext
     );
 
     const { filteredCustomizations } = useCustomizationsFilter(
       availableCustomizations,
       customizationAvailableOptionValues,
-      [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter]
+      [
+        emailCustomizationFilter,
+        requiredCustomizationsFilter,
+        abTestingCustomizationFilter,
+        preSelectedCustomizationsFilter
+      ]
     );
 
     const customizationGroups = useCustomizationsGroups(
@@ -331,6 +375,7 @@ export default defineComponent({
       customizationGroups.customizationRootGroups,
       existingCartItem,
       onStepSubmit,
+      flow,
       context
     );
 
@@ -375,7 +420,15 @@ export default defineComponent({
       context
     );
 
+    const showProductTypeChooseStep = computed<boolean>(() => {
+      return !isCustomizeFlow.value;
+    });
+
     const beforeCustomizationStateMerge = async (preservedState: PersistedData): Promise<boolean> => {
+      if (!showProductTypeChooseStep.value) {
+        return true;
+      }
+
       const productSku = preservedState.additionalData?.productSku;
 
       if (!productSku) {
@@ -394,9 +447,15 @@ export default defineComponent({
       formSteps.goToStep(persistedData.additionalData?.stepIndex);
     }
 
+    const preservationStorageKey = computed<string>(() => {
+      return isCustomizeFlow.value && draftPlushie.value
+        ? draftPlushie.value.id
+        : plushieType.value;
+    });
+
     const { removePreservedState } =
       useCustomizationStatePreservation(
-        plushieType,
+        preservationStorageKey,
         customizationState,
         existingCartItem,
         [unhandledCustomizationsFilter],
@@ -409,7 +468,7 @@ export default defineComponent({
       );
 
     const { quantity } = useProductQuantity(existingCartItem);
-    const { addToCartHandler, isSubmitting } = useAddToCart(
+    const { addToCartHandler, isSubmitting: isSubmittingAddToCart } = useAddToCart(
       currentProduct,
       quantity,
       customizationState,
@@ -417,11 +476,21 @@ export default defineComponent({
       context
     );
 
+    const { confirmCustomization, isSubmitting: isSubmittingCustomize } = useCustomizeAction(
+      customizationState,
+      draftPlushie,
+      context
+    );
+
     const { isUnmounted } = useComponentUnmountedChecker();
 
     async function onFormSubmit (): Promise<void> {
       try {
-        await addToCartHandler();
+        if (isCustomizeFlow.value) {
+          await confirmCustomization();
+        } else {
+          await addToCartHandler();
+        }
 
         persistCustomerEmail();
         removePreservedState();
@@ -430,10 +499,16 @@ export default defineComponent({
           return;
         }
 
-        context.root.$router.push({
-          name: 'cross-sells',
-          params: { parentSku: currentProduct.value.sku }
-        });
+        if (isCustomizeFlow.value) {
+          context.root.$router.push({
+            name: 'orders-history'
+          });
+        } else {
+          context.root.$router.push({
+            name: 'cross-sells',
+            params: { parentSku: currentProduct.value.sku }
+          });
+        }
       } catch (error) {
         context.root.$store.dispatch('notification/spawnNotification', {
           type: 'danger',
@@ -443,11 +518,19 @@ export default defineComponent({
       }
     }
 
+    const isSubmitting = computed<boolean>(() => {
+      return isSubmittingAddToCart.value || isSubmittingCustomize.value;
+    });
+
     const isDisabled = computed<boolean>(() => {
       return isSubmitting.value || productTypeStep.isProductLoading.value;
     });
 
     const submitButtonText = computed<string>(() => {
+      if (isCustomizeFlow.value) {
+        return i18n.t('Confirm Customization').toString();
+      }
+
       return (
         existingCartItem.value ? i18n.t('Update') : i18n.t('Add to Cart')
       ).toString();
@@ -456,6 +539,15 @@ export default defineComponent({
     const isSubmitButtonDisabled = computed<boolean>(() => {
       return isDisabled.value || isSomeCustomizationOptionBusy.value;
     });
+
+    const {
+      filteredOptionValues: filteredCustomizationAvailableOptionValues
+    } = useAvailableOptionsValuesFilter(
+      customizationAvailableOptionValues,
+      [
+        preSelectedOptionValuesFilter
+      ]
+    );
 
     return {
       ...customizationGroups,
@@ -466,7 +558,7 @@ export default defineComponent({
         getAllFormRefs(context.refs)
       ),
       currentProduct,
-      customizationAvailableOptionValues,
+      filteredCustomizationAvailableOptionValues,
       customizationOptionValue,
       isDisabled,
       isSubmitButtonDisabled,
@@ -475,7 +567,10 @@ export default defineComponent({
       onFormSubmit,
       submitButtonText,
       quantity,
-      validationObserver
+      validationObserver,
+      isCustomizeFlow,
+      preSelectedCustomizations,
+      showProductTypeChooseStep
     };
   }
 });
