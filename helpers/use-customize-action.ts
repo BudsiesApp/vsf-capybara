@@ -1,6 +1,7 @@
 import { ref, Ref, SetupContext } from '@vue/composition-api';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
+import i18n from '@vue-storefront/i18n'
 
 import { CustomizationStateItem, DraftPlushie, saveOrderItemCustomizationsState, submitOrderItemCustomizationsState } from 'src/modules/customization-system';
 
@@ -31,6 +32,11 @@ export function useCustomizeAction (
 
       root.$router.push({ name: 'orders-history' });
     } catch (e) {
+      root.$store.dispatch('notification/spawnNotification', {
+        type: 'error',
+        message: i18n.t('Failed to save customization'),
+        action1: { label: i18n.t('OK') }
+      });
       Logger.error(e, 'draft-plushie')();
     } finally {
       isSubmitting.value = false;
