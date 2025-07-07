@@ -10,7 +10,8 @@ const INFO_STEP_CUSTOMIZATION_NAME = 'pet info';
 export function useCreationWizardGtmEvents (
   customizations: Ref<Customization[]>,
   customizationOptionValue: Ref<Record<string, CustomizationOptionValue>>,
-  plushieType: Ref<string>
+  plushieType: Ref<string>,
+  customerEmail: Ref<string | undefined>
 ) {
   const photoStepCustomization = computed<Customization | undefined>(() => {
     return customizations.value.find(
@@ -65,7 +66,13 @@ export function useCreationWizardGtmEvents (
       return;
     }
 
-    EventBus.$emit(PlushieWizardEvents.PLUSHIE_WIZARD_INFO_FILL, plushieType.value);
+    EventBus.$emit(
+      PlushieWizardEvents.PLUSHIE_WIZARD_INFO_FILL,
+      {
+        plushieType: plushieType.value,
+        customerEmail: customerEmail.value
+      }
+    );
   }
 
   return {
