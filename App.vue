@@ -134,6 +134,8 @@ body,
     display: flex;
     flex: 1 0 auto;
     flex-direction: column;
+    min-height: 70vh;
+    justify-content: stretch;
   }
   .o-footer {
     flex: 0 0 auto;

@@ -228,6 +228,7 @@ export default {
 
 #checkout {
   box-sizing: border-box;
+  flex-grow: 1;
   @include for-desktop {
     padding: 0 var(--spacer-sm);
     max-width: 1272px;
