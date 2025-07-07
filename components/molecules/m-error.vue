@@ -49,7 +49,6 @@ export default {
 .error {
   display: flex;
   flex-direction: column;
-  height: 70vh;
   justify-content: center;
   align-items: center;
   flex: 1;

@@ -49,12 +49,19 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .sign-in-page {
+  margin: auto 0;
+
   ._content {
     padding: var(--spacer-xl) var(--spacer-sm) var(--spacer-base);
     box-sizing: border-box;
     margin: 0 auto;
     max-width: 28rem;
     width: 100%;
+  }
+
+  .m-login,
+  .m-register {
+    margin-top: var(--spacer-xl);
   }
 }
 </style>
