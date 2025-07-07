@@ -60,6 +60,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .restore-password-page {
+  margin: auto 0;
+
   ._content {
     padding: var(--spacer-xl) var(--spacer-sm) var(--spacer-base);
     box-sizing: border-box;

@@ -2,7 +2,9 @@
   <div class="minimal-layout" :class="{'storyblok-preview-mode': isStoryblokPreviewMode}">
     <div id="viewport">
       <OHeaderMinimal />
-      <slot />
+      <div class="content">
+        <slot />
+      </div>
       <OFooter />
     </div>
   </div>
@@ -27,7 +29,7 @@ export default {
 </script>
 
 <style lang="scss">
-.default-layout {
+.minimal-layout {
   &.storyblok-preview-mode {
     a,
     button {
