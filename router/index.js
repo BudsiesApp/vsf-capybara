@@ -703,6 +703,16 @@ let routes = [
     })
   },
   {
+    name: 'huggables-creation-page',
+    path: '/petsies-huggables/create/',
+    component: CustomizableProduct,
+    props: (route) => ({
+      sku: 'petsiesHuggables_bundle',
+      existingPlushieId: route.query.existingPlushieId,
+      layout: 'vertical'
+    })
+  },
+  {
     name: 'home-page-alias-1',
     path: '/home/',
     redirect: (route) => ({

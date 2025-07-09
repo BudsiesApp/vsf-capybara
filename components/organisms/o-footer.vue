@@ -204,6 +204,7 @@ export default {
             { name: this.$t('Custom Socks'), link: { name: 'printed-socks-creation-page' } },
             { name: this.$t('Custom Face Masks'), link: { name: 'printed-masks-creation-page' } },
             { name: this.$t('Bobbleheads & Figurines'), link: '/pet-bobblehead-figurines/' },
+            // { name: this.$t('Petsies Huggables'), link: { name: 'huggables-creation-page' } },
             {
               name: this.$t('Pajamas'),
               link: {
