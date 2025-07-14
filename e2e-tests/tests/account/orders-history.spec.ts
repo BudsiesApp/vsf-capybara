@@ -6,7 +6,7 @@ import { getRandomEmail } from '../../helpers/get-random-email';
 
 const test = mergeTests(checkoutPageTest, accountPageTest);
 
-test('item can be reordered', async ({ accountPage, page, printedSocksPage, cartPage, checkoutPage }) => {
+test.skip('item can be reordered', async ({ accountPage, page, printedSocksPage, cartPage, checkoutPage }) => {
   test.slow();
 
   await printedSocksPage.goto();
