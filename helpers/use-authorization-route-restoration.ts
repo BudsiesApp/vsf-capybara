@@ -20,6 +20,7 @@ export function useAuthorizationRouteRestoration (
     const route = await urlStorage.getItem(postAuthRedirectPathLocalStorageKey);
 
     if (!route) {
+      await root.$router.push({ name: 'orders-history' });
       return;
     }
 
