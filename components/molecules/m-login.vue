@@ -1,179 +1,448 @@
 <template>
   <div class="m-login modal-content">
-    <form @submit.prevent="login" class="form">
-      <SfInput
-        v-model="email"
-        name="email"
-        type="email"
-        :label="$t('Your email')"
-        :valid="!$v.email.$error"
-        :error-message="
-          !$v.email.required
-            ? $t('Field is required.')
-            : $t('Please provide valid e-mail address.')
-        "
-        class="form__element"
-      />
-      <SfInput
-        v-model="password"
-        name="password"
-        :label="$t('Password')"
-        :valid="!$v.password.$error"
-        :error-message="$t('Field is required.')"
-        type="password"
-        class="form__element"
-      />
-      <SfCheckbox
-        v-model="rememberMe"
-        name="remember-me"
-        :label="$t('Remember me')"
-        class="form__element form__checkbox"
-      />
-      <SfButton class="sf-button--full-width form__submit">
-        {{ $t('Login') }}
-      </SfButton>
-    </form>
-    <SfButton class="sf-button--text action-button" @click.native="switchElem('forgot-pass')">
-      {{ $t('Forgotten password?') }}
-    </SfButton>
-    <div class="aside">
-      <SfHeading
-        :title="$t('Don\'t have an account yet?')"
-        :level="3"
-        class="aside__heading"
-      />
-      <SfButton class="sf-button--text" @click.native="switchElem('register')">
-        {{ $t('Register now') }}
-      </SfButton>
-    </div>
+    <ValidationObserver
+      v-slot="{ handleSubmit: validateAndSubmit }"
+      ref="validationObserver"
+      slim
+    >
+      <form
+        @submit.prevent="validateAndSubmit(handleSubmit)"
+        class="_form"
+      >
+        <ValidationProvider
+          v-slot="{ errors }"
+          :rules="{
+            required: true,
+            email: true
+          }"
+          slim
+          name="Email"
+          mode="eager"
+        >
+          <SfInput
+            v-model.trim="emailValue"
+            name="email-address"
+            type="email"
+            :label="$t('Email address')"
+            :valid="!errors.length"
+            :error-message="errors[0]"
+            :disabled="isSubmitting"
+          />
+        </ValidationProvider>
+
+        <div v-if="isCodeSent" class="_code-sent-message">
+          {{ $t('Verification code sent to your email') }}
+        </div>
+
+        <ValidationProvider
+          v-if="isCodeSent"
+          v-slot="{ errors }"
+          slim
+          :rules="{ required: true }"
+          name="OTP"
+          mode="eager"
+        >
+          <SfInput
+            v-model.trim="otpCode"
+            name="otp"
+            type="text"
+            ref="otpInput"
+            :label="$t('Enter verification code')"
+            :valid="!errors.length"
+            :error-message="errors[0]"
+            :disabled="isSubmitting"
+          />
+        </ValidationProvider>
+
+        <div
+          class="_buttons-container"
+          :class="{ '-resend': isCodeSent }"
+        >
+          <SfButton
+            v-if="showCancelButton"
+            class="sf-button sf-button--text"
+            type="button"
+            :disabled="isSubmitting"
+            @click="cancelLogin"
+          >
+            {{ $t('Cancel') }}
+          </SfButton>
+
+          <SfButton
+            v-if="isCodeSent"
+            class="sf-button sf-button--text"
+            type="button"
+            :disabled="rateLimitCountdown > 0 || isSubmitting"
+            @click="resendOtp"
+          >
+            {{ resendOtpButtonText }}
+          </SfButton>
+
+          <slot
+            name="submit-button"
+            :isDisabled="isSubmitting"
+            :submitButtonText="submitButtonText"
+          >
+            <SfButton
+              class="sf-button _submit-button"
+              :disabled="isSubmitting"
+              type="submit"
+            >
+              {{ submitButtonText }}
+            </SfButton>
+          </slot>
+        </div>
+      </form>
+    </ValidationObserver>
   </div>
 </template>
 
-<script>
-import { SfInput, SfButton, SfCheckbox, SfHeading } from '@storefront-ui/vue';
-import { required, email } from 'vuelidate/lib/validators';
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+  onBeforeUnmount,
+  ref,
+  SetupContext,
+  nextTick,
+  PropType,
+  Ref
+} from '@vue/composition-api';
+import { extend, ValidationProvider, ValidationObserver } from 'vee-validate';
+import { required } from 'vee-validate/dist/rules';
+import { SfInput, SfButton } from '@storefront-ui/vue';
 
-import i18n from '@vue-storefront/i18n';
 import { Logger } from '@vue-storefront/core/lib/logger';
+import { AuthenticateRequestResponse } from '@vue-storefront/core/modules/user';
+import Task from 'core/lib/sync/types/Task';
 
-export default {
-  name: 'MLogin',
-  components: { SfInput, SfButton, SfCheckbox, SfHeading },
-  props: {
-    prefilledEmail: {
-      type: String,
-      default: ''
+extend('required', {
+  ...required,
+  message: 'Field is required'
+});
+
+function useRateLimit ({ root }: SetupContext) {
+  const RATE_LIMIT_TIMEOUT = 60;
+  const RATE_LIMIT_ERROR_CODE = 429;
+
+  const rateLimitCountdown = ref(0);
+  const rateLimitTimer = ref<number | undefined>(undefined);
+
+  const clearRateLimitTimer = (): void => {
+    if (rateLimitTimer.value) {
+      window.clearInterval(rateLimitTimer.value);
+      rateLimitTimer.value = undefined;
     }
-  },
-  data () {
-    return {
-      email: '',
-      password: '',
-      rememberMe: false
-    };
-  },
-  methods: {
-    switchElem (to) {
-      this.$v.$reset();
-      this.$emit('form-switched', to);
-    },
-    login () {
-      this.$v.$touch();
-      if (this.$v.$invalid) {
-        this.$store.dispatch('notification/spawnNotification', {
-          type: 'danger',
-          message: this.$t('Please fix the validation errors'),
-          action1: { label: this.$t('OK') }
-        });
-        return;
+
+    rateLimitCountdown.value = 0;
+  };
+
+  const startRateLimitTimer = (): void => {
+    if (rateLimitTimer.value) {
+      clearRateLimitTimer();
+    }
+
+    rateLimitCountdown.value = RATE_LIMIT_TIMEOUT;
+
+    rateLimitTimer.value = window.setInterval(() => {
+      rateLimitCountdown.value--;
+
+      if (rateLimitCountdown.value <= 0) {
+        clearRateLimitTimer();
       }
-      this.$bus.$emit(
-        'notification-progress-start',
-        this.$t('Authorization in progress ...')
-      );
-      this.$store
-        .dispatch('user/login', {
-          username: this.email,
-          password: this.password
-        })
-        .then(result => {
-          this.$bus.$emit('notification-progress-stop', {});
+    }, 1000);
+  };
 
-          if (result.code !== 200) {
-            this.onFailure(result);
-          } else {
-            this.onSuccess(i18n.t('You are logged in!'));
-            this.$emit('login-success');
-          }
-        })
-        .catch(err => {
-          Logger.error(err, 'user')();
-          this.onFailure({
-            result:
-              'Unexpected authorization error. Check your Network conection.'
-          });
-          this.$bus.$emit('notification-progress-stop');
-        });
-    },
-    onSuccess (message) {
-      this.$store.dispatch('notification/spawnNotification', {
-        type: 'success',
-        message: message,
-        action1: { label: i18n.t('OK') }
-      });
-    },
-    onFailure (result) {
-      this.$store.dispatch('notification/spawnNotification', {
-        type: 'danger',
-        message: i18n.t(result.result),
-        action1: { label: i18n.t('OK') }
-      });
-    }
-  },
-  beforeMount () {
-    if (this.prefilledEmail) {
-      this.email = this.prefilledEmail;
-    }
-  },
-  validations: {
-    email: {
-      required,
-      email
-    },
-    password: {
-      required
-    }
+  const isRateLimitError = (task: Task): boolean => {
+    return task.code === RATE_LIMIT_ERROR_CODE;
+  };
+
+  const handleRateLimitError = (): void => {
+    startRateLimitTimer();
+
+    root.$store.dispatch('notification/spawnNotification', {
+      type: 'warning',
+      message: root.$t('Too many requests. Please wait before trying again.'),
+      action1: { label: root.$t('OK') }
+    });
+  };
+
+  onBeforeUnmount(() => {
+    clearRateLimitTimer();
+  });
+
+  return {
+    handleRateLimitError,
+    isRateLimitError,
+    rateLimitCountdown,
+    startRateLimitTimer
   }
 }
+
+type ValidationObserverInstance = InstanceType<typeof ValidationObserver>;
+type SfInputInstance = InstanceType<typeof SfInput>;
+
+export default defineComponent({
+  name: 'MLogin',
+  props: {
+    emailSubmitButtonText: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
+    email: {
+      type: String,
+      default: ''
+    },
+    allowCancel: {
+      type: Boolean,
+      default: false
+    }
+  },
+  components: {
+    SfInput,
+    SfButton,
+    ValidationProvider,
+    ValidationObserver
+  },
+  setup (props, context) {
+    const root = context.root;
+    const emit = context.emit;
+
+    const otpInput = ref<SfInputInstance | null>(null);
+    const validationObserver = ref<ValidationObserverInstance | null>(null);
+
+    const emailValue = computed<string>({
+      get: () => {
+        return props.email
+      },
+      set: (value: string) => {
+        context.emit('update:email', value);
+      }
+    });
+
+    const otpCode = ref<string>('');
+
+    const _isSubmitting = ref(false);
+    const isSubmitting = computed<boolean>({
+      get: () => _isSubmitting.value,
+      set: (value: boolean) => {
+        _isSubmitting.value = value;
+        emit('is-submitting-changed', value);
+      }
+    });
+
+    const isCodeSent = ref(false);
+
+    const submitButtonText = computed<string>(() => {
+      if (isCodeSent.value) {
+        return root.$t('Verify').toString();
+      }
+
+      return props.emailSubmitButtonText || root.$t('Login').toString();
+    });
+
+    const {
+      handleRateLimitError,
+      isRateLimitError,
+      rateLimitCountdown,
+      startRateLimitTimer
+    } = useRateLimit(context);
+
+    function focusOtpInput (): void {
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      const otpInputRootElement = (otpInput as Ref<SfInputInstance | null>).value?.$el;
+
+      if (!otpInputRootElement) {
+        return;
+      }
+
+      const inputElement = otpInputRootElement.querySelector('input');
+
+      if (!inputElement) {
+        return;
+      }
+
+      inputElement.focus();
+    }
+
+    const resendOtpButtonText = computed<string>(() => {
+      if (rateLimitCountdown.value > 0) {
+        return `${root.$t('Resend in')} ${rateLimitCountdown.value}`
+      }
+
+      return root.$t('Resend code').toString();
+    });
+
+    const requestOtp = async (): Promise<void> => {
+      isSubmitting.value = true;
+
+      try {
+        const task: Task = await root.$store.dispatch('user/login', { email: emailValue.value });
+
+        if (isRateLimitError(task)) {
+          handleRateLimitError();
+          return;
+        }
+
+        if (task.code !== 200) {
+          throw new Error(`Failed to send verification code: ${task.result}`);
+        }
+
+        isCodeSent.value = true;
+        startRateLimitTimer();
+        isSubmitting.value = false;
+
+        emit('otp-requested');
+
+        await nextTick();
+        focusOtpInput();
+      } catch (error) {
+        Logger.error(error, 'user-login')();
+
+        root.$store.dispatch('notification/spawnNotification', {
+          type: 'danger',
+          message: root.$t('Unable to send verification code. Please try again.'),
+          action1: { label: root.$t('OK') }
+        });
+      } finally {
+        isSubmitting.value = false;
+      }
+    };
+
+    const submitOtpCode = async (): Promise<void> => {
+      isSubmitting.value = true;
+
+      try {
+        const response: Task = await root.$store.dispatch('user/authenticate', {
+          token: otpCode.value,
+          email: emailValue.value
+        });
+        const result: AuthenticateRequestResponse = response.result;
+
+        if (response.code !== 200) {
+          const error = response.result.errorMessage || root.$t('Authentication failed').toString();
+
+          root.$store.dispatch('notification/spawnNotification', {
+            type: 'danger',
+            message: error,
+            action1: { label: root.$t('OK') }
+          });
+          return;
+        }
+
+        emit('otp-submitted');
+
+        if (!result.is_new_customer) {
+          root.$store.dispatch('notification/spawnNotification', {
+            type: 'success',
+            message: root.$t('Successfully logged in!'),
+            action1: { label: root.$t('OK') }
+          });
+          return;
+        }
+
+        emit('registration-required', result.token);
+      } catch (error) {
+        Logger.error(error, 'user-authenticate')();
+
+        root.$store.dispatch('notification/spawnNotification', {
+          type: 'danger',
+          message: root.$t('Authentication failed. Please try again.'),
+          action1: { label: root.$t('OK') }
+        });
+      } finally {
+        isSubmitting.value = false;
+      }
+    };
+
+    const resendOtp = async (): Promise<void> => {
+      if (rateLimitCountdown.value > 0) {
+        return;
+      }
+
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      (validationObserver as Ref<ValidationObserverInstance | null>).value?.reset();
+
+      await requestOtp();
+    };
+
+    const handleSubmit = async (): Promise<void> => {
+      if (isCodeSent.value) {
+        await submitOtpCode();
+      } else {
+        await requestOtp();
+      }
+    };
+
+    const validateForm = async (): Promise<boolean> => {
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      const _validationObserver = (validationObserver as Ref<ValidationObserverInstance | null>);
+
+      if (!_validationObserver.value) {
+        return false;
+      }
+
+      return _validationObserver.value.validate();
+    }
+
+    const showCancelButton = computed<boolean>(() => {
+      return props.allowCancel && isCodeSent.value;
+    });
+
+    const cancelLogin = (): void => {
+      if (!props.allowCancel) {
+        return;
+      }
+
+      isCodeSent.value = false;
+      otpCode.value = '';
+      isSubmitting.value = false;
+
+      emit('cancelled');
+    };
+
+    return {
+      cancelLogin,
+      emailValue,
+      handleSubmit,
+      isCodeSent,
+      isSubmitting,
+      otpCode,
+      rateLimitCountdown,
+      resendOtp,
+      resendOtpButtonText,
+      showCancelButton,
+      submitButtonText,
+      otpInput,
+      validationObserver,
+      validateForm
+    };
+  }
+});
 </script>
 
 <style lang="scss" scoped>
-.modal-content,
-.aside {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.form {
-  width: 100%;
-  &__element {
-    margin: var(--spacer-base) 0;
+.m-login {
+  ._buttons-container {
+    display: flex;
+    align-items: center;
+    justify-content: var(--m-login-buttons-justify-content, flex-end);
+    flex-direction: var(--m-login-buttons-direction, row);
+    column-gap: var(--spacer-sm);
+
+    &.-resend {
+      justify-content: var(--m-login-buttons-resend-justify-content, space-between);
+    }
   }
-  &__checkbox {
-    margin: var(--spacer-xl) 0 var(--spacer-2xl) 0;
+
+  ._code-sent-message {
+    font-size: var(--font-sm);
   }
-  &__submit {
-    margin: var(--spacer-xl) 0 0 0;
-  }
-}
-.action-button {
-  margin: var(--spacer-xl) 0;
-}
-.aside {
-  margin: 0 0 var(--spacer-xl) 0;
-  &__heading {
-    --heading-title-color: var(--c-primary);
-    margin: 0 0 var(--spacer-sm) 0;
+
+  .sf-input {
+  --input-label-required: " *";
+
+    margin: var(--spacer-base) 0 var(--spacer-xs);
   }
 }
 </style>

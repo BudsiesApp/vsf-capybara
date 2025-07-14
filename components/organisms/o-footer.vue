@@ -178,8 +178,7 @@ export default {
                 if (!this.isLoggedIn) {
                   if ([
                     PageName.SIGN_IN,
-                    PageName.SIGN_UP,
-                    PageName.RESTORE_PASSWORD
+                    PageName.SIGN_UP
                   ].includes(this.$route.name)) {
                     return;
                   }
