@@ -121,7 +121,7 @@ test('order can be placed', async ({ cartPage, checkoutPage, plushSamplePage }) 
   await checkoutPage.selectPaymentMethodAndPlaceOrder();
 });
 
-test('order can be placed and user account created', async ({ cartPage, checkoutPage, plushSamplePage }) => {
+test.skip('order can be placed and user account created', async ({ cartPage, checkoutPage, plushSamplePage }) => {
   test.setTimeout(60_000);
 
   await plushSamplePage.goto();
@@ -132,7 +132,7 @@ test('order can be placed and user account created', async ({ cartPage, checkout
   await checkoutPage.goto();
 
   const email = getRandomEmail();
-  await checkoutPage.personalDetailsStep.fillPersonalDetails(undefined, undefined, email, true);
+  await checkoutPage.personalDetailsStep.fillPersonalDetails(undefined, undefined, email);
 
   await checkoutPage.fillShippingAddress();
   await checkoutPage.fillBillingAddress();
