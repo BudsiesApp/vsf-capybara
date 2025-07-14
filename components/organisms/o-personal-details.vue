@@ -6,15 +6,53 @@
       class="sf-heading--left sf-heading--no-underline title"
     />
 
-    <div v-if="!currentUser" class="log-in desktop-only">
-      <SfButton class="log-in__button color-secondary" @click="login">
-        {{ $t('Log in to your account') }}
-      </SfButton>
-      <p class="log-in__info">
-        {{ $t('or fill the details below') }}:
-      </p>
-    </div>
     <div class="form">
+      <div
+        v-if="showLoginForm"
+        class="log-in form__element"
+      >
+        <m-login
+          ref="login-form"
+          class="login-form"
+          :allow-cancel="true"
+          :email.sync="personalDetails.emailAddress"
+          :email-submit-button-text="$t('Log In/Create account')"
+          @is-submitting-changed="onLoginFormIsSubmittingChanged"
+          @otp-submitted="resetPostAuthRedirectPath"
+          @otp-requested="onOtpRequested"
+          @registration-required="onRegistrationRequired"
+          @cancelled="onLoginCancelled"
+        >
+          <template #submit-button="{ isDisabled, submitButtonText }">
+            <SfButton
+              type="submit"
+              :disabled="isDisabled"
+              class="log-in__button color-secondary"
+            >
+              {{ submitButtonText }}
+            </SfButton>
+          </template>
+        </m-login>
+      </div>
+
+      <SfInput
+        v-else
+        v-model.trim="personalDetails.emailAddress"
+        class="form__element"
+        :class="{[vuelidateErrorClassName]: $v.personalDetails.emailAddress.$error}"
+        name="email-address"
+        :disabled="true"
+        :label="$t('Email address')"
+        :required="true"
+        :valid="!$v.personalDetails.emailAddress.$error"
+        :error-message="
+          !$v.personalDetails.emailAddress.required
+            ? $t('Field is required')
+            : $t('Please provide valid e-mail address.')
+        "
+        @blur="$v.personalDetails.emailAddress.$touch()"
+      />
+
       <SfInput
         v-model.trim="personalDetails.firstName"
         class="form__element form__element--half"
@@ -24,6 +62,7 @@
         :required="true"
         :valid="!$v.personalDetails.firstName.$error"
         :error-message="$t('Field is required')"
+        :disabled="isFormDisabled"
         @blur="$v.personalDetails.firstName.$touch()"
       />
       <SfInput
@@ -35,69 +74,10 @@
         :required="true"
         :valid="!$v.personalDetails.lastName.$error"
         :error-message="$t('Field is required')"
+        :disabled="isFormDisabled"
         @blur="$v.personalDetails.lastName.$touch()"
       />
-      <SfInput
-        v-model.trim="personalDetails.emailAddress"
-        class="form__element"
-        :class="{[vuelidateErrorClassName]: $v.personalDetails.emailAddress.$error}"
-        name="email-address"
-        :label="$t('Email address')"
-        :required="true"
-        :valid="!$v.personalDetails.emailAddress.$error"
-        :error-message="
-          !$v.personalDetails.emailAddress.required
-            ? $t('Field is required')
-            : $t('Please provide valid e-mail address.')
-        "
-        @blur="$v.personalDetails.emailAddress.$touch()"
-      />
-      <template v-if="!currentUser">
-        <div class="form__element">
-          <SfCheckbox
-            v-model="createAccount"
-            :label="$t('I want to create an account')"
-            class="form__checkbox"
-            name="createAccount"
-          />
-        </div>
-        <template v-if="createAccount">
-          <m-password
-            ref="password"
-            v-model="passwordData"
-            :error-class-name="vuelidateErrorClassName"
-          />
 
-          <div class="form__element form__group">
-            <SfCheckbox
-              v-model="acceptConditions"
-              class="form__checkbox"
-              name="acceptConditions"
-              :required="true"
-              :valid="!$v.acceptConditions.$error"
-            >
-              <template #label>
-                <span class="sf-checkbox__label">
-                  {{ $t('I accept') }}
-
-                  <router-link
-                    target="_blank"
-                    to="/terms-of-service/"
-                  >
-                    {{ $t('Terms of Service') }}
-                  </router-link>
-
-                  <span>
-                    {{ $t('and') }}
-                  </span>
-
-                  <privacy-policy-link />
-                </span>
-              </template>
-            </SfCheckbox>
-          </div>
-        </template>
-      </template>
       <APromoCode :allow-promo-code-removal="false" class="mobile-only">
         <template #title>
           <SfHeading
@@ -110,18 +90,12 @@
       <div class="form__action">
         <SfButton
           class="_continue-button sf-button--full-width form__action-button"
+          :disabled="isFormDisabled"
           @click="onContinueButtonClick"
         >
           {{
             $t(isVirtualCart ? "Continue to payment" : "Continue to shipping")
           }}
-        </SfButton>
-        <SfButton
-          v-if="!currentUser"
-          class="sf-button--full-width sf-button--text form__action-button form__action-button--secondary mobile-only"
-          @click="login"
-        >
-          {{ $t('or login to your account') }}
         </SfButton>
       </div>
 
@@ -131,23 +105,27 @@
     </div>
   </div>
 </template>
+
 <script>
+import { defineComponent } from '@vue/composition-api';
 import { required, minLength, email, sameAs } from 'vuelidate/lib/validators';
 import { PersonalDetails } from '@vue-storefront/core/modules/checkout/components/PersonalDetails';
 import { SfInput, SfButton, SfHeading, SfCheckbox } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
 import { mapActions } from 'vuex';
 
+import i18n from '@vue-storefront/i18n';
 import { PERSISTED_CUSTOMER_EMAIL, PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_EMAIL, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME } from 'src/modules/persisted-customer-data';
 import { PrivacyPolicyLink } from 'src/modules/shared';
 
 import { createSmoothscroll } from 'theme/helpers';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
+import { useAuthorizationRouteRestoration } from 'theme/helpers/use-authorization-route-restoration';
 
 import APromoCode from 'theme/components/atoms/a-promo-code'
-import MPassword from 'theme/components/molecules/m-password'
+import MLogin from 'theme/components/molecules/m-login';
 
-export default {
+export default defineComponent({
   name: 'OPersonalDetails',
   components: {
     APromoCode,
@@ -156,7 +134,19 @@ export default {
     SfButton,
     SfHeading,
     SfCheckbox,
-    MPassword
+    MLogin
+  },
+  setup (_, context) {
+    const { persistPostAuthRedirectPath, resetPostAuthRedirectPath } = useAuthorizationRouteRestoration(context);
+
+    function onOtpRequested () {
+      persistPostAuthRedirectPath(context.root.$route.fullPath);
+    }
+
+    return {
+      onOtpRequested,
+      resetPostAuthRedirectPath
+    }
   },
   mixins: [PersonalDetails],
   validations: {
@@ -179,7 +169,19 @@ export default {
   },
   data () {
     return {
-      vuelidateErrorClassName
+      vuelidateErrorClassName,
+      isRegistrationRequired: false,
+      registrationToken: '',
+      isRegistrationInProgress: false,
+      isLoginFormSubmitting: false
+    }
+  },
+  computed: {
+    showLoginForm () {
+      return !this.currentUser && !this.isRegistrationRequired;
+    },
+    isFormDisabled () {
+      return this.isRegistrationInProgress || this.isLoginFormSubmitting;
     }
   },
   beforeMount () {
@@ -200,25 +202,76 @@ export default {
     ...mapActions('ui', {
       openModal: 'openModal'
     }),
+    onLoginFormIsSubmittingChanged (value) {
+      this.isLoginFormSubmitting = value;
+    },
+    onRegistrationRequired (token) {
+      this.isRegistrationRequired = true;
+      this.registrationToken = token;
+    },
+    onLoginCancelled () {
+      this.isRegistrationRequired = false;
+      this.registrationToken = '';
+      this.isLoginFormSubmitting = false;
+    },
     login () {
       this.openModal({ name: ModalList.Auth, payload: 'login' })
     },
     async onContinueButtonClick () {
       let isInvalid = false;
 
-      if (this.createAccount) {
-        const isPasswordValid = await this.$refs.password.getIsPasswordValid();
-        this.$v.$touch();
-        isInvalid = this.$v.$invalid || !isPasswordValid;
-      } else {
-        this.$v.personalDetails.$touch();
-        isInvalid = this.$v.personalDetails.$invalid;
+      this.$v.personalDetails.$touch();
+      isInvalid = this.$v.personalDetails.$invalid;
+
+      const loginForm = this.$refs['login-form'];
+
+      if (loginForm?.validateForm) {
+        const isLoginFormValid = await loginForm.validateForm();
+
+        if (!isLoginFormValid) {
+          isInvalid = true;
+        }
       }
 
       if (isInvalid) {
         await this.$nextTick();
         vuelidateScrollToFirstError(this.$el);
         return;
+      }
+
+      if (this.isRegistrationRequired) {
+        if (this.isRegistrationInProgress) {
+          return;
+        }
+
+        try {
+          this.isRegistrationInProgress = true;
+          const response = await this.$store.dispatch('user/register', {
+            email: this.personalDetails.emailAddress,
+            token: this.registrationToken,
+            firstname: this.personalDetails.firstName,
+            lastname: this.personalDetails.lastName
+          });
+
+          if (response.code !== 200) {
+            throw new Error('Registration failed');
+          } else {
+            this.$store.dispatch('notification/spawnNotification', {
+              type: 'success',
+              message: i18n.t('Successfully logged in!'),
+              action1: { label: i18n.t('OK') }
+            });
+          }
+        } catch (error) {
+          this.$store.dispatch('notification/spawnNotification', {
+            type: 'danger',
+            message: i18n.t(error),
+            action1: { label: i18n.t('OK') }
+          });
+          return;
+        } finally {
+          this.isRegistrationInProgress = false;
+        }
       }
 
       this.$store.commit(
@@ -258,24 +311,34 @@ export default {
         this.personalDetails.lastName = customerLastName;
       }
     }
+  },
+  watch: {
+    currentUser (newValue) {
+      if (newValue) {
+        this.isRegistrationRequired = false;
+        this.isLoginFormSubmitting = false;
+      }
+    }
   }
-};
+});
 </script>
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .o-personal-details {
-  --password-inputs-margin: 0 0 var(--spacer-sm) 0;
-
-  .m-password {
-    flex: 0 0 100%;
-  }
-
   .california-privacy-notice-link {
     width: 100%;
 
     --privacy-notice-link-text-align: start;
     --privacy-notice-link-margin: 0;
+  }
+
+  .login-form {
+    --m-login-buttons-justify-content: flex-end;
+    --m-login-buttons-resend-justify-content: flex-end;
+    --m-login-buttons-direction: row-reverse;
+
+    margin-bottom: var(--spacer-sm);
   }
 }
 

@@ -11,12 +11,12 @@ const Checkout = () =>
 const DetailedCart = () =>
   import(/* webpackChunkName: "vsf-detailed-cart" */ 'theme/pages/DetailedCart');
 
+const Auth = () =>
+  import(/* webpackChunkName: "vsf-authorization" */ 'theme/pages/Authorization/Auth');
 const SignIn = () =>
   import(/* webpackChunkName: "vsf-authorization" */ 'theme/pages/Authorization/SignIn');
 const SignUp = () =>
   import(/* webpackChunkName: "vsf-authorization" */ 'theme/pages/Authorization/SignUp');
-const RestorePassword = () =>
-  import(/* webpackChunkName: "vsf-authorization" */ 'theme/pages/Authorization/RestorePassword');
 
 const MyAccount = () =>
   import(/* webpackChunkName: "vsf-my-account" */ 'theme/pages/MyAccount');
@@ -94,6 +94,15 @@ let routes = [
     })
   },
   {
+    path: '/authenticate/',
+    name: 'auth',
+    component: Auth,
+    props: (route) => ({
+      token: route.query.token,
+      email: route.query.email
+    })
+  },
+  {
     path: '/sign-in/',
     name: PageName.SIGN_IN,
     component: SignIn
@@ -109,11 +118,6 @@ let routes = [
     path: '/sign-up/',
     name: PageName.SIGN_UP,
     component: SignUp
-  },
-  {
-    path: '/restore-password/',
-    name: PageName.RESTORE_PASSWORD,
-    component: RestorePassword
   },
   {
     path: '/my-account/',
