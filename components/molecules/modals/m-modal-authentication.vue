@@ -1,45 +1,42 @@
 <template>
   <div class="m-modal-authentication">
     <SfModal :visible="isVisible" @close="closeModal" ref="modal">
-      <transition
-        name="fade"
-        mode="out-in"
-        @after-enter="onTransitionAfterEnter"
-      >
-        <MLogin
-          v-if="modalData.payload === 'login'"
-          @form-switched="onFormSwitched"
-          @login-success="closeModal"
-        />
+      <MLogin
+        v-if="!showRegisterForm"
+        :email.sync="email"
+        @otp-requested="onOtpRequested"
+        @otp-submitted="resetPostAuthRedirectPath"
+        @registration-required="onRegistrationRequired"
+        @hook:mounted="onTransitionAfterEnter"
+      />
 
-        <MRegister
-          v-if="modalData.payload === 'register'"
-          @form-switched="onFormSwitched"
-          @login-success="closeModal"
-        />
-
-        <MResetPassword
-          v-if="modalData.payload === 'forgot-pass'"
-          @form-switched="onFormSwitched"
-        />
-      </transition>
+      <MRegister
+        v-if="showRegisterForm"
+        :email="email"
+        :registration-token="registrationToken"
+        @hook:mounted="onTransitionAfterEnter"
+      />
     </SfModal>
   </div>
 </template>
 
-<script>
-import { SfModal } from '@storefront-ui/vue';
+<script lang="ts">
+import { defineComponent } from '@vue/composition-api';
+import { SfModal, StorefrontUiInstanceType } from '@storefront-ui/vue';
 import { mapActions } from 'vuex';
 
-import { ModalList } from 'theme/store/ui/modals'
+import { useAuthorizationRouteRestoration } from 'theme/helpers/use-authorization-route-restoration';
 
-import MLogin from 'theme/components/molecules/m-login'
-import MRegister from 'theme/components/molecules/m-register'
-import MResetPassword from 'theme/components/molecules/m-reset-password'
+import MLogin from 'theme/components/molecules/m-login.vue'
+import MRegister from 'theme/components/molecules/m-register.vue'
 
-export default {
+export default defineComponent({
   name: 'MModalAuthentication',
-  components: { SfModal, MLogin, MRegister, MResetPassword },
+  components: {
+    MLogin,
+    MRegister,
+    SfModal
+  },
   props: {
     isVisible: {
       type: Boolean,
@@ -51,25 +48,63 @@ export default {
       required: true
     }
   },
+  setup (_, context) {
+    const { persistPostAuthRedirectPath, resetPostAuthRedirectPath } = useAuthorizationRouteRestoration(context);
+
+    const onOtpRequested = () => {
+      persistPostAuthRedirectPath(context.root.$route.fullPath);
+    };
+
+    return {
+      onOtpRequested,
+      resetPostAuthRedirectPath
+    };
+  },
+  data () {
+    return {
+      email: '',
+      registrationToken: '',
+      showRegisterForm: false
+    };
+  },
+  computed: {
+    isUserLoggedIn () {
+      return this.$store.getters['user/isLoggedIn'];
+    }
+  },
   methods: {
     ...mapActions('ui', {
       openModal: 'openModal'
     }),
+    reset () {
+      this.email = '';
+      this.registrationToken = '';
+      this.showRegisterForm = false;
+    },
     closeModal () {
       this.$emit('close', this.modalData.name)
+      this.reset();
+    },
+    onRegistrationRequired (registrationToken: string) {
+      this.registrationToken = registrationToken;
+      this.showRegisterForm = true;
     },
     onTransitionAfterEnter () {
-      const modalComponent = this.$refs.modal;
+      const modalComponent = this.$refs.modal as StorefrontUiInstanceType<typeof SfModal> | undefined;
 
       if (!modalComponent) {
         return;
       }
 
       modalComponent.updateDirectivesData();
-    },
-    onFormSwitched (to) {
-      this.openModal({ name: ModalList.Auth, payload: to })
+    }
+  },
+  watch: {
+    isUserLoggedIn (newValue) {
+      if (newValue) {
+        this.closeModal();
+      }
     }
   }
-};
+});
 </script>
