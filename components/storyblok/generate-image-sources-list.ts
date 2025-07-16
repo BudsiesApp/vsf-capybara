@@ -60,9 +60,9 @@ export default function generateImageSourcesList (
       let mod = '/m/fit-in';
       mod += `/${adjustedWidth}x${adjustedHeight}`;
 
-      const webpResizedUrl = 'https://a.storyblok.com' + resource + mod + webpFilter;
-      const avifResizedUrl = 'https://a.storyblok.com' + resource + mod + avifFilter;
-      const defaultResizedUrl = 'https://a.storyblok.com' + resource + mod;
+      const webpResizedUrl = 'https://sb-assets.budsies.com' + resource + mod + webpFilter;
+      const avifResizedUrl = 'https://sb-assets.budsies.com' + resource + mod + avifFilter;
+      const defaultResizedUrl = 'https://sb-assets.budsies.com' + resource + mod;
 
       webpSourceItem.srcset.push(`${webpResizedUrl}${density > 1 ? ' ' + density + 'x' : ''}`);
       avifSourceItem.srcset.push(`${avifResizedUrl}${density > 1 ? ' ' + density + 'x' : ''}`);
