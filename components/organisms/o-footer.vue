@@ -204,6 +204,7 @@ export default {
             { name: this.$t('Custom Socks'), link: { name: 'printed-socks-creation-page' } },
             { name: this.$t('Custom Face Masks'), link: { name: 'printed-masks-creation-page' } },
             { name: this.$t('Bobbleheads & Figurines'), link: '/pet-bobblehead-figurines/' },
+            // { name: this.$t('Petsies Huggables'), link: { name: 'huggables-creation-page' } },
             {
               name: this.$t('Pajamas'),
               link: {
@@ -253,8 +254,7 @@ export default {
                 if (!this.isLoggedIn) {
                   if ([
                     PageName.SIGN_IN,
-                    PageName.SIGN_UP,
-                    PageName.RESTORE_PASSWORD
+                    PageName.SIGN_UP
                   ].includes(this.$route.name)) {
                     return;
                   }

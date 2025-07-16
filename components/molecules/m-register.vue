@@ -2,27 +2,14 @@
   <div class="m-register modal-content">
     <form @submit.prevent="register" class="form">
       <SfInput
-        v-model="email"
-        name="email"
-        type="email"
-        :label="$t('Your email')"
-        :valid="!$v.email.$error"
-        :error-message="
-          !$v.email.required
-            ? $t('Field is required.')
-            : $t('Please provide valid e-mail address.')
-        "
-        class="form__element"
-      />
-
-      <SfInput
         v-model="firstName"
         name="first-name"
         :label="$t('First name')"
         :valid="!$v.firstName.$error"
+        :disabled="isSubmitting"
         :error-message="
           !$v.firstName.required
-            ? $t('Field is required.')
+            ? $t('Field is required')
             : $t('Field is not valid')
         "
         class="form__element"
@@ -33,24 +20,22 @@
         name="last-name"
         :label="$t('Last name')"
         :valid="!$v.lastName.$error"
+        :disabled="isSubmitting"
         :error-message="
           !$v.lastName.required
-            ? $t('Field is required.')
+            ? $t('Field is required')
             : $t('Field is not valid')
         "
         class="form__element"
       />
 
-      <m-password ref="password" v-model="passwordData" />
-
-      <SfButton class="sf-button--full-width form__submit">
+      <SfButton
+        :disabled="isSubmitting"
+        class="sf-button--full-width form__submit"
+      >
         {{ $t('Create an account') }}
       </SfButton>
     </form>
-
-    <SfButton class="sf-button--text action-button" @click.native="switchElem('login')">
-      {{ `${$t('or')} ${$t('login in to your account')}` }}
-    </SfButton>
 
     <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
       <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
@@ -58,16 +43,18 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from '@vue/composition-api';
 import { SfInput, SfButton } from '@storefront-ui/vue';
-import { required, email } from 'vuelidate/lib/validators';
+import { required } from 'vuelidate/lib/validators';
 
+import Task from '@vue-storefront/core/lib/sync/types/Task';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import i18n from '@vue-storefront/i18n';
 
 import MPassword from 'theme/components/molecules/m-password.vue';
 
-export default {
+export default defineComponent({
   name: 'MRegister',
   components: {
     SfInput,
@@ -75,34 +62,33 @@ export default {
     MPassword
   },
   props: {
-    prefilledEmail: {
+    email: {
       type: String,
-      default: ''
+      required: true
+    },
+    registrationToken: {
+      type: String,
+      required: true
     }
   },
   data () {
     return {
-      email: '',
-      passwordData: {
-        password: '',
-        repeatPassword: ''
-      },
       firstName: '',
       lastName: '',
-      serverErrorFields: []
+      serverErrorFields: [] as string[],
+      isSubmitting: false
     };
   },
   methods: {
-    switchElem (to) {
-      this.$v.$reset();
-      this.$emit('form-switched', to);
-    },
     async register () {
+      if (this.isSubmitting) {
+        return;
+      }
+
       this.serverErrorFields = [];
       this.$v.$touch();
-      const isPasswordValid = await this.$refs.password.getIsPasswordValid();
 
-      if (this.$v.$invalid || !isPasswordValid) {
+      if (this.$v.$invalid) {
         this.$store.dispatch('notification/spawnNotification', {
           type: 'danger',
           message: this.$t('Please fix the validation errors'),
@@ -110,52 +96,44 @@ export default {
         });
         return;
       }
-      this.$bus.$emit(
-        'notification-progress-start',
-        this.$t('Registering the account ...')
-      );
-      this.$store
-        .dispatch('user/register', {
+
+      this.isSubmitting = true;
+
+      try {
+        const response = await this.$store.dispatch('user/register', {
           email: this.email,
-          password: this.passwordData.password,
+          token: this.registrationToken,
           firstname: this.firstName,
           lastname: this.lastName
-        })
-        .then(result => {
-          this.$bus.$emit('notification-progress-stop');
-          if (result.code !== 200) {
-            this.processError(result)
-          } else {
-            this.$store.dispatch('user/login', {
-              username: this.email,
-              password: this.passwordData.password
-            }).then(() => {
-              this.$emit('login-success');
-            });
-            this.onSuccess(i18n.t('You are logged in!'));
-          }
-        })
-        .catch(err => {
-          this.onFailure('Unexpected authorization error. Check your Network conection.');
-          this.$bus.$emit('notification-progress-stop');
-          Logger.error(err, 'user')();
         });
+
+        if (response.code !== 200) {
+          this.processError(response)
+        } else {
+          this.onSuccess(i18n.t('You are logged in!').toString());
+        }
+      } catch (err) {
+        this.onFailure('Unexpected authorization error. Check your Network conection.');
+        Logger.error(err, 'user')();
+      } finally {
+        this.isSubmitting = false;
+      }
     },
-    onSuccess (message) {
+    onSuccess (message: string) {
       this.$store.dispatch('notification/spawnNotification', {
         type: 'success',
         message: message,
         action1: { label: i18n.t('OK') }
       });
     },
-    onFailure (message) {
+    onFailure (message: string) {
       this.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
         message: i18n.t(message),
         action1: { label: i18n.t('OK') }
       });
     },
-    processError (result) {
+    processError (result: Task) {
       if (typeof result.result === 'string') {
         this.onFailure(result.result);
         return;
@@ -168,7 +146,7 @@ export default {
 
       this.processBadRequestErrors(result.result);
     },
-    processBadRequestErrors (errorsList) {
+    processBadRequestErrors (errorsList: any[]) {
       for (const error of errorsList) {
         if (!error.dataPath) {
           continue;
@@ -186,22 +164,12 @@ export default {
 
       this.$v.$touch();
     },
-    serverErrorsValidator (fieldName) {
+    serverErrorsValidator (fieldName: string) {
       return !this.serverErrorFields.find((field) => fieldName === field);
-    }
-  },
-  beforeMount () {
-    if (this.prefilledEmail) {
-      this.email = this.prefilledEmail;
     }
   },
   validations () {
     return {
-      email: {
-        required,
-        email,
-        serverErrors: () => this.serverErrorsValidator('email')
-      },
       firstName: {
         required,
         serverErrors: () => this.serverErrorsValidator('firstname')
@@ -212,29 +180,33 @@ export default {
       }
     }
   }
-}
+});
 </script>
 
 <style lang="scss" scoped>
-.modal-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.form {
-  width: 100%;
-  &__element {
-    margin: var(--spacer-base) 0;
+.m-register {
+  &.modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
-  &__submit {
-    margin: var(--spacer-xl) 0 0 0;
+
+  .form {
+    width: 100%;
+
+    &__element,
+    &__submit {
+      margin-top: var(--spacer-base);
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
   }
-}
-.california-privacy-notice-link {
-  --privacy-notice-link-display: inline;
-  --privacy-notice-link-margin: 0;
-}
-.action-button {
-  margin: var(--spacer-xl) 0;
+
+  .california-privacy-notice-link {
+    --privacy-notice-link-display: inline;
+    --privacy-notice-link-margin: 0;
+  }
 }
 </style>

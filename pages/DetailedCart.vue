@@ -231,6 +231,7 @@ const clothesProductSkuRouteNameDictionary = {
 const customPillowSku = 'customPillow_bundle';
 const customPhotoPortraitsSku = 'customPhotoPortraits_bundle';
 const customTumblersSku = 'customTumblers_bundle';
+const customPetsiesHuggablesSku = 'petsiesHuggables_bundle';
 
 const editableProductsSkus = [
   ...foreversProductsSkus,
@@ -241,7 +242,8 @@ const editableProductsSkus = [
   ...Object.keys(clothesProductSkuRouteNameDictionary),
   customPillowSku,
   customPhotoPortraitsSku,
-  customTumblersSku
+  customTumblersSku,
+  customPetsiesHuggablesSku
 ];
 
 export default {
@@ -417,7 +419,14 @@ export default {
   methods: {
     getCartItemOptions,
     editHandler (product) {
-      if (product.sku === customTumblersSku) {
+      if (product.sku === customPetsiesHuggablesSku) {
+        this.$router.push({
+          name: 'huggables-creation-page',
+          query: {
+            existingPlushieId: product.extension_attributes?.plushie_id
+          }
+        });
+      } else if (product.sku === customTumblersSku) {
         this.$router.push({
           name: 'tumblers-creation',
           query: {

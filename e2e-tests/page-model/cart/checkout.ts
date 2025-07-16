@@ -43,15 +43,10 @@ export class PersonalDetailsStep {
   public firstNameFormField: InputFormField;
   public lastNameFormField: InputFormField;
   public emailFormField: InputFormField;
-  public passwordFormField: InputFormField;
-  public repeatPasswordFormField: InputFormField;
 
   public continueButton: Locator;
 
-  public createAccountCheckbox: Locator;
   public agreeToTermsCheckbox: Locator;
-
-  public agreeToTermsError: Locator;
 
   public constructor (public readonly page: Page) {
     this.stepTitle = page.locator('.sf-heading__title--h3:has-text("Contact")');
@@ -65,11 +60,6 @@ export class PersonalDetailsStep {
     this.lastNameFormField = new InputFormField(this.formFieldLocator, 'input[name="last-name"]', page);
     this.emailFormField = new InputFormField(this.formFieldLocator, 'input[name="email-address"]', page);
 
-    this.createAccountCheckbox = page.locator('label:has-text("I want to create an account")');
-
-    this.passwordFormField = new InputFormField(this.passwordFormFieldLocator, 'input[name="password"]', page);
-    this.repeatPasswordFormField = new InputFormField(this.passwordFormFieldLocator, 'input[name="password-confirm"]', page);
-
     const checkboxInputLocator = page.locator('input[name="acceptConditions"]');
 
     this.agreeToTermsCheckbox = page.locator(
@@ -78,51 +68,30 @@ export class PersonalDetailsStep {
         has: checkboxInputLocator
       }
     );
-    this.agreeToTermsError = this.agreeToTermsCheckbox.and(page.locator('.sf-checkbox--has-error'));
   }
 
   public async fillPersonalDetails (
     firstName: string = DEFAULT_FIRST_NAME,
     lastName: string = DEFAULT_LAST_NAME,
-    email: string = DEFAULT_EMAIL,
-    createAccount: boolean = false,
-    password: string = DEFAULT_PASSWORD
+    email: string = DEFAULT_EMAIL
   ) {
     await this.firstNameFormField.fill(firstName);
     await this.lastNameFormField.fill(lastName);
     await this.emailFormField.fill(email);
 
-    if (createAccount) {
-      await this.createAccountCheckbox.click();
-      await this.passwordFormField.fill(password);
-      await this.repeatPasswordFormField.fill(password);
-      await this.agreeToTermsCheckbox.locator('.sf-checkbox__label').click();
-    }
-
     await this.continueButton.click();
   }
 
   public async expectCorrectValidation () {
-    await this.fillPersonalDetails('', '', '', false, '');
-    await this.createAccountCheckbox.click();
+    await this.fillPersonalDetails('', '', '');
     await this.continueButton.click();
 
     await this.firstNameFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
     await this.lastNameFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
     await this.emailFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
-    await this.passwordFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
-    await this.repeatPasswordFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
-
-    await expect(this.agreeToTermsError).toBeVisible();
 
     await this.emailFormField.fill('test');
-    await this.emailFormField.expectToHaveErrorMessage('Please provide valid e-mail address.');
-
-    await this.passwordFormField.fill('test');
-    await this.repeatPasswordFormField.fill('test2');
-
-    await this.passwordFormField.expectToHaveErrorMessage('Password must have at least 7 symbols.');
-    await this.repeatPasswordFormField.expectToHaveErrorMessage('Passwords must be identical');
+    await this.emailFormField.expectToHaveErrorMessage('Please, provide the correct email address');
   }
 
   public async waitToBeVisible () {
@@ -403,13 +372,9 @@ export class CheckoutPage {
     expect(payloadAddress.street[0]).toEqual(addressData.address);
   }
 
-  public async selectPaymentMethodAndPlaceOrder (createAccount: boolean = false) {
+  public async selectPaymentMethodAndPlaceOrder () {
     await this.orderReviewStep.selectCreditCardPaymentMethodAndFillCardData();
     await this.orderReviewStep.placeOrderButton.click();
-
-    if (createAccount) {
-      await expect(this.orderReviewStep.accountCreatingLoader).toBeVisible();
-    }
 
     await expect(this.orderReviewStep.orderProcessingLoader).toBeVisible({ timeout: 10000 });
 

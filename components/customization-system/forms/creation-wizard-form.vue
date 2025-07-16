@@ -338,7 +338,7 @@ export default defineComponent({
       onCustomizationOptionInput
     );
 
-    const { emailCustomizationFilter, persistCustomerEmail } =
+    const { emailCustomizationFilter, persistCustomerEmail, emailValue } =
       useEmailCustomization(
         availableCustomizations,
         customizationOptionValue,
@@ -368,7 +368,8 @@ export default defineComponent({
     const { onStepSubmit } = useCreationWizardGtmEvents(
       availableCustomizations,
       customizationOptionValue,
-      plushieType
+      plushieType,
+      emailValue
     )
 
     const formSteps = useCreationWizardFormSteps(

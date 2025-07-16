@@ -4,39 +4,64 @@
       <SfHeading :level="1" :title="$t('Sign In')" />
 
       <m-login
-        :prefilled-email="prefilledEmail"
-        @form-switched="onFormSwitched"
-        @login-success="onLoginSuccess"
+        v-if="!showRegistrationForm"
+        :email.sync="email"
+        @otp-submitted="resetPostAuthRedirectPath"
+        @otp-requested="onOtpRequested"
+        @registration-required="onRegistrationRequired"
+      />
+
+      <MRegister
+        v-else
+        :email="email"
+        :registration-token="registrationToken"
       />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent, ref, onBeforeMount } from '@vue/composition-api';
 import { SfHeading } from '@storefront-ui/vue';
 
 import { useAuthorizationPage } from 'theme/helpers/use-authorization-page';
+import { useAuthorizationRouteRestoration } from 'theme/helpers/use-authorization-route-restoration';
+import { useRegistrationForm } from 'theme/helpers/use-registration-form';
 
 import MLogin from '../../components/molecules/m-login.vue';
+import MRegister from '../../components/molecules/m-register.vue';
 
 export default defineComponent({
   name: 'SignInPage',
   components: {
     MLogin,
+    MRegister,
     SfHeading
   },
-  setup (_, setupContext) {
+  setup (_, context) {
+    const email = ref<string>('')
+
     const {
-      onFormSwitched,
-      onLoginSuccess,
-      prefilledEmail
-    } = useAuthorizationPage(setupContext);
+      prefilledEmail,
+      redirectTarget
+    } = useAuthorizationPage(context);
+    const { persistPostAuthRedirectPath, resetPostAuthRedirectPath } = useAuthorizationRouteRestoration(context);
+
+    function onOtpRequested () {
+      persistPostAuthRedirectPath(redirectTarget.value);
+    }
+
+    onBeforeMount(() => {
+      if (prefilledEmail.value) {
+        email.value = prefilledEmail.value;
+      }
+    });
 
     return {
-      onFormSwitched,
-      onLoginSuccess,
-      prefilledEmail
+      ...useRegistrationForm(),
+      email,
+      onOtpRequested,
+      resetPostAuthRedirectPath
     }
   },
   metaInfo (): any {
@@ -49,12 +74,19 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .sign-in-page {
+  margin: auto 0;
+
   ._content {
     padding: var(--spacer-xl) var(--spacer-sm) var(--spacer-base);
     box-sizing: border-box;
     margin: 0 auto;
     max-width: 28rem;
     width: 100%;
+  }
+
+  .m-login,
+  .m-register {
+    margin-top: var(--spacer-xl);
   }
 }
 </style>
