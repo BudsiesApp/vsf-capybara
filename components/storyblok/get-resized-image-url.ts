@@ -19,7 +19,7 @@ export default function getResizedImageUrl (
   mod += `/${width}x${height}`;
   mod += filters;
 
-  const resizedUrl = 'https://a.storyblok.com' + resource + mod;
+  const resizedUrl = 'https://sb-assets.budsies.com' + resource + mod;
 
   return resizedUrl;
 }
