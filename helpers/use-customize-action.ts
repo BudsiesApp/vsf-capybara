@@ -28,7 +28,7 @@ export function useCustomizeAction (
         id: draftPlushie.value.id,
         customization_state: customizationStateItems.value
       });
-      await submitOrderItemCustomizationsState({ orderItemId: draftPlushie.value.id });
+      await submitOrderItemCustomizationsState({ order_item_id: draftPlushie.value.id });
     } catch (e) {
       root.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
