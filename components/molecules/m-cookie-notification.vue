@@ -26,7 +26,9 @@
 <script>
 import i18n from '@vue-storefront/i18n';
 import { SfIcon } from '@storefront-ui/vue';
-import { PrivacyPolicyLink } from 'src/modules/shared';
+
+import { extractCookieValue } from '@vue-storefront/core/helpers';
+import { DETECTED_COUNTRY_COOKIE_KEY, EU_COUNTRY_CODES, PrivacyPolicyLink } from 'src/modules/shared';
 
 export default {
   name: 'MCookieNotification',
@@ -47,6 +49,13 @@ export default {
     };
   },
   beforeMount () {
+    const detectedCountry = extractCookieValue(DETECTED_COUNTRY_COOKIE_KEY, document.cookie);
+
+    if (!EU_COUNTRY_CODES.includes(detectedCountry)) {
+      this.isOpen = false;
+      return;
+    }
+
     this.$store
       .dispatch('claims/check', {
         claimCode: 'cookiesAccepted'
