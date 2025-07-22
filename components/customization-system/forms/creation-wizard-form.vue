@@ -87,7 +87,7 @@
                 :product-type="plushieType"
                 :submit-button-text="submitButtonText"
                 :quantity.sync="quantity"
-                :pre-selected-customizations="preSelectedCustomizations"
+                :locked-customizations="lockedCustomizations"
                 :show-quantity="!isCustomizeFlow"
                 @input="onCustomizationOptionInput"
                 @customization-option-busy-state-changed="
@@ -136,13 +136,13 @@ import {
   useCustomizationsBundleOptions,
   useCustomizationsOptionsDefaultValue,
   useCustomizationStatePreservation,
-  usePreSelectedCustomizations,
+  useLockedCustomizations,
   useSelectedOptionValueUrlQuery,
   useEmailCustomization,
   useCustomizationsFilter,
   requiredCustomizationsFilter,
   PersistedData,
-  DraftPlushie,
+  DraftOrderItem,
   CustomizationStateItem,
   useAvailableOptionsValuesFilter
 } from 'src/modules/customization-system';
@@ -187,8 +187,8 @@ function getAllFormRefs (
 export default defineComponent({
   name: 'CreationWizardForm',
   props: {
-    draftPlushie: {
-      type: Object as PropType<DraftPlushie | undefined>,
+    draftOrderItem: {
+      type: Object as PropType<DraftOrderItem | undefined>,
       default: undefined
     },
     flow: {
@@ -235,7 +235,7 @@ export default defineComponent({
   setup (props, context) {
     const {
       canUsePersistedCustomizationState,
-      draftPlushie,
+      draftOrderItem,
       flow,
       existingCartItem,
       plushieType,
@@ -268,6 +268,10 @@ export default defineComponent({
       return dictionary;
     });
 
+    const initialCustomizationState = computed<CustomizationStateItem[]>(() => {
+      return draftOrderItem.value?.customization_state || [];
+    });
+
     const {
       addCustomizationOptionValue,
       customizationOptionValue,
@@ -277,7 +281,7 @@ export default defineComponent({
       selectedOptionValuesIds,
       updateCustomizationOptionValue,
       mergeCustomizationState
-    } = useCustomizationState(existingCartItem);
+    } = useCustomizationState(existingCartItem, initialCustomizationState);
 
     const {
       availableCustomizations,
@@ -309,19 +313,14 @@ export default defineComponent({
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
     }
 
-    const initialCustomizationState = computed<CustomizationStateItem[]>(() => {
-      return draftPlushie.value?.customization_state || [];
-    });
-
     const {
-      preSelectedCustomizations,
-      customizationsFilter: preSelectedCustomizationsFilter,
-      optionValuesFilter: preSelectedOptionValuesFilter
-    } = usePreSelectedCustomizations(
-      initialCustomizationState,
+      lockedCustomizations,
+      customizationsFilter: lockedCustomizationsFilter,
+      optionValuesFilter: lockedOptionValuesFilter
+    } = useLockedCustomizations(
+      customizationOptionValue,
       productCustomizations,
-      flow,
-      onCustomizationOptionInput
+      flow
     );
 
     useCustomizationsBundleOptions(
@@ -356,7 +355,7 @@ export default defineComponent({
         emailCustomizationFilter,
         requiredCustomizationsFilter,
         abTestingCustomizationFilter,
-        preSelectedCustomizationsFilter
+        lockedCustomizationsFilter
       ]
     );
 
@@ -449,8 +448,8 @@ export default defineComponent({
     }
 
     const preservationStorageKey = computed<string>(() => {
-      return isCustomizeFlow.value && draftPlushie.value
-        ? draftPlushie.value.id
+      return isCustomizeFlow.value && draftOrderItem.value
+        ? draftOrderItem.value.id
         : plushieType.value;
     });
 
@@ -479,7 +478,7 @@ export default defineComponent({
 
     const { confirmCustomization, isSubmitting: isSubmittingCustomize } = useCustomizeAction(
       customizationState,
-      draftPlushie,
+      draftOrderItem,
       context
     );
 
@@ -546,7 +545,7 @@ export default defineComponent({
     } = useAvailableOptionsValuesFilter(
       customizationAvailableOptionValues,
       [
-        preSelectedOptionValuesFilter
+        lockedOptionValuesFilter
       ]
     );
 
@@ -570,7 +569,7 @@ export default defineComponent({
       quantity,
       validationObserver,
       isCustomizeFlow,
-      preSelectedCustomizations,
+      lockedCustomizations,
       showProductTypeChooseStep
     };
   }

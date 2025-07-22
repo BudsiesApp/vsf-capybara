@@ -11,9 +11,9 @@
       :title="$t('Customize your {productType}', { productType })"
     />
 
-    <div v-if="preSelectedCustomizations.length" class="_pre-selected-customizations">
+    <div v-if="lockedCustomizations.length" class="_pre-selected-customizations">
       <customization-option
-        v-for="customization in preSelectedCustomizations"
+        v-for="customization in lockedCustomizations"
         class="_customization-option"
         ref="customizationOption"
         :key="customization.id"
@@ -188,7 +188,7 @@ export default defineComponent({
       type: Number,
       required: true
     },
-    preSelectedCustomizations: {
+    lockedCustomizations: {
       type: Array as PropType<Customization[]>,
       default: () => []
     },

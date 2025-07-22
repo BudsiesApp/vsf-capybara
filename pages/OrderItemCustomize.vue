@@ -1,5 +1,5 @@
 <template>
-  <div id="plushie-customize" :class="`-${formComponent}`">
+  <div id="order-item-customize" :class="`-${formComponent}`">
     <SfHeading :level="1" :title="mainTitleText" v-if="mainTitleText" />
 
     <MBlockStory
@@ -15,7 +15,7 @@
       :plushie-type="plushieType"
       :can-use-persisted-customization-state="true"
       :flow="CustomizableProductFlowType.CUSTOMIZE"
-      :draft-plushie="draftPlushie"
+      :draft-order-item="draftOrderItem"
       @hook:mounted="onFormMounted"
     />
 
@@ -42,7 +42,7 @@ import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/stor
 import { CustomizableProductFlowType } from 'src/modules/customization-system';
 
 import { PlushieType } from 'theme/interfaces/plushie.type';
-import { useDraftPlushie } from 'theme/helpers/use-draft-plushie';
+import { useDraftOrderItem } from 'theme/helpers/use-draft-order-item';
 import { useProductPage } from 'theme/helpers/use-product-page';
 import {
   LayoutType,
@@ -56,7 +56,7 @@ import CreationWizardFormPlaceholder from 'theme/components/customization-system
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 
 export default defineComponent({
-  name: 'PlushieCustomize',
+  name: 'OrderItemCustomize',
   components: {
     CreationWizardForm: () =>
       import(
@@ -106,7 +106,7 @@ export default defineComponent({
       sku,
       context
     );
-    const { draftPlushie, isDataLoaded: isDraftPlushieLoaded } = useDraftPlushie(
+    const { draftOrderItem, isDataLoaded: isDraftOrderItemLoaded } = useDraftOrderItem(
       orderItemId,
       context
     );
@@ -114,9 +114,9 @@ export default defineComponent({
     const showForm = computed<boolean>(() => {
       return (
         isProductLoaded.value &&
-        isDraftPlushieLoaded.value &&
+        isDraftOrderItemLoaded.value &&
         !!currentProduct.value &&
-        !!draftPlushie.value
+        !!draftOrderItem.value
       );
     });
 
@@ -157,7 +157,7 @@ export default defineComponent({
     return {
       CustomizableProductFlowType,
       currentProduct,
-      draftPlushie,
+      draftOrderItem,
       formComponent,
       formPlaceholderComponent,
       mainTitleText,
@@ -177,7 +177,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-#plushie-customize {
+#order-item-customize {
   box-sizing: border-box;
   padding: 0 1rem;
 

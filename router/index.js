@@ -49,8 +49,8 @@ const CustomizationSystemWidgetsTestPage = () =>
   import(/* webpackChunkName: "vsf-widgets-test" */ 'theme/pages/CustomizationSystemWidgetsTest');
 const CustomizableProduct = () =>
   import(/* webpackChunkName: "vsf-customizable-product" */ 'theme/pages/CustomizableProduct');
-const PlushieCustomize = () =>
-  import(/* webpackChunkName: "vsf-plushie-customize" */ 'theme/pages/PlushieCustomize');
+const OrderItemCustomize = () =>
+  import(/* webpackChunkName: "vsf-order-item-customize" */ 'theme/pages/OrderItemCustomize');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -730,7 +730,7 @@ let routes = [
   {
     name: 'forevers-customize',
     path: '/forevers/customize/',
-    component: PlushieCustomize,
+    component: OrderItemCustomize,
     props: (route) => ({
       orderItemId: route.query.orderItemId,
       layout: LayoutType.CREATION_WIZARD,
