@@ -512,7 +512,7 @@ export default defineComponent({
       } catch (error) {
         context.root.$store.dispatch('notification/spawnNotification', {
           type: 'danger',
-          message: 'Error: ' + error,
+          message: 'Error: ' + error.message,
           action1: { label: i18n.t('OK') }
         });
       }

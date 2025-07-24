@@ -38,12 +38,7 @@ export function useCustomizeAction (
         userToken
       );
     } catch (e) {
-      root.$store.dispatch('notification/spawnNotification', {
-        type: 'danger',
-        message: i18n.t('Failed to save customization'),
-        action1: { label: i18n.t('OK') }
-      });
-      Logger.error(e, 'draft-order-item')();
+      throw e;
     } finally {
       isSubmitting.value = false;
     }
