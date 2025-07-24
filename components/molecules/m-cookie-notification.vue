@@ -51,7 +51,7 @@ export default {
   beforeMount () {
     const detectedCountry = extractCookieValue(DETECTED_COUNTRY_COOKIE_KEY, document.cookie);
 
-    if (!EU_COUNTRY_CODES.includes(detectedCountry)) {
+    if (detectedCountry === 'US') {
       this.isOpen = false;
       return;
     }
