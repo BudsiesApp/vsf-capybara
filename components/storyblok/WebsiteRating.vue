@@ -134,7 +134,7 @@ export default Blok.extend({
       return `https://${host}`;
     },
     getStoreImageUrl (): string {
-      return `${this.getStoreUrl()}/assets/logo-footer.png`;
+      return `${this.getStoreUrl()}/assets/logo.png`;
     },
     fetchStoreRating (): Promise<StoreRating> {
       const storeView = currentStoreView();
