@@ -44,9 +44,11 @@
 import StarRating from 'vue-star-rating/src';
 
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
+import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-headers.function';
 import { StoreRating } from 'src/modules/budsies';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
 
+import { socialServices } from 'theme/interfaces/social-services';
 import WebsiteRatingData from './interfaces/website-rating-data.interface';
 
 export default Blok.extend({
@@ -102,7 +104,9 @@ export default Blok.extend({
         '@context': 'https://schema.org',
         '@type': 'Organization',
         'name': storeView.name,
-        'image': this.getStoreImageUrl(),
+        'logo': this.getStoreImageUrl(),
+        'url': this.getStoreUrl(),
+        'sameAs': socialServices.map(service => service.url),
         'aggregateRating': {
           '@type': 'AggregateRating',
           'ratingCount': this.reviewsCount,
@@ -122,8 +126,15 @@ export default Blok.extend({
     void this.fetchStoreRating();
   },
   methods: {
+    getStoreUrl (): string {
+      const host = this.$ssrContext
+        ? getHostFromHeaders(this.$ssrContext)
+        : window.location.host;
+
+      return `https://${host}`;
+    },
     getStoreImageUrl (): string {
-      return '/assets/logo.png';
+      return `${this.getStoreUrl()}/assets/logo-footer.png`;
     },
     fetchStoreRating (): Promise<StoreRating> {
       const storeView = currentStoreView();
