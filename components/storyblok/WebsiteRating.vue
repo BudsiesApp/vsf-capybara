@@ -106,7 +106,6 @@ export default Blok.extend({
         'name': storeView.name,
         'logo': this.getStoreImageUrl(),
         'url': this.getStoreUrl(),
-        'sameAs': socialServices.map(service => service.url),
         'aggregateRating': {
           '@type': 'AggregateRating',
           'ratingCount': this.reviewsCount,
@@ -134,7 +133,7 @@ export default Blok.extend({
       return `https://${host}`;
     },
     getStoreImageUrl (): string {
-      return `${this.getStoreUrl()}/assets/logo-footer.png`;
+      return `${this.getStoreUrl()}/assets/logo.png`;
     },
     fetchStoreRating (): Promise<StoreRating> {
       const storeView = currentStoreView();
