@@ -117,6 +117,7 @@ import { PrivacyPolicyLink } from 'src/modules/shared';
 import { PageName } from 'theme/pages/page-name';
 
 import MBudsiesBrands from '../molecules/m-budsies-brands';
+import { socialServices } from 'theme/interfaces/social-services';
 
 export default {
   name: 'OFooter',
@@ -142,33 +143,13 @@ export default {
     social () {
       const { name } = currentStoreView();
 
-      return [
-        {
-          name: 'facebook',
-          url: 'https://www.facebook.com/budsies/',
-          label: this.$t('{brand} {service} page', { brand: name, service: 'Facebook' })
-        },
-        {
-          name: 'instagram',
-          url: 'https://instagram.com/budsies',
-          label: this.$t('{brand} {service} page', { brand: name, service: 'Instagram' })
-        },
-        {
-          name: 'twitter',
-          url: 'https://twitter.com/budsiestoys',
-          label: this.$t('{brand} {service} page', { brand: name, service: 'Twitter' })
-        },
-        {
-          name: 'linkedin',
-          url: 'https://www.linkedin.com/company/budsies',
-          label: this.$t('{brand} {service} page', { brand: name, service: 'LinkedIn' })
-        },
-        {
-          name: 'tiktok',
-          url: 'https://www.tiktok.com/@budsies',
-          label: this.$t('{brand} {service} page', { brand: name, service: 'TikTok' })
-        }
-      ]
+      return socialServices.map((service) => {
+        return {
+          name: service.name,
+          url: service.url,
+          label: this.$t('{brand} {service} page', { brand: name, service: service.serviceLabel })
+        };
+      });
     },
     multistoreEnabled () {
       return get(config, 'storeViews.multistore', false);
