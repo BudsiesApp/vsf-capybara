@@ -1,8 +1,5 @@
 import { ref, Ref, SetupContext } from '@vue/composition-api';
 
-import { Logger } from '@vue-storefront/core/lib/logger';
-import i18n from '@vue-storefront/core/i18n';
-
 import { CustomizationStateItem, DraftOrderItem, saveOrderItemCustomizationsState, submitOrderItemCustomizationsState } from 'src/modules/customization-system';
 
 export function useCustomizeAction (
@@ -26,19 +23,23 @@ export function useCustomizeAction (
 
     try {
       await saveOrderItemCustomizationsState(
-        {
+        [{
           id: draftOrderItem.value.id,
           customization_state: customizationStateItems.value
-        },
+        }],
         userToken
       );
 
       await submitOrderItemCustomizationsState(
-        { order_item_id: draftOrderItem.value.id },
+        [draftOrderItem.value.id],
         userToken
       );
-    } catch (e) {
-      throw e;
+    } catch (error) {
+      if (!error.messages) {
+        throw error;
+      }
+
+      throw new Error(error.messages[0]);
     } finally {
       isSubmitting.value = false;
     }
