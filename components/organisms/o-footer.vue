@@ -92,6 +92,7 @@ import { PrivacyPolicyLink } from 'src/modules/shared';
 import { PageName } from 'theme/pages/page-name';
 
 import MBudsiesBrands from '../molecules/m-budsies-brands.vue';
+import { socialServices } from 'theme/interfaces/social-services';
 
 export default {
   name: 'OFooter',
@@ -115,18 +116,13 @@ export default {
     social () {
       const { name } = currentStoreView();
 
-      return [
-        {
-          name: 'facebook',
-          url: 'https://www.facebook.com/waggables/',
-          label: this.$t('{brand} {service} page', { brand: name, service: 'Facebook' })
-        },
-        {
-          name: 'instagram',
-          url: 'https://www.instagram.com/waggables/',
-          label: this.$t('{brand} {service} page', { brand: name, service: 'Instagram' })
-        }
-      ]
+      return socialServices.map((service) => {
+        return {
+          name: service.name,
+          url: service.url,
+          label: this.$t('{brand} {service} page', { brand: name, service: service.serviceLabel })
+        };
+      });
     },
     multistoreEnabled () {
       return get(config, 'storeViews.multistore', false);
