@@ -7,8 +7,6 @@
   >
     <editor-block-icons :item="itemData" />
 
-    <script type="application/ld+json" v-html="ratingDataString" />
-
     <div class="_website-rating" :data-average-rating="averageValue">
       <div class="_rating">
         Rating: {{ averageValue }} / 5
@@ -44,11 +42,9 @@
 import StarRating from 'vue-star-rating/src';
 
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
-import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-headers.function';
 import { StoreRating } from 'src/modules/budsies';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
 
-import { socialServices } from 'theme/interfaces/social-services';
 import WebsiteRatingData from './interfaces/website-rating-data.interface';
 
 export default Blok.extend({
@@ -93,27 +89,6 @@ export default Blok.extend({
       }
       return this.itemData.link_text;
     },
-    ratingDataString (): string {
-      if (!this.storeRating) {
-        return '';
-      }
-
-      const storeView = currentStoreView();
-
-      const data = {
-        '@context': 'https://schema.org',
-        '@type': 'Organization',
-        'name': storeView.name,
-        'logo': this.getStoreImageUrl(),
-        'url': this.getStoreUrl(),
-        'aggregateRating': {
-          '@type': 'AggregateRating',
-          'ratingCount': this.reviewsCount,
-          'ratingValue': this.averageValue
-        }
-      };
-      return JSON.stringify(data);
-    },
     storeRating (): StoreRating | undefined {
       return this.$store.getters['budsies/getStoreRating'];
     }
@@ -125,16 +100,6 @@ export default Blok.extend({
     void this.fetchStoreRating();
   },
   methods: {
-    getStoreUrl (): string {
-      const host = this.$ssrContext
-        ? getHostFromHeaders(this.$ssrContext)
-        : window.location.host;
-
-      return `https://${host}`;
-    },
-    getStoreImageUrl (): string {
-      return `${this.getStoreUrl()}/assets/logo.png`;
-    },
     fetchStoreRating (): Promise<StoreRating> {
       const storeView = currentStoreView();
 
