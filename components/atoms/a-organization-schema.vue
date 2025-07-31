@@ -2,28 +2,45 @@
   <script
     v-if="showOrganizationSchema"
     type="application/ld+json"
-    v-html="organizationDataString"
+    v-html="schemaDataString"
   />
 </template>
 
 <script lang="ts">
+import config from 'config';
 import {
   computed,
   defineComponent
 } from '@vue/composition-api';
-
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-headers.function';
 
 import { socialServices } from 'theme/interfaces/social-services';
 
-interface OrganizationData {
-  '@context': string,
-  '@type': string,
+interface OrganizationSchema {
+  '@type': 'Organization',
+  '@id': string,
   name: string,
-  logo: string,
   url: string,
-  sameAs: string[]
+  logo: string,
+  sameAs: string[],
+  description: string
+}
+
+interface WebSiteSchema {
+  '@type': 'WebSite',
+  '@id': string,
+  url: string,
+  name: string,
+  inLanguage: string,
+  publisher: { '@id': string },
+  copyrightHolder: { '@id': string },
+  copyrightYear: string
+}
+
+interface SchemaData {
+  '@context': string,
+  '@graph': (OrganizationSchema | WebSiteSchema)[]
 }
 
 export default defineComponent({
@@ -45,32 +62,54 @@ export default defineComponent({
       return `${storeUrl.value}/assets/organization-logo.png`;
     });
 
-    const organizationData = computed<OrganizationData | null>(() => {
+    const schemaData = computed<SchemaData | null>(() => {
       const storeView = currentStoreView();
 
-      const baseData: OrganizationData = {
-        '@context': 'https://schema.org',
+      if (!storeView.name) {
+        return null;
+      }
+
+      const organizationId = `${storeUrl.value}/#organization`;
+      const websiteId = `${storeUrl.value}/#website`;
+
+      const organizationSchema: OrganizationSchema = {
         '@type': 'Organization',
-        name: storeView.name || '',
-        logo: storeImageUrl.value,
+        '@id': organizationId,
+        name: storeView.name,
         url: storeUrl.value,
-        sameAs: socialServices.map(service => service.url)
+        logo: storeImageUrl.value,
+        sameAs: socialServices.map(service => service.url),
+        description: config.seo.defaultDescription
       };
 
-      return baseData;
+      const websiteSchema: WebSiteSchema = {
+        '@type': 'WebSite',
+        '@id': websiteId,
+        url: storeUrl.value,
+        name: config.seo.defaultTitle,
+        inLanguage: storeView.i18n?.defaultLocale || 'en-US',
+        publisher: { '@id': organizationId },
+        copyrightHolder: { '@id': organizationId },
+        copyrightYear: new Date().getFullYear().toString()
+      };
+
+      return {
+        '@context': 'https://schema.org',
+        '@graph': [organizationSchema, websiteSchema]
+      };
     });
 
-    const organizationDataString = computed<string>(() => {
-      return organizationData.value ? JSON.stringify(organizationData.value) : '';
+    const schemaDataString = computed<string>(() => {
+      return schemaData.value ? JSON.stringify(schemaData.value) : '';
     });
 
     const showOrganizationSchema = computed<boolean>(() => {
-      return !!organizationData.value && isHomepage.value;
+      return !!schemaData.value && isHomepage.value;
     });
 
     return {
-      organizationData,
-      organizationDataString,
+      schemaData,
+      schemaDataString,
       showOrganizationSchema
     };
   }
