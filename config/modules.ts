@@ -24,12 +24,13 @@ import { BackendSettings } from 'src/modules/backend-settings';
 import { ErrorLoggingModule } from 'src/modules/error-logging';
 import { PageLoadingIndicatorModule } from 'src/modules/page-loading-indicator';
 import { MailchimpModule } from 'src/modules/mailchimp'
-import { PersistedCustomerDataModule } from 'src/modules/persisted-customer-data'
+import { PersistedCustomerDataModule, SET_PERSISTED_CUSTOMER_EMAIL, SET_PERSISTED_CUSTOMER_PHONE_NUMBER } from 'src/modules/persisted-customer-data'
 import { TrueVaultModule } from 'src/modules/true-vault';
 import { OrdersHistoryModule } from 'src/modules/orders-history';
 import { CurrencyModule } from 'src/modules/currency';
 
 import registerStoryblokComponents from 'theme/components/storyblok'
+import { KlaviyoModule, ModuleConfig } from 'src/modules/klaviyo'
 
 const extendUrlVuex = {
   actions: {
@@ -81,6 +82,12 @@ export function registerClientModules () {
   registerModule(PersistedCustomerDataModule)
   registerModule(OrdersHistoryModule)
   registerModule(CurrencyModule)
+
+  const klaviyoModuleConfig: ModuleConfig = {
+    updateEmailMutation: SET_PERSISTED_CUSTOMER_EMAIL,
+    updatePhoneNumberMutation: SET_PERSISTED_CUSTOMER_PHONE_NUMBER
+  };
+  registerModule(KlaviyoModule, klaviyoModuleConfig);
 }
 
 // Deprecated API, will be removed in 2.0

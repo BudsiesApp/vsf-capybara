@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <a-organization-schema />
     <component :is="layout">
       <router-view />
     </component>
@@ -12,6 +13,7 @@ import config from 'config';
 
 import DefaultLayout from './layouts/Default'
 import MinimalLayout from './layouts/Minimal'
+import AOrganizationSchema from './components/atoms/a-organization-schema.vue'
 import { ModalList } from './store/ui/modals';
 
 import { FileProcessingRepositoryFactory, ImageHandlerService, itemFactory } from 'src/modules/file-storage'
@@ -32,6 +34,7 @@ const imageHandlerService = new ImageHandlerService(
 
 export default {
   components: {
+    AOrganizationSchema,
     DefaultLayout,
     MinimalLayout
   },
