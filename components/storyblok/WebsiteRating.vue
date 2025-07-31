@@ -7,8 +7,6 @@
   >
     <editor-block-icons :item="itemData" />
 
-    <script type="application/ld+json" v-html="ratingDataString" />
-
     <div class="_website-rating" :data-average-rating="averageValue">
       <div class="_rating">
         Rating: {{ averageValue }} / 5
@@ -91,26 +89,6 @@ export default Blok.extend({
       }
       return this.itemData.link_text;
     },
-    ratingDataString (): string {
-      if (!this.storeRating) {
-        return '';
-      }
-
-      const storeView = currentStoreView();
-
-      const data = {
-        '@context': 'https://schema.org',
-        '@type': 'Organization',
-        'name': storeView.name,
-        'image': this.getStoreImageUrl(),
-        'aggregateRating': {
-          '@type': 'AggregateRating',
-          'ratingCount': this.reviewsCount,
-          'ratingValue': this.averageValue
-        }
-      };
-      return JSON.stringify(data);
-    },
     storeRating (): StoreRating | undefined {
       return this.$store.getters['budsies/getStoreRating'];
     }
@@ -122,9 +100,6 @@ export default Blok.extend({
     void this.fetchStoreRating();
   },
   methods: {
-    getStoreImageUrl (): string {
-      return '/assets/logo.png';
-    },
     fetchStoreRating (): Promise<StoreRating> {
       const storeView = currentStoreView();
 
