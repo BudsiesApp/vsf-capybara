@@ -81,11 +81,7 @@
 
       <template v-if="$additionalContent.footerLinks">
         <div class="_additional-links">
-          <component
-            :is="linkComponent.component"
-            :key="linkComponent.key"
-            v-for="linkComponent in $additionalContent.footerLinks"
-          />
+          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.footerLinks" />
         </div>
       </template>
     </div>
@@ -99,9 +95,9 @@ import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 
 import { BaseImage } from 'src/modules/budsies';
 import { PrivacyPolicyLink } from 'src/modules/shared';
-import { PageName } from 'theme/pages/page-name';
 
 import MBudsiesBrands from '../molecules/m-budsies-brands';
+import { socialServices } from 'theme/interfaces/social-services';
 
 export default {
   name: 'OFooterMinimal',
@@ -127,33 +123,13 @@ export default {
     social () {
       const { name } = currentStoreView();
 
-      return [
-        {
-          name: 'facebook',
-          url: 'https://www.facebook.com/budsies/',
-          label: this.$t('{brand} {service} page', { brand: name, service: 'Facebook' })
-        },
-        {
-          name: 'instagram',
-          url: 'https://instagram.com/budsies',
-          label: this.$t('{brand} {service} page', { brand: name, service: 'Instagram' })
-        },
-        {
-          name: 'twitter',
-          url: 'https://twitter.com/budsiestoys',
-          label: this.$t('{brand} {service} page', { brand: name, service: 'Twitter' })
-        },
-        {
-          name: 'linkedin',
-          url: 'https://www.linkedin.com/company/budsies',
-          label: this.$t('{brand} {service} page', { brand: name, service: 'LinkedIn' })
-        },
-        {
-          name: 'tiktok',
-          url: 'https://www.tiktok.com/@budsies',
-          label: this.$t('{brand} {service} page', { brand: name, service: 'TikTok' })
-        }
-      ]
+      return socialServices.map((service) => {
+        return {
+          name: service.name,
+          url: service.url,
+          label: this.$t('{brand} {service} page', { brand: name, service: service.serviceLabel })
+        };
+      });
     }
   }
 };
@@ -168,7 +144,6 @@ export default {
   background-color: var(--c-footer);
   // padding-bottom: var(--spacer-lg);
   margin-top: calc(var(--spacer-2xl) + var(--spacer-xl));
-
   &__logo {
     background-image: url(../../assets/logo-footer.png);
     height: 121px;
@@ -202,7 +177,6 @@ export default {
     --footer-column-title-background: var(--c-footer);
 
     --footer-column-title-font-size: --h4-font-size;
-
   }
   ::v-deep .sf-footer-column__content {
     padding: 0 var(--spacer-xl);
