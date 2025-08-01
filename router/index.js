@@ -132,7 +132,7 @@ let routes = [
       },
       {
         name: 'profile',
-        path: '/profile/',
+        path: 'profile/',
         component: AccountProfile,
         meta: {
           auth: true
