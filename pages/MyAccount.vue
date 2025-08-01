@@ -40,6 +40,21 @@
         />
 
         <SfList class="_items-list">
+          <SfListItem class="_menu-item -orders-history">
+            <router-link
+              :to="{name: RouteNames.ORDERS_HISTORY}"
+              @click.native="showMobileNavigation = false"
+            >
+              {{ $t('Order history') }}
+            </router-link>
+
+            <SfIcon
+              class="mobile-only"
+              icon="chevron_right"
+              size="0.875rem"
+            />
+          </SfListItem>
+
           <SfListItem class="_menu-item -profile">
             <router-link
               :to="{name: RouteNames.MY_ACCOUNT}"
@@ -61,21 +76,6 @@
               @click.native="showMobileNavigation = false"
             >
               {{ $t('Address book') }}
-            </router-link>
-
-            <SfIcon
-              class="mobile-only"
-              icon="chevron_right"
-              size="0.875rem"
-            />
-          </SfListItem>
-
-          <SfListItem class="_menu-item -orders-history">
-            <router-link
-              :to="{name: RouteNames.ORDERS_HISTORY}"
-              @click.native="showMobileNavigation = false"
-            >
-              {{ $t('Order history') }}
             </router-link>
 
             <SfIcon
@@ -124,7 +124,7 @@ const RouteNames = {
   ADDRESS_BOOK_EDIT: 'address-book-edit',
   ADDRESS_BOOK_ADD: 'address-book-add',
   ORDERS_HISTORY: 'orders-history',
-  MY_ACCOUNT: 'my-account'
+  MY_ACCOUNT: 'profile'
 }
 
 export default {
