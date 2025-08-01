@@ -3,6 +3,14 @@
     <SfTabs :open-tab="1">
       <SfTab :title="$t('Personal data')">
         <MUpdatePersonalData />
+
+        <router-link
+          class="sf-button color-secondary _logout-button mobile-only"
+          to="/"
+          @click.native="logout"
+        >
+          {{ $t('Log out') }}
+        </router-link>
       </SfTab>
     </SfTabs>
   </div>
@@ -17,12 +25,21 @@ export default {
   components: {
     SfTabs,
     MUpdatePersonalData
+  },
+  methods: {
+    async logout () {
+      await this.$store.dispatch('user/logout', {});
+    }
   }
 };
 </script>
 
 <style lang="scss" scoped>
 .o-my-account-profile {
+  ._logout-button {
+    margin-top: var(--spacer-2xl);
+  }
+
   ::v-deep {
     .sf-tabs__title {
       padding: var(--tabs-title-padding, var(--spacer-sm));

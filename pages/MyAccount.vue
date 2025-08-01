@@ -22,17 +22,8 @@
 
     <div
       class="_content"
-      :class="{'-show-mobile': showMobileNavigation}"
     >
-      <div class="_mobile-header mobile-only">
-        <SfBar
-          :title="mobileTitle"
-          :back="!showMobileNavigation"
-          @click:back="showMobileNavigation = !showMobileNavigation"
-        />
-      </div>
-
-      <nav class="_navigation">
+      <nav class="_navigation desktop-only">
         <SfHeading
           :title="$t('My Account')"
           :level="1"
@@ -43,7 +34,6 @@
           <SfListItem class="_menu-item -profile">
             <router-link
               :to="{name: RouteNames.MY_ACCOUNT}"
-              @click.native="showMobileNavigation = false"
             >
               {{ $t('My profile') }}
             </router-link>
@@ -58,7 +48,6 @@
           <SfListItem class="_menu-item -address-book">
             <router-link
               :to="{name: RouteNames.ADDRESS_BOOK_LIST}"
-              @click.native="showMobileNavigation = false"
             >
               {{ $t('Address book') }}
             </router-link>
@@ -73,7 +62,6 @@
           <SfListItem class="_menu-item -orders-history">
             <router-link
               :to="{name: RouteNames.ORDERS_HISTORY}"
-              @click.native="showMobileNavigation = false"
             >
               {{ $t('Order history') }}
             </router-link>
@@ -106,12 +94,26 @@
         class="_page"
         :tab-title="mobileTitle"
       />
+
+      <SfBottomNavigation class="_bottom-navigation mobile-only">
+        <router-link
+          class="_bottom-navigation-item"
+          :class="item.class"
+          v-for="item in navigationItems"
+          :key="item.label"
+          :to="item.link"
+        >
+          <SfIcon :icon="item.icon" size="1.2rem" />
+
+          <span class="_bottom_navigation-item-label">{{ item.label }}</span>
+        </router-link>
+      </SfBottomNavigation>
     </div>
   </div>
 </template>
 
 <script>
-import { SfBar, SfBreadcrumbs, SfIcon, SfHeading, SfList } from '@storefront-ui/vue';
+import { SfButton, SfBottomNavigation, SfBar, SfBreadcrumbs, SfIcon, SfHeading, SfList } from '@storefront-ui/vue';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import MyAccount from '@vue-storefront/core/pages/MyAccount';
@@ -131,6 +133,8 @@ export default {
   components: {
     SfBar,
     SfBreadcrumbs,
+    SfBottomNavigation,
+    SfButton,
     SfIcon,
     SfHeading,
     SfList
@@ -138,8 +142,31 @@ export default {
   mixins: [MyAccount],
   data () {
     return {
-      showMobileNavigation: true,
-      RouteNames
+      RouteNames,
+      navigationItems: [
+        {
+          icon: 'shipping',
+          label: 'Order History',
+          title: 'Order History',
+          link: { name: RouteNames.ORDERS_HISTORY },
+          class: '-orders-history'
+        },
+        {
+          icon: 'profile',
+          label: 'Profile',
+          title: 'Profile',
+          link: { name: RouteNames.MY_ACCOUNT },
+          class: '-profile'
+        },
+        {
+          icon: 'home',
+          label: 'Address Book',
+          title: 'Address Book',
+          link: { name: RouteNames.ADDRESS_BOOK_LIST },
+          class: '-address-book'
+        }
+      ]
+
     };
   },
   computed: {
@@ -210,10 +237,6 @@ export default {
       return breadcrumbs;
     },
     mobileTitle () {
-      if (this.showMobileNavigation) {
-        return this.$t('My Account');
-      }
-
       switch (this.$route.name) {
         case RouteNames.ADDRESS_BOOK_LIST:
           return this.$t('Address book');
@@ -239,9 +262,6 @@ export default {
   methods: {
     async logout () {
       await this.$store.dispatch('user/logout', {});
-    },
-    onAccountButtonClicked () {
-      this.showMobileNavigation = true;
     }
   }
 };
@@ -364,6 +384,35 @@ export default {
         ._page {
           display: none;
         }
+      }
+    }
+  }
+
+  ._bottom-navigation {
+    --bottom-navigation-padding: 0;
+
+    align-items: center;
+  }
+
+  ._bottom-navigation-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    row-gap: var(--spacer-2xs);
+    color: var(--c-text);
+
+    &.router-link-active {
+      text-decoration: underline;
+    }
+
+    &.-profile {
+      &.router-link-active {
+        text-decoration: none;
+      }
+
+      &.router-link-exact-active {
+        text-decoration: underline;
       }
     }
   }
