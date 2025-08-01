@@ -8,6 +8,7 @@ import { ABTesting } from 'src/modules/a-b-testing'
 import { BackendSettings } from 'src/modules/backend-settings';
 import { ErrorLoggingModule } from 'src/modules/error-logging';
 import { PageLoadingIndicatorModule } from 'src/modules/page-loading-indicator';
+import { TrueVaultModule } from 'src/modules/true-vault';
 import { OrdersHistoryModule } from 'src/modules/orders-history';
 import { CurrencyModule } from 'src/modules/currency';
 
@@ -16,6 +17,7 @@ import registerStoryblokComponents from 'theme/components/storyblok'
 // TODO:distributed across proper pages BEFORE 1.11
 export function registerClientModules () {
   registerStoryblokComponents()
+  registerModule(TrueVaultModule)
   registerModule(PageLoadingIndicatorModule)
   registerModule(UrlModule)
   registerModule(NotificationModule)
