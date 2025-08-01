@@ -51,10 +51,10 @@ export default {
   beforeMount () {
     const detectedCountry = extractCookieValue(DETECTED_COUNTRY_COOKIE_KEY, document.cookie);
 
-    if (detectedCountry === 'US') {
-      this.isOpen = false;
-      return;
-    }
+    // if (detectedCountry === 'US') {
+    //   this.isOpen = false;
+    //   return;
+    // }
 
     this.$store
       .dispatch('claims/check', {
