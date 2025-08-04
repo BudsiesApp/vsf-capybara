@@ -94,20 +94,6 @@
         class="_page"
         :tab-title="mobileTitle"
       />
-
-      <SfBottomNavigation class="_bottom-navigation mobile-only">
-        <router-link
-          class="_bottom-navigation-item"
-          :class="item.class"
-          v-for="item in navigationItems"
-          :key="item.label"
-          :to="item.link"
-        >
-          <SfIcon :icon="item.icon" size="1.2rem" />
-
-          <span class="_bottom_navigation-item-label">{{ item.label }}</span>
-        </router-link>
-      </SfBottomNavigation>
     </div>
   </div>
 </template>
