@@ -6,6 +6,7 @@
         <slot />
       </div>
       <OFooter />
+      <MCookieNotification />
     </div>
   </div>
 </template>
@@ -13,12 +14,14 @@
 <script>
 import OHeaderMinimal from 'theme/components/organisms/o-header-minimal';
 import OFooter from 'theme/components/organisms/o-footer';
+import MCookieNotification from 'theme/components/molecules/m-cookie-notification';
 import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
 
 export default {
   components: {
     OHeaderMinimal,
-    OFooter
+    OFooter,
+    MCookieNotification
   },
   computed: {
     isStoryblokPreviewMode () {
