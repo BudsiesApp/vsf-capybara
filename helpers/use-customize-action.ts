@@ -22,7 +22,7 @@ export function useCustomizeAction (
     const userToken = root.$store.getters['user/getUserToken'];
 
     try {
-      await saveOrderItemCustomizationsState(
+      const saveResult = await saveOrderItemCustomizationsState(
         [{
           id: draftOrderItem.value.id,
           customization_state: customizationStateItems.value
@@ -30,16 +30,18 @@ export function useCustomizeAction (
         userToken
       );
 
-      await submitOrderItemCustomizationsState(
+      if (saveResult.errors[0]) {
+        throw new Error(saveResult.errors[0].errorMessage);
+      }
+
+      const submitResult = await submitOrderItemCustomizationsState(
         [draftOrderItem.value.id],
         userToken
       );
-    } catch (error) {
-      if (!error.messages) {
-        throw error;
-      }
 
-      throw new Error(error.messages[0]);
+      if (submitResult.errors[0]) {
+        throw new Error(submitResult.errors[0].errorMessage);
+      }
     } finally {
       isSubmitting.value = false;
     }

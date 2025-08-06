@@ -30,6 +30,7 @@ import {
   Customization,
   CustomizationOptionValue,
   CustomizationStateItem,
+  DraftOrderItem,
   useAvailableCustomizations,
   useCustomizationsBusyState,
   useCustomizationState,
@@ -44,9 +45,9 @@ export default defineComponent({
     CustomizationOption
   },
   props: {
-    initialCustomizationState: {
-      type: Array as PropType<CustomizationStateItem[]>,
-      default: () => []
+    draftOrderItem: {
+      type: Object as PropType<DraftOrderItem>,
+      required: true
     },
     isDisabled: {
       type: Boolean,
@@ -58,7 +59,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const { initialCustomizationState, product } = toRefs(props);
+    const { draftOrderItem, product } = toRefs(props);
 
     const productCustomizations = computed<Customization[]>(() => {
       return product.value.customizations || [];
@@ -81,7 +82,7 @@ export default defineComponent({
       removeCustomizationOptionValue,
       selectedOptionValuesIds,
       updateCustomizationOptionValue
-    } = useCustomizationState(undefined, initialCustomizationState);
+    } = useCustomizationState(undefined, draftOrderItem.value.customization_state);
 
     const {
       availableCustomizations,

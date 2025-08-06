@@ -51,6 +51,8 @@ const CustomizableProduct = () =>
   import(/* webpackChunkName: "vsf-customizable-product" */ 'theme/pages/CustomizableProduct');
 const OrderItemCustomize = () =>
   import(/* webpackChunkName: "vsf-order-item-customize" */ 'theme/pages/OrderItemCustomize');
+const OrderItemsBulkCustomize = () =>
+  import(/* webpackChunkName: "vsf-order-items-bulk-customize" */ 'theme/pages/OrderItemsBulkCustomize');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -736,6 +738,17 @@ let routes = [
       layout: LayoutType.CREATION_WIZARD,
       sku: route.query.sku,
       plushieType: PlushieType.FOREVERS
+    }),
+    meta: {
+      auth: true
+    }
+  },
+  {
+    path: '/order-items/bulk-customize/',
+    name: 'order-items-bulk-customize',
+    component: OrderItemsBulkCustomize,
+    props: (route) => ({
+      orderItemIds: route.query.orderItemIds
     }),
     meta: {
       auth: true
