@@ -31,39 +31,16 @@
         />
 
         <SfList class="_items-list">
-          <SfListItem class="_menu-item -profile">
+          <SfListItem
+            class="_menu-item"
+            :class="item.class"
+            v-for="item in navigationItems"
+            :key="item.title"
+          >
             <router-link
-              :to="{name: RouteNames.MY_ACCOUNT}"
+              :to="item.link"
             >
-              {{ $t('My profile') }}
-            </router-link>
-
-            <SfIcon
-              class="mobile-only"
-              icon="chevron_right"
-              size="0.875rem"
-            />
-          </SfListItem>
-
-          <SfListItem class="_menu-item -address-book">
-            <router-link
-              :to="{name: RouteNames.ADDRESS_BOOK_LIST}"
-            >
-              {{ $t('Address book') }}
-            </router-link>
-
-            <SfIcon
-              class="mobile-only"
-              icon="chevron_right"
-              size="0.875rem"
-            />
-          </SfListItem>
-
-          <SfListItem class="_menu-item -orders-history">
-            <router-link
-              :to="{name: RouteNames.ORDERS_HISTORY}"
-            >
-              {{ $t('Order history') }}
+              {{ item.label }}
             </router-link>
 
             <SfIcon
@@ -99,13 +76,15 @@
 </template>
 
 <script>
-import { SfButton, SfBottomNavigation, SfBar, SfBreadcrumbs, SfIcon, SfHeading, SfList } from '@storefront-ui/vue';
+import Vue from 'vue';
+import { SfBreadcrumbs, SfIcon, SfHeading, SfList } from '@storefront-ui/vue';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import MyAccount from '@vue-storefront/core/pages/MyAccount';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 
 import { AccountIconClickedEvent } from 'theme/interfaces/account-icon-clicked.event';
+import OAccountTopNavigation from 'theme/components/organisms/o-account-top-navigation.vue';
 
 const RouteNames = {
   ADDRESS_BOOK_LIST: 'address-book-list',
@@ -117,10 +96,7 @@ const RouteNames = {
 
 export default {
   components: {
-    SfBar,
     SfBreadcrumbs,
-    SfBottomNavigation,
-    SfButton,
     SfIcon,
     SfHeading,
     SfList
@@ -133,21 +109,18 @@ export default {
         {
           icon: 'shipping',
           label: 'Order History',
-          title: 'Order History',
           link: { name: RouteNames.ORDERS_HISTORY },
           class: '-orders-history'
         },
         {
           icon: 'profile',
           label: 'Profile',
-          title: 'Profile',
           link: { name: RouteNames.MY_ACCOUNT },
           class: '-profile'
         },
         {
           icon: 'home',
           label: 'Address Book',
-          title: 'Address Book',
           link: { name: RouteNames.ADDRESS_BOOK_LIST },
           class: '-address-book'
         }
@@ -239,10 +212,19 @@ export default {
       }
     }
   },
+  created () {
+    Vue.set(this.$additionalContent, 'navigationHeader', {
+      component: OAccountTopNavigation,
+      props: {
+        navigationItems: this.navigationItems
+      }
+    });
+  },
   beforeMount () {
     EventBus.$on(AccountIconClickedEvent, this.onAccountButtonClicked);
   },
   beforeDestroy () {
+    Vue.set(this.$additionalContent, 'navigationHeader', undefined);
     EventBus.$off(AccountIconClickedEvent, this.onAccountButtonClicked);
   },
   methods: {

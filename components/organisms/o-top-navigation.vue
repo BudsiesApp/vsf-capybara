@@ -1,5 +1,10 @@
 <template>
-  <div class="o-top-navigation">
+  <div
+    class="o-top-navigation"
+    :class="{
+      '-additional-navigation': $additionalContent.navigationHeader
+    }"
+  >
     <SfBottomNavigation class="_bottom-navigation">
       <SfBottomNavigationItem
         v-for="item in navigationItems"
@@ -34,19 +39,12 @@
       </div>
     </SfBottomNavigation>
 
-    <SfBottomNavigation class="_bottom-navigation-account mobile-only" v-if="isAccountPage">
-      <router-link
-        class="_bottom-navigation-account-item"
-        :class="item.class"
-        v-for="item in navigationItemsAccount"
-        :key="item.label"
-        :to="item.link"
-      >
-        <SfIcon :icon="item.icon" size="1.2rem" />
-
-        <span class="_bottom_navigation-account-item-label">{{ item.label }}</span>
-      </router-link>
-    </SfBottomNavigation>
+    <div v-if="$additionalContent.navigationHeader" class="_additional-navigation">
+      <component
+        :is="$additionalContent.navigationHeader.component"
+        v-bind="$additionalContent.navigationHeader.props"
+      />
+    </div>
   </div>
 </template>
 
@@ -60,14 +58,6 @@ import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
 import ALogo from 'theme/components/atoms/a-logo.vue';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
-
-const RouteNames = {
-  ADDRESS_BOOK_LIST: 'address-book-list',
-  ADDRESS_BOOK_EDIT: 'address-book-edit',
-  ADDRESS_BOOK_ADD: 'address-book-add',
-  ORDERS_HISTORY: 'orders-history',
-  MY_ACCOUNT: 'my-account'
-}
 
 export default {
   name: 'OTopNavigation',
@@ -85,29 +75,6 @@ export default {
     return {
       navigationItems: [
         { icon: 'list', label: '', title: 'Menu', onClick: this.goToMenu }
-      ],
-      navigationItemsAccount: [
-        {
-          icon: 'shipping',
-          label: 'Order History',
-          title: 'Order History',
-          link: { name: RouteNames.ORDERS_HISTORY },
-          class: '-orders-history'
-        },
-        {
-          icon: 'profile',
-          label: 'Profile',
-          title: 'Profile',
-          link: { name: RouteNames.MY_ACCOUNT },
-          class: '-profile'
-        },
-        {
-          icon: 'home',
-          label: 'Address Book',
-          title: 'Address Book',
-          link: { name: RouteNames.ADDRESS_BOOK_LIST },
-          class: '-address-book'
-        }
       ]
     }
   },
@@ -117,9 +84,6 @@ export default {
       isMobileMenu: state => state.ui.isMobileMenu,
       isSearchPanelVisible: state => state.ui.searchpanel
     }),
-    isAccountPage () {
-      return this.$route.fullPath.includes('/my-account');
-    },
     isActive () {
       return (icon) => {
         switch (icon) {
@@ -214,48 +178,15 @@ export default {
     }
   }
 
-  ._bottom-navigation-account {
-    --bottom-navigation-padding: 0;
-
-    align-items: center;
-    position: relative;
-
-    &.sf-bottom-navigation {
-      justify-content: space-around;
+  &.-additional-navigation {
+    .sf-bottom-navigation {
+      --bottom-navigation-box-shadow: none;
     }
   }
 
-  ._bottom-navigation-account-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    row-gap: var(--spacer-2xs);
-    color: var(--c-text);
-
-    &.router-link-active {
-      text-decoration: underline;
-    }
-
-    &.-profile {
-      &.router-link-active {
-        text-decoration: none;
-      }
-
-      &.router-link-exact-active {
-        text-decoration: underline;
-      }
-    }
-  }
-
-  .sf-bottom-navigation {
-    --bottom-navigation-box-shadow: none;
-
-    &:last-child {
-      --bottom-navigation-box-shadow:  0px -2px 10px rgba(var(--c-dark-base), 0.15);
-
-      --bottom-navigation-z-index: 11;
-    }
+  ._additional-navigation {
+    z-index: 11;
+    box-shadow: 0px 2px 10px rgba(var(--c-dark-base), 0.15);
   }
 
   ::v-deep .sf-bottom-navigation {
