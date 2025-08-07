@@ -125,7 +125,6 @@ export default {
           class: '-address-book'
         }
       ]
-
     };
   },
   computed: {
@@ -224,7 +223,7 @@ export default {
     EventBus.$on(AccountIconClickedEvent, this.onAccountButtonClicked);
   },
   beforeDestroy () {
-    Vue.set(this.$additionalContent, 'navigationHeader', undefined);
+    Vue.delete(this.$additionalContent, 'navigationHeader');
     EventBus.$off(AccountIconClickedEvent, this.onAccountButtonClicked);
   },
   methods: {
@@ -352,35 +351,6 @@ export default {
         ._page {
           display: none;
         }
-      }
-    }
-  }
-
-  ._bottom-navigation {
-    --bottom-navigation-padding: 0;
-
-    align-items: center;
-  }
-
-  ._bottom-navigation-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    row-gap: var(--spacer-2xs);
-    color: var(--c-text);
-
-    &.router-link-active {
-      text-decoration: underline;
-    }
-
-    &.-profile {
-      &.router-link-active {
-        text-decoration: none;
-      }
-
-      &.router-link-exact-active {
-        text-decoration: underline;
       }
     }
   }
