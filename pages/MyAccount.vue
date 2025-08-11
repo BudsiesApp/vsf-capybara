@@ -212,18 +212,13 @@ export default {
     }
   },
   created () {
-    Vue.set(this.$additionalContent, 'navigationHeader', {
-      component: OAccountTopNavigation,
-      props: {
-        navigationItems: this.navigationItems
-      }
-    });
+    this.$store.commit('ui/setAdditionalTopNavigationItems', this.navigationItems);
   },
   beforeMount () {
     EventBus.$on(AccountIconClickedEvent, this.onAccountButtonClicked);
   },
   beforeDestroy () {
-    Vue.delete(this.$additionalContent, 'navigationHeader');
+    this.$store.commit('ui/resetAdditionalTopNavigationItems');
     EventBus.$off(AccountIconClickedEvent, this.onAccountButtonClicked);
   },
   methods: {

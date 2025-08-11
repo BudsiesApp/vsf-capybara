@@ -2,7 +2,7 @@
   <div
     class="o-top-navigation"
     :class="{
-      '-additional-navigation': $additionalContent.navigationHeader
+      '-additional-navigation': additionalTopNavigationItems.length
     }"
   >
     <SfBottomNavigation class="_bottom-navigation">
@@ -39,12 +39,10 @@
       </div>
     </SfBottomNavigation>
 
-    <div v-if="$additionalContent.navigationHeader" class="_additional-navigation">
-      <component
-        :is="$additionalContent.navigationHeader.component"
-        v-bind="$additionalContent.navigationHeader.props"
-      />
-    </div>
+    <o-additional-top-navigation
+      v-show="additionalNavigationItems.length"
+      class="_additional-navigation"
+    />
   </div>
 </template>
 
@@ -58,6 +56,7 @@ import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
 import ALogo from 'theme/components/atoms/a-logo.vue';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
+import OAdditionalTopNavigation from 'theme/components/organisms/o-addditional-top-navigation.vue';
 
 export default {
   name: 'OTopNavigation',
@@ -69,7 +68,8 @@ export default {
     ALogo,
     ADetailedCartIcon,
     MCtaButton,
-    AAccountIcon
+    AAccountIcon,
+    OAdditionalTopNavigation
   },
   data () {
     return {
@@ -84,6 +84,9 @@ export default {
       isMobileMenu: state => state.ui.isMobileMenu,
       isSearchPanelVisible: state => state.ui.searchpanel
     }),
+    additionalTopNavigationItems () {
+      return this.$store.getters['ui/additionaTopNavigationItems'];
+    },
     isActive () {
       return (icon) => {
         switch (icon) {
@@ -179,7 +182,7 @@ export default {
   }
 
   &.-additional-navigation {
-    .sf-bottom-navigation {
+    ._bottom-navigation {
       --bottom-navigation-box-shadow: none;
     }
   }

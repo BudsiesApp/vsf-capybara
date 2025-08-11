@@ -1,7 +1,7 @@
 <template>
-  <SfBottomNavigation class="_bottom-navigation-account mobile-only">
+  <SfBottomNavigation class="o-additional-top-navigation mobile-only">
     <router-link
-      class="_bottom-navigation-account-item"
+      class="_navigation-item"
       :class="item.class"
       v-for="item in navigationItems"
       :key="item.label"
@@ -9,7 +9,7 @@
     >
       <SfIcon :icon="item.icon" size="1.2rem" />
 
-      <span class="_bottom_navigation-account-item-label">
+      <span class="_label">
         {{ item.label }}
       </span>
     </router-link>
@@ -20,7 +20,7 @@
 import { SfBottomNavigation, SfIcon } from '@storefront-ui/vue';
 import { defineComponent, PropType } from '@vue/composition-api';
 
-interface NavigationItem {
+interface AdditionalTopNavigationItem {
   label: string,
   icon: string,
   link: string,
@@ -31,7 +31,7 @@ export default defineComponent({
   name: 'OAccountTopNavigation',
   props: {
     navigationItems: {
-      type: Array as PropType<NavigationItem[]>,
+      type: Array as PropType<AdditionalTopNavigationItem[]>,
       default: () => []
     }
   },
@@ -43,7 +43,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-._bottom-navigation-account {
+.o-additional-top-navigation {
   --bottom-navigation-padding: 0;
 
   align-items: center;
@@ -55,7 +55,7 @@ export default defineComponent({
     justify-content: space-around;
   }
 
-  ._bottom-navigation-account-item {
+  ._navigation-item {
     display: flex;
     flex-direction: column;
     align-items: center;

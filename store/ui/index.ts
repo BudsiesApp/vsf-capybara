@@ -3,6 +3,8 @@ import supportsWebP from 'supports-webp';
 import { artworkUploadStore } from './artwork-upload';
 import { modalStore } from './modals';
 
+import { AdditionalTopNavigationItem } from '../../interfaces/additional-top-navigation-item.interface.ts';
+
 export const uiStore = {
   namespaced: true,
   modules: {
@@ -23,7 +25,8 @@ export const uiStore = {
     },
     isWebpSupported: true,
     isReviewProductTab: false,
-    isMobileMenu: false
+    isMobileMenu: false,
+    additionalTopNavigationItems: []
   },
   mutations: {
     setCheckoutMode (state, action) {
@@ -68,6 +71,17 @@ export const uiStore = {
     },
     closeMenu (state) {
       state.isMobileMenu = false
+    },
+    setAdditionalTopNavigationItems (state, items: AdditionalTopNavigationItem[]) {
+      state.additionalTopNavigationItems = items;
+    },
+    resetAdditionalTopNavigationItems (state) {
+      state.aditionalTopNavigationItems = [];
+    }
+  },
+  getters: {
+    additionalTopNavigationItems (state): AdditionalTopNavigationItem[] {
+      return state.additionalTopNavigationItems;
     }
   },
   actions: {
