@@ -44,13 +44,12 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .o-additional-top-navigation {
-  --bottom-navigation-padding: 0;
-
   align-items: center;
   position: relative;
 
   &.sf-bottom-navigation {
     --bottom-navigation-box-shadow: none;
+    --bottom-navigation-padding: 0;
 
     justify-content: space-around;
   }

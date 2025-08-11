@@ -76,7 +76,7 @@ export const uiStore = {
       state.additionalTopNavigationItems = items;
     },
     resetAdditionalTopNavigationItems (state) {
-      state.aditionalTopNavigationItems = [];
+      state.additionalTopNavigationItems = [];
     }
   },
   getters: {

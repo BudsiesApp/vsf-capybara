@@ -182,6 +182,15 @@ export default {
     }
   }
 
+ ._bottom-navigation {
+    --bottom-navigation-z-index: 12;
+
+    top: auto;
+    bottom: auto;
+    align-items: center;
+    justify-content: space-between;
+  }
+
   &.-additional-navigation {
     ._bottom-navigation {
       --bottom-navigation-box-shadow: none;
@@ -194,11 +203,6 @@ export default {
   }
 
   ::v-deep .sf-bottom-navigation {
-    top: auto;
-    bottom: auto;
-    --bottom-navigation-z-index: 12;
-    align-items: center;
-    justify-content: space-between;
 
     .sf-bottom-navigation-item {
       cursor: pointer;
