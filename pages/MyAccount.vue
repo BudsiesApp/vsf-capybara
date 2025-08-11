@@ -90,7 +90,7 @@ const RouteNames = {
   ADDRESS_BOOK_EDIT: 'address-book-edit',
   ADDRESS_BOOK_ADD: 'address-book-add',
   ORDERS_HISTORY: 'orders-history',
-  MY_ACCOUNT: 'my-account'
+  MY_ACCOUNT: 'profile'
 }
 
 export default {
@@ -139,7 +139,7 @@ export default {
           text: this.$t('My account'),
           route: {
             link: {
-              name: RouteNames.MY_ACCOUNT
+              name: RouteNames.ORDERS_HISTORY
             }
           }
         }
@@ -151,6 +151,17 @@ export default {
           route: {
             link: {
               name: RouteNames.ORDERS_HISTORY
+            }
+          }
+        });
+      }
+
+      if (this.$route.name === RouteNames.MY_ACCOUNT) {
+        breadcrumbs.push({
+          text: this.$t('My profile'),
+          route: {
+            link: {
+              name: RouteNames.MY_ACCOUNT
             }
           }
         });

@@ -35,6 +35,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+
 .o-my-account-profile {
   ._logout-button {
     margin-top: var(--spacer-2xl);
@@ -43,6 +45,14 @@ export default {
   ::v-deep {
     .sf-tabs__title {
       padding: var(--tabs-title-padding, var(--spacer-sm));
+    }
+  }
+
+  @include for-mobile {
+    --tabs-title-display: none;
+
+    .m-update-personal-data {
+      margin-top: var(--spacer-base);
     }
   }
 }
