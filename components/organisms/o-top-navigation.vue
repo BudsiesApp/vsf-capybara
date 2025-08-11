@@ -203,7 +203,6 @@ export default {
   }
 
   ::v-deep .sf-bottom-navigation {
-
     .sf-bottom-navigation-item {
       cursor: pointer;
     }
@@ -212,6 +211,5 @@ export default {
   @include for-desktop() {
     display: none;
   }
-
 }
 </style>
