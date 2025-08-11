@@ -42,6 +42,7 @@
     <o-additional-top-navigation
       v-show="additionalNavigationItems.length"
       class="_additional-navigation"
+      :navigation-items="additionalNavigationItems"
     />
   </div>
 </template>
