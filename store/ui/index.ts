@@ -3,7 +3,7 @@ import supportsWebP from 'supports-webp';
 import { artworkUploadStore } from './artwork-upload';
 import { modalStore } from './modals';
 
-import { AdditionalTopNavigationItem } from '../../interfaces/additional-top-navigation-item.interface.ts';
+import { AdditionalTopNavigationItem } from '../../interfaces/additional-top-navigation-item.interface';
 
 export const uiStore = {
   namespaced: true,

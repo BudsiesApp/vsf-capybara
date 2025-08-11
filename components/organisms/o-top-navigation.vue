@@ -40,9 +40,9 @@
     </SfBottomNavigation>
 
     <o-additional-top-navigation
-      v-show="additionalNavigationItems.length"
+      v-show="additionalTopNavigationItems.length"
       class="_additional-navigation"
-      :navigation-items="additionalNavigationItems"
+      :navigation-items="additionalTopNavigationItems"
     />
   </div>
 </template>
@@ -57,7 +57,7 @@ import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
 import ALogo from 'theme/components/atoms/a-logo.vue';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
-import OAdditionalTopNavigation from 'theme/components/organisms/o-addditional-top-navigation.vue';
+import OAdditionalTopNavigation from 'theme/components/organisms/o-additional-top-navigation.vue';
 
 export default {
   name: 'OTopNavigation',
@@ -86,7 +86,7 @@ export default {
       isSearchPanelVisible: state => state.ui.searchpanel
     }),
     additionalTopNavigationItems () {
-      return this.$store.getters['ui/additionaTopNavigationItems'];
+      return this.$store.getters['ui/additionalTopNavigationItems'];
     },
     isActive () {
       return (icon) => {

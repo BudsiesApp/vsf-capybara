@@ -84,7 +84,6 @@ import MyAccount from '@vue-storefront/core/pages/MyAccount';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 
 import { AccountIconClickedEvent } from 'theme/interfaces/account-icon-clicked.event';
-import OAccountTopNavigation from 'theme/components/organisms/o-account-top-navigation.vue';
 
 const RouteNames = {
   ADDRESS_BOOK_LIST: 'address-book-list',
