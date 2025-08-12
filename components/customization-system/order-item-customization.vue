@@ -83,6 +83,10 @@ export default defineComponent({
     product: {
       type: Object as PropType<Product>,
       required: true
+    },
+    title: {
+      type: String,
+      required: true
     }
   },
   setup (props, context) {
@@ -164,7 +168,11 @@ export default defineComponent({
     );
 
     function validateForm (): Promise<boolean> {
-      return formValidation.validateAndGoToFirstError();
+      return formValidation.validate();
+    }
+
+    function scrollToFirstError (): void {
+      formValidation.goToFirstError();
     }
 
     return {
@@ -178,7 +186,8 @@ export default defineComponent({
       getCustomizationState,
       isCustomizationStateEmpty,
       validateForm,
-      validationObserver
+      validationObserver,
+      scrollToFirstError
     };
   }
 });

@@ -96,6 +96,8 @@ export function useFormValidation (
   return {
     getFieldAnchorName,
     goToFieldByName,
-    validateAndGoToFirstError
+    validateAndGoToFirstError,
+    validate,
+    goToFirstError
   }
 }

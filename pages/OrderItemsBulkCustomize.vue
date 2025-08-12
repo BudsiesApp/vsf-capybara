@@ -27,9 +27,16 @@
             :draft-order-item="item.draftOrderItem"
             ref="orderItemCustomization"
             :order-item-id="item.id"
+            :title="item.title"
           />
         </div>
       </div>
+
+      <m-form-errors
+        class="_form-errors"
+        :form-errors="orderItemsErrors"
+        @item-click="goToOrderItem"
+      />
 
       <div class="_actions">
         <SfButton
@@ -45,7 +52,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, Ref, ref, SetupContext, computed } from '@vue/composition-api';
+import { set, defineComponent, Ref, ref, SetupContext, computed } from '@vue/composition-api';
 import { SfButton, SfDivider, SfHeading } from '@storefront-ui/vue';
 import { SearchQuery } from 'storefront-query-builder';
 
@@ -55,6 +62,7 @@ import { DraftOrderItem, fetchOrderItemsCustomizationsStates, submitOrderItemCus
 
 import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 
+import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import OrderItemCustomization from 'theme/components/customization-system/order-item-customization.vue';
 
 interface OrderItemCustomizationData {
@@ -219,9 +227,12 @@ function useOrderItemsBulkCustomizations (
   };
 }
 
+type OrderItemCustomizationForm = InstanceType<typeof OrderItemCustomization>;
+
 export default defineComponent({
   name: 'OrderItemsBulkCustomize',
   components: {
+    MFormErrors,
     OrderItemCustomization,
     SfButton,
     SfDivider,
@@ -234,7 +245,29 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const orderItemCustomization = ref<InstanceType<typeof OrderItemCustomization>[]>([]);
+    const orderItemCustomization = ref<OrderItemCustomizationForm[]>([]);
+    const orderItemsErrors = ref<Record<string, string>>({});
+
+    const orderItemCustomizationByOrderItemId = computed<Record<string, OrderItemCustomizationForm>>(() => {
+      const dictionary: Record<string, OrderItemCustomizationForm> = {};
+
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      for (const orderItemCustomizationForm of ((orderItemCustomization as any).value as unknown as OrderItemCustomizationForm[])) {
+        dictionary[orderItemCustomizationForm.draftOrderItem.id] = orderItemCustomizationForm;
+      }
+
+      return dictionary;
+    });
+
+    function goToOrderItem (orderItemId: string): void {
+      const orderItemCustomizationForm = orderItemCustomizationByOrderItemId.value[orderItemId]
+
+      if (!orderItemCustomizationForm) {
+        return;
+      }
+
+      orderItemCustomizationForm.scrollToFirstError();
+    }
 
     const { isLoading, orderItemsCustomizationData } = useOrderItemsBulkCustomizations(
       ref(props.orderItemIds),
@@ -250,25 +283,43 @@ export default defineComponent({
     });
 
     async function onFormSubmit (): Promise<void> {
-      let isValid = false;
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      (orderItemsErrors.value as unknown as Record<string, string>) = {};
+
+      if (isFormDisabled.value) {
+        return;
+      }
+
+      const orderItemsWithError: OrderItemCustomizationForm[] = [];
 
       // TODO: temporary - current TS version don't handle `value` type right in this case
-      for (const customization of ((orderItemCustomization as any).value as unknown as InstanceType<typeof OrderItemCustomization>[])) {
-        const isOrderItemCustomizationsValid = await customization.validateForm();
+      for (const item of ((orderItemCustomization as any).value as unknown as OrderItemCustomizationForm[])) {
+        const isOrderItemCustomizationsValid = await item.validateForm();
 
         if (!isOrderItemCustomizationsValid) {
-          isValid = false;
+          orderItemsWithError.push(item);
         }
       }
 
-      if (isFormDisabled.value || !isValid) {
+      for (const errorItem of orderItemsWithError) {
+        set(
+          orderItemsErrors.value,
+          errorItem.draftOrderItem.id,
+          [`${errorItem.title} error`]
+        );
+      }
+
+      const firstOrderItemWithError = orderItemsWithError[0];
+
+      if (firstOrderItemWithError) {
+        firstOrderItemWithError.scrollToFirstError();
         return;
       }
 
       const draftOrderItemsDictionary: Record<string, DraftOrderItem> = {};
 
       // TODO: temporary - current TS version don't handle `value` type right in this case
-      for (const customization of ((orderItemCustomization as any).value) as unknown as InstanceType<typeof OrderItemCustomization>[]) {
+      for (const customization of ((orderItemCustomization as any).value) as unknown as OrderItemCustomizationForm[]) {
         if (customization.isCustomizationStateEmpty) {
           continue;
         }
@@ -293,10 +344,15 @@ export default defineComponent({
     return {
       ...useBulkImagesUpload(context),
       isFormDisabled,
+      goToOrderItem,
       orderItemCustomization,
       orderItemsCustomizationData,
+      orderItemsErrors,
       onFormSubmit
     }
+  },
+  metaInfo () {
+    return { title: 'Order Items Customize' };
   }
 });
 </script>
@@ -332,6 +388,10 @@ export default defineComponent({
   ._step-title {
     display: inline-block;
     margin-top: var(--spacer-base);
+  }
+
+  ._form-errors {
+    margin-top: var(--spacer-xl);
   }
 
   ._actions {
