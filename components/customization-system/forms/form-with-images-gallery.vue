@@ -149,6 +149,7 @@ import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
+import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useProductGallery } from 'theme/helpers/use-product-gallery';
@@ -397,6 +398,7 @@ export default defineComponent({
         context
       ),
       ...formValidation,
+      ...useBulkImagesUpload(context),
       availableCustomizations,
       availableOptionCustomizations,
       customizationAvailableOptionValues,

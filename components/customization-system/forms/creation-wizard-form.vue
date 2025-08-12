@@ -149,6 +149,7 @@ import {
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
+import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import { useCreationWizardFormSteps } from 'theme/helpers/use-creation-wizard-form-steps';
 import { useCreationWizardGtmEvents } from 'theme/helpers/use-creation-wizard-gtm-events';
@@ -557,6 +558,7 @@ export default defineComponent({
       ...useFormValidation(validationObserver, () =>
         getAllFormRefs(context.refs)
       ),
+      ...useBulkImagesUpload(context),
       currentProduct,
       filteredCustomizationAvailableOptionValues,
       customizationOptionValue,

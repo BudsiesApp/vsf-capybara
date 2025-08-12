@@ -1,8 +1,8 @@
-interface UploaderData {
+import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
+
+export interface UploaderData {
   uid: number,
-  allowMultiple: boolean,
-  hasUploadedFiles: boolean,
-  isMaxFilesCountReached: boolean
+  artworkUploadComponent: InstanceType<typeof MArtworkUpload>
 };
 
 interface ArtworkUploadStoreState {
@@ -17,19 +17,6 @@ export const artworkUploadStore = {
     registerUploader (state: ArtworkUploadStoreState, uploaderData: UploaderData) {
       state.activeUploaders.push(uploaderData);
     },
-    updateUploaderData (
-      state: ArtworkUploadStoreState,
-      { uid, dataForUpdate }: { uid: number, dataForUpdate: Partial<UploaderData> }
-    ) {
-      const index = state.activeUploaders.findIndex((uploaderData) => uid === uploaderData.uid);
-
-      if (index < 0) {
-        return;
-      }
-
-      const uploader = { ...state.activeUploaders[index], ...dataForUpdate };
-      state.activeUploaders.splice(index, 1, uploader);
-    },
     unregisterUploader (state: ArtworkUploadStoreState, uploaderUid: number) {
       const index = state.activeUploaders.findIndex(({ uid }) => uid === uploaderUid);
 
@@ -41,12 +28,8 @@ export const artworkUploadStore = {
     }
   },
   getters: {
-    firstAvailablePageDropUploaderUid (state: ArtworkUploadStoreState): number | undefined {
-      const uploader = state.activeUploaders.find((uploaderData) => {
-        return (uploaderData.allowMultiple && !uploaderData.isMaxFilesCountReached) || !uploaderData.hasUploadedFiles;
-      })
-
-      return uploader?.uid;
+    getUploaders (state: ArtworkUploadStoreState): UploaderData[] {
+      return state.activeUploaders;
     }
   }
 }
