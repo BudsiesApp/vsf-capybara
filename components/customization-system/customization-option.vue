@@ -125,10 +125,14 @@ export default defineComponent({
     disableValidation: {
       type: Boolean,
       default: false
+    },
+    fieldNamePrefix: {
+      type: String as PropType<string | undefined>,
+      default: undefined
     }
   },
   setup (props, context) {
-    const { customization, disableValidation, optionValues, productId, value } = toRefs(props);
+    const { customization, disableValidation, fieldNamePrefix, optionValues, productId, value } = toRefs(props);
 
     const optionLabel = computed<string>(() => {
       return customization.value.title || customization.value.name;
@@ -150,7 +154,11 @@ export default defineComponent({
     });
 
     return {
-      ...useCustomizationOptionValidation(customization, disableValidation),
+      ...useCustomizationOptionValidation(
+        customization,
+        disableValidation,
+        fieldNamePrefix
+      ),
       ...useCustomizationOptionWidget(
         value,
         customization,

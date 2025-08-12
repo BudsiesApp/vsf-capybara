@@ -1,5 +1,9 @@
 <template>
-  <div class="order-item-customization">
+  <validation-observer
+    tag="div"
+    class="order-item-customization"
+    ref="validationObserver"
+  >
     <customization-option
       v-for="customization in availableCustomizations"
       class="_customization-option"
@@ -11,10 +15,11 @@
       :product-id="+product.id"
       :value="customizationOptionValue[customization.id]"
       :disable-validation="isCustomizationStateEmpty"
+      :field-name-prefix="draftOrderItem.id"
       @input="onCustomizationOptionInput"
       @customization-option-busy-state-changed="onCustomizationOptionBusyChanged"
     />
-  </div>
+  </validation-observer>
 </template>
 
 <script lang="ts">
@@ -22,8 +27,10 @@ import {
   computed,
   defineComponent,
   PropType,
+  ref,
   toRefs
 } from '@vue/composition-api';
+import { ValidationObserver } from 'vee-validate';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import {
@@ -37,12 +44,32 @@ import {
   useOptionValueActions
 } from 'src/modules/customization-system';
 
+import { useFormValidation } from 'theme/helpers/use-form-validation';
+
 import CustomizationOption from './customization-option.vue';
+
+function getAllFormRefs (
+  refs: Record<string, Vue | Element | Vue[] | Element[]>
+): Record<string, Vue | Element | Vue[] | Element[]> {
+  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = {};
+  const customizationOptions = refs['customizationOption'] as InstanceType<
+    typeof CustomizationOption
+  >[];
+
+  for (const customizationOption of customizationOptions) {
+    for (const key in customizationOption.$refs) {
+      refsDictionary[key] = customizationOption.$refs[key];
+    }
+  }
+
+  return refsDictionary;
+}
 
 export default defineComponent({
   name: 'OrderItemCustomization',
   components: {
-    CustomizationOption
+    CustomizationOption,
+    ValidationObserver
   },
   props: {
     draftOrderItem: {
@@ -61,6 +88,9 @@ export default defineComponent({
   setup (props, context) {
     const { draftOrderItem, product } = toRefs(props);
 
+    const validationObserver = ref<InstanceType<typeof ValidationObserver> | null>(null);
+    const customizationOption = ref<InstanceType<typeof CustomizationOption>[] | null>(null);
+
     const productCustomizations = computed<Customization[]>(() => {
       return product.value.customizations || [];
     });
@@ -75,6 +105,10 @@ export default defineComponent({
       return dictionary;
     });
 
+    const initialCustomizationState = computed<CustomizationStateItem[]>(() => {
+      return draftOrderItem.value.customization_state || [];
+    });
+
     const {
       addCustomizationOptionValue,
       customizationOptionValue,
@@ -82,7 +116,7 @@ export default defineComponent({
       removeCustomizationOptionValue,
       selectedOptionValuesIds,
       updateCustomizationOptionValue
-    } = useCustomizationState(undefined, draftOrderItem.value.customization_state);
+    } = useCustomizationState(undefined, initialCustomizationState);
 
     const {
       availableCustomizations,
@@ -107,6 +141,10 @@ export default defineComponent({
     const { isSomeCustomizationOptionBusy, onCustomizationOptionBusyChanged } =
       useCustomizationsBusyState();
 
+    const isCustomizationStateEmpty = computed((): boolean => {
+      return customizationState.value.length === 0;
+    });
+
     function onCustomizationOptionInput (payload: {
       customizationId: string,
       value: CustomizationOptionValue
@@ -119,28 +157,52 @@ export default defineComponent({
       return customizationState.value;
     }
 
-    function isCustomizationStateEmpty (): boolean {
-      return customizationState.value.length === 0;
+    const formValidation = useFormValidation(
+      validationObserver,
+      () => getAllFormRefs(context.refs),
+      props.draftOrderItem.id
+    );
+
+    function validateForm (): Promise<boolean> {
+      return formValidation.validateAndGoToFirstError();
     }
 
     return {
       availableCustomizations,
       customizationAvailableOptionValues,
+      customizationOption,
       customizationOptionValue,
       isSomeCustomizationOptionBusy,
       onCustomizationOptionBusyChanged,
       onCustomizationOptionInput,
       getCustomizationState,
-      isCustomizationStateEmpty
+      isCustomizationStateEmpty,
+      validateForm,
+      validationObserver
     };
   }
 });
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+
 .order-item-customization {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--spacer-base);
+  justify-content: center;
+
   ._customization-option {
     margin-bottom: var(--spacer-base);
+    flex-basis: 100%;
+    flex-grow: 1;
+  }
+
+  @media (min-width: $tablet-min) {
+    ._customization-option {
+      flex-basis: 40%;
+    }
   }
 }
 </style>

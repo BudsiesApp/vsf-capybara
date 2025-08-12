@@ -1,54 +1,59 @@
 <template>
-  <div id="order-item-bulk-customize">
-    <validation-observer
-      slim
-      v-slot="{ errors }"
-      ref="validationObserver"
-    >
-      <form
-        class="_form"
-        @submit.prevent="onFormSubmit"
-      >
-        <div
-          class="_order-item"
-          v-for="item in orderItemsCustomizationData"
-          :key="item.id"
-        >
-          <SfHeading :level="2" :title="item.title" />
+  <div id="order-item-bulk-customize" class="order-items-bulk-customize">
+    <SfHeading :level="1" :title="$t('Order Items Customize')" />
 
+    <form
+      class="_form"
+      @submit.prevent="onFormSubmit"
+    >
+      <div
+        class="_step"
+        v-for="item in orderItemsCustomizationData"
+        :key="item.id"
+      >
+        <SfDivider class="_step-divider" />
+
+        <SfHeading
+          class="_step-title"
+          :level="3"
+          :title="item.title"
+        />
+
+        <div class="_content">
           <order-item-customization
             class="_customization"
             :is-disabled="isFormDisabled || item.isCustomized"
             :product="item.product"
             :draft-order-item="item.draftOrderItem"
-            :ref="orderItemCustomization"
+            ref="orderItemCustomization"
             :order-item-id="item.id"
           />
         </div>
+      </div>
 
-        <div class="_actions">
-          <SfButton
-            class="_submit-button color-primary"
-            type="submit"
-            :disabled="isFormDisabled"
-          >
-            {{ $t('Confirm Customization') }}
-          </SfButton>
-        </div>
-      </form>
-    </validation-observer>
+      <div class="_actions">
+        <SfButton
+          class="_submit-button color-primary"
+          type="submit"
+          :disabled="isFormDisabled"
+        >
+          {{ $t('Confirm Customization') }}
+        </SfButton>
+      </div>
+    </form>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, Ref, ref, SetupContext, computed } from '@vue/composition-api';
-import { SfHeading } from '@storefront-ui/vue';
+import { SfButton, SfDivider, SfHeading } from '@storefront-ui/vue';
 import { SearchQuery } from 'storefront-query-builder';
-import { ValidationObserver } from 'vee-validate';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { DraftOrderItem, fetchOrderItemsCustomizationsStates, submitOrderItemCustomizationsState, saveOrderItemCustomizationsState } from 'src/modules/customization-system';
+
+import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 
 import OrderItemCustomization from 'theme/components/customization-system/order-item-customization.vue';
 
@@ -144,7 +149,7 @@ function useOrderItemsBulkCustomizations (
           title: isMultipleItems ? `${product.name} (${index + 1})` : product.name,
           draftOrderItem: item,
           product,
-          isCustomized: item.is_customized
+          isCustomized: !!item.is_customized
         });
       }
     }
@@ -154,22 +159,29 @@ function useOrderItemsBulkCustomizations (
 
   async function loadData (): Promise<void> {
     isLoading.value = true;
-    draftOrderItemsByProductSku.value = {};
+    // TODO: temporary - current TS version don't handle `value` type right in this case
+    (draftOrderItemsByProductSku.value as unknown as Record<string, DraftOrderItem[]>) = {};
 
     try {
       const draftOrderItems = await fetchOrderItemsCustomizationsStates(orderItemIds.value);
+      const _draftOrderItemsByProductSku: Record<string, DraftOrderItem[]> = {};
 
       for (const item of draftOrderItems) {
         const productSku = item.product_sku;
 
-        if (!draftOrderItemsByProductSku.value[productSku]) {
-          draftOrderItemsByProductSku.value[productSku] = [];
+        if (!productSku) {
+          Logger.error(`Draft order item with ID "${item.id}" has no product SKU`, 'bulk-customize')();
+          continue;
         }
 
-        draftOrderItemsByProductSku.value[productSku].push(item);
+        if (!_draftOrderItemsByProductSku[productSku]) {
+          _draftOrderItemsByProductSku[productSku] = [];
+        }
+
+        _draftOrderItemsByProductSku[productSku].push(item);
       }
 
-      const productSkus = Object.keys(draftOrderItemsByProductSku.value);
+      const productSkus = Object.keys(_draftOrderItemsByProductSku);
       let notExistingProductsSkus: string[] = [];
 
       for (const sku of productSkus) {
@@ -188,7 +200,11 @@ function useOrderItemsBulkCustomizations (
           prefetchGroupProducts: false
         }
       });
+
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      (draftOrderItemsByProductSku.value as unknown as Record<string, DraftOrderItem[]>) = _draftOrderItemsByProductSku;
     } catch (error) {
+      console.error(error);
       Logger.error('Failed to load draft order items', 'bulk-customize')();
     } finally {
       isLoading.value = false;
@@ -207,8 +223,9 @@ export default defineComponent({
   name: 'OrderItemsBulkCustomize',
   components: {
     OrderItemCustomization,
-    SfHeading,
-    ValidationObserver
+    SfButton,
+    SfDivider,
+    SfHeading
   },
   props: {
     orderItemIds: {
@@ -233,7 +250,18 @@ export default defineComponent({
     });
 
     async function onFormSubmit (): Promise<void> {
-      if (isFormDisabled.value) {
+      let isValid = false;
+
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      for (const customization of ((orderItemCustomization as any).value as unknown as InstanceType<typeof OrderItemCustomization>[])) {
+        const isOrderItemCustomizationsValid = await customization.validateForm();
+
+        if (!isOrderItemCustomizationsValid) {
+          isValid = false;
+        }
+      }
+
+      if (isFormDisabled.value || !isValid) {
         return;
       }
 
@@ -241,9 +269,7 @@ export default defineComponent({
 
       // TODO: temporary - current TS version don't handle `value` type right in this case
       for (const customization of ((orderItemCustomization as any).value) as unknown as InstanceType<typeof OrderItemCustomization>[]) {
-        const isCustomizationStateEmpty = customization.isCustomizationStateEmpty();
-
-        if (isCustomizationStateEmpty) {
+        if (customization.isCustomizationStateEmpty) {
           continue;
         }
 
@@ -265,10 +291,62 @@ export default defineComponent({
     }
 
     return {
+      ...useBulkImagesUpload(context),
       isFormDisabled,
+      orderItemCustomization,
       orderItemsCustomizationData,
       onFormSubmit
     }
   }
 });
 </script>
+
+<style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+
+.order-items-bulk-customize {
+  text-align: center;
+  padding: var(--spacer-lg) var(--spacer-sm) 0;
+  box-sizing: border-box;
+
+  ._step {
+    margin-top: var(--spacer-lg);
+
+    ._content {
+      max-width: 720px;
+      width: 100%;
+      margin: var(--spacer-sm) auto 0;
+    }
+  }
+
+  ._customization {
+    margin-top: var(--spacer-base);
+    text-align: left;
+  }
+
+  ._step-divider {
+    display: none;
+    margin-top: var(--spacer-lg);
+  }
+
+  ._step-title {
+    display: inline-block;
+    margin-top: var(--spacer-base);
+  }
+
+  ._actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: var(--spacer-xl);
+  }
+
+  @media (min-width: $tablet-min) {
+    padding: var(--spacer-lg) 1rem 0;
+
+    ._step-divider {
+      display: block;
+    }
+  }
+}
+</style>
