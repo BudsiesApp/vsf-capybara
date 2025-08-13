@@ -271,8 +271,12 @@ export default {
       isDropdownOpen: false,
       dropdownActions: [
         {
-          label: 'Petsies',
+          label: this.$t('Forevers Pet'),
           url: '/forevers-pet-plush/'
+        },
+        {
+          label: this.$t('Huggables Pet'),
+          url: '/huggables/'
         },
         {
           label: this.$t('Golf Club Headcovers'),

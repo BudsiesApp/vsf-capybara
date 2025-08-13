@@ -140,6 +140,10 @@ export default Vue.extend({
           url: '/forevers-pet-plush/'
         },
         {
+          label: this.$t('Petsies Huggables'),
+          url: '/huggables/'
+        },
+        {
           label: this.$t('Golf Club Headcovers'),
           url: '/golf-headcovers/'
         },
@@ -147,10 +151,6 @@ export default Vue.extend({
           label: this.$t('Bobbleheads & Figurines'),
           url: '/pet-bobblehead-figurines/'
         },
-        // {
-        //   name: this.$t('Petsies Huggables'),
-        //   url: { name: 'huggables-creation-page' }
-        // },
         {
           label: this.$t('Magnets'),
           url: {

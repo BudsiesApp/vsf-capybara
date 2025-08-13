@@ -131,8 +131,14 @@ let routes = [
       {
         name: 'my-account',
         path: '',
+        redirect: {
+          name: 'orders-history'
+        }
+      },
+      {
+        name: 'profile',
+        path: 'profile/',
         component: AccountProfile,
-
         meta: {
           auth: true
         }

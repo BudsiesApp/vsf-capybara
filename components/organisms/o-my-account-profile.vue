@@ -22,10 +22,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+
 .o-my-account-profile {
   ::v-deep {
     .sf-tabs__title {
       padding: var(--tabs-title-padding, var(--spacer-sm));
+    }
+  }
+
+  @include for-mobile {
+    --tabs-title-display: none;
+
+    .m-update-personal-data {
+      margin-top: var(--spacer-base);
     }
   }
 }

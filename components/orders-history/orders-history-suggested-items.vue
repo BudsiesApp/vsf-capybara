@@ -253,6 +253,7 @@ $desktop-max-products-count: 5;
     --price-regular-font-size: var(--font-size-base);
     --price-special-font-size: var(--font-size-base);
     --price-old-font-size: var(--font-size-base);
+    --product-card-title-font-line-height: 1.2;
 
     max-width: 160px;
 
@@ -293,12 +294,21 @@ $desktop-max-products-count: 5;
     ._products {
       grid-template-columns: repeat($mobile-max-products-count - 1, 1fr);
       column-gap: var(--spacer-xs);
+      margin-top: var(--spacer-sm);
 
       &.-minimized {
         ._product {
           &:nth-child(n+#{$mobile-max-products-count}) {
             display: none;
           }
+        }
+      }
+
+      ::v-deep {
+        .base-image {
+          max-width: 80px;
+          margin: 0 auto;
+          display: block;
         }
       }
     }
