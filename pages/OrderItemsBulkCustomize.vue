@@ -29,6 +29,7 @@
             :order-item-id="item.id"
             :title="item.title"
             @order-item-customization-busy-state-changed="onEntityBusyChanged"
+            @order-item-customization-form-errors-changed="onOrderItemCustomizationFormErrorChanged"
           />
         </div>
       </div>
@@ -53,7 +54,15 @@
 </template>
 
 <script lang="ts">
-import { set, defineComponent, Ref, ref, SetupContext, computed } from '@vue/composition-api';
+import {
+  del,
+  set,
+  defineComponent,
+  Ref,
+  ref,
+  SetupContext,
+  computed
+} from '@vue/composition-api';
 import { SfButton, SfDivider, SfHeading } from '@storefront-ui/vue';
 import { SearchQuery } from 'storefront-query-builder';
 
@@ -279,6 +288,17 @@ export default defineComponent({
     const { isSomeEntityBusy, onEntityBusyChanged } =
       useEntityBusyState();
 
+    function onOrderItemCustomizationFormErrorChanged (
+      { hasError, id }: {hasError: boolean, id: string}
+    ): void {
+      if (!hasError) {
+        del(
+          orderItemsErrors.value,
+          id
+        );
+      }
+    }
+
     const { isLoading, orderItemsCustomizationData } = useOrderItemsBulkCustomizations(
       ref(props.orderItemIds),
       context
@@ -364,7 +384,8 @@ export default defineComponent({
       orderItemsCustomizationData,
       orderItemsErrors,
       onEntityBusyChanged,
-      onFormSubmit
+      onFormSubmit,
+      onOrderItemCustomizationFormErrorChanged
     }
   },
   metaInfo () {

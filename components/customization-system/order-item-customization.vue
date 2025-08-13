@@ -146,8 +146,21 @@ export default defineComponent({
     const { isSomeEntityBusy, onEntityBusyChanged } =
       useEntityBusyState();
 
-    const isCustomizationStateEmpty = computed((): boolean => {
+    const isCustomizationStateEmpty = computed<boolean>(() => {
       return customizationState.value.length === 0;
+    });
+
+    const isFormHasError = computed<boolean>(() => {
+    // TODO: temporary - current TS version don't handle `value` type right in this case
+      const _validationObserver = (validationObserver as any).value as unknown as InstanceType<typeof ValidationObserver>;
+
+      if (!_validationObserver || isCustomizationStateEmpty.value) {
+        return false;
+      }
+
+      const hasError = Object.values(_validationObserver.errors).some((item) => item.length > 0);
+
+      return hasError;
     });
 
     function onCustomizationOptionInput (payload: {
@@ -187,6 +200,14 @@ export default defineComponent({
       {
         immediate: true
       }
+    );
+
+    watch(
+      isFormHasError,
+      (value) => context.emit(
+        'order-item-customization-form-errors-changed',
+        { hasError: !!value, id: props.draftOrderItem.id }
+      )
     );
 
     return {
