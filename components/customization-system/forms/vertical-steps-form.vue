@@ -43,7 +43,7 @@
               :value="customizationOptionValue[customization.id]"
               @input="onCustomizationOptionInput"
               @customization-option-busy-state-changed="
-                onCustomizationOptionBusyChanged
+                onEntityBusyChanged
               "
             />
 
@@ -152,7 +152,7 @@ import {
   requiredCustomizationsFilter,
   useAvailableCustomizations,
   useCustomizationsBundleOptions,
-  useCustomizationsBusyState,
+  useEntityBusyState,
   useCustomizationsFilter,
   useCustomizationsGroups,
   useCustomizationsOptionsDefaultValue,
@@ -287,8 +287,8 @@ export default defineComponent({
         addCustomizationOptionValue
       );
 
-    const { isSomeCustomizationOptionBusy, onCustomizationOptionBusyChanged } =
-      useCustomizationsBusyState();
+    const { isSomeEntityBusy, onEntityBusyChanged } =
+      useEntityBusyState();
 
     function onCustomizationOptionInput (payload: {
       customizationId: string,
@@ -421,7 +421,7 @@ export default defineComponent({
       return isSubmitting.value;
     });
     const isSubmitButtonDisabled = computed<boolean>(() => {
-      return isSomeCustomizationOptionBusy.value || isDisabled.value;
+      return isSomeEntityBusy.value || isDisabled.value;
     });
 
     const pageTitle = computed<string>(() => {
@@ -461,7 +461,7 @@ export default defineComponent({
       customizationOptionValue,
       isDisabled,
       isSubmitButtonDisabled,
-      onCustomizationOptionBusyChanged,
+      onEntityBusyChanged,
       onCustomizationOptionInput,
       onFormSubmit,
       pageTitle,

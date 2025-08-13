@@ -74,7 +74,7 @@
                 :value="customizationOptionValue[customization.id]"
                 @input="onCustomizationOptionInput"
                 @customization-option-busy-state-changed="
-                  onCustomizationOptionBusyChanged
+                  onEntityBusyChanged
                 "
               />
 
@@ -99,7 +99,7 @@
                 :quantity.sync="quantity"
                 @input="onCustomizationOptionInput"
                 @customization-option-busy-state-changed="
-                  onCustomizationOptionBusyChanged
+                  onEntityBusyChanged
                 "
               />
             </sf-step>
@@ -133,7 +133,7 @@ import {
   useCustomizationState,
   useAvailableCustomizations,
   useOptionValueActions,
-  useCustomizationsBusyState,
+  useEntityBusyState,
   CustomizationOptionValue,
   useCustomizationsGroups,
   useCustomizationsBundleOptions,
@@ -242,8 +242,8 @@ export default defineComponent({
         removeCustomizationOptionValue,
         addCustomizationOptionValue
       );
-    const { isSomeCustomizationOptionBusy, onCustomizationOptionBusyChanged } =
-      useCustomizationsBusyState();
+    const { isSomeEntityBusy, onEntityBusyChanged } =
+      useEntityBusyState();
     function onCustomizationOptionInput (payload: {
       customizationId: string,
       value: CustomizationOptionValue
@@ -385,7 +385,7 @@ export default defineComponent({
     });
 
     const isSubmitButtonDisabled = computed<boolean>(() => {
-      return isDisabled.value || isSomeCustomizationOptionBusy.value;
+      return isDisabled.value || isSomeEntityBusy.value;
     });
 
     watch(formSteps.currentStep, (val, oldVal) => {
@@ -420,7 +420,7 @@ export default defineComponent({
       customizationOptionValue,
       isDisabled,
       isSubmitButtonDisabled,
-      onCustomizationOptionBusyChanged,
+      onEntityBusyChanged,
       onCustomizationOptionInput,
       onFormSubmit,
       preview,

@@ -17,7 +17,7 @@
       :disable-validation="isCustomizationStateEmpty"
       :field-name-prefix="draftOrderItem.id"
       @input="onCustomizationOptionInput"
-      @customization-option-busy-state-changed="onCustomizationOptionBusyChanged"
+      @customization-option-busy-state-changed="onEntityBusyChanged"
     />
   </validation-observer>
 </template>
@@ -28,7 +28,8 @@ import {
   defineComponent,
   PropType,
   ref,
-  toRefs
+  toRefs,
+  watch
 } from '@vue/composition-api';
 import { ValidationObserver } from 'vee-validate';
 
@@ -39,7 +40,7 @@ import {
   CustomizationStateItem,
   DraftOrderItem,
   useAvailableCustomizations,
-  useCustomizationsBusyState,
+  useEntityBusyState,
   useCustomizationState,
   useOptionValueActions
 } from 'src/modules/customization-system';
@@ -142,8 +143,8 @@ export default defineComponent({
         addCustomizationOptionValue
       );
 
-    const { isSomeCustomizationOptionBusy, onCustomizationOptionBusyChanged } =
-      useCustomizationsBusyState();
+    const { isSomeEntityBusy, onEntityBusyChanged } =
+      useEntityBusyState();
 
     const isCustomizationStateEmpty = computed((): boolean => {
       return customizationState.value.length === 0;
@@ -175,13 +176,26 @@ export default defineComponent({
       formValidation.goToFirstError();
     }
 
+    watch(
+      isSomeEntityBusy,
+      (value) => {
+        context.emit(
+          'order-item-customization-busy-state-changed',
+          { isBusy: value, entityId: props.draftOrderItem.id }
+        );
+      },
+      {
+        immediate: true
+      }
+    );
+
     return {
       availableCustomizations,
       customizationAvailableOptionValues,
       customizationOption,
       customizationOptionValue,
-      isSomeCustomizationOptionBusy,
-      onCustomizationOptionBusyChanged,
+      isSomeEntityBusy,
+      onEntityBusyChanged,
       onCustomizationOptionInput,
       getCustomizationState,
       isCustomizationStateEmpty,

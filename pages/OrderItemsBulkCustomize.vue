@@ -28,6 +28,7 @@
             ref="orderItemCustomization"
             :order-item-id="item.id"
             :title="item.title"
+            @order-item-customization-busy-state-changed="onEntityBusyChanged"
           />
         </div>
       </div>
@@ -42,7 +43,7 @@
         <SfButton
           class="_submit-button color-primary"
           type="submit"
-          :disabled="isFormDisabled"
+          :disabled="isSubmitButtonDisabled"
         >
           {{ $t('Confirm Customization') }}
         </SfButton>
@@ -58,7 +59,13 @@ import { SearchQuery } from 'storefront-query-builder';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { Logger } from '@vue-storefront/core/lib/logger';
-import { DraftOrderItem, fetchOrderItemsCustomizationsStates, submitOrderItemCustomizationsState, saveOrderItemCustomizationsState } from 'src/modules/customization-system';
+import {
+  DraftOrderItem,
+  fetchOrderItemsCustomizationsStates,
+  submitOrderItemCustomizationsState,
+  saveOrderItemCustomizationsState,
+  useEntityBusyState
+} from 'src/modules/customization-system';
 
 import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 
@@ -269,6 +276,9 @@ export default defineComponent({
       orderItemCustomizationForm.scrollToFirstError();
     }
 
+    const { isSomeEntityBusy, onEntityBusyChanged } =
+      useEntityBusyState();
+
     const { isLoading, orderItemsCustomizationData } = useOrderItemsBulkCustomizations(
       ref(props.orderItemIds),
       context
@@ -280,6 +290,10 @@ export default defineComponent({
 
     const isFormDisabled = computed(() => {
       return isLoading.value || isSubmitting.value;
+    });
+
+    const isSubmitButtonDisabled = computed(() => {
+      return isFormDisabled.value || isSomeEntityBusy.value;
     });
 
     async function onFormSubmit (): Promise<void> {
@@ -305,7 +319,7 @@ export default defineComponent({
         set(
           orderItemsErrors.value,
           errorItem.draftOrderItem.id,
-          [`${errorItem.title} error`]
+          [`${errorItem.title} form has error`]
         );
       }
 
@@ -344,10 +358,12 @@ export default defineComponent({
     return {
       ...useBulkImagesUpload(context),
       isFormDisabled,
+      isSubmitButtonDisabled,
       goToOrderItem,
       orderItemCustomization,
       orderItemsCustomizationData,
       orderItemsErrors,
+      onEntityBusyChanged,
       onFormSubmit
     }
   },
