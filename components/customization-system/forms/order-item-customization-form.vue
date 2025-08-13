@@ -1,7 +1,7 @@
 <template>
   <validation-observer
     tag="div"
-    class="order-item-customization"
+    class="order-item-customization-form"
     ref="validationObserver"
   >
     <customization-option
@@ -47,7 +47,7 @@ import {
 
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 
-import CustomizationOption from './customization-option.vue';
+import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 
 function getAllFormRefs (
   refs: Record<string, Vue | Element | Vue[] | Element[]>
@@ -67,7 +67,7 @@ function getAllFormRefs (
 }
 
 export default defineComponent({
-  name: 'OrderItemCustomization',
+  name: 'OrderItemCustomizationForm',
   components: {
     CustomizationOption,
     ValidationObserver
@@ -231,7 +231,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-.order-item-customization {
+.order-item-customization-form {
   display: flex;
   flex-wrap: wrap;
   column-gap: var(--spacer-base);
