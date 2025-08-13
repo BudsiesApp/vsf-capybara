@@ -1,13 +1,24 @@
 <template>
-  <div id="order-items-bulk-customize" class="order-items-bulk-customize">
+  <div id="order-items-bulk-customize">
     <SfHeading :level="1" :title="$t('Order Items Customize')" />
 
+    <vertical-steps-form-placeholder v-if="isLoading" />
+
     <order-items-bulk-customization-form
-      v-if="!isLoading"
+      v-else-if="showForm"
       :order-items-customization-forms-data="orderItemsCustomizationData"
     />
 
-    <vertical-steps-form-placeholder v-else />
+    <div class="_not-found" v-else>
+      <SfHeading :level="4" :title="$t('No Customizable Order Items Found')" />
+
+      <router-link
+        class="sf-button _order-history-link"
+        :to="{name: 'orders-history'}"
+      >
+        {{ $t('Go To Order History') }}
+      </router-link>
+    </div>
   </div>
 </template>
 
@@ -17,7 +28,8 @@ import {
   Ref,
   ref,
   SetupContext,
-  computed
+  computed,
+  PropType
 } from '@vue/composition-api';
 import { SfHeading } from '@storefront-ui/vue';
 import { SearchQuery } from 'storefront-query-builder';
@@ -142,19 +154,28 @@ export default defineComponent({
   },
   props: {
     orderItemIds: {
-      type: Array as () => string[],
+      type: Array as PropType<string[] | string>,
       required: true
     }
   },
   setup (props, context) {
+    const orderItemIds = computed<string[]>(() => {
+      return Array.isArray(props.orderItemIds) ? props.orderItemIds : [props.orderItemIds];
+    });
+
     const { isLoading, orderItemsCustomizationData } = useOrderItemsBulkCustomizations(
-      ref(props.orderItemIds),
+      orderItemIds,
       context
     );
 
+    const showForm = computed<boolean>(() => {
+      return !isLoading.value && orderItemsCustomizationData.value.length > 0;
+    });
+
     return {
+      isLoading,
       orderItemsCustomizationData,
-      isLoading
+      showForm
     }
   },
   metaInfo () {
@@ -166,5 +187,21 @@ export default defineComponent({
 <style lang="scss" scoped>
 #order-items-bulk-customize {
   padding: var(--spacer-lg) var(--spacer-sm) 0;
+
+  ._not-found {
+    margin-top: var(--spacer-xl);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  ._order-history-link {
+    margin-top: var(--spacer-base);
+
+    &:hover {
+      color: var(--c-white);
+    }
+  }
 }
 </style>

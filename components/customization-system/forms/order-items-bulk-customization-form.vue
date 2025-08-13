@@ -139,15 +139,15 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const orderItemCustomization = ref<OrderItemCustomizationFormType[]>([]);
+    const orderItemCustomizationForm = ref<OrderItemCustomizationFormType[]>([]);
     const orderItemsErrors = ref<Record<string, string>>({});
 
     const { orderItemsCustomizationFormsData } = toRefs(props);
 
     const orderItemCustomizationByOrderItemId = computed<Record<string, OrderItemCustomizationFormType>>(() => {
       const dictionary: Record<string, OrderItemCustomizationFormType> = {};
-      for (const orderItemCustomizationForm of ((orderItemCustomization as any).value as unknown as OrderItemCustomizationFormType[])) {
-        dictionary[orderItemCustomizationForm.draftOrderItem.id] = orderItemCustomizationForm;
+      for (const form of ((orderItemCustomizationForm as any).value as unknown as OrderItemCustomizationFormType[])) {
+        dictionary[form.draftOrderItem.id] = form;
       }
       return dictionary;
     });
@@ -194,7 +194,7 @@ export default defineComponent({
       }
 
       const orderItemsWithError: OrderItemCustomizationFormType[] = [];
-      for (const item of ((orderItemCustomization as any).value as unknown as OrderItemCustomizationFormType[])) {
+      for (const item of ((orderItemCustomizationForm as any).value as unknown as OrderItemCustomizationFormType[])) {
         const isOrderItemCustomizationsValid = await item.validateForm();
 
         if (!isOrderItemCustomizationsValid) {
@@ -217,7 +217,7 @@ export default defineComponent({
       }
 
       const draftOrderItemsDictionary: Record<string, any> = {};
-      for (const customization of ((orderItemCustomization as any).value) as unknown as OrderItemCustomizationFormType[]) {
+      for (const customization of ((orderItemCustomizationForm as any).value) as unknown as OrderItemCustomizationFormType[]) {
         if (customization.isCustomizationStateEmpty) {
           continue;
         }
@@ -247,7 +247,7 @@ export default defineComponent({
       isFormDisabled,
       isSubmitButtonDisabled,
       goToOrderItem,
-      orderItemCustomization,
+      orderItemCustomization: orderItemCustomizationForm,
       orderItemsCustomizationFormsData,
       orderItemsErrors,
       onEntityBusyChanged,
