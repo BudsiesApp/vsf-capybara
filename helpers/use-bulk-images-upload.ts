@@ -1,7 +1,10 @@
 import { onBeforeMount, onBeforeUnmount, SetupContext } from '@vue/composition-api';
 import { UploaderData } from 'theme/store/ui/artwork-upload';
 
-export function useBulkImagesUpload ({ root }: SetupContext) {
+export function useBulkImagesUpload (
+  { root }: SetupContext,
+  allowMultipleImagesPerUploader: boolean = true
+) {
   function windowDragHoverHandler (event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
@@ -50,10 +53,14 @@ export function useBulkImagesUpload ({ root }: SetupContext) {
     let uploadedFilesCount = 0;
 
     for (const uploader of uploaders) {
-      const availableForUploadFilesCount = uploader.artworkUploadComponent.getAvailableForUploadFilesCount();
+      let availableForUploadFilesCount = uploader.artworkUploadComponent.getAvailableForUploadFilesCount();
 
       if (availableForUploadFilesCount === 0) {
         continue;
+      }
+
+      if (!allowMultipleImagesPerUploader) {
+        availableForUploadFilesCount = 1;
       }
 
       const filesToUpload = Array.from(files).slice(

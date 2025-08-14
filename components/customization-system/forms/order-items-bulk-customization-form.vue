@@ -142,8 +142,6 @@ export default defineComponent({
     const orderItemCustomizationForm = ref<OrderItemCustomizationFormType[]>([]);
     const orderItemsErrors = ref<Record<string, string>>({});
 
-    const { orderItemsCustomizationFormsData } = toRefs(props);
-
     const orderItemCustomizationByOrderItemId = computed<Record<string, OrderItemCustomizationFormType>>(() => {
       const dictionary: Record<string, OrderItemCustomizationFormType> = {};
       for (const form of ((orderItemCustomizationForm as any).value as unknown as OrderItemCustomizationFormType[])) {
@@ -243,12 +241,11 @@ export default defineComponent({
     }
 
     return {
-      ...useBulkImagesUpload(context),
+      ...useBulkImagesUpload(context, false),
       isFormDisabled,
       isSubmitButtonDisabled,
       goToOrderItem,
       orderItemCustomization: orderItemCustomizationForm,
-      orderItemsCustomizationFormsData,
       orderItemsErrors,
       onEntityBusyChanged,
       onFormSubmit,
