@@ -35,19 +35,13 @@
             class="_menu-item"
             :class="item.class"
             v-for="item in navigationItems"
-            :key="item.title"
+            :key="item.icon"
           >
             <router-link
               :to="item.link"
             >
               {{ item.label }}
             </router-link>
-
-            <SfIcon
-              class="mobile-only"
-              icon="chevron_right"
-              size="0.875rem"
-            />
           </SfListItem>
 
           <SfListItem class="_menu-item">
@@ -57,12 +51,6 @@
             >
               {{ $t('Log out') }}
             </router-link>
-
-            <SfIcon
-              class="mobile-only"
-              icon="chevron_right"
-              size="0.875rem"
-            />
           </SfListItem>
         </SfList>
       </nav>
@@ -76,14 +64,10 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { SfBreadcrumbs, SfIcon, SfHeading, SfList } from '@storefront-ui/vue';
 
-import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import MyAccount from '@vue-storefront/core/pages/MyAccount';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
-
-import { AccountIconClickedEvent } from 'theme/interfaces/account-icon-clicked.event';
 
 const RouteNames = {
   ADDRESS_BOOK_LIST: 'address-book-list',
@@ -103,30 +87,33 @@ export default {
   mixins: [MyAccount],
   data () {
     return {
-      RouteNames,
-      navigationItems: [
+      RouteNames
+
+    };
+  },
+  computed: {
+    navigationItems () {
+      return [
         {
           icon: 'shipping',
-          label: 'Order History',
+          label: this.$t('Order history'),
           link: { name: RouteNames.ORDERS_HISTORY },
           class: '-orders-history'
         },
         {
           icon: 'profile',
-          label: 'Profile',
+          label: this.$t('Profile'),
           link: { name: RouteNames.MY_ACCOUNT },
           class: '-profile'
         },
         {
           icon: 'home',
-          label: 'Address Book',
+          label: this.$t('Address book'),
           link: { name: RouteNames.ADDRESS_BOOK_LIST },
           class: '-address-book'
         }
-      ]
-    };
-  },
-  computed: {
+      ];
+    },
     breadcrumbs () {
       const breadcrumbs = [
         {
@@ -221,19 +208,20 @@ export default {
       }
     }
   },
-  created () {
-    this.$store.commit('ui/setAdditionalTopNavigationItems', this.navigationItems);
-  },
-  beforeMount () {
-    EventBus.$on(AccountIconClickedEvent, this.onAccountButtonClicked);
-  },
   beforeDestroy () {
     this.$store.commit('ui/resetAdditionalTopNavigationItems');
-    EventBus.$off(AccountIconClickedEvent, this.onAccountButtonClicked);
   },
   methods: {
     async logout () {
       await this.$store.dispatch('user/logout', {});
+    }
+  },
+  watch: {
+    navigationItems: {
+      handler () {
+        this.$store.commit('ui/setAdditionalTopNavigationItems', this.navigationItems);
+      },
+      immediate: true
     }
   }
 };

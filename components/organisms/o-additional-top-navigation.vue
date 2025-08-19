@@ -4,7 +4,7 @@
       class="_navigation-item"
       :class="item.class"
       v-for="item in navigationItems"
-      :key="item.label"
+      :key="item.icon"
       :to="item.link"
     >
       <SfIcon :icon="item.icon" size="1.2rem" />
@@ -20,15 +20,10 @@
 import { SfBottomNavigation, SfIcon } from '@storefront-ui/vue';
 import { defineComponent, PropType } from '@vue/composition-api';
 
-interface AdditionalTopNavigationItem {
-  label: string,
-  icon: string,
-  link: string,
-  class: string
-}
+import { AdditionalTopNavigationItem } from 'theme/interfaces/additional-top-navigation-item.interface';
 
 export default defineComponent({
-  name: 'OAccountTopNavigation',
+  name: 'OAdditionalTopNavigation',
   props: {
     navigationItems: {
       type: Array as PropType<AdditionalTopNavigationItem[]>,
