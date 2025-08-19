@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import { SfBreadcrumbs, SfIcon, SfHeading, SfList } from '@storefront-ui/vue';
+import { SfBreadcrumbs, SfHeading, SfList } from '@storefront-ui/vue';
 
 import MyAccount from '@vue-storefront/core/pages/MyAccount';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
@@ -80,7 +80,6 @@ const RouteNames = {
 export default {
   components: {
     SfBreadcrumbs,
-    SfIcon,
     SfHeading,
     SfList
   },
