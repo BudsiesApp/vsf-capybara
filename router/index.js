@@ -1,5 +1,6 @@
 import { PlushieType } from 'theme/interfaces/plushie.type';
 import { PageName } from 'theme/pages/page-name';
+import { LayoutType } from 'theme/helpers/use-product-form-layout';
 
 const ErrorPage = () =>
   import(/* webpackChunkName: "vsf-error" */ 'theme/pages/Error');
@@ -48,6 +49,8 @@ const CustomizationSystemWidgetsTestPage = () =>
   import(/* webpackChunkName: "vsf-widgets-test" */ 'theme/pages/CustomizationSystemWidgetsTest');
 const CustomizableProduct = () =>
   import(/* webpackChunkName: "vsf-customizable-product" */ 'theme/pages/CustomizableProduct');
+const OrderItemCustomize = () =>
+  import(/* webpackChunkName: "vsf-order-item-customize" */ 'theme/pages/OrderItemCustomize');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -729,6 +732,20 @@ let routes = [
       path: '/',
       query: route.query
     })
+  },
+  {
+    name: 'forevers-customize',
+    path: '/forevers/customize/',
+    component: OrderItemCustomize,
+    props: (route) => ({
+      orderItemId: route.query.orderItemId,
+      layout: LayoutType.CREATION_WIZARD,
+      sku: route.query.sku,
+      plushieType: PlushieType.FOREVERS
+    }),
+    meta: {
+      auth: true
+    }
   }
 ];
 

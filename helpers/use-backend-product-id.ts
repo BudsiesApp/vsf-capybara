@@ -55,10 +55,13 @@ export function useBackendProductId (productId: Ref<string | number>) {
       case ProductId.GOLF_SHIRTS:
         return ProductValue.GOLF_SHIRTS;
       case ProductId.FOREVERS_DOG:
+      case ProductId.SHOPIFY_FOREVERS_DOG:
         return ProductValue.FOREVERS_DOG;
       case ProductId.FOREVERS_CAT:
+      case ProductId.SHOPIFY_FOREVERS_CAT:
         return ProductValue.FOREVERS_CAT;
       case ProductId.FOREVERS_OTHER:
+      case ProductId.SHOPIFY_FOREVERS_OTHER:
         return ProductValue.FOREVERS_OTHER;
       case ProductId.GOLF_COVERS_DOG:
         return ProductValue.GOLF_COVERS_DOG;
