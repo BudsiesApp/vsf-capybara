@@ -125,6 +125,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        isLocked: false,
         showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
@@ -172,6 +173,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        isLocked: false,
         showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
@@ -215,6 +217,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        isLocked: false,
         showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
@@ -286,6 +289,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        isLocked: false,
         showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
@@ -341,6 +345,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        isLocked: false,
         showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
@@ -396,6 +401,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        isLocked: false,
         showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
@@ -420,6 +426,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        isLocked: false,
         showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
@@ -447,6 +454,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        isLocked: false,
         showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
@@ -474,6 +482,7 @@ export default defineComponent({
         type: CustomizationType.OPTION,
         sn: 0,
         isEnabled: true,
+        isLocked: false,
         showInCart: true,
         availabilityRules: {
           forActivatedOptionValueIds: []
