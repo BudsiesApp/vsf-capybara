@@ -22,17 +22,8 @@
 
     <div
       class="_content"
-      :class="{'-show-mobile': showMobileNavigation}"
     >
-      <div class="_mobile-header mobile-only">
-        <SfBar
-          :title="mobileTitle"
-          :back="!showMobileNavigation"
-          @click:back="showMobileNavigation = !showMobileNavigation"
-        />
-      </div>
-
-      <nav class="_navigation">
+      <nav class="_navigation desktop-only">
         <SfHeading
           :title="$t('My Account')"
           :level="1"
@@ -40,49 +31,17 @@
         />
 
         <SfList class="_items-list">
-          <SfListItem class="_menu-item -orders-history">
+          <SfListItem
+            class="_menu-item"
+            :class="item.class"
+            v-for="item in navigationItems"
+            :key="item.icon"
+          >
             <router-link
-              :to="{name: RouteNames.ORDERS_HISTORY}"
-              @click.native="showMobileNavigation = false"
+              :to="item.link"
             >
-              {{ $t('Order history') }}
+              {{ item.label }}
             </router-link>
-
-            <SfIcon
-              class="mobile-only"
-              icon="chevron_right"
-              size="0.875rem"
-            />
-          </SfListItem>
-
-          <SfListItem class="_menu-item -profile">
-            <router-link
-              :to="{name: RouteNames.MY_ACCOUNT}"
-              @click.native="showMobileNavigation = false"
-            >
-              {{ $t('My profile') }}
-            </router-link>
-
-            <SfIcon
-              class="mobile-only"
-              icon="chevron_right"
-              size="0.875rem"
-            />
-          </SfListItem>
-
-          <SfListItem class="_menu-item -address-book">
-            <router-link
-              :to="{name: RouteNames.ADDRESS_BOOK_LIST}"
-              @click.native="showMobileNavigation = false"
-            >
-              {{ $t('Address book') }}
-            </router-link>
-
-            <SfIcon
-              class="mobile-only"
-              icon="chevron_right"
-              size="0.875rem"
-            />
           </SfListItem>
 
           <SfListItem class="_menu-item">
@@ -92,12 +51,6 @@
             >
               {{ $t('Log out') }}
             </router-link>
-
-            <SfIcon
-              class="mobile-only"
-              icon="chevron_right"
-              size="0.875rem"
-            />
           </SfListItem>
         </SfList>
       </nav>
@@ -111,13 +64,10 @@
 </template>
 
 <script>
-import { SfBar, SfBreadcrumbs, SfIcon, SfHeading, SfList } from '@storefront-ui/vue';
+import { SfBreadcrumbs, SfHeading, SfList } from '@storefront-ui/vue';
 
-import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import MyAccount from '@vue-storefront/core/pages/MyAccount';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
-
-import { AccountIconClickedEvent } from 'theme/interfaces/account-icon-clicked.event';
 
 const RouteNames = {
   ADDRESS_BOOK_LIST: 'address-book-list',
@@ -129,20 +79,40 @@ const RouteNames = {
 
 export default {
   components: {
-    SfBar,
     SfBreadcrumbs,
-    SfIcon,
     SfHeading,
     SfList
   },
   mixins: [MyAccount],
   data () {
     return {
-      showMobileNavigation: true,
       RouteNames
+
     };
   },
   computed: {
+    navigationItems () {
+      return [
+        {
+          icon: 'shipping',
+          label: this.$t('Order history'),
+          link: { name: RouteNames.ORDERS_HISTORY },
+          class: '-orders-history'
+        },
+        {
+          icon: 'profile',
+          label: this.$t('Profile'),
+          link: { name: RouteNames.MY_ACCOUNT },
+          class: '-profile'
+        },
+        {
+          icon: 'home',
+          label: this.$t('Address book'),
+          link: { name: RouteNames.ADDRESS_BOOK_LIST },
+          class: '-address-book'
+        }
+      ];
+    },
     breadcrumbs () {
       const breadcrumbs = [
         {
@@ -221,10 +191,6 @@ export default {
       return breadcrumbs;
     },
     mobileTitle () {
-      if (this.showMobileNavigation) {
-        return this.$t('My Account');
-      }
-
       switch (this.$route.name) {
         case RouteNames.ADDRESS_BOOK_LIST:
           return this.$t('Address book');
@@ -241,18 +207,20 @@ export default {
       }
     }
   },
-  beforeMount () {
-    EventBus.$on(AccountIconClickedEvent, this.onAccountButtonClicked);
-  },
   beforeDestroy () {
-    EventBus.$off(AccountIconClickedEvent, this.onAccountButtonClicked);
+    this.$store.commit('ui/resetAdditionalTopNavigationItems');
   },
   methods: {
     async logout () {
       await this.$store.dispatch('user/logout', {});
-    },
-    onAccountButtonClicked () {
-      this.showMobileNavigation = true;
+    }
+  },
+  watch: {
+    navigationItems: {
+      handler () {
+        this.$store.commit('ui/setAdditionalTopNavigationItems', this.navigationItems);
+      },
+      immediate: true
     }
   }
 };

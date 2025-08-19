@@ -1,5 +1,10 @@
 <template>
-  <div class="o-top-navigation">
+  <div
+    class="o-top-navigation"
+    :class="{
+      '-additional-navigation': additionalTopNavigationItems.length
+    }"
+  >
     <SfBottomNavigation class="_bottom-navigation">
       <SfBottomNavigationItem
         v-for="item in navigationItems"
@@ -33,6 +38,12 @@
         <ADetailedCartIcon class="sf-header__action _item" />
       </div>
     </SfBottomNavigation>
+
+    <o-additional-top-navigation
+      v-show="additionalTopNavigationItems.length"
+      class="_additional-navigation"
+      :navigation-items="additionalTopNavigationItems"
+    />
   </div>
 </template>
 
@@ -46,6 +57,7 @@ import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
 import ALogo from 'theme/components/atoms/a-logo.vue';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
+import OAdditionalTopNavigation from 'theme/components/organisms/o-additional-top-navigation.vue';
 
 export default {
   name: 'OTopNavigation',
@@ -57,7 +69,8 @@ export default {
     ALogo,
     ADetailedCartIcon,
     MCtaButton,
-    AAccountIcon
+    AAccountIcon,
+    OAdditionalTopNavigation
   },
   data () {
     return {
@@ -72,6 +85,9 @@ export default {
       isMobileMenu: state => state.ui.isMobileMenu,
       isSearchPanelVisible: state => state.ui.searchpanel
     }),
+    additionalTopNavigationItems () {
+      return this.$store.getters['ui/additionalTopNavigationItems'];
+    },
     isActive () {
       return (icon) => {
         switch (icon) {
@@ -166,13 +182,27 @@ export default {
     }
   }
 
-  ::v-deep .sf-bottom-navigation {
+ ._bottom-navigation {
+    --bottom-navigation-z-index: 12;
+
     top: auto;
     bottom: auto;
-    --bottom-navigation-z-index: 11;
     align-items: center;
     justify-content: space-between;
+  }
 
+  &.-additional-navigation {
+    ._bottom-navigation {
+      --bottom-navigation-box-shadow: none;
+    }
+  }
+
+  ._additional-navigation {
+    z-index: 11;
+    box-shadow: 0px 2px 10px rgba(var(--c-dark-base), 0.15);
+  }
+
+  ::v-deep .sf-bottom-navigation {
     .sf-bottom-navigation-item {
       cursor: pointer;
     }
