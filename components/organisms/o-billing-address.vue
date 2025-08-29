@@ -155,24 +155,24 @@
           @blur="$v.payment.zipCode.$touch()"
         />
         <SfInput
-          v-model.trim="payment.phoneNumber"
+          v-model="localPhoneNumber"
           :required="isPhoneNumberRequired"
-          :valid="!$v.payment.phoneNumber.$error"
+          :valid="!$v.localPhoneNumber.$error"
           :error-message="
-            !$v.payment.phoneNumber || !$v.payment.phoneNumber.required
+            !$v.localPhoneNumber || !$v.localPhoneNumber.required
               ? $t('Field is required')
               : $t('Please, enter valid phone number')
           "
           class="form__element"
           :class="{
-            [vuelidateErrorClassName]: $v.payment.phoneNumber.$error,
+            [vuelidateErrorClassName]: $v.localPhoneNumber.$error,
             'form__element--half': showVatIdField
           }"
           name="phone"
           autocomplete="tel"
           :label="$t('Phone number')"
           :disabled="isFormFieldsDisabled"
-          @blur="$v.payment.phoneNumber.$touch()"
+          @blur="onPhoneNumberBlur"
         />
 
         <SfInput
@@ -238,12 +238,14 @@ import {
   METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
 } from 'src/modules/vsf-amazon-pay/index';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
-import { stateCodeAutocompleteOptionSearch } from 'src/modules/shared';
+import { stateCodeAutocompleteOptionSearch, createPhoneHelpers } from 'src/modules/shared';
+
+import { parsePhoneNumber } from 'libphonenumber-js';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
-const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/);
 const unitedStatesCountryCode = 'US';
+const phoneHelpers = createPhoneHelpers(parsePhoneNumber);
 
 export default {
   name: 'OBillingAddress',
@@ -286,23 +288,26 @@ export default {
       city: {
         required,
         unicodeAlpha
-      },
-      phoneNumber: {
-        required: requiredIf(function () { return this.isPhoneNumberRequired }),
-        phoneValidator
       }
     };
 
     return {
       payment: {
         ...rules
+      },
+      localPhoneNumber: {
+        required: requiredIf(function () { return this.isPhoneNumberRequired }),
+        phoneValid: function (value) {
+          return !value || phoneHelpers.isValidPhoneNumber(value, this.payment.country || unitedStatesCountryCode)
+        }
       }
     };
   },
   data: () => {
     return {
       states: States,
-      vuelidateErrorClassName
+      vuelidateErrorClassName,
+      localPhoneNumber: ''
     };
   },
   computed: {
@@ -447,7 +452,20 @@ export default {
     },
     validateCountryRelatedFields () {
       this.$v.payment.region_id.$touch();
-      this.$v.payment.phoneNumber.$touch();
+      this.$v.localPhoneNumber.$touch();
+    },
+    onPhoneNumberBlur () {
+      this.$v.localPhoneNumber.$touch();
+
+      if (!this.localPhoneNumber || !this.payment.country) {
+        return;
+      }
+
+      const formattedNumber = phoneHelpers.formatPhoneNumberToE164(this.localPhoneNumber, this.payment.country);
+
+      if (formattedNumber) {
+        this.payment.phoneNumber = formattedNumber;
+      }
     },
     fillLastUsedCustomerData () {
       const customerFirstName = this.$store
@@ -471,6 +489,12 @@ export default {
     }
   },
   watch: {
+    'payment.phoneNumber': {
+      handler (value) {
+        this.localPhoneNumber = phoneHelpers.formatPhoneNumberForDisplay(value, this.payment.country);
+      },
+      immediate: true
+    },
     getPaymentCountry (after, before) {
       if (after && before !== after) {
         this.changeCountry();

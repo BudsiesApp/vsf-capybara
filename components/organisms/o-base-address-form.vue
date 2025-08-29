@@ -165,7 +165,7 @@
       slim
     >
       <SfInput
-        v-model="phoneNumber"
+        v-model="localPhoneNumber"
         :required="isPhoneNumberRequired"
         :valid="!errors.length"
         :error-message="errors[0]"
@@ -175,6 +175,7 @@
         autocomplete="tel"
         :label="$t('Phone number')"
         :disabled="isFormFieldsDisabled"
+        @blur="onPhoneNumberBlur"
       />
     </validation-provider>
 
@@ -203,8 +204,9 @@ import { extend, ValidationProvider } from 'vee-validate';
 import { min, regex, required } from 'vee-validate/dist/rules';
 import Vue, { PropType } from 'vue';
 import { SfInput } from '@storefront-ui/vue';
+import { parsePhoneNumber } from 'libphonenumber-js';
 
-import { stateCodeAutocompleteOptionSearch } from 'src/modules/shared';
+import { stateCodeAutocompleteOptionSearch, createPhoneHelpers } from 'src/modules/shared';
 import { BaseAddressFormValue } from 'theme/components/interfaces/base-address-form-value.interface';
 
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
@@ -212,8 +214,8 @@ import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
 const Countries = require('@vue-storefront/i18n/resource/countries.json');
 const States = require('@vue-storefront/i18n/resource/states.json');
 
-const phoneValidationRegex = /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/;
 const unitedStatesCountryCode = 'US';
+const phoneHelpers = createPhoneHelpers(parsePhoneNumber);
 
 extend('required', {
   ...required,
@@ -223,8 +225,11 @@ extend('min', {
   ...min,
   message: 'Field must have at least {length} characters'
 });
-extend('regex', {
-  ...regex,
+extend('phone', {
+  params: ['country'],
+  validate (value, { country }: Record<string, any>) {
+    return phoneHelpers.isValidPhoneNumber(value, country);
+  },
   message: 'Please, enter valid phone number'
 });
 
@@ -249,14 +254,15 @@ export default Vue.extend({
     return {
       states: States,
       fZipCodeChanged: false,
-      countries: Countries
+      countries: Countries,
+      localPhoneNumber: ''
     }
   },
   computed: {
     isPhoneNumberRequired (): boolean {
       return !!this.country && this.country !== unitedStatesCountryCode;
     },
-    isSelectedCountryHasStates () {
+    isSelectedCountryHasStates (): boolean {
       if (!this.value.country || !this.states) {
         return false;
       }
@@ -266,7 +272,7 @@ export default Vue.extend({
     phoneValidationRules (): any {
       return {
         required: this.isPhoneNumberRequired,
-        regex: phoneValidationRegex
+        phone: { country: this.country }
       }
     },
     city: {
@@ -371,6 +377,17 @@ export default Vue.extend({
   },
   methods: {
     stateCodeAutocompleteOptionSearch,
+    onPhoneNumberBlur (): void {
+      if (!this.localPhoneNumber || !this.country) {
+        return;
+      }
+
+      const formattedNumber = phoneHelpers.formatPhoneNumberToE164(this.localPhoneNumber, this.country);
+
+      if (formattedNumber) {
+        this.phoneNumber = formattedNumber;
+      }
+    },
     async onChangeCountry (): Promise<void> {
       await this.$nextTick();
       this.validateCountryRelatedFields();
@@ -410,6 +427,12 @@ export default Vue.extend({
           this.state = null;
           this.regionId = null;
         }
+      },
+      immediate: true
+    },
+    phoneNumber: {
+      handler (value: string) {
+        this.localPhoneNumber = phoneHelpers.formatPhoneNumberForDisplay(value, this.country);
       },
       immediate: true
     },

@@ -136,24 +136,24 @@
       />
 
       <SfInput
-        v-model.trim="shipping.phoneNumber"
+        v-model="localPhoneNumber"
         :required="isPhoneNumberRequired"
-        :valid="!$v.shipping.phoneNumber.$error"
+        :valid="!$v.localPhoneNumber.$error"
         :error-message="
-          !$v.shipping.phoneNumber || !$v.shipping.phoneNumber.required
+          !$v.localPhoneNumber || !$v.localPhoneNumber.required
             ? $t('Field is required')
             : $t('Please, enter valid phone number')
         "
         class="form__element"
         :class="{
-          [vuelidateErrorClassName]: $v.shipping.phoneNumber.$error,
+          [vuelidateErrorClassName]: $v.localPhoneNumber.$error,
           'form__element--half': showVatIdField
         }"
         name="phone"
         autocomplete="tel"
         :label="$t('Phone number')"
         :disabled="isFormFieldsDisabled"
-        @blur="$v.shipping.phoneNumber.$touch()"
+        @blur="onPhoneNumberBlur"
       />
 
       <SfInput
@@ -249,13 +249,15 @@ import {
 } from 'src/modules/vsf-amazon-pay/index';
 import { GET_ACTIVE_CURRENCY, GET_CURRENCY_EXCHANGE_RATE } from 'src/modules/currency';
 import { PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, PERSISTED_CUSTOMER_PHONE_NUMBER, PERSISTED_CUSTOMER_SHIPPING_COUNTRY, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_SHIPPING_COUNTRY } from 'src/modules/persisted-customer-data';
-import { stateCodeAutocompleteOptionSearch, PriceHelper } from 'src/modules/shared';
+import { stateCodeAutocompleteOptionSearch, PriceHelper, createPhoneHelpers } from 'src/modules/shared';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
+
+import { parsePhoneNumber } from 'libphonenumber-js';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
-const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/);
 const unitedStatesCountryCode = 'US';
+const phoneHelpers = createPhoneHelpers(parsePhoneNumber);
 
 export default {
   name: 'OShipping',
@@ -297,18 +299,22 @@ export default {
       city: {
         required,
         unicodeAlpha
-      },
-      phoneNumber: {
-        required: requiredIf(function () { return this.isPhoneNumberRequired }),
-        phoneValidator
+      }
+    },
+    localPhoneNumber: {
+      required: requiredIf(function () { return this.isPhoneNumberRequired }),
+      phoneValid: function (value) {
+        return !value || phoneHelpers.isValidPhoneNumber(value, this.shipping.country || unitedStatesCountryCode)
       }
     }
+
   },
   data: () => {
     return {
       states: States,
       fZipCodeChanged: false,
-      vuelidateErrorClassName
+      vuelidateErrorClassName,
+      localPhoneNumber: ''
     };
   },
   computed: {
@@ -448,7 +454,7 @@ export default {
     },
     validateCountryRelatedFields () {
       this.$v.shipping.region_id.$touch();
-      this.$v.shipping.phoneNumber.$touch();
+      this.$v.localPhoneNumber.$touch();
     },
     fillLastUsedCustomerData () {
       const customerFirstName = this.$store
@@ -476,6 +482,19 @@ export default {
         this.shipping.country = customerShippingCountry;
       }
     },
+    onPhoneNumberBlur () {
+      this.$v.localPhoneNumber.$touch();
+
+      if (!this.localPhoneNumber || !this.shipping.country) {
+        return;
+      }
+
+      const formattedNumber = phoneHelpers.formatPhoneNumberToE164(this.localPhoneNumber, this.shipping.country);
+
+      if (formattedNumber) {
+        this.shipping.phoneNumber = formattedNumber;
+      }
+    },
     formatPrice (price) {
       price = price * this.currencyExchangeRate;
 
@@ -492,6 +511,12 @@ export default {
     EventBus.$off('user-after-loggedin', this.fillLastUsedCustomerData);
   },
   watch: {
+    'shipping.phoneNumber': {
+      handler (value) {
+        this.localPhoneNumber = phoneHelpers.formatPhoneNumberForDisplay(value, this.country);
+      },
+      immediate: true
+    },
     getZipCode: {
       handler () {
         this.fZipCodeChanged = true;
