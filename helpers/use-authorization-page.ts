@@ -32,13 +32,13 @@ export function useAuthorizationPage (
 
   onBeforeMount(async () => {
     if (isUserLoggedIn.value) {
-      return root.$router.push(redirectTarget.value);
+      return root.$router.replace(redirectTarget.value);
     }
   });
 
   watch(isUserLoggedIn, (isLoggedIn) => {
     if (isLoggedIn) {
-      root.$router.push(redirectTarget.value);
+      root.$router.replace(redirectTarget.value);
     }
   });
 
