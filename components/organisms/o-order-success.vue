@@ -213,7 +213,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
     };
   },
   destroyed () {
-    this.$store.dispatch(CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION, undefined);
+    this.$store.commit(CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION, undefined);
   }
 })
 </script>

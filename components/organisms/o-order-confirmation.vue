@@ -130,7 +130,7 @@ export default {
     createSmoothscroll(document.documentElement.scrollTop || document.body.scrollTop, 0);
   },
   destroyed () {
-    this.$store.dispatch(CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION, undefined);
+    this.$store.commit(CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION, undefined);
   },
   methods: {
     requestNotificationPermission () {
