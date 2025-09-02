@@ -94,6 +94,7 @@ import { isServer } from '@vue-storefront/core/helpers';
 import { registerModule } from '@vue-storefront/core/lib/modules';
 import { MailerModule } from '@vue-storefront/core/modules/mailer';
 import { SfHeading, SfButton } from '@storefront-ui/vue';
+import { CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION } from '@vue-storefront/core/modules/checkout';
 import { createSmoothscroll } from 'theme/helpers';
 
 export default {
@@ -129,7 +130,7 @@ export default {
     createSmoothscroll(document.documentElement.scrollTop || document.body.scrollTop, 0);
   },
   destroyed () {
-    this.$store.dispatch('checkout/setThankYouPage', false);
+    this.$store.commit(CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION, undefined);
   },
   methods: {
     requestNotificationPermission () {

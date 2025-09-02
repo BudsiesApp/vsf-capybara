@@ -133,6 +133,7 @@
 import Vue, { PropType, VueConstructor } from 'vue'
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 
+import { CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION } from '@vue-storefront/core/modules/checkout';
 import { Order } from 'core/modules/order/types/Order';
 import { InjectType } from 'src/modules/shared';
 
@@ -204,7 +205,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
     };
   },
   destroyed () {
-    this.$store.dispatch('checkout/setThankYouPage', false);
+    this.$store.commit(CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION, undefined);
   }
 })
 </script>
