@@ -113,9 +113,10 @@ import config from 'config';
 import Vue, { VueConstructor } from 'vue'
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 
-import MSocialSharing from 'theme/components/molecules/m-social-sharing.vue';
-
+import { CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION } from '@vue-storefront/core/modules/checkout';
 import { InjectType } from 'src/modules/shared';
+
+import MSocialSharing from 'theme/components/molecules/m-social-sharing.vue';
 
 interface BrandItem {
   link: string,
@@ -186,7 +187,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
     ]
   },
   destroyed () {
-    this.$store.dispatch('checkout/setThankYouPage', false);
+    this.$store.commit(CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION, undefined);
   }
 })
 </script>

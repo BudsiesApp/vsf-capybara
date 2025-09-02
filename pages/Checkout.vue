@@ -1,6 +1,6 @@
 <template>
   <div id="checkout">
-    <div v-if="!showThankYouPage" class="checkout">
+    <div v-if="!showSuccessOrderPage" class="checkout">
       <div class="checkout__main">
         <SfSteps
           :active="currentStep"
@@ -114,8 +114,8 @@ export default {
     isSuccess () {
       return this.success === successParamValue;
     },
-    showThankYouPage () {
-      return this.isThankYouPage && this.isSuccess;
+    showSuccessOrderPage () {
+      return this.successOrderData && this.isSuccess;
     },
     availableSteps () {
       if (this.isVirtualCart) {
@@ -140,7 +140,7 @@ export default {
   },
   methods: {
     activateHashSection () {
-      if (!this.showThankYouPage) {
+      if (!this.showSuccessOrderPage) {
         Checkout.methods.activateHashSection.bind(this)();
       }
     },
@@ -207,7 +207,7 @@ export default {
     }
   },
   watch: {
-    showThankYouPage (value) {
+    showSuccessOrderPage (value) {
       if (!value && !this.productsInCart.length) {
         this.$router.push({ name: 'detailed-cart' });
       }
@@ -217,8 +217,8 @@ export default {
     const storeName = currentStoreView().name;
 
     return {
-      title: htmlDecode(this.showThankYouPage ? this.$t('Thank You - You\'ve Ordered a Custom {storeName} Plushie', { storeName }) : this.$t('Checkout')),
-      description: this.showThankYouPage ? [{ vmid: 'description', name: 'description', content: htmlDecode(this.$t('Thank you for ordering a custom {storeName} toy', { storeName })) }] : []
+      title: htmlDecode(this.showSuccessOrderPage ? this.$t('Thank You - You\'ve Ordered a Custom {storeName} Plushie', { storeName }) : this.$t('Checkout')),
+      description: this.showSuccessOrderPage ? [{ vmid: 'description', name: 'description', content: htmlDecode(this.$t('Thank you for ordering a custom {storeName} toy', { storeName })) }] : []
     };
   }
 };

@@ -16,6 +16,8 @@
         </template>
       </APromoCode>
 
+      <ExpressCheckoutButtons class="_express-checkout" />
+
       <SfButton
         class="sf-button--full-width actions__button _checkout-button color-secondary"
         @click="goToCheckout"
@@ -33,14 +35,19 @@ import {
   SfButton
 } from '@storefront-ui/vue';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
+import { mapActions } from 'vuex'
+
+import { registerModule } from '@vue-storefront/core/lib/modules'
+import { Braintree } from 'src/modules/payment-braintree';
 
 import APromoCode from 'theme/components/atoms/a-promo-code.vue';
 import MPriceSummary from 'theme/components/molecules/m-price-summary.vue';
-import { mapActions } from 'vuex'
+import ExpressCheckoutButtons from 'src/modules/payment-braintree/components/express-checkout-buttons.vue';
 
 export default {
   name: 'OrderSummary',
   components: {
+    ExpressCheckoutButtons,
     MPriceSummary,
     SfLoader,
     APromoCode,
@@ -52,6 +59,9 @@ export default {
       type: Boolean,
       required: true
     }
+  },
+  beforeMount () {
+    registerModule(Braintree)
   },
   methods: {
     ...mapActions('ui', {
@@ -88,8 +98,14 @@ export default {
       font-size: var(--font-base);
     }
   }
+
   .actions {
     margin-top: var(--spacer-lg);
+
+    ._express-checkout {
+      margin-top: var(--spacer-sm);
+    }
+
     &__button {
       margin: var(--spacer-sm) 0;
       &--secondary {
