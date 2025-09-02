@@ -76,9 +76,9 @@ export function useBackendProductId (productId: Ref<string | number>) {
       case ProductId.PETSIES_HUGGABLES:
         return ProductValue.PETSIES_HUGGABLES;
       case ProductId.TEACHERS_BUDSIE:
-        return ProductValue.TEACHERS_BUDSIE;
+        return ProductValue.BUDSIE;
       case ProductId.TEACHERS_SELFIE:
-        return ProductValue.TEACHERS_SELFIE;
+        return ProductValue.SELFIE;
       default:
         throw new Error(
           `Can't resolve Backend product ID for Magento '${productId.value}' product ID`
