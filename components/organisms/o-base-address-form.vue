@@ -82,6 +82,7 @@
 
     <SfInput
       v-if="!isSelectedCountryHasStates"
+      key="state"
       v-model="state"
       class="form__element form__element--half"
       name="address-level1"
@@ -92,6 +93,7 @@
 
     <div
       class="form__element form__element--half form__select"
+      key="stateMultiselect"
       v-else
     >
       <validation-provider
@@ -165,7 +167,7 @@
       slim
     >
       <SfInput
-        v-model="localPhoneNumber"
+        v-model="formattedPhoneNumber"
         :required="isPhoneNumberRequired"
         :valid="!errors.length"
         :error-message="errors[0]"
@@ -182,6 +184,7 @@
     <validation-provider
       v-slot="{ errors }"
       :rules="vatIdValidationRules"
+      key="taxId"
       name="'Tax ID'"
       v-if="showVatIdField"
       tag="div"
@@ -201,10 +204,10 @@
 
 <script lang="ts">
 import { extend, ValidationProvider } from 'vee-validate';
-import { min, regex, required } from 'vee-validate/dist/rules';
+import { min, required } from 'vee-validate/dist/rules';
 import Vue, { PropType } from 'vue';
 import { SfInput } from '@storefront-ui/vue';
-import { parsePhoneNumber } from 'libphonenumber-js';
+import { parsePhoneNumberWithError } from 'libphonenumber-js';
 
 import { stateCodeAutocompleteOptionSearch, createPhoneHelpers } from 'src/modules/shared';
 import { BaseAddressFormValue } from 'theme/components/interfaces/base-address-form-value.interface';
@@ -215,7 +218,7 @@ const Countries = require('@vue-storefront/i18n/resource/countries.json');
 const States = require('@vue-storefront/i18n/resource/states.json');
 
 const unitedStatesCountryCode = 'US';
-const phoneHelpers = createPhoneHelpers(parsePhoneNumber);
+const phoneHelpers = createPhoneHelpers(parsePhoneNumberWithError);
 
 extend('required', {
   ...required,
@@ -255,7 +258,7 @@ export default Vue.extend({
       states: States,
       fZipCodeChanged: false,
       countries: Countries,
-      localPhoneNumber: ''
+      formattedPhoneNumber: ''
     }
   },
   computed: {
@@ -378,14 +381,19 @@ export default Vue.extend({
   methods: {
     stateCodeAutocompleteOptionSearch,
     onPhoneNumberBlur (): void {
-      if (!this.localPhoneNumber || !this.country) {
+      if (!this.formattedPhoneNumber) {
+        this.phoneNumber = '';
         return;
       }
 
-      const formattedNumber = phoneHelpers.formatPhoneNumberToE164(this.localPhoneNumber, this.country);
+      const normalizedNumber = phoneHelpers.formatPhoneNumberToE164(this.formattedPhoneNumber, this.country);
 
-      if (formattedNumber) {
-        this.phoneNumber = formattedNumber;
+      if (normalizedNumber === this.phoneNumber) {
+        this.updateFormattedPhoneNumber(normalizedNumber);
+      }
+
+      if (normalizedNumber) {
+        this.phoneNumber = normalizedNumber;
       }
     },
     async onChangeCountry (): Promise<void> {
@@ -418,6 +426,9 @@ export default Vue.extend({
     },
     updateValueField (field: Record<string, string | number | null>): void {
       this.$emit('input', { ...this.value, ...field });
+    },
+    updateFormattedPhoneNumber (phoneNumber: string): void {
+      this.formattedPhoneNumber = phoneHelpers.formatPhoneNumberForDisplay(phoneNumber, this.country);
     }
   },
   watch: {
@@ -432,7 +443,7 @@ export default Vue.extend({
     },
     phoneNumber: {
       handler (value: string) {
-        this.localPhoneNumber = phoneHelpers.formatPhoneNumberForDisplay(value, this.country);
+        this.updateFormattedPhoneNumber(value);
       },
       immediate: true
     },

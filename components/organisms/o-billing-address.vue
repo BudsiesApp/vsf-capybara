@@ -155,24 +155,24 @@
           @blur="$v.payment.zipCode.$touch()"
         />
         <SfInput
-          v-model="localPhoneNumber"
+          v-model="formattedPhoneNumber"
           :required="isPhoneNumberRequired"
-          :valid="!$v.localPhoneNumber.$error"
+          :valid="!$v.formattedPhoneNumber.$error"
           :error-message="
-            !$v.localPhoneNumber || !$v.localPhoneNumber.required
+            !$v.formattedPhoneNumber || !$v.formattedPhoneNumber.required
               ? $t('Field is required')
               : $t('Please, enter valid phone number')
           "
           class="form__element"
           :class="{
-            [vuelidateErrorClassName]: $v.localPhoneNumber.$error,
+            [vuelidateErrorClassName]: $v.formattedPhoneNumber.$error,
             'form__element--half': showVatIdField
           }"
           name="phone"
           autocomplete="tel"
           :label="$t('Phone number')"
           :disabled="isFormFieldsDisabled"
-          @blur="onPhoneNumberBlur"
+          @blur="updatePhoneNumber"
         />
 
         <SfInput
@@ -240,12 +240,12 @@ import {
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
 import { stateCodeAutocompleteOptionSearch, createPhoneHelpers } from 'src/modules/shared';
 
-import { parsePhoneNumber } from 'libphonenumber-js';
+import { parsePhoneNumberWithError } from 'libphonenumber-js';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
 const unitedStatesCountryCode = 'US';
-const phoneHelpers = createPhoneHelpers(parsePhoneNumber);
+const phoneHelpers = createPhoneHelpers(parsePhoneNumberWithError);
 
 export default {
   name: 'OBillingAddress',
@@ -295,7 +295,7 @@ export default {
       payment: {
         ...rules
       },
-      localPhoneNumber: {
+      formattedPhoneNumber: {
         required: requiredIf(function () { return this.isPhoneNumberRequired }),
         phoneValid: function (value) {
           return !value || phoneHelpers.isValidPhoneNumber(value, this.payment.country || unitedStatesCountryCode)
@@ -307,7 +307,7 @@ export default {
     return {
       states: States,
       vuelidateErrorClassName,
-      localPhoneNumber: ''
+      formattedPhoneNumber: ''
     };
   },
   computed: {
@@ -411,6 +411,7 @@ export default {
       ]);
     },
     async onGoReviewButtonClicked () {
+      this.updatePhoneNumber();
       this.$v.$touch();
 
       if (this.$v.$invalid) {
@@ -452,19 +453,24 @@ export default {
     },
     validateCountryRelatedFields () {
       this.$v.payment.region_id.$touch();
-      this.$v.localPhoneNumber.$touch();
+      this.$v.formattedPhoneNumber.$touch();
     },
-    onPhoneNumberBlur () {
-      this.$v.localPhoneNumber.$touch();
+    updatePhoneNumber () {
+      this.$v.formattedPhoneNumber.$touch();
 
-      if (!this.localPhoneNumber || !this.payment.country) {
+      if (!this.formattedPhoneNumber) {
+        this.payment.phoneNumber = '';
         return;
       }
 
-      const formattedNumber = phoneHelpers.formatPhoneNumberToE164(this.localPhoneNumber, this.payment.country);
+      const normalizedNumber = phoneHelpers.formatPhoneNumberToE164(this.formattedPhoneNumber, this.payment.country);
 
-      if (formattedNumber) {
-        this.payment.phoneNumber = formattedNumber;
+      if (normalizedNumber === this.payment.phoneNumber) {
+        this.updateFormattedPhoneNumber(normalizedNumber);
+      }
+
+      if (normalizedNumber) {
+        this.payment.phoneNumber = normalizedNumber;
       }
     },
     fillLastUsedCustomerData () {
@@ -486,12 +492,15 @@ export default {
       if (customerPhoneNumber && !this.payment.phoneNumber) {
         this.payment.phoneNumber = customerPhoneNumber;
       }
+    },
+    updateFormattedPhoneNumber (phoneNumber) {
+      this.formattedPhoneNumber = phoneHelpers.formatPhoneNumberForDisplay(phoneNumber, this.payment.country);
     }
   },
   watch: {
     'payment.phoneNumber': {
       handler (value) {
-        this.localPhoneNumber = phoneHelpers.formatPhoneNumberForDisplay(value, this.payment.country);
+        this.updateFormattedPhoneNumber(value);
       },
       immediate: true
     },

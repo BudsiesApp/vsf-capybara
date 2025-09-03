@@ -21,12 +21,13 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { parsePhoneNumber } from 'libphonenumber-js';
+import { parsePhoneNumberWithError } from 'libphonenumber-js';
 
+import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import { createPhoneHelpers } from 'src/modules/shared';
 
 const Countries = require('@vue-storefront/i18n/resource/countries.json');
-const phoneHelpers = createPhoneHelpers(parsePhoneNumber);
+const phoneHelpers = createPhoneHelpers(parsePhoneNumberWithError);
 
 export default Vue.extend({
   name: 'MAddressItem',
@@ -55,7 +56,12 @@ export default Vue.extend({
         return phoneNumber;
       }
 
-      return phoneHelpers.formatPhoneNumberForDisplay(phoneNumber, countryId || 'US');
+      const { i18n } = currentStoreView();
+
+      return phoneHelpers.formatPhoneNumberForDisplay(
+        phoneNumber,
+        countryId || i18n.defaultCountry
+      );
     }
   }
 })

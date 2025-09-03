@@ -136,24 +136,24 @@
       />
 
       <SfInput
-        v-model="localPhoneNumber"
+        v-model="formattedPhoneNumber"
         :required="isPhoneNumberRequired"
-        :valid="!$v.localPhoneNumber.$error"
+        :valid="!$v.formattedPhoneNumber.$error"
         :error-message="
-          !$v.localPhoneNumber || !$v.localPhoneNumber.required
+          !$v.formattedPhoneNumber || !$v.formattedPhoneNumber.required
             ? $t('Field is required')
             : $t('Please, enter valid phone number')
         "
         class="form__element"
         :class="{
-          [vuelidateErrorClassName]: $v.localPhoneNumber.$error,
+          [vuelidateErrorClassName]: $v.formattedPhoneNumber.$error,
           'form__element--half': showVatIdField
         }"
         name="phone"
         autocomplete="tel"
         :label="$t('Phone number')"
         :disabled="isFormFieldsDisabled"
-        @blur="onPhoneNumberBlur"
+        @blur="updatePhoneNumber"
       />
 
       <SfInput
@@ -252,12 +252,12 @@ import { PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, PERSISTED_
 import { stateCodeAutocompleteOptionSearch, PriceHelper, createPhoneHelpers } from 'src/modules/shared';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
 
-import { parsePhoneNumber } from 'libphonenumber-js';
+import { parsePhoneNumberWithError } from 'libphonenumber-js';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
 const unitedStatesCountryCode = 'US';
-const phoneHelpers = createPhoneHelpers(parsePhoneNumber);
+const phoneHelpers = createPhoneHelpers(parsePhoneNumberWithError);
 
 export default {
   name: 'OShipping',
@@ -301,7 +301,7 @@ export default {
         unicodeAlpha
       }
     },
-    localPhoneNumber: {
+    formattedPhoneNumber: {
       required: requiredIf(function () { return this.isPhoneNumberRequired }),
       phoneValid: function (value) {
         return !value || phoneHelpers.isValidPhoneNumber(value, this.shipping.country || unitedStatesCountryCode)
@@ -314,7 +314,7 @@ export default {
       states: States,
       fZipCodeChanged: false,
       vuelidateErrorClassName,
-      localPhoneNumber: ''
+      formattedPhoneNumber: ''
     };
   },
   computed: {
@@ -420,6 +420,7 @@ export default {
       this.$bus.$emit('checkout-before-shippingMethods', this.shipping.country)
     },
     async saveDataToCheckout () {
+      this.updatePhoneNumber();
       this.$v.$touch();
 
       if (this.$v.$invalid) {
@@ -454,7 +455,7 @@ export default {
     },
     validateCountryRelatedFields () {
       this.$v.shipping.region_id.$touch();
-      this.$v.localPhoneNumber.$touch();
+      this.$v.formattedPhoneNumber.$touch();
     },
     fillLastUsedCustomerData () {
       const customerFirstName = this.$store
@@ -482,24 +483,33 @@ export default {
         this.shipping.country = customerShippingCountry;
       }
     },
-    onPhoneNumberBlur () {
-      this.$v.localPhoneNumber.$touch();
+    updatePhoneNumber () {
+      this.$v.formattedPhoneNumber.$touch();
 
-      if (!this.localPhoneNumber || !this.shipping.country) {
+      if (!this.formattedPhoneNumber) {
+        this.shipping.phoneNumber = '';
         return;
       }
 
-      const formattedNumber = phoneHelpers.formatPhoneNumberToE164(this.localPhoneNumber, this.shipping.country);
+      const normalizedNumber = phoneHelpers.formatPhoneNumberToE164(this.formattedPhoneNumber, this.shipping.country);
 
-      if (formattedNumber) {
-        this.shipping.phoneNumber = formattedNumber;
+      if (normalizedNumber === this.shipping.phoneNumber) {
+        this.updateFormattedPhoneNumber(normalizedNumber);
+      }
+
+      if (normalizedNumber) {
+        this.shipping.phoneNumber = normalizedNumber;
       }
     },
     formatPrice (price) {
       price = price * this.currencyExchangeRate;
 
       return PriceHelper.formatPrice(price, this.selectedCurrency.symbol);
+    },
+    updateFormattedPhoneNumber (phoneNumber) {
+      this.formattedPhoneNumber = phoneHelpers.formatPhoneNumberForDisplay(phoneNumber, this.shipping.country);
     }
+
   },
   mounted () {
     createSmoothscroll(document.documentElement.scrollTop || document.body.scrollTop, 0);
@@ -513,7 +523,7 @@ export default {
   watch: {
     'shipping.phoneNumber': {
       handler (value) {
-        this.localPhoneNumber = phoneHelpers.formatPhoneNumberForDisplay(value, this.country);
+        this.updateFormattedPhoneNumber(value);
       },
       immediate: true
     },

@@ -94,12 +94,14 @@
 <script>
 import { mapGetters } from 'vuex';
 import { SfHeading, SfButton } from '@storefront-ui/vue';
-import { parsePhoneNumber } from 'libphonenumber-js';
+import { parsePhoneNumberWithError } from 'libphonenumber-js';
 
-import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
+import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import { createPhoneHelpers } from 'src/modules/shared';
 
-const phoneHelpers = createPhoneHelpers(parsePhoneNumber);
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
+
+const phoneHelpers = createPhoneHelpers(parsePhoneNumberWithError);
 
 export default {
   name: 'OOrderReview',
@@ -135,12 +137,17 @@ export default {
     }
   },
   methods: {
-    formatPhoneNumber (phoneNumber, country) {
+    formatPhoneNumber (phoneNumber, countryId) {
       if (!phoneNumber) {
         return phoneNumber;
       }
 
-      return phoneHelpers.formatPhoneNumberForDisplay(phoneNumber, country || 'US');
+      const { i18n } = currentStoreView();
+
+      return phoneHelpers.formatPhoneNumberForDisplay(
+        phoneNumber,
+        countryId || i18n.defaultCountry
+      );
     }
   }
 };
