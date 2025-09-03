@@ -227,7 +227,8 @@
   </div>
 </template>
 <script>
-import { required, requiredIf, minLength, helpers } from 'vuelidate/lib/validators';
+import { parsePhoneNumberWithError } from 'libphonenumber-js';
+import { required, requiredIf, minLength } from 'vuelidate/lib/validators';
 import { unicodeAlpha, unicodeAlphaNum } from '@vue-storefront/core/helpers/validators';
 import {
   SfInput,
@@ -251,8 +252,6 @@ import { GET_ACTIVE_CURRENCY, GET_CURRENCY_EXCHANGE_RATE } from 'src/modules/cur
 import { PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, PERSISTED_CUSTOMER_PHONE_NUMBER, PERSISTED_CUSTOMER_SHIPPING_COUNTRY, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_SHIPPING_COUNTRY } from 'src/modules/persisted-customer-data';
 import { stateCodeAutocompleteOptionSearch, PriceHelper, createPhoneHelpers } from 'src/modules/shared';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
-
-import { parsePhoneNumberWithError } from 'libphonenumber-js';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 

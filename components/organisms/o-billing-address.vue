@@ -215,7 +215,8 @@
   </div>
 </template>
 <script>
-import { required, requiredIf, minLength, helpers } from 'vuelidate/lib/validators';
+import { parsePhoneNumberWithError } from 'libphonenumber-js';
+import { required, requiredIf, minLength } from 'vuelidate/lib/validators';
 import { mapGetters } from 'vuex';
 import {
   unicodeAlpha,
@@ -239,8 +240,6 @@ import {
 } from 'src/modules/vsf-amazon-pay/index';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
 import { stateCodeAutocompleteOptionSearch, createPhoneHelpers } from 'src/modules/shared';
-
-import { parsePhoneNumberWithError } from 'libphonenumber-js';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
