@@ -48,7 +48,7 @@
         :error-message="
           !$v.personalDetails.emailAddress.required
             ? $t('Field is required')
-            : $t('Please provide valid e-mail address.')
+            : $t('Please, provide the correct email address')
         "
         @blur="$v.personalDetails.emailAddress.$touch()"
       />

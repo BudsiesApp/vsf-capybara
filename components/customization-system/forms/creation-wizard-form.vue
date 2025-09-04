@@ -87,7 +87,7 @@
                 :product-type="plushieType"
                 :submit-button-text="submitButtonText"
                 :quantity.sync="quantity"
-                :locked-customizations="lockedCustomizations"
+                :locked-customizations="selectedLockedCustomizations"
                 :show-quantity="!isCustomizeFlow"
                 @input="onCustomizationOptionInput"
                 @customization-option-busy-state-changed="
@@ -314,7 +314,7 @@ export default defineComponent({
     }
 
     const {
-      lockedCustomizations,
+      selectedLockedCustomizations,
       customizationsFilter: lockedCustomizationsFilter,
       optionValuesFilter: lockedOptionValuesFilter
     } = useLockedCustomizations(
@@ -569,7 +569,7 @@ export default defineComponent({
       quantity,
       validationObserver,
       isCustomizeFlow,
-      lockedCustomizations,
+      selectedLockedCustomizations,
       showProductTypeChooseStep
     };
   }
