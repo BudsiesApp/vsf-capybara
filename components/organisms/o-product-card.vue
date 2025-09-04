@@ -30,12 +30,22 @@
           </span>
         </h3>
       </template>
+
+      <template #badge v-if="product.discount">
+        <SfBadge class="sf-product-card__badge _discount-badge">
+          <span class="_value">
+            {{ product.discount }}
+          </span>
+
+          {{ $t('Off') }}
+        </SfBadge>
+      </template>
     </SfProductCard>
   </div>
 </template>
 
 <script lang="ts">
-import { SfProductCard } from '@storefront-ui/vue';
+import { SfBadge, SfProductCard } from '@storefront-ui/vue';
 
 import BaseImage from 'src/modules/budsies/components/BaseImage.vue';
 
@@ -43,6 +53,7 @@ export default {
   name: 'OProductCard',
   components: {
     BaseImage,
+    SfBadge,
     SfProductCard
   },
   props: {
@@ -107,6 +118,7 @@ $border-width: 2px;
   --badge-font-weight: 800;
   --badge-background: var(--c-white);
   --badge-font-size: var(--font-sm);
+  --badge-font-line-height: 1.1;
 
   ._turnaround-time {
     font-size: var(--font-xs);
@@ -115,9 +127,11 @@ $border-width: 2px;
     display: inline-block;
   }
 
-  ::v-deep .sf-badge {
+  ._discount-badge {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     color: var(--c-accent);
-    line-height: calc(var(--o-product-card-badge-size) - #{$border-width} * 2);
     pointer-events: none;
   }
 
