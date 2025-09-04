@@ -19,7 +19,7 @@ const DEFAULT_COUNTRY = COUNTRY_WITH_STATES_LIST;
 const DEFAULT_STATE = COUNTRY_WITH_STATES_DEFAULT_STATE;
 const DEFAULT_CITY = 'Test City';
 const DEFAULT_ZIP_CODE = '12345';
-const DEFAULT_PHONE = '1234567890';
+const DEFAULT_PHONE = '+17472920712';
 
 export interface AddressData {
   firstName: string,
