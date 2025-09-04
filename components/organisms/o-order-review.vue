@@ -59,7 +59,7 @@
       </p>
 
       <p class="content" v-if="shippingDetails.phoneNumber">
-        {{ shippingDetails.phoneNumber }}
+        {{ formatPhoneNumber(shippingDetails.phoneNumber, shippingDetails.country) }}
       </p>
     </div>
 
@@ -85,8 +85,8 @@
         {{ paymentDetails.city }}, {{ paymentDetails.country }}
       </p>
 
-      <p class="content" v-if="shippingDetails.phoneNumber">
-        {{ paymentDetails.phoneNumber }}
+      <p class="content" v-if="paymentDetails.phoneNumber">
+        {{ formatPhoneNumber(paymentDetails.phoneNumber, paymentDetails.country) }}
       </p>
     </div>
   </div>
@@ -94,8 +94,14 @@
 <script>
 import { mapGetters } from 'vuex';
 import { SfHeading, SfButton } from '@storefront-ui/vue';
+import { parsePhoneNumberWithError } from 'libphonenumber-js';
+
+import { currentStoreView } from '@vue-storefront/core/lib/multistore';
+import { createPhoneHelpers } from 'src/modules/shared';
 
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
+
+const phoneHelpers = createPhoneHelpers(parsePhoneNumberWithError);
 
 export default {
   name: 'OOrderReview',
@@ -128,6 +134,20 @@ export default {
     },
     skinClass () {
       return getCurrentThemeClass();
+    }
+  },
+  methods: {
+    formatPhoneNumber (phoneNumber, countryId) {
+      if (!phoneNumber) {
+        return phoneNumber;
+      }
+
+      const { i18n } = currentStoreView();
+
+      return phoneHelpers.formatPhoneNumberForDisplay(
+        phoneNumber,
+        countryId || i18n.defaultCountry
+      );
     }
   }
 };

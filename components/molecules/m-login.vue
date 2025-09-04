@@ -109,7 +109,7 @@ import {
   Ref
 } from '@vue/composition-api';
 import { extend, ValidationProvider, ValidationObserver } from 'vee-validate';
-import { required } from 'vee-validate/dist/rules';
+import { required, email } from 'vee-validate/dist/rules';
 import { SfInput, SfButton } from '@storefront-ui/vue';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
@@ -119,6 +119,10 @@ import Task from 'core/lib/sync/types/Task';
 extend('required', {
   ...required,
   message: 'Field is required'
+});
+extend('email', {
+  ...email,
+  message: 'Please, provide the correct email address'
 });
 
 function useRateLimit ({ root }: SetupContext) {

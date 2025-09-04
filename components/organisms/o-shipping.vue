@@ -136,24 +136,24 @@
       />
 
       <SfInput
-        v-model.trim="shipping.phoneNumber"
+        v-model="formattedPhoneNumber"
         :required="true"
-        :valid="!$v.shipping.phoneNumber.$error"
+        :valid="!$v.formattedPhoneNumber.$error"
         :error-message="
-          !$v.shipping.phoneNumber || !$v.shipping.phoneNumber.required
+          !$v.formattedPhoneNumber || !$v.formattedPhoneNumber.required
             ? $t('Field is required')
             : $t('Please, enter valid phone number')
         "
         class="form__element"
         :class="{
-          [vuelidateErrorClassName]: $v.shipping.phoneNumber.$error,
+          [vuelidateErrorClassName]: $v.formattedPhoneNumber.$error,
           'form__element--half': showVatIdField
         }"
         name="phone"
         autocomplete="tel"
         :label="$t('Phone number')"
         :disabled="isFormFieldsDisabled"
-        @blur="$v.shipping.phoneNumber.$touch()"
+        @blur="updatePhoneNumber"
       />
 
       <SfInput
@@ -227,7 +227,8 @@
   </div>
 </template>
 <script>
-import { required, requiredIf, minLength, helpers } from 'vuelidate/lib/validators';
+import { parsePhoneNumberWithError } from 'libphonenumber-js';
+import { required, requiredIf, minLength } from 'vuelidate/lib/validators';
 import { unicodeAlpha, unicodeAlphaNum } from '@vue-storefront/core/helpers/validators';
 import {
   SfInput,
@@ -249,13 +250,13 @@ import {
 } from 'src/modules/vsf-amazon-pay/index';
 import { GET_ACTIVE_CURRENCY, GET_CURRENCY_EXCHANGE_RATE } from 'src/modules/currency';
 import { PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, PERSISTED_CUSTOMER_PHONE_NUMBER, PERSISTED_CUSTOMER_SHIPPING_COUNTRY, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_SHIPPING_COUNTRY } from 'src/modules/persisted-customer-data';
-import { stateCodeAutocompleteOptionSearch, PriceHelper } from 'src/modules/shared';
+import { stateCodeAutocompleteOptionSearch, PriceHelper, createPhoneHelpers } from 'src/modules/shared';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
-const phoneValidator = helpers.regex('phone', /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/);
 const unitedStatesCountryCode = 'US';
+const phoneHelpers = createPhoneHelpers(parsePhoneNumberWithError);
 
 export default {
   name: 'OShipping',
@@ -297,18 +298,22 @@ export default {
       city: {
         required,
         unicodeAlpha
-      },
-      phoneNumber: {
-        required,
-        phoneValidator
+      }
+    },
+    formattedPhoneNumber: {
+      required,
+      phoneValid: function (value) {
+        return !value || phoneHelpers.isValidPhoneNumber(value, this.shipping.country || unitedStatesCountryCode)
       }
     }
+
   },
   data: () => {
     return {
       states: States,
       fZipCodeChanged: false,
-      vuelidateErrorClassName
+      vuelidateErrorClassName,
+      formattedPhoneNumber: ''
     };
   },
   computed: {
@@ -411,6 +416,7 @@ export default {
       this.$bus.$emit('checkout-before-shippingMethods', this.shipping.country)
     },
     async saveDataToCheckout () {
+      this.updatePhoneNumber();
       this.$v.$touch();
 
       if (this.$v.$invalid) {
@@ -445,7 +451,7 @@ export default {
     },
     validateCountryRelatedFields () {
       this.$v.shipping.region_id.$touch();
-      this.$v.shipping.phoneNumber.$touch();
+      this.$v.formattedPhoneNumber.$touch();
     },
     fillLastUsedCustomerData () {
       const customerFirstName = this.$store
@@ -473,11 +479,33 @@ export default {
         this.shipping.country = customerShippingCountry;
       }
     },
+    updatePhoneNumber () {
+      this.$v.formattedPhoneNumber.$touch();
+
+      if (!this.formattedPhoneNumber) {
+        this.shipping.phoneNumber = '';
+        return;
+      }
+
+      const normalizedNumber = phoneHelpers.formatPhoneNumberToE164(this.formattedPhoneNumber, this.shipping.country);
+
+      if (normalizedNumber === this.shipping.phoneNumber) {
+        this.updateFormattedPhoneNumber(normalizedNumber);
+      }
+
+      if (normalizedNumber) {
+        this.shipping.phoneNumber = normalizedNumber;
+      }
+    },
     formatPrice (price) {
       price = price * this.currencyExchangeRate;
 
       return PriceHelper.formatPrice(price, this.selectedCurrency.symbol);
+    },
+    updateFormattedPhoneNumber (phoneNumber) {
+      this.formattedPhoneNumber = phoneHelpers.formatPhoneNumberForDisplay(phoneNumber, this.shipping.country);
     }
+
   },
   mounted () {
     createSmoothscroll(document.documentElement.scrollTop || document.body.scrollTop, 0);
@@ -489,6 +517,12 @@ export default {
     EventBus.$off('user-after-loggedin', this.fillLastUsedCustomerData);
   },
   watch: {
+    'shipping.phoneNumber': {
+      handler (value) {
+        this.updateFormattedPhoneNumber(value);
+      },
+      immediate: true
+    },
     getZipCode: {
       handler () {
         this.fZipCodeChanged = true;

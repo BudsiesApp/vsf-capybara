@@ -23,7 +23,7 @@ const fedexAvailableAddress: AddressData = {
   regionId: null,
   city: 'Buenos Aires',
   zipCode: 'C1420',
-  phoneNumber: '1111111111'
+  phoneNumber: '+548752887012'
 };
 
 const USPS_SHIPPING_COUNTRY_CODE = 'US';
@@ -40,7 +40,7 @@ const uspsAvailableAddress: AddressData = {
   regionId: 12,
   city: 'Test city',
   zipCode: '12345',
-  phoneNumber: '2222222222'
+  phoneNumber: '+17472920712'
 };
 
 const billingAddress: AddressData = {
@@ -53,7 +53,7 @@ const billingAddress: AddressData = {
   regionId: 12,
   city: 'Test city',
   zipCode: '12345',
-  phoneNumber: '2222222222'
+  phoneNumber: '+17472920712'
 }
 
 const COUNTRY_WITHOUT_SHIPPING_METHODS = 'Curaçao';
