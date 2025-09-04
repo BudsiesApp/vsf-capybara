@@ -9,7 +9,7 @@
       </p>
 
       <p class="_address">
-        {{ address.telephone }}
+        {{ formatPhoneNumber(address.telephone, address.country_id) }}
       </p>
     </div>
 
@@ -21,8 +21,13 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import { parsePhoneNumberWithError } from 'libphonenumber-js';
 
-const Countries = require('@vue-storefront/i18n/resource/countries.json')
+import { currentStoreView } from '@vue-storefront/core/lib/multistore';
+import { createPhoneHelpers } from 'src/modules/shared';
+
+const Countries = require('@vue-storefront/i18n/resource/countries.json');
+const phoneHelpers = createPhoneHelpers(parsePhoneNumberWithError);
 
 export default Vue.extend({
   name: 'MAddressItem',
@@ -45,6 +50,18 @@ export default Vue.extend({
     getCountryById (id: string): string {
       let countryObject = Countries.filter((country: any) => country.code === id)
       return countryObject.length > 0 ? countryObject[0].name : id
+    },
+    formatPhoneNumber (phoneNumber: string, countryId: string): string {
+      if (!phoneNumber) {
+        return phoneNumber;
+      }
+
+      const { i18n } = currentStoreView();
+
+      return phoneHelpers.formatPhoneNumberForDisplay(
+        phoneNumber,
+        countryId || i18n.defaultCountry
+      );
     }
   }
 })
