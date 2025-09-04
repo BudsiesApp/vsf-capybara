@@ -91,7 +91,7 @@ export class PersonalDetailsStep {
     await this.emailFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
 
     await this.emailFormField.fill('test');
-    await this.emailFormField.expectToHaveErrorMessage('Email is not valid.');
+    await this.emailFormField.expectToHaveErrorMessage('Please, provide the correct email address');
   }
 
   public async waitToBeVisible () {
