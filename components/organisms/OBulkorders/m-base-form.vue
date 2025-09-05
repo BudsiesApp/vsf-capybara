@@ -348,10 +348,11 @@
             :label="$t('Phone Number')"
             :ref="getFieldAnchorName('Phone Number')"
             name="phone-number"
-            v-model="customerPhone"
+            v-model="formattedPhoneNumber"
             class="sf-input--required"
             :valid="!errors.length"
             :error-message="errors[0]"
+            @blur="onPhoneNumberBlur"
           />
         </validation-provider>
       </div>
@@ -423,6 +424,7 @@
 </template>
 
 <script lang="ts">
+import { parsePhoneNumberWithError } from 'libphonenumber-js';
 import { PropType, computed, defineComponent, inject } from '@vue/composition-api';
 import config from 'config';
 import { ValidationProvider, extend } from 'vee-validate';
@@ -437,6 +439,8 @@ import {
 import Product from 'core/modules/catalog/types/Product';
 import { Dictionary, ProductId, ProductValue } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
+import { createPhoneHelpers } from 'src/modules/shared';
+
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 import CustomerType from 'theme/components/interfaces/customer-type.interface';
 
@@ -448,6 +452,8 @@ import MBulkordersCalculationAnimation from './m-calculation-animation.vue';
 import { usePersistedEmail, usePersistedFirstName, usePersistedLastName, usePersistedPhoneNumber, usePersistedShippingCountry } from 'src/modules/persisted-customer-data';
 
 const Countries = require('@vue-storefront/i18n/resource/countries.json');
+
+const phoneHelpers = createPhoneHelpers(parsePhoneNumberWithError);
 
 extend('required', {
   ...required,
@@ -471,16 +477,13 @@ extend('regex', {
   message: 'Please, enter valid phone number'
 });
 
-extend(
-  'max',
-  {
-    ...max,
-    message: 'Maximum length is {length} symbols'
-  }
-);
-
-const phoneValidationRegex = /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/;
-const phoneNumberMaxLength = 30;
+extend('phone', {
+  params: ['country'],
+  validate (value, { country }: Record<string, any>) {
+    return phoneHelpers.isValidPhoneNumber(value, country);
+  },
+  message: 'Please, enter valid phone number'
+});
 
 export default defineComponent({
   name: 'MBaseForm',
@@ -596,7 +599,7 @@ export default defineComponent({
     return {
       countries: Countries,
       showAdditionalQuantity: false,
-      phoneValidationRegex
+      formattedPhoneNumber: ''
     }
   },
   computed: {
@@ -604,10 +607,7 @@ export default defineComponent({
     phoneValidationRules (): any {
       return {
         required: true,
-        regex: phoneValidationRegex,
-        max: {
-          length: phoneNumberMaxLength
-        }
+        phone: { country: this.country }
       }
     },
     agreement: {
@@ -778,10 +778,37 @@ export default defineComponent({
       this.persistLastUsedCustomerLastName(this.customerLastName);
       this.persistLastUsedCustomerPhoneNumber(this.customerPhone);
       this.persistLastUsedCustomerShippingCountry(this.country);
+    },
+    onPhoneNumberBlur (): void {
+      if (!this.formattedPhoneNumber) {
+        this.customerPhone = '';
+        return;
+      }
+
+      const normalizedNumber = phoneHelpers.formatPhoneNumberToE164(this.formattedPhoneNumber, this.country);
+
+      if (normalizedNumber === this.customerPhone) {
+        this.updateFormattedPhoneNumber(normalizedNumber);
+      }
+
+      if (normalizedNumber) {
+        this.customerPhone = normalizedNumber;
+      }
+    },
+    updateFormattedPhoneNumber (phoneNumber: string): void {
+      this.formattedPhoneNumber = phoneHelpers.formatPhoneNumberForDisplay(phoneNumber, this.country);
     }
   },
   beforeDestroy () {
     unMapMobileObserver();
+  },
+  watch: {
+    customerPhone: {
+      handler (value: string) {
+        this.updateFormattedPhoneNumber(value);
+      },
+      immediate: true
+    }
   }
 })
 </script>
