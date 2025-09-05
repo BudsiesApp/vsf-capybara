@@ -15,22 +15,12 @@
 </template>
 
 <script lang="ts">
-import { VueConstructor } from 'vue';
-
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
-import { InjectType } from 'src/modules/shared';
 
 import { ProductReviewData } from './interfaces/product-review-data.interface';
 
-interface InjectedServices {
-  window: Window
-}
-
-export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServices>).extend({
+export default Blok.extend({
   name: 'StoryblokProductReview',
-  inject: {
-    window: { from: 'WindowObject' }
-  } as unknown as InjectType<InjectedServices>,
   computed: {
     itemData (): ProductReviewData {
       return this.item as ProductReviewData;
@@ -38,6 +28,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
   },
   data () {
     return {
+      // false by default to avoid hydration mismatch
       showContainer: false
     }
   },
@@ -46,16 +37,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
   },
   methods: {
     async reloadWidgets (): Promise<void> {
-      await this.$nextTick();
-
-      if (
-        !this.itemData.product_id ||
-        !this.window.fera ||
-        typeof this.window.fera.reloadWidgets !== 'function'
-      ) {
-        return;
-      }
-
       this.showContainer = false;
       await this.$nextTick();
       this.showContainer = true;
