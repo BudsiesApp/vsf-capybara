@@ -29,6 +29,7 @@ import { PersistedCustomerDataModule, SET_PERSISTED_CUSTOMER_EMAIL, SET_PERSISTE
 import { TrueVaultModule } from 'src/modules/true-vault';
 import { OrdersHistoryModule } from 'src/modules/orders-history';
 import { CurrencyModule } from 'src/modules/currency';
+import { FeraModule } from 'src/modules/fera';
 
 import registerStoryblokComponents from 'theme/components/storyblok'
 import { KlaviyoModule, ModuleConfig } from 'src/modules/klaviyo'
@@ -84,6 +85,7 @@ export function registerClientModules () {
   registerModule(PersistedCustomerDataModule)
   registerModule(OrdersHistoryModule)
   registerModule(CurrencyModule)
+  registerModule(FeraModule)
 
   const klaviyoModuleConfig: ModuleConfig = {
     updateEmailMutation: SET_PERSISTED_CUSTOMER_EMAIL,
