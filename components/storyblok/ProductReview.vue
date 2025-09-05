@@ -14,7 +14,7 @@ import { Blok } from 'src/modules/vsf-storyblok-module/components';
 import { ProductReviewData } from './interfaces/product-review-data.interface';
 
 export default Blok.extend({
-  name: 'StoryblokProductBlock',
+  name: 'StoryblokProductReview',
   computed: {
     itemData (): ProductReviewData {
       return this.item as ProductReviewData;
