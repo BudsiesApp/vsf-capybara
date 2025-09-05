@@ -82,6 +82,7 @@
 
     <SfInput
       v-if="!isSelectedCountryHasStates"
+      key="state"
       v-model="state"
       class="form__element form__element--half"
       name="address-level1"
@@ -92,6 +93,7 @@
 
     <div
       class="form__element form__element--half form__select"
+      key="stateMultiselect"
       v-else
     >
       <validation-provider
@@ -165,7 +167,7 @@
       slim
     >
       <SfInput
-        v-model="phoneNumber"
+        v-model="formattedPhoneNumber"
         :required="isPhoneNumberRequired"
         :valid="!errors.length"
         :error-message="errors[0]"
@@ -175,12 +177,14 @@
         autocomplete="tel"
         :label="$t('Phone number')"
         :disabled="isFormFieldsDisabled"
+        @blur="onPhoneNumberBlur"
       />
     </validation-provider>
 
     <validation-provider
       v-slot="{ errors }"
       :rules="vatIdValidationRules"
+      key="taxId"
       name="'Tax ID'"
       v-if="showVatIdField"
       tag="div"
@@ -200,11 +204,12 @@
 
 <script lang="ts">
 import { extend, ValidationProvider } from 'vee-validate';
-import { min, regex, required } from 'vee-validate/dist/rules';
+import { min, required } from 'vee-validate/dist/rules';
 import Vue, { PropType } from 'vue';
 import { SfInput } from '@storefront-ui/vue';
+import { parsePhoneNumberWithError } from 'libphonenumber-js';
 
-import { stateCodeAutocompleteOptionSearch } from 'src/modules/shared';
+import { stateCodeAutocompleteOptionSearch, createPhoneHelpers } from 'src/modules/shared';
 import { BaseAddressFormValue } from 'theme/components/interfaces/base-address-form-value.interface';
 
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
@@ -212,8 +217,8 @@ import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
 const Countries = require('@vue-storefront/i18n/resource/countries.json');
 const States = require('@vue-storefront/i18n/resource/states.json');
 
-const phoneValidationRegex = /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/;
 const unitedStatesCountryCode = 'US';
+const phoneHelpers = createPhoneHelpers(parsePhoneNumberWithError);
 
 extend('required', {
   ...required,
@@ -223,8 +228,11 @@ extend('min', {
   ...min,
   message: 'Field must have at least {length} characters'
 });
-extend('regex', {
-  ...regex,
+extend('phone', {
+  params: ['country'],
+  validate (value, { country }: Record<string, any>) {
+    return phoneHelpers.isValidPhoneNumber(value, country);
+  },
   message: 'Please, enter valid phone number'
 });
 
@@ -249,14 +257,15 @@ export default Vue.extend({
     return {
       states: States,
       fZipCodeChanged: false,
-      countries: Countries
+      countries: Countries,
+      formattedPhoneNumber: ''
     }
   },
   computed: {
     isPhoneNumberRequired (): boolean {
       return !!this.country && this.country !== unitedStatesCountryCode;
     },
-    isSelectedCountryHasStates () {
+    isSelectedCountryHasStates (): boolean {
       if (!this.value.country || !this.states) {
         return false;
       }
@@ -266,7 +275,7 @@ export default Vue.extend({
     phoneValidationRules (): any {
       return {
         required: this.isPhoneNumberRequired,
-        regex: phoneValidationRegex
+        phone: { country: this.country }
       }
     },
     city: {
@@ -371,6 +380,22 @@ export default Vue.extend({
   },
   methods: {
     stateCodeAutocompleteOptionSearch,
+    onPhoneNumberBlur (): void {
+      if (!this.formattedPhoneNumber) {
+        this.phoneNumber = '';
+        return;
+      }
+
+      const normalizedNumber = phoneHelpers.formatPhoneNumberToE164(this.formattedPhoneNumber, this.country);
+
+      if (normalizedNumber === this.phoneNumber) {
+        this.updateFormattedPhoneNumber(normalizedNumber);
+      }
+
+      if (normalizedNumber) {
+        this.phoneNumber = normalizedNumber;
+      }
+    },
     async onChangeCountry (): Promise<void> {
       await this.$nextTick();
       this.validateCountryRelatedFields();
@@ -401,6 +426,9 @@ export default Vue.extend({
     },
     updateValueField (field: Record<string, string | number | null>): void {
       this.$emit('input', { ...this.value, ...field });
+    },
+    updateFormattedPhoneNumber (phoneNumber: string): void {
+      this.formattedPhoneNumber = phoneHelpers.formatPhoneNumberForDisplay(phoneNumber, this.country);
     }
   },
   watch: {
@@ -410,6 +438,12 @@ export default Vue.extend({
           this.state = null;
           this.regionId = null;
         }
+      },
+      immediate: true
+    },
+    phoneNumber: {
+      handler (value: string) {
+        this.updateFormattedPhoneNumber(value);
       },
       immediate: true
     },
