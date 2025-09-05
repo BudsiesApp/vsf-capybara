@@ -184,7 +184,9 @@ import ProductionSpotCountdown from 'src/modules/promotion-platform/components/P
 import { CartItemConfiguration, getCustomizationSystemThumbnail } from 'src/modules/customization-system';
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 import { htmlDecode } from '@vue-storefront/core/filters';
+import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
+import { ModalList } from 'theme/store/ui/modals';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MDropdown from 'theme/components/molecules/m-dropdown.vue';
 
@@ -417,8 +419,12 @@ export default {
     await this.$nextTick();
     this.isMounted = true;
   },
+  beforeMount () {
+    EventBus.$on(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
+  },
   beforeDestroy () {
     this.syncQuantityDebounced.cancel();
+    EventBus.$off(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
   },
   methods: {
     getCartItemOptions,
@@ -577,6 +583,9 @@ export default {
     },
     processStartShopping () {
       this.$router.push(localizedRoute('/'));
+    },
+    onOrderErrorEventHandler (payload) {
+      this.$store.dispatch('ui/openModal', { name: ModalList.OrderError, payload });
     }
   },
   watch: {
