@@ -132,7 +132,7 @@ function useOrderItemsBulkCustomizations (
     } catch (error) {
       // TODO: temporary - current TS version don't handle `value` type right in this case
       (draftOrderItemsByProductSku.value as unknown as Record<string, DraftOrderItem[]>) = {};
-      Logger.error('Failed to load draft order items', 'bulk-customize')();
+      Logger.error(`Failed to load draft order items: ${error}`, 'bulk-customize')();
     } finally {
       isLoading.value = false;
     }

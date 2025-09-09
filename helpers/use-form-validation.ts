@@ -66,7 +66,7 @@ export function useFormValidation (
     return validationObserver.value.validate();
   }
 
-  async function goToFirstError (): Promise<boolean> {
+  async function goToFirstError (): Promise<void> {
     if (!validationObserver.value) {
       throw new Error('Validation observer is not defined');
     }
@@ -74,11 +74,10 @@ export function useFormValidation (
     const fieldName = getNameOfFirstFieldWithError(validationObserver.value.errors);
 
     if (!fieldName) {
-      return true;
+      return;
     }
 
     goToFieldByName(fieldName);
-    return true;
   }
 
   async function validateAndGoToFirstError (): Promise<boolean> {
@@ -90,7 +89,8 @@ export function useFormValidation (
       return true;
     }
 
-    return goToFirstError();
+    goToFirstError();
+    return false;
   }
 
   return {
