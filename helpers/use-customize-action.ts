@@ -25,7 +25,8 @@ export function useCustomizeAction (
       const saveResult = await saveOrderItemCustomizationsState(
         [{
           id: draftOrderItem.value.id,
-          customization_state: customizationStateItems.value
+          customization_state: customizationStateItems.value,
+          status_id: draftOrderItem.value.status_id
         }],
         userToken
       );

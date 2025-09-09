@@ -22,7 +22,7 @@
           :is-disabled="isFormDisabled || item.isCustomized"
           :product="item.product"
           :draft-order-item="item.draftOrderItem"
-          ref="orderItemCustomization"
+          ref="orderItemCustomizationForm"
           :order-item-id="item.id"
           :title="item.title"
           @order-item-customization-busy-state-changed="onEntityBusyChanged"
@@ -56,7 +56,6 @@ import {
   defineComponent,
   ref,
   computed,
-  toRefs,
   SetupContext
 } from '@vue/composition-api';
 import { SfButton, SfDivider, SfHeading } from '@storefront-ui/vue';
@@ -68,6 +67,7 @@ import { OrderItemCustomizationFormData } from 'theme/interfaces/order-item-cust
 
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import OrderItemCustomizationForm from 'theme/components/customization-system/forms/order-item-customization-form.vue';
+import { BudsieStatus } from 'src/modules/shared';
 
 function useOrderItemsBulkCustomizationActions (
   { root }: SetupContext
@@ -100,6 +100,10 @@ function useOrderItemsBulkCustomizationActions (
         spawnError(saveError.errorMessage);
       }
 
+      if (savedOrderItemsIds.length === 0) {
+        return;
+      }
+
       const submitResult = await submitOrderItemCustomizationsState(
         savedOrderItemsIds,
         userToken
@@ -107,6 +111,17 @@ function useOrderItemsBulkCustomizationActions (
 
       for (const submitError of submitResult.errors) {
         spawnError(submitError.errorMessage);
+      }
+
+      if (submitResult.success.length > 0) {
+        root.$store.dispatch('notification/spawnNotification', {
+          type: 'success',
+          message: root.$t(
+            '{count} Order item(s) have been updated successfully',
+            { count: submitResult.success.length }
+          ),
+          action1: { label: root.$t('OK') }
+        });
       }
     } catch (error) {
       spawnError((error as any).message || 'An error occurred while confirming customizations');
@@ -136,6 +151,10 @@ export default defineComponent({
     orderItemsCustomizationFormsData: {
       type: Array as () => OrderItemCustomizationFormData[],
       required: true
+    },
+    isDisabled: {
+      type: Boolean,
+      default: false
     }
   },
   setup (props, context) {
@@ -177,7 +196,7 @@ export default defineComponent({
     const { confirmCustomization, isSubmitting } = useOrderItemsBulkCustomizationActions(context);
 
     const isFormDisabled = computed(() => {
-      return isSubmitting.value;
+      return isSubmitting.value || props.isDisabled;
     });
 
     const isSubmitButtonDisabled = computed(() => {
@@ -216,7 +235,7 @@ export default defineComponent({
 
       const draftOrderItemsDictionary: Record<string, any> = {};
       for (const customization of ((orderItemCustomizationForm as any).value) as unknown as OrderItemCustomizationFormType[]) {
-        if (customization.isCustomizationStateEmpty) {
+        if (customization.isCustomizationStateEmpty || customization.draftOrderItem.status_id !== BudsieStatus.AWAITING_CUSTOMIZATION) {
           continue;
         }
 
@@ -226,7 +245,7 @@ export default defineComponent({
             id: customization.draftOrderItem.id,
             customization_state: customizationState,
             product_sku: customization.draftOrderItem.product_sku,
-            is_customized: customization.draftOrderItem.is_customized
+            is_customized: customization.draftOrderItem.status_id !== BudsieStatus.AWAITING_CUSTOMIZATION
           };
         }
       }
@@ -238,6 +257,8 @@ export default defineComponent({
       await confirmCustomization(
         draftOrderItemsDictionary
       );
+
+      context.emit('confirmed');
     }
 
     return {
@@ -245,7 +266,7 @@ export default defineComponent({
       isFormDisabled,
       isSubmitButtonDisabled,
       goToOrderItem,
-      orderItemCustomization: orderItemCustomizationForm,
+      orderItemCustomizationForm,
       orderItemsErrors,
       onEntityBusyChanged,
       onFormSubmit,
@@ -273,7 +294,7 @@ export default defineComponent({
 
   ._customization {
     margin-top: var(--spacer-base);
-    text-align: left;
+    text-align: center;
   }
 
   ._step-divider {

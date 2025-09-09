@@ -5,7 +5,7 @@
     ref="validationObserver"
   >
     <customization-option
-      v-for="customization in availableCustomizations"
+      v-for="customization in filteredCustomizations"
       class="_customization-option"
       ref="customizationOption"
       :key="customization.id"
@@ -15,7 +15,7 @@
       :product-id="+product.id"
       :value="customizationOptionValue[customization.id]"
       :disable-validation="isCustomizationStateEmpty"
-      :field-name-prefix="draftOrderItem.id"
+      :field-name-prefix="draftOrderItem.id.toString(10)"
       @input="onCustomizationOptionInput"
       @customization-option-busy-state-changed="onEntityBusyChanged"
     />
@@ -39,9 +39,11 @@ import {
   CustomizationOptionValue,
   CustomizationStateItem,
   DraftOrderItem,
+  requiredCustomizationsFilter,
   useAvailableCustomizations,
   useEntityBusyState,
   useCustomizationState,
+  useCustomizationsFilter,
   useOptionValueActions
 } from 'src/modules/customization-system';
 
@@ -143,11 +145,36 @@ export default defineComponent({
         addCustomizationOptionValue
       );
 
+    const { filteredCustomizations } = useCustomizationsFilter(
+      availableCustomizations,
+      customizationAvailableOptionValues,
+      [requiredCustomizationsFilter]
+    );
+
     const { isSomeEntityBusy, onEntityBusyChanged } =
       useEntityBusyState();
 
     const isCustomizationStateEmpty = computed<boolean>(() => {
-      return customizationState.value.length === 0;
+      if (customizationState.value.length === 0) {
+        return true;
+      }
+
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      const _customizationOptionValue: Record<string, CustomizationOptionValue> = (customizationOptionValue as any).value;
+
+      for (const customization of filteredCustomizations.value) {
+        const selectedOptions = _customizationOptionValue[customization.id];
+
+        if (Array.isArray(selectedOptions) && selectedOptions.length > 0) {
+          return false;
+        }
+
+        if (selectedOptions) {
+          return false;
+        }
+      }
+
+      return true;
     });
 
     const isFormHasError = computed<boolean>(() => {
@@ -211,7 +238,7 @@ export default defineComponent({
     );
 
     return {
-      availableCustomizations,
+      filteredCustomizations,
       customizationAvailableOptionValues,
       customizationOption,
       customizationOptionValue,
@@ -229,23 +256,28 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "~@storefront-ui/shared/styles/helpers/breakpoints";
-
 .order-item-customization-form {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   column-gap: var(--spacer-base);
-  justify-content: center;
 
   ._customization-option {
     margin-bottom: var(--spacer-base);
     flex-basis: 100%;
-    flex-grow: 1;
-  }
 
-  @media (min-width: $tablet-min) {
-    ._customization-option {
-      flex-basis: 40%;
+    --customization-option-align-items: center;
+
+    --customization-option-label-align: center;
+
+    --customization-option-description-align: center;
+    --customization-option-hint-align: center;
+
+    margin-top: var(--spacer-base);
+
+    ::v-deep {
+      .cards-list-widget {
+        width: 100%;
+      }
     }
   }
 }

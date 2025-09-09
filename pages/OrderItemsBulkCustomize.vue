@@ -2,11 +2,13 @@
   <div id="order-items-bulk-customize">
     <SfHeading :level="1" :title="$t('Order Items Customize')" />
 
-    <vertical-steps-form-placeholder v-if="isLoading" />
+    <vertical-steps-form-placeholder v-if="isLoading && !showForm" />
 
     <order-items-bulk-customization-form
       v-else-if="showForm"
       :order-items-customization-forms-data="orderItemsCustomizationData"
+      :is-disabled="isLoading"
+      @confirmed="onCustomizationConfirmed"
     />
 
     <div class="_not-found" v-else>
@@ -42,6 +44,7 @@ import { OrderItemCustomizationFormData } from 'theme/interfaces/order-item-cust
 
 import OrderItemsBulkCustomizationForm from 'theme/components/customization-system/forms/order-items-bulk-customization-form.vue';
 import VerticalStepsFormPlaceholder from 'theme/components/customization-system/forms/placeholders/vertical-steps-form-placeholder.vue';
+import { BudsieStatus } from 'src/modules/shared';
 
 function useOrderItemsBulkCustomizations (
   orderItemIds: Ref<string[]>,
@@ -74,7 +77,7 @@ function useOrderItemsBulkCustomizations (
           title: isMultipleItems ? `${product.name} (${index + 1})` : product.name,
           draftOrderItem: item,
           product,
-          isCustomized: !!item.is_customized
+          isCustomized: item.status_id !== BudsieStatus.AWAITING_CUSTOMIZATION
         });
       }
     }
@@ -84,8 +87,6 @@ function useOrderItemsBulkCustomizations (
 
   async function loadData (): Promise<void> {
     isLoading.value = true;
-    // TODO: temporary - current TS version don't handle `value` type right in this case
-    (draftOrderItemsByProductSku.value as unknown as Record<string, DraftOrderItem[]>) = {};
 
     try {
       const draftOrderItems = await fetchOrderItemsCustomizationsStates(orderItemIds.value);
@@ -129,7 +130,8 @@ function useOrderItemsBulkCustomizations (
       // TODO: temporary - current TS version don't handle `value` type right in this case
       (draftOrderItemsByProductSku.value as unknown as Record<string, DraftOrderItem[]>) = _draftOrderItemsByProductSku;
     } catch (error) {
-      console.error(error);
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      (draftOrderItemsByProductSku.value as unknown as Record<string, DraftOrderItem[]>) = {};
       Logger.error('Failed to load draft order items', 'bulk-customize')();
     } finally {
       isLoading.value = false;
@@ -140,6 +142,7 @@ function useOrderItemsBulkCustomizations (
 
   return {
     isLoading,
+    loadData,
     orderItemsCustomizationData
   };
 }
@@ -163,17 +166,28 @@ export default defineComponent({
       return Array.isArray(props.orderItemIds) ? props.orderItemIds : [props.orderItemIds];
     });
 
-    const { isLoading, orderItemsCustomizationData } = useOrderItemsBulkCustomizations(
+    const { isLoading, loadData, orderItemsCustomizationData } = useOrderItemsBulkCustomizations(
       orderItemIds,
       context
     );
 
     const showForm = computed<boolean>(() => {
-      return !isLoading.value && orderItemsCustomizationData.value.length > 0;
+      return orderItemsCustomizationData.value.length > 0;
     });
+
+    async function onCustomizationConfirmed (): Promise<void> {
+      await loadData();
+
+      const allItemsCustomized = orderItemsCustomizationData.value.every((item) => item.isCustomized);
+
+      if (allItemsCustomized) {
+        context.root.$router.replace({ name: 'orders-history' });
+      }
+    }
 
     return {
       isLoading,
+      onCustomizationConfirmed,
       orderItemsCustomizationData,
       showForm
     }
