@@ -224,7 +224,7 @@ export default defineComponent({
         set(
           orderItemsErrors.value,
           errorItem.draftOrderItem.id,
-          [`${errorItem.title} form has error`]
+          [`Please fix the errors in the ${errorItem.title} form`]
         );
       }
 
