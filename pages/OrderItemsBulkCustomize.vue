@@ -1,6 +1,6 @@
 <template>
   <div id="order-items-bulk-customize">
-    <SfHeading :level="1" :title="$t('Order Items Customize')" />
+    <SfHeading :level="1" :title="$t('Customize Your Order Items')" />
 
     <vertical-steps-form-placeholder v-if="isLoading && !showForm" />
 
@@ -193,7 +193,7 @@ export default defineComponent({
     }
   },
   metaInfo () {
-    return { title: 'Order Items Customize' };
+    return { title: 'Customize Your Order Items' };
   }
 });
 </script>
