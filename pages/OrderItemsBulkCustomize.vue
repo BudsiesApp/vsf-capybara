@@ -2,6 +2,26 @@
   <div id="order-items-bulk-customize">
     <SfHeading :level="1" :title="$t('Customize Your Order Items')" />
 
+    <section class="form-hints">
+      <SfHeading :level="3" :title="$t('How drag & drop works')" />
+
+      <div class="_hints-section">
+        <strong>Drop files anywhere on the page (outside the individual upload boxes)</strong>
+        <ul>
+          <li>Images are automatically distributed into the empty upload slots.</li>
+          <li>Each empty uploader receives one image, in order, until there are no more empty uploaders or files.</li>
+        </ul>
+      </div>
+
+      <div class="_hints-section">
+        <strong>Drop files onto a specific uploader box</strong>
+        <ul>
+          <li>All files you drop onto that single box are added to that particular item.</li>
+          <li>Use this when you want multiple images for one product/item.</li>
+        </ul>
+      </div>
+    </section>
+
     <vertical-steps-form-placeholder v-if="isLoading && !showForm" />
 
     <order-items-bulk-customization-form
@@ -201,6 +221,23 @@ export default defineComponent({
 <style lang="scss" scoped>
 #order-items-bulk-customize {
   padding: var(--spacer-lg) var(--spacer-sm) 0;
+
+  .form-hints {
+    max-width: 960px;
+    margin: var(--spacer-base) auto 0;
+
+    ._section-title {
+      text-align: center;
+    }
+
+    ._hints-section {
+      margin-top: var(--spacer-sm);
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+  }
 
   ._not-found {
     margin-top: var(--spacer-xl);
