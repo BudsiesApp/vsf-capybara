@@ -189,6 +189,7 @@ export default defineComponent({
   ._option-label {
     width: 100%;
 
+    display: var(--customization-option-label-display, block);
     font-size: var(--customization-option-label-size, var(--font-base));
     font-weight: var(--customization-option-label-weight, var(--font-bold));
     text-align: var(--customization-option-label-align, left);
@@ -204,6 +205,7 @@ export default defineComponent({
   ._option-description {
     width: 100%;
 
+    display: var(--customization-option-description-display, block);
     font-size: var(--customization-option-description-size, var(--font-sm));
     text-align: var(--customization-option-description-align, left);
     margin: var(
@@ -213,6 +215,7 @@ export default defineComponent({
   }
 
   ._option-hint {
+    display: var(--customization-option-hint-display, block);
     font-size: var(--customization-option-hint-size, var(--font-sm));
     text-align: var(--customization-option-hint-align, left);
     margin: var(--customization-option-hint-margin, var(--spacer-xs) 0 0);

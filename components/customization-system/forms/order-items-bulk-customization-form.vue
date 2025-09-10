@@ -3,30 +3,32 @@
     class="order-items-bulk-customization-form"
     @submit.prevent="onFormSubmit"
   >
-    <div
-      class="_step"
-      v-for="item in orderItemsCustomizationFormsData"
-      :key="item.id"
-    >
-      <SfDivider class="_step-divider" />
+    <div class="_steps">
+      <div
+        class="_step"
+        v-for="item in orderItemsCustomizationFormsData"
+        :key="item.id"
+      >
+        <SfDivider class="_step-divider" />
 
-      <SfHeading
-        class="_step-title"
-        :level="3"
-        :title="item.title"
-      />
-
-      <div class="_content">
-        <order-item-customization-form
-          class="_customization"
-          :is-disabled="isFormDisabled || item.isCustomized"
-          :product="item.product"
-          :draft-order-item="item.draftOrderItem"
-          ref="orderItemCustomizationForm"
+        <SfHeading
+          class="_step-title"
+          :level="3"
           :title="item.title"
-          @order-item-customization-busy-state-changed="onEntityBusyChanged"
-          @order-item-customization-form-errors-changed="onOrderItemCustomizationFormErrorChanged"
         />
+
+        <div class="_content">
+          <order-item-customization-form
+            class="_customization"
+            :is-disabled="isFormDisabled || item.isCustomized"
+            :product="item.product"
+            :draft-order-item="item.draftOrderItem"
+            ref="orderItemCustomizationForm"
+            :title="item.title"
+            @order-item-customization-busy-state-changed="onEntityBusyChanged"
+            @order-item-customization-form-errors-changed="onOrderItemCustomizationFormErrorChanged"
+          />
+        </div>
       </div>
     </div>
 
@@ -281,18 +283,26 @@ export default defineComponent({
 .order-items-bulk-customization-form {
   text-align: center;
 
-  ._step {
-    margin-top: var(--spacer-lg);
+  ._steps {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--spacer-base);
+  }
 
-    ._content {
-      max-width: 720px;
-      width: 100%;
-      margin: var(--spacer-sm) auto 0;
-    }
+  ._step {
+    text-align: left;
+    width: 100%;
+    max-width: 290px;
+    flex: 0 0 290px;
+  }
+
+  ._content {
+    width: 100%;
+    margin-top: var(--spacer-sm);
   }
 
   ._customization {
-    margin-top: var(--spacer-base);
     text-align: center;
   }
 
@@ -302,7 +312,6 @@ export default defineComponent({
   }
 
   ._step-title {
-    display: inline-block;
     margin-top: var(--spacer-base);
   }
 

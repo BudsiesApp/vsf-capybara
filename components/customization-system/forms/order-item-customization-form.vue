@@ -262,17 +262,13 @@ export default defineComponent({
   column-gap: var(--spacer-base);
 
   ._customization-option {
-    margin-bottom: var(--spacer-base);
     flex-basis: 100%;
 
+    --customization-option-label-display: none;
+    --customization-option-description-display: none;
+    --customization-option-hint-display: none;
+
     --customization-option-align-items: center;
-
-    --customization-option-label-align: center;
-
-    --customization-option-description-align: center;
-    --customization-option-hint-align: center;
-
-    margin-top: var(--spacer-base);
 
     ::v-deep {
       .cards-list-widget {
