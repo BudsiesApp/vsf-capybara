@@ -26,6 +26,7 @@ export default function registerComponents () {
   add('carousel', () => import(/* webpackChunkName: "vsf-storyblok" */ './Carousel.vue'))
   add('lightbox_gallery', () => import(/* webpackChunkName: "vsf-storyblok" */ './LightboxGallery.vue'))
   add('product_review', () => import(/* webpackChunkName: "vsf-storyblok" */ './ProductReview.vue'))
+  add('review', () => import(/* webpackChunkName: "vsf-storyblok" */ './Review.vue'))
 
   // add('product', () => import('./Product.vue'))
   // add('category', () => import('./Category.vue'))
