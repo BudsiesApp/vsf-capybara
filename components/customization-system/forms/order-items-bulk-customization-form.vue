@@ -23,7 +23,6 @@
           :product="item.product"
           :draft-order-item="item.draftOrderItem"
           ref="orderItemCustomizationForm"
-          :order-item-id="item.id"
           :title="item.title"
           @order-item-customization-busy-state-changed="onEntityBusyChanged"
           @order-item-customization-form-errors-changed="onOrderItemCustomizationFormErrorChanged"

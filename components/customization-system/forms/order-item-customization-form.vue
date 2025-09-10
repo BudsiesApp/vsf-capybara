@@ -205,7 +205,7 @@ export default defineComponent({
     const formValidation = useFormValidation(
       validationObserver,
       () => getAllFormRefs(context.refs),
-      props.draftOrderItem.id
+      props.draftOrderItem.id.toString()
     );
 
     function validateForm (): Promise<boolean> {
@@ -221,7 +221,7 @@ export default defineComponent({
       (value) => {
         context.emit(
           'order-item-customization-busy-state-changed',
-          { isBusy: value, entityId: props.draftOrderItem.id }
+          { isBusy: value, entityId: props.draftOrderItem.id.toString() }
         );
       },
       {

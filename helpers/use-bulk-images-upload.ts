@@ -1,5 +1,9 @@
 import { onBeforeMount, onBeforeUnmount, SetupContext } from '@vue/composition-api';
+
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
+
 import { UploaderData } from 'theme/store/ui/artwork-upload';
+import { FilesUploaderEvents } from 'theme/interfaces/files-uploader-events';
 
 export function useBulkImagesUpload (
   { root }: SetupContext,
@@ -29,9 +33,10 @@ export function useBulkImagesUpload (
 
     const uploader = uploaders[0];
 
-    if (uploader.artworkUploadComponent) {
-      uploader.artworkUploadComponent.showMaxFilesLimitWarning();
-    }
+    EventBus.$emit(
+      FilesUploaderEvents.FILES_UPLOADER_MAX_FILES_COUNT_REACHED,
+      { uid: uploader.uid }
+    );
   }
 
   function windowDropHandler (event: DragEvent): void {
@@ -53,13 +58,17 @@ export function useBulkImagesUpload (
     let uploadedFilesCount = 0;
 
     for (const uploader of uploaders) {
-      let availableForUploadFilesCount = uploader.artworkUploadComponent.getAvailableForUploadFilesCount();
+      let availableForUploadFilesCount = uploader.availableForUploadFilesCount;
 
       if (availableForUploadFilesCount === 0) {
         continue;
       }
 
       if (!allowMultipleImagesPerUploader) {
+        if (uploader.hasUploadedFiles) {
+          continue;
+        }
+
         availableForUploadFilesCount = 1;
       }
 
@@ -68,7 +77,10 @@ export function useBulkImagesUpload (
         uploadedFilesCount + availableForUploadFilesCount
       );
 
-      void uploader.artworkUploadComponent.uploadFiles(filesToUpload);
+      EventBus.$emit(
+        FilesUploaderEvents.FILES_UPLOADER_FILES_TO_UPLOAD_ADDED,
+        { uid: uploader.uid, filesToUpload }
+      );
       uploadedFilesCount += filesToUpload.length;
     }
 

@@ -1,8 +1,7 @@
-import MArtworkUpload from 'theme/components/molecules/m-artwork-upload.vue';
-
 export interface UploaderData {
   uid: number,
-  artworkUploadComponent: InstanceType<typeof MArtworkUpload>
+  hasUploadedFiles: boolean,
+  availableForUploadFilesCount: number
 };
 
 interface ArtworkUploadStoreState {
@@ -25,6 +24,19 @@ export const artworkUploadStore = {
       }
 
       state.activeUploaders.splice(index, 1);
+    },
+    updateUploaderData (
+      state: ArtworkUploadStoreState,
+      { uid, dataForUpdate }: { uid: number, dataForUpdate: Partial<UploaderData> }
+    ) {
+      const index = state.activeUploaders.findIndex((uploaderData) => uid === uploaderData.uid);
+
+      if (index < 0) {
+        return;
+      }
+
+      const uploader = { ...state.activeUploaders[index], ...dataForUpdate };
+      state.activeUploaders.splice(index, 1, uploader);
     }
   },
   getters: {

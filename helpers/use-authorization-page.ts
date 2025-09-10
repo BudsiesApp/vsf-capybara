@@ -19,7 +19,7 @@ export function useAuthorizationPage (
       delete query[REDIRECT_TARGET_QUERY_KEY];
     }
 
-    let queryString = '';
+    const searchParams = new URLSearchParams();
 
     for (const key in query) {
       const value = query[key];
@@ -34,12 +34,14 @@ export function useAuthorizationPage (
             continue;
           }
 
-          queryString += `${key}=${encodeURIComponent(item)}&`;
+          searchParams.append(key, item);
         }
       } else {
-        queryString += `${key}=${encodeURIComponent(value)}&`;
+        searchParams.append(key, value);
       }
     }
+
+    const queryString = searchParams.toString();
 
     if (!queryString) {
       return target;
