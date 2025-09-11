@@ -1,13 +1,15 @@
 <template>
   <div
-    class="storyblok-review layout-regular-component"
+    class="storyblok-product-reviews layout-regular-component"
     :class="cssClasses"
+    v-if="itemData.product_id"
   >
     <editor-block-icons :item="itemData" />
 
     <div
       v-if="showContainer"
       :data-fera-widget="itemData.widget"
+      :data-product-id="itemData.product_id"
     />
   </div>
 </template>
@@ -15,13 +17,13 @@
 <script lang="ts">
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
 
-import { ReviewData } from './interfaces/review-data.interface';
+import { ProductReviewsData } from './interfaces/product-reviews-data.interface';
 
 export default Blok.extend({
-  name: 'StoryblokReview',
+  name: 'StoryblokProductReviews',
   computed: {
-    itemData (): ReviewData {
-      return this.item as ReviewData;
+    itemData (): ProductReviewsData {
+      return this.item as ProductReviewsData;
     }
   },
   data () {
@@ -41,6 +43,9 @@ export default Blok.extend({
     }
   },
   watch: {
+    'itemData.product_id': function () {
+      this.reloadWidgets();
+    },
     'itemData.widget': function () {
       this.reloadWidgets();
     }
@@ -52,7 +57,7 @@ export default Blok.extend({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
-.storyblok-review {
+.storyblok-product-reviews {
   @include display-property-handling;
 }
 </style>
