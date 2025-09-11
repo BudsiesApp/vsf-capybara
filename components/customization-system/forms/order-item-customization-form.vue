@@ -44,7 +44,8 @@ import {
   useEntityBusyState,
   useCustomizationState,
   useCustomizationsFilter,
-  useOptionValueActions
+  useOptionValueActions,
+  useCustomizationStatePreservation
 } from 'src/modules/customization-system';
 
 import { useFormValidation } from 'theme/helpers/use-form-validation';
@@ -122,12 +123,14 @@ export default defineComponent({
       customizationState,
       removeCustomizationOptionValue,
       selectedOptionValuesIds,
-      updateCustomizationOptionValue
+      updateCustomizationOptionValue,
+      mergeCustomizationState
     } = useCustomizationState(undefined, initialCustomizationState);
 
     const {
       availableCustomizations,
-      customizationAvailableOptionValues
+      customizationAvailableOptionValues,
+      removeUnavailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
       selectedOptionValuesIds,
@@ -208,6 +211,18 @@ export default defineComponent({
       props.draftOrderItem.id.toString()
     );
 
+    const orderItemKey = computed<string>(() => `orderItemCustomization:${draftOrderItem.value.id}`);
+
+    const { removePreservedState } = useCustomizationStatePreservation(
+      orderItemKey,
+      customizationState,
+      ref(undefined),
+      [],
+      isCustomizationStateEmpty,
+      mergeCustomizationState,
+      removeUnavailableOptionValues
+    );
+
     function validateForm (): Promise<boolean> {
       return formValidation.validate();
     }
@@ -249,7 +264,8 @@ export default defineComponent({
       isCustomizationStateEmpty,
       validateForm,
       validationObserver,
-      scrollToFirstError
+      scrollToFirstError,
+      removePreservedState
     };
   }
 });

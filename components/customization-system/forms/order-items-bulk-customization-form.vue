@@ -38,6 +38,15 @@
       @item-click="goToOrderItem"
     />
 
+    <SfButton
+      class="_save-button color-secondary"
+      type="button"
+      :disabled="isSubmitButtonDisabled"
+      @click="saveProgress"
+    >
+      {{ $t('Save Progress') }}
+    </SfButton>
+
     <div class="_actions">
       <SfButton
         class="_submit-button color-primary"
@@ -84,14 +93,14 @@ function useOrderItemsBulkCustomizationActions (
     Logger.error(errorMessage, 'bulk-customize')();
   }
 
-  async function confirmCustomization (draftOrderItemsDictionary: Record<string, DraftOrderItem>): Promise<void> {
+  async function saveCustomizationsState (draftOrderItems: DraftOrderItem[]): Promise<number[]> {
     if (isSubmitting.value) {
-      return;
+      return [];
     }
 
     isSubmitting.value = true;
     const userToken = root.$store.getters['user/getUserToken'];
-    const draftOrderItems = Object.values(draftOrderItemsDictionary);
+    let submittedIds: number[] = [];
 
     try {
       const saveResult = await saveOrderItemCustomizationsState(draftOrderItems, userToken);
@@ -102,7 +111,49 @@ function useOrderItemsBulkCustomizationActions (
       }
 
       if (savedOrderItemsIds.length === 0) {
-        return;
+        return submittedIds;
+      }
+
+      submittedIds = savedOrderItemsIds;
+
+      root.$store.dispatch('notification/spawnNotification', {
+        type: 'success',
+        message: root.$t(
+          '{count} Order item(s) have been saved successfully',
+          { count: savedOrderItemsIds.length }
+        ),
+        action1: { label: root.$t('OK') }
+      });
+
+      return savedOrderItemsIds;
+    } catch (error) {
+      spawnError((error as any).message || 'An error occurred while saving customizations');
+    } finally {
+      isSubmitting.value = false;
+    }
+
+    return submittedIds;
+  }
+
+  async function confirmCustomization (draftOrderItems: DraftOrderItem[]): Promise<number[]> {
+    if (isSubmitting.value) {
+      return [];
+    }
+
+    isSubmitting.value = true;
+    const userToken = root.$store.getters['user/getUserToken'];
+    let submittedIds: number[] = [];
+
+    try {
+      const saveResult = await saveOrderItemCustomizationsState(draftOrderItems, userToken);
+      const savedOrderItemsIds = saveResult.success.map((item) => item.orderItemId);
+
+      for (const saveError of saveResult.errors) {
+        spawnError(saveError.errorMessage);
+      }
+
+      if (savedOrderItemsIds.length === 0) {
+        return submittedIds;
       }
 
       const submitResult = await submitOrderItemCustomizationsState(
@@ -114,12 +165,14 @@ function useOrderItemsBulkCustomizationActions (
         spawnError(submitError.errorMessage);
       }
 
-      if (submitResult.success.length > 0) {
+      submittedIds = submitResult.success.map(s => s.orderItemId);
+
+      if (submittedIds.length > 0) {
         root.$store.dispatch('notification/spawnNotification', {
           type: 'success',
           message: root.$t(
             '{count} Order item(s) have been updated successfully',
-            { count: submitResult.success.length }
+            { count: submittedIds.length }
           ),
           action1: { label: root.$t('OK') }
         });
@@ -129,11 +182,14 @@ function useOrderItemsBulkCustomizationActions (
     } finally {
       isSubmitting.value = false;
     }
+
+    return submittedIds;
   }
 
   return {
     isSubmitting,
-    confirmCustomization
+    confirmCustomization,
+    saveCustomizationsState
   }
 }
 
@@ -164,6 +220,7 @@ export default defineComponent({
 
     const orderItemCustomizationByOrderItemId = computed<Record<string, OrderItemCustomizationFormType>>(() => {
       const dictionary: Record<string, OrderItemCustomizationFormType> = {};
+      // TODO: temporary - current TS version don't handle `value` type right in this case
       for (const form of ((orderItemCustomizationForm as any).value as unknown as OrderItemCustomizationFormType[])) {
         dictionary[form.draftOrderItem.id] = form;
       }
@@ -194,7 +251,7 @@ export default defineComponent({
       }
     }
 
-    const { confirmCustomization, isSubmitting } = useOrderItemsBulkCustomizationActions(context);
+    const { confirmCustomization, isSubmitting, saveCustomizationsState } = useOrderItemsBulkCustomizationActions(context);
 
     const isFormDisabled = computed(() => {
       return isSubmitting.value || props.isDisabled;
@@ -204,6 +261,44 @@ export default defineComponent({
       return isFormDisabled.value || isSomeEntityBusy.value;
     });
 
+    function getDraftItemsAvailableForUpdate (): DraftOrderItem[] {
+      const draftOrderItems: DraftOrderItem[] = [];
+
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      for (const customization of ((orderItemCustomizationForm as any).value) as unknown as OrderItemCustomizationFormType[]) {
+        if (customization.isCustomizationStateEmpty || customization.draftOrderItem.status_id !== BudsieStatus.AWAITING_CUSTOMIZATION) {
+          continue;
+        }
+
+        const customizationState = customization.getCustomizationState();
+        if (customizationState) {
+          draftOrderItems.push({
+            id: customization.draftOrderItem.id,
+            customization_state: customizationState,
+            product_sku: customization.draftOrderItem.product_sku,
+            status_id: customization.draftOrderItem.status_id
+          });
+        }
+      }
+
+      return draftOrderItems;
+    }
+
+    function removePreservedStateByOrderItemsIds (orderItemsIds: number[]): void {
+      for (const id of orderItemsIds) {
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+        const formInstance = (((orderItemCustomizationForm as any).value) as unknown as OrderItemCustomizationFormType[]).find(
+          (form) => form.draftOrderItem.id === id
+        );
+
+        if (!formInstance) {
+          continue;
+        }
+
+        formInstance.removePreservedState();
+      }
+    }
+
     async function onFormSubmit (): Promise<void> {
       (orderItemsErrors.value as unknown as Record<string, string>) = {};
 
@@ -212,6 +307,7 @@ export default defineComponent({
       }
 
       const orderItemsWithError: OrderItemCustomizationFormType[] = [];
+      // TODO: temporary - current TS version don't handle `value` type right in this case
       for (const item of ((orderItemCustomizationForm as any).value as unknown as OrderItemCustomizationFormType[])) {
         const isOrderItemCustomizationsValid = await item.validateForm();
 
@@ -234,32 +330,26 @@ export default defineComponent({
         return;
       }
 
-      const draftOrderItemsDictionary: Record<string, any> = {};
-      for (const customization of ((orderItemCustomizationForm as any).value) as unknown as OrderItemCustomizationFormType[]) {
-        if (customization.isCustomizationStateEmpty || customization.draftOrderItem.status_id !== BudsieStatus.AWAITING_CUSTOMIZATION) {
-          continue;
-        }
+      const draftOrderItems = getDraftItemsAvailableForUpdate();
 
-        const customizationState = customization.getCustomizationState();
-        if (customizationState) {
-          draftOrderItemsDictionary[customization.draftOrderItem.id] = {
-            id: customization.draftOrderItem.id,
-            customization_state: customizationState,
-            product_sku: customization.draftOrderItem.product_sku,
-            is_customized: customization.draftOrderItem.status_id !== BudsieStatus.AWAITING_CUSTOMIZATION
-          };
-        }
-      }
-
-      if (Object.values(draftOrderItemsDictionary).length === 0) {
+      if (Object.values(draftOrderItems).length === 0) {
         return;
       }
 
-      await confirmCustomization(
-        draftOrderItemsDictionary
-      );
+      const submittedIds = await confirmCustomization(draftOrderItems);
+      removePreservedStateByOrderItemsIds(submittedIds);
 
       context.emit('confirmed');
+    }
+
+    async function saveProgress (): Promise<void> {
+      if (isFormDisabled.value) {
+        return;
+      }
+
+      const draftOrderItems = getDraftItemsAvailableForUpdate();
+      const updatedIds = await saveCustomizationsState(draftOrderItems);
+      removePreservedStateByOrderItemsIds(updatedIds);
     }
 
     return {
@@ -271,7 +361,8 @@ export default defineComponent({
       orderItemsErrors,
       onEntityBusyChanged,
       onFormSubmit,
-      onOrderItemCustomizationFormErrorChanged
+      onOrderItemCustomizationFormErrorChanged,
+      saveProgress
     };
   }
 });
@@ -324,6 +415,12 @@ export default defineComponent({
     flex-direction: column;
     align-items: center;
     margin-top: var(--spacer-xl);
+  }
+
+  ._save-button {
+    position: sticky;
+    bottom: var(--spacer-base);
+    margin: var(--spacer-lg) auto 0;
   }
 
   @media (min-width: $tablet-min) {
