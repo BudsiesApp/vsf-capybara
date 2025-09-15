@@ -185,21 +185,23 @@ export default Vue.extend({
         {
           label: this.$t('Magnets'),
           url: {
-            name: 'felted-magnets-creation-page',
-            thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.FeltedMagnets), 100, 100)
-          }
+            name: 'felted-magnets-creation-page'
+          },
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.FeltedMagnets), 100, 100)
         },
         {
           label: this.$t('Ornaments'),
           url: {
             name: 'felted-ornaments-creation-page'
-          }
+          },
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 100, 100)
         }
       ],
       householdItems: [
         {
           label: this.$t('Pet Shaped Pillows'),
-          url: '/pet-pillow/'
+          url: '/pet-pillow/',
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.ForeversCat), 100, 100)
         },
         {
           label: this.$t('Square Photo Pillows'),
@@ -208,25 +210,29 @@ export default Vue.extend({
             params: {
               slug: 'photo-pillows-designs'
             }
-          }
+          },
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 100, 100)
         },
         {
           label: this.$t('Pet Photo Blankets'),
           url: {
             name: 'cut-out-blankets'
-          }
+          },
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.FeltedMagnets), 100, 100)
         },
         {
           label: this.$t('Renaissance Blankets'),
           url: {
             name: 'renaissance-blankets'
-          }
+          },
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.ForeversCat), 100, 100)
         },
         {
           label: this.$t('Pet Portraits'),
           url: {
             name: 'photo-portraits-creation-page'
-          }
+          },
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 100, 100)
         }
       ],
       accessoriesItems: [
@@ -234,13 +240,15 @@ export default Vue.extend({
           label: this.$t('Socks'),
           url: {
             name: 'printed-socks-creation-page'
-          }
+          },
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.FeltedMagnets), 100, 100)
         },
         {
           label: this.$t('Pajamas'),
           url: {
             name: 'pajamas-creation'
-          }
+          },
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.ForeversCat), 100, 100)
         },
         // {
         //   label: this.$t('Hawaiian Shirts'),
@@ -252,25 +260,29 @@ export default Vue.extend({
           label: this.$t('Golf Shirts'),
           url: {
             name: 'golf-shirts-creation'
-          }
+          },
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 100, 100)
         },
         {
           label: this.$t('Face Masks'),
           url: {
             name: 'printed-masks-creation-page'
-          }
+          },
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.FeltedMagnets), 100, 100)
         },
         {
           label: this.$t('Pet Keychains'),
           url: {
             name: 'printed-keychains-creation-page'
-          }
+          },
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.ForeversCat), 100, 100)
         },
         {
           label: this.$t('Tumblers'),
           url: {
             name: 'tumblers-creation'
-          }
+          },
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 100, 100)
         }
       ],
       otherProductsItems: [
