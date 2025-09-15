@@ -48,7 +48,17 @@
           <SfListItem
             v-for="item in householdItems"
             :key="item.label"
+            class="_menu-item"
           >
+            <template v-if="item.thumbnail">
+              <BaseImage
+                :src="item.thumbnail"
+                :aspect-ratio="1.0"
+                alt=""
+                class="_menu-item-thumbnail"
+              />
+            </template>
+
             <router-link
               :to="item.url"
               @click.native="$emit('close')"
@@ -66,7 +76,17 @@
           <SfListItem
             v-for="item in accessoriesItems"
             :key="item.label"
+            class="_menu-item"
           >
+            <template v-if="item.thumbnail">
+              <BaseImage
+                :src="item.thumbnail"
+                :aspect-ratio="1.0"
+                alt=""
+                class="_menu-item-thumbnail"
+              />
+            </template>
+
             <router-link
               :to="item.url"
               @click.native="$emit('close')"
@@ -338,9 +358,6 @@ export default Vue.extend({
       ]
     }
   },
-  created () {
-    this.$store.dispatch('product/fetchProductsThumbnails', { productSkus: ['ShopifyForeversDog_bundle'] });
-  },
   async mounted () {
     await this.$nextTick();
 
@@ -420,6 +437,7 @@ export default Vue.extend({
       max-width: 100px;
       left: 100%;
       display: none;
+      z-index: 2;
     }
 
     ._menu-item {
