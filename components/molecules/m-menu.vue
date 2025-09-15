@@ -20,7 +20,17 @@
           <SfListItem
             v-for="item in customProductsItems"
             :key="item.label"
+            class="_menu-item"
           >
+            <template v-if="item.thumbnail">
+              <BaseImage
+                :src="item.thumbnail"
+                :aspect-ratio="1.0"
+                alt=""
+                class="_menu-item-thumbnail"
+              />
+            </template>
+
             <router-link
               :to="item.url"
               @click.native="$emit('close')"
@@ -115,8 +125,13 @@
 import Vue from 'vue';
 import { SfIcon, SfMegaMenu, SfList, SfMenuItem } from '@storefront-ui/vue';
 
+import { productThumbnailPath, getThumbnailPath } from '@vue-storefront/core/helpers'
+
+import { BaseImage } from 'src/modules/budsies';
+
 export default Vue.extend({
   components: {
+    BaseImage,
     SfIcon,
     SfMegaMenu,
     SfList,
@@ -133,28 +148,45 @@ export default Vue.extend({
     }
   },
   data () {
+    const productThumbnailData = {
+      ForeversCat: {
+        image: '/s/t/stuffed_animal_of_your_cat.jpg'
+      },
+      Figurines: {
+        image: '/f/i/figurine-husky.png'
+      },
+      FeltedMagnets: {
+        image: '/y/e/yes_3462694_the_miami_aussie_ig_1.jpeg'
+      }
+    };
+
     return {
       customProductsItems: [
         {
           label: this.$t('Petsies Stuffed Animals'),
-          url: '/forevers-pet-plush/'
+          url: '/forevers-pet-plush/',
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.ForeversCat), 100, 100)
         },
         {
           label: this.$t('Petsies Huggables'),
-          url: '/huggables/'
+          url: '/huggables/',
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 100, 100)
         },
         {
           label: this.$t('Golf Club Headcovers'),
-          url: '/golf-headcovers/'
+          url: '/golf-headcovers/',
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.FeltedMagnets), 100, 100)
         },
         {
           label: this.$t('Bobbleheads & Figurines'),
-          url: '/pet-bobblehead-figurines/'
+          url: '/pet-bobblehead-figurines/',
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 100, 100)
         },
         {
           label: this.$t('Magnets'),
           url: {
-            name: 'felted-magnets-creation-page'
+            name: 'felted-magnets-creation-page',
+            thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.FeltedMagnets), 100, 100)
           }
         },
         {
@@ -294,6 +326,9 @@ export default Vue.extend({
       ]
     }
   },
+  created () {
+    this.$store.dispatch('product/fetchProductsThumbnails', { productSkus: ['ShopifyForeversDog_bundle'] });
+  },
   async mounted () {
     await this.$nextTick();
 
@@ -366,6 +401,25 @@ export default Vue.extend({
     .sf-mega-menu-column {
       --mega-menu-margin: var(--spacer-xl) var(--spacer-2xl) 0 0;
       --list-item-margin: var(--spacer-base) 0 0 0;
+    }
+
+    ._menu-item-thumbnail {
+      position: absolute;
+      max-width: 100px;
+      left: 100%;
+      display: none;
+    }
+
+    ._menu-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+
+      &:hover {
+        ._menu-item-thumbnail {
+          display: block;
+        }
+      }
     }
   }
 
