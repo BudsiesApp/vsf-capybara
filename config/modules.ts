@@ -11,6 +11,7 @@ import { PageLoadingIndicatorModule } from 'src/modules/page-loading-indicator';
 import { TrueVaultModule } from 'src/modules/true-vault';
 import { OrdersHistoryModule } from 'src/modules/orders-history';
 import { CurrencyModule } from 'src/modules/currency';
+import { FeraModule } from 'src/modules/fera';
 
 import registerStoryblokComponents from 'theme/components/storyblok'
 
@@ -28,6 +29,7 @@ export function registerClientModules () {
   registerModule(ErrorLoggingModule)
   registerModule(OrdersHistoryModule)
   registerModule(CurrencyModule)
+  registerModule(FeraModule)
 }
 
 // Deprecated API, will be removed in 2.0
