@@ -75,9 +75,9 @@ export function useBackendProductId (productId: Ref<string | number>) {
         return ProductValue.TUMBLERS;
       case ProductId.PETSIES_HUGGABLES:
         return ProductValue.PETSIES_HUGGABLES;
-      case ProductId.TEACHERS_BUDSIE:
+      case ProductId.CLASSROOM_BUDSIE:
         return ProductValue.BUDSIE;
-      case ProductId.TEACHERS_SELFIE:
+      case ProductId.CLASSROOM_SELFIE:
         return ProductValue.SELFIE;
       default:
         throw new Error(
