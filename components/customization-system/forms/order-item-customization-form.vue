@@ -34,6 +34,7 @@ import {
 import { ValidationObserver } from 'vee-validate';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
+import { BudsieStatus } from 'src/modules/shared';
 import {
   Customization,
   CustomizationOptionValue,
@@ -115,6 +116,10 @@ export default defineComponent({
 
     const initialCustomizationState = computed<CustomizationStateItem[]>(() => {
       return draftOrderItem.value.customization_state || [];
+    });
+
+    const isCustomizable = computed<boolean>(() => {
+      return draftOrderItem.value.status_id === BudsieStatus.AWAITING_CUSTOMIZATION;
     });
 
     const {
@@ -218,7 +223,7 @@ export default defineComponent({
       customizationState,
       ref(undefined),
       [],
-      isCustomizationStateEmpty,
+      isCustomizable,
       mergeCustomizationState,
       removeUnavailableOptionValues
     );
