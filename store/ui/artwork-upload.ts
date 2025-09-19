@@ -1,8 +1,7 @@
-interface UploaderData {
+export interface UploaderData {
   uid: number,
-  allowMultiple: boolean,
   hasUploadedFiles: boolean,
-  isMaxFilesCountReached: boolean
+  availableForUploadFilesCount: number
 };
 
 interface ArtworkUploadStoreState {
@@ -17,6 +16,15 @@ export const artworkUploadStore = {
     registerUploader (state: ArtworkUploadStoreState, uploaderData: UploaderData) {
       state.activeUploaders.push(uploaderData);
     },
+    unregisterUploader (state: ArtworkUploadStoreState, uploaderUid: number) {
+      const index = state.activeUploaders.findIndex(({ uid }) => uid === uploaderUid);
+
+      if (index < 0) {
+        return;
+      }
+
+      state.activeUploaders.splice(index, 1);
+    },
     updateUploaderData (
       state: ArtworkUploadStoreState,
       { uid, dataForUpdate }: { uid: number, dataForUpdate: Partial<UploaderData> }
@@ -29,24 +37,11 @@ export const artworkUploadStore = {
 
       const uploader = { ...state.activeUploaders[index], ...dataForUpdate };
       state.activeUploaders.splice(index, 1, uploader);
-    },
-    unregisterUploader (state: ArtworkUploadStoreState, uploaderUid: number) {
-      const index = state.activeUploaders.findIndex(({ uid }) => uid === uploaderUid);
-
-      if (index < 0) {
-        return;
-      }
-
-      state.activeUploaders.splice(index, 1);
     }
   },
   getters: {
-    firstAvailablePageDropUploaderUid (state: ArtworkUploadStoreState): number | undefined {
-      const uploader = state.activeUploaders.find((uploaderData) => {
-        return (uploaderData.allowMultiple && !uploaderData.isMaxFilesCountReached) || !uploaderData.hasUploadedFiles;
-      })
-
-      return uploader?.uid;
+    getUploaders (state: ArtworkUploadStoreState): UploaderData[] {
+      return state.activeUploaders;
     }
   }
 }

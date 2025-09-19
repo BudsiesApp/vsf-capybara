@@ -19,7 +19,35 @@ export function useAuthorizationPage (
       delete query[REDIRECT_TARGET_QUERY_KEY];
     }
 
-    return `${target}?${new URLSearchParams(query).toString()}`;
+    const searchParams = new URLSearchParams();
+
+    for (const key in query) {
+      const value = query[key];
+
+      if (!value) {
+        continue;
+      }
+
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          if (!item) {
+            continue;
+          }
+
+          searchParams.append(key, item);
+        }
+      } else {
+        searchParams.append(key, value);
+      }
+    }
+
+    const queryString = searchParams.toString();
+
+    if (!queryString) {
+      return target;
+    }
+
+    return `${target}?${queryString}`;
   });
 
   const prefilledEmail = computed<string | undefined>(() => {

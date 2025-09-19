@@ -121,10 +121,18 @@ export default defineComponent({
     value: {
       type: [Object, String, Array] as PropType<CustomizationOptionValue>,
       default: undefined
+    },
+    disableValidation: {
+      type: Boolean,
+      default: false
+    },
+    fieldNamePrefix: {
+      type: String as PropType<string | undefined>,
+      default: undefined
     }
   },
   setup (props, context) {
-    const { customization, optionValues, productId, value } = toRefs(props);
+    const { customization, disableValidation, fieldNamePrefix, optionValues, productId, value } = toRefs(props);
 
     const optionLabel = computed<string>(() => {
       return customization.value.title || customization.value.name;
@@ -146,7 +154,11 @@ export default defineComponent({
     });
 
     return {
-      ...useCustomizationOptionValidation(customization),
+      ...useCustomizationOptionValidation(
+        customization,
+        disableValidation,
+        fieldNamePrefix
+      ),
       ...useCustomizationOptionWidget(
         value,
         customization,
@@ -177,6 +189,7 @@ export default defineComponent({
   ._option-label {
     width: 100%;
 
+    display: var(--customization-option-label-display, block);
     font-size: var(--customization-option-label-size, var(--font-base));
     font-weight: var(--customization-option-label-weight, var(--font-bold));
     text-align: var(--customization-option-label-align, left);
@@ -192,6 +205,7 @@ export default defineComponent({
   ._option-description {
     width: 100%;
 
+    display: var(--customization-option-description-display, block);
     font-size: var(--customization-option-description-size, var(--font-sm));
     text-align: var(--customization-option-description-align, left);
     margin: var(
@@ -201,6 +215,7 @@ export default defineComponent({
   }
 
   ._option-hint {
+    display: var(--customization-option-hint-display, block);
     font-size: var(--customization-option-hint-size, var(--font-sm));
     text-align: var(--customization-option-hint-align, left);
     margin: var(--customization-option-hint-margin, var(--spacer-xs) 0 0);
