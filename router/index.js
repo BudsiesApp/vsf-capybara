@@ -41,6 +41,8 @@ const GiftCards = () =>
   import(/* webpackChunkName: "vsf-gift-cards" */ 'theme/pages/GiftCards');
 const PasswordReset = () =>
   import(/* webpackChunkName: "vsf-password-reset" */ 'theme/pages/PasswordReset');
+const OrderItemsBulkCustomize = () =>
+  import(/* webpackChunkName: "vsf-order-items-bulk-customize" */ 'theme/pages/OrderItemsBulkCustomize');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -317,6 +319,17 @@ let routes = [
       path: '/',
       query: route.query
     })
+  },
+  {
+    path: '/order-items/bulk-customize/',
+    name: 'order-items-bulk-customize',
+    component: OrderItemsBulkCustomize,
+    props: (route) => ({
+      orderItemIds: route.query.orderItemIds
+    }),
+    meta: {
+      auth: true
+    }
   }
 ];
 

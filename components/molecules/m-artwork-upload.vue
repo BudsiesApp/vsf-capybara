@@ -62,8 +62,8 @@ import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 // import FilePondPluginImageResize from "filepond-plugin-image-resize";
 import FilePondPluginImageTransform from 'filepond-plugin-image-transform';
 
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { InjectType, CustomerImage } from 'src/modules/shared';
-
 import { ErrorConverterService } from 'src/modules/budsies';
 import {
   FileProcessingRepositoryFactory,
@@ -72,6 +72,7 @@ import {
 } from 'src/modules/file-storage';
 
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
+import { FilesUploaderEvents } from 'theme/interfaces/files-uploader-events';
 
 // Create component
 const FilePondComponent = vueFilePond(
@@ -108,6 +109,7 @@ interface InjectedServices {
 }
 
 const MAX_FILES_LIMIT_WARNING_SHOW_TIME = 3000;
+const MAX_FILES_COUNT = 20;
 
 export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   name: 'MArtworkUpload',
@@ -154,14 +156,26 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       fDragHoverHandler: undefined as undefined | ((e: DragEvent) => void),
       fDragDropHandler: undefined as undefined | ((e: DragEvent) => void),
       files: undefined as FilePondInitialFile[] | undefined,
-      fWindowDragHoverHandler: undefined as undefined | ((e: DragEvent) => void),
-      fWindowDropHandler: undefined as undefined | ((e: DragEvent) => void),
       filesCount: 0,
       isMaxFilesLimitWarningShow: false,
       maxFilesLimitWarningTimeout: undefined as undefined | number
     }
   },
   computed: {
+    availableForUploadFilesCount (): number {
+      if (this.disabled || this.isMaxFilesCountReached) {
+        return 0;
+      }
+
+      if (!this.maxFiles) {
+        return MAX_FILES_COUNT;
+      }
+
+      return Math.max(0, this.maxFiles - this.filesCount);
+    },
+    hasUploadedFiles (): boolean {
+      return this.filesCount > 0;
+    },
     classes (): string[] {
       const result = [getCurrentThemeClass()];
 
@@ -174,9 +188,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     isBusy (): boolean {
       return this.fIsBusy || this.fRemoveRequestsCount > 0;
     },
-    firstAvailablePageDropUploaderUid (): number | undefined {
-      return this.$store.getters['ui/firstAvailablePageDropUploaderUid'];
-    },
     isMaxFilesCountReached (): boolean {
       return !!this.maxFiles && this.maxFiles <= this.filesCount;
     }
@@ -187,8 +198,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     );
     this.fDragHoverHandler = (e: DragEvent) => this.onDropzoneDragHover(e);
     this.fDragDropHandler = (e: DragEvent) => this.onDropzoneDrop(e);
-    this.fWindowDragHoverHandler = (e: DragEvent) => this.windowDragHoverHandler(e);
-    this.fWindowDropHandler = (e: DragEvent) => this.windowDropHandler(e);
     this.initFiles();
   },
   mounted (): void {
@@ -197,13 +206,14 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
     this.registerUploaderInStore();
 
+    EventBus.$on(FilesUploaderEvents.FILES_UPLOADER_MAX_FILES_COUNT_REACHED, this.onMaxFilesCountReached);
+    EventBus.$on(FilesUploaderEvents.FILES_UPLOADER_FILES_TO_UPLOAD_ADDED, this.onFilesToUploadAdded);
+
     if (
       !dropzone ||
       !dropzoneOverlay ||
       !this.fDragHoverHandler ||
-      !this.fDragDropHandler ||
-      !this.fWindowDragHoverHandler ||
-      !this.fWindowDropHandler
+      !this.fDragDropHandler
     ) {
       return;
     }
@@ -219,22 +229,36 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     dropzoneOverlay.addEventListener('drop', this.fDragDropHandler, {
       capture: true
     });
-
-    this.window.addEventListener('dragover', this.fWindowDragHoverHandler);
-    this.window.addEventListener('dragleave', this.fWindowDragHoverHandler);
-    this.window.addEventListener('drop', this.fWindowDropHandler);
   },
   beforeDestroy (): void {
-    if (this.fWindowDragHoverHandler) {
-      this.window.removeEventListener('dragover', this.fWindowDragHoverHandler);
-      this.window.removeEventListener('dragleave', this.fWindowDragHoverHandler);
-    }
-
-    if (this.fWindowDropHandler) {
-      this.window.removeEventListener('drop', this.fWindowDropHandler);
-    }
-
     this.unregisterUploaderInStore();
+
+    EventBus.$off(FilesUploaderEvents.FILES_UPLOADER_MAX_FILES_COUNT_REACHED, this.onMaxFilesCountReached);
+    EventBus.$off(FilesUploaderEvents.FILES_UPLOADER_FILES_TO_UPLOAD_ADDED, this.onFilesToUploadAdded);
+
+    const dropzone = this.getDropzone();
+    const dropzoneOverlay = this.getDropzoneOverlay();
+
+    if (
+      !dropzone ||
+      !dropzoneOverlay ||
+      !this.fDragHoverHandler ||
+      !this.fDragDropHandler
+    ) {
+      return;
+    }
+
+    dropzone.removeEventListener('dragover', this.fDragHoverHandler, {
+      capture: true
+    });
+
+    dropzoneOverlay.removeEventListener('dragleave', this.fDragHoverHandler, {
+      capture: true
+    });
+
+    dropzoneOverlay.removeEventListener('drop', this.fDragDropHandler, {
+      capture: true
+    });
   },
   methods: {
     getFiles (): FilePondFile[] {
@@ -506,11 +530,34 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         'ui/registerUploader',
         {
           uid: (fileInput as any)._uid,
-          allowMultiple: this.allowMultiple,
-          hasUploadedFiles: fileInput.getFiles().length > 0,
-          isMaxFilesCountReached: this.isMaxFilesCountReached
+          hasUploadedFiles: this.hasUploadedFiles,
+          availableForUploadFilesCount: this.availableForUploadFilesCount
         }
       )
+    },
+    onMaxFilesCountReached ({ uid }: { uid: string }): void {
+      const fileInput = this.getFileInput();
+      if (!fileInput) {
+        return;
+      }
+
+      if (uid !== (fileInput as any)._uid) {
+        return;
+      }
+
+      this.showMaxFilesLimitWarning();
+    },
+    onFilesToUploadAdded ({ uid, filesToUpload }: { uid: string, filesToUpload: File[] }): void {
+      const fileInput = this.getFileInput();
+      if (!fileInput) {
+        return;
+      }
+
+      if (uid !== (fileInput as any)._uid) {
+        return;
+      }
+
+      this.uploadFiles(filesToUpload);
     },
     showMaxFilesLimitWarning (): void {
       if (this.maxFilesLimitWarningTimeout) {
@@ -535,6 +582,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     updateFilesCount (): void {
       const fileInput = this.getFileInput();
+
       if (!fileInput) {
         this.filesCount = 0;
         return;
@@ -544,49 +592,16 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     async updateUploaderDataInStore (): Promise<void> {
       await this.$nextTick();
-
-      const fileInput = this.getFileInput();
-      if (!fileInput) {
-        return;
-      }
       this.updateFilesCount();
-      this.$store.commit(
-        'ui/updateUploaderData',
-        {
-          uid: (fileInput as any)._uid,
-          dataForUpdate: {
-            allowMultiple: this.allowMultiple,
-            hasUploadedFiles: fileInput.getFiles().length > 0,
-            isMaxFilesCountReached: this.isMaxFilesCountReached
-          }
-        }
-      )
     },
-    windowDragHoverHandler (event: DragEvent): void {
-      event.preventDefault();
-      event.stopPropagation();
-    },
-    async windowDropHandler (event: DragEvent): Promise<void> {
-      event.preventDefault();
-      event.stopPropagation();
-
+    async uploadFiles (files: File[]): Promise<void> {
       const fileInput = this.getFileInput();
 
-      if (
-        !event.dataTransfer ||
-        !fileInput ||
-        this.disabled ||
-        !this.firstAvailablePageDropUploaderUid ||
-        this.firstAvailablePageDropUploaderUid !== (fileInput as any)._uid
-      ) {
-        if (this.isMaxFilesCountReached) {
-          this.showMaxFilesLimitWarning();
-        }
-
+      if (!fileInput || this.disabled) {
         return;
       }
 
-      await this.addFilesFromDropEvent(event, fileInput);
+      await fileInput.addFiles(files);
     },
     async addFilesFromDropEvent (event: DragEvent, fileInput: VueFilePondComponent): Promise<void> {
       if (!event.dataTransfer) {
@@ -612,6 +627,25 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       if (!newValue.length) {
         this.initFiles();
       }
+    },
+    availableForUploadFilesCount () {
+      const fileInput = this.getFileInput();
+
+      if (!fileInput) {
+        this.filesCount = 0;
+        return;
+      }
+
+      this.$store.commit(
+        'ui/updateUploaderData',
+        {
+          uid: (fileInput as any)._uid,
+          dataForUpdate: {
+            hasUploadedFiles: this.hasUploadedFiles,
+            availableForUploadFilesCount: this.availableForUploadFilesCount
+          }
+        }
+      );
     }
   }
 })
