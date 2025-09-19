@@ -43,7 +43,7 @@
               :value="customizationOptionValue[customization.id]"
               @input="onCustomizationOptionInput"
               @customization-option-busy-state-changed="
-                onCustomizationOptionBusyChanged
+                onEntityBusyChanged
               "
             />
           </div>
@@ -144,7 +144,7 @@ import {
   requiredCustomizationsFilter,
   useAvailableCustomizations,
   useCustomizationsBundleOptions,
-  useCustomizationsBusyState,
+  useEntityBusyState,
   useCustomizationsFilter,
   useCustomizationsGroups,
   useCustomizationsOptionsDefaultValue,
@@ -161,6 +161,7 @@ import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { PrivacyPolicyLink } from 'src/modules/shared';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
+import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import {
   getFieldAnchorName,
@@ -282,8 +283,8 @@ export default defineComponent({
         addCustomizationOptionValue
       );
 
-    const { isSomeCustomizationOptionBusy, onCustomizationOptionBusyChanged } =
-      useCustomizationsBusyState();
+    const { isSomeEntityBusy, onEntityBusyChanged } =
+      useEntityBusyState();
 
     function onCustomizationOptionInput (payload: {
       customizationId: string,
@@ -416,7 +417,7 @@ export default defineComponent({
       return isSubmitting.value;
     });
     const isSubmitButtonDisabled = computed<boolean>(() => {
-      return isSomeCustomizationOptionBusy.value || isDisabled.value;
+      return isSomeEntityBusy.value || isDisabled.value;
     });
 
     const pageTitle = computed<string>(() => {
@@ -448,6 +449,7 @@ export default defineComponent({
       ...useCustomizationsGroups(filteredCustomizations, productCustomization),
       ...useQuantityAndShippingDiscounts(),
       ...formValidation,
+      ...useBulkImagesUpload(context),
       agreement,
       availableCustomizations,
       availableOptionCustomizations,
@@ -457,7 +459,7 @@ export default defineComponent({
       getFieldAnchorName,
       isDisabled,
       isSubmitButtonDisabled,
-      onCustomizationOptionBusyChanged,
+      onEntityBusyChanged,
       onCustomizationOptionInput,
       onFormSubmit,
       pageTitle,

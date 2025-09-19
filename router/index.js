@@ -31,6 +31,8 @@ const AddressesList = () =>
 
 const CartRecovery = () =>
   import(/* webpackChunkName: "vsf-cart-recovery" */ 'theme/pages/CartRecovery');
+const PasswordReset = () =>
+  import(/* webpackChunkName: "vsf-password-reset" */ 'theme/pages/PasswordReset');
 const KeychainQuote = () =>
   import(/* webpackChunkName: "vsf-keychain-quote" */ 'theme/pages/KeychainQuote');
 const PillowQuote = () =>
@@ -43,8 +45,8 @@ const BulkorderQuotation = () =>
   import(/* webpackChunkName: "vsf-bulkorder-quotation" */ 'theme/pages/BulkorderQuotation');
 const CustomizableProduct = () =>
   import(/* webpackChunkName: "vsf-customizable-product" */ 'theme/pages/CustomizableProduct');
-const PasswordReset = () =>
-  import(/* webpackChunkName: "vsf-password-reset" */ 'theme/pages/PasswordReset');
+const OrderItemsBulkCustomize = () =>
+  import(/* webpackChunkName: "vsf-order-items-bulk-customize" */ 'theme/pages/OrderItemsBulkCustomize');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -372,6 +374,17 @@ let routes = [
       path: '/',
       query: route.query
     })
+  },
+  {
+    path: '/order-items/bulk-customize/',
+    name: 'order-items-bulk-customize',
+    component: OrderItemsBulkCustomize,
+    props: (route) => ({
+      orderItemIds: route.query.orderItemIds
+    }),
+    meta: {
+      auth: true
+    }
   }
 ];
 
