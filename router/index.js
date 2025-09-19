@@ -52,6 +52,8 @@ const PasswordReset = () =>
   import(/* webpackChunkName: "vsf-password-reset" */ 'theme/pages/PasswordReset');
 const CustomizableProduct = () =>
   import(/* webpackChunkName: "vsf-customizable-product" */ 'theme/pages/CustomizableProduct');
+const OrderItemsBulkCustomize = () =>
+  import(/* webpackChunkName: "vsf-order-items-bulk-customize" */ 'theme/pages/OrderItemsBulkCustomize');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -921,6 +923,17 @@ let routes = [
     path: '/plushie/index/create/type/nft-budsie/',
     redirect: {
       name: 'nft-budsies-create'
+    }
+  },
+  {
+    path: '/order-items/bulk-customize/',
+    name: 'order-items-bulk-customize',
+    component: OrderItemsBulkCustomize,
+    props: (route) => ({
+      orderItemIds: route.query.orderItemIds
+    }),
+    meta: {
+      auth: true
     }
   }
 ];
