@@ -33,7 +33,7 @@ export class QuoteOrderPage {
   public readonly DEFAULT_CUSTOMER_FIRST_NAME = 'Test first name';
   public readonly DEFAULT_CUSTOMER_LAST_NAME = 'Test last name';
   public readonly DEFAULT_CUSTOMER_EMAIL = 'test@test.test';
-  public readonly DEFAULT_CUSTOMER_PHONE = '1234567890';
+  public readonly DEFAULT_CUSTOMER_PHONE = '+17715128896';
   public readonly DEFAULT_COUNTRY_NAME = 'United States';
 
   public readonly BULK_QUOTE_CREATION_RESOURCE_URL = '/api/ext/budsies/bulk-orders/create'
