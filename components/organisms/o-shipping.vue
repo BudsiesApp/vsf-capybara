@@ -165,6 +165,17 @@
         :disabled="isFormFieldsDisabled"
       />
     </div>
+
+    <div class="form">
+      <SfCheckbox
+        v-model="useShippingAddressAsBilling"
+        class="form__element form__checkbox"
+        name="useShippingAddressAsBilling"
+        :label="$t('Use as Billing Address')"
+        :disabled="isFormFieldsDisabled"
+      />
+    </div>
+
     <SfHeading
       :title="$t('Shipping method')"
       :level="3"
@@ -205,7 +216,11 @@
           :disabled="isContinueButtonDisabled"
           @click="saveDataToCheckout"
         >
-          {{ $t('Continue to payment') }}
+          {{
+            useShippingAddressAsBilling
+              ? $t('Go review the order')
+              : $t('Continue to payment')
+          }}
         </SfButton>
         <SfButton
           type="submit"
@@ -228,6 +243,7 @@
 </template>
 <script>
 import { parsePhoneNumberWithError } from 'libphonenumber-js';
+import { mapGetters } from 'vuex';
 import { required, requiredIf, minLength } from 'vuelidate/lib/validators';
 import { unicodeAlpha, unicodeAlphaNum } from '@vue-storefront/core/helpers/validators';
 import {
@@ -240,6 +256,7 @@ import {
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { IS_SHIPPING_METHODS_SYNCING } from '@vue-storefront/core/modules/cart';
+import { CHECKOUT_SET_USE_SHIPPING_AS_BILLING_MUTATION, CHECKOUT_USE_SHIPPING_ADDRESS_AS_BILLING_GETTER, CHECKOUT_COPY_SHIPPING_TO_BILLING_ADDRESS_MUTATION } from '@vue-storefront/core/modules/checkout';
 import { Shipping } from '@vue-storefront/core/modules/checkout/components/Shipping';
 
 import { createSmoothscroll } from 'theme/helpers';
@@ -317,6 +334,17 @@ export default {
     };
   },
   computed: {
+    ...mapGetters({
+      isVirtualCart: 'cart/isVirtualCart'
+    }),
+    useShippingAddressAsBilling: {
+      get () {
+        return this.$store.getters[CHECKOUT_USE_SHIPPING_ADDRESS_AS_BILLING_GETTER];
+      },
+      set (value) {
+        this.$store.commit(CHECKOUT_SET_USE_SHIPPING_AS_BILLING_MUTATION, value);
+      }
+    },
     isShippingMethodsSyncing () {
       return this.$store.getters[IS_SHIPPING_METHODS_SYNCING];
     },
@@ -447,6 +475,12 @@ export default {
         SET_PERSISTED_CUSTOMER_SHIPPING_COUNTRY,
         this.shipping.country
       );
+
+      if (this.useShippingAddressAsBilling) {
+        this.$store.commit(
+          CHECKOUT_COPY_SHIPPING_TO_BILLING_ADDRESS_MUTATION
+        );
+      }
 
       this.sendDataToCheckout();
       await this.$store.dispatch('cart/syncTotals', { forceServerSync: true });

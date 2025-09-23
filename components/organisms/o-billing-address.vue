@@ -7,14 +7,6 @@
     />
     <div class="form" :disabled="isAddressFormDisabled">
       <SfCheckbox
-        v-if="!isVirtualCart"
-        v-model="sendToShippingAddress"
-        class="form__element form__checkbox -always-enabled"
-        name="sendToShippingAddress"
-        :label="$t('Copy address data from shipping')"
-        :disabled="isFormFieldsDisabled"
-      />
-      <SfCheckbox
         v-if="hasBillingData()"
         v-model="sendToBillingAddress"
         class="form__element form__checkbox -always-enabled"
@@ -25,7 +17,6 @@
 
       <div
         class="_form-fields"
-        v-show="showAddressFormFields"
       >
         <SfInput
           v-model.trim="payment.firstName"
@@ -317,7 +308,7 @@ export default {
       return this.payment.country && this.payment.country !== unitedStatesCountryCode;
     },
     isAddressFormDisabled () {
-      return this.sendToShippingAddress || this.sendToBillingAddress;
+      return this.sendToBillingAddress;
     },
     isSelectedCountryHasStates () {
       if (!this.payment.country || !this.states) {
@@ -362,9 +353,6 @@ export default {
       }
 
       return false;
-    },
-    showAddressFormFields () {
-      return !this.sendToShippingAddress;
     },
     showVatIdField () {
       return !!this.payment.country && this.payment.country !== unitedStatesCountryCode;
