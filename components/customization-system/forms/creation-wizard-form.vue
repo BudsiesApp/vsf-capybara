@@ -49,7 +49,7 @@
                   :value="customizationOptionValue[customization.id]"
                   @input="onCustomizationOptionInput"
                   @customization-option-busy-state-changed="
-                    onCustomizationOptionBusyChanged
+                    onEntityBusyChanged
                   "
                 />
 
@@ -91,7 +91,7 @@
                 :show-quantity="!isCustomizeFlow"
                 @input="onCustomizationOptionInput"
                 @customization-option-busy-state-changed="
-                  onCustomizationOptionBusyChanged
+                  onEntityBusyChanged
                 "
               />
             </sf-step>
@@ -130,7 +130,7 @@ import {
   useCustomizationState,
   useAvailableCustomizations,
   useOptionValueActions,
-  useCustomizationsBusyState,
+  useEntityBusyState,
   CustomizationOptionValue,
   useCustomizationsGroups,
   useCustomizationsBundleOptions,
@@ -149,6 +149,7 @@ import {
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
+import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import { useCreationWizardFormSteps } from 'theme/helpers/use-creation-wizard-form-steps';
 import { useCreationWizardGtmEvents } from 'theme/helpers/use-creation-wizard-gtm-events';
@@ -303,8 +304,8 @@ export default defineComponent({
         removeCustomizationOptionValue,
         addCustomizationOptionValue
       );
-    const { isSomeCustomizationOptionBusy, onCustomizationOptionBusyChanged } =
-      useCustomizationsBusyState();
+    const { isSomeEntityBusy, onEntityBusyChanged } =
+      useEntityBusyState();
     function onCustomizationOptionInput (payload: {
       customizationId: string,
       value: CustomizationOptionValue
@@ -537,7 +538,7 @@ export default defineComponent({
     });
 
     const isSubmitButtonDisabled = computed<boolean>(() => {
-      return isDisabled.value || isSomeCustomizationOptionBusy.value;
+      return isDisabled.value || isSomeEntityBusy.value;
     });
 
     const {
@@ -557,12 +558,13 @@ export default defineComponent({
       ...useFormValidation(validationObserver, () =>
         getAllFormRefs(context.refs)
       ),
+      ...useBulkImagesUpload(context),
       currentProduct,
       filteredCustomizationAvailableOptionValues,
       customizationOptionValue,
       isDisabled,
       isSubmitButtonDisabled,
-      onCustomizationOptionBusyChanged,
+      onEntityBusyChanged,
       onCustomizationOptionInput,
       onFormSubmit,
       submitButtonText,
