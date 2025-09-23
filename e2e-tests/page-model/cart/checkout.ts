@@ -177,10 +177,15 @@ export class ShippingStep {
   public shippingMethodSelector: Locator;
   public continueToPaymentButton: Locator;
 
+  public useShippingAddressAsBillingCheckbox: Locator;
+  public goToReviewButton: Locator;
+
   public constructor (public readonly page: Page) {
     this.addressForm = new AddressForm(page);
     this.shippingMethodSelector = page.locator('input.form__radio.shipping input[type="radio"]');
     this.continueToPaymentButton = page.locator('button:has-text("Continue to payment")');
+    this.useShippingAddressAsBillingCheckbox = page.locator('input[name="useShippingAddressAsBilling"]').locator('..');
+    this.goToReviewButton = page.locator('button:has-text("Go review the order")');
   }
 
   public async expectShippingMethodsCountToBe (count: number): Promise<void> {
@@ -194,32 +199,49 @@ export class ShippingStep {
 
     await expect(selectedShippingMethod).toBeVisible({ timeout: 10000 });
   }
+
+  public async setUseShippingAddressAsBilling (shouldCheck: boolean): Promise<void> {
+    const isChecked = await this.useShippingAddressAsBillingCheckbox.isChecked();
+
+    if ((isChecked && shouldCheck) || (!isChecked && !shouldCheck)) {
+      return;
+    }
+
+    await this.useShippingAddressAsBillingCheckbox.locator('.sf-checkbox__label').click();
+
+    if (shouldCheck) {
+      await expect(this.useShippingAddressAsBillingCheckbox).toBeChecked();
+    } else {
+      await expect(this.useShippingAddressAsBillingCheckbox).not.toBeChecked();
+    }
+  }
+
+  public async nextStepButtonClick (): Promise<void> {
+    const nextStepButton = await this.getNextStepButton();
+    await nextStepButton.click();
+  }
+
+  public async getNextStepButton (): Promise<Locator> {
+    const isChecked = await this.useShippingAddressAsBillingCheckbox.isChecked();
+
+    if (isChecked) {
+      return this.goToReviewButton;
+    }
+
+    return this.continueToPaymentButton;
+  }
 }
 
 export class BillingStep {
   public addressForm: AddressForm;
-  public useShippingAddressCheckbox: Locator;
   public goToReviewButton: Locator;
 
   public constructor (public readonly page: Page) {
     this.addressForm = new AddressForm(page);
-    this.useShippingAddressCheckbox = page.locator('input[name="sendToShippingAddress"]').locator('..');
     this.goToReviewButton = page.locator('button:has-text("Go review the order")');
   }
 
-  public async useShippingAddress (): Promise<void> {
-    const isChecked = await this.useShippingAddressCheckbox.isChecked();
-
-    if (isChecked) {
-      return;
-    }
-
-    await this.useShippingAddressCheckbox.locator('.sf-checkbox__label').click();
-    await expect(this.useShippingAddressCheckbox).toBeChecked();
-  }
-
   public async fillAddress (
-    useShippingAddress: boolean = true,
     address?: string,
     country?: string,
     state?: string,
@@ -227,14 +249,6 @@ export class BillingStep {
     zipCode?: string,
     phone?: string
   ) {
-    if (useShippingAddress) {
-      return;
-    }
-
-    if (await this.useShippingAddressCheckbox.isVisible()) {
-      await this.useShippingAddressCheckbox.locator('.sf-checkbox__label').click();
-    }
-
     await this.addressForm.fillAddress(
       address,
       country,
@@ -332,11 +346,10 @@ export class CheckoutPage {
     phone?: string
   ) {
     await this.shippingStep.addressForm.fillAddress(address, country, state, city, zipCode, phone);
-    await this.shippingStep.continueToPaymentButton.click();
+    await this.shippingStep.nextStepButtonClick();
   }
 
   public async fillBillingAddress (
-    useShippingAddress: boolean = true,
     address?: string,
     country?: string,
     state?: string,
@@ -344,7 +357,7 @@ export class CheckoutPage {
     zipCode?: string,
     phone?: string
   ) {
-    await this.billingStep.fillAddress(useShippingAddress, address, country, state, city, zipCode, phone);
+    await this.billingStep.fillAddress(address, country, state, city, zipCode, phone);
 
     await this.billingStep.goToReviewButton.click();
   }
