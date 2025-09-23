@@ -96,9 +96,9 @@ test('billing address form has correct validation', async ({ cartPage, checkoutP
   await checkoutPage.goto();
 
   await checkoutPage.personalDetailsStep.fillPersonalDetails();
+  await checkoutPage.shippingStep.setUseShippingAddressAsBilling(false);
   await checkoutPage.fillShippingAddress();
 
-  await checkoutPage.billingStep.useShippingAddressCheckbox.click();
   await checkoutPage.billingStep.addressForm.expectCorrectValidation();
 });
 
@@ -116,7 +116,6 @@ test('order can be placed', async ({ page, printedSocksPage, simpleProductPage, 
   await checkoutPage.goto();
   await checkoutPage.personalDetailsStep.fillPersonalDetails();
   await checkoutPage.fillShippingAddress();
-  await checkoutPage.fillBillingAddress();
   await checkoutPage.selectPaymentMethodAndPlaceOrder();
 });
 
@@ -134,8 +133,7 @@ test.skip('order can be placed and user account created', async ({ page, simpleP
   await checkoutPage.personalDetailsStep.fillPersonalDetails(undefined, undefined, email);
 
   await checkoutPage.fillShippingAddress();
-  await checkoutPage.fillBillingAddress();
-  await checkoutPage.selectPaymentMethodAndPlaceOrder(true);
+  await checkoutPage.selectPaymentMethodAndPlaceOrder();
   await expect(page.locator('._header .a-account-icon .sf-header__icon--is-active')).toBeVisible();
 });
 
@@ -180,7 +178,7 @@ test('Gift Cards payment is not available if cart contains Gift Card', async ({ 
 
   await checkoutPage.goto();
   await checkoutPage.personalDetailsStep.fillPersonalDetails();
-  await checkoutPage.fillBillingAddress(false);
+  await checkoutPage.fillBillingAddress();
 
   await checkoutPage.orderReviewStep.expectGiftCardPaymentToBeNotAvailable();
 });
@@ -198,6 +196,7 @@ test('shipping address and shipping method are correct while placing order', asy
     fedexAvailableAddress.lastName
   );
 
+  await checkoutPage.shippingStep.setUseShippingAddressAsBilling(false);
   await checkoutPage.shippingStep.addressForm.fillAddress(
     fedexAvailableAddress.address,
     fedexAvailableAddress.country,
@@ -206,14 +205,15 @@ test('shipping address and shipping method are correct while placing order', asy
     fedexAvailableAddress.zipCode,
     fedexAvailableAddress.phoneNumber
   );
-  await expect(checkoutPage.shippingStep.continueToPaymentButton).toBeDisabled();
-  await checkoutPage.shippingStep.expectShippingMethodToBeSelected(FEDEX_LABEL);
-  await expect(checkoutPage.shippingStep.continueToPaymentButton).not.toBeDisabled();
 
-  await checkoutPage.shippingStep.continueToPaymentButton.click();
+  const nextStepButton = await checkoutPage.shippingStep.getNextStepButton();
+  await expect(nextStepButton).toBeDisabled();
+  await checkoutPage.shippingStep.expectShippingMethodToBeSelected(FEDEX_LABEL);
+  await expect(nextStepButton).not.toBeDisabled();
+
+  await nextStepButton.click();
 
   await checkoutPage.billingStep.fillAddress(
-    false,
     billingAddress.address,
     billingAddress.country,
     billingAddress.state,
@@ -263,10 +263,8 @@ test('usps shipping method available and address data is correct while placing o
   );
 
   await checkoutPage.shippingStep.expectShippingMethodToBeSelected(USPS_LABEL);
-  await checkoutPage.shippingStep.continueToPaymentButton.click();
-
-  await checkoutPage.billingStep.fillAddress(true);
-  await checkoutPage.billingStep.goToReviewButton.click();
+  await checkoutPage.shippingStep.setUseShippingAddressAsBilling(true);
+  await checkoutPage.shippingStep.nextStepButtonClick();
 
   const placeOrderRequestPromise = checkoutPage.waitForPlaceOrderRequest();
   await checkoutPage.selectPaymentMethodAndPlaceOrder();
@@ -297,7 +295,8 @@ test('continue button is disabled if no shipping methods available', async ({ ca
 
   await checkoutPage.shippingStep.addressForm.countrySelectorFormField.selectByOptionTitle(COUNTRY_WITHOUT_SHIPPING_METHODS);
   await checkoutPage.shippingStep.expectShippingMethodsCountToBe(0);
-  await expect(checkoutPage.shippingStep.continueToPaymentButton).toBeDisabled();
+  const nextStepButton = await checkoutPage.shippingStep.getNextStepButton();
+  await expect(nextStepButton).toBeDisabled();
 });
 
 test('billing address is correct after "use shipping address" option is selected', async ({ cartPage, checkoutPage, printedSocksPage }) => {
@@ -321,14 +320,16 @@ test('billing address is correct after "use shipping address" option is selected
     fedexAvailableAddress.zipCode,
     fedexAvailableAddress.phoneNumber
   );
-  await expect(checkoutPage.shippingStep.continueToPaymentButton).toBeDisabled();
-  await checkoutPage.shippingStep.expectShippingMethodToBeSelected(FEDEX_LABEL);
-  await expect(checkoutPage.shippingStep.continueToPaymentButton).not.toBeDisabled();
+  const nextStepButton = await checkoutPage.shippingStep.getNextStepButton();
 
-  await checkoutPage.shippingStep.continueToPaymentButton.click();
+  await expect(nextStepButton).toBeDisabled();
+  await checkoutPage.shippingStep.expectShippingMethodToBeSelected(FEDEX_LABEL);
+  await expect(nextStepButton).not.toBeDisabled();
+
+  await checkoutPage.shippingStep.setUseShippingAddressAsBilling(false);
+  await checkoutPage.shippingStep.nextStepButtonClick();
 
   await checkoutPage.billingStep.fillAddress(
-    false,
     billingAddress.address,
     billingAddress.country,
     billingAddress.state,
@@ -341,10 +342,10 @@ test('billing address is correct after "use shipping address" option is selected
   await checkoutPage.billingStep.goToReviewButton.click();
 
   await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.orderReview);
-  await checkoutPage.goToStepByName(checkoutPage.stepsName.billing);
+  await checkoutPage.goToStepByName(checkoutPage.stepsName.shipping);
 
-  await checkoutPage.billingStep.useShippingAddress();
-  await checkoutPage.billingStep.goToReviewButton.click();
+  await checkoutPage.shippingStep.setUseShippingAddressAsBilling(true);
+  await checkoutPage.shippingStep.nextStepButtonClick();
 
   const placeOrderRequestPromise = checkoutPage.waitForPlaceOrderRequest();
   await checkoutPage.selectPaymentMethodAndPlaceOrder();
