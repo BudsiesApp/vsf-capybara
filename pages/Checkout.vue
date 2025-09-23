@@ -157,16 +157,20 @@ export default {
       return this.successOrderData && this.isSuccess;
     },
     availableSteps () {
-      const steps = this.isVirtualCart
-        ? this.steps.filter(step => step.key !== 'shipping')
-        : [...this.steps];
+      const steps = [];
 
-      return steps.map(step => {
-        if (step.key === 'payment' && this.useShippingAddressAsBilling && !this.isVirtualCart) {
-          return { ...step, hidden: true };
+      for (const step of this.steps) {
+        if (this.isVirtualCart && step.key === 'shipping') {
+          continue;
         }
-        return { ...step, hidden: false };
-      });
+
+        steps.push({
+          ...step,
+          hidden: step.key === 'payment' && this.useShippingAddressAsBilling && !this.isVirtualCart
+        });
+      }
+
+      return steps;
     },
     displayedSteps () {
       return this.availableSteps.filter((step) => !step.hidden);
