@@ -6,7 +6,27 @@
           :active="currentStep"
           :steps="availableSteps.map(step => step.name)"
           @change="changeStep"
+          :style="{
+            '--steps-progress-width': `${1 / displayedSteps.length * 100}%`,
+            '--steps-progress-active-step': displayedActiveStep
+          }"
         >
+          <template #steps="{ stepClick, step }">
+            <SfButton
+              :key="step.index"
+              v-show="!availableSteps[step.index].hidden"
+              class="sf-button--pure sf-steps__step"
+              :class="{
+                'sf-steps__step--done': step.done,
+                'sf-steps__step--current': step.current,
+                'sf-steps__step--disabled': step.disabled,
+              }"
+              @click="stepClick(step)"
+            >
+              <span class="sf-steps__title">{{ step.step }}</span>
+            </SfButton>
+          </template>
+
           <template>
             <ProductionSpotCountdown
               :can-show="canShowProductionSpotCountdown"
@@ -17,6 +37,7 @@
               v-for="step in availableSteps"
               :key="step.key"
               :name="step.name"
+              v-show="!step.hidden"
             >
               <component :is="step.component" :is-active="true" />
             </SfStep>
@@ -43,13 +64,14 @@
 </template>
 <script>
 import Checkout from '@vue-storefront/core/pages/Checkout';
-import { SfSteps } from '@storefront-ui/vue';
+import { CHECKOUT_USE_SHIPPING_ADDRESS_AS_BILLING_GETTER, ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
+import { SfButton, SfSteps } from '@storefront-ui/vue';
 import { mapGetters } from 'vuex';
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
-import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
+
 import { registerModule } from '@vue-storefront/core/lib/modules'
 
 import { Braintree } from 'src/modules/payment-braintree';
@@ -78,6 +100,7 @@ export default {
     }
   },
   components: {
+    SfButton,
     SfSteps,
     OBillingAddress,
     OShipping,
@@ -106,7 +129,8 @@ export default {
         {
           key: 'payment',
           name: this.$t('Billing address'),
-          component: OBillingAddress
+          component: OBillingAddress,
+          hidden: false
         },
         {
           key: 'orderReview',
@@ -119,7 +143,9 @@ export default {
   computed: {
     ...mapGetters({
       productsInCart: 'cart/getCartItems',
-      isVirtualCart: 'cart/isVirtualCart'
+      isVirtualCart: 'cart/isVirtualCart',
+      useShippingAddressAsBilling: CHECKOUT_USE_SHIPPING_ADDRESS_AS_BILLING_GETTER,
+      successOrderData: 'checkout/getSuccessOrderData'
     }),
     currentStep () {
       return this.availableSteps.findIndex(step => this.activeSection[step.key]);
@@ -131,11 +157,22 @@ export default {
       return this.successOrderData && this.isSuccess;
     },
     availableSteps () {
-      if (this.isVirtualCart) {
-        return this.steps.filter(step => step.key !== 'shipping');
-      }
+      const steps = this.isVirtualCart
+        ? this.steps.filter(step => step.key !== 'shipping')
+        : [...this.steps];
 
-      return this.steps;
+      return steps.map(step => {
+        if (step.key === 'payment' && this.useShippingAddressAsBilling && !this.isVirtualCart) {
+          return { ...step, hidden: true };
+        }
+        return { ...step, hidden: false };
+      });
+    },
+    displayedSteps () {
+      return this.availableSteps.filter((step) => !step.hidden);
+    },
+    displayedActiveStep () {
+      return this.displayedSteps.findIndex((step) => this.activeSection[step.key]);
     },
     isReviewStep () {
       return this.availableSteps[this.currentStep].key === orderReviewStepKey;
@@ -263,6 +300,14 @@ export default {
 
   ._production-spot-countdown {
     margin-top: var(--spacer-sm);
+  }
+
+  ::v-deep {
+    .sf-steps {
+      .sf-steps__progress {
+        --steps-progress-transform: scale3d(calc(var(--steps-progress-active-step, 0) + 0.5), 1, 1);
+      }
+    }
   }
 
   @include for-desktop {
