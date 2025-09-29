@@ -1,5 +1,5 @@
 <template>
-  <div class="m-base-form">
+  <form class="m-base-form">
     <validation-provider
       tag="div"
       class="_section"
@@ -40,7 +40,7 @@
       class="_section"
       v-slot="{ errors }"
       name="Project Name"
-      rules="required"
+      rules="required|min:1|max:40"
     >
       <AOrderedHeading
         :order="2"
@@ -69,7 +69,7 @@
       tag="div"
       class="_section"
       v-slot="{ errors }"
-      rules="required"
+      rules="required|min:1|max:10000"
       name="Design"
     >
       <AOrderedHeading
@@ -116,7 +116,7 @@
       <validation-provider
         tag="div"
         v-slot="{ errors, failedRules }"
-        rules="required|min_value:50"
+        rules="required|min_value:50|max_value:1000000"
         name="Quantity"
       >
         <SfInput
@@ -143,12 +143,16 @@
               Budsies.com
             </a>
           </template>
+
+          <template v-else>
+            {{ errors[0] }}
+          </template>
         </div>
       </validation-provider>
 
       <validation-provider
-        tag="div" v-slot="{ errors }"
-        rules="min_value:50"
+        tag="div" v-slot="{ errors, failedRules }"
+        rules="min_value:50|max_value:1000000"
         class="_additional-quantity"
         name="Additional Quantity"
         v-show="showAdditionalQuantity"
@@ -170,12 +174,16 @@
           class="_error-text"
           v-if="errors.length"
         >
-          <template>
+          <template v-if="failedRules.min_value">
             {{ $t('For orders less than 50, please upload your character to our sister company') }}
 
             <a :href="budsiesStoreDomain" target="_blank">
               Budsies.com
             </a>
+          </template>
+
+          <template v-else>
+            {{ errors[0] }}
           </template>
         </div>
       </validation-provider>
@@ -230,7 +238,7 @@
         v-slot="{ errors }"
         name="Deadline Date"
         :ref="getFieldAnchorName('Deadline Date')"
-        :rules="deadline === '1' ? 'required' : ''"
+        :rules="deadline === '1' ? `required|min_date:${minDeadlineDate}` : 'min_date:${minDeadlineDate}'"
       >
         <div
           class="sf-input _deadline-input"
@@ -241,6 +249,7 @@
             type="date"
             aria-label="Deadline Date"
             :disabled="!deadline || deadline === '0'"
+            :min="minDeadlineDate"
           >
 
           <div
@@ -300,7 +309,7 @@
       <div class="_content --half">
         <validation-provider
           v-slot="{ errors }"
-          rules="required"
+          rules="required|min:1|max:255"
           name="First Name"
           slim
         >
@@ -315,15 +324,24 @@
           />
         </validation-provider>
 
-        <SfInput
-          :label="$t('Last Name')"
-          name="last-name"
-          v-model="customerLastName"
-        />
+        <validation-provider
+          v-slot="{ errors }"
+          rules="min:1|max:255"
+          name="Last Name"
+          slim
+        >
+          <SfInput
+            :label="$t('Last Name')"
+            name="last-name"
+            v-model="customerLastName"
+            :valid="!errors.length"
+            :error-message="errors[0]"
+          />
+        </validation-provider>
 
         <validation-provider
           v-slot="{ errors }"
-          rules="required|email"
+          rules="required|email|max:255"
           name="Email"
           slim
         >
@@ -420,7 +438,7 @@
       :show-calculation-animation="showCalculationAnimation"
       @calculation-animation-finished="onCalculationAnimationFinished"
     />
-  </div>
+  </form>
 </template>
 
 <script lang="ts">
@@ -428,7 +446,7 @@ import { parsePhoneNumberWithError } from 'libphonenumber-js';
 import { PropType, computed, defineComponent, inject } from '@vue/composition-api';
 import config from 'config';
 import { ValidationProvider, extend } from 'vee-validate';
-import { email, required, max, min_value, regex } from 'vee-validate/dist/rules';
+import { email, required, max, min, min_value, max_value, regex } from 'vee-validate/dist/rules';
 import { TranslateResult } from 'vue-i18n';
 import { SfButton, SfInput, SfRadio, SfSelect } from '@storefront-ui/vue';
 import {
@@ -470,6 +488,20 @@ extend('min_value', {
   message: 'The \'{_field_}\' field should be greater than {min}'
 });
 
+extend('max_value', {
+  ...max_value,
+  message: 'The \'{_field_}\' field should be lower than {max}'
+});
+
+extend('min', {
+  ...min,
+  message: 'The \'{_field_}\' length should be greater than {length}'
+});
+extend('max', {
+  ...max,
+  message: 'The \'{_field_}\' length should be less than {length}'
+});
+
 extend('email', email);
 
 extend('regex', {
@@ -483,6 +515,16 @@ extend('phone', {
     return phoneHelpers.isValidPhoneNumber(value, country);
   },
   message: 'Please, enter valid phone number'
+});
+
+extend('min_date', {
+  params: ['min'],
+  validate (value, { min }: Record<string, any>) {
+    const dateValue = new Date(value);
+    const minDate = new Date(min);
+    return dateValue.getTime() > minDate.getTime()
+  },
+  message: 'The date must be on or after {min}'
 });
 
 export default defineComponent({
@@ -581,6 +623,11 @@ export default defineComponent({
       }
     });
 
+    const currentDate = new Date();
+    currentDate.setDate(currentDate.getDate() + 1);
+
+    const minDeadlineDate = currentDate.toISOString().split('T')[0];
+
     return {
       imageHandlerService,
       customerLastName,
@@ -588,6 +635,7 @@ export default defineComponent({
       customerEmail,
       customerPhone,
       country,
+      minDeadlineDate,
       ...usePersistedEmail(customerEmail),
       ...usePersistedLastName(customerLastName),
       ...usePersistedFirstName(customerFirstName),
