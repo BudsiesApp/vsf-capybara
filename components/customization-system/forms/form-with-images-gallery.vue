@@ -146,6 +146,7 @@ import {
   CustomizableProductFlowType,
   DraftOrderItem,
   CustomizationStateItem,
+  LockedCustomizationsFilterType,
   useLockedCustomizations,
   useAvailableOptionsValuesFilter
 } from 'src/modules/customization-system';
@@ -267,6 +268,7 @@ export default defineComponent({
       updateCustomizationOptionValue,
       mergeCustomizationState
     } = useCustomizationState(existingCartItem, initialCustomizationState);
+
     const {
       availableCustomizations,
       availableOptionCustomizations,
@@ -367,11 +369,13 @@ export default defineComponent({
     const {
       selectedLockedCustomizations,
       lockedCustomizationDictionary,
-      optionValuesFilter: lockedOptionValuesFilter
+      optionValuesFilter: lockedOptionValuesFilter,
+      customizationsFilter: lockedCustomizationsFilter
     } = useLockedCustomizations(
       customizationOptionValue,
       productCustomizations,
-      flow
+      flow,
+      LockedCustomizationsFilterType.UNSELECTED
     );
 
     const {
@@ -456,7 +460,7 @@ export default defineComponent({
       ...useCustomizationsFilter(
         availableOptionCustomizations,
         customizationAvailableOptionValues,
-        [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter]
+        [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter, lockedCustomizationsFilter]
       ),
       ...useProductGallery(
         product,
