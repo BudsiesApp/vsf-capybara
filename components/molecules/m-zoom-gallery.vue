@@ -140,7 +140,7 @@ import { OCarouselItem } from '../interfaces/o-carousel-item.interface';
 require('@cabbiepete/cloud-zoom');
 require('@cabbiepete/cloud-zoom/cloud-zoom.css');
 
-type ImageKeys = keyof ZoomGalleryAsset;
+type ImageKeys = keyof Omit<ZoomGalleryAsset, 'video'>;
 
 const debounceTime = 300;
 

@@ -1,10 +1,10 @@
 import { ImageSourceItem } from 'src/modules/budsies';
-import { VideoProvider } from 'src/modules/shared';
+import { AspectRatio, VideoProvider } from 'src/modules/shared';
 
 export interface ZoomGalleryVideoData {
   videoId: string,
   provider: VideoProvider,
-  aspectRatio?: string,
+  aspectRatio?: AspectRatio,
   displayControls?: boolean,
   autoplay?: boolean
 }
