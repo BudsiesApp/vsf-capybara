@@ -77,7 +77,7 @@ export function useProductGallery (
     const videos: ZoomGalleryAsset[] = videoDefs.map((v) => ({
       ...poster,
       video: {
-        videoId: 'F-dt-tCjtmI',
+        videoId: Math.random() > 0.5 ? 'F-dt-tCjtmI' : 'dCAP4DnO2DY',
         provider: VideoProvider.youtube,
         aspectRatio: v.aspectRatio,
         displayControls: true,
