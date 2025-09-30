@@ -20,7 +20,7 @@ import { InjectType } from 'src/modules/shared';
 import { ComponentWidthCalculator, SizeValue } from 'src/modules/vsf-storyblok-module';
 
 import MZoomGallery from 'theme/components/molecules/m-zoom-gallery.vue';
-import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
+import ZoomGalleryAsset from 'theme/interfaces/zoom-gallery-asset.interface';
 
 import { Blok } from 'src/modules/vsf-storyblok-module/components'
 import SliderData from './interfaces/slider-data.interface';
@@ -45,7 +45,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     itemData (): SliderData {
       return this.item as SliderData;
     },
-    slides (): ZoomGalleryImage[] {
+    slides (): ZoomGalleryAsset[] {
       const slides = [];
       for (const sliderItem of this.itemData.slider_items) {
         if (!sliderItem.image.filename) {
@@ -83,7 +83,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
           brakpointsList[SizeValue.xlarge]
         )
 
-        const slide: ZoomGalleryImage = {
+        const slide: ZoomGalleryAsset = {
           thumb: thumb.sourceItems,
           thumbFallback: thumb.fallbackSourceItem,
           stage: stage.sourceItems,

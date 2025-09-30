@@ -6,14 +6,14 @@ import { getProductGallery } from '@vue-storefront/core/modules/catalog/helpers'
 import Product from 'core/modules/catalog/types/Product';
 import { Customization } from 'src/modules/customization-system';
 
-import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
+import ZoomGalleryAsset from 'theme/interfaces/zoom-gallery-asset.interface';
 
 export function useProductGallery (
   product: Ref<Product>,
   customizations: Ref<Customization[]>,
   selectedOptionValuesIds: ComputedRef<string[]>
 ) {
-  const mainProductImages = computed<ZoomGalleryImage[]>(() => {
+  const mainProductImages = computed<ZoomGalleryAsset[]>(() => {
     return getProductGallery(product.value)
       .map((image: any) => {
         return {
@@ -24,8 +24,8 @@ export function useProductGallery (
         };
       });
   });
-  const optionValueImages = computed<Record<string, ZoomGalleryImage[]>>(() => {
-    const result: Record<string, ZoomGalleryImage[]> = {};
+  const optionValueImages = computed<Record<string, ZoomGalleryAsset[]>>(() => {
+    const result: Record<string, ZoomGalleryAsset[]> = {};
 
     for (const customization of customizations.value) {
       if (!customization.optionData?.values || !customization.optionData?.hasGalleryImages) {
@@ -53,12 +53,12 @@ export function useProductGallery (
     return result;
   });
 
-  const galleryImages = computed<ZoomGalleryImage[]>(() => {
+  const galleryImages = computed<ZoomGalleryAsset[]>(() => {
     if (!selectedOptionValuesIds.value.length) {
       return mainProductImages.value;
     }
 
-    const selectedOptionValuesImages: ZoomGalleryImage[] = [];
+    const selectedOptionValuesImages: ZoomGalleryAsset[] = [];
 
     if (!selectedOptionValuesIds.value.length) {
       return mainProductImages.value;

@@ -19,17 +19,17 @@
         :horizontal-slides="isHorizontalThumbnails"
         @slide-clicked="onThumbnailSlideClicked"
       >
-        <template #default="{ item: image }">
-          <div :key="JSON.stringify(image.thumb)" class="_thumbnail-item">
+        <template #default="{ item: asset }">
+          <div :key="JSON.stringify(asset.thumb)" class="_thumbnail-item">
             <div class="_thumbnail-item-content-wrapper">
               <BaseImage
                 class="_image"
                 object-fit="cover"
-                :src="getImageSrc(image, 'thumb')"
-                :srcsets="getImageSrcSets(image, 'thumb')"
-                :fallback-srcset="getImageFallbackSrcSet(image, 'thumbFallback')"
-                :alt="getThumbnailAlt(image)"
-                :title="image.title"
+                :src="getImageSrc(asset, 'thumb')"
+                :srcsets="getImageSrcSets(asset, 'thumb')"
+                :fallback-srcset="getImageFallbackSrcSet(asset, 'thumbFallback')"
+                :alt="getThumbnailAlt(asset)"
+                :title="asset.title"
                 :aspect-ratio="1.0"
               />
             </div>
@@ -46,19 +46,22 @@
           @click="goToPreviousImage"
         />
 
-        <div class="_cloud-zoom-wrapper" v-if="stageImage">
+        <div
+          class="_cloud-zoom-wrapper"
+          v-if="stageAsset && !stageAsset.video"
+        >
           <div
             ref="stageImageWrapper"
             class="_image-wrapper cloud-zoom"
-            :href="stageImage.big"
+            :href="stageAsset.big"
           >
             <BaseImage
               class="_image"
-              :src="getImageSrc(stageImage, 'stage')"
-              :srcsets="getImageSrcSets(stageImage, 'stage')"
-              :fallback-srcset="getImageFallbackSrcSet(stageImage, 'stageFallback')"
-              :alt="stageImage.alt"
-              :title="stageImage.title"
+              :src="getImageSrc(stageAsset, 'stage')"
+              :srcsets="getImageSrcSets(stageAsset, 'stage')"
+              :fallback-srcset="getImageFallbackSrcSet(stageAsset, 'stageFallback')"
+              :alt="stageAsset.alt"
+              :title="stageAsset.title"
               :aspect-ratio="1.0"
               :lazy="lazyLoadStageImage"
             />
@@ -73,21 +76,30 @@
           :show-navigation-buttons="false"
           @active-index-changed="onStageActiveIndexChanged"
         >
-          <template #default="{ item: image }">
-            <div
-              class="_image-wrapper"
-              v-if="image"
-            >
+          <template #default="{ item: asset }">
+            <div v-if="asset" class="_image-wrapper">
               <BaseImage
+                v-if="!asset.video"
                 class="_image"
-                :src="getImageSrc(image, 'stage')"
-                :srcsets="getImageSrcSets(image, 'stage')"
-                :fallback-srcset="getImageFallbackSrcSet(image, 'stageFallback')"
-                :alt="image.alt"
-                :title="image.title"
+                :src="getImageSrc(asset, 'stage')"
+                :srcsets="getImageSrcSets(asset, 'stage')"
+                :fallback-srcset="getImageFallbackSrcSet(asset, 'stageFallback')"
+                :alt="asset.alt"
+                :title="asset.title"
                 :aspect-ratio="1.0"
                 :lazy="true"
               />
+
+              <div v-else class="_video-wrapper">
+                <StreamingVideo
+                  v-if="asset.video"
+                  :video-id="asset.video.videoId"
+                  :provider="asset.video.provider"
+                  :aspect-ratio="asset.video.aspectRatio"
+                  :display-controls="asset.video.displayControls"
+                  :auto-play="asset.video.autoplay"
+                />
+              </div>
             </div>
           </template>
         </o-carousel>
@@ -119,8 +131,8 @@ import Vue, { PropType } from 'vue';
 import jQuery from 'jquery';
 
 import { BaseImage, ImageSourceItem } from 'src/modules/budsies';
-import { BreakpointValue } from 'src/modules/shared';
-import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
+import { BreakpointValue, StreamingVideo } from 'src/modules/shared';
+import ZoomGalleryAsset from 'theme/interfaces/zoom-gallery-asset.interface';
 
 import OCarousel from '../organisms/o-carousel.vue';
 import { OCarouselItem } from '../interfaces/o-carousel-item.interface';
@@ -128,7 +140,7 @@ import { OCarouselItem } from '../interfaces/o-carousel-item.interface';
 require('@cabbiepete/cloud-zoom');
 require('@cabbiepete/cloud-zoom/cloud-zoom.css');
 
-type ImageKeys = keyof ZoomGalleryImage;
+type ImageKeys = keyof ZoomGalleryAsset;
 
 const debounceTime = 300;
 
@@ -139,11 +151,12 @@ export default Vue.extend({
   name: 'MZoomGallery',
   components: {
     BaseImage,
-    OCarousel
+    OCarousel,
+    StreamingVideo
   },
   props: {
     images: {
-      type: Array as PropType<ZoomGalleryImage[]>,
+      type: Array as PropType<ZoomGalleryAsset[]>,
       default: () => []
     },
     horizontalThumbnails: {
@@ -176,10 +189,10 @@ export default Vue.extend({
       return this.currentIndex === this.carouselItems.length - 1;
     },
     carouselItems (): OCarouselItem[] {
-      return this.images.map((image) => {
+      return this.images.map((asset) => {
         return {
-          key: image.big,
-          data: image
+          key: asset.big,
+          data: asset
         };
       });
     },
@@ -190,7 +203,7 @@ export default Vue.extend({
 
       return false;
     },
-    stageImage (): ZoomGalleryImage | undefined {
+    stageAsset (): ZoomGalleryAsset | undefined {
       if (this.currentIndex == null) {
         return undefined;
       }
@@ -239,13 +252,13 @@ export default Vue.extend({
     window.removeEventListener('resize', this.fWindowResizeHandler);
   },
   methods: {
-    getThumbnailAlt (image: ZoomGalleryImage): string {
-      if (!image.alt) {
+    getThumbnailAlt (asset: ZoomGalleryAsset): string {
+      if (!asset.alt) {
         return this.$t('Select to view image').toString();
       }
 
       return this.$t("Select to view '{alt}' image", {
-        alt: image.alt
+        alt: asset.alt
       }).toString();
     },
     onStageActiveIndexChanged (realIndex: number): void {
@@ -294,10 +307,14 @@ export default Vue.extend({
         return false;
       }
 
+      if (!this.stageAsset || this.stageAsset.video) {
+        return false;
+      }
+
       return window.innerWidth > BreakpointValue.MEDIUM;
     },
     getImageSrc (
-      image: ZoomGalleryImage,
+      image: ZoomGalleryAsset,
       variant: ImageKeys
     ): string | undefined {
       const value = image[variant];
@@ -308,7 +325,7 @@ export default Vue.extend({
       return value;
     },
     getImageSrcSets (
-      image: ZoomGalleryImage,
+      image: ZoomGalleryAsset,
       variant: ImageKeys
     ): ImageSourceItem[] | undefined {
       const value = image[variant];
@@ -319,7 +336,7 @@ export default Vue.extend({
       return value;
     },
     getImageFallbackSrcSet (
-      image: ZoomGalleryImage,
+      image: ZoomGalleryAsset,
       variant: ImageKeys
     ): ImageSourceItem | undefined {
       const value = image[variant];
@@ -396,7 +413,7 @@ export default Vue.extend({
   },
   watch: {
     images: {
-      handler (prev: ZoomGalleryImage[], next: ZoomGalleryImage[]) {
+      handler (prev: ZoomGalleryAsset[], next: ZoomGalleryAsset[]) {
         if (JSON.stringify(prev) === JSON.stringify(next)) {
           return;
         }
