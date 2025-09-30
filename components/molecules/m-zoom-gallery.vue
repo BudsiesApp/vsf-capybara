@@ -77,7 +77,11 @@
           @active-index-changed="onStageActiveIndexChanged"
         >
           <template #default="{ item: asset }">
-            <div v-if="asset" class="_image-wrapper">
+            <div
+              v-if="asset"
+              class="_image-wrapper"
+              :class="{ '-video': !!asset.video }"
+            >
               <BaseImage
                 v-if="!asset.video"
                 class="_image"
@@ -95,7 +99,6 @@
                   v-if="asset.video"
                   :video-id="asset.video.videoId"
                   :provider="asset.video.provider"
-                  :aspect-ratio="asset.video.aspectRatio"
                   :display-controls="asset.video.displayControls"
                   :auto-play="asset.video.autoplay"
                 />
@@ -538,6 +541,21 @@ $bullet-size: 8px;
       ._image {
         width: 100%;
         height: 100%;
+      }
+
+      &.-video {
+        padding-bottom: 100%;
+      }
+    }
+
+    ._video-wrapper {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+
+      .streaming-video {
+        height: 100%;
+        padding-top: 0;
       }
     }
 

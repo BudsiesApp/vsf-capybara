@@ -7,6 +7,7 @@ import Product from 'core/modules/catalog/types/Product';
 import { Customization } from 'src/modules/customization-system';
 
 import ZoomGalleryAsset from 'theme/interfaces/zoom-gallery-asset.interface';
+import { AspectRatio, VideoProvider } from 'src/modules/shared';
 
 export function useProductGallery (
   product: Ref<Product>,
@@ -38,8 +39,8 @@ export function useProductGallery (
         }
 
         result[value.id] = value.galleryImages
-          .sort((a, b) => a.sn - b.sn)
-          .map(image => {
+          .sort((a: any, b: any) => a.sn - b.sn)
+          .map((image: any) => {
             return {
               stage: getThumbnailPath(image.imageUrl, config.products.gallery.width, config.products.gallery.height, ''),
               thumb: getThumbnailPath(image.imageUrl, config.products.gallery.width, config.products.gallery.height, ''),
@@ -52,10 +53,45 @@ export function useProductGallery (
 
     return result;
   });
+  function appendVideos (assets: ZoomGalleryAsset[]): ZoomGalleryAsset[] {
+    if (!assets.length) {
+      return assets;
+    }
+
+    const base = assets[0];
+    const poster = {
+      stage: base.stage,
+      thumb: base.thumb,
+      big: base.big,
+      alt: base.alt,
+      title: base.title
+    };
+
+    const videoDefs: { aspectRatio: AspectRatio }[] = [
+      { aspectRatio: AspectRatio.A16_9 },
+      { aspectRatio: AspectRatio.A4_3 },
+      { aspectRatio: AspectRatio.A16_10 },
+      { aspectRatio: AspectRatio.A9_16 }
+    ];
+
+    const videos: ZoomGalleryAsset[] = videoDefs.map((v) => ({
+      ...poster,
+      video: {
+        videoId: 'F-dt-tCjtmI',
+        provider: VideoProvider.youtube,
+        aspectRatio: v.aspectRatio,
+        displayControls: true,
+        autoplay: false
+      }
+    }));
+
+    return [...videos, ...assets];
+  }
 
   const galleryImages = computed<ZoomGalleryAsset[]>(() => {
     if (!selectedOptionValuesIds.value.length) {
-      return mainProductImages.value;
+      const base = mainProductImages.value;
+      return appendVideos(base);
     }
 
     const selectedOptionValuesImages: ZoomGalleryAsset[] = [];
@@ -75,10 +111,10 @@ export function useProductGallery (
     }
 
     if (!selectedOptionValuesImages.length) {
-      return mainProductImages.value;
+      return appendVideos(mainProductImages.value);
     }
 
-    return selectedOptionValuesImages;
+    return appendVideos(selectedOptionValuesImages);
   });
 
   return {
