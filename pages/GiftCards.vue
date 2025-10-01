@@ -193,7 +193,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return this.product.am_gift_card_prices
     },
     baseGiftCardType (): AmGiftCardType {
-      const type = (this.product as any)?.am_giftcard_type;
+      const type = this.product?.am_giftcard_type;
 
       if (type === AmGiftCardType.PHYSICAL || type === AmGiftCardType.COMBINED) {
         return type;
