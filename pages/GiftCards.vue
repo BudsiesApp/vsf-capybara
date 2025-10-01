@@ -44,6 +44,7 @@
           :is-disabled="isSubmitting"
           :price-amount-list="priceAmountList"
           :custom-amount-values="customAmountValues"
+          :gift-card-type="baseGiftCardType"
           @submit-form="onFormSubmit"
           @show-preview="onShowPreviewModalHandler"
         />
@@ -190,6 +191,15 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       }
 
       return this.product.am_gift_card_prices
+    },
+    baseGiftCardType (): AmGiftCardType {
+      const type = (this.product as any)?.am_giftcard_type;
+
+      if (type === AmGiftCardType.PHYSICAL || type === AmGiftCardType.COMBINED) {
+        return type;
+      }
+
+      return AmGiftCardType.VIRTUAL;
     },
     product (): Product | null {
       const product = this.$store.getters['product/getCurrentProduct'];
@@ -344,6 +354,14 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       }
 
       if (this.product.sku === AMASTY_GIFT_CARD_SKU) {
+        let selectedGiftCardType = this.baseGiftCardType;
+
+        if (this.baseGiftCardType === AmGiftCardType.COMBINED) {
+          selectedGiftCardType = this.giftCardOrderFormData.shouldShipPhysically
+            ? AmGiftCardType.PHYSICAL
+            : AmGiftCardType.VIRTUAL;
+        }
+
         const options = {
           am_giftcard_image: this.giftCardOrderFormData.selectedTemplateId,
           am_giftcard_amount: this.giftCardOrderFormData.priceAmount,
@@ -353,9 +371,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           am_giftcard_recipient_name: this.recipientName,
           am_giftcard_recipient_email: this.recipientEmail,
           am_giftcard_message: this.customMessage,
-          am_giftcard_type: this.giftCardOrderFormData.shouldShipPhysically
-            ? AmGiftCardType.PHYSICAL
-            : AmGiftCardType.VIRTUAL
+          am_giftcard_type: selectedGiftCardType
         };
 
         return {

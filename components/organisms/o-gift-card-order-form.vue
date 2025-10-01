@@ -143,6 +143,7 @@
         </validation-provider>
 
         <SfCheckbox
+          v-if="showPhysicalCheckbox"
           v-model="shouldShipPhysically"
           class="_recipient-ship"
           :disabled="isDisabled"
@@ -230,6 +231,7 @@ import {
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
 import { SfCheckbox, SfButton, SfInput, SfSelect } from '@storefront-ui/vue';
+import { AmGiftCardType } from 'src/modules/gift-card';
 
 import GiftCardOrderFormData from 'theme/components/interfaces/gift-card-order-form-data.interface';
 import GiftCardTemplate from 'src/modules/gift-card/types/GiftCardTemplate.interface';
@@ -294,6 +296,10 @@ export default Vue.extend({
           max: DEFAULT_MAXIMUM_CUSTOM_PRICE_AMOUNT
         }
       )
+    },
+    giftCardType: {
+      type: Number as PropType<AmGiftCardType>,
+      default: () => AmGiftCardType.VIRTUAL
     }
   },
   computed: {
@@ -456,10 +462,21 @@ export default Vue.extend({
       return this.selectedPriceAmount === 0;
     },
     showRecipientFields (): boolean {
+      if (this.giftCardType === AmGiftCardType.PHYSICAL) {
+        return false;
+      }
+
+      if (this.giftCardType === AmGiftCardType.VIRTUAL) {
+        return true;
+      }
+
       return !this.shouldShipPhysically;
     },
     showSendFriendFields (): boolean {
       return this.shouldSendFriend;
+    },
+    showPhysicalCheckbox (): boolean {
+      return this.giftCardType === AmGiftCardType.COMBINED;
     },
     quantity: {
       get (): number {
@@ -492,6 +509,16 @@ export default Vue.extend({
       }
 
       this.customPriceAmount = 0;
+    },
+    giftCardType: {
+      immediate: true,
+      handler (value: AmGiftCardType) {
+        if (value === AmGiftCardType.VIRTUAL && this.shouldShipPhysically) {
+          this.shouldShipPhysically = false;
+        } else if (value === AmGiftCardType.PHYSICAL && !this.shouldShipPhysically) {
+          this.shouldShipPhysically = true;
+        }
+      }
     }
   }
 });
