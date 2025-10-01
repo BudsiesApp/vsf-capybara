@@ -513,9 +513,9 @@ export default Vue.extend({
     giftCardType: {
       immediate: true,
       handler (value: AmGiftCardType) {
-        if (value === AmGiftCardType.VIRTUAL && this.shouldShipPhysically) {
+        if (value === AmGiftCardType.VIRTUAL) {
           this.shouldShipPhysically = false;
-        } else if (value === AmGiftCardType.PHYSICAL && !this.shouldShipPhysically) {
+        } else if (value === AmGiftCardType.PHYSICAL) {
           this.shouldShipPhysically = true;
         }
       }
