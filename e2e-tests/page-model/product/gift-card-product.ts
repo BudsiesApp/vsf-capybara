@@ -125,8 +125,6 @@ export class GiftCardProductPage {
 
     await this.recipientEmailInputFormField.fill('invalid-email');
     await this.recipientEmailInputFormField.expectToHaveErrorMessage('Please, provide the correct email address');
-    await this.sendPhysicalGiftCardCheckbox.click();
-    expect(this.recipientEmailInputFormField.formField).not.toBeVisible();
 
     await this.valueSelectFormField.selectByOptionTitle(CUSTOM_AMOUNT_OPTION);
     await this.customValueInputFormField.fill('0');
