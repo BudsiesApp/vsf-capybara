@@ -63,12 +63,12 @@ export function useCreationWizardProductTypeStep (
       return;
     }
 
-    EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, currentProduct);
-
     await loadProduct(productSku);
     resetCustomizationState();
 
     afterProductTypeSet();
+
+    EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, currentProduct.value);
 
     EventBus.$emit(PlushieWizardEvents.PLUSHIE_WIZARD_TYPE_CHANGE, {
       productType: type,
