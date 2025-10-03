@@ -21,16 +21,9 @@
             v-for="item in customProductsItems"
             :key="item.label"
             class="_menu-item"
+            @mouseenter.native="hoveredItem = item"
+            @mouseleave.native="hoveredItem = null"
           >
-            <template v-if="item.thumbnail">
-              <BaseImage
-                :src="item.thumbnail"
-                :aspect-ratio="1.0"
-                alt=""
-                class="_menu-item-thumbnail"
-              />
-            </template>
-
             <router-link
               :to="item.url"
               @click.native="$emit('close')"
@@ -49,16 +42,9 @@
             v-for="item in householdItems"
             :key="item.label"
             class="_menu-item"
+            @mouseenter.native="hoveredItem = item"
+            @mouseleave.native="hoveredItem = null"
           >
-            <template v-if="item.thumbnail">
-              <BaseImage
-                :src="item.thumbnail"
-                :aspect-ratio="1.0"
-                alt=""
-                class="_menu-item-thumbnail"
-              />
-            </template>
-
             <router-link
               :to="item.url"
               @click.native="$emit('close')"
@@ -77,16 +63,9 @@
             v-for="item in accessoriesItems"
             :key="item.label"
             class="_menu-item"
+            @mouseenter.native="hoveredItem = item"
+            @mouseleave.native="hoveredItem = null"
           >
-            <template v-if="item.thumbnail">
-              <BaseImage
-                :src="item.thumbnail"
-                :aspect-ratio="1.0"
-                alt=""
-                class="_menu-item-thumbnail"
-              />
-            </template>
-
             <router-link
               :to="item.url"
               @click.native="$emit('close')"
@@ -138,6 +117,16 @@
           </SfListItem>
         </SfList>
       </SfMegaMenuColumn>
+
+      <template #aside>
+        <BaseImage
+          v-if="hoveredItemThumbnail"
+          :src="hoveredItemThumbnail"
+          :aspect-ratio="1.0"
+          alt=""
+          class="_menu-item-thumbnail desktop-only"
+        />
+      </template>
     </SfMegaMenu>
   </div>
 </template>
@@ -185,43 +174,43 @@ export default Vue.extend({
         {
           label: this.$t('Petsies Stuffed Animals'),
           url: '/forevers-pet-plush/',
-          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.ForeversCat), 100, 100)
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.ForeversCat), 320, 320)
         },
         {
           label: this.$t('Petsies Huggables'),
           url: '/huggables/',
-          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 100, 100)
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 320, 320)
         },
         {
           label: this.$t('Golf Club Headcovers'),
           url: '/golf-headcovers/',
-          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.FeltedMagnets), 100, 100)
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.FeltedMagnets), 320, 320)
         },
         {
           label: this.$t('Bobbleheads & Figurines'),
           url: '/pet-bobblehead-figurines/',
-          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 100, 100)
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 320, 320)
         },
         {
           label: this.$t('Magnets'),
           url: {
             name: 'felted-magnets-creation-page'
           },
-          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.FeltedMagnets), 100, 100)
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.FeltedMagnets), 320, 320)
         },
         {
           label: this.$t('Ornaments'),
           url: {
             name: 'felted-ornaments-creation-page'
           },
-          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 100, 100)
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 320, 320)
         }
       ],
       householdItems: [
         {
           label: this.$t('Pet Shaped Pillows'),
           url: '/pet-pillow/',
-          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.ForeversCat), 100, 100)
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.ForeversCat), 320, 320)
         },
         {
           label: this.$t('Square Photo Pillows'),
@@ -231,28 +220,28 @@ export default Vue.extend({
               slug: 'photo-pillows-designs'
             }
           },
-          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 100, 100)
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 320, 320)
         },
         {
           label: this.$t('Pet Photo Blankets'),
           url: {
             name: 'cut-out-blankets'
           },
-          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.FeltedMagnets), 100, 100)
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.FeltedMagnets), 320, 320)
         },
         {
           label: this.$t('Renaissance Blankets'),
           url: {
             name: 'renaissance-blankets'
           },
-          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.ForeversCat), 100, 100)
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.ForeversCat), 320, 320)
         },
         {
           label: this.$t('Pet Portraits'),
           url: {
             name: 'photo-portraits-creation-page'
           },
-          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 100, 100)
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 320, 320)
         }
       ],
       accessoriesItems: [
@@ -261,14 +250,14 @@ export default Vue.extend({
           url: {
             name: 'printed-socks-creation-page'
           },
-          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.FeltedMagnets), 100, 100)
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.FeltedMagnets), 320, 320)
         },
         {
           label: this.$t('Pajamas'),
           url: {
             name: 'pajamas-creation'
           },
-          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.ForeversCat), 100, 100)
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.ForeversCat), 320, 320)
         },
         // {
         //   label: this.$t('Hawaiian Shirts'),
@@ -281,28 +270,28 @@ export default Vue.extend({
           url: {
             name: 'golf-shirts-creation'
           },
-          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 100, 100)
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 320, 320)
         },
         {
           label: this.$t('Face Masks'),
           url: {
             name: 'printed-masks-creation-page'
           },
-          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.FeltedMagnets), 100, 100)
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.FeltedMagnets), 320, 320)
         },
         {
           label: this.$t('Pet Keychains'),
           url: {
             name: 'printed-keychains-creation-page'
           },
-          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.ForeversCat), 100, 100)
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.ForeversCat), 320, 320)
         },
         {
           label: this.$t('Tumblers'),
           url: {
             name: 'tumblers-creation'
           },
-          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 100, 100)
+          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 320, 320)
         }
       ],
       otherProductsItems: [
@@ -355,7 +344,17 @@ export default Vue.extend({
           label: this.$t('Reviews'),
           url: '/reviews/'
         }
-      ]
+      ],
+      hoveredItem: null
+    }
+  },
+  computed: {
+    hoveredItemThumbnail () {
+      if (!this.hoveredItem) {
+        return;
+      }
+
+      return this.hoveredItem.thumbnail;
     }
   },
   async mounted () {
@@ -427,17 +426,14 @@ export default Vue.extend({
       flex: 0 1 auto;
     }
 
+    .sf-mega-menu__aside {
+       --mega-menu-section-flex: 1 0 25%;
+       --mega-menu-aside-content-padding: var(--spacer-xl) var(--spacer-xl) 0 0;
+    }
+
     .sf-mega-menu-column {
       --mega-menu-margin: var(--spacer-xl) var(--spacer-2xl) 0 0;
       --list-item-margin: var(--spacer-base) 0 0 0;
-    }
-
-    ._menu-item-thumbnail {
-      position: absolute;
-      max-width: 100px;
-      left: 100%;
-      display: none;
-      z-index: 2;
     }
 
     ._menu-item {
@@ -465,7 +461,6 @@ export default Vue.extend({
       --mega-menu-margin: var(--spacer-base) var(--spacer-2xl) 0 0;
       --list-item-margin: var(--spacer-sm) 0 0 0;
       --mega-menu-column-title-margin: 0 0 var(--spacer-sm) 0;
-
     }
   }
 }
