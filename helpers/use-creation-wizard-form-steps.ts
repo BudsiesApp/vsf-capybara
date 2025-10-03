@@ -86,6 +86,10 @@ export function useCreationWizardFormSteps (
     (step: number) => {
       const stepQueryValue = getStepQueryValue(step, stepsList.value);
 
+      if (stepQueryValue === root.$route.query.step) {
+        return;
+      }
+
       root.$router.replace({
         query: {
           ...root.$route.query,
