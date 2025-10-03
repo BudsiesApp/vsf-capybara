@@ -25,6 +25,8 @@ export default function registerComponents () {
   add('tab', () => import(/* webpackChunkName: "vsf-storyblok" */ './Tab.vue'))
   add('carousel', () => import(/* webpackChunkName: "vsf-storyblok" */ './Carousel.vue'))
   add('lightbox_gallery', () => import(/* webpackChunkName: "vsf-storyblok" */ './LightboxGallery.vue'))
+  add('product_reviews', () => import(/* webpackChunkName: "vsf-storyblok" */ './ProductReviews.vue'))
+  add('reviews', () => import(/* webpackChunkName: "vsf-storyblok" */ './Reviews.vue'))
 
   // add('product', () => import('./Product.vue'))
   // add('category', () => import('./Category.vue'))
