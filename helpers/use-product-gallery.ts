@@ -58,32 +58,29 @@ export function useProductGallery (
       return assets;
     }
 
-    const base = assets[0];
-    const poster = {
-      stage: base.stage,
-      thumb: base.thumb,
-      big: base.big,
-      alt: base.alt,
-      title: base.title
-    };
-
-    const videoDefs: { aspectRatio: AspectRatio }[] = [
-      { aspectRatio: AspectRatio.A16_9 },
-      { aspectRatio: AspectRatio.A4_3 },
-      { aspectRatio: AspectRatio.A16_10 },
-      { aspectRatio: AspectRatio.A9_16 }
+    const videoDefs: { aspectRatio: AspectRatio, videoId: string, displayControls: boolean }[] = [
+      { aspectRatio: AspectRatio.A16_9, videoId: 'F-dt-tCjtmI', displayControls: true },
+      { aspectRatio: AspectRatio.A4_3, videoId: 'dCAP4DnO2DY', displayControls: false },
+      { aspectRatio: AspectRatio.A16_10, videoId: 'C21wgj31wqU', displayControls: true },
+      { aspectRatio: AspectRatio.A9_16, videoId: 'zlUZutWwQds', displayControls: false }
     ];
 
-    const videos: ZoomGalleryAsset[] = videoDefs.map((v) => ({
-      ...poster,
-      video: {
-        videoId: Math.random() > 0.5 ? 'F-dt-tCjtmI' : 'dCAP4DnO2DY',
-        provider: VideoProvider.youtube,
-        aspectRatio: v.aspectRatio,
-        displayControls: false,
-        autoplay: false
-      }
-    }));
+    const videos: ZoomGalleryAsset[] = videoDefs.map((v) => {
+      return {
+        stage: `https://img.youtube.com/vi/${v.videoId}/maxresdefault.jpg`,
+        thumb: `https://img.youtube.com/vi/${v.videoId}/maxresdefault.jpg`,
+        big: `https://img.youtube.com/vi/${v.videoId}/maxresdefault.jpg`,
+        alt: '',
+        title: '',
+        video: {
+          videoId: v.videoId,
+          provider: VideoProvider.youtube,
+          aspectRatio: v.aspectRatio,
+          displayControls: v.displayControls,
+          autoplay: false
+        }
+      };
+    });
 
     return [...videos, ...assets];
   }
