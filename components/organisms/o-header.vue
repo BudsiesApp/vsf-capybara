@@ -41,8 +41,8 @@
         </SfHeaderNavigationItem>
 
         <SfHeaderNavigationItem>
-          <router-link class="o-header__submenu" to="/how-to-order/">
-            {{ $t('How To Order') }}
+          <router-link class="o-header__submenu" to="/distributors/">
+            {{ $t('Distributors') }}
           </router-link>
         </SfHeaderNavigationItem>
 
@@ -78,7 +78,6 @@
 <script>
 import { SfButton, SfHeader, SfOverlay } from '@storefront-ui/vue';
 import { mapState, mapGetters } from 'vuex';
-
 
 import { CurrencySelector } from 'src/modules/currency';
 
