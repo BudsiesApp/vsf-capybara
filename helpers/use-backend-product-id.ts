@@ -23,6 +23,7 @@ export function useBackendProductId (productId: Ref<string | number>) {
         return ProductValue.PILLOW;
       case ProductId.PRINTED_SOCKS:
       case ProductId.PETSIES_PRINTED_SOCKS:
+      case ProductId.SHOPIFY_PETSIES_PRINTED_SOCKS:
         return ProductValue.PRINTED_SOCKS;
       case ProductId.PRINTED_MASKS:
         return ProductValue.PRINTED_MASKS;
@@ -38,15 +39,18 @@ export function useBackendProductId (productId: Ref<string | number>) {
       case ProductId.FIGURINES:
         return ProductValue.FIGURINES;
       case ProductId.RENAISSANCE_BLANKETS:
+      case ProductId.SHOPIFY_RENAISSANCE_BLANKETS:
         return ProductValue.RENAISSANCE_BLANKETS;
       case ProductId.CUT_OUT_BLANKETS:
       case ProductId.PETSIES_CUT_OUT_BLANKETS:
+      case ProductId.SHOPIFY_PETSIES_CUT_OUT_BLANKETS:
         return ProductValue.CUT_OUT_BLANKETS;
       case ProductId.PETSIES_FIGURINES:
         return ProductValue.PETSIES_FIGURINES;
       case ProductId.PETSIES_BOBBLEHEADS:
         return ProductValue.PETSIES_BOBBLEHEADS;
       case ProductId.PAJAMAS:
+      case ProductId.SHOPIFY_PAJAMAS:
         return ProductValue.PAJAMAS;
       case ProductId.CARTOON_PILLOW:
         return ProductValue.CARTOON_PILLOW;
@@ -70,8 +74,10 @@ export function useBackendProductId (productId: Ref<string | number>) {
       case ProductId.GOLF_COVERS_OTHER:
         return ProductValue.GOLF_COVERS_OTHER;
       case ProductId.PHOTO_PORTRAITS:
+      case ProductId.SHOPIFY_PHOTO_PORTRAITS:
         return ProductValue.PHOTO_PORTRAITS;
       case ProductId.TUMBLERS:
+      case ProductId.SHOPIFY_TUMBLERS:
         return ProductValue.TUMBLERS;
       case ProductId.PETSIES_HUGGABLES:
         return ProductValue.PETSIES_HUGGABLES;
