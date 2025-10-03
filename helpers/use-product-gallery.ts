@@ -80,7 +80,7 @@ export function useProductGallery (
         videoId: Math.random() > 0.5 ? 'F-dt-tCjtmI' : 'dCAP4DnO2DY',
         provider: VideoProvider.youtube,
         aspectRatio: v.aspectRatio,
-        displayControls: true,
+        displayControls: false,
         autoplay: false
       }
     }));
