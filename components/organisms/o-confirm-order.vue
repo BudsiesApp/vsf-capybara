@@ -178,7 +178,8 @@
           :key="method.code"
           :ref="method.code"
           :braintree-client="braintreeClient"
-          :is="componentsByMethodCode[method.code]"
+          :is="componentsByMethodCode[method.code].component"
+          v-bind="componentsByMethodCode[method.code].props"
           :show-content="payment.paymentMethod === method.code"
           :is-order-placement-disabled="isPlaceOrderButtonDisabled"
           @success="placeOrder"
@@ -346,17 +347,37 @@ export default {
       return paymentMethod ? paymentMethod.title : '';
     },
     showPlaceOrderButton () {
+      const autoPlacedMethods = [
+        braintreeSupportedMethodsCodes.PAY_PAL,
+        braintreeSupportedMethodsCodes.VENMO
+      ];
+
       return !this.isBraintreeMethodSelected ||
        (this.isBraintreeMethodSelected &&
-        this.paymentDetails.paymentMethod !== braintreeSupportedMethodsCodes.PAY_PAL);
+        !autoPlacedMethods.includes(this.paymentDetails.paymentMethod));
     },
     componentsByMethodCode () {
       const componentsByMethodCode = {};
 
       this.paymentMethods.forEach((method) => {
         const componentByMethodCode = getComponentByMethodCode(method.code);
-        componentsByMethodCode[method.code] = componentByMethodCode || 'div';
-      })
+        const props = {};
+
+        switch (method.code) {
+          case braintreeSupportedMethodsCodes.PAY_PAL:
+          case braintreeSupportedMethodsCodes.MAGENTO1_PAY_PAL:
+            props.fundingType = braintreeSupportedMethodsCodes.PAY_PAL;
+            break;
+          case braintreeSupportedMethodsCodes.VENMO:
+            props.fundingType = braintreeSupportedMethodsCodes.VENMO;
+            break;
+        }
+
+        componentsByMethodCode[method.code] = {
+          component: componentByMethodCode || 'div',
+          props
+        };
+      });
 
       return componentsByMethodCode;
     },
