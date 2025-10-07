@@ -57,6 +57,7 @@ export function useBackendProductId (productId: Ref<string | number>) {
       case ProductId.HAWAIIAN_SHIRTS:
         return ProductValue.HAWAIIAN_SHIRTS;
       case ProductId.GOLF_SHIRTS:
+      case ProductId.SHOPIFY_GOLF_SHIRTS:
         return ProductValue.GOLF_SHIRTS;
       case ProductId.FOREVERS_DOG:
       case ProductId.SHOPIFY_FOREVERS_DOG:
@@ -68,10 +69,13 @@ export function useBackendProductId (productId: Ref<string | number>) {
       case ProductId.SHOPIFY_FOREVERS_OTHER:
         return ProductValue.FOREVERS_OTHER;
       case ProductId.GOLF_COVERS_DOG:
+      case ProductId.SHOPIFY_GOLF_COVERS_DOG:
         return ProductValue.GOLF_COVERS_DOG;
       case ProductId.GOLF_COVERS_CAT:
+      case ProductId.SHOPIFY_GOLF_COVERS_CAT:
         return ProductValue.GOLF_COVERS_CAT;
       case ProductId.GOLF_COVERS_OTHER:
+      case ProductId.SHOPIFY_GOLF_COVERS_OTHER:
         return ProductValue.GOLF_COVERS_OTHER;
       case ProductId.PHOTO_PORTRAITS:
       case ProductId.SHOPIFY_PHOTO_PORTRAITS:
