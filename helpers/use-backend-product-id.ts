@@ -23,6 +23,7 @@ export function useBackendProductId (productId: Ref<string | number>) {
         return ProductValue.PILLOW;
       case ProductId.PRINTED_SOCKS:
       case ProductId.PETSIES_PRINTED_SOCKS:
+      case ProductId.SHOPIFY_PETSIES_PRINTED_SOCKS:
         return ProductValue.PRINTED_SOCKS;
       case ProductId.PRINTED_MASKS:
         return ProductValue.PRINTED_MASKS;
@@ -38,21 +39,25 @@ export function useBackendProductId (productId: Ref<string | number>) {
       case ProductId.FIGURINES:
         return ProductValue.FIGURINES;
       case ProductId.RENAISSANCE_BLANKETS:
+      case ProductId.SHOPIFY_RENAISSANCE_BLANKETS:
         return ProductValue.RENAISSANCE_BLANKETS;
       case ProductId.CUT_OUT_BLANKETS:
       case ProductId.PETSIES_CUT_OUT_BLANKETS:
+      case ProductId.SHOPIFY_PETSIES_CUT_OUT_BLANKETS:
         return ProductValue.CUT_OUT_BLANKETS;
       case ProductId.PETSIES_FIGURINES:
         return ProductValue.PETSIES_FIGURINES;
       case ProductId.PETSIES_BOBBLEHEADS:
         return ProductValue.PETSIES_BOBBLEHEADS;
       case ProductId.PAJAMAS:
+      case ProductId.SHOPIFY_PAJAMAS:
         return ProductValue.PAJAMAS;
       case ProductId.CARTOON_PILLOW:
         return ProductValue.CARTOON_PILLOW;
       case ProductId.HAWAIIAN_SHIRTS:
         return ProductValue.HAWAIIAN_SHIRTS;
       case ProductId.GOLF_SHIRTS:
+      case ProductId.SHOPIFY_GOLF_SHIRTS:
         return ProductValue.GOLF_SHIRTS;
       case ProductId.FOREVERS_DOG:
       case ProductId.SHOPIFY_FOREVERS_DOG:
@@ -64,14 +69,19 @@ export function useBackendProductId (productId: Ref<string | number>) {
       case ProductId.SHOPIFY_FOREVERS_OTHER:
         return ProductValue.FOREVERS_OTHER;
       case ProductId.GOLF_COVERS_DOG:
+      case ProductId.SHOPIFY_GOLF_COVERS_DOG:
         return ProductValue.GOLF_COVERS_DOG;
       case ProductId.GOLF_COVERS_CAT:
+      case ProductId.SHOPIFY_GOLF_COVERS_CAT:
         return ProductValue.GOLF_COVERS_CAT;
       case ProductId.GOLF_COVERS_OTHER:
+      case ProductId.SHOPIFY_GOLF_COVERS_OTHER:
         return ProductValue.GOLF_COVERS_OTHER;
       case ProductId.PHOTO_PORTRAITS:
+      case ProductId.SHOPIFY_PHOTO_PORTRAITS:
         return ProductValue.PHOTO_PORTRAITS;
       case ProductId.TUMBLERS:
+      case ProductId.SHOPIFY_TUMBLERS:
         return ProductValue.TUMBLERS;
       case ProductId.PETSIES_HUGGABLES:
         return ProductValue.PETSIES_HUGGABLES;
