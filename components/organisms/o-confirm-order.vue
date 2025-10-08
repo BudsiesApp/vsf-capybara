@@ -178,7 +178,7 @@
           :key="method.code"
           :ref="method.code"
           :braintree-client="braintreeClient"
-          :is="componentsByMethodCode[method.code].component"
+          :is="componentsByMethodCode[method.code]"
           :show-content="payment.paymentMethod === method.code"
           :is-order-placement-disabled="isPlaceOrderButtonDisabled"
           @success="placeOrder"
@@ -277,7 +277,7 @@ import { PAYMENT_ERROR_EVENT, PriceHelper } from 'src/modules/shared';
 import { createSmoothscroll } from 'theme/helpers';
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
 
-import PaymentPayPal, { PaymentMethod as PayPalPaymentMethod } from 'src/modules/payment-braintree/components/payment-pay-pal.vue';
+import PaymentPayPal from 'src/modules/payment-braintree/components/payment-pay-pal.vue';
 
 import APromoCode from 'theme/components/atoms/a-promo-code';
 import MPriceSummary from 'theme/components/molecules/m-price-summary';
@@ -372,10 +372,7 @@ export default {
 
       this.paymentMethods.forEach((method) => {
         const componentByMethodCode = getComponentByMethodCode(method.code);
-
-        componentsByMethodCode[method.code] = {
-          component: componentByMethodCode || 'div'
-        };
+        componentsByMethodCode[method.code] = componentByMethodCode || 'div';
       });
 
       return componentsByMethodCode;
@@ -406,6 +403,8 @@ export default {
       if (this.payment.paymentMethod === braintreeSupportedMethodsCodes.VENMO) {
         return [braintreeSupportedMethodsCodes.VENMO];
       }
+
+      return [];
     },
     showPaymentPayPal () {
       return [braintreeSupportedMethodsCodes.PAY_PAL, braintreeSupportedMethodsCodes.VENMO].includes(this.payment.paymentMethod);
