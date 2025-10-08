@@ -179,7 +179,6 @@
           :ref="method.code"
           :braintree-client="braintreeClient"
           :is="componentsByMethodCode[method.code].component"
-          v-bind="componentsByMethodCode[method.code].props"
           :show-content="payment.paymentMethod === method.code"
           :is-order-placement-disabled="isPlaceOrderButtonDisabled"
           @success="placeOrder"
@@ -225,6 +224,15 @@
       >
         {{ $t('Place the order') }}
       </SfButton>
+
+      <PaymentPayPal
+        v-if="showPaymentPayPal"
+        :braintree-client="braintreeClient"
+        :show-content="true"
+        :is-order-placement-disabled="isPlaceOrderButtonDisabled"
+        :payment-methods="paymentPayPalPaymentMethods"
+        @success="placeOrder"
+      />
     </div>
 
     <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
@@ -269,6 +277,8 @@ import { PAYMENT_ERROR_EVENT, PriceHelper } from 'src/modules/shared';
 import { createSmoothscroll } from 'theme/helpers';
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
 
+import PaymentPayPal, { PaymentMethod as PayPalPaymentMethod } from 'src/modules/payment-braintree/components/payment-pay-pal.vue';
+
 import APromoCode from 'theme/components/atoms/a-promo-code';
 import MPriceSummary from 'theme/components/molecules/m-price-summary';
 import OCartItemsTable from 'theme/components/organisms/o-cart-items-table';
@@ -290,7 +300,8 @@ export default {
     SfButton,
     SfHeading,
     SfAccordion,
-    SfCollectedProduct
+    SfCollectedProduct,
+    PaymentPayPal
   },
   mixins: [OrderReview, Payment],
   inject: {
@@ -361,21 +372,9 @@ export default {
 
       this.paymentMethods.forEach((method) => {
         const componentByMethodCode = getComponentByMethodCode(method.code);
-        const props = {};
-
-        switch (method.code) {
-          case braintreeSupportedMethodsCodes.PAY_PAL:
-          case braintreeSupportedMethodsCodes.MAGENTO1_PAY_PAL:
-            props.fundingType = braintreeSupportedMethodsCodes.PAY_PAL;
-            break;
-          case braintreeSupportedMethodsCodes.VENMO:
-            props.fundingType = braintreeSupportedMethodsCodes.VENMO;
-            break;
-        }
 
         componentsByMethodCode[method.code] = {
-          component: componentByMethodCode || 'div',
-          props
+          component: componentByMethodCode || 'div'
         };
       });
 
@@ -398,6 +397,18 @@ export default {
     },
     selectedCurrency () {
       return this.$store.getters[GET_ACTIVE_CURRENCY];
+    },
+    paymentPayPalPaymentMethods () {
+      if (this.payment.paymentMethod === braintreeSupportedMethodsCodes.PAY_PAL) {
+        return [braintreeSupportedMethodsCodes.PAY_PAL];
+      }
+
+      if (this.payment.paymentMethod === braintreeSupportedMethodsCodes.VENMO) {
+        return [braintreeSupportedMethodsCodes.VENMO];
+      }
+    },
+    showPaymentPayPal () {
+      return [braintreeSupportedMethodsCodes.PAY_PAL, braintreeSupportedMethodsCodes.VENMO].includes(this.payment.paymentMethod);
     }
   },
   beforeCreate () {
