@@ -367,7 +367,6 @@ export default defineComponent({
     const { isUnmounted } = useComponentUnmountedChecker();
 
     const {
-      selectedLockedCustomizations,
       lockedCustomizationDictionary,
       optionValuesFilter: lockedOptionValuesFilter,
       customizationsFilter: lockedCustomizationsFilter
@@ -491,7 +490,6 @@ export default defineComponent({
       onEntityBusyChanged,
       onCustomizationOptionInput,
       onFormSubmit,
-      selectedLockedCustomizations,
       shortDescription,
       submitButtonText,
       quantity,
