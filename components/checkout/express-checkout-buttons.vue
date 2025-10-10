@@ -40,8 +40,8 @@ import { CHECKOUT_UPDATE_SHIPPING_DETAILS_MUTATION, CHECKOUT_UPDATE_PAYMENT_DETA
 import {
   PaymentAmazonPay,
   SupportedMethodCodes as AmazonPaySupportedMethodCodes,
-  CLEAR_PAYMENT_NONCE_MUTATION,
-  PAYMENT_NONCE_GETTER
+  CLEAR_AMAZON_SESSION_ID_MUTATION,
+  AMAZON_SESSION_ID_GETTER
 } from 'src/modules/vsf-amazon-pay';
 import {
   supportedMethodsCodes as BraintreeSupportedMethodCodes,
@@ -346,18 +346,16 @@ export default defineComponent({
         const paymentMethod = root.$store.getters['checkout/getPaymentDetails'].paymentMethod;
         const isAmazonPay = paymentMethod === AmazonPaySupportedMethodCodes.AMAZON_PAY;
 
-        let paymentMethodNonce = '';
-
         const additionalData: Record<string, any> = {};
 
-        if (!isAmazonPay) {
-          paymentMethodNonce = root.$store.getters['braintree/paymentMethodNonce'];
+        if (isAmazonPay) {
+          const amazonSessionId = root.$store.getters[AMAZON_SESSION_ID_GETTER];
+          root.$store.commit(CLEAR_AMAZON_SESSION_ID_MUTATION);
+          additionalData.amazon_session_id = amazonSessionId;
+        } else {
+          const paymentMethodNonce = root.$store.getters['braintree/paymentMethodNonce'];
           root.$store.commit(SET_PAYMENT_METHOD_NONCE_MUTATION, undefined);
           additionalData.payment_method_nonce = paymentMethodNonce;
-        } else {
-          paymentMethodNonce = root.$store.getters[PAYMENT_NONCE_GETTER];
-          root.$store.commit(CLEAR_PAYMENT_NONCE_MUTATION);
-          additionalData.amazon_session_id = paymentMethodNonce;
         }
 
         await root.$store.dispatch(
