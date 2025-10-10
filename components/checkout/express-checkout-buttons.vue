@@ -55,7 +55,8 @@ import {
   createPhoneHelpers,
   PAYMENT_ERROR_EVENT,
   PaymentType,
-  ExpressCheckoutData
+  ExpressCheckoutData,
+  useExpressCheckoutTotals
 } from 'src/modules/shared';
 
 type AllSupportedMethodsCodes = BraintreeSupportedMethodCodes | AmazonPaySupportedMethodCodes;
@@ -185,41 +186,7 @@ export default defineComponent({
       EventBus.$off('order-after-placed', onOrderAfterPlaced);
     });
 
-    const totals = computed<ExpressCheckoutUpdateData['total']>(() => {
-      const totals = root.$store.getters['cart/getTotals'];
-
-      const total: ExpressCheckoutUpdateData['total'] = {
-        final: 0,
-        base: 0,
-        tax: 0,
-        shipping: 0,
-        discount: 0
-      };
-
-      for (const item of totals) {
-        if (item.code === 'grand_total') {
-          total.final = item.value;
-        }
-
-        if (item.code === 'subtotal') {
-          total.base = item.value;
-        }
-
-        if (item.code === 'tax') {
-          total.tax = item.value;
-        }
-
-        if (item.code === 'shipping') {
-          total.shipping = item.value;
-        }
-
-        if (item.code === 'discount') {
-          total.discount = item.value;
-        }
-      }
-
-      return total;
-    });
+    const { expressCheckoutTotals } = useExpressCheckoutTotals(context);
 
     const shippingMethods = computed<ExpressCheckoutUpdateData['availableShippingMethods']>(() => {
       return root.$store.getters['checkout/getShippingMethods'];
@@ -273,14 +240,14 @@ export default defineComponent({
 
       if (!selectedShippingMethod) {
         return {
-          total: totals.value,
+          total: expressCheckoutTotals.value,
           availableShippingMethods: shippingMethods.value,
           selectedShippingMethod: ''
         }
       }
 
       return {
-        total: totals.value,
+        total: expressCheckoutTotals.value,
         availableShippingMethods: shippingMethods.value,
         selectedShippingMethod: selectedShippingMethod.method_code || ''
       }
