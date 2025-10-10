@@ -174,7 +174,7 @@
 
       <div class="form__radio-group">
         <component
-          v-for="method in paymentMethods"
+          v-for="method in sortedPaymentMethods"
           :key="method.code"
           :ref="method.code"
           :braintree-client="braintreeClient"
@@ -408,6 +408,21 @@ export default {
     },
     showPaymentPayPal () {
       return [braintreeSupportedMethodsCodes.PAY_PAL, braintreeSupportedMethodsCodes.VENMO].includes(this.payment.paymentMethod);
+    },
+    sortedPaymentMethods () {
+      const sorted = [...this.paymentMethods];
+
+      const payPalIndex = sorted.findIndex((item) => item.code === braintreeSupportedMethodsCodes.PAY_PAL);
+      const venmoIndex = sorted.findIndex((item) => item.code === braintreeSupportedMethodsCodes.VENMO);
+
+      if (payPalIndex > venmoIndex) {
+        const payPal = sorted[payPalIndex];
+
+        sorted[payPalIndex] = sorted[venmoIndex];
+        sorted[venmoIndex] = payPal;
+      }
+
+      return sorted;
     }
   },
   beforeCreate () {
