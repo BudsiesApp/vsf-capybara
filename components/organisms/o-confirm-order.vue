@@ -273,6 +273,7 @@ import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { AFFIRM_MODAL_CLOSED } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';
 import { getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
 import { PAYMENT_ERROR_EVENT, PriceHelper } from 'src/modules/shared';
+import { SupportedMethodCodes as AmazonSupportedMethodCodes } from 'src/modules/vsf-amazon-pay';
 
 import { createSmoothscroll } from 'theme/helpers';
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
@@ -410,12 +411,13 @@ export default {
       return [braintreeSupportedMethodsCodes.PAY_PAL, braintreeSupportedMethodsCodes.VENMO].includes(this.payment.paymentMethod);
     },
     sortedPaymentMethods () {
-      const sorted = [...this.paymentMethods];
+      const sorted = this.paymentMethods
+        .filter((method) => method.code !== AmazonSupportedMethodCodes.AMAZON_PAY);
 
       const payPalIndex = sorted.findIndex((item) => item.code === braintreeSupportedMethodsCodes.PAY_PAL);
       const venmoIndex = sorted.findIndex((item) => item.code === braintreeSupportedMethodsCodes.VENMO);
 
-      if (payPalIndex > venmoIndex) {
+      if (payPalIndex >= 0 && venmoIndex >= 0 && payPalIndex > venmoIndex) {
         const payPal = sorted[payPalIndex];
 
         sorted[payPalIndex] = sorted[venmoIndex];
