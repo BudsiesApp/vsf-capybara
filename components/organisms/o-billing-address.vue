@@ -12,7 +12,6 @@
         class="form__element form__checkbox -always-enabled"
         name="sendToShippingAddress"
         :label="$t('Copy address data from shipping')"
-        :disabled="isFormFieldsDisabled"
       />
       <SfCheckbox
         v-if="hasBillingData()"
@@ -20,7 +19,6 @@
         class="form__element form__checkbox -always-enabled"
         name="sendToBillingAddress"
         :label="$t('Use my default billing data')"
-        :disabled="isFormFieldsDisabled"
       />
 
       <div
@@ -35,7 +33,6 @@
           autocomplete="given-name"
           :label="$t('First name')"
           :required="true"
-          :disabled="isFormFieldsDisabled"
           :valid="!$v.payment.firstName.$error"
           :error-message="
             !$v.payment.firstName.required
@@ -52,7 +49,6 @@
           autocomplete="family-name"
           :label="$t('Last name')"
           :required="true"
-          :disabled="isFormFieldsDisabled"
           :valid="!$v.payment.lastName.$error"
           :error-message="$t('Field is required')"
           @blur="$v.payment.lastName.$touch()"
@@ -65,7 +61,6 @@
           autocomplete="street-address"
           :label="$t('Address')"
           :required="true"
-          :disabled="isFormFieldsDisabled"
           :valid="!$v.payment.streetAddress.$error"
           :error-message="$t('Field is required')"
           @blur="$v.payment.streetAddress.$touch()"
@@ -88,7 +83,6 @@
           :options="countries"
           :valid="!$v.payment.country.$error"
           :error-message="$t('Field is required')"
-          :disabled="isFormFieldsDisabled"
           @change="onChangeCountry"
         />
 
@@ -99,7 +93,6 @@
           name="address-level1"
           autocomplete="address-level1"
           :label="$t('State / Province')"
-          :disabled="isFormFieldsDisabled"
         />
 
         <MMultiselect
@@ -121,7 +114,6 @@
           :options="getStatesForSelectedCountry"
           :valid="!$v.payment.region_id.$error"
           :error-message="$t('Field is required')"
-          :disabled="isFormFieldsDisabled"
         />
 
         <SfInput
@@ -132,7 +124,6 @@
           autocomplete="address-level2"
           :label="$t('City')"
           :required="true"
-          :disabled="isFormFieldsDisabled"
           :valid="!$v.payment.city.$error"
           :error-message="$t('Field is required')"
           @blur="$v.payment.city.$touch()"
@@ -145,7 +136,6 @@
           autocomplete="postal-code"
           :label="$t('Zip-code')"
           :required="true"
-          :disabled="isFormFieldsDisabled"
           :valid="!$v.payment.zipCode.$error"
           :error-message="
             !$v.payment.zipCode.required
@@ -171,7 +161,6 @@
           name="phone"
           autocomplete="tel"
           :label="$t('Phone number')"
-          :disabled="isFormFieldsDisabled"
           @blur="updatePhoneNumber"
         />
 
@@ -181,7 +170,6 @@
           class="form__element form__element--half"
           name="vat_id"
           :label="$t('Tax ID')"
-          :disabled="isFormFieldsDisabled"
         />
       </div>
     </div>
@@ -338,30 +326,6 @@ export default {
     },
     cartItems () {
       return this.$store.getters['cart/getCartItems'];
-    },
-    isFormFieldsDisabled () {
-      let paymentDetails = this.$store.getters['checkout/getPaymentDetails'];
-
-      if (paymentDetails.paymentMethod !== AMAZON_PAY_PAYMENT_METHOD_CODE) {
-        return false;
-      }
-
-      let amazonOrderState = this.$store.state[AMAZON_PAY_MODULE_KEY].orderState;
-
-      if (!amazonOrderState) {
-        return false;
-      }
-
-      if (paymentDetails.firstName !== '' &&
-        paymentDetails.lastName !== '' &&
-        paymentDetails.streetAddress !== '' &&
-        paymentDetails.city !== '' &&
-        paymentDetails.zipCode !== '' &&
-        paymentDetails.country !== '') {
-        return true;
-      }
-
-      return false;
     },
     showAddressFormFields () {
       return !this.sendToShippingAddress;
