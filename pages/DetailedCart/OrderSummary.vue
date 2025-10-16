@@ -42,7 +42,7 @@ import { Braintree } from 'src/modules/payment-braintree';
 
 import APromoCode from 'theme/components/atoms/a-promo-code.vue';
 import MPriceSummary from 'theme/components/molecules/m-price-summary.vue';
-import ExpressCheckoutButtons from 'src/modules/payment-braintree/components/express-checkout-buttons.vue';
+import ExpressCheckoutButtons from 'theme/components/checkout/express-checkout-buttons.vue';
 
 export default {
   name: 'OrderSummary',
