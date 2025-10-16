@@ -1,4 +1,5 @@
 import { PageName } from 'theme/pages/page-name';
+import { LayoutType } from 'theme/helpers/use-product-form-layout';
 
 const ErrorPage = () =>
   import(/* webpackChunkName: "vsf-error" */ 'theme/pages/Error');
@@ -52,6 +53,8 @@ const PasswordReset = () =>
   import(/* webpackChunkName: "vsf-password-reset" */ 'theme/pages/PasswordReset');
 const CustomizableProduct = () =>
   import(/* webpackChunkName: "vsf-customizable-product" */ 'theme/pages/CustomizableProduct');
+const OrderItemCustomize = () =>
+  import(/* webpackChunkName: "vsf-order-item-customize" */ 'theme/pages/OrderItemCustomize');
 const OrderItemsBulkCustomize = () =>
   import(/* webpackChunkName: "vsf-order-items-bulk-customize" */ 'theme/pages/OrderItemsBulkCustomize');
 
@@ -923,20 +926,6 @@ let routes = [
     path: '/plushie/index/create/type/nft-budsie/',
     redirect: {
       name: 'nft-budsies-create'
-    }
-  },
-  {
-    name: 'golf-head-covers-customize',
-    path: '/golf-head-covers/customize/',
-    component: OrderItemCustomize,
-    props: (route) => ({
-      orderItemId: route.query.orderItemId,
-      layout: LayoutType.CREATION_WIZARD,
-      sku: route.query.sku,
-      plushieType: PlushieType.GOLF_COVERS
-    }),
-    meta: {
-      auth: true
     }
   },
   {
