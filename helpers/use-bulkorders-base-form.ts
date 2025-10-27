@@ -24,7 +24,19 @@ export function useBulkOrdersBaseForm () {
 
   useBulkorderBaseFormPersistanceState(bulkordersBaseFormData);
 
+  function trimValues (): void {
+    // TODO: temporary - current TS version don't handle `value` type right in this case
+    const value = ((bulkordersBaseFormData as any).value as unknown as BulkordersBaseFormData);
+
+    value.name = value.name.trim();
+    value.description = value.description.trim();
+    value.customerEmail = value.customerEmail.trim();
+    value.customerFirstName = value.customerFirstName.trim();
+    value.customerLastName = value.customerLastName?.trim();
+  }
+
   return {
-    bulkordersBaseFormData
+    bulkordersBaseFormData,
+    trimValues
   }
 }

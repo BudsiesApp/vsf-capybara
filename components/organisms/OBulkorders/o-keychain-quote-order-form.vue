@@ -136,6 +136,7 @@ export default defineComponent({
         return;
       }
 
+      this.trimValues();
       const isValid = await this.validateAndGoToFirstError();
 
       if (!isValid) {
