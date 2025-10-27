@@ -12,7 +12,6 @@
         class="form__element form__checkbox -always-enabled"
         name="shipToMyAddress"
         :label="$t('Ship to my default address')"
-        :disabled="isFormFieldsDisabled"
       />
       <SfInput
         v-model.trim="shipping.firstName"
@@ -22,7 +21,6 @@
         autocomplete="given-name"
         :label="$t('First name')"
         :required="true"
-        :disabled="isFormFieldsDisabled"
         :valid="!$v.shipping.firstName.$error"
         :error-message="
           !$v.shipping.firstName.required
@@ -39,7 +37,6 @@
         autocomplete="family-name"
         :label="$t('Last name')"
         :required="true"
-        :disabled="isFormFieldsDisabled"
         :valid="!$v.shipping.lastName.$error"
         :error-message="$t('Field is required')"
         @blur="$v.shipping.lastName.$touch()"
@@ -52,7 +49,6 @@
         autocomplete="street-address"
         :label="$t('Address')"
         :required="true"
-        :disabled="isFormFieldsDisabled"
         :valid="!$v.shipping.streetAddress.$error"
         :error-message="$t('Field is required')"
         @blur="$v.shipping.streetAddress.$touch()"
@@ -71,7 +67,6 @@
         :options="countries"
         :valid="!$v.shipping.country.$error"
         :error-message="$t('Field is required')"
-        :disabled="isFormFieldsDisabled"
         @change="onChangeCountry"
       />
 
@@ -82,7 +77,6 @@
         name="address-level1"
         autocomplete="address-level1"
         :label="$t('State / Province')"
-        :disabled="isFormFieldsDisabled"
       />
 
       <MMultiselect
@@ -100,7 +94,6 @@
         :options="getStatesForSelectedCountry"
         :valid="!$v.shipping.region_id.$error"
         :error-message="$t('Field is required')"
-        :disabled="isFormFieldsDisabled"
       />
 
       <SfInput
@@ -111,7 +104,6 @@
         autocomplete="address-level2"
         :label="$t('City')"
         :required="true"
-        :disabled="isFormFieldsDisabled"
         :valid="!$v.shipping.city.$error"
         :error-message="$t('Field is required')"
         @blur="$v.shipping.city.$touch()"
@@ -125,7 +117,6 @@
         autocomplete="postal-code"
         :label="$t('Zip-code')"
         :required="true"
-        :disabled="isFormFieldsDisabled"
         :valid="!$v.shipping.zipCode.$error"
         :error-message="
           !$v.shipping.zipCode.required
@@ -152,7 +143,6 @@
         name="phone"
         autocomplete="tel"
         :label="$t('Phone number')"
-        :disabled="isFormFieldsDisabled"
         @blur="updatePhoneNumber"
       />
 
@@ -162,7 +152,6 @@
         class="form__element form__element--half"
         name="vat_id"
         :label="$t('Tax ID')"
-        :disabled="isFormFieldsDisabled"
       />
     </div>
     <SfHeading
@@ -348,19 +337,6 @@ export default {
     },
     getZipCode () {
       return this.shipping.zipCode;
-    },
-    isFormFieldsDisabled () {
-      if (this.$store.getters['checkout/getPaymentDetails'].paymentMethod !== AMAZON_PAY_PAYMENT_METHOD_CODE) {
-        return false;
-      }
-
-      let amazonOrderState = this.$store.state[AMAZON_PAY_MODULE_KEY].orderState;
-
-      if (amazonOrderState) {
-        return true;
-      }
-
-      return false;
     },
     showVatIdField () {
       return !!this.shipping.country && this.shipping.country !== unitedStatesCountryCode;

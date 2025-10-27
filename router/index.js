@@ -750,6 +750,33 @@ let routes = [
     }
   },
   {
+    name: 'golf-head-covers-customize',
+    path: '/golf-head-covers/customize/',
+    component: OrderItemCustomize,
+    props: (route) => ({
+      orderItemId: route.query.orderItemId,
+      layout: LayoutType.CREATION_WIZARD,
+      sku: route.query.sku,
+      plushieType: PlushieType.GOLF_COVERS
+    }),
+    meta: {
+      auth: true
+    }
+  },
+  {
+    name: 'printed-product-customize',
+    path: '/printed-product/customize/',
+    component: OrderItemCustomize,
+    props: (route) => ({
+      orderItemId: route.query.orderItemId,
+      layout: LayoutType.WITH_IMAGES_GALLERY,
+      sku: route.query.sku
+    }),
+    meta: {
+      auth: true
+    }
+  },
+  {
     path: '/order-items/bulk-customize/',
     name: 'order-items-bulk-customize',
     component: OrderItemsBulkCustomize,
