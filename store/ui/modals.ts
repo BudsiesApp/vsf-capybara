@@ -10,7 +10,6 @@ export enum ModalList {
   LanguageSwitcher = 'm-modal-language-switcher',
   OrderConfirmation = 'm-modal-order-confirmation',
   Newsletter = 'm-modal-newsletter',
-  AmazonPayOrderDetails = 'm-modal-amazonpay-order-details',
   WebsiteLeaving = 'm-modal-website-leaving',
   OrderError = 'm-modal-order-error',
   ImagesGallery = 'm-modal-images-gallery',
@@ -28,7 +27,6 @@ export const modalComponents = new Map([
   [ModalList.LanguageSwitcher, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-language-switcher.vue')],
   [ModalList.OrderConfirmation, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-order-confirmation.vue')],
   [ModalList.Newsletter, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-newsletter.vue')],
-  [ModalList.AmazonPayOrderDetails, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-amazonpay-order-details.vue')],
   [ModalList.WebsiteLeaving, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-website-leaving.vue')],
   [ModalList.OrderError, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-order-error.vue')],
   [ModalList.ImagesGallery, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-images-gallery.vue')]
