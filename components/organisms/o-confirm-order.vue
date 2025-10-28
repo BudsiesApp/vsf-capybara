@@ -416,6 +416,10 @@ export default {
       const payPalIndex = sorted.findIndex((item) => item.code === braintreeSupportedMethodsCodes.PAY_PAL);
       const venmoIndex = sorted.findIndex((item) => item.code === braintreeSupportedMethodsCodes.VENMO);
 
+      if (payPalIndex === -1 || venmoIndex === -1) {
+        return sorted;
+      }
+
       if (payPalIndex > venmoIndex) {
         const payPal = sorted[payPalIndex];
 
@@ -426,7 +430,7 @@ export default {
       return sorted;
     },
     filteredPaymentMethods () {
-      return this.paymentMethods.filter((method) => method.code !== AmazonSupportedMethodCodes.AMAZON_PAY);
+      return this.sortedPaymentMethods.filter((method) => method.code !== AmazonSupportedMethodCodes.AMAZON_PAY);
     }
   },
   beforeCreate () {
