@@ -411,7 +411,8 @@ export default {
       return [braintreeSupportedMethodsCodes.PAY_PAL, braintreeSupportedMethodsCodes.VENMO].includes(this.payment.paymentMethod);
     },
     sortedPaymentMethods () {
-      const sorted = [...this.paymentMethods];
+      const sorted = this.paymentMethods
+        .filter((method) => method.code !== AmazonSupportedMethodCodes.AMAZON_PAY);
 
       const payPalIndex = sorted.findIndex((item) => item.code === braintreeSupportedMethodsCodes.PAY_PAL);
       const venmoIndex = sorted.findIndex((item) => item.code === braintreeSupportedMethodsCodes.VENMO);
