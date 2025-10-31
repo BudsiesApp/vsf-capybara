@@ -141,7 +141,6 @@ import {
   useCustomizationState,
   useCustomizationStatePreservation,
   useEmailCustomization,
-  useExistingOrderItemImage,
   useOptionValueActions,
   useSelectedOptionValueUrlQuery,
   CustomizableProductFlowType,
@@ -159,6 +158,7 @@ import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
+import { useExistingOrderItemImage } from 'theme/helpers/use-existing-order-item-image';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useProductGallery } from 'theme/helpers/use-product-gallery';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
