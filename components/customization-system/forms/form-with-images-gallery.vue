@@ -158,7 +158,7 @@ import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
-import { useExistingOrderItemImage } from 'theme/helpers/use-existing-order-item-image';
+import { useDeliverableOrderItemImage } from 'theme/helpers/use-deliverable-order-item-image';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useProductGallery } from 'theme/helpers/use-product-gallery';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
@@ -196,8 +196,8 @@ export default defineComponent({
       type: Object as PropType<DraftOrderItem | undefined>,
       default: undefined
     },
-    existingImageUrl: {
-      type: String as PropType<string | undefined>,
+    orderItemId: {
+      type: Number as PropType<number | undefined>,
       default: undefined
     },
     flow: {
@@ -231,7 +231,7 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
-    const { canUsePersistedCustomizationState, existingCartItem, existingImageUrl, product, flow, draftOrderItem } = toRefs(props);
+    const { canUsePersistedCustomizationState, existingCartItem, orderItemId, product, flow, draftOrderItem } = toRefs(props);
 
     const isCustomizeFlow = computed<boolean>(() => {
       return flow.value === CustomizableProductFlowType.CUSTOMIZE;
@@ -318,8 +318,8 @@ export default defineComponent({
       return String(key);
     });
 
-    const { uploadExistingImage } = useExistingOrderItemImage(
-      existingImageUrl,
+    const { uploadExistingImage } = useDeliverableOrderItemImage(
+      orderItemId,
       existingCartItem,
       productCustomizations,
       customizationOptionValue,

@@ -2,15 +2,15 @@ import { Ref, inject } from '@vue/composition-api';
 
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 
-import { Customization, CustomizationOptionValue } from 'src/modules/customization-system';
+import { Customization, CustomizationOptionValue, fetchOrderItemDeliverables } from 'src/modules/customization-system';
 import ImageHandlerService from 'src/modules/file-storage/image-handler.service';
 
 import CustomizationOption from '../components/customization-system/customization-option.vue';
 
 const IMAGE_UPLOAD_CUSTOMIZATION_NAME = 'Customer Image';
 
-export function useExistingOrderItemImage (
-  imageUrl: Ref<string | undefined>,
+export function useDeliverableOrderItemImage (
+  orderItemId: Ref<number | undefined>,
   existingCartItem: Ref<CartItem | undefined>,
   customizations: Ref<Customization[]>,
   customizationOptionValue: Ref<Record<string, CustomizationOptionValue>>,
@@ -23,7 +23,21 @@ export function useExistingOrderItemImage (
       throw new Error('Image Handler Service is not defined');
     }
 
-    if (!imageUrl.value || existingCartItem.value || !customizationOptionComponents.value) {
+    if (!orderItemId.value || existingCartItem.value || !customizationOptionComponents.value) {
+      return;
+    }
+
+    let imageUrl: string;
+
+    try {
+      const deliverables = await fetchOrderItemDeliverables(orderItemId.value);
+
+      if (!deliverables || deliverables.length === 0) {
+        return;
+      }
+
+      imageUrl = deliverables[0].storage_item_url;
+    } catch (error) {
       return;
     }
 
@@ -57,7 +71,7 @@ export function useExistingOrderItemImage (
     }
 
     if ('uploadRemoteImage' in widgetComponent) {
-      const absoluteImageUrl = imageHandlerService.getOriginalImageUrl(imageUrl.value);
+      const absoluteImageUrl = imageHandlerService.getOriginalImageUrl(imageUrl);
       await widgetComponent.uploadRemoteImage(absoluteImageUrl);
     }
   }
