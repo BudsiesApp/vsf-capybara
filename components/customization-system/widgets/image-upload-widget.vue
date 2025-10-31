@@ -95,14 +95,14 @@ export default defineComponent({
       });
     });
 
-    async function uploadImage (imageUrl: string | File): Promise<void> {
+    async function uploadRemoteImage (imageUrl: string): Promise<void> {
       // TODO: temporary - current TS version don't handle `value` type right in this case
       if (!(artworkUpload as any).value) {
         return;
       }
 
       // TODO: temporary - current TS version don't handle `value` type right in this case
-      await ((artworkUpload as any).value as InstanceType<typeof MArtworkUpload>).uploadFiles([imageUrl] as (string[] | File[]));
+      await ((artworkUpload as any).value as InstanceType<typeof MArtworkUpload>).uploadRemoteFile(imageUrl);
     }
 
     watch(filesUploadFields.initialItems, async () => {
@@ -120,7 +120,7 @@ export default defineComponent({
       ...useBackendProductId(productId),
       artworkUpload,
       artworkUploadUrl: config.images.fileuploaderUploadUrl as string,
-      uploadImage
+      uploadRemoteImage
     };
   }
 });

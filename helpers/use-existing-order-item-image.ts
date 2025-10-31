@@ -19,6 +19,10 @@ export function useExistingOrderItemImage (
   const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
 
   async function uploadExistingImage (): Promise<void> {
+    if (!imageHandlerService) {
+      throw new Error('Image Handler Service is not defined');
+    }
+
     if (!imageUrl.value || existingCartItem.value || !customizationOptionComponents.value) {
       return;
     }
@@ -52,9 +56,9 @@ export function useExistingOrderItemImage (
       return;
     }
 
-    if ('uploadImage' in widgetComponent) {
+    if ('uploadRemoteImage' in widgetComponent) {
       const absoluteImageUrl = imageHandlerService.getOriginalImageUrl(imageUrl.value);
-      await widgetComponent.uploadImage(absoluteImageUrl);
+      await widgetComponent.uploadRemoteImage(absoluteImageUrl);
     }
   }
 
