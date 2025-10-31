@@ -141,6 +141,7 @@ import {
   useCustomizationState,
   useCustomizationStatePreservation,
   useEmailCustomization,
+  useExistingOrderItemImage,
   useOptionValueActions,
   useSelectedOptionValueUrlQuery,
   CustomizableProductFlowType,
@@ -195,6 +196,10 @@ export default defineComponent({
       type: Object as PropType<DraftOrderItem | undefined>,
       default: undefined
     },
+    existingImageUrl: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
     flow: {
       type: String as PropType<CustomizableProductFlowType>,
       default: CustomizableProductFlowType.ADD_TO_CART
@@ -226,11 +231,13 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
-    const { canUsePersistedCustomizationState, existingCartItem, product, flow, draftOrderItem } = toRefs(props);
+    const { canUsePersistedCustomizationState, existingCartItem, existingImageUrl, product, flow, draftOrderItem } = toRefs(props);
 
     const isCustomizeFlow = computed<boolean>(() => {
       return flow.value === CustomizableProductFlowType.CUSTOMIZE;
     });
+
+    const customizationOption = ref<InstanceType<typeof CustomizationOption>[] | null>(null);
 
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
@@ -328,6 +335,14 @@ export default defineComponent({
         customizationOptionValue,
         updateCustomizationOptionValue
       );
+
+    const { uploadExistingImage } = useExistingOrderItemImage(
+      existingImageUrl,
+      existingCartItem,
+      productCustomizations,
+      customizationOptionValue,
+      customizationOption
+    );
 
     function onCustomizationOptionInput (payload: {
       customizationId: string,
@@ -481,6 +496,7 @@ export default defineComponent({
       availableCustomizations,
       availableOptionCustomizations,
       customizationAvailableOptionValues,
+      customizationOption,
       customizationOptionValue,
       filteredCustomizationAvailableOptionValues,
       isDisabled,
