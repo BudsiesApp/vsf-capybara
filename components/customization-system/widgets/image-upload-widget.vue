@@ -95,6 +95,14 @@ export default defineComponent({
       });
     });
 
+    async function uploadImage (imageUrl: string | File): Promise<void> {
+      if (!artworkUpload.value) {
+        return;
+      }
+
+      await (artworkUpload.value as InstanceType<typeof MArtworkUpload>).uploadFiles([imageUrl]);
+    }
+
     watch(filesUploadFields.initialItems, async () => {
       if (!canReplaceInitialItems.value) {
         return;
@@ -109,7 +117,8 @@ export default defineComponent({
       ...filesUploadFields,
       ...useBackendProductId(productId),
       artworkUpload,
-      artworkUploadUrl: config.images.fileuploaderUploadUrl as string
+      artworkUploadUrl: config.images.fileuploaderUploadUrl as string,
+      uploadImage
     };
   }
 });
