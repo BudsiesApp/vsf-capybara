@@ -1,8 +1,9 @@
-import { Ref } from '@vue/composition-api';
+import { Ref, inject } from '@vue/composition-api';
 
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 
 import { Customization, CustomizationOptionValue } from 'src/modules/customization-system';
+import ImageHandlerService from 'src/modules/file-storage/image-handler.service';
 
 import CustomizationOption from '../components/customization-system/customization-option.vue';
 
@@ -15,6 +16,8 @@ export function useExistingOrderItemImage (
   customizationOptionValue: Ref<Record<string, CustomizationOptionValue>>,
   customizationOptionComponents: Ref<InstanceType<typeof CustomizationOption>[] | null>
 ) {
+  const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
+
   async function uploadExistingImage (): Promise<void> {
     if (!imageUrl.value || existingCartItem.value || !customizationOptionComponents.value) {
       return;
@@ -50,7 +53,8 @@ export function useExistingOrderItemImage (
     }
 
     if ('uploadImage' in widgetComponent) {
-      await widgetComponent.uploadImage(imageUrl.value);
+      const absoluteImageUrl = imageHandlerService.getOriginalImageUrl(imageUrl.value);
+      await widgetComponent.uploadImage(absoluteImageUrl);
     }
   }
 
