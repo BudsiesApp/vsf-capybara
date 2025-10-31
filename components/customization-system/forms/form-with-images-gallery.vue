@@ -318,6 +318,18 @@ export default defineComponent({
       return String(key);
     });
 
+    const { uploadExistingImage } = useExistingOrderItemImage(
+      existingImageUrl,
+      existingCartItem,
+      productCustomizations,
+      customizationOptionValue,
+      customizationOption
+    );
+
+    async function onCustomizationStateRestored (): Promise<void> {
+      await uploadExistingImage();
+    }
+
     const { removePreservedState } =
       useCustomizationStatePreservation(
         preservationStorageKey,
@@ -326,7 +338,11 @@ export default defineComponent({
         [unhandledCustomizationsFilter],
         canUsePersistedCustomizationState,
         mergeCustomizationState,
-        removeUnavailableOptionValues
+        removeUnavailableOptionValues,
+        undefined,
+        onCustomizationStateRestored,
+        undefined,
+        onCustomizationStateRestored
       );
 
     const { emailCustomizationFilter, persistCustomerEmail } =
@@ -335,14 +351,6 @@ export default defineComponent({
         customizationOptionValue,
         updateCustomizationOptionValue
       );
-
-    const { uploadExistingImage } = useExistingOrderItemImage(
-      existingImageUrl,
-      existingCartItem,
-      productCustomizations,
-      customizationOptionValue,
-      customizationOption
-    );
 
     function onCustomizationOptionInput (payload: {
       customizationId: string,
