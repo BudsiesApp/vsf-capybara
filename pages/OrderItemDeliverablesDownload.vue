@@ -186,7 +186,7 @@ export default defineComponent({
     }
 
     function getProductCustomizeLink (product: any): string {
-      const imageUrl = encodeURIComponent((deliverables as Ref<Deliverable[]>).value[0]?.storage_item_url);
+      const imageUrl = (deliverables as Ref<Deliverable[]>).value[0]?.storage_item_url;
 
       const routeName = PRODUCT_SKU_ROUTE_MAPPING[product.sku];
 
