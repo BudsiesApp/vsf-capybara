@@ -212,9 +212,9 @@ export default defineComponent({
     async function downloadDeliverable (deliverable: Deliverable) {
       const imageSrc = getAbsoluteImageUrl(deliverable.storage_item_url);
 
-      const image = await fetch(imageSrc)
-      const imageBlog = await image.blob()
-      const imageURL = URL.createObjectURL(imageBlog)
+      const image = await fetch(imageSrc);
+      const imageBlob = await image.blob();
+      const imageURL = URL.createObjectURL(imageBlob);
 
       const link = document.createElement('a');
       link.href = imageURL;

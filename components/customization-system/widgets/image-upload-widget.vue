@@ -101,8 +101,13 @@ export default defineComponent({
         return;
       }
 
+      const image = await fetch(imageUrl);
+      const imageBlob = await image.blob();
+
       // TODO: temporary - current TS version don't handle `value` type right in this case
-      await ((artworkUpload as any).value as InstanceType<typeof MArtworkUpload>).uploadRemoteFile(imageUrl);
+      await ((artworkUpload as any).value as InstanceType<typeof MArtworkUpload>).uploadFiles(
+        [imageBlob]
+      );
     }
 
     watch(filesUploadFields.initialItems, async () => {
