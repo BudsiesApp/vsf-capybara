@@ -21,7 +21,6 @@
         >
           <BaseImage
             class="_image"
-            :aspect-ratio="1"
             :src="getAbsoluteImageUrl(deliverable.storage_item_url)"
             alt=""
           />
@@ -41,9 +40,13 @@
         <div class="_products-grid">
           <o-product-card
             v-for="product in relatedProducts"
+            class="_product"
             :key="product.id"
             :product="product"
             :link="getProductCustomizeLink(product)"
+            :image-height="216"
+            :image-width="216"
+            :wishlist-icon="false"
           />
         </div>
       </div>
@@ -248,11 +251,15 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
+$mobile-sm: 479px;
+
 #order-item-deliverables-download {
   box-sizing: border-box;
   padding: 0 1rem;
 
   ._title {
+    --heading-padding: 0;
+
     margin-top: var(--spacer-lg);
   }
 
@@ -268,24 +275,49 @@ export default defineComponent({
     flex-wrap: wrap;
     justify-content: center;
     gap: var(--spacer-base);
+    height: 55vh;
   }
 
   ._deliverable-item {
     display: flex;
     flex-direction: column;
-    row-gap: var(--spacer-xs);
+    align-items: center;
+    row-gap: var(--spacer-sm);
     border: 1px solid var(--c-light);
     padding: var(--spacer-sm);
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  ._image {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
   }
 
   ._related-products {
-    margin-top: var(--spacer-xl);
-
     ._products-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: var(--spacer-base);
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: var(--spacer-sm);
       margin-top: var(--spacer-base);
+
+      ._product {
+        ::v-deep {
+          .sf-product-card {
+            margin: 0 auto;
+          }
+        }
+      }
+    }
+  }
+
+  @media (min-width: $mobile-sm) {
+    ._related-products {
+      ._products-grid {
+        gap: var(--spacer-base);
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      }
     }
   }
 
@@ -293,6 +325,10 @@ export default defineComponent({
     max-width: 1272px;
     width: 100%;
     margin: 0 auto;
+
+    ._deliverables-list {
+      height: 60vh;
+    }
   }
 }
 </style>

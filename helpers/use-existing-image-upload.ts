@@ -9,7 +9,7 @@ import CustomizationOption from '../components/customization-system/customizatio
 
 const IMAGE_UPLOAD_CUSTOMIZATION_NAME = 'Customer Image';
 
-export function useExistingOrderItemImage (
+export function useExistingImageUpload (
   imageUrl: Ref<string | undefined>,
   existingCartItem: Ref<CartItem | undefined>,
   customizations: Ref<Customization[]>,
