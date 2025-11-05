@@ -54,7 +54,7 @@ export function useExistingImageUpload (
       return;
     }
 
-    if ('uploadRemoteImage' in widgetComponent) {
+    if ('uploadRemoteImage' in widgetComponent && !!widgetComponent.uploadRemoteImage) {
       const absoluteImageUrl = imageHandlerService.getOriginalImageUrl(imageUrl.value);
       await widgetComponent.uploadRemoteImage(absoluteImageUrl);
     }

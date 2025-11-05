@@ -6,7 +6,11 @@
       class="_title"
     />
 
-    <div v-if="showLoading" class="_loading" />
+    <div v-if="showLoading" class="_loading">
+      <div class="_deliverables-placeholder _placeholder" />
+
+      <div class="_related-placeholder _placeholder" />
+    </div>
 
     <div v-else-if="showNotFound" class="_not-found">
       {{ $t('No deliverables found for this order item') }}
@@ -163,11 +167,12 @@ export default defineComponent({
       return context.root.$store.getters[GET_ACTIVE_CURRENCY];
     });
 
-    const relatedProducts = computed(() => {
-      const list: any[] = [];
+    const relatedProducts = computed<ReturnType<typeof prepareCategoryProduct>[]>(() => {
+      const list: ReturnType<typeof prepareCategoryProduct>[] = [];
+      const _productBySkuDictionary = productBySkuDictionary.value;
 
       for (const sku of RELATED_PRODUCTS_SKUS) {
-        const product = productBySkuDictionary.value[sku];
+        const product = _productBySkuDictionary[sku];
 
         if (!product) continue;
 
@@ -186,7 +191,7 @@ export default defineComponent({
     const showLoading = computed(() => isLoading.value && !isError.value);
     const showNotFound = computed(() =>
     // TODO: temporary - current TS version don't handle `value` type right in this case
-      !isLoading.value && !isError.value && (deliverables as Ref<Deliverable[]>).value.length === 0
+      isError.value || (!isLoading.value && (deliverables as Ref<Deliverable[]>).value.length === 0)
     );
     const showContent = computed(() =>
     // TODO: temporary - current TS version don't handle `value` type right in this case
@@ -233,9 +238,10 @@ export default defineComponent({
       link.href = imageURL;
       link.download = props.orderItemId.toString();
 
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(imageURL);
     }
 
     function onProductCardClick (productSku: string): void {
@@ -274,6 +280,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "theme/css/mixins/form-placeholder-item.scss";
 
 #order-item-deliverables-download {
   box-sizing: border-box;
@@ -348,6 +355,10 @@ export default defineComponent({
         flex: 1 1 50%;
       }
     }
+  }
+
+  ._placeholder {
+    @include form-placeholder-item;
   }
 
   @media (min-width: $tablet-min) {
