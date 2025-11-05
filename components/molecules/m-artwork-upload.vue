@@ -594,7 +594,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       await this.$nextTick();
       this.updateFilesCount();
     },
-    async uploadFiles (files: File[] | string[] | Blob[]): Promise<void> {
+    async uploadFiles (files: File[] | Blob[]): Promise<void> {
       const fileInput = this.getFileInput();
 
       if (!fileInput || this.disabled) {
@@ -602,15 +602,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       }
 
       await fileInput.addFiles(files);
-    },
-    async uploadRemoteFile (file: string): Promise<void> {
-      const fileInput = this.getFileInput();
-
-      if (!fileInput || this.disabled) {
-        return;
-      }
-
-      await fileInput.addFile(file, { type: 'local' });
     },
     async addFilesFromDropEvent (event: DragEvent, fileInput: VueFilePondComponent): Promise<void> {
       if (!event.dataTransfer) {
