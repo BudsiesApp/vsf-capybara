@@ -363,7 +363,8 @@ export default defineComponent({
 
   ._deliverables-placeholder {
     height: 55vh;
-    margin-top: var(--spacer-lg);
+    max-width: 40rem;
+    margin: var(--spacer-lg) auto 0;
   }
 
   ._related-placeholder {
