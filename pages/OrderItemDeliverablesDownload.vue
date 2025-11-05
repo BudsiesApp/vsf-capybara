@@ -34,6 +34,7 @@
       <div class="_related-products" v-if="relatedProducts.length > 0">
         <SfHeading
           :title="$t('Create personalized keepsakes with your image')"
+          class="_products-title"
           :level="3"
         />
 
@@ -44,9 +45,11 @@
             :key="product.id"
             :product="product"
             :link="getProductCustomizeLink(product)"
-            :image-height="216"
-            :image-width="216"
+            link-tag="router-link"
+            :image-height="352"
+            :image-width="352"
             :wishlist-icon="false"
+            @click.native.capture="() => onProductCardClick(product.sku)"
           />
         </div>
       </div>
@@ -60,13 +63,14 @@ import { SfButton, SfHeading } from '@storefront-ui/vue';
 import { SearchQuery } from 'storefront-query-builder';
 import config from 'config';
 
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { BaseImage } from 'src/modules/budsies';
 import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { fetchOrderItemDeliverables, Deliverable } from 'src/modules/customization-system';
 import ImageHandlerService from 'src/modules/file-storage/image-handler.service';
-import { PriceHelper } from 'src/modules/shared';
+import { PriceHelper, ProductEvent } from 'src/modules/shared';
 
 import { prepareCategoryProduct } from 'theme/helpers';
 import OProductCard from 'theme/components/organisms/o-product-card.vue';
@@ -228,6 +232,19 @@ export default defineComponent({
       document.body.removeChild(link)
     }
 
+    function onProductCardClick (productSku: string): void {
+      const product = productBySkuDictionary.value[productSku];
+
+      EventBus.$emit(
+        ProductEvent.PRODUCT_CARD_CLICK,
+        {
+          product,
+          categoryName: 'Result Download',
+          categoryId: 'Result Download'
+        }
+      );
+    }
+
     return {
       deliverables,
       relatedProducts,
@@ -237,7 +254,8 @@ export default defineComponent({
       getAbsoluteImageUrl,
       getProductCustomizeLink,
       formatDate,
-      downloadDeliverable
+      downloadDeliverable,
+      onProductCardClick
     };
   },
   metaInfo (): any {
@@ -251,11 +269,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-$mobile-sm: 479px;
-
 #order-item-deliverables-download {
   box-sizing: border-box;
-  padding: 0 1rem;
 
   ._title {
     --heading-padding: 0;
@@ -276,6 +291,7 @@ $mobile-sm: 479px;
     justify-content: center;
     gap: var(--spacer-base);
     height: 55vh;
+    padding: 0 var(--spacer-sm);
   }
 
   ._deliverable-item {
@@ -295,28 +311,35 @@ $mobile-sm: 479px;
     object-fit: contain;
   }
 
+  ._title,
+  ._products-title {
+    padding: 0 var(--spacer-sm);
+  }
+
   ._related-products {
+    &::v-deep {
+      .sf-product-card {
+        --image-width: 100%;
+
+        margin: 0 auto;
+        height: 100%;
+      }
+    }
+
     ._products-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: var(--spacer-sm);
+      justify-content: space-between;
+      grid-template-columns: repeat(auto-fit, minmax(46%, 1fr));
+      row-gap: calc(var(--spacer-sm) + var(--spacer-xs));
+      column-gap: calc(var(--spacer-sm) + var(--spacer-xs));
+      padding: 0 calc(var(--spacer-sm) + var(--spacer-xs));
       margin-top: var(--spacer-base);
 
       ._product {
-        ::v-deep {
-          .sf-product-card {
-            margin: 0 auto;
-          }
-        }
-      }
-    }
-  }
+        --product-card-max-width: none;
 
-  @media (min-width: $mobile-sm) {
-    ._related-products {
-      ._products-grid {
-        gap: var(--spacer-base);
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        margin: 0 var(--spacer-xs);
+        flex: 1 1 50%;
       }
     }
   }
@@ -328,6 +351,40 @@ $mobile-sm: 479px;
 
     ._deliverables-list {
       height: 60vh;
+    }
+
+    ._related-products {
+      ._products-grid {
+        grid-template-columns: repeat(auto-fit, minmax(31%, 1fr));
+      }
+
+      ._product {
+        flex: 1 1 33%;
+      }
+    }
+  }
+
+  @include for-desktop {
+    ._related-products {
+      ._products-grid {
+        grid-template-columns: repeat(auto-fit, minmax(23%, 1fr));
+      }
+
+      ._product {
+        flex: 1 1 25%;
+      }
+    }
+  }
+
+  @media (min-width: $desktop-l-min) {
+    ._related-products {
+      ._products-grid {
+        grid-template-columns: repeat(auto-fit, minmax(18%, 1fr));
+      }
+
+      ._product {
+        flex: 1 1 20%;
+      }
     }
   }
 }
