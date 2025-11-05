@@ -1,9 +1,10 @@
 <template>
   <div id="order-item-deliverables-download">
     <SfHeading
-      :title="$t('Your Order Item Is Ready To Download', { orderItemId })"
+      :title="$t('Your Order Item Is Ready To Download')"
       :level="1"
       class="_title"
+      v-if="!showNotFound"
     />
 
     <div v-if="showLoading" class="_loading">
@@ -13,7 +14,14 @@
     </div>
 
     <div v-else-if="showNotFound" class="_not-found">
-      {{ $t('No deliverables found for this order item') }}
+      <SfHeading :level="4" :title="$t('No deliverables found for this order item')" />
+
+      <router-link
+        class="sf-button _order-history-link"
+        :to="{name: 'orders-history'}"
+      >
+        {{ $t('Go To Order History') }}
+      </router-link>
     </div>
 
     <div v-else-if="showContent" class="_content">
@@ -370,6 +378,22 @@ export default defineComponent({
   ._related-placeholder {
     height: 200px;
     margin-top: var(--spacer-lg);
+  }
+
+  ._not-found {
+    margin-top: var(--spacer-xl);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  ._order-history-link {
+    margin-top: var(--spacer-base);
+
+    &:hover {
+      color: var(--c-white);
+    }
   }
 
   @media (min-width: $tablet-min) {
