@@ -362,7 +362,7 @@ export default defineComponent({
   }
 
   ._deliverables-placeholder {
-    height: 60vh;
+    height: 55vh;
     margin-top: var(--spacer-lg);
   }
 
@@ -377,6 +377,10 @@ export default defineComponent({
     margin: 0 auto;
 
     ._deliverables-list {
+      height: 60vh;
+    }
+
+    ._deliverables-placeholder {
       height: 60vh;
     }
 
