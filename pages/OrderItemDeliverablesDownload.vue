@@ -361,6 +361,16 @@ export default defineComponent({
     @include form-placeholder-item;
   }
 
+  ._deliverables-placeholder {
+    height: 60vh;
+    margin-top: var(--spacer-lg);
+  }
+
+  ._related-placeholder {
+    height: 200px;
+    margin-top: var(--spacer-lg);
+  }
+
   @media (min-width: $tablet-min) {
     max-width: 1272px;
     width: 100%;
