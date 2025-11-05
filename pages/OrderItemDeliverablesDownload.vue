@@ -77,17 +77,23 @@ import OProductCard from 'theme/components/organisms/o-product-card.vue';
 
 const RELATED_PRODUCTS_SKUS = [
   'petsiesCustomCutOutBlankets_bundle',
+  'customRenaissanceBlankets_bundle',
+  'customPhotoPortraits_bundle',
   'petsiesCustomPrintedSocks_bundle',
   'customPajamas_bundle',
   'customGolfShirts_bundle',
+  'customPrintedMasks_bundle',
   'customTumblers_bundle'
 ];
 
 const PRODUCT_SKU_ROUTE_MAPPING: Record<string, string> = {
   'petsiesCustomCutOutBlankets_bundle': 'cut-out-blankets',
+  'customRenaissanceBlankets_bundle': 'renaissance-blankets',
+  'customPhotoPortraits_bundle': 'photo-portraits-creation-page',
   'petsiesCustomPrintedSocks_bundle': 'printed-socks-creation-page',
   'customPajamas_bundle': 'pajamas-creation',
   'customGolfShirts_bundle': 'golf-shirts-creation',
+  'customPrintedMasks_bundle': 'printed-masks-creation-page',
   'customTumblers_bundle': 'tumblers-creation'
 };
 
@@ -333,7 +339,7 @@ export default defineComponent({
       row-gap: calc(var(--spacer-sm) + var(--spacer-xs));
       column-gap: calc(var(--spacer-sm) + var(--spacer-xs));
       padding: 0 calc(var(--spacer-sm) + var(--spacer-xs));
-      margin-top: var(--spacer-base);
+      margin-top: var(--spacer-lg);
 
       ._product {
         --product-card-max-width: none;
