@@ -5,8 +5,6 @@ import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import { Customization, CustomizationOptionValue } from 'src/modules/customization-system';
 import ImageHandlerService from 'src/modules/file-storage/image-handler.service';
 
-import CustomizationOption from '../components/customization-system/customization-option.vue';
-
 const IMAGE_UPLOAD_CUSTOMIZATION_NAME = 'Customer Image';
 
 export function useExistingImageUpload (
@@ -14,7 +12,7 @@ export function useExistingImageUpload (
   existingCartItem: Ref<CartItem | undefined>,
   customizations: Ref<Customization[]>,
   customizationOptionValue: Ref<Record<string, CustomizationOptionValue>>,
-  customizationOptionComponents: Ref<InstanceType<typeof CustomizationOption>[] | null>
+  customizationOptionComponents: Ref<any[] | null>
 ) {
   const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
 
@@ -42,8 +40,8 @@ export function useExistingImageUpload (
       return;
     }
 
-    const customerImageOptionComponent: InstanceType<typeof CustomizationOption> | undefined = customizationOptionComponents.value.find(
-      (comp: InstanceType<typeof CustomizationOption>) => comp.customization.id === customerImageCustomizationId
+    const customerImageOptionComponent = customizationOptionComponents.value.find(
+      (comp: any) => comp.customization.id === customerImageCustomizationId
     );
 
     if (!customerImageOptionComponent) {
