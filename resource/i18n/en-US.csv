@@ -863,6 +863,7 @@
 "Your kit includes printable templates of your special creature and all the awesome extras you selected.","Your kit includes printable templates of your special creature and all the awesome extras you selected."
 "Your name","Your name"
 "Your order history is empty","Your order history is empty"
+"Your order is #{orderNumber}","Your order is #{orderNumber}"
 "Your password has been updated","Your password has been updated"
 "Your password reset link has expired.","Your password reset link has expired."
 "Your purchase","Your purchase"

@@ -6,11 +6,20 @@
         :title="$t('Order Complete')"
         :level="1"
       />
+
       <SfHeading
         class="_main-subtitle"
         :title="$t('Thank you for placing your Petsies order.')"
         :level="3"
       />
+
+      <SfHeading
+        v-if="confirmation.orderNumber"
+        :level="3"
+        :title="$t('Your order is #{orderNumber}', { orderNumber: confirmation.orderNumber })"
+        class="_order-number"
+      />
+
       <SfHeading
         :level="4"
       >
@@ -233,8 +242,13 @@ $number-margin-right-desktop: var(--spacer-sm);
     margin-bottom: var(--spacer-lg);
   }
 
+  ._order-number,
   ._main-subtitle {
     margin-bottom: var(--spacer-base);
+  }
+
+  ._order-number {
+    --heading-title-color: var(--c-accent);
   }
 
   ._confirmation {
