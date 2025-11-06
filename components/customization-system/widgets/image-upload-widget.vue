@@ -95,6 +95,21 @@ export default defineComponent({
       });
     });
 
+    async function uploadImage (imageUrl: string): Promise<void> {
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      if (!(artworkUpload as any).value) {
+        return;
+      }
+
+      const image = await fetch(imageUrl);
+      const imageBlob = await image.blob();
+
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      await ((artworkUpload as any).value as InstanceType<typeof MArtworkUpload>).uploadFiles(
+        [imageBlob]
+      );
+    }
+
     watch(filesUploadFields.initialItems, async () => {
       if (!canReplaceInitialItems.value) {
         return;
@@ -109,7 +124,8 @@ export default defineComponent({
       ...filesUploadFields,
       ...useBackendProductId(productId),
       artworkUpload,
-      artworkUploadUrl: config.images.fileuploaderUploadUrl as string
+      artworkUploadUrl: config.images.fileuploaderUploadUrl as string,
+      uploadImage
     };
   }
 });
