@@ -97,6 +97,7 @@
 import {
   computed,
   defineComponent,
+  inject,
   PropType,
   ref,
   Ref,
@@ -129,7 +130,6 @@ import {
   useLockedCustomizations,
   useAvailableOptionsValuesFilter
 } from 'src/modules/customization-system';
-import { useCustomizeAction } from 'theme/helpers/use-customize-action';
 import i18n from '@vue-storefront/core/i18n';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -137,6 +137,8 @@ import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
+import { useCustomizeAction } from 'theme/helpers/use-customize-action';
+import { useImageUpload } from 'theme/helpers/use-image-upload';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useProductGallery } from 'theme/helpers/use-product-gallery';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
@@ -174,6 +176,10 @@ export default defineComponent({
       type: Object as PropType<DraftOrderItem | undefined>,
       default: undefined
     },
+    imageUrl: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
     flow: {
       type: String as PropType<CustomizableProductFlowType>,
       default: CustomizableProductFlowType.ADD_TO_CART
@@ -205,11 +211,13 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
-    const { canUsePersistedCustomizationState, existingCartItem, product, flow, draftOrderItem } = toRefs(props);
+    const { canUsePersistedCustomizationState, existingCartItem, imageUrl, product, flow, draftOrderItem } = toRefs(props);
 
     const isCustomizeFlow = computed<boolean>(() => {
       return flow.value === CustomizableProductFlowType.CUSTOMIZE;
     });
+
+    const customizationOption = ref<InstanceType<typeof CustomizationOption>[] | null>(null);
 
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
@@ -290,6 +298,21 @@ export default defineComponent({
       return String(key);
     });
 
+    const { uploadImage } = useImageUpload(
+      existingCartItem,
+      availableCustomizations,
+      customizationOptionValue,
+      customizationOption
+    );
+
+    async function onCustomizationStateRestored (): Promise<void> {
+      if (!imageUrl.value) {
+        return;
+      }
+
+      await uploadImage(imageUrl.value);
+    }
+
     const { removePreservedState } =
       useCustomizationStatePreservation(
         preservationStorageKey,
@@ -298,7 +321,11 @@ export default defineComponent({
         [unhandledCustomizationsFilter],
         canUsePersistedCustomizationState,
         mergeCustomizationState,
-        removeUnavailableOptionValues
+        removeUnavailableOptionValues,
+        undefined,
+        onCustomizationStateRestored,
+        undefined,
+        onCustomizationStateRestored
       );
 
     const { emailCustomizationFilter, persistCustomerEmail } =
@@ -459,6 +486,7 @@ export default defineComponent({
       availableCustomizations,
       availableOptionCustomizations,
       customizationAvailableOptionValues,
+      customizationOption,
       customizationOptionValue,
       filteredCustomizationAvailableOptionValues,
       isDisabled,

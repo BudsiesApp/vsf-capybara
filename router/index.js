@@ -47,6 +47,8 @@ const CustomizableProduct = () =>
   import(/* webpackChunkName: "vsf-customizable-product" */ 'theme/pages/CustomizableProduct');
 const OrderItemsBulkCustomize = () =>
   import(/* webpackChunkName: "vsf-order-items-bulk-customize" */ 'theme/pages/OrderItemsBulkCustomize');
+const OrderItemDeliverablesDownload = () =>
+  import(/* webpackChunkName: "vsf-order-item-deliverables" */ 'theme/pages/OrderItemDeliverablesDownload');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -382,6 +384,25 @@ let routes = [
     props: (route) => ({
       orderItemIds: route.query.orderItemIds
     }),
+    meta: {
+      auth: true
+    }
+  },
+  {
+    path: '/order-items/deliverables/download/',
+    name: 'order-item-deliverables-download',
+    component: OrderItemDeliverablesDownload,
+    props: (route) => {
+      let orderItemId = Number(route.query['order-item-id']);
+
+      if (Number.isNaN(orderItemId)) {
+        orderItemId = undefined;
+      }
+
+      return {
+        orderItemId
+      }
+    },
     meta: {
       auth: true
     }
