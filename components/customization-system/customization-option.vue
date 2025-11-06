@@ -35,6 +35,7 @@
       ref="validationProvider"
     >
       <component
+        ref="widgetComponent"
         class="_widget"
         :error="errors[0]"
         :is-disabled="isDisabled"
@@ -57,6 +58,7 @@
 import {
   computed,
   defineComponent,
+  ref,
   PropType,
   toRefs
 } from '@vue/composition-api';
@@ -82,6 +84,17 @@ import SearchFieldWidget from './widgets/search-field-widget.vue';
 import TextAreaWidget from './widgets/textarea-widget.vue';
 import TextInputWidget from './widgets/text-input-widget.vue';
 import ThumbnailsListWidget from './widgets/thumbnails-list-widget.vue';
+
+type WidgetComponent = InstanceType<typeof CardsListWidget> |
+InstanceType<typeof CheckboxWidget> |
+InstanceType<typeof ColorsListWidget> |
+InstanceType<typeof DropdownWidget> |
+InstanceType<typeof ImageUploadWidget> |
+InstanceType<typeof ProductionTimeSelector> |
+InstanceType<typeof SearchFieldWidget> |
+InstanceType<typeof TextAreaWidget> |
+InstanceType<typeof TextInputWidget> |
+InstanceType<typeof ThumbnailsListWidget>;
 
 const customizationWidgetBusyStateChangedEventName =
   'customization-option-busy-state-changed';
@@ -153,6 +166,8 @@ export default defineComponent({
       );
     });
 
+    const widgetComponent = ref<null | WidgetComponent>(null);
+
     return {
       ...useCustomizationOptionValidation(
         customization,
@@ -174,7 +189,8 @@ export default defineComponent({
       optionDescription,
       optionHint,
       optionLabel,
-      showLabel
+      showLabel,
+      widgetComponent
     };
   }
 });
