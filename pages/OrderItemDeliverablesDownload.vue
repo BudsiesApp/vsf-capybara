@@ -207,7 +207,6 @@ export default defineComponent({
         throw new Error('Image Handler Service is not defined');
       }
 
-      // TODO: temporary, need to tweak on the API side
       const urlWithoutBucket = url.split('/')[1]
       if (!urlWithoutBucket) {
         return url;
@@ -218,6 +217,10 @@ export default defineComponent({
 
     function getProductCustomizeLink (product: any): string {
       const imageUrl = (deliverables as Ref<Deliverable[]>).value[0]?.storage_item_url;
+
+      if (!imageUrl) {
+        throw new Error('Image URL is not defined');
+      }
 
       const routeName = PRODUCT_SKU_ROUTE_MAPPING[product.sku];
 

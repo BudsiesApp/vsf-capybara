@@ -151,7 +151,6 @@ import {
   useLockedCustomizations,
   useAvailableOptionsValuesFilter
 } from 'src/modules/customization-system';
-import { ImageHandlerService } from 'src/modules/file-storage';
 import i18n from '@vue-storefront/core/i18n';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -234,9 +233,6 @@ export default defineComponent({
   },
   setup (props, context) {
     const { canUsePersistedCustomizationState, existingCartItem, imageUrl, product, flow, draftOrderItem } = toRefs(props);
-
-    const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
-    const qaPhotosHandlerService = inject<ImageHandlerService>('QaPhotosHandlerService');
 
     const isCustomizeFlow = computed<boolean>(() => {
       return flow.value === CustomizableProductFlowType.CUSTOMIZE;
@@ -335,19 +331,6 @@ export default defineComponent({
         return;
       }
 
-      // if (!imageHandlerService || !qaPhotosHandlerService) {
-      //   throw new Error('Image Handler Service is not defined');
-      // }
-      //
-      // let originalImageUrl = imageHandlerService.getOriginalImageUrl(imageUrl.value);
-      //
-      // // TODO: temporary, need to tweak on the API side
-      // const urlWithoutBucket = imageUrl.value.split('/')[1]
-      // if (urlWithoutBucket) {
-      //   originalImageUrl = qaPhotosHandlerService.getOriginalImageUrl(urlWithoutBucket);
-      // }
-      //
-      // await uploadImage(originalImageUrl);
       await uploadImage(imageUrl.value);
     }
 
