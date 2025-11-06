@@ -594,7 +594,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       await this.$nextTick();
       this.updateFilesCount();
     },
-    async uploadFiles (files: File[]): Promise<void> {
+    async uploadFiles (files: File[] | Blob[]): Promise<void> {
       const fileInput = this.getFileInput();
 
       if (!fileInput || this.disabled) {

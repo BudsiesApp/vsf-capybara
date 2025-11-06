@@ -29,7 +29,10 @@ const fileProcessingRepositoryFactory = new FileProcessingRepositoryFactory(
 );
 const imageHandlerService = new ImageHandlerService(
   config.images.imageHandlerServiceUrl
-)
+);
+const qaPhotosHandlerService = new ImageHandlerService(
+  config.images.qaPhotosHandlerServiceUrl
+);
 
 export default {
   components: {
@@ -66,6 +69,7 @@ export default {
     ErrorConverterService: errorConverterService,
     FileProcessingRepositoryFactory: fileProcessingRepositoryFactory,
     ImageHandlerService: imageHandlerService,
+    QaPhotosHandlerService: qaPhotosHandlerService,
     WindowObject: windowObject
   },
   methods: {
