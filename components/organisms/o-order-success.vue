@@ -16,7 +16,7 @@
       <SfHeading
         v-if="confirmation.orderNumber"
         :level="3"
-        :title="$t('Your order is #{orderNumber}', { orderNumber: confirmation.orderNumber })"
+        :title="$t('Your order # is {orderNumber}', { orderNumber: confirmation.orderNumber })"
         class="_order-number"
       />
 
