@@ -4,7 +4,7 @@ import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 
 import { Customization, CustomizationOptionValue, WidgetType } from 'src/modules/customization-system';
 
-export function useExistingImageUpload (
+export function useImageUpload (
   existingCartItem: Ref<CartItem | undefined>,
   availableCustomizations: Ref<Customization[]>,
   customizationOptionValue: Ref<Record<string, CustomizationOptionValue>>,
