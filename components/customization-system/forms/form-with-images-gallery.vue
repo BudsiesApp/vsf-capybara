@@ -118,6 +118,7 @@
 import {
   computed,
   defineComponent,
+  inject,
   PropType,
   ref,
   Ref,
@@ -150,7 +151,7 @@ import {
   useLockedCustomizations,
   useAvailableOptionsValuesFilter
 } from 'src/modules/customization-system';
-import { useCustomizeAction } from 'theme/helpers/use-customize-action';
+import { ImageHandlerService } from 'src/modules/file-storage';
 import i18n from '@vue-storefront/core/i18n';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -158,6 +159,7 @@ import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
+import { useCustomizeAction } from 'theme/helpers/use-customize-action';
 import { useExistingImageUpload } from 'theme/helpers/use-existing-image-upload';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useProductGallery } from 'theme/helpers/use-product-gallery';
@@ -196,7 +198,7 @@ export default defineComponent({
       type: Object as PropType<DraftOrderItem | undefined>,
       default: undefined
     },
-    existingImageUrl: {
+    imageUrl: {
       type: String as PropType<string | undefined>,
       default: undefined
     },
@@ -231,7 +233,10 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
-    const { canUsePersistedCustomizationState, existingCartItem, existingImageUrl, product, flow, draftOrderItem } = toRefs(props);
+    const { canUsePersistedCustomizationState, existingCartItem, imageUrl, product, flow, draftOrderItem } = toRefs(props);
+
+    const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
+    const qaPhotosHandlerService = inject<ImageHandlerService>('QaPhotosHandlerService');
 
     const isCustomizeFlow = computed<boolean>(() => {
       return flow.value === CustomizableProductFlowType.CUSTOMIZE;
@@ -318,16 +323,32 @@ export default defineComponent({
       return String(key);
     });
 
-    const { uploadExistingImage } = useExistingImageUpload(
-      existingImageUrl,
+    const { uploadImage } = useExistingImageUpload(
       existingCartItem,
-      productCustomizations,
+      availableCustomizations,
       customizationOptionValue,
       customizationOption
     );
 
     async function onCustomizationStateRestored (): Promise<void> {
-      await uploadExistingImage();
+      if (!imageUrl.value) {
+        return;
+      }
+
+      // if (!imageHandlerService || !qaPhotosHandlerService) {
+      //   throw new Error('Image Handler Service is not defined');
+      // }
+      //
+      // let originalImageUrl = imageHandlerService.getOriginalImageUrl(imageUrl.value);
+      //
+      // // TODO: temporary, need to tweak on the API side
+      // const urlWithoutBucket = imageUrl.value.split('/')[1]
+      // if (urlWithoutBucket) {
+      //   originalImageUrl = qaPhotosHandlerService.getOriginalImageUrl(urlWithoutBucket);
+      // }
+      //
+      // await uploadImage(originalImageUrl);
+      await uploadImage(imageUrl.value);
     }
 
     const { removePreservedState } =

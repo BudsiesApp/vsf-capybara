@@ -1,32 +1,22 @@
-import { Ref, inject } from '@vue/composition-api';
+import { Ref } from '@vue/composition-api';
 
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 
-import { Customization, CustomizationOptionValue } from 'src/modules/customization-system';
-import ImageHandlerService from 'src/modules/file-storage/image-handler.service';
-
-const IMAGE_UPLOAD_CUSTOMIZATION_NAME = 'Customer Image';
+import { Customization, CustomizationOptionValue, WidgetType } from 'src/modules/customization-system';
 
 export function useExistingImageUpload (
-  imageUrl: Ref<string | undefined>,
   existingCartItem: Ref<CartItem | undefined>,
-  customizations: Ref<Customization[]>,
+  availableCustomizations: Ref<Customization[]>,
   customizationOptionValue: Ref<Record<string, CustomizationOptionValue>>,
   customizationOptionComponents: Ref<any[] | null>
 ) {
-  const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
-
-  async function uploadExistingImage (): Promise<void> {
-    if (!imageHandlerService) {
-      throw new Error('Image Handler Service is not defined');
-    }
-
-    if (!imageUrl.value || existingCartItem.value || !customizationOptionComponents.value) {
+  async function uploadImage (imageUrl: string): Promise<void> {
+    if (!imageUrl || existingCartItem.value || !customizationOptionComponents.value) {
       return;
     }
 
-    const customerImageCustomization = customizations.value.find(
-      (customization: Customization) => customization.name === IMAGE_UPLOAD_CUSTOMIZATION_NAME
+    const customerImageCustomization = availableCustomizations.value.find(
+      (customization: Customization) => customization.optionData?.displayWidget === WidgetType.IMAGE_UPLOAD
     );
 
     if (!customerImageCustomization) {
@@ -54,13 +44,12 @@ export function useExistingImageUpload (
       return;
     }
 
-    if ('uploadRemoteImage' in widgetComponent && !!widgetComponent.uploadRemoteImage) {
-      const absoluteImageUrl = imageHandlerService.getOriginalImageUrl(imageUrl.value);
-      await widgetComponent.uploadRemoteImage(absoluteImageUrl);
+    if ('uploadImage' in widgetComponent && !!widgetComponent.uploadImage) {
+      await widgetComponent.uploadImage(imageUrl);
     }
   }
 
   return {
-    uploadExistingImage
+    uploadImage
   };
 }

@@ -90,22 +90,18 @@ import OProductCard from 'theme/components/organisms/o-product-card.vue';
 const RELATED_PRODUCTS_SKUS = [
   'petsiesCustomCutOutBlankets_bundle',
   'customRenaissanceBlankets_bundle',
-  'customPhotoPortraits_bundle',
   'petsiesCustomPrintedSocks_bundle',
   'customPajamas_bundle',
   'customGolfShirts_bundle',
-  'customPrintedMasks_bundle',
   'customTumblers_bundle'
 ];
 
 const PRODUCT_SKU_ROUTE_MAPPING: Record<string, string> = {
   'petsiesCustomCutOutBlankets_bundle': 'cut-out-blankets',
   'customRenaissanceBlankets_bundle': 'renaissance-blankets',
-  'customPhotoPortraits_bundle': 'photo-portraits-creation-page',
   'petsiesCustomPrintedSocks_bundle': 'printed-socks-creation-page',
   'customPajamas_bundle': 'pajamas-creation',
   'customGolfShirts_bundle': 'golf-shirts-creation',
-  'customPrintedMasks_bundle': 'printed-masks-creation-page',
   'customTumblers_bundle': 'tumblers-creation'
 };
 
@@ -124,7 +120,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
+    const qaPhotosHandlerService = inject<ImageHandlerService>('QaPhotosHandlerService');
 
     const deliverables = ref<Deliverable[]>([]);
     const isLoading = ref(true);
@@ -207,8 +203,17 @@ export default defineComponent({
     );
 
     function getAbsoluteImageUrl (url: string): string {
-      if (!imageHandlerService) return url;
-      return imageHandlerService.getOriginalImageUrl(url);
+      if (!qaPhotosHandlerService) {
+        throw new Error('Image Handler Service is not defined');
+      }
+
+      // TODO: temporary, need to tweak on the API side
+      const urlWithoutBucket = url.split('/')[1]
+      if (!urlWithoutBucket) {
+        return url;
+      }
+
+      return qaPhotosHandlerService.getOriginalImageUrl(urlWithoutBucket);
     }
 
     function getProductCustomizeLink (product: any): string {
@@ -219,7 +224,7 @@ export default defineComponent({
       return context.root.$router.resolve({
         name: routeName,
         query: {
-          'existing-image-url': imageUrl
+          'image-url': getAbsoluteImageUrl(imageUrl)
         }
       }).href;
     }

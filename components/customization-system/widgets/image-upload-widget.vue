@@ -95,7 +95,7 @@ export default defineComponent({
       });
     });
 
-    async function uploadRemoteImage (imageUrl: string): Promise<void> {
+    async function uploadImage (imageUrl: string): Promise<void> {
       // TODO: temporary - current TS version don't handle `value` type right in this case
       if (!(artworkUpload as any).value) {
         return;
@@ -125,7 +125,7 @@ export default defineComponent({
       ...useBackendProductId(productId),
       artworkUpload,
       artworkUploadUrl: config.images.fileuploaderUploadUrl as string,
-      uploadRemoteImage
+      uploadImage
     };
   }
 });
