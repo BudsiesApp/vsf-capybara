@@ -393,7 +393,7 @@ let routes = [
     name: 'order-item-deliverables-download',
     component: OrderItemDeliverablesDownload,
     props: (route) => {
-      let orderItemId = Number(route.query['order-item-id']);
+      let orderItemId = Number(route.query['order_item_id']);
 
       if (Number.isNaN(orderItemId)) {
         orderItemId = undefined;
