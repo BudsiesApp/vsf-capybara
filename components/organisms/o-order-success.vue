@@ -14,6 +14,13 @@
       />
 
       <SfHeading
+        v-if="confirmation.orderNumber"
+        :level="3"
+        :title="$t('Your order # is {orderNumber}', { orderNumber: confirmation.orderNumber })"
+        class="_order-number"
+      />
+
+      <SfHeading
         :level="4"
       >
         <template #title>
@@ -24,6 +31,10 @@
           </h4>
         </template>
       </SfHeading>
+
+      <p class="_confirmation">
+        {{ $t('You\'ll receive your confirmation email soon!') }}
+      </p>
     </div>
 
     <div class="_content">
@@ -110,10 +121,11 @@
 
 <script lang="ts">
 import config from 'config';
-import Vue, { VueConstructor } from 'vue'
+import Vue, { PropType, VueConstructor } from 'vue'
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 
 import { CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION } from '@vue-storefront/core/modules/checkout';
+import { Order } from 'core/modules/order/types/Order';
 import { InjectType } from 'src/modules/shared';
 
 import MSocialSharing from 'theme/components/molecules/m-social-sharing.vue';
@@ -143,6 +155,16 @@ interface InjectedServices {
 
 export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>).extend({
   name: 'OOrderSuccess',
+  props: {
+    confirmation: {
+      type: Object as PropType<any>,
+      required: true
+    },
+    order: {
+      type: Object as PropType<Order>,
+      required: true
+    }
+  },
   inject: {
     window: { from: 'WindowObject' }
   } as unknown as InjectType<InjectedServices>,
@@ -207,8 +229,20 @@ $number-margin-right-desktop: var(--spacer-sm);
     margin-bottom: var(--spacer-lg);
   }
 
+  ._order-number,
   ._main-subtitle {
     margin-bottom: var(--spacer-base);
+  }
+
+  ._order-number {
+    --heading-title-color: var(--c-accent);
+  }
+
+  ._confirmation {
+    color: var(--c-danger-variant);
+    text-align: center;
+    font-size: var(--font-base);
+    margin-top: var(--spacer-base);
   }
 
   ._content {
