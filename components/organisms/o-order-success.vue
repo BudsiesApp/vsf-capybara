@@ -33,7 +33,7 @@
       </SfHeading>
 
       <p class="_confirmation">
-        {{ $t('You\'ll receive a confirmation email with your order number shortly!') }}
+        {{ $t('You\'ll receive your confirmation email soon!') }}
       </p>
     </div>
 
