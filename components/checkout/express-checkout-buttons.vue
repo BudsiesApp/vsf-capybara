@@ -278,6 +278,7 @@ export default defineComponent({
     const { prepareOrderData } = useOrderCreation(context);
 
     const onExpressCheckoutAuthorized = async (data: ExpressCheckoutAuthorizedCallbackData): Promise<void> => {
+      EventBus.$emit('notification-progress-start', root.$t('Processing order...'))
       await updateCustomerData(data.customer);
 
       const { i18n } = currentStoreView();
