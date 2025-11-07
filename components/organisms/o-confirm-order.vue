@@ -177,6 +177,7 @@
           :show-content="payment.paymentMethod === method.code"
           :is-order-placement-disabled="isPlaceOrderButtonDisabled"
           @success="placeOrder"
+          @cancelled="isCheckoutInProgress = false"
         >
           <template>
             <SfRadio
