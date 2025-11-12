@@ -365,6 +365,8 @@ export default defineComponent({
   ._buttons {
     display: flex;
     flex-direction: column;
+    position: relative;
+    z-index: 0;
 
     ._button {
       margin-top: var(--spacer-sm);
