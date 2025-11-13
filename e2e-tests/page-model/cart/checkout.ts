@@ -116,7 +116,7 @@ export class AddressForm {
 
   public constructor (public readonly page: Page) {
     this.formFieldLocator = page.locator('.form__element');
-    this.multiselectFieldLocator = page.locator('.form__element.m-multiselect');
+    this.multiselectFieldLocator = page.locator('.m-multiselect');
 
     this.firstNameFormField = new InputFormField(this.formFieldLocator, 'input[name="first-name"]', page);
     this.lastNameFormField = new InputFormField(this.formFieldLocator, 'input[name="last-name"]', page);
