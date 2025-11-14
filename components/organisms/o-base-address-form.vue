@@ -205,7 +205,7 @@
 <script lang="ts">
 import { extend, ValidationProvider } from 'vee-validate';
 import { min, required } from 'vee-validate/dist/rules';
-import Vue, { PropType } from 'vue';
+import { defineComponent, PropType, ref, computed, watch, nextTick } from '@vue/composition-api';
 import { SfInput } from '@storefront-ui/vue';
 import { parsePhoneNumberWithError } from 'libphonenumber-js';
 
@@ -236,7 +236,7 @@ extend('phone', {
   message: 'Please, enter valid phone number'
 });
 
-export default Vue.extend({
+export default defineComponent({
   name: 'OBaseAddressForm',
   props: {
     value: {
@@ -253,221 +253,261 @@ export default Vue.extend({
     MMultiselect,
     ValidationProvider
   },
-  data () {
-    return {
-      states: States,
-      fZipCodeChanged: false,
-      countries: Countries,
-      formattedPhoneNumber: ''
-    }
-  },
-  computed: {
-    isPhoneNumberRequired (): boolean {
-      return !!this.country && this.country !== unitedStatesCountryCode;
-    },
-    isSelectedCountryHasStates (): boolean {
-      if (!this.value.country || !this.states) {
+  setup (props, { emit, refs }) {
+    const states = States;
+    const fZipCodeChanged = ref(false);
+    const countries = Countries;
+    const formattedPhoneNumber = ref('');
+    const stateValidator = ref<InstanceType<typeof ValidationProvider> | undefined>(undefined);
+    const phoneValidator = ref<InstanceType<typeof ValidationProvider> | undefined>(undefined);
+
+    const updateValueField = (field: Record<string, string | number | null>): void => {
+      emit('input', { ...props.value, ...field });
+    };
+
+    const city = computed<string>({
+      get (): string {
+        return props.value.city;
+      },
+      set (value: string) {
+        updateValueField({ city: value });
+      }
+    });
+
+    const country = computed<string>({
+      get (): string {
+        return props.value.country;
+      },
+      set (value: string) {
+        updateValueField({ country: value });
+      }
+    });
+
+    const firstName = computed<string>({
+      get (): string {
+        return props.value.firstName;
+      },
+      set (value: string) {
+        updateValueField({ firstName: value });
+      }
+    });
+
+    const lastName = computed<string>({
+      get (): string {
+        return props.value.lastName;
+      },
+      set (value: string) {
+        updateValueField({ lastName: value });
+      }
+    });
+
+    const phoneNumber = computed<string>({
+      get (): string {
+        return props.value.phoneNumber;
+      },
+      set (value: string) {
+        updateValueField({ phoneNumber: value });
+      }
+    });
+
+    const regionId = computed<number | null>({
+      get (): number | null {
+        return props.value.regionId
+      },
+      set (value: number | null) {
+        updateValueField({ regionId: value });
+      }
+    });
+
+    const state = computed<string | null>({
+      get (): string | null {
+        return props.value.state;
+      },
+      set (value: string | null) {
+        updateValueField({ state: value });
+      }
+    });
+
+    const streetAddress = computed<string>({
+      get (): string {
+        return props.value.streetAddress;
+      },
+      set (value: string) {
+        updateValueField({ streetAddress: value });
+      }
+    });
+
+    const vatId = computed<string>({
+      get (): string {
+        return props.value.vatId;
+      },
+      set (value: string) {
+        updateValueField({ vatId: value });
+      }
+    });
+
+    const zipCode = computed<string>({
+      get (): string {
+        return props.value.zipCode;
+      },
+      set (value: string) {
+        updateValueField({ zipCode: value });
+      }
+    });
+
+    const isPhoneNumberRequired = computed<boolean>(() => {
+      return !!country.value && country.value !== unitedStatesCountryCode;
+    });
+
+    const isSelectedCountryHasStates = computed<boolean>(() => {
+      if (!props.value.country || !states) {
         return false;
       }
 
-      return this.states.hasOwnProperty(this.value.country);
-    },
-    phoneValidationRules (): any {
+      return states.hasOwnProperty(props.value.country);
+    });
+
+    const phoneValidationRules = computed<any>(() => {
       return {
-        required: this.isPhoneNumberRequired,
-        phone: { country: this.country }
+        required: isPhoneNumberRequired.value,
+        phone: { country: country.value }
       }
-    },
-    city: {
-      get (): string {
-        return this.value.city;
-      },
-      set (value: string) {
-        this.updateValueField({ city: value });
-      }
-    },
-    country: {
-      get (): string {
-        return this.value.country;
-      },
-      set (value: string) {
-        this.updateValueField({ country: value });
-      }
-    },
-    firstName: {
-      get (): string {
-        return this.value.firstName;
-      },
-      set (value: string) {
-        this.updateValueField({ firstName: value });
-      }
-    },
-    lastName: {
-      get (): string {
-        return this.value.lastName;
-      },
-      set (value: string) {
-        this.updateValueField({ lastName: value });
-      }
-    },
-    phoneNumber: {
-      get (): string {
-        return this.value.phoneNumber;
-      },
-      set (value: string) {
-        this.updateValueField({ phoneNumber: value });
-      }
-    },
-    regionId: {
-      get (): number | null {
-        return this.value.regionId
-      },
-      set (value: number | null) {
-        this.updateValueField({ regionId: value });
-      }
-    },
-    state: {
-      get (): string | null {
-        return this.value.state;
-      },
-      set (value: string | null) {
-        this.updateValueField({ state: value });
-      }
-    },
-    streetAddress: {
-      get (): string {
-        return this.value.streetAddress;
-      },
-      set (value: string) {
-        this.updateValueField({ streetAddress: value });
-      }
-    },
-    vatId: {
-      get (): string {
-        return this.value.vatId;
-      },
-      set (value: string) {
-        this.updateValueField({ vatId: value });
-      }
-    },
-    zipCode: {
-      get (): string {
-        return this.value.zipCode;
-      },
-      set (value: string) {
-        this.updateValueField({ zipCode: value });
-      }
-    },
-    showVatIdField (): boolean {
-      return !!this.country && this.country !== unitedStatesCountryCode;
-    },
-    statesForSelectedCountry (): any[] {
-      if (!this.isSelectedCountryHasStates) {
+    });
+
+    const showVatIdField = computed<boolean>(() => {
+      return !!country.value && country.value !== unitedStatesCountryCode;
+    });
+
+    const statesForSelectedCountry = computed<any[]>(() => {
+      if (!isSelectedCountryHasStates.value) {
         return [];
       }
 
-      return this.states[this.country];
-    },
-    vatIdValidationRules (): any {
-      if (!this.vatId) {
+      return states[country.value];
+    });
+
+    const vatIdValidationRules = computed<any>(() => {
+      if (!vatId.value) {
         return {};
       }
 
       return {
         min: 3
       }
-    }
-  },
-  methods: {
-    stateCodeAutocompleteOptionSearch,
-    onPhoneNumberBlur (): void {
-      if (!this.formattedPhoneNumber) {
-        this.phoneNumber = '';
+    });
+
+    const updateFormattedPhoneNumber = (phoneNumber: string): void => {
+      formattedPhoneNumber.value = phoneHelpers.formatPhoneNumberForDisplay(phoneNumber, country.value);
+    };
+
+    const onPhoneNumberBlur = (): void => {
+      if (!formattedPhoneNumber.value) {
+        phoneNumber.value = '';
         return;
       }
 
-      const normalizedNumber = phoneHelpers.formatPhoneNumberToE164(this.formattedPhoneNumber, this.country);
+      const normalizedNumber = phoneHelpers.formatPhoneNumberToE164(formattedPhoneNumber.value, country.value);
 
-      if (normalizedNumber === this.phoneNumber) {
-        this.updateFormattedPhoneNumber(normalizedNumber);
+      if (normalizedNumber === phoneNumber.value) {
+        updateFormattedPhoneNumber(normalizedNumber);
       }
 
       if (normalizedNumber) {
-        this.phoneNumber = normalizedNumber;
+        phoneNumber.value = normalizedNumber;
       }
-    },
-    async onChangeCountry (): Promise<void> {
-      await this.$nextTick();
-      this.validateCountryRelatedFields();
-      this.$emit('country-changed');
-    },
-    onZipCodeBlur (): void {
-      if (!this.fZipCodeChanged) {
+    };
+
+    const validateCountryRelatedFields = (): void => {
+      type validatorType = InstanceType<typeof ValidationProvider> | undefined;
+
+      const stateValidatorInstance = refs.stateValidator as validatorType;
+      const phoneValidatorInstance = refs.phoneValidator as validatorType;
+
+      if (stateValidatorInstance) {
+        stateValidatorInstance.validate();
+      }
+
+      if (phoneValidatorInstance) {
+        phoneValidatorInstance.validate();
+      }
+    };
+
+    const onChangeCountry = async (): Promise<void> => {
+      await nextTick();
+      validateCountryRelatedFields();
+      emit('country-changed');
+    };
+
+    const onZipCodeBlur = (): void => {
+      if (!fZipCodeChanged.value) {
         return;
       }
 
-      this.fZipCodeChanged = false;
+      fZipCodeChanged.value = false;
 
-      this.$emit('zip-code-blur');
-    },
-    validateCountryRelatedFields (): void {
-      type validatorType = InstanceType<typeof ValidationProvider> | undefined;
+      emit('zip-code-blur');
+    };
 
-      const stateValidator = this.$refs.stateValidator as validatorType;
-      const phoneValidator = this.$refs.phoneValidator as validatorType;
+    watch(country, (after, before) => {
+      if (after && before && after !== before) {
+        state.value = null;
+        regionId.value = null;
+      }
+    }, { immediate: true });
 
-      if (stateValidator) {
-        stateValidator.validate();
+    watch(phoneNumber, (value: string) => {
+      updateFormattedPhoneNumber(value);
+    }, { immediate: true });
+
+    watch(isSelectedCountryHasStates, (val) => {
+      if (val) {
+        state.value = null;
+        return;
       }
 
-      if (phoneValidator) {
-        phoneValidator.validate();
-      }
-    },
-    updateValueField (field: Record<string, string | number | null>): void {
-      this.$emit('input', { ...this.value, ...field });
-    },
-    updateFormattedPhoneNumber (phoneNumber: string): void {
-      this.formattedPhoneNumber = phoneHelpers.formatPhoneNumberForDisplay(phoneNumber, this.country);
-    }
-  },
-  watch: {
-    country: {
-      handler (after, before) {
-        if (after && before && after !== before) {
-          this.state = null;
-          this.regionId = null;
-        }
-      },
-      immediate: true
-    },
-    phoneNumber: {
-      handler (value: string) {
-        this.updateFormattedPhoneNumber(value);
-      },
-      immediate: true
-    },
-    isSelectedCountryHasStates: {
-      handler (val) {
-        if (val) {
-          this.state = null;
-          return;
-        }
+      (regionId.value as any) = null;
+    }, { immediate: true });
 
-        (this.regionId as any) = null;
-      },
-      immediate: true
-    },
-    showVatIdField (value) {
+    watch(showVatIdField, (value) => {
       if (!value) {
-        this.vatId = '';
+        vatId.value = '';
       }
-    },
-    zipCode: {
-      handler () {
-        this.fZipCodeChanged = true;
-      },
-      immediate: true
+    });
+
+    watch(zipCode, () => {
+      fZipCodeChanged.value = true;
+    }, { immediate: true });
+
+    return {
+      states,
+      fZipCodeChanged,
+      countries,
+      formattedPhoneNumber,
+      stateValidator,
+      phoneValidator,
+      isPhoneNumberRequired,
+      isSelectedCountryHasStates,
+      phoneValidationRules,
+      city,
+      country,
+      firstName,
+      lastName,
+      phoneNumber,
+      regionId,
+      state,
+      streetAddress,
+      vatId,
+      zipCode,
+      showVatIdField,
+      statesForSelectedCountry,
+      vatIdValidationRules,
+      stateCodeAutocompleteOptionSearch,
+      onPhoneNumberBlur,
+      onChangeCountry,
+      onZipCodeBlur,
+      validateCountryRelatedFields,
+      updateValueField,
+      updateFormattedPhoneNumber
     }
   }
 })

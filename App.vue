@@ -24,6 +24,7 @@ import { USER_LEAVING_WEBSITE } from 'src/modules/promotion-platform';
 import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
 import { SN_PROMOTION_PLATFORM } from 'src/modules/promotion-platform/types/StoreMutations';
 import { FETCH_AVAILABLE_CURRENCIES_ACTION, FETCH_CURRENCY_RATES_ACTION, GET_CURRENCY_EXCHANGE_RATE } from 'src/modules/currency';
+import { GoogleAddressValidationProviderService } from 'src/modules/address';
 
 const windowObject = isServer ? {} : window;
 const errorConverterService = new ErrorConverterService();
@@ -36,6 +37,7 @@ const imageHandlerService = new ImageHandlerService(
 const qaPhotosHandlerService = new ImageHandlerService(
   config.images.qaPhotosHandlerServiceUrl
 );
+const addressValidationProviderService = new GoogleAddressValidationProviderService();
 
 export default {
   components: {
@@ -79,7 +81,8 @@ export default {
     FileProcessingRepositoryFactory: fileProcessingRepositoryFactory,
     ImageHandlerService: imageHandlerService,
     QaPhotosHandlerService: qaPhotosHandlerService,
-    WindowObject: windowObject
+    WindowObject: windowObject,
+    AddressValidationProviderService: addressValidationProviderService
   },
   methods: {
     onUserLeavingWebsite () {
