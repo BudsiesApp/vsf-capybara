@@ -164,25 +164,16 @@ export default defineComponent({
   },
   data () {
     return {
-      // Hardcoded mock data for development
-      enteredAddress: {
-        streetAddress: '123 Main St',
-        city: 'Springfield',
-        state: 'IL',
-        zipCode: '62701',
-        country: 'US'
-      },
-      suggestedAddress: {
-        streetAddress: '123 Main Street',
-        city: 'Springfield',
-        state: 'IL',
-        zipCode: '62701-1234',
-        country: 'US'
-      },
       unitNumber: ''
     };
   },
   computed: {
+    enteredAddress () {
+      return this.modalData?.payload?.enteredAddress || {};
+    },
+    suggestedAddress () {
+      return this.modalData?.payload?.suggestedAddress || {};
+    },
     isFixMode (): boolean {
       return this.modalData?.payload?.verdict === 'FIX';
     },
@@ -245,8 +236,8 @@ export default defineComponent({
     },
     useUpdatedAddress () {
       const addressWithUnit = {
-        ...this.enteredAddress,
-        streetAddress: `${this.enteredAddress.streetAddress} ${this.unitNumber}`.trim()
+        ...this.suggestedAddress,
+        streetAddress: `${this.suggestedAddress.streetAddress} ${this.unitNumber}`.trim()
       };
 
       (this as any).$bus.$emit('address-selected', {
