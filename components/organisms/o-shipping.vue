@@ -82,6 +82,7 @@
   </div>
 </template>
 <script>
+import { toRef, defineComponent } from '@vue/composition-api';
 import {
   SfInput,
   SfRadio,
@@ -104,11 +105,12 @@ import { GET_ACTIVE_CURRENCY, GET_CURRENCY_EXCHANGE_RATE } from 'src/modules/cur
 import { PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, PERSISTED_CUSTOMER_PHONE_NUMBER, PERSISTED_CUSTOMER_SHIPPING_COUNTRY, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_SHIPPING_COUNTRY } from 'src/modules/persisted-customer-data';
 import { PriceHelper } from 'src/modules/shared';
 import { mapCheckoutAddressToFormValue, mapFormValueToCheckoutAddress } from 'theme/helpers/checkout-address-mapper';
+import { useAddressValidation } from 'src/modules/address';
 import OBaseAddressForm from './o-base-address-form.vue';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
-export default {
+export default defineComponent({
   name: 'OShipping',
   components: {
     SfInput,
@@ -118,6 +120,14 @@ export default {
     SfCheckbox,
     MMultiselect,
     OBaseAddressForm
+  },
+  setup (_, context) {
+    const { validateAddress, isValidating } = useAddressValidation(context);
+
+    return {
+      validateAddress,
+      isValidatingAddress: isValidating
+    };
   },
   mixins: [Shipping],
   data: () => {
@@ -178,6 +188,13 @@ export default {
       this.$bus.$emit('checkout-before-shippingMethods', this.shipping.country)
     },
     async saveDataToCheckout () {
+      const shippingRef = toRef(this, 'shipping');
+      const shouldProceed = await this.validateAddress(shippingRef);
+
+      if (!shouldProceed) {
+        return;
+      }
+
       this.$store.commit(
         SET_PERSISTED_CUSTOMER_FIRST_NAME,
         this.shipping.firstName
@@ -243,7 +260,7 @@ export default {
   beforeDestroy () {
     EventBus.$off('user-after-loggedin', this.fillLastUsedCustomerData);
   }
-};
+});
 </script>
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
