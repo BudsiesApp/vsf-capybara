@@ -1,5 +1,5 @@
 <template>
-  <div class="o-base-address-form form">
+  <div class="o-base-address-form">
     <validation-provider
       slim
       rules="required|min:2"
@@ -44,16 +44,20 @@
       name="'Address'"
       v-slot="{errors}"
     >
-      <SfInput
+      <MSuggestionsList
         v-model="streetAddress"
         class="form__element"
-        name="street-address"
-        autocomplete="street-address"
+        :suggestions="autocompleteSuggestions"
+        :loading="autocompleteLoading"
         :label="$t('Address')"
         :required="true"
         :disabled="isFormFieldsDisabled"
         :valid="!errors.length"
         :error-message="errors[0]"
+        name="street-address"
+        autocomplete="street-address"
+        @input="onStreetAddressInput"
+        @select="onSelectSuggestion"
       />
     </validation-provider>
 
@@ -205,14 +209,16 @@
 <script lang="ts">
 import { extend, ValidationProvider } from 'vee-validate';
 import { min, required } from 'vee-validate/dist/rules';
-import { defineComponent, PropType, ref, computed, watch, nextTick } from '@vue/composition-api';
+import { defineComponent, PropType, ref, computed, watch, nextTick, toRef } from '@vue/composition-api';
 import { SfInput } from '@storefront-ui/vue';
 import { parsePhoneNumberWithError } from 'libphonenumber-js';
 
 import { stateCodeAutocompleteOptionSearch, createPhoneHelpers } from 'src/modules/shared';
 import { BaseAddressFormValue } from 'theme/components/interfaces/base-address-form-value.interface';
+import { useAddressAutocomplete } from 'src/modules/address/composables/use-address-autocomplete';
 
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
+import MSuggestionsList from 'theme/components/molecules/m-suggestions-list.vue';
 
 const Countries = require('@vue-storefront/i18n/resource/countries.json');
 const States = require('@vue-storefront/i18n/resource/states.json');
@@ -251,6 +257,7 @@ export default defineComponent({
   components: {
     SfInput,
     MMultiselect,
+    MSuggestionsList,
     ValidationProvider
   },
   setup (props, { emit, refs }) {
@@ -260,6 +267,14 @@ export default defineComponent({
     const formattedPhoneNumber = ref('');
     const stateValidator = ref<InstanceType<typeof ValidationProvider> | undefined>(undefined);
     const phoneValidator = ref<InstanceType<typeof ValidationProvider> | undefined>(undefined);
+
+    const addressRef = toRef(props, 'value');
+    const {
+      suggestions: autocompleteSuggestions,
+      loading: autocompleteLoading,
+      selectSuggestion: selectAutocompleteSuggestion,
+      runSuggestionQuery
+    } = useAddressAutocomplete(addressRef);
 
     const updateValueField = (field: Record<string, string | number | null>): void => {
       emit('input', { ...props.value, ...field });
@@ -396,6 +411,10 @@ export default defineComponent({
       }
     });
 
+    const onStreetAddressInput = async (value: string): Promise<void> => {
+      await runSuggestionQuery(value);
+    };
+
     const updateFormattedPhoneNumber = (phoneNumber: string): void => {
       formattedPhoneNumber.value = phoneHelpers.formatPhoneNumberForDisplay(phoneNumber, country.value);
     };
@@ -448,10 +467,37 @@ export default defineComponent({
       emit('zip-code-blur');
     };
 
+    const onAutocompleteAddressSelected = async (placeId: string | undefined): Promise<void> => {
+      if (!placeId || typeof placeId !== 'string') {
+        return;
+      }
+
+      try {
+        await selectAutocompleteSuggestion(placeId);
+
+        await nextTick();
+        validateCountryRelatedFields();
+
+        emit('address-autocompleted');
+      } catch (error) {
+        console.error('Error selecting autocomplete suggestion:', error);
+      }
+    };
+
+    const onSelectSuggestion = async (placeId: string): Promise<void> => {
+      if (!placeId) return;
+
+      await onAutocompleteAddressSelected(placeId);
+    };
+
     watch(country, (after, before) => {
       if (after && before && after !== before) {
         state.value = null;
         regionId.value = null;
+
+        if (streetAddress.value) {
+          streetAddress.value = '';
+        }
       }
     }, { immediate: true });
 
@@ -485,6 +531,9 @@ export default defineComponent({
       formattedPhoneNumber,
       stateValidator,
       phoneValidator,
+      autocompleteSuggestions,
+      autocompleteLoading,
+      selectAutocompleteSuggestion,
       isPhoneNumberRequired,
       isSelectedCountryHasStates,
       phoneValidationRules,
@@ -502,9 +551,13 @@ export default defineComponent({
       statesForSelectedCountry,
       vatIdValidationRules,
       stateCodeAutocompleteOptionSearch,
+      onStreetAddressInput,
+      onSelectSuggestion,
       onPhoneNumberBlur,
       onChangeCountry,
       onZipCodeBlur,
+      onAutocompleteAddressSelected,
+      runSuggestionQuery,
       validateCountryRelatedFields,
       updateValueField,
       updateFormattedPhoneNumber
@@ -516,9 +569,11 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-.form {
-  &__element {
-      margin: 0 0 var(--spacer-sm) 0;
+.o-base-address-form {
+  --multiselect-margin: 0;
+
+  .form__element {
+    margin: 0 0 var(--spacer-sm) 0;
   }
 
   @include for-desktop {
@@ -527,10 +582,10 @@ export default defineComponent({
     align-items: center;
     column-gap: var(--spacer-xl);
 
-    &__element {
+    .form__element {
       flex: 0 0 100%;
 
-      &--half {
+      &.form__element--half {
         flex: 1 1 40%;
       }
     }

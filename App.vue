@@ -47,11 +47,11 @@ export default {
   },
   computed: {
     layout () {
-      return `${get(this.$route, 'meta.layout', 'default')}-layout`
+      return `${get(this.$route, 'meta.layout', 'default')}-layout`;
     }
   },
   mounted () {
-    EventBus.$on(USER_LEAVING_WEBSITE, this.onUserLeavingWebsite)
+    EventBus.$on(USER_LEAVING_WEBSITE, this.onUserLeavingWebsite);
   },
   beforeDestroy () {
     EventBus.$off(USER_LEAVING_WEBSITE, this.onUserLeavingWebsite);

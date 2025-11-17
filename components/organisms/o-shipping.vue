@@ -5,7 +5,7 @@
       :level="3"
       class="sf-heading--left sf-heading--no-underline title"
     />
-    <div class="_form" :disabled="isAddressFormDisabled">
+    <div class="form" :disabled="isAddressFormDisabled">
       <SfCheckbox
         v-if="currentUser && hasDefaultShippingAddress"
         v-model="shipToMyAddress"
@@ -25,7 +25,7 @@
       :level="3"
       class="sf-heading--left sf-heading--no-underline title"
     />
-    <div class="_form">
+    <div class="form">
       <div class="form__radio-group">
         <SfRadio
           v-for="method in shippingMethods"
@@ -257,7 +257,7 @@ export default {
     }
   }
 }
-._form {
+.form {
   &__group {
     display: flex;
     align-items: center;
