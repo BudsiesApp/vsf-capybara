@@ -1,41 +1,44 @@
 <template>
-  <div class="o-billing-address">
+  <validation-observer
+    class="o-billing-address"
+    ref="validationObserver"
+    slim
+    tag="div"
+  >
     <SfHeading
       :title="`${$t('Billing address')}`"
       :level="3"
       class="sf-heading--left sf-heading--no-underline title"
     />
-    <validation-observer ref="validationObserver" slim tag="div">
-      <div class="form" :disabled="isAddressFormDisabled">
-        <SfCheckbox
-          v-if="!isVirtualCart"
-          v-model="sendToShippingAddress"
-          class="form__element form__checkbox -always-enabled"
-          name="sendToShippingAddress"
-          :label="$t('Copy address data from shipping')"
-        />
-        <SfCheckbox
-          v-if="hasBillingData()"
-          v-model="sendToBillingAddress"
-          class="form__element form__checkbox -always-enabled"
-          name="sendToBillingAddress"
-          :label="$t('Use my default billing data')"
-        />
+    <div class="form" :disabled="isAddressFormDisabled">
+      <SfCheckbox
+        v-if="!isVirtualCart"
+        v-model="sendToShippingAddress"
+        class="form__element form__checkbox -always-enabled"
+        name="sendToShippingAddress"
+        :label="$t('Copy address data from shipping')"
+      />
+      <SfCheckbox
+        v-if="hasBillingData()"
+        v-model="sendToBillingAddress"
+        class="form__element form__checkbox -always-enabled"
+        name="sendToBillingAddress"
+        :label="$t('Use my default billing data')"
+      />
 
-        <div
-          class="_form-fields"
-          v-show="showAddressFormFields"
-        >
-          <OBaseAddressForm
-            ref="baseAddressForm"
-            v-model="addressValue"
-            :is-form-fields-disabled="isAddressFormDisabled"
-            :get-field-anchor-name="getFieldAnchorName"
-            @country-changed="onChangeCountry"
-          />
-        </div>
+      <div
+        class="_form-fields"
+        v-show="showAddressFormFields"
+      >
+        <OBaseAddressForm
+          ref="baseAddressForm"
+          v-model="addressValue"
+          :is-form-fields-disabled="isAddressFormDisabled"
+          :get-field-anchor-name="getFieldAnchorName"
+          @country-changed="onChangeCountry"
+        />
       </div>
-    </validation-observer>
+    </div>
 
     <div class="form">
       <div class="form__action">
@@ -64,7 +67,7 @@
     <!-- This dummy container below is needed because src\modules\payment-cash-on-delivery\index.ts
          tries to inject here a component with payment description -->
     <div v-show="false" id="checkout-order-review-additional-container" />
-  </div>
+  </validation-observer>
 </template>
 <script>
 import { defineComponent, ref, toRef } from '@vue/composition-api';

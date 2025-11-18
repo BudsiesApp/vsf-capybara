@@ -1,93 +1,92 @@
 <template>
-  <div class="o-shipping">
+  <validation-observer
+    ref="validationObserver"
+    slim
+    tag="div"
+    class="o-shipping"
+  >
     <SfHeading
       :title="`${$t('Shipping address')}`"
       :level="3"
       class="sf-heading--left sf-heading--no-underline title"
     />
-    <validation-observer
-      ref="validationObserver"
-      slim
-      tag="div"
-    >
-      <div class="form" :disabled="isAddressFormDisabled">
-        <SfCheckbox
-          v-if="currentUser && hasDefaultShippingAddress"
-          v-model="shipToMyAddress"
-          class="form__element form__checkbox -always-enabled"
-          name="shipToMyAddress"
-          :label="$t('Ship to my default address')"
-        />
-        <OBaseAddressForm
-          ref="baseAddressForm"
-          v-model="addressValue"
-          :is-form-fields-disabled="shipToMyAddress"
-          :get-field-anchor-name="getFieldAnchorName"
-          @country-changed="onChangeCountry"
-          @zip-code-blur="onZipCodeBlur"
-        />
-      </div>
-      <SfHeading
-        :title="$t('Shipping method')"
-        :level="3"
-        class="sf-heading--left sf-heading--no-underline title"
+    <div class="form" :disabled="isAddressFormDisabled">
+      <SfCheckbox
+        v-if="currentUser && hasDefaultShippingAddress"
+        v-model="shipToMyAddress"
+        class="form__element form__checkbox -always-enabled"
+        name="shipToMyAddress"
+        :label="$t('Ship to my default address')"
       />
-      <div class="form">
-        <div class="form__radio-group">
-          <SfRadio
-            v-for="method in shippingMethods"
-            :key="method.method_code"
-            v-model="shipping.shippingMethod"
-            :value="method.method_code"
-            :disabled="isShippingMethodsSyncing"
-            name="shipping-method"
-            class="form__radio shipping"
-            @input="changeShippingMethod()"
-          >
-            <template #label>
-              <div class="sf-radio__label shipping__label">
-                <div>{{ getCarrierTitle(method) }}</div>
-                <div class="shipping__label-price">
-                  {{ formatPrice(method.amount) }}
-                </div>
+      <OBaseAddressForm
+        ref="baseAddressForm"
+        v-model="addressValue"
+        :is-form-fields-disabled="shipToMyAddress"
+        :get-field-anchor-name="getFieldAnchorName"
+        @country-changed="onChangeCountry"
+        @zip-code-blur="onZipCodeBlur"
+      />
+    </div>
+    <SfHeading
+      :title="$t('Shipping method')"
+      :level="3"
+      class="sf-heading--left sf-heading--no-underline title"
+    />
+    <div class="form">
+      <div class="form__radio-group">
+        <SfRadio
+          v-for="method in shippingMethods"
+          :key="method.method_code"
+          v-model="shipping.shippingMethod"
+          :value="method.method_code"
+          :disabled="isShippingMethodsSyncing"
+          name="shipping-method"
+          class="form__radio shipping"
+          @input="changeShippingMethod()"
+        >
+          <template #label>
+            <div class="sf-radio__label shipping__label">
+              <div>{{ getCarrierTitle(method) }}</div>
+              <div class="shipping__label-price">
+                {{ formatPrice(method.amount) }}
               </div>
-            </template>
+            </div>
+          </template>
 
-            <template #details v-if="getMethodTitle(method)">
-              <p>{{ getMethodTitle(method) }}</p>
-            </template>
-          </SfRadio>
-          <p class="shipping__note">
-            {{ $t('Our service is not responsible for local tariffs or duties on international shipments') }}
-          </p>
-        </div>
-        <div class="form__action">
-          <SfButton
-            class="sf-button--full-width form__action-button"
-            :disabled="isContinueButtonDisabled"
-            @click="saveDataToCheckout"
-          >
-            {{ $t('Continue to payment') }}
-          </SfButton>
-          <SfButton
-            type="submit"
-            class="sf-button--full-width sf-button--text form__action-button form__action-button--secondary"
-            @click="$bus.$emit('checkout-before-edit', 'personalDetails')"
-          >
-            {{ $t('Edit contact') }}
-          </SfButton>
-        </div>
-
-        <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-          <component
-            :is="linkComponent.component"
-            :key="linkComponent.key"
-            v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks"
-          />
-        </template>
+          <template #details v-if="getMethodTitle(method)">
+            <p>{{ getMethodTitle(method) }}</p>
+          </template>
+        </SfRadio>
+        <p class="shipping__note">
+          {{ $t('Our service is not responsible for local tariffs or duties on international shipments') }}
+        </p>
       </div>
-    </validation-observer>
-  </div>
+      <div class="form__action">
+        <SfButton
+          class="sf-button--full-width form__action-button"
+          :disabled="isContinueButtonDisabled"
+          @click="saveDataToCheckout"
+        >
+          {{ $t('Continue to payment') }}
+        </SfButton>
+        <SfButton
+          type="submit"
+          class="sf-button--full-width sf-button--text form__action-button form__action-button--secondary"
+          @click="$bus.$emit('checkout-before-edit', 'personalDetails')"
+        >
+          {{ $t('Edit contact') }}
+        </SfButton>
+      </div>
+
+      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+        <component
+          :is="linkComponent.component"
+          :key="linkComponent.key"
+          v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks"
+        />
+      </template>
+    </div>
+  </validation-observer>
 </template>
 <script>
 import { toRef, defineComponent, ref } from '@vue/composition-api';
@@ -302,6 +301,7 @@ export default defineComponent({
 
 .title {
   --heading-padding: var(--spacer-base) 0;
+
   @include for-desktop {
     --heading-padding: var(--spacer-xl) 0 var(--spacer-base) 0;
     &:last-of-type {
