@@ -105,7 +105,7 @@ export default defineComponent({
     const validationObserver = ref(null);
     const baseAddressForm = ref(null);
 
-    const { validateAddress, isValidating: isValidatingAddress } = useAddressValidation(context);
+    const { validateAddress, isValidating: isValidatingAddress, completeValidation: completeAddressValidation } = useAddressValidation(context);
 
     const { validateAndGoToFirstError } = useFormValidation(
       validationObserver,
@@ -123,6 +123,7 @@ export default defineComponent({
       baseAddressForm,
       validateAddress,
       isValidatingAddress,
+      completeAddressValidation,
       validateAndGoToFirstError,
       getFieldAnchorName
     };
@@ -212,6 +213,8 @@ export default defineComponent({
         if (!shouldProceed) {
           return;
         }
+
+        this.completeAddressValidation();
       }
 
       this.$store.commit(
