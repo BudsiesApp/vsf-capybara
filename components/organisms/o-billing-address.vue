@@ -5,38 +5,43 @@
       :level="3"
       class="sf-heading--left sf-heading--no-underline title"
     />
-    <div class="form" :disabled="isAddressFormDisabled">
-      <SfCheckbox
-        v-if="!isVirtualCart"
-        v-model="sendToShippingAddress"
-        class="form__element form__checkbox -always-enabled"
-        name="sendToShippingAddress"
-        :label="$t('Copy address data from shipping')"
-      />
-      <SfCheckbox
-        v-if="hasBillingData()"
-        v-model="sendToBillingAddress"
-        class="form__element form__checkbox -always-enabled"
-        name="sendToBillingAddress"
-        :label="$t('Use my default billing data')"
-      />
-
-      <div
-        class="_form-fields"
-        v-show="showAddressFormFields"
-      >
-        <OBaseAddressForm
-          v-model="addressValue"
-          :is-form-fields-disabled="isAddressFormDisabled"
-          @country-changed="onChangeCountry"
+    <validation-observer ref="validationObserver" slim tag="div">
+      <div class="form" :disabled="isAddressFormDisabled">
+        <SfCheckbox
+          v-if="!isVirtualCart"
+          v-model="sendToShippingAddress"
+          class="form__element form__checkbox -always-enabled"
+          name="sendToShippingAddress"
+          :label="$t('Copy address data from shipping')"
         />
+        <SfCheckbox
+          v-if="hasBillingData()"
+          v-model="sendToBillingAddress"
+          class="form__element form__checkbox -always-enabled"
+          name="sendToBillingAddress"
+          :label="$t('Use my default billing data')"
+        />
+
+        <div
+          class="_form-fields"
+          v-show="showAddressFormFields"
+        >
+          <OBaseAddressForm
+            ref="baseAddressForm"
+            v-model="addressValue"
+            :is-form-fields-disabled="isAddressFormDisabled"
+            :get-field-anchor-name="getFieldAnchorName"
+            @country-changed="onChangeCountry"
+          />
+        </div>
       </div>
-    </div>
+    </validation-observer>
 
     <div class="form">
       <div class="form__action">
         <SfButton
           class="sf-button--full-width form__action-button"
+          :disabled="isValidatingAddress"
           @click="onGoReviewButtonClicked"
         >
           {{ $t('Go review the order') }}
@@ -62,6 +67,7 @@
   </div>
 </template>
 <script>
+import { defineComponent, ref, toRef } from '@vue/composition-api';
 import { mapGetters } from 'vuex';
 import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
 import {
@@ -70,21 +76,20 @@ import {
   SfHeading,
   SfCheckbox
 } from '@storefront-ui/vue';
+import { ValidationObserver } from 'vee-validate';
 import { createSmoothscroll } from 'theme/helpers';
 import MMultiselect from 'theme/components/molecules/m-multiselect';
 import { PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_BILLING_ADDRESS } from 'src/modules/persisted-customer-data';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
-import {
-  KEY as AMAZON_PAY_MODULE_KEY,
-  METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
-} from 'src/modules/vsf-amazon-pay/index';
 import { mapCheckoutAddressToFormValue, mapFormValueToCheckoutAddress } from 'theme/helpers/checkout-address-mapper';
+import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
+import { useAddressValidation } from 'src/modules/address';
 import OBaseAddressForm from './o-base-address-form.vue';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
-export default {
+export default defineComponent({
   name: 'OBillingAddress',
   components: {
     SfInput,
@@ -92,9 +97,36 @@ export default {
     SfHeading,
     SfCheckbox,
     MMultiselect,
-    OBaseAddressForm
+    OBaseAddressForm,
+    ValidationObserver
   },
   mixins: [Payment],
+  setup (_, context) {
+    const validationObserver = ref(null);
+    const baseAddressForm = ref(null);
+
+    const { validateAddress, isValidating: isValidatingAddress } = useAddressValidation(context);
+
+    const { validateAndGoToFirstError } = useFormValidation(
+      validationObserver,
+      () => {
+        const baseAddressFormComponent = baseAddressForm.value;
+        return {
+          ...context.refs,
+          ...(baseAddressFormComponent?.$refs || {})
+        };
+      }
+    );
+
+    return {
+      validationObserver,
+      baseAddressForm,
+      validateAddress,
+      isValidatingAddress,
+      validateAndGoToFirstError,
+      getFieldAnchorName
+    };
+  },
   data: () => {
     return {
       states: States
@@ -165,6 +197,23 @@ export default {
       ]);
     },
     async onGoReviewButtonClicked () {
+      const shouldValidate = !this.sendToShippingAddress && !this.sendToBillingAddress;
+
+      if (shouldValidate) {
+        const isFormValid = await this.validateAndGoToFirstError();
+
+        if (!isFormValid) {
+          return;
+        }
+
+        const paymentRef = toRef(this, 'payment');
+        const shouldProceed = await this.validateAddress(paymentRef);
+
+        if (!shouldProceed) {
+          return;
+        }
+      }
+
       this.$store.commit(
         SET_PERSISTED_CUSTOMER_FIRST_NAME,
         this.payment.firstName
@@ -219,7 +268,7 @@ export default {
   },
   watch: {
   }
-};
+});
 </script>
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";

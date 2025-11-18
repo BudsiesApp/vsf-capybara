@@ -132,7 +132,7 @@ export default defineComponent({
     const validationObserver = ref(null);
     const baseAddressForm = ref(null);
 
-    const { validateAddress, isValidating } = useAddressValidation(context);
+    const { validateAddress, isValidating: isValidatingAddress } = useAddressValidation(context);
 
     const { validateAndGoToFirstError } = useFormValidation(
       validationObserver,
@@ -148,7 +148,7 @@ export default defineComponent({
 
     return {
       validateAddress,
-      isValidatingAddress: isValidating,
+      isValidatingAddress,
       validateAndGoToFirstError,
       getFieldAnchorName,
       validationObserver,
@@ -174,7 +174,7 @@ export default defineComponent({
       return this.$store.getters[IS_SHIPPING_METHODS_SYNCING];
     },
     isContinueButtonDisabled () {
-      return !this.shippingMethods.length || this.isShippingMethodsSyncing;
+      return !this.shippingMethods.length || this.isShippingMethodsSyncing || this.isValidatingAddress;
     },
     isAddressFormDisabled () {
       return this.shipToMyAddress;
