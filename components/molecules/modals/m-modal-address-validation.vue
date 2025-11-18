@@ -178,7 +178,7 @@ export default defineComponent({
       return this.modalData?.payload?.verdict === 'FIX';
     },
     isSubpremisesMode (): boolean {
-      return this.modalData?.payload?.verdict === 'CONFIRM_ADD_SUBPREMISE';
+      return this.modalData?.payload?.verdict === 'CONFIRM_ADD_SUBPREMISES';
     },
     getModalTitle (): string {
       if (this.isFixMode) {

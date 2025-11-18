@@ -9,7 +9,6 @@
       ref="validationObserver"
       slim
       tag="div"
-      v-slot="{passes}"
     >
       <div class="form" :disabled="isAddressFormDisabled">
         <SfCheckbox
@@ -20,8 +19,10 @@
           :label="$t('Ship to my default address')"
         />
         <OBaseAddressForm
+          ref="baseAddressForm"
           v-model="addressValue"
           :is-form-fields-disabled="shipToMyAddress"
+          :get-field-anchor-name="getFieldAnchorName"
           @country-changed="onChangeCountry"
           @zip-code-blur="onZipCodeBlur"
         />
@@ -64,7 +65,7 @@
           <SfButton
             class="sf-button--full-width form__action-button"
             :disabled="isContinueButtonDisabled"
-            @click="() => passes(() => saveDataToCheckout())"
+            @click="saveDataToCheckout"
           >
             {{ $t('Continue to payment') }}
           </SfButton>
@@ -89,7 +90,7 @@
   </div>
 </template>
 <script>
-import { toRef, defineComponent } from '@vue/composition-api';
+import { toRef, defineComponent, ref } from '@vue/composition-api';
 import {
   SfInput,
   SfRadio,
@@ -105,15 +106,12 @@ import { Shipping } from '@vue-storefront/core/modules/checkout/components/Shipp
 
 import { createSmoothscroll } from 'theme/helpers';
 import MMultiselect from 'theme/components/molecules/m-multiselect';
-import {
-  KEY as AMAZON_PAY_MODULE_KEY,
-  METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
-} from 'src/modules/vsf-amazon-pay/index';
 import { GET_ACTIVE_CURRENCY, GET_CURRENCY_EXCHANGE_RATE } from 'src/modules/currency';
 import { PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, PERSISTED_CUSTOMER_PHONE_NUMBER, PERSISTED_CUSTOMER_SHIPPING_COUNTRY, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_SHIPPING_COUNTRY } from 'src/modules/persisted-customer-data';
 import { PriceHelper } from 'src/modules/shared';
 import { mapCheckoutAddressToFormValue, mapFormValueToCheckoutAddress } from 'theme/helpers/checkout-address-mapper';
 import { useAddressValidation } from 'src/modules/address';
+import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 import OBaseAddressForm from './o-base-address-form.vue';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
@@ -131,11 +129,30 @@ export default defineComponent({
     ValidationObserver
   },
   setup (_, context) {
+    const validationObserver = ref(null);
+    const baseAddressForm = ref(null);
+
     const { validateAddress, isValidating } = useAddressValidation(context);
+
+    const { validateAndGoToFirstError } = useFormValidation(
+      validationObserver,
+      () => {
+        const baseAddressFormComponent = baseAddressForm.value;
+
+        return {
+          ...context.refs,
+          ...(baseAddressFormComponent?.$refs || {})
+        };
+      }
+    );
 
     return {
       validateAddress,
-      isValidatingAddress: isValidating
+      isValidatingAddress: isValidating,
+      validateAndGoToFirstError,
+      getFieldAnchorName,
+      validationObserver,
+      baseAddressForm
     };
   },
   mixins: [Shipping],
@@ -197,6 +214,12 @@ export default defineComponent({
       this.$bus.$emit('checkout-before-shippingMethods', this.shipping.country)
     },
     async saveDataToCheckout () {
+      const isFormValid = await this.validateAndGoToFirstError();
+
+      if (!isFormValid) {
+        return;
+      }
+
       const shippingRef = toRef(this, 'shipping');
       const shouldProceed = await this.validateAddress(shippingRef);
 

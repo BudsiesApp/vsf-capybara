@@ -8,6 +8,7 @@
     >
       <SfInput
         v-model="firstName"
+        :ref="getFieldAnchorName('First name')"
         class="form__element form__element--half"
         name="first-name"
         autocomplete="given-name"
@@ -27,6 +28,7 @@
     >
       <SfInput
         v-model="lastName"
+        :ref="getFieldAnchorName('Last name')"
         class="form__element form__element--half"
         name="last-name"
         autocomplete="family-name"
@@ -46,6 +48,7 @@
     >
       <MSuggestionsList
         v-model="streetAddress"
+        :ref="getFieldAnchorName('Address')"
         class="form__element"
         :suggestions="autocompleteSuggestions"
         :loading="autocompleteLoading"
@@ -69,6 +72,7 @@
     >
       <MMultiselect
         v-model="country"
+        :ref="getFieldAnchorName('Country')"
         class="form__element form__element--half form__select"
         name="country-name"
         autocomplete="country-name"
@@ -88,6 +92,7 @@
       v-if="!isSelectedCountryHasStates"
       key="state"
       v-model="state"
+      :ref="getFieldAnchorName('State')"
       class="form__element form__element--half"
       name="address-level1"
       autocomplete="address-level1"
@@ -109,6 +114,7 @@
       >
         <MMultiselect
           v-model="regionId"
+          :ref="getFieldAnchorName('State')"
           name="address-level1"
           autocomplete="address-level1"
           :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
@@ -132,6 +138,7 @@
     >
       <SfInput
         v-model="city"
+        :ref="getFieldAnchorName('City')"
         class="form__element form__element--half"
         name="city"
         autocomplete="address-level2"
@@ -151,6 +158,7 @@
     >
       <SfInput
         v-model="zipCode"
+        :ref="getFieldAnchorName('Zip Code')"
         class="form__element form__element--half"
         name="zipCode"
         autocomplete="postal-code"
@@ -172,6 +180,7 @@
     >
       <SfInput
         v-model="formattedPhoneNumber"
+        :ref="getFieldAnchorName('Phone number')"
         :required="isPhoneNumberRequired"
         :valid="!errors.length"
         :error-message="errors[0]"
@@ -196,6 +205,7 @@
     >
       <SfInput
         v-model.trim="vatId"
+        :ref="getFieldAnchorName('Tax ID')"
         name="vat_id"
         :label="$t('Tax ID')"
         :disabled="isFormFieldsDisabled"
@@ -252,6 +262,10 @@ export default defineComponent({
     isFormFieldsDisabled: {
       type: Boolean,
       default: false
+    },
+    getFieldAnchorName: {
+      type: Function as PropType<(field: string) => string>,
+      required: true
     }
   },
   components: {
