@@ -209,7 +209,7 @@
 <script lang="ts">
 import { extend, ValidationProvider } from 'vee-validate';
 import { min, required } from 'vee-validate/dist/rules';
-import { defineComponent, PropType, ref, computed, watch, nextTick, toRef } from '@vue/composition-api';
+import { defineComponent, PropType, ref, computed, watch, nextTick } from '@vue/composition-api';
 import { SfInput } from '@storefront-ui/vue';
 import { parsePhoneNumberWithError } from 'libphonenumber-js';
 
@@ -267,14 +267,6 @@ export default defineComponent({
     const formattedPhoneNumber = ref('');
     const stateValidator = ref<InstanceType<typeof ValidationProvider> | undefined>(undefined);
     const phoneValidator = ref<InstanceType<typeof ValidationProvider> | undefined>(undefined);
-
-    const addressRef = toRef(props, 'value');
-    const {
-      suggestions: autocompleteSuggestions,
-      loading: autocompleteLoading,
-      selectSuggestion: selectAutocompleteSuggestion,
-      runSuggestionQuery
-    } = useAddressAutocomplete(addressRef);
 
     const updateValueField = (field: Record<string, string | number | null>): void => {
       emit('input', { ...props.value, ...field });
@@ -369,6 +361,22 @@ export default defineComponent({
         updateValueField({ zipCode: value });
       }
     });
+
+    const addressRef = computed<BaseAddressFormValue>({
+      get (): BaseAddressFormValue {
+        return props.value;
+      },
+      set (value: BaseAddressFormValue) {
+        emit('input', value);
+      }
+    });
+
+    const {
+      suggestions: autocompleteSuggestions,
+      loading: autocompleteLoading,
+      selectSuggestion: selectAutocompleteSuggestion,
+      runSuggestionQuery
+    } = useAddressAutocomplete(addressRef);
 
     const isPhoneNumberRequired = computed<boolean>(() => {
       return !!country.value && country.value !== unitedStatesCountryCode;

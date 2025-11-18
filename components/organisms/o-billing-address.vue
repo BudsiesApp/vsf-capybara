@@ -106,7 +106,7 @@ export default {
         return mapCheckoutAddressToFormValue(this.payment);
       },
       set (value) {
-        mapFormValueToCheckoutAddress(value, this.payment);
+        this.payment = mapFormValueToCheckoutAddress(value, this.payment);
       }
     },
     ...mapGetters({

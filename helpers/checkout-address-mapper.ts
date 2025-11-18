@@ -22,15 +22,18 @@ export function mapCheckoutAddressToFormValue (
 export function mapFormValueToCheckoutAddress (
   value: BaseAddressFormValue,
   address: BaseAddressDetails
-): void {
-  address.city = value.city;
-  address.country = value.country;
-  address.firstName = value.firstName;
-  address.lastName = value.lastName;
-  address.phoneNumber = value.phoneNumber;
-  address.state = value.state || '';
-  address.streetAddress = value.streetAddress;
-  address.zipCode = value.zipCode;
-  address.region_id = value.regionId;
-  address.vat_id = value.vatId;
+): BaseAddressDetails {
+  return {
+    ...address,
+    city: value.city,
+    country: value.country,
+    firstName: value.firstName,
+    lastName: value.lastName,
+    phoneNumber: value.phoneNumber,
+    state: value.state || '',
+    streetAddress: value.streetAddress,
+    zipCode: value.zipCode,
+    region_id: value.regionId,
+    vat_id: value.vatId
+  };
 }
