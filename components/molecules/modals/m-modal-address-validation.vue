@@ -12,7 +12,7 @@
       </span>
 
       <div class="address-validation__container" :class="{ 'address-validation__container--single': isFixMode || isSubpremisesMode }">
-        <div v-if="!isSubpremisesMode" class="address-validation__column">
+        <div v-if="!isSubpremisesMode && !isConfirmMode" class="address-validation__column">
           <SfHeading
             class="sf-heading--left address-validation__column-title"
             :title="$t('Address You Entered')"
@@ -34,7 +34,7 @@
           </div>
         </div>
 
-        <div v-if="!isFixMode && !isSubpremisesMode" class="address-validation__column">
+        <div v-if="!isFixMode && !isSubpremisesMode && !isConfirmMode" class="address-validation__column">
           <SfHeading
             class="sf-heading--left address-validation__column-title"
             :title="$t('Suggested Address')"
@@ -54,6 +54,60 @@
               {{ suggestedAddress.country }}
             </p>
           </div>
+        </div>
+
+        <div v-if="isConfirmMode" class="address-validation__radio-group">
+          <SfRadio
+            v-model="selectedAddressType"
+            value="entered"
+            name="address-selection"
+            class="address-validation__radio"
+          >
+            <template #label>
+              <div class="address-validation__radio-label">
+                <span class="address-validation__radio-title">{{ $t('Address You Entered') }}</span>
+                <div class="address-validation__address-card">
+                  <p class="address-validation__street">
+                    {{ enteredAddress.streetAddress }}
+                  </p>
+
+                  <p class="address-validation__location">
+                    {{ enteredAddress.city }}, {{ enteredAddress.state }} {{ enteredAddress.zipCode }}
+                  </p>
+
+                  <p class="address-validation__country">
+                    {{ enteredAddress.country }}
+                  </p>
+                </div>
+              </div>
+            </template>
+          </SfRadio>
+
+          <SfRadio
+            v-model="selectedAddressType"
+            value="suggested"
+            name="address-selection"
+            class="address-validation__radio"
+          >
+            <template #label>
+              <div class="address-validation__radio-label">
+                <span class="address-validation__radio-title">{{ $t('Suggested Address') }}</span>
+                <div class="address-validation__address-card address-validation__address-card--suggested">
+                  <p class="address-validation__street">
+                    {{ suggestedAddress.streetAddress }}
+                  </p>
+
+                  <p class="address-validation__location">
+                    {{ suggestedAddress.city }}, {{ suggestedAddress.state }} {{ suggestedAddress.zipCode }}
+                  </p>
+
+                  <p class="address-validation__country">
+                    {{ suggestedAddress.country }}
+                  </p>
+                </div>
+              </div>
+            </template>
+          </SfRadio>
         </div>
 
         <div v-if="isSubpremisesMode" class="address-validation__column">
@@ -88,19 +142,11 @@
 
       <div class="address-validation__buttons">
         <SfButton
-          v-if="!isFixMode && !isSubpremisesMode"
-          class="sf-button sf-button--outline address-validation__button"
-          @click="useEnteredAddress"
-        >
-          {{ $t('Use Original Address') }}
-        </SfButton>
-
-        <SfButton
-          v-if="!isFixMode && !isSubpremisesMode"
+          v-if="isConfirmMode"
           class="sf-button address-validation__button"
-          @click="useSuggestedAddress"
+          @click="useSelectedAddress"
         >
-          {{ $t('Use Suggested Address') }}
+          {{ $t('Use Selected') }}
         </SfButton>
 
         <SfButton
@@ -142,7 +188,7 @@
 
 <script lang="ts">
 import { defineComponent } from '@vue/composition-api';
-import { SfModal, SfHeading, SfButton, SfInput } from '@storefront-ui/vue';
+import { SfModal, SfHeading, SfButton, SfInput, SfRadio } from '@storefront-ui/vue';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 
 export default defineComponent({
@@ -151,7 +197,8 @@ export default defineComponent({
     SfModal,
     SfHeading,
     SfButton,
-    SfInput
+    SfInput,
+    SfRadio
   },
   props: {
     isVisible: {
@@ -165,7 +212,8 @@ export default defineComponent({
   },
   data () {
     return {
-      unitNumber: ''
+      unitNumber: '',
+      selectedAddressType: 'suggested'
     };
   },
   computed: {
@@ -174,6 +222,9 @@ export default defineComponent({
     },
     suggestedAddress () {
       return this.modalData?.payload?.suggestedAddress || {};
+    },
+    isConfirmMode (): boolean {
+      return this.modalData?.payload?.verdict === 'CONFIRM';
     },
     isFixMode (): boolean {
       return this.modalData?.payload?.verdict === 'FIX';
@@ -208,6 +259,13 @@ export default defineComponent({
     closeModal () {
       EventBus.$emit('modal-hide', this.modalData.name);
       this.$emit('close', this.modalData.name);
+    },
+    useSelectedAddress () {
+      if (this.selectedAddressType === 'entered') {
+        this.useEnteredAddress();
+      } else {
+        this.useSuggestedAddress();
+      }
     },
     useEnteredAddress () {
       EventBus.$emit('address-selected', {
@@ -303,9 +361,6 @@ export default defineComponent({
   }
 
   &__address-card {
-    border: 1px solid var(--c-light);
-    border-radius: var(--border-radius);
-    padding: var(--spacer-base);
     flex-grow: 1;
 
     &--suggested {
@@ -357,6 +412,33 @@ export default defineComponent({
     @include for-mobile {
       width: 100%;
     }
+  }
+
+  &__radio-group {
+    display: flex;
+    gap: var(--spacer-sm);
+    margin: var(--spacer-lg) 0;
+  }
+
+  &__radio {
+    --radio-container-padding: var(--spacer-sm) var(--spacer-sm) var(--spacer-sm) var(--spacer-xs);
+
+    &:hover {
+      --radio-border: 2px solid var(--c-primary-lighten);
+    }
+  }
+
+  &__radio-label {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__radio-title {
+    font-weight: var(--font-semibold);
+    font-size: var(--font-base);
+    margin-bottom: var(--spacer-xs);
+    display: block;
   }
 
   &__unit-input {
