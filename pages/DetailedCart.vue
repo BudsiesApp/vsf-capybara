@@ -314,12 +314,12 @@ export default {
             name: 'printed-socks-creation-page'
           }
         },
-        {
-          label: 'Face Masks',
-          url: {
-            name: 'printed-masks-creation-page'
-          }
-        },
+        // {
+        //   label: 'Face Masks',
+        //   url: {
+        //     name: 'printed-masks-creation-page'
+        //   }
+        // },
         {
           label: 'Bobbleheads & Figurines',
           url: '/pet-bobblehead-figurines/'
