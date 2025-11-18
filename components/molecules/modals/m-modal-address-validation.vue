@@ -143,6 +143,7 @@
 <script lang="ts">
 import { defineComponent } from '@vue/composition-api';
 import { SfModal, SfHeading, SfButton, SfInput } from '@storefront-ui/vue';
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 
 export default defineComponent({
   name: 'MModalAddressValidation',
@@ -205,10 +206,11 @@ export default defineComponent({
   },
   methods: {
     closeModal () {
+      EventBus.$emit('modal-hide', this.modalData.name);
       this.$emit('close', this.modalData.name);
     },
     useEnteredAddress () {
-      (this as any).$bus.$emit('address-selected', {
+      EventBus.$emit('address-selected', {
         type: 'entered',
         address: this.enteredAddress
       });
@@ -216,18 +218,18 @@ export default defineComponent({
       this.closeModal();
     },
     useSuggestedAddress () {
-      (this as any).$bus.$emit('address-selected', {
+      EventBus.$emit('address-selected', {
         type: 'suggested',
         address: this.suggestedAddress
       });
       this.closeModal();
     },
     changeAddress () {
-      (this as any).$bus.$emit('change-address');
+      EventBus.$emit('change-address');
       this.closeModal();
     },
     useWithoutUnit () {
-      (this as any).$bus.$emit('address-selected', {
+      EventBus.$emit('address-selected', {
         type: 'entered',
         address: this.enteredAddress
       });
@@ -240,7 +242,7 @@ export default defineComponent({
         streetAddress: `${this.suggestedAddress.streetAddress} ${this.unitNumber}`.trim()
       };
 
-      (this as any).$bus.$emit('address-selected', {
+      EventBus.$emit('address-selected', {
         type: 'with-unit',
         address: addressWithUnit
       });
