@@ -43,6 +43,30 @@
     <validation-provider
       slim
       rules="required"
+      name="'Country'"
+      v-slot="{errors}"
+    >
+      <MMultiselect
+        v-model="country"
+        :ref="getFieldAnchorName('Country')"
+        class="form__element form__select"
+        name="country-name"
+        autocomplete="country-name"
+        :label="$t('Country')"
+        :required="true"
+        id-field="code"
+        label-field="name"
+        :options="countries"
+        :valid="!errors.length"
+        :error-message="errors[0]"
+        :disabled="isFormFieldsDisabled"
+        @change="onChangeCountry"
+      />
+    </validation-provider>
+
+    <validation-provider
+      slim
+      rules="required"
       name="'Address'"
       v-slot="{errors}"
     >
@@ -61,30 +85,6 @@
         autocomplete="street-address"
         @input="onStreetAddressInput"
         @select="onSelectSuggestion"
-      />
-    </validation-provider>
-
-    <validation-provider
-      slim
-      rules="required"
-      name="'Country'"
-      v-slot="{errors}"
-    >
-      <MMultiselect
-        v-model="country"
-        :ref="getFieldAnchorName('Country')"
-        class="form__element form__element--half form__select"
-        name="country-name"
-        autocomplete="country-name"
-        :label="$t('Country')"
-        :required="true"
-        id-field="code"
-        label-field="name"
-        :options="countries"
-        :valid="!errors.length"
-        :error-message="errors[0]"
-        :disabled="isFormFieldsDisabled"
-        @change="onChangeCountry"
       />
     </validation-provider>
 
@@ -184,8 +184,7 @@
         :required="isPhoneNumberRequired"
         :valid="!errors.length"
         :error-message="errors[0]"
-        class="form__element"
-        :class="{ 'form__element--half': showVatIdField }"
+        class="form__element form__element--half"
         name="phone"
         autocomplete="tel"
         :label="$t('Phone number')"

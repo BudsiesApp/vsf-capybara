@@ -50,10 +50,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref, watch } from '@vue/composition-api';
+import { defineComponent, PropType, Ref, ref, watch } from '@vue/composition-api';
 import { SfInput } from '@storefront-ui/vue';
 
 import { AutocompleteSuggestion } from 'src/modules/address/types/autocomplete';
+import { use1PasswordDisable } from 'src/themes/petsies-capybara/helpers/use-1password-disable';
 
 export default defineComponent({
   name: 'MSuggestionsList',
@@ -103,9 +104,21 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
-    const input = ref<HTMLInputElement | null>(null);
+    const input = ref<InstanceType<typeof SfInput> | null>(null);
     const isActive = ref<boolean>(false);
     const pointer = ref<number>(-1);
+
+    const getInputElement = (): HTMLInputElement | null => {
+      const _input: InstanceType<typeof SfInput> | null = (input as any).value;
+
+      if (!_input) {
+        return null;
+      }
+
+      return _input.$el.querySelector('input');
+    };
+
+    use1PasswordDisable(getInputElement);
 
     const activate = (): void => {
       if (props.disabled) return;

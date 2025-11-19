@@ -25,7 +25,7 @@
             </p>
 
             <p class="address-validation__location">
-              {{ enteredAddress.city }}, {{ enteredAddress.state }} {{ enteredAddress.zipCode }}
+              {{ enteredAddress.city }}, {{ enteredAddressState }} {{ enteredAddress.zipCode }}
             </p>
 
             <p class="address-validation__country">
@@ -47,7 +47,7 @@
             </p>
 
             <p class="address-validation__location">
-              {{ suggestedAddress.city }}, {{ suggestedAddress.state }} {{ suggestedAddress.zipCode }}
+              {{ suggestedAddress.city }}, {{ suggestedAddressState }} {{ suggestedAddress.zipCode }}
             </p>
 
             <p class="address-validation__country">
@@ -72,7 +72,7 @@
                   </p>
 
                   <p class="address-validation__location">
-                    {{ enteredAddress.city }}, {{ enteredAddress.state }} {{ enteredAddress.zipCode }}
+                    {{ enteredAddress.city }}, {{ enteredAddressState }} {{ enteredAddress.zipCode }}
                   </p>
 
                   <p class="address-validation__country">
@@ -98,7 +98,7 @@
                   </p>
 
                   <p class="address-validation__location">
-                    {{ suggestedAddress.city }}, {{ suggestedAddress.state }} {{ suggestedAddress.zipCode }}
+                    {{ suggestedAddress.city }}, {{ suggestedAddressState }} {{ suggestedAddress.zipCode }}
                   </p>
 
                   <p class="address-validation__country">
@@ -123,7 +123,7 @@
             </p>
 
             <p class="address-validation__location">
-              {{ suggestedAddress.city }}, {{ suggestedAddress.state }} {{ suggestedAddress.zipCode }}
+              {{ suggestedAddress.city }}, {{ suggestedAddressState }} {{ suggestedAddress.zipCode }}
             </p>
 
             <p class="address-validation__country">
@@ -191,6 +191,8 @@ import { defineComponent } from '@vue/composition-api';
 import { SfModal, SfHeading, SfButton, SfInput, SfRadio } from '@storefront-ui/vue';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 
+const States = require('@vue-storefront/i18n/resource/states.json');
+
 export default defineComponent({
   name: 'MModalAddressValidation',
   components: {
@@ -222,6 +224,12 @@ export default defineComponent({
     },
     suggestedAddress () {
       return this.modalData?.payload?.suggestedAddress || {};
+    },
+    enteredAddressState (): string {
+      return this.getStateName(this.enteredAddress);
+    },
+    suggestedAddressState (): string {
+      return this.getStateName(this.suggestedAddress);
     },
     isConfirmMode (): boolean {
       return this.modalData?.payload?.verdict === 'CONFIRM';
@@ -256,6 +264,25 @@ export default defineComponent({
     }
   },
   methods: {
+    getStateName (address: any): string {
+      // If state is already a name (not a code), return it
+      if (address.state) {
+        return address.state;
+      }
+
+      // If we have region_id, find the state name from States data
+      if (address.region_id && address.country) {
+        const countryData = States[address.country.toUpperCase()];
+        if (countryData) {
+          const stateItem = countryData.find((stateData: { code: string, name: string, id: number }) => {
+            return stateData.id === address.region_id;
+          });
+          return stateItem?.name || '';
+        }
+      }
+
+      return '';
+    },
     closeModal () {
       EventBus.$emit('modal-hide', this.modalData.name);
       this.$emit('close', this.modalData.name);
