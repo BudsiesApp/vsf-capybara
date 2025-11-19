@@ -8,7 +8,10 @@
       />
 
       <div class="_notes">
-        <MBlockStory story-slug="budsies_phrase_pillows_top" />
+        <MBlockStory
+          :story-slug="topStorySlug"
+          v-if="topStorySlug"
+        />
       </div>
 
       <SfHeading
@@ -111,6 +114,13 @@
         </form>
       </div>
     </validation-observer>
+
+    <div class="_notes">
+      <MBlockStory
+        :story-slug="bottomStorySlug"
+        v-if="bottomStorySlug"
+      />
+    </div>
   </div>
 </template>
 
@@ -215,6 +225,13 @@ export default defineComponent({
       }
 
       return dictionary;
+    });
+
+    const topStorySlug = computed<string | undefined>(() => {
+      return `${product.value.sku}_creation_page_top`;
+    });
+    const bottomStorySlug = computed<string | undefined>(() => {
+      return `${product.value.sku}_creation_page_bottom`;
     });
 
     const {
@@ -420,6 +437,7 @@ export default defineComponent({
       ...useBulkImagesUpload(context),
       availableCustomizations,
       availableOptionValues,
+      bottomStorySlug,
       customizationAvailableOptionValues,
       customizationOptionValue,
       isDisabled,
@@ -431,6 +449,7 @@ export default defineComponent({
       svgPath,
       submitButtonText,
       quantity,
+      topStorySlug,
       validationObserver
     };
   }
