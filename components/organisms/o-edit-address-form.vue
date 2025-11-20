@@ -4,6 +4,7 @@
       <o-base-address-form
         v-model="existingAddress"
         :is-form-fields-disabled="isSubmitting"
+        :get-field-anchor-name="getFieldAnchorName"
       />
 
       <div class="_buttons-row">
@@ -33,6 +34,7 @@ import { TranslateResult } from 'vue-i18n';
 import { SfButton } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
 
+import { getFieldAnchorName } from 'theme/helpers/use-form-validation';
 import OBaseAddressForm from './o-base-address-form.vue';
 
 export default Vue.extend({
@@ -50,7 +52,8 @@ export default Vue.extend({
   },
   data () {
     return {
-      isSubmitting: false
+      isSubmitting: false,
+      getFieldAnchorName
     }
   },
   computed: {

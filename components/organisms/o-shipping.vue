@@ -4,7 +4,6 @@
     slim
     tag="div"
     class="o-shipping"
-    data-lpignore="true"
   >
     <SfHeading
       :title="`${$t('Shipping address')}`"

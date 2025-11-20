@@ -4,6 +4,7 @@
       <o-base-address-form
         v-model="address"
         :is-form-fields-disabled="isSubmitting"
+        :get-field-anchor-name="getFieldAnchorName"
       />
 
       <div class="_buttons-row">
@@ -37,6 +38,7 @@ import i18n from '@vue-storefront/i18n';
 import { usePersistedFirstName, usePersistedLastName, usePersistedPhoneNumber } from 'src/modules/persisted-customer-data';
 
 import { BaseAddressFormValue } from 'theme/components/interfaces/base-address-form-value.interface';
+import { getFieldAnchorName } from 'theme/helpers/use-form-validation';
 
 import OBaseAddressForm from './o-base-address-form.vue';
 
@@ -72,6 +74,7 @@ export default defineComponent({
       lastName,
       addressData,
       phoneNumber,
+      getFieldAnchorName,
       ...usePersistedFirstName(firstName),
       ...usePersistedLastName(lastName),
       ...usePersistedPhoneNumber(phoneNumber)
