@@ -191,7 +191,9 @@ export default defineComponent({
 
     const { expressCheckoutTotals } = useExpressCheckoutTotals(context);
 
-    const { validateAddress, completeValidation } = useAddressValidation(context);
+    const { validateAddress, completeValidation } = useAddressValidation(context, {
+      interactiveVerdicts: ['CONFIRM', 'CONFIRM_ADD_SUBPREMISES']
+    });
 
     const shippingMethods = computed<ExpressCheckoutUpdateData['availableShippingMethods']>(() => {
       return root.$store.getters['checkout/getShippingMethods'];
