@@ -19,19 +19,9 @@
             :level="4"
           />
 
-          <div class="address-validation__address-card">
-            <p class="address-validation__street">
-              {{ enteredAddress.streetAddress }}
-            </p>
-
-            <p class="address-validation__location">
-              {{ enteredAddress.city }}, {{ enteredAddressState }} {{ enteredAddress.zipCode }}
-            </p>
-
-            <p class="address-validation__country">
-              {{ enteredAddress.country }}
-            </p>
-          </div>
+          <AAddressCard
+            :address="enteredAddress"
+          />
         </div>
 
         <div v-if="!isFixMode && !isSubpremisesMode && !isConfirmMode" class="address-validation__column">
@@ -41,19 +31,10 @@
             :level="4"
           />
 
-          <div class="address-validation__address-card address-validation__address-card--suggested">
-            <p class="address-validation__street">
-              {{ suggestedAddress.streetAddress }}
-            </p>
-
-            <p class="address-validation__location">
-              {{ suggestedAddress.city }}, {{ suggestedAddressState }} {{ suggestedAddress.zipCode }}
-            </p>
-
-            <p class="address-validation__country">
-              {{ suggestedAddress.country }}
-            </p>
-          </div>
+          <AAddressCard
+            :address="suggestedAddress"
+            :is-suggested="true"
+          />
         </div>
 
         <div v-if="isConfirmMode" class="address-validation__radio-group">
@@ -66,19 +47,9 @@
             <template #label>
               <div class="address-validation__radio-label">
                 <span class="address-validation__radio-title">{{ $t('Address You Entered') }}</span>
-                <div class="address-validation__address-card">
-                  <p class="address-validation__street">
-                    {{ enteredAddress.streetAddress }}
-                  </p>
-
-                  <p class="address-validation__location">
-                    {{ enteredAddress.city }}, {{ enteredAddressState }} {{ enteredAddress.zipCode }}
-                  </p>
-
-                  <p class="address-validation__country">
-                    {{ enteredAddress.country }}
-                  </p>
-                </div>
+                <AAddressCard
+                  :address="enteredAddress"
+                />
               </div>
             </template>
           </SfRadio>
@@ -92,19 +63,10 @@
             <template #label>
               <div class="address-validation__radio-label">
                 <span class="address-validation__radio-title">{{ $t('Suggested Address') }}</span>
-                <div class="address-validation__address-card address-validation__address-card--suggested">
-                  <p class="address-validation__street">
-                    {{ suggestedAddress.streetAddress }}
-                  </p>
-
-                  <p class="address-validation__location">
-                    {{ suggestedAddress.city }}, {{ suggestedAddressState }} {{ suggestedAddress.zipCode }}
-                  </p>
-
-                  <p class="address-validation__country">
-                    {{ suggestedAddress.country }}
-                  </p>
-                </div>
+                <AAddressCard
+                  :address="suggestedAddress"
+                  :is-suggested="true"
+                />
               </div>
             </template>
           </SfRadio>
@@ -117,19 +79,10 @@
             :level="4"
           />
 
-          <div class="address-validation__address-card address-validation__address-card--suggested">
-            <p class="address-validation__street">
-              {{ suggestedAddress.streetAddress }}
-            </p>
-
-            <p class="address-validation__location">
-              {{ suggestedAddress.city }}, {{ suggestedAddressState }} {{ suggestedAddress.zipCode }}
-            </p>
-
-            <p class="address-validation__country">
-              {{ suggestedAddress.country }}
-            </p>
-          </div>
+          <AAddressCard
+            :address="suggestedAddress"
+            :is-suggested="true"
+          />
 
           <SfInput
             v-model.trim="unitNumber"
@@ -191,7 +144,7 @@ import { defineComponent } from '@vue/composition-api';
 import { SfModal, SfHeading, SfButton, SfInput, SfRadio } from '@storefront-ui/vue';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 
-const States = require('@vue-storefront/i18n/resource/states.json');
+import AAddressCard from '../../atoms/a-address-card.vue';
 
 export default defineComponent({
   name: 'MModalAddressValidation',
@@ -200,7 +153,8 @@ export default defineComponent({
     SfHeading,
     SfButton,
     SfInput,
-    SfRadio
+    SfRadio,
+    AAddressCard
   },
   props: {
     isVisible: {
@@ -224,12 +178,6 @@ export default defineComponent({
     },
     suggestedAddress () {
       return this.modalData?.payload?.suggestedAddress || {};
-    },
-    enteredAddressState (): string {
-      return this.getStateName(this.enteredAddress);
-    },
-    suggestedAddressState (): string {
-      return this.getStateName(this.suggestedAddress);
     },
     isConfirmMode (): boolean {
       return this.modalData?.payload?.verdict === 'CONFIRM';
@@ -264,25 +212,6 @@ export default defineComponent({
     }
   },
   methods: {
-    getStateName (address: any): string {
-      // If state is already a name (not a code), return it
-      if (address.state) {
-        return address.state;
-      }
-
-      // If we have region_id, find the state name from States data
-      if (address.region_id && address.country) {
-        const countryData = States[address.country.toUpperCase()];
-        if (countryData) {
-          const stateItem = countryData.find((stateData: { code: string, name: string, id: number }) => {
-            return stateData.id === address.region_id;
-          });
-          return stateItem?.name || '';
-        }
-      }
-
-      return '';
-    },
     closeModal () {
       EventBus.$emit('modal-hide', this.modalData.name);
       this.$emit('close', this.modalData.name);
@@ -385,41 +314,6 @@ export default defineComponent({
     --heading-title-font-weight: var(--font-semibold);
     --heading-title-margin: 0 0 var(--spacer-sm) 0;
     --heading-padding: 0;
-  }
-
-  &__address-card {
-    flex-grow: 1;
-
-    &--suggested {
-      border-color: var(--c-primary);
-    }
-
-    p {
-      margin: 0 0 var(--spacer-2xs) 0;
-      line-height: 1.6;
-      color: var(--c-text);
-
-      &:last-child {
-        margin-bottom: 0;
-      }
-    }
-  }
-
-  &__name {
-    font-weight: var(--font-semibold);
-  }
-
-  &__street {
-    font-size: var(--font-base);
-  }
-
-  &__location {
-    font-size: var(--font-base);
-  }
-
-  &__country {
-    font-size: var(--font-sm);
-    color: var(--c-text-muted);
   }
 
   &__buttons {
