@@ -137,11 +137,21 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent, ref, computed, PropType, SetupContext } from '@vue/composition-api';
 import { SfModal, SfHeading, SfButton, SfInput, SfRadio } from '@storefront-ui/vue';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
+import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 
 import AAddressCard from '../../atoms/a-address-card.vue';
+
+interface ModalData {
+  name: string,
+  payload?: {
+    verdict: 'CONFIRM' | 'FIX' | 'CONFIRM_ADD_SUBPREMISES',
+    enteredAddress?: Partial<BaseAddressDetails>,
+    suggestedAddress?: Partial<BaseAddressDetails>
+  }
+}
 
 export default defineComponent({
   name: 'MModalAddressValidation',
@@ -159,99 +169,107 @@ export default defineComponent({
       default: false
     },
     modalData: {
-      type: Object,
+      type: Object as PropType<ModalData>,
       default: () => ({})
     }
   },
-  data () {
-    return {
-      unitNumber: '',
-      selectedAddressType: 'suggested'
-    };
-  },
-  computed: {
-    enteredAddress () {
-      return this.modalData?.payload?.enteredAddress || {};
-    },
-    suggestedAddress () {
-      return this.modalData?.payload?.suggestedAddress || {};
-    },
-    isConfirmMode (): boolean {
-      return this.modalData?.payload?.verdict === 'CONFIRM';
-    },
-    isFixMode (): boolean {
-      return this.modalData?.payload?.verdict === 'FIX';
-    },
-    isSubpremisesMode (): boolean {
-      return this.modalData?.payload?.verdict === 'CONFIRM_ADD_SUBPREMISES';
-    },
-    getModalTitle (): string {
-      if (this.isFixMode) {
+  setup (props, { emit }: SetupContext) {
+    const unitNumber = ref('');
+    const selectedAddressType = ref<'entered' | 'suggested'>('suggested');
+
+    const enteredAddress = computed(() => {
+      return props.modalData?.payload?.enteredAddress || {};
+    });
+
+    const suggestedAddress = computed(() => {
+      return props.modalData?.payload?.suggestedAddress || {};
+    });
+
+    const isConfirmMode = computed<boolean>(() => {
+      return props.modalData?.payload?.verdict === 'CONFIRM';
+    });
+
+    const isFixMode = computed<boolean>(() => {
+      return props.modalData?.payload?.verdict === 'FIX';
+    });
+
+    const isSubpremisesMode = computed<boolean>(() => {
+      return props.modalData?.payload?.verdict === 'CONFIRM_ADD_SUBPREMISES';
+    });
+
+    const getModalTitle = computed<string>(() => {
+      if (isFixMode.value) {
         return 'Address Could Not Be Validated';
       }
 
-      if (this.isSubpremisesMode) {
+      if (isSubpremisesMode.value) {
         return 'Please Provide Unit Number';
       }
 
       return 'Confirm Shipping Address';
-    },
-    getModalSubtitle (): string {
-      if (this.isFixMode) {
+    });
+
+    const getModalSubtitle = computed<string>(() => {
+      if (isFixMode.value) {
         return 'The address you entered could not be validated. Please review and correct it.';
       }
 
-      if (this.isSubpremisesMode) {
+      if (isSubpremisesMode.value) {
         return 'We found your address but need the unit or apartment number to ensure accurate delivery.';
       }
 
       return 'We found a suggested address that may be more accurate. Please select which address to use.';
-    }
-  },
-  methods: {
-    closeModal () {
-      EventBus.$emit('modal-hide', this.modalData.name);
-      this.$emit('close', this.modalData.name);
-      this.unitNumber = '';
-    },
-    useSelectedAddress () {
-      if (this.selectedAddressType === 'entered') {
-        this.useEnteredAddress();
-      } else {
-        this.useSuggestedAddress();
-      }
-    },
-    useEnteredAddress () {
+    });
+
+    const closeModal = () => {
+      EventBus.$emit('modal-hide', props.modalData.name);
+      emit('close', props.modalData.name);
+      unitNumber.value = '';
+    };
+
+    const useEnteredAddress = () => {
       EventBus.$emit('address-selected', {
         type: 'entered',
-        address: this.enteredAddress
+        address: enteredAddress.value
       });
 
-      this.closeModal();
-    },
-    useSuggestedAddress () {
+      closeModal();
+    };
+
+    const useSuggestedAddress = () => {
       EventBus.$emit('address-selected', {
         type: 'suggested',
-        address: this.suggestedAddress
+        address: suggestedAddress.value
       });
-      this.closeModal();
-    },
-    changeAddress () {
+      closeModal();
+    };
+
+    const useSelectedAddress = () => {
+      if (selectedAddressType.value === 'entered') {
+        useEnteredAddress();
+      } else {
+        useSuggestedAddress();
+      }
+    };
+
+    const changeAddress = () => {
       EventBus.$emit('change-address');
-      this.closeModal();
-    },
-    useWithoutUnit () {
+      closeModal();
+    };
+
+    const useWithoutUnit = () => {
       EventBus.$emit('address-selected', {
         type: 'entered',
-        address: this.enteredAddress
+        address: enteredAddress.value
       });
 
-      this.closeModal();
-    },
-    useUpdatedAddress () {
+      closeModal();
+    };
+
+    const useUpdatedAddress = () => {
       const addressWithUnit = {
-        ...this.suggestedAddress,
-        streetAddress: `${this.suggestedAddress.streetAddress} ${this.unitNumber}`.trim()
+        ...suggestedAddress.value,
+        streetAddress: `${suggestedAddress.value.streetAddress} ${unitNumber.value}`.trim()
       };
 
       EventBus.$emit('address-selected', {
@@ -259,8 +277,27 @@ export default defineComponent({
         address: addressWithUnit
       });
 
-      this.closeModal();
-    }
+      closeModal();
+    };
+
+    return {
+      unitNumber,
+      selectedAddressType,
+      enteredAddress,
+      suggestedAddress,
+      isConfirmMode,
+      isFixMode,
+      isSubpremisesMode,
+      getModalTitle,
+      getModalSubtitle,
+      closeModal,
+      useSelectedAddress,
+      useEnteredAddress,
+      useSuggestedAddress,
+      changeAddress,
+      useWithoutUnit,
+      useUpdatedAddress
+    };
   }
 });
 </script>

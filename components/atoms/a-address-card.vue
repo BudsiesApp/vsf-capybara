@@ -18,23 +18,15 @@
 
 <script lang="ts">
 import { defineComponent, PropType, computed } from '@vue/composition-api';
+import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
-
-interface Address {
-  streetAddress?: string,
-  city?: string,
-  zipCode?: string,
-  country?: string,
-  state?: string,
-  region_id?: number
-}
 
 export default defineComponent({
   name: 'AAddressCard',
   props: {
     address: {
-      type: Object as PropType<Address>,
+      type: Object as PropType<Partial<BaseAddressDetails>>,
       required: true
     }
   },
