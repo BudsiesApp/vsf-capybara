@@ -11,7 +11,7 @@
         {{ getModalSubtitle }}
       </span>
 
-      <div class="_container" :class="{ '-single': isFixMode || isSubpremisesMode }">
+      <div class="_container">
         <div v-if="!isSubpremisesMode && !isConfirmMode" class="_column">
           <SfHeading
             class="sf-heading--left _column-title"
@@ -318,23 +318,8 @@ export default defineComponent({
   ._container {
     display: flex;
     flex-direction: column;
-    gap: var(--spacer-lg);
-    margin: var(--spacer-lg) 0;
-
-    @include for-desktop {
-      flex-direction: row;
-      gap: var(--spacer-xl);
-    }
-
-    &.-single {
-      flex-direction: column;
-
-      ._column {
-        @include for-desktop {
-          max-width: 100%;
-        }
-      }
-    }
+    gap: var(--spacer-xl);
+    margin: var(--spacer-xl) 0;
   }
 
   ._column {
@@ -355,7 +340,7 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     gap: var(--spacer-sm);
-    margin-top: var(--spacer-lg);
+    margin-top: var(--spacer-xl);
 
     @include for-desktop {
       flex-direction: row;
@@ -372,8 +357,7 @@ export default defineComponent({
 
   ._radio-group {
     display: flex;
-    gap: var(--spacer-sm);
-    margin: var(--spacer-lg) 0;
+    flex-direction: column;
   }
 
   ._radio {
