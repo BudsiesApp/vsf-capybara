@@ -170,7 +170,7 @@ export default defineComponent({
     },
     modalData: {
       type: Object as PropType<ModalData>,
-      default: () => ({})
+      required: true
     }
   },
   setup (props, { emit }: SetupContext) {
