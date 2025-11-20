@@ -1,20 +1,20 @@
 <template>
   <div class="m-modal-address-validation">
-    <SfModal :visible="isVisible" @close="closeModal" class="address-validation">
+    <SfModal :visible="isVisible" @close="closeModal" class="m-modal-address-validation">
       <SfHeading
         class="sf-heading--left"
         :title="getModalTitle"
         :level="3"
       />
 
-      <span class="address-validation__subtitle">
+      <span class="_subtitle">
         {{ getModalSubtitle }}
       </span>
 
-      <div class="address-validation__container" :class="{ 'address-validation__container--single': isFixMode || isSubpremisesMode }">
-        <div v-if="!isSubpremisesMode && !isConfirmMode" class="address-validation__column">
+      <div class="_container" :class="{ '-single': isFixMode || isSubpremisesMode }">
+        <div v-if="!isSubpremisesMode && !isConfirmMode" class="_column">
           <SfHeading
-            class="sf-heading--left address-validation__column-title"
+            class="sf-heading--left _column-title"
             :title="$t('Address You Entered')"
             :level="4"
           />
@@ -24,9 +24,9 @@
           />
         </div>
 
-        <div v-if="!isFixMode && !isSubpremisesMode && !isConfirmMode" class="address-validation__column">
+        <div v-if="!isFixMode && !isSubpremisesMode && !isConfirmMode" class="_column">
           <SfHeading
-            class="sf-heading--left address-validation__column-title"
+            class="sf-heading--left _column-title"
             :title="$t('Suggested Address')"
             :level="4"
           />
@@ -37,16 +37,16 @@
           />
         </div>
 
-        <div v-if="isConfirmMode" class="address-validation__radio-group">
+        <div v-if="isConfirmMode" class="_radio-group">
           <SfRadio
             v-model="selectedAddressType"
             value="entered"
             name="address-selection"
-            class="address-validation__radio"
+            class="_radio"
           >
             <template #label>
-              <div class="address-validation__radio-label">
-                <span class="address-validation__radio-title">{{ $t('Address You Entered') }}</span>
+              <div class="_radio-label">
+                <span class="_radio-title">{{ $t('Address You Entered') }}</span>
                 <AAddressCard
                   :address="enteredAddress"
                 />
@@ -58,11 +58,11 @@
             v-model="selectedAddressType"
             value="suggested"
             name="address-selection"
-            class="address-validation__radio"
+            class="_radio"
           >
             <template #label>
-              <div class="address-validation__radio-label">
-                <span class="address-validation__radio-title">{{ $t('Suggested Address') }}</span>
+              <div class="_radio-label">
+                <span class="_radio-title">{{ $t('Suggested Address') }}</span>
                 <AAddressCard
                   :address="suggestedAddress"
                   :is-suggested="true"
@@ -72,9 +72,9 @@
           </SfRadio>
         </div>
 
-        <div v-if="isSubpremisesMode" class="address-validation__column">
+        <div v-if="isSubpremisesMode" class="_column">
           <SfHeading
-            class="sf-heading--left address-validation__column-title"
+            class="sf-heading--left _column-title"
             :title="$t('Suggested Address')"
             :level="4"
           />
@@ -86,17 +86,17 @@
 
           <SfInput
             v-model.trim="unitNumber"
-            class="address-validation__unit-input"
+            class="_unit-input"
             name="unit-number"
             :label="$t('Apartment, suite, unit, etc.')"
           />
         </div>
       </div>
 
-      <div class="address-validation__buttons">
+      <div class="_buttons">
         <SfButton
           v-if="isConfirmMode"
-          class="sf-button address-validation__button"
+          class="sf-button _button"
           @click="useSelectedAddress"
         >
           {{ $t('Use Selected') }}
@@ -104,7 +104,7 @@
 
         <SfButton
           v-if="isFixMode"
-          class="sf-button sf-button--outline address-validation__button"
+          class="sf-button sf-button--outline _button"
           @click="useEnteredAddress"
         >
           {{ $t('Use Entered Address') }}
@@ -112,7 +112,7 @@
 
         <SfButton
           v-if="isFixMode"
-          class="sf-button address-validation__button"
+          class="sf-button _button"
           @click="changeAddress"
         >
           {{ $t('Change Address') }}
@@ -120,7 +120,7 @@
 
         <SfButton
           v-if="isSubpremisesMode"
-          class="sf-button sf-button--outline address-validation__button"
+          class="sf-button sf-button--outline _button"
           @click="useWithoutUnit"
         >
           {{ $t('No Unit / Use Without Unit') }}
@@ -128,7 +128,7 @@
 
         <SfButton
           v-if="isSubpremisesMode"
-          class="sf-button address-validation__button"
+          class="sf-button _button"
           :disabled="!unitNumber"
           @click="useUpdatedAddress"
         >
@@ -270,17 +270,17 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-.address-validation {
+.m-modal-address-validation {
   --modal-width: auto;
 
-  &__subtitle {
+  ._subtitle {
     display: block;
     margin: var(--spacer-xs) 0 0 0;
     line-height: 1.4;
     font-size: var(--font-sm);
   }
 
-  &__container {
+  ._container {
     display: flex;
     flex-direction: column;
     gap: var(--spacer-lg);
@@ -291,10 +291,10 @@ export default defineComponent({
       gap: var(--spacer-xl);
     }
 
-    &--single {
+    &.-single {
       flex-direction: column;
 
-      .address-validation__column {
+      ._column {
         @include for-desktop {
           max-width: 100%;
         }
@@ -302,21 +302,21 @@ export default defineComponent({
     }
   }
 
-  &__column {
+  ._column {
     flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
   }
 
-  &__column-title {
+  ._column-title {
     --heading-title-font-size: var(--font-base);
     --heading-title-font-weight: var(--font-semibold);
     --heading-title-margin: 0 0 var(--spacer-sm) 0;
     --heading-padding: 0;
   }
 
-  &__buttons {
+  ._buttons {
     display: flex;
     flex-direction: column;
     gap: var(--spacer-sm);
@@ -329,19 +329,19 @@ export default defineComponent({
     }
   }
 
-  &__button {
+  ._button {
     @include for-mobile {
       width: 100%;
     }
   }
 
-  &__radio-group {
+  ._radio-group {
     display: flex;
     gap: var(--spacer-sm);
     margin: var(--spacer-lg) 0;
   }
 
-  &__radio {
+  ._radio {
     --radio-container-padding: var(--spacer-sm) var(--spacer-sm) var(--spacer-sm) var(--spacer-xs);
 
     &:hover {
@@ -349,20 +349,20 @@ export default defineComponent({
     }
   }
 
-  &__radio-label {
+  ._radio-label {
     width: 100%;
     display: flex;
     flex-direction: column;
   }
 
-  &__radio-title {
+  ._radio-title {
     font-weight: var(--font-semibold);
     font-size: var(--font-base);
     margin-bottom: var(--spacer-xs);
     display: block;
   }
 
-  &__unit-input {
+  ._unit-input {
     margin: var(--spacer-base) 0 0;
   }
 }
