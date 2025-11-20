@@ -33,7 +33,6 @@
 
           <AAddressCard
             :address="suggestedAddress"
-            :is-suggested="true"
           />
         </div>
 
@@ -65,7 +64,6 @@
                 <span class="_radio-title">{{ $t('Suggested Address') }}</span>
                 <AAddressCard
                   :address="suggestedAddress"
-                  :is-suggested="true"
                 />
               </div>
             </template>
@@ -81,7 +79,6 @@
 
           <AAddressCard
             :address="suggestedAddress"
-            :is-suggested="true"
           />
 
           <SfInput

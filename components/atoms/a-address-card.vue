@@ -1,7 +1,6 @@
 <template>
   <div
     class="a-address-card"
-    :class="{ '-suggested': isSuggested }"
   >
     <p class="_street">
       {{ address.streetAddress }}
@@ -37,10 +36,6 @@ export default defineComponent({
     address: {
       type: Object as PropType<Address>,
       required: true
-    },
-    isSuggested: {
-      type: Boolean,
-      default: false
     }
   },
   setup (props) {
@@ -74,10 +69,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 .a-address-card {
   flex-grow: 1;
-
-  &.-suggested {
-    border-color: var(--c-primary);
-  }
 
   p {
     margin: 0 0 var(--spacer-2xs) 0;
