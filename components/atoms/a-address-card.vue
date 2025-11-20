@@ -1,17 +1,17 @@
 <template>
   <div
     class="a-address-card"
-    :class="{ 'a-address-card--suggested': isSuggested }"
+    :class="{ '-suggested': isSuggested }"
   >
-    <p class="a-address-card__street">
+    <p class="_street">
       {{ address.streetAddress }}
     </p>
 
-    <p class="a-address-card__location">
+    <p class="_location">
       {{ address.city }}, {{ stateName }} {{ address.zipCode }}
     </p>
 
-    <p class="a-address-card__country">
+    <p class="_country">
       {{ address.country }}
     </p>
   </div>
@@ -75,7 +75,7 @@ export default defineComponent({
 .a-address-card {
   flex-grow: 1;
 
-  &--suggested {
+  &.-suggested {
     border-color: var(--c-primary);
   }
 
@@ -89,15 +89,15 @@ export default defineComponent({
     }
   }
 
-  &__street {
+  ._street {
     font-size: var(--font-base);
   }
 
-  &__location {
+  ._location {
     font-size: var(--font-base);
   }
 
-  &__country {
+  ._country {
     font-size: var(--font-sm);
     color: var(--c-text-muted);
   }

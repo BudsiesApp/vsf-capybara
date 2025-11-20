@@ -96,7 +96,7 @@
       <div class="_buttons">
         <SfButton
           v-if="isConfirmMode"
-          class="sf-button _button"
+          class="_button"
           @click="useSelectedAddress"
         >
           {{ $t('Use Selected') }}
@@ -104,7 +104,7 @@
 
         <SfButton
           v-if="isFixMode"
-          class="sf-button sf-button--outline _button"
+          class="sf-button--outline _button"
           @click="useEnteredAddress"
         >
           {{ $t('Use Entered Address') }}
@@ -112,7 +112,7 @@
 
         <SfButton
           v-if="isFixMode"
-          class="sf-button _button"
+          class="_button"
           @click="changeAddress"
         >
           {{ $t('Change Address') }}
@@ -120,7 +120,7 @@
 
         <SfButton
           v-if="isSubpremisesMode"
-          class="sf-button sf-button--outline _button"
+          class="sf-button--outline _button"
           @click="useWithoutUnit"
         >
           {{ $t('No Unit / Use Without Unit') }}
@@ -128,7 +128,7 @@
 
         <SfButton
           v-if="isSubpremisesMode"
-          class="sf-button _button"
+          class="_button"
           :disabled="!unitNumber"
           @click="useUpdatedAddress"
         >
@@ -215,6 +215,7 @@ export default defineComponent({
     closeModal () {
       EventBus.$emit('modal-hide', this.modalData.name);
       this.$emit('close', this.modalData.name);
+      this.unitNumber = '';
     },
     useSelectedAddress () {
       if (this.selectedAddressType === 'entered') {
