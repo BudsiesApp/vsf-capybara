@@ -36,6 +36,8 @@ import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { registerModule } from '@vue-storefront/core/lib/modules';
 import { OrderModule } from '@vue-storefront/core/modules/order';
 import { CHECKOUT_UPDATE_SHIPPING_DETAILS_MUTATION, CHECKOUT_UPDATE_PAYMENT_DETAILS_MUTATION, useOrderCreation, CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION } from '@vue-storefront/core/modules/checkout';
+import isAddressesEquals from '@vue-storefront/core/modules/checkout/helpers/is-addresses-equals.function';
+import { Logger } from '@vue-storefront/core/lib/logger';
 
 import {
   PaymentAmazonPay,
@@ -58,6 +60,7 @@ import {
   ExpressCheckoutData,
   useExpressCheckoutTotals
 } from 'src/modules/shared';
+import { useAddressValidation } from 'src/modules/address';
 
 type AllSupportedMethodsCodes = BraintreeSupportedMethodCodes | AmazonPaySupportedMethodCodes;
 
@@ -188,6 +191,8 @@ export default defineComponent({
 
     const { expressCheckoutTotals } = useExpressCheckoutTotals(context);
 
+    const { validateAddress, completeValidation } = useAddressValidation(context);
+
     const shippingMethods = computed<ExpressCheckoutUpdateData['availableShippingMethods']>(() => {
       return root.$store.getters['checkout/getShippingMethods'];
     });
@@ -298,6 +303,43 @@ export default defineComponent({
         CHECKOUT_UPDATE_PAYMENT_DETAILS_MUTATION,
         { paymentMethod: data.paymentMethod }
       );
+
+      try {
+        const shippingAddress = root.$store.getters['checkout/getShippingDetails'];
+        const paymentAddress = root.$store.getters['checkout/getPaymentDetails'];
+        const addressesAreEqual = isAddressesEquals(shippingAddress, paymentAddress);
+
+        const shippingComputed = computed({
+          get: () => root.$store.getters['checkout/getShippingDetails'],
+          set: (value) => root.$store.commit(CHECKOUT_UPDATE_SHIPPING_DETAILS_MUTATION, value)
+        });
+
+        const shouldProceedShipping = await validateAddress(shippingComputed);
+
+        if (!shouldProceedShipping) {
+          Logger.warn('Express checkout: User cancelled address validation, proceeding with original address', 'express-checkout-validation')();
+        }
+
+        if (addressesAreEqual) {
+          root.$store.commit(CHECKOUT_UPDATE_PAYMENT_DETAILS_MUTATION, shippingComputed.value);
+        } else {
+          const paymentComputed = computed({
+            get: () => root.$store.getters['checkout/getPaymentDetails'],
+            set: (value) => root.$store.commit(CHECKOUT_UPDATE_PAYMENT_DETAILS_MUTATION, value)
+          });
+
+          const shouldProceedPayment = await validateAddress(paymentComputed);
+
+          if (!shouldProceedPayment) {
+            Logger.warn('Express checkout: User cancelled billing address validation, proceeding with original address', 'express-checkout-validation')();
+          }
+        }
+
+        completeValidation();
+      } catch (error) {
+        Logger.error('Express checkout: Address validation error - ' + error, 'express-checkout-validation')();
+        completeValidation();
+      }
     };
 
     const onPaymentStarted = (): void => {
