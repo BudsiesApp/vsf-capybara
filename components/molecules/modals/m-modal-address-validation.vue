@@ -173,7 +173,7 @@ export default defineComponent({
       required: true
     }
   },
-  setup (props, { emit }: SetupContext) {
+  setup (props, { emit, root }: SetupContext) {
     const unitNumber = ref('');
     const selectedAddressType = ref<'entered' | 'suggested'>('suggested');
 
@@ -199,26 +199,26 @@ export default defineComponent({
 
     const getModalTitle = computed<string>(() => {
       if (isFixMode.value) {
-        return 'Address Could Not Be Validated';
+        return root.$t('Address Could Not Be Validated').toString();
       }
 
       if (isSubpremisesMode.value) {
-        return 'Please Provide Unit Number';
+        return root.$t('Please Provide Unit Number').toString();
       }
 
-      return 'Confirm Shipping Address';
+      return root.$t('Confirm Shipping Address').toString();
     });
 
     const getModalSubtitle = computed<string>(() => {
       if (isFixMode.value) {
-        return 'The address you entered could not be validated. Please review and correct it.';
+        return root.$t('The address you entered could not be validated. Please review and correct it.').toString();
       }
 
       if (isSubpremisesMode.value) {
-        return 'We found your address but need the unit or apartment number to ensure accurate delivery.';
+        return root.$t('We found your address but need the unit or apartment number to ensure accurate delivery.').toString();
       }
 
-      return 'We found a suggested address that may be more accurate. Please select which address to use.';
+      return root.$t('We found a suggested address that may be more accurate. Please select which address to use.').toString();
     });
 
     const closeModal = () => {
