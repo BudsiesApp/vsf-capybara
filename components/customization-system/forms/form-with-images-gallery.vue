@@ -32,6 +32,12 @@
           :special-price="totalPrice.special"
         />
 
+        <component
+          v-if="shouldShowProductRating"
+          :is="productRatingComponent"
+          :product-id="product.id"
+          class="_product-rating"
+        />
         <validation-observer
           v-slot="{ errors: formErrors }"
           slim
@@ -106,6 +112,7 @@ import {
 import { SfButton } from '@storefront-ui/vue';
 import { ValidationObserver, ValidationProvider } from 'vee-validate';
 
+import config from 'config';
 import { useABTestingCustomizationsFilter } from 'src/modules/a-b-testing';
 import {
   Customization,
@@ -212,6 +219,11 @@ export default defineComponent({
   },
   setup (props, context) {
     const { canUsePersistedCustomizationState, existingCartItem, imageUrl, product, flow, draftOrderItem } = toRefs(props);
+
+    const productRatingComponent = inject('ProductRatingComponent', null);
+    const shouldShowProductRating = computed(() => {
+      return config.products.showRating && !!productRatingComponent && !!product.value.id;
+    });
 
     const isCustomizeFlow = computed<boolean>(() => {
       return flow.value === CustomizableProductFlowType.CUSTOMIZE;
@@ -499,7 +511,9 @@ export default defineComponent({
       shortDescription,
       submitButtonText,
       quantity,
-      validationObserver
+      validationObserver,
+      productRatingComponent,
+      shouldShowProductRating
     };
   }
 });
@@ -561,7 +575,8 @@ export default defineComponent({
   ._customization-option,
   ._form-errors,
   ._quantity-field,
-  ._price {
+  ._price,
+  ._product-rating {
     margin-top: var(--spacer-base);
   }
 
