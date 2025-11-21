@@ -32,6 +32,11 @@
           :special-price="totalPrice.special"
         />
 
+        <component
+          :is="productRatingComponent"
+          :product-id="product.id"
+          class="_product-rating"
+        />
         <validation-observer
           v-slot="{ errors: formErrors }"
           slim
@@ -232,6 +237,7 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
+    const productRatingComponent = inject('ProductRatingComponent', null);
     const { canUsePersistedCustomizationState, existingCartItem, imageUrl, product, flow, draftOrderItem } = toRefs(props);
 
     const isCustomizeFlow = computed<boolean>(() => {
@@ -521,7 +527,8 @@ export default defineComponent({
       shortDescription,
       submitButtonText,
       quantity,
-      validationObserver
+      validationObserver,
+      productRatingComponent
     };
   }
 });
@@ -583,7 +590,8 @@ export default defineComponent({
   ._customization-option,
   ._form-errors,
   ._quantity-field,
-  ._price {
+  ._price,
+  ._product-rating {
     margin-top: var(--spacer-base);
   }
 
