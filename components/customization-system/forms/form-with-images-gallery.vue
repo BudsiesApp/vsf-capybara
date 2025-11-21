@@ -239,12 +239,12 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
+    const { canUsePersistedCustomizationState, existingCartItem, imageUrl, product, flow, draftOrderItem } = toRefs(props);
+
     const productRatingComponent = inject('ProductRatingComponent', null);
     const shouldShowProductRating = computed(() => {
-      return config.products.showRating && !!productRatingComponent;
+      return config.products.showRating && !!productRatingComponent && !!product.value.id;
     });
-
-    const { canUsePersistedCustomizationState, existingCartItem, imageUrl, product, flow, draftOrderItem } = toRefs(props);
 
     const isCustomizeFlow = computed<boolean>(() => {
       return flow.value === CustomizableProductFlowType.CUSTOMIZE;
