@@ -33,6 +33,7 @@
         />
 
         <component
+          v-if="shouldShowProductRating"
           :is="productRatingComponent"
           :product-id="product.id"
           class="_product-rating"
@@ -132,6 +133,7 @@ import {
 import { SfButton } from '@storefront-ui/vue';
 import { ValidationObserver, ValidationProvider } from 'vee-validate';
 
+import config from 'config';
 import { useABTestingCustomizationsFilter } from 'src/modules/a-b-testing';
 import {
   Customization,
@@ -238,6 +240,10 @@ export default defineComponent({
   },
   setup (props, context) {
     const productRatingComponent = inject('ProductRatingComponent', null);
+    const shouldShowProductRating = computed(() => {
+      return config.products.showRating && !!productRatingComponent;
+    });
+
     const { canUsePersistedCustomizationState, existingCartItem, imageUrl, product, flow, draftOrderItem } = toRefs(props);
 
     const isCustomizeFlow = computed<boolean>(() => {
@@ -528,7 +534,8 @@ export default defineComponent({
       submitButtonText,
       quantity,
       validationObserver,
-      productRatingComponent
+      productRatingComponent,
+      shouldShowProductRating
     };
   }
 });
