@@ -142,7 +142,7 @@ export default defineComponent({
         return mapCheckoutAddressToFormValue(this.payment);
       },
       set (value) {
-        this.payment = mapFormValueToCheckoutAddress(value, this.payment);
+        mapFormValueToCheckoutAddress(value, this.payment);
       }
     },
     ...mapGetters({

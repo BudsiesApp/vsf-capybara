@@ -167,7 +167,7 @@ export default defineComponent({
         return mapCheckoutAddressToFormValue(this.shipping);
       },
       set (value) {
-        this.shipping = mapFormValueToCheckoutAddress(value, this.shipping);
+        mapFormValueToCheckoutAddress(value, this.shipping);
       }
     },
     isShippingMethodsSyncing () {
