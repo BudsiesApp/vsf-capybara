@@ -21,6 +21,15 @@
         />
       </template>
 
+      <template #reviews v-if="productCollectionRatingComponent">
+        <component
+          v-if="shouldShowProductRating"
+          :is="productCollectionRatingComponent"
+          :product-id="product.id"
+          class="_product-rating"
+        />
+      </template>
+
       <template #title="{title}" v-if="turnaroundTime">
         <h3 class="sf-product-card__title">
           {{ title }}
@@ -35,11 +44,12 @@
 </template>
 
 <script lang="ts">
+import { defineComponent, computed, inject } from '@vue/composition-api';
+import config from 'config';
 import { SfProductCard } from '@storefront-ui/vue';
-
 import BaseImage from 'src/modules/budsies/components/BaseImage.vue';
 
-export default {
+export default defineComponent({
   name: 'OProductCard',
   components: {
     BaseImage,
@@ -75,18 +85,23 @@ export default {
       default: undefined
     }
   },
-  computed: {
-    productLink (): string {
-      return this.link ? this.link : this.product.link;
-    },
-    imageAspectRatio (): number {
-      return this.imageWidth / this.imageHeight;
-    },
-    turnaroundWeeks (): number {
-      return Math.ceil(this.turnaroundTime / 7);
-    }
+  setup (props) {
+    const productCollectionRatingComponent = inject('ProductCollectionRatingComponent', null);
+
+    const productLink = computed(() => props.link ? props.link : props.product.link);
+    const imageAspectRatio = computed(() => props.imageWidth / props.imageHeight);
+    const turnaroundWeeks = computed(() => Math.ceil(props.turnaroundTime / 7));
+    const shouldShowProductRating = computed(() => config.products.showRating && !!productCollectionRatingComponent && !!props.product.id);
+
+    return {
+      productLink,
+      imageAspectRatio,
+      turnaroundWeeks,
+      productCollectionRatingComponent,
+      shouldShowProductRating
+    };
   }
-}
+});
 </script>
 
 <style lang="scss" scoped>
