@@ -2,6 +2,7 @@
   <div
     class="storyblok-product-reviews layout-regular-component"
     :class="cssClasses"
+    :style="styles"
     v-if="itemData.product_id"
   >
     <editor-block-icons :item="itemData" />
