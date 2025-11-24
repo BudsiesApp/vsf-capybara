@@ -29,15 +29,14 @@
 
 <script lang="ts">
 import { ValidationObserver } from 'vee-validate';
-import Vue from 'vue';
-import { TranslateResult } from 'vue-i18n';
+import { defineComponent, computed, ref } from '@vue/composition-api';
 import { SfButton } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
 
 import { getFieldAnchorName } from 'theme/helpers/use-form-validation';
 import OBaseAddressForm from './o-base-address-form.vue';
 
-export default Vue.extend({
+export default defineComponent({
   name: 'OEditAddressForm',
   components: {
     OBaseAddressForm,
@@ -50,71 +49,77 @@ export default Vue.extend({
       required: true
     }
   },
-  data () {
-    return {
-      isSubmitting: false,
-      getFieldAnchorName
-    }
-  },
-  computed: {
-    existingAddress: {
-      get (): any {
-        return this.value;
+  setup (props, { emit, root }) {
+    const isSubmitting = ref(false);
+
+    const existingAddress = computed({
+      get () {
+        return props.value;
       },
       set (value: any) {
-        this.$emit('input', value);
+        emit('input', value);
       }
-    },
-    isSubmitButtonDisabled (): boolean {
-      return this.isSubmitting;
-    }
-  },
-  methods: {
-    async onFormSubmit (): Promise<void> {
-      if (this.isSubmitting) {
-        return;
-      }
+    });
 
-      this.isSubmitting = true;
+    const isSubmitButtonDisabled = computed<boolean>(() => isSubmitting.value);
 
-      try {
-        await this.updateAddress();
-
-        this.$emit('address-update');
-      } catch (error) {
-        this.onFailure(this.$t('Unable to update address'));
-      } finally {
-        this.isSubmitting = false;
-      }
-    },
-    async updateAddress () {
-      const addressToUpdate = {
-        id: this.existingAddress.id,
-        firstname: this.existingAddress.firstName,
-        lastname: this.existingAddress.lastName,
-        street: [this.existingAddress.streetAddress],
-        city: this.existingAddress.city,
-        region: { region: this.existingAddress.state, region_id: this.existingAddress.regionId },
-        postcode: this.existingAddress.zipCode,
-        country_id: this.existingAddress.country,
-        telephone: this.existingAddress.phoneNumber,
-        default_shipping: this.existingAddress.defaultShipping,
-        default_billing: this.existingAddress.defaultBilling,
-        customer_id: this.existingAddress.customerId,
-        vat_id: this.existingAddress.vatId
-      }
-
-      return this.$store.dispatch('budsies/updateAddress', { address: addressToUpdate });
-    },
-    onCancelButtonClick (): void {
-      this.$emit('cancel');
-    },
-    onFailure (message: TranslateResult): void {
-      this.$store.dispatch('notification/spawnNotification', {
+    function onFailure (message: string): void {
+      root.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
         message,
         action1: { label: i18n.t('OK') }
       });
+    }
+
+    async function updateAddress (): Promise<void> {
+      const addressToUpdate = {
+        id: existingAddress.value.id,
+        firstname: existingAddress.value.firstName,
+        lastname: existingAddress.value.lastName,
+        street: [existingAddress.value.streetAddress],
+        city: existingAddress.value.city,
+        region: { region: existingAddress.value.state, region_id: existingAddress.value.regionId },
+        postcode: existingAddress.value.zipCode,
+        country_id: existingAddress.value.country,
+        telephone: existingAddress.value.phoneNumber,
+        default_shipping: existingAddress.value.defaultShipping,
+        default_billing: existingAddress.value.defaultBilling,
+        customer_id: existingAddress.value.customerId,
+        vat_id: existingAddress.value.vatId
+      };
+
+      return root.$store.dispatch('budsies/updateAddress', { address: addressToUpdate });
+    }
+
+    async function onFormSubmit (): Promise<void> {
+      if (isSubmitting.value) {
+        return;
+      }
+
+      isSubmitting.value = true;
+
+      try {
+        await updateAddress();
+
+        emit('address-update');
+      } catch (error) {
+        onFailure(root.$t('Unable to update address') as string);
+      } finally {
+        isSubmitting.value = false;
+      }
+    }
+
+    function onCancelButtonClick (): void {
+      emit('cancel');
+    }
+
+    return {
+      existingAddress,
+      isSubmitting,
+      isSubmitButtonDisabled,
+      getFieldAnchorName,
+      onFormSubmit,
+      onCancelButtonClick
     }
   }
 })
