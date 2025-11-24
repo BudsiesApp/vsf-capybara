@@ -107,7 +107,7 @@ export default defineComponent({
 
     const address = computed<BaseAddressDetails>({
       get () {
-        const _addressData = addressData.value;
+        const _addressData = (addressData as any).value as BaseAddressDetails;
 
         return {
           city: _addressData.city,
@@ -124,7 +124,7 @@ export default defineComponent({
         }
       },
       set (newAddress: BaseAddressDetails) {
-        const _addressData = addressData.value;
+        const _addressData = (addressData as any).value as BaseAddressDetails;
 
         _addressData.city = newAddress.city;
         _addressData.country = newAddress.country;
