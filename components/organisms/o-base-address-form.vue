@@ -88,6 +88,25 @@
       />
     </validation-provider>
 
+    <validation-provider
+      slim
+      rules=""
+      name="'Apartment'"
+      v-slot="{errors}"
+    >
+      <SfInput
+        v-model="apartmentNumber"
+        :ref="getFieldAnchorName('Apartment')"
+        class="form__element"
+        name="apartment"
+        autocomplete="address-line2"
+        :label="$t('Apartment, suite, etc.(Optional)')"
+        :disabled="isFormFieldsDisabled"
+        :valid="!errors.length"
+        :error-message="errors[0]"
+      />
+    </validation-provider>
+
     <SfInput
       v-if="!isSelectedCountryHasStates"
       key="state"
@@ -113,7 +132,7 @@
         v-slot="{errors}"
       >
         <MMultiselect
-          v-model="regionId"
+          v-model="region_id"
           :ref="getFieldAnchorName('State')"
           name="address-level1"
           autocomplete="address-level1"
@@ -203,7 +222,7 @@
       class="form__element form__element--half"
     >
       <SfInput
-        v-model.trim="vatId"
+        v-model.trim="vat_id"
         :ref="getFieldAnchorName('Tax ID')"
         name="vat_id"
         :label="$t('Tax ID')"
@@ -223,7 +242,7 @@ import { SfInput } from '@storefront-ui/vue';
 import { parsePhoneNumberWithError } from 'libphonenumber-js';
 
 import { stateCodeAutocompleteOptionSearch, createPhoneHelpers } from 'src/modules/shared';
-import { BaseAddressFormValue } from 'theme/components/interfaces/base-address-form-value.interface';
+import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 import { useAddressAutocomplete } from 'src/modules/address/composables/use-address-autocomplete';
 
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
@@ -255,7 +274,7 @@ export default defineComponent({
   name: 'OBaseAddressForm',
   props: {
     value: {
-      type: Object as PropType<BaseAddressFormValue>,
+      type: Object as PropType<BaseAddressDetails>,
       required: true
     },
     isFormFieldsDisabled: {
@@ -330,21 +349,21 @@ export default defineComponent({
       }
     });
 
-    const regionId = computed<number | null>({
+    const region_id = computed<number | null>({
       get (): number | null {
-        return props.value.regionId
+        return props.value.region_id
       },
       set (value: number | null) {
-        updateValueField({ regionId: value });
+        updateValueField({ region_id: value });
       }
     });
 
-    const state = computed<string | null>({
-      get (): string | null {
-        return props.value.state;
+    const state = computed<string>({
+      get (): string {
+        return props.value.state || '';
       },
-      set (value: string | null) {
-        updateValueField({ state: value });
+      set (value: string) {
+        updateValueField({ state: value || '' });
       }
     });
 
@@ -357,12 +376,21 @@ export default defineComponent({
       }
     });
 
-    const vatId = computed<string>({
+    const apartmentNumber = computed<string>({
       get (): string {
-        return props.value.vatId;
+        return props.value.apartmentNumber;
       },
       set (value: string) {
-        updateValueField({ vatId: value });
+        updateValueField({ apartmentNumber: value });
+      }
+    });
+
+    const vat_id = computed<string>({
+      get (): string {
+        return props.value.vat_id;
+      },
+      set (value: string) {
+        updateValueField({ vat_id: value });
       }
     });
 
@@ -375,11 +403,11 @@ export default defineComponent({
       }
     });
 
-    const addressRef = computed<BaseAddressFormValue>({
-      get (): BaseAddressFormValue {
+    const addressRef = computed<BaseAddressDetails>({
+      get (): BaseAddressDetails {
         return props.value;
       },
-      set (value: BaseAddressFormValue) {
+      set (value: BaseAddressDetails) {
         emit('input', value);
       }
     });
@@ -423,7 +451,7 @@ export default defineComponent({
     });
 
     const vatIdValidationRules = computed<any>(() => {
-      if (!vatId.value) {
+      if (!vat_id.value) {
         return {};
       }
 
@@ -513,8 +541,8 @@ export default defineComponent({
 
     watch(country, (after, before) => {
       if (after && before && after !== before) {
-        state.value = null;
-        regionId.value = null;
+        state.value = '';
+        region_id.value = null;
 
         if (streetAddress.value) {
           streetAddress.value = '';
@@ -528,16 +556,16 @@ export default defineComponent({
 
     watch(isSelectedCountryHasStates, (val) => {
       if (val) {
-        state.value = null;
+        state.value = '';
         return;
       }
 
-      (regionId.value as any) = null;
+      region_id.value = null;
     }, { immediate: true });
 
     watch(showVatIdField, (value) => {
       if (!value) {
-        vatId.value = '';
+        vat_id.value = '';
       }
     });
 
@@ -563,10 +591,11 @@ export default defineComponent({
       firstName,
       lastName,
       phoneNumber,
-      regionId,
+      region_id,
       state,
       streetAddress,
-      vatId,
+      apartmentNumber,
+      vat_id,
       zipCode,
       showVatIdField,
       statesForSelectedCountry,

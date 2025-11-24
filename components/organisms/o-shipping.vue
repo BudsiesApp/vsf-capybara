@@ -20,7 +20,7 @@
       />
       <OBaseAddressForm
         ref="baseAddressForm"
-        v-model="addressValue"
+        v-model="shipping"
         :is-form-fields-disabled="shipToMyAddress"
         :get-field-anchor-name="getFieldAnchorName"
         @country-changed="onChangeCountry"
@@ -108,7 +108,6 @@ import MMultiselect from 'theme/components/molecules/m-multiselect';
 import { GET_ACTIVE_CURRENCY, GET_CURRENCY_EXCHANGE_RATE } from 'src/modules/currency';
 import { PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, PERSISTED_CUSTOMER_PHONE_NUMBER, PERSISTED_CUSTOMER_SHIPPING_COUNTRY, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_SHIPPING_COUNTRY } from 'src/modules/persisted-customer-data';
 import { PriceHelper } from 'src/modules/shared';
-import { mapCheckoutAddressToFormValue, mapFormValueToCheckoutAddress } from 'theme/helpers/checkout-address-mapper';
 import { useAddressValidation } from 'src/modules/address';
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 import OBaseAddressForm from './o-base-address-form.vue';
@@ -162,14 +161,6 @@ export default defineComponent({
     };
   },
   computed: {
-    addressValue: {
-      get () {
-        return mapCheckoutAddressToFormValue(this.shipping);
-      },
-      set (value) {
-        mapFormValueToCheckoutAddress(value, this.shipping);
-      }
-    },
     isShippingMethodsSyncing () {
       return this.$store.getters[IS_SHIPPING_METHODS_SYNCING];
     },

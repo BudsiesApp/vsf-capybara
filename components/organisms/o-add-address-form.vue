@@ -39,15 +39,13 @@ import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/Base
 import { usePersistedFirstName, usePersistedLastName, usePersistedPhoneNumber } from 'src/modules/persisted-customer-data';
 import { useAddressValidation } from 'src/modules/address';
 
-import { BaseAddressFormValue } from 'theme/components/interfaces/base-address-form-value.interface';
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
-import { mapCheckoutAddressToFormValue, mapFormValueToCheckoutAddress } from 'theme/helpers/checkout-address-mapper';
 
 import OBaseAddressForm from './o-base-address-form.vue';
 
 type AddressData = Pick<
-BaseAddressFormValue,
-'city' | 'country' | 'state' | 'streetAddress' | 'zipCode' | 'regionId' | 'vatId'
+BaseAddressDetails,
+'city' | 'country' | 'state' | 'streetAddress' | 'apartmentNumber' | 'zipCode' | 'region_id' | 'vat_id'
 >
 
 export default defineComponent({
@@ -69,11 +67,12 @@ export default defineComponent({
     const addressData = ref<AddressData>({
       city: '',
       country: '',
-      state: null,
+      state: '',
       streetAddress: '',
+      apartmentNumber: '',
       zipCode: '',
-      regionId: null,
-      vatId: ''
+      region_id: null,
+      vat_id: ''
     });
 
     const {
@@ -106,7 +105,7 @@ export default defineComponent({
 
     const isSubmitButtonDisabled = computed(() => isSubmitting.value || isValidatingAddress.value);
 
-    const address = computed<BaseAddressFormValue>({
+    const address = computed<BaseAddressDetails>({
       get () {
         const _addressData = addressData.value;
 
@@ -115,51 +114,30 @@ export default defineComponent({
           country: _addressData.country,
           state: _addressData.state,
           streetAddress: _addressData.streetAddress,
+          apartmentNumber: _addressData.apartmentNumber,
           zipCode: _addressData.zipCode,
           firstName: firstName.value,
           lastName: lastName.value,
           phoneNumber: phoneNumber.value,
-          regionId: _addressData.regionId,
-          vatId: _addressData.vatId
+          region_id: _addressData.region_id,
+          vat_id: _addressData.vat_id
         }
       },
-      set (newAddress: BaseAddressFormValue) {
+      set (newAddress: BaseAddressDetails) {
         const _addressData = addressData.value;
 
         _addressData.city = newAddress.city;
         _addressData.country = newAddress.country;
         _addressData.state = newAddress.state;
         _addressData.streetAddress = newAddress.streetAddress;
+        _addressData.apartmentNumber = newAddress.apartmentNumber;
         _addressData.zipCode = newAddress.zipCode;
-        _addressData.regionId = newAddress.regionId;
-        _addressData.vatId = newAddress.vatId;
+        _addressData.region_id = newAddress.region_id;
+        _addressData.vat_id = newAddress.vat_id;
 
         firstName.value = newAddress.firstName;
         lastName.value = newAddress.lastName;
         phoneNumber.value = newAddress.phoneNumber;
-      }
-    });
-
-    const addressForValidation = computed<BaseAddressDetails>({
-      get: () => {
-        const baseAddress: BaseAddressDetails = {
-          apartmentNumber: '',
-          city: '',
-          country: '',
-          firstName: '',
-          lastName: '',
-          phoneNumber: '',
-          state: '',
-          region_id: null,
-          streetAddress: '',
-          zipCode: '',
-          vat_id: ''
-        };
-
-        return mapFormValueToCheckoutAddress(address.value, baseAddress);
-      },
-      set: (validatedAddress: BaseAddressDetails) => {
-        address.value = mapCheckoutAddressToFormValue(validatedAddress);
       }
     });
 
@@ -182,7 +160,7 @@ export default defineComponent({
         return;
       }
 
-      const shouldProceed = await validateAddress(addressForValidation);
+      const shouldProceed = await validateAddress(address);
 
       if (!shouldProceed) {
         return;
@@ -195,14 +173,14 @@ export default defineComponent({
       const addressToCreate = {
         firstname: address.value.firstName,
         lastname: address.value.lastName,
-        street: [address.value.streetAddress],
+        street: [address.value.streetAddress, address.value.apartmentNumber],
         city: address.value.city,
-        region: { region: address.value.state, region_id: address.value.regionId },
+        region: { region: address.value.state, region_id: address.value.region_id },
         postcode: address.value.zipCode,
         country_id: address.value.country,
         telephone: address.value.phoneNumber,
         default_shipping: false,
-        vat_id: address.value.vatId
+        vat_id: address.value.vat_id
       };
 
       try {

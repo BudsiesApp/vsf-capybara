@@ -32,7 +32,7 @@
       >
         <OBaseAddressForm
           ref="baseAddressForm"
-          v-model="addressValue"
+          v-model="payment"
           :is-form-fields-disabled="isAddressFormDisabled"
           :get-field-anchor-name="getFieldAnchorName"
           @country-changed="onChangeCountry"
@@ -85,7 +85,6 @@ import MMultiselect from 'theme/components/molecules/m-multiselect';
 import { PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_BILLING_ADDRESS } from 'src/modules/persisted-customer-data';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
-import { mapCheckoutAddressToFormValue, mapFormValueToCheckoutAddress } from 'theme/helpers/checkout-address-mapper';
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 import { useAddressValidation } from 'src/modules/address';
 import OBaseAddressForm from './o-base-address-form.vue';
@@ -137,14 +136,6 @@ export default defineComponent({
     };
   },
   computed: {
-    addressValue: {
-      get () {
-        return mapCheckoutAddressToFormValue(this.payment);
-      },
-      set (value) {
-        mapFormValueToCheckoutAddress(value, this.payment);
-      }
-    },
     ...mapGetters({
       isVirtualCart: 'cart/isVirtualCart'
     }),

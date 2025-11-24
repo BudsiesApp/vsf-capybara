@@ -38,7 +38,6 @@ import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/Base
 import { useAddressValidation } from 'src/modules/address';
 
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
-import { mapCheckoutAddressToFormValue, mapFormValueToCheckoutAddress } from 'theme/helpers/checkout-address-mapper';
 import OBaseAddressForm from './o-base-address-form.vue';
 
 export default defineComponent({
@@ -82,36 +81,7 @@ export default defineComponent({
         return props.value;
       },
       set (value: any) {
-        debugger;
         emit('input', value);
-      }
-    });
-
-    const addressForValidation = computed<BaseAddressDetails>({
-      get: () => {
-        const baseAddress: BaseAddressDetails = {
-          apartmentNumber: '',
-          city: '',
-          country: '',
-          firstName: '',
-          lastName: '',
-          phoneNumber: '',
-          state: '',
-          region_id: null,
-          streetAddress: '',
-          zipCode: '',
-          vat_id: ''
-        };
-
-        const mapped = mapFormValueToCheckoutAddress(existingAddress.value, baseAddress);
-        return mapped;
-      },
-      set: (validatedAddress: BaseAddressDetails) => {
-        const mapped = mapCheckoutAddressToFormValue(validatedAddress);
-        (mapped as any).id = existingAddress.value.id;
-        (mapped as any).customerId = existingAddress.value.customerId;
-
-        existingAddress.value = mapped;
       }
     });
 
@@ -130,16 +100,16 @@ export default defineComponent({
         id: existingAddress.value.id,
         firstname: existingAddress.value.firstName,
         lastname: existingAddress.value.lastName,
-        street: [existingAddress.value.streetAddress],
+        street: [existingAddress.value.streetAddress, existingAddress.value.apartmentNumber || ''],
         city: existingAddress.value.city,
-        region: { region: existingAddress.value.state, region_id: existingAddress.value.regionId },
+        region: { region: existingAddress.value.state, region_id: existingAddress.value.region_id },
         postcode: existingAddress.value.zipCode,
         country_id: existingAddress.value.country,
         telephone: existingAddress.value.phoneNumber,
         default_shipping: existingAddress.value.defaultShipping,
         default_billing: existingAddress.value.defaultBilling,
         customer_id: existingAddress.value.customerId,
-        vat_id: existingAddress.value.vatId
+        vat_id: existingAddress.value.vat_id
       };
 
       return root.$store.dispatch('budsies/updateAddress', { address: addressToUpdate });
@@ -156,7 +126,7 @@ export default defineComponent({
         return;
       }
 
-      const shouldProceed = await validateAddress(addressForValidation);
+      const shouldProceed = await validateAddress(existingAddress);
 
       if (!shouldProceed) {
         return;

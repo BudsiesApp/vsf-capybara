@@ -6,6 +6,10 @@
       {{ address.streetAddress }}
     </p>
 
+    <p v-if="address.apartmentNumber" class="_apartment">
+      {{ address.apartmentNumber }}
+    </p>
+
     <p class="_location">
       {{ address.city }}, {{ stateName }} {{ address.zipCode }}
     </p>
@@ -72,10 +76,8 @@ export default defineComponent({
     }
   }
 
-  ._street {
-    font-size: var(--font-base);
-  }
-
+  ._street,
+  ._apartment,
   ._location {
     font-size: var(--font-base);
   }
