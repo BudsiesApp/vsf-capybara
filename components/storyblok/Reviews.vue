@@ -2,6 +2,7 @@
   <div
     class="storyblok-reviews layout-regular-component"
     :class="cssClasses"
+    :style="styles"
   >
     <editor-block-icons :item="itemData" />
 
