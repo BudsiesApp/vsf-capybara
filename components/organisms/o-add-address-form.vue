@@ -1,7 +1,8 @@
 <template>
   <div class="o-add-address-form">
-    <validation-observer slim v-slot="{passes}">
+    <validation-observer ref="validationObserver" slim tag="div">
       <o-base-address-form
+        ref="baseAddressForm"
         v-model="address"
         :is-form-fields-disabled="isSubmitting"
         :get-field-anchor-name="getFieldAnchorName"
@@ -13,7 +14,7 @@
         </SfButton>
 
         <SfButton
-          @click="() => passes(() => onFormSubmit())"
+          @click="onFormSubmit"
           :disabled="isSubmitButtonDisabled"
         >
           {{ $t('Add Address') }}
@@ -33,11 +34,14 @@ import { defineComponent, ref, computed } from '@vue/composition-api';
 import { SfButton } from '@storefront-ui/vue';
 
 import i18n from '@vue-storefront/i18n';
+import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 
 import { usePersistedFirstName, usePersistedLastName, usePersistedPhoneNumber } from 'src/modules/persisted-customer-data';
+import { useAddressValidation } from 'src/modules/address';
 
 import { BaseAddressFormValue } from 'theme/components/interfaces/base-address-form-value.interface';
-import { getFieldAnchorName } from 'theme/helpers/use-form-validation';
+import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
+import { mapCheckoutAddressToFormValue, mapFormValueToCheckoutAddress } from 'theme/helpers/checkout-address-mapper';
 
 import OBaseAddressForm from './o-base-address-form.vue';
 
@@ -54,6 +58,9 @@ export default defineComponent({
     ValidationObserver
   },
   setup (props, { emit, root }) {
+    const validationObserver = ref(null);
+    const baseAddressForm = ref(null);
+
     const firstName = ref('');
     const lastName = ref('');
     const phoneNumber = ref('');
@@ -79,11 +86,29 @@ export default defineComponent({
       ...usePersistedPhoneNumber(phoneNumber)
     };
 
-    const isSubmitButtonDisabled = computed(() => isSubmitting.value);
+    const {
+      validateAddress,
+      isValidating: isValidatingAddress,
+      completeValidation: completeAddressValidation
+    } = useAddressValidation({ root, emit, attrs: {}, slots: {} } as any);
+
+    const { validateAndGoToFirstError } = useFormValidation(
+      validationObserver,
+      () => {
+        const baseAddressFormComponent = baseAddressForm.value as any;
+
+        return {
+          ...root.$refs,
+          ...(baseAddressFormComponent?.$refs || {})
+        };
+      }
+    );
+
+    const isSubmitButtonDisabled = computed(() => isSubmitting.value || isValidatingAddress.value);
 
     const address = computed<BaseAddressFormValue>({
       get () {
-        const _addressData = (addressData as any).value as BaseAddressFormValue;
+        const _addressData = addressData.value;
 
         return {
           city: _addressData.city,
@@ -99,7 +124,7 @@ export default defineComponent({
         }
       },
       set (newAddress: BaseAddressFormValue) {
-        const _addressData = (addressData as any).value as BaseAddressFormValue;
+        const _addressData = addressData.value;
 
         _addressData.city = newAddress.city;
         _addressData.country = newAddress.country;
@@ -115,6 +140,29 @@ export default defineComponent({
       }
     });
 
+    const addressForValidation = computed<BaseAddressDetails>({
+      get: () => {
+        const baseAddress: BaseAddressDetails = {
+          apartmentNumber: '',
+          city: '',
+          country: '',
+          firstName: '',
+          lastName: '',
+          phoneNumber: '',
+          state: '',
+          region_id: null,
+          streetAddress: '',
+          zipCode: '',
+          vat_id: ''
+        };
+
+        return mapFormValueToCheckoutAddress(address.value, baseAddress);
+      },
+      set: (validatedAddress: BaseAddressDetails) => {
+        address.value = mapCheckoutAddressToFormValue(validatedAddress);
+      }
+    });
+
     function onFailure (message: string): void {
       root.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
@@ -127,6 +175,20 @@ export default defineComponent({
       if (isSubmitting.value) {
         return;
       }
+
+      const isFormValid = await validateAndGoToFirstError();
+
+      if (!isFormValid) {
+        return;
+      }
+
+      const shouldProceed = await validateAddress(addressForValidation);
+
+      if (!shouldProceed) {
+        return;
+      }
+
+      completeAddressValidation();
 
       isSubmitting.value = true;
 
@@ -163,6 +225,8 @@ export default defineComponent({
     }
 
     return {
+      validationObserver,
+      baseAddressForm,
       firstName,
       lastName,
       phoneNumber,
@@ -170,6 +234,10 @@ export default defineComponent({
       isSubmitting,
       isSubmitButtonDisabled,
       address,
+      validateAddress,
+      isValidatingAddress,
+      completeAddressValidation,
+      validateAndGoToFirstError,
       getFieldAnchorName,
       onFormSubmit,
       onCancelButtonClick

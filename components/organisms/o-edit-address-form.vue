@@ -1,7 +1,8 @@
 <template>
   <div class="o-edit-address-form">
-    <validation-observer slim v-slot="{passes}">
+    <validation-observer ref="validationObserver" slim tag="div">
       <o-base-address-form
+        ref="baseAddressForm"
         v-model="existingAddress"
         :is-form-fields-disabled="isSubmitting"
         :get-field-anchor-name="getFieldAnchorName"
@@ -13,7 +14,7 @@
         </SfButton>
 
         <SfButton
-          @click="() => passes(() => onFormSubmit())"
+          @click="onFormSubmit"
           :disabled="isSubmitButtonDisabled"
         >
           {{ $t('Update Address') }}
@@ -32,8 +33,12 @@ import { ValidationObserver } from 'vee-validate';
 import { defineComponent, computed, ref } from '@vue/composition-api';
 import { SfButton } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
+import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 
-import { getFieldAnchorName } from 'theme/helpers/use-form-validation';
+import { useAddressValidation } from 'src/modules/address';
+
+import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
+import { mapCheckoutAddressToFormValue, mapFormValueToCheckoutAddress } from 'theme/helpers/checkout-address-mapper';
 import OBaseAddressForm from './o-base-address-form.vue';
 
 export default defineComponent({
@@ -50,18 +55,67 @@ export default defineComponent({
     }
   },
   setup (props, { emit, root }) {
+    const validationObserver = ref(null);
+    const baseAddressForm = ref(null);
     const isSubmitting = ref(false);
+
+    const {
+      validateAddress,
+      isValidating: isValidatingAddress,
+      completeValidation: completeAddressValidation
+    } = useAddressValidation({ root, emit, attrs: {}, slots: {} } as any);
+
+    const { validateAndGoToFirstError } = useFormValidation(
+      validationObserver,
+      () => {
+        const baseAddressFormComponent = baseAddressForm.value as any;
+
+        return {
+          ...root.$refs,
+          ...(baseAddressFormComponent?.$refs || {})
+        };
+      }
+    );
 
     const existingAddress = computed({
       get () {
         return props.value;
       },
       set (value: any) {
+        debugger;
         emit('input', value);
       }
     });
 
-    const isSubmitButtonDisabled = computed<boolean>(() => isSubmitting.value);
+    const addressForValidation = computed<BaseAddressDetails>({
+      get: () => {
+        const baseAddress: BaseAddressDetails = {
+          apartmentNumber: '',
+          city: '',
+          country: '',
+          firstName: '',
+          lastName: '',
+          phoneNumber: '',
+          state: '',
+          region_id: null,
+          streetAddress: '',
+          zipCode: '',
+          vat_id: ''
+        };
+
+        const mapped = mapFormValueToCheckoutAddress(existingAddress.value, baseAddress);
+        return mapped;
+      },
+      set: (validatedAddress: BaseAddressDetails) => {
+        const mapped = mapCheckoutAddressToFormValue(validatedAddress);
+        (mapped as any).id = existingAddress.value.id;
+        (mapped as any).customerId = existingAddress.value.customerId;
+
+        existingAddress.value = mapped;
+      }
+    });
+
+    const isSubmitButtonDisabled = computed<boolean>(() => isSubmitting.value || isValidatingAddress.value);
 
     function onFailure (message: string): void {
       root.$store.dispatch('notification/spawnNotification', {
@@ -96,6 +150,20 @@ export default defineComponent({
         return;
       }
 
+      const isFormValid = await validateAndGoToFirstError();
+
+      if (!isFormValid) {
+        return;
+      }
+
+      const shouldProceed = await validateAddress(addressForValidation);
+
+      if (!shouldProceed) {
+        return;
+      }
+
+      completeAddressValidation();
+
       isSubmitting.value = true;
 
       try {
@@ -114,9 +182,15 @@ export default defineComponent({
     }
 
     return {
+      validationObserver,
+      baseAddressForm,
       existingAddress,
       isSubmitting,
       isSubmitButtonDisabled,
+      validateAddress,
+      isValidatingAddress,
+      completeAddressValidation,
+      validateAndGoToFirstError,
       getFieldAnchorName,
       onFormSubmit,
       onCancelButtonClick
