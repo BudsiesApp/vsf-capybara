@@ -88,24 +88,15 @@
       />
     </validation-provider>
 
-    <validation-provider
-      slim
-      rules=""
-      name="'Apartment'"
-      v-slot="{errors}"
-    >
-      <SfInput
-        v-model="apartmentNumber"
-        :ref="getFieldAnchorName('Apartment')"
-        class="form__element"
-        name="apartment"
-        autocomplete="address-line2"
-        :label="$t('Apartment, suite, etc.(Optional)')"
-        :disabled="isFormFieldsDisabled"
-        :valid="!errors.length"
-        :error-message="errors[0]"
-      />
-    </validation-provider>
+    <SfInput
+      v-model="apartmentNumber"
+      :ref="getFieldAnchorName('Apartment')"
+      class="form__element"
+      name="apartment"
+      autocomplete="address-line2"
+      :label="$t('Apartment, suite, etc.(Optional)')"
+      :disabled="isFormFieldsDisabled"
+    />
 
     <SfInput
       v-if="!isSelectedCountryHasStates"

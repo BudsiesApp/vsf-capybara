@@ -22,6 +22,14 @@
           <AAddressCard
             :address="enteredAddress"
           />
+
+          <SfInput
+            v-if="isMissingStreetNumber"
+            v-model.trim="streetNumber"
+            class="_street-number-input"
+            name="street-number"
+            :placeholder="$t('Street Number')"
+          />
         </div>
 
         <div v-if="!isFixMode && !isSubpremisesMode && !isConfirmMode" class="_column">
@@ -100,7 +108,7 @@
         </SfButton>
 
         <SfButton
-          v-if="isFixMode"
+          v-if="isFixMode && !isMissingStreetNumber"
           class="sf-button--outline _button"
           @click="useEnteredAddress"
         >
@@ -108,11 +116,28 @@
         </SfButton>
 
         <SfButton
-          v-if="isFixMode"
+          v-if="isFixMode && !isMissingStreetNumber"
           class="_button"
           @click="changeAddress"
         >
           {{ $t('Change Address') }}
+        </SfButton>
+
+        <SfButton
+          v-if="isFixMode && isMissingStreetNumber"
+          class="sf-button--outline _button"
+          @click="useEnteredAddress"
+        >
+          {{ $t('Use Without Street Number') }}
+        </SfButton>
+
+        <SfButton
+          v-if="isFixMode && isMissingStreetNumber"
+          class="_button"
+          :disabled="!streetNumber"
+          @click="useAddressWithStreetNumber"
+        >
+          {{ $t('Use Updated Address') }}
         </SfButton>
 
         <SfButton
@@ -149,7 +174,8 @@ interface ModalData {
   payload?: {
     verdict: 'CONFIRM' | 'FIX' | 'CONFIRM_ADD_SUBPREMISES',
     enteredAddress?: Partial<BaseAddressDetails>,
-    suggestedAddress?: Partial<BaseAddressDetails>
+    suggestedAddress?: Partial<BaseAddressDetails>,
+    missingComponents?: string[]
   }
 }
 
@@ -175,6 +201,7 @@ export default defineComponent({
   },
   setup (props, { emit, root }: SetupContext) {
     const unitNumber = ref('');
+    const streetNumber = ref('');
     const selectedAddressType = ref<'entered' | 'suggested'>('suggested');
 
     const enteredAddress = computed(() => {
@@ -197,8 +224,17 @@ export default defineComponent({
       return props.modalData?.payload?.verdict === 'CONFIRM_ADD_SUBPREMISES';
     });
 
+    const isMissingStreetNumber = computed<boolean>(() => {
+      const missingComponents = props.modalData?.payload?.missingComponents || [];
+      return props.modalData?.payload?.verdict === 'FIX' &&
+             missingComponents.includes('street_number');
+    });
+
     const getModalTitle = computed<string>(() => {
       if (isFixMode.value) {
+        if (isMissingStreetNumber.value) {
+          return root.$t('Street Number Required').toString();
+        }
         return root.$t('Address Could Not Be Validated').toString();
       }
 
@@ -211,6 +247,9 @@ export default defineComponent({
 
     const getModalSubtitle = computed<string>(() => {
       if (isFixMode.value) {
+        if (isMissingStreetNumber.value) {
+          return root.$t('Please provide the street number to complete validation.').toString();
+        }
         return root.$t('The address you entered could not be validated. Please review and correct it.').toString();
       }
 
@@ -225,6 +264,7 @@ export default defineComponent({
       EventBus.$emit('modal-hide', props.modalData.name);
       emit('close', props.modalData.name);
       unitNumber.value = '';
+      streetNumber.value = '';
     };
 
     const useEnteredAddress = () => {
@@ -280,14 +320,31 @@ export default defineComponent({
       closeModal();
     };
 
+    const useAddressWithStreetNumber = () => {
+      const currentStreetAddress = enteredAddress.value.streetAddress || '';
+      const updatedStreetAddress = `${streetNumber.value} ${currentStreetAddress}`.trim();
+
+      EventBus.$emit('address-selected', {
+        type: 'with-street-number',
+        address: {
+          ...enteredAddress.value,
+          streetAddress: updatedStreetAddress
+        }
+      });
+
+      closeModal();
+    };
+
     return {
       unitNumber,
+      streetNumber,
       selectedAddressType,
       enteredAddress,
       suggestedAddress,
       isConfirmMode,
       isFixMode,
       isSubpremisesMode,
+      isMissingStreetNumber,
       getModalTitle,
       getModalSubtitle,
       closeModal,
@@ -296,7 +353,8 @@ export default defineComponent({
       useSuggestedAddress,
       changeAddress,
       useWithoutUnit,
-      useUpdatedAddress
+      useUpdatedAddress,
+      useAddressWithStreetNumber
     };
   }
 });
@@ -382,6 +440,10 @@ export default defineComponent({
   }
 
   ._unit-input {
+    margin: var(--spacer-base) 0 0;
+  }
+
+  ._street-number-input {
     margin: var(--spacer-base) 0 0;
   }
 }
