@@ -1,6 +1,6 @@
 <template>
   <div class="o-edit-address-form">
-    <validation-observer ref="validationObserver" slim tag="div">
+    <validation-observer ref="validationObserver" slim>
       <o-base-address-form
         ref="baseAddressForm"
         v-model="existingAddress"
@@ -33,7 +33,6 @@ import { ValidationObserver } from 'vee-validate';
 import { defineComponent, computed, ref } from '@vue/composition-api';
 import { SfButton } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
-import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 
 import { useAddressValidation } from 'src/modules/address';
 
@@ -53,16 +52,19 @@ export default defineComponent({
       required: true
     }
   },
-  setup (props, { emit, root }) {
+  setup (props, context) {
     const validationObserver = ref(null);
     const baseAddressForm = ref(null);
     const isSubmitting = ref(false);
+
+    const emit = context.emit;
+    const root = context.root;
 
     const {
       validateAddress,
       isValidating: isValidatingAddress,
       completeValidation: completeAddressValidation
-    } = useAddressValidation({ root, emit, attrs: {}, slots: {} } as any);
+    } = useAddressValidation(context);
 
     const { validateAndGoToFirstError } = useFormValidation(
       validationObserver,
@@ -70,7 +72,6 @@ export default defineComponent({
         const baseAddressFormComponent = baseAddressForm.value as any;
 
         return {
-          ...root.$refs,
           ...(baseAddressFormComponent?.$refs || {})
         };
       }
@@ -85,7 +86,9 @@ export default defineComponent({
       }
     });
 
-    const isSubmitButtonDisabled = computed<boolean>(() => isSubmitting.value || isValidatingAddress.value);
+    const isSubmitButtonDisabled = computed<boolean>(() => {
+      return isSubmitting.value || isValidatingAddress.value
+    });
 
     function onFailure (message: string): void {
       root.$store.dispatch('notification/spawnNotification', {

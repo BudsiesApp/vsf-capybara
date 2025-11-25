@@ -54,6 +54,7 @@
             <template #label>
               <div class="_radio-label">
                 <span class="_radio-title">{{ $t('Address You Entered') }}</span>
+
                 <AAddressCard
                   :address="enteredAddress"
                 />
@@ -70,6 +71,7 @@
             <template #label>
               <div class="_radio-label">
                 <span class="_radio-title">{{ $t('Suggested Address') }}</span>
+
                 <AAddressCard
                   :address="suggestedAddress"
                 />
@@ -164,6 +166,7 @@
 <script lang="ts">
 import { defineComponent, ref, computed, PropType, SetupContext } from '@vue/composition-api';
 import { SfModal, SfHeading, SfButton, SfInput, SfRadio } from '@storefront-ui/vue';
+
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 

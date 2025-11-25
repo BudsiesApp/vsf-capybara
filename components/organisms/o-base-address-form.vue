@@ -508,7 +508,7 @@ export default defineComponent({
     };
 
     const onAutocompleteAddressSelected = async (placeId: string | undefined): Promise<void> => {
-      if (!placeId || typeof placeId !== 'string') {
+      if (!placeId) {
         return;
       }
 

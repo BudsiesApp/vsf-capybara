@@ -2,7 +2,6 @@
   <validation-observer
     class="o-billing-address"
     ref="validationObserver"
-    slim
     tag="div"
   >
     <SfHeading
@@ -72,6 +71,8 @@
 <script>
 import { defineComponent, ref, toRef } from '@vue/composition-api';
 import { mapGetters } from 'vuex';
+import { ValidationObserver } from 'vee-validate';
+
 import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
 import {
   SfInput,
@@ -79,7 +80,6 @@ import {
   SfHeading,
   SfCheckbox
 } from '@storefront-ui/vue';
-import { ValidationObserver } from 'vee-validate';
 import { createSmoothscroll } from 'theme/helpers';
 import MMultiselect from 'theme/components/molecules/m-multiselect';
 import { PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_BILLING_ADDRESS } from 'src/modules/persisted-customer-data';

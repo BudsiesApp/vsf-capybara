@@ -1,6 +1,6 @@
 <template>
   <div class="o-add-address-form">
-    <validation-observer ref="validationObserver" slim tag="div">
+    <validation-observer ref="validationObserver" slim>
       <o-base-address-form
         ref="baseAddressForm"
         v-model="address"

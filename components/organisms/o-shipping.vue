@@ -1,7 +1,6 @@
 <template>
   <validation-observer
     ref="validationObserver"
-    slim
     tag="div"
     class="o-shipping"
   >
@@ -138,7 +137,6 @@ export default defineComponent({
         const baseAddressFormComponent = baseAddressForm.value;
 
         return {
-          ...context.refs,
           ...(baseAddressFormComponent?.$refs || {})
         };
       }
