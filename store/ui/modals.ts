@@ -1,3 +1,5 @@
+import { ADDRESS_VALIDATION_MODAL } from 'src/modules/address';
+
 /**
  * List of modal names
  */
@@ -13,7 +15,6 @@ export enum ModalList {
   WebsiteLeaving = 'm-modal-website-leaving',
   OrderError = 'm-modal-order-error',
   ImagesGallery = 'm-modal-images-gallery',
-  AddressValidation = 'm-modal-address-validation',
 }
 
 /**
@@ -31,7 +32,7 @@ export const modalComponents = new Map([
   [ModalList.WebsiteLeaving, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-website-leaving.vue')],
   [ModalList.OrderError, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-order-error.vue')],
   [ModalList.ImagesGallery, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-images-gallery.vue')],
-  [ModalList.AddressValidation, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-address-validation.vue')]
+  [ADDRESS_VALIDATION_MODAL, () => import(/* webpackChunkName: "vsf-modals" */ 'src/modules/address/components/modal-address-validation.vue')]
 ])
 
 /**
