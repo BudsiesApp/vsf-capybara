@@ -23,7 +23,7 @@
     />
 
     <div
-      v-if="isActive && (suggestions.length > 0 || loading)"
+      v-if="isActive && suggestions.length > 0"
       class="m-suggestions-list__dropdown"
     >
       <ul
