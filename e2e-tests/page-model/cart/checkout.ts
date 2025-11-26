@@ -5,7 +5,7 @@ import { MultiselectFormField, InputFormField } from '../../helpers/form/form-fi
 
 export const COUNTRY_WITH_STATES_LIST = 'United States';
 export const COUNTRY_WITH_STATES_LIST_CODE = 'US';
-export const COUNTRY_WITH_STATES_DEFAULT_STATE = 'California';
+export const COUNTRY_WITH_STATES_DEFAULT_STATE = 'Georgia';
 export const COUNTRY_WITHOUT_STATES_LIST = 'United Kingdom';
 
 const REQUIRED_FIELD_ERROR_MESSAGE = 'Field is required';
@@ -14,11 +14,11 @@ const DEFAULT_FIRST_NAME = 'Test first name';
 const DEFAULT_LAST_NAME = 'Test last name';
 const DEFAULT_EMAIL = 'test@test.test';
 const DEFAULT_PASSWORD = 'testPassword123';
-const DEFAULT_ADDRESS = 'Test Address';
+const DEFAULT_ADDRESS = '15 Bridge Creek Rd';
 const DEFAULT_COUNTRY = COUNTRY_WITH_STATES_LIST;
 const DEFAULT_STATE = COUNTRY_WITH_STATES_DEFAULT_STATE;
-const DEFAULT_CITY = 'Test City';
-const DEFAULT_ZIP_CODE = '12345';
+const DEFAULT_CITY = 'Tiger';
+const DEFAULT_ZIP_CODE = '30576';
 const DEFAULT_PHONE = '+17472920712';
 
 export interface AddressData {

@@ -64,13 +64,13 @@ $forms-color-placeholder: #a09999;
     --font-extra-bold: 800;
     --font-black: 800;
     // font-size
-    --font-2xs: 0.703rem; 
-    --font-xs: 0.844rem; 
-    --font-sm: 0.984rem; 
-    --font-base: 1.125rem; 
-    --font-lg: 1.266rem; 
+    --font-2xs: 0.703rem;
+    --font-xs: 0.844rem;
+    --font-sm: 0.984rem;
+    --font-base: 1.125rem;
+    --font-lg: 1.266rem;
     --font-xl: 1.5rem;
-    --font-2xl: 1.875rem; 
+    --font-2xl: 1.875rem;
     // headings font-size
     --h1-font-size: 1.375rem;
     --h2-font-size: 1.375rem;
@@ -124,6 +124,8 @@ $forms-color-placeholder: #a09999;
 
     --ios-select-dropdown-background: #4e4e4e;
     --ios-select-option-active-background: #636465;
+    --input-error-message-color: var(--c-danger-variant);
+    --input-error-message-font-weight: var(--font-light);
     --ios-select-option-border-color: #606060;
 
     @include assign-color-variants(--c-primary, --_c-blue-primary);
