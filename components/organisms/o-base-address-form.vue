@@ -85,7 +85,17 @@
         autocomplete="street-address"
         @input="onStreetAddressInput"
         @select="onSelectSuggestion"
-      />
+      >
+        <template #bottom>
+          <div class="_attribution">
+            <img
+              alt=""
+              :src="googleMapsAttributionLogo"
+              class="_logo-icon"
+            >
+          </div>
+        </template>
+      </MSuggestionsList>
     </validation-provider>
 
     <SfInput
@@ -235,6 +245,7 @@ import { parsePhoneNumberWithError } from 'libphonenumber-js';
 import { stateCodeAutocompleteOptionSearch, createPhoneHelpers } from 'src/modules/shared';
 import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 import { useAddressAutocomplete } from 'src/modules/address/composables/use-address-autocomplete';
+import { googleMapsAttributionLogo } from 'src/modules/address';
 
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
 import MSuggestionsList from 'theme/components/molecules/m-suggestions-list.vue';
@@ -601,7 +612,8 @@ export default defineComponent({
       runSuggestionQuery,
       validateCountryRelatedFields,
       updateValueField,
-      updateFormattedPhoneNumber
+      updateFormattedPhoneNumber,
+      googleMapsAttributionLogo
     }
   }
 })
@@ -615,6 +627,12 @@ export default defineComponent({
 
   .form__element {
     margin: 0 0 var(--spacer-sm) 0;
+  }
+
+  ._attribution {
+    padding: var(--spacer-xs);
+    display: flex;
+    align-items: center;
   }
 
   @include for-desktop {

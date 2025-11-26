@@ -45,12 +45,14 @@
           {{ suggestion.description }}
         </li>
       </ul>
+
+      <slot name="bottom" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, Ref, ref, watch } from '@vue/composition-api';
+import { defineComponent, PropType, ref, watch } from '@vue/composition-api';
 import { SfInput } from '@storefront-ui/vue';
 
 import { AutocompleteSuggestion } from 'src/modules/address/types/autocomplete';
