@@ -184,7 +184,7 @@ export default {
             { name: this.$t('Custom Pillows'), link: '/custom-pillows/' },
             { name: this.$t('Custom Blankets'), link: '/custom-blankets/' },
             { name: this.$t('Custom Socks'), link: { name: 'printed-socks-creation-page' } },
-            { name: this.$t('Custom Face Masks'), link: { name: 'printed-masks-creation-page' } },
+            // { name: this.$t('Custom Face Masks'), link: { name: 'printed-masks-creation-page' } },
             { name: this.$t('Bobbleheads & Figurines'), link: '/pet-bobblehead-figurines/' },
             {
               name: this.$t('Pajamas'),

@@ -7,6 +7,7 @@
       :is="formComponent"
       :product="currentProduct"
       :existing-cart-item="existingCartItem"
+      :image-url="imageUrl"
       @hook:mounted="onFormMounted"
       v-if="showForm"
     />
@@ -140,10 +141,25 @@ export default defineComponent({
       }
     );
 
+    const imageUrl = computed<string | undefined>(() => {
+      let url = context.root.$route.query['image-url'];
+
+      if (Array.isArray(url)) {
+        url = url[0] || '';
+      }
+
+      if (!url) {
+        return;
+      }
+
+      return url;
+    });
+
     return {
       ...useExistingCartItem(existingPlushieId, context),
       canUsePersistedCustomizationState,
       currentProduct,
+      imageUrl,
       formComponent,
       formPlaceholderComponent,
       isLeavePage,

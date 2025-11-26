@@ -222,12 +222,12 @@ export default Vue.extend({
             name: 'golf-shirts-creation'
           }
         },
-        {
-          label: this.$t('Face Masks'),
-          url: {
-            name: 'printed-masks-creation-page'
-          }
-        },
+        // {
+        //   label: this.$t('Face Masks'),
+        //   url: {
+        //     name: 'printed-masks-creation-page'
+        //   }
+        // },
         {
           label: this.$t('Pet Keychains'),
           url: {

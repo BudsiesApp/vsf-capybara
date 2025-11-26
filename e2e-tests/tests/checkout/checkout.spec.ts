@@ -164,7 +164,8 @@ test('shipping step is visible if cart contains virtual gift card and other prod
   await checkoutPage.expectStepToBeVisible(checkoutPage.stepsName.shipping);
 });
 
-test('shipping step is visible if cart contains only gift card with "Send physical" option enabled', async ({ giftCardProductPage, checkoutPage }) => {
+// Currently "Send physical" option is disabled
+test.skip('shipping step is visible if cart contains only gift card with "Send physical" option enabled', async ({ giftCardProductPage, checkoutPage }) => {
   await giftCardProductPage.goto();
   await giftCardProductPage.fillFormData(undefined, undefined, undefined, true);
   await giftCardProductPage.addToCartButton.click();
