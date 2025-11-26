@@ -192,7 +192,7 @@ export default defineComponent({
       ]);
     },
     async onGoReviewButtonClicked () {
-      const shouldValidate = !this.sendToShippingAddress && !this.sendToBillingAddress;
+      const shouldValidate = !this.sendToShippingAddress;
 
       if (shouldValidate) {
         const isFormValid = await this.validateAndGoToFirstError();
