@@ -630,6 +630,8 @@ export default defineComponent({
   }
 
   ._attribution {
+    width: 100%;
+    background-color: var(--c-white);
     padding: var(--spacer-xs);
     display: flex;
     align-items: center;
