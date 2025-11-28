@@ -201,13 +201,13 @@ export default defineComponent({
     right: 0;
     z-index: 10;
     margin-top: calc(var(--spacer-sm) * -1);
+    box-shadow: 0 4px 11px rgba(var(--c-dark-base), 0.1);
   }
 
   &__options {
     max-height: 300px;
     overflow-x: hidden;
     overflow-y: auto;
-    box-shadow: 0 4px 11px rgba(var(--c-dark-base), 0.1);
     background-color: var(--c-white);
     list-style: none;
     margin: 0;
