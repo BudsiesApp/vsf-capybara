@@ -286,6 +286,10 @@ export default defineComponent({
     getFieldAnchorName: {
       type: Function as PropType<(field: string) => string>,
       required: true
+    },
+    isPhoneRequired: {
+      type: Boolean,
+      default: false
     }
   },
   components: {
@@ -422,7 +426,7 @@ export default defineComponent({
     } = useAddressAutocomplete(addressRef);
 
     const isPhoneNumberRequired = computed<boolean>(() => {
-      return !!country.value && country.value !== unitedStatesCountryCode;
+      return props.isPhoneRequired || (!!country.value && country.value !== unitedStatesCountryCode);
     });
 
     const isSelectedCountryHasStates = computed<boolean>(() => {
