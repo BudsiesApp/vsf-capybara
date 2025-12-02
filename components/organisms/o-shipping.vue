@@ -1,5 +1,9 @@
 <template>
-  <div class="o-shipping">
+  <validation-observer
+    ref="validationObserver"
+    tag="div"
+    class="o-shipping"
+  >
     <SfHeading
       :title="`${$t('Shipping address')}`"
       :level="3"
@@ -13,145 +17,13 @@
         name="shipToMyAddress"
         :label="$t('Ship to my default address')"
       />
-      <SfInput
-        v-model.trim="shipping.firstName"
-        class="form__element form__element--half"
-        :class="{[vuelidateErrorClassName]: $v.shipping.firstName.$error}"
-        name="first-name"
-        autocomplete="given-name"
-        :label="$t('First name')"
-        :required="true"
-        :valid="!$v.shipping.firstName.$error"
-        :error-message="
-          !$v.shipping.firstName.required
-            ? $t('Field is required')
-            : $t('Name must have at least 2 letters.')
-        "
-        @blur="$v.shipping.firstName.$touch()"
-      />
-      <SfInput
-        v-model.trim="shipping.lastName"
-        class="form__element form__element--half"
-        :class="{[vuelidateErrorClassName]: $v.shipping.lastName.$error}"
-        name="last-name"
-        autocomplete="family-name"
-        :label="$t('Last name')"
-        :required="true"
-        :valid="!$v.shipping.lastName.$error"
-        :error-message="$t('Field is required')"
-        @blur="$v.shipping.lastName.$touch()"
-      />
-      <SfInput
-        v-model.trim="shipping.streetAddress"
-        class="form__element"
-        :class="{[vuelidateErrorClassName]: $v.shipping.streetAddress.$error}"
-        name="street-address"
-        autocomplete="street-address"
-        :label="$t('Address')"
-        :required="true"
-        :valid="!$v.shipping.streetAddress.$error"
-        :error-message="$t('Field is required')"
-        @blur="$v.shipping.streetAddress.$touch()"
-      />
-
-      <MMultiselect
-        v-model="shipping.country"
-        class="form__element form__element--half form__select"
-        :class="{[vuelidateErrorClassName]: $v.shipping.country.$error}"
-        name="country-name"
-        autocomplete="country-name"
-        :label="$t('Country')"
-        :required="true"
-        id-field="code"
-        label-field="name"
-        :options="countries"
-        :valid="!$v.shipping.country.$error"
-        :error-message="$t('Field is required')"
-        @change="onChangeCountry"
-      />
-
-      <SfInput
-        v-if="!isSelectedCountryHasStates"
-        v-model.trim="shipping.state"
-        class="form__element form__element--half"
-        name="address-level1"
-        autocomplete="address-level1"
-        :label="$t('State / Province')"
-      />
-
-      <MMultiselect
-        v-else
-        v-model="shipping.region_id"
-        class="form__element form__element--half form__select"
-        :class="{[vuelidateErrorClassName]: $v.shipping.region_id.$error}"
-        name="address-level1"
-        autocomplete="address-level1"
-        :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
-        :label="$t('State / Province')"
-        :required="true"
-        id-field="id"
-        label-field="name"
-        :options="getStatesForSelectedCountry"
-        :valid="!$v.shipping.region_id.$error"
-        :error-message="$t('Field is required')"
-      />
-
-      <SfInput
-        v-model.trim="shipping.city"
-        class="form__element form__element--half"
-        :class="{[vuelidateErrorClassName]: $v.shipping.city.$error}"
-        name="city"
-        autocomplete="address-level2"
-        :label="$t('City')"
-        :required="true"
-        :valid="!$v.shipping.city.$error"
-        :error-message="$t('Field is required')"
-        @blur="$v.shipping.city.$touch()"
-      />
-
-      <SfInput
-        v-model.trim="shipping.zipCode"
-        class="form__element form__element--half"
-        :class="{[vuelidateErrorClassName]: $v.shipping.zipCode.$error}"
-        name="zipCode"
-        autocomplete="postal-code"
-        :label="$t('Zip-code')"
-        :required="true"
-        :valid="!$v.shipping.zipCode.$error"
-        :error-message="
-          !$v.shipping.zipCode.required
-            ? $t('Field is required')
-            : $t('Zip-code must have at least {number} characters.', { number: 3 })
-        "
-        @blur="onZipCodeBlur"
-      />
-
-      <SfInput
-        v-model="formattedPhoneNumber"
-        :required="true"
-        :valid="!$v.formattedPhoneNumber.$error"
-        :error-message="
-          !$v.formattedPhoneNumber || !$v.formattedPhoneNumber.required
-            ? $t('Field is required')
-            : $t('Please, enter valid phone number')
-        "
-        class="form__element"
-        :class="{
-          [vuelidateErrorClassName]: $v.formattedPhoneNumber.$error,
-          'form__element--half': showVatIdField
-        }"
-        name="phone"
-        autocomplete="tel"
-        :label="$t('Phone number')"
-        @blur="updatePhoneNumber"
-      />
-
-      <SfInput
-        v-if="showVatIdField"
-        v-model.trim="shipping.vat_id"
-        class="form__element form__element--half"
-        name="vat_id"
-        :label="$t('Tax ID')"
+      <OBaseAddressForm
+        ref="baseAddressForm"
+        v-model="shipping"
+        :is-form-fields-disabled="shipToMyAddress"
+        :get-field-anchor-name="getFieldAnchorName"
+        @country-changed="onChangeCountry"
+        @zip-code-blur="onZipCodeBlur"
       />
     </div>
     <SfHeading
@@ -213,12 +85,10 @@
         />
       </template>
     </div>
-  </div>
+  </validation-observer>
 </template>
 <script>
-import { parsePhoneNumberWithError } from 'libphonenumber-js';
-import { required, requiredIf, minLength } from 'vuelidate/lib/validators';
-import { unicodeAlpha, unicodeAlphaNum } from '@vue-storefront/core/helpers/validators';
+import { toRef, defineComponent, ref } from '@vue/composition-api';
 import {
   SfInput,
   SfRadio,
@@ -226,6 +96,7 @@ import {
   SfHeading,
   SfCheckbox
 } from '@storefront-ui/vue';
+import { ValidationObserver } from 'vee-validate';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { IS_SHIPPING_METHODS_SYNCING } from '@vue-storefront/core/modules/cart';
@@ -233,21 +104,16 @@ import { Shipping } from '@vue-storefront/core/modules/checkout/components/Shipp
 
 import { createSmoothscroll } from 'theme/helpers';
 import MMultiselect from 'theme/components/molecules/m-multiselect';
-import {
-  KEY as AMAZON_PAY_MODULE_KEY,
-  METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
-} from 'src/modules/vsf-amazon-pay/index';
 import { GET_ACTIVE_CURRENCY, GET_CURRENCY_EXCHANGE_RATE } from 'src/modules/currency';
 import { PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, PERSISTED_CUSTOMER_PHONE_NUMBER, PERSISTED_CUSTOMER_SHIPPING_COUNTRY, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_SHIPPING_COUNTRY } from 'src/modules/persisted-customer-data';
-import { stateCodeAutocompleteOptionSearch, PriceHelper, createPhoneHelpers } from 'src/modules/shared';
-import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
+import { PriceHelper } from 'src/modules/shared';
+import { useAddressValidation } from 'src/modules/address';
+import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
+import OBaseAddressForm from './o-base-address-form.vue';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
-const unitedStatesCountryCode = 'US';
-const phoneHelpers = createPhoneHelpers(parsePhoneNumberWithError);
-
-export default {
+export default defineComponent({
   name: 'OShipping',
   components: {
     SfInput,
@@ -255,54 +121,41 @@ export default {
     SfButton,
     SfHeading,
     SfCheckbox,
-    MMultiselect
+    MMultiselect,
+    OBaseAddressForm,
+    ValidationObserver
+  },
+  setup (_, context) {
+    const validationObserver = ref(null);
+    const baseAddressForm = ref(null);
+
+    const { validateAddress, isValidating: isValidatingAddress, completeValidation: completeAddressValidation } = useAddressValidation(context);
+
+    const { validateAndGoToFirstError } = useFormValidation(
+      validationObserver,
+      () => {
+        const baseAddressFormComponent = baseAddressForm.value;
+
+        return {
+          ...(baseAddressFormComponent?.$refs || {})
+        };
+      }
+    );
+
+    return {
+      validateAddress,
+      isValidatingAddress,
+      completeAddressValidation,
+      validateAndGoToFirstError,
+      getFieldAnchorName,
+      validationObserver,
+      baseAddressForm
+    };
   },
   mixins: [Shipping],
-  validations: {
-    shipping: {
-      firstName: {
-        required,
-        minLength: minLength(2),
-        unicodeAlpha
-      },
-      lastName: {
-        required,
-        unicodeAlpha
-      },
-      country: {
-        required
-      },
-      region_id: {
-        required: requiredIf(function () { return this.isSelectedCountryHasStates })
-      },
-      streetAddress: {
-        required,
-        unicodeAlphaNum
-      },
-      zipCode: {
-        required,
-        minLength: minLength(3),
-        unicodeAlphaNum
-      },
-      city: {
-        required,
-        unicodeAlpha
-      }
-    },
-    formattedPhoneNumber: {
-      required,
-      phoneValid: function (value) {
-        return !value || phoneHelpers.isValidPhoneNumber(value, this.shipping.country || unitedStatesCountryCode)
-      }
-    }
-
-  },
   data: () => {
     return {
-      states: States,
-      fZipCodeChanged: false,
-      vuelidateErrorClassName,
-      formattedPhoneNumber: ''
+      states: States
     };
   },
   computed: {
@@ -310,33 +163,10 @@ export default {
       return this.$store.getters[IS_SHIPPING_METHODS_SYNCING];
     },
     isContinueButtonDisabled () {
-      return !this.shippingMethods.length || this.isShippingMethodsSyncing;
+      return !this.shippingMethods.length || this.isShippingMethodsSyncing || this.isValidatingAddress;
     },
     isAddressFormDisabled () {
       return this.shipToMyAddress;
-    },
-    isSelectedCountryHasStates () {
-      if (!this.shipping.country || !this.states) {
-        return false;
-      }
-
-      return this.states.hasOwnProperty(this.shipping.country);
-    },
-    getStatesForSelectedCountry () {
-      if (!this.isSelectedCountryHasStates) {
-        return [];
-      }
-
-      return this.states[this.shipping.country];
-    },
-    getShippingCountry () {
-      return this.shipping.country;
-    },
-    getZipCode () {
-      return this.shipping.zipCode;
-    },
-    showVatIdField () {
-      return !!this.shipping.country && this.shipping.country !== unitedStatesCountryCode;
     },
     selectedCurrency () {
       return this.$store.getters[GET_ACTIVE_CURRENCY];
@@ -346,7 +176,6 @@ export default {
     }
   },
   methods: {
-    stateCodeAutocompleteOptionSearch,
     getCarrierTitle (method) {
       // It's the only way to separate M1 from M2
       if (method.hasOwnProperty('method_name')) {
@@ -369,37 +198,25 @@ export default {
 
       this.shipping.state = '';
       this.shipping.region_id = null;
-
-      this.validateCountryRelatedFields();
     },
     onZipCodeBlur () {
-      this.$v.shipping.zipCode.$touch();
-
-      if (!this.fZipCodeChanged) {
-        return;
-      }
-
-      if (this.$v.shipping.country.$invalid) {
-        return;
-      }
-
-      if (this.$v.shipping.zipCode.$invalid) {
-        return;
-      }
-
-      this.fZipCodeChanged = false;
-
       this.$bus.$emit('checkout-before-shippingMethods', this.shipping.country)
     },
     async saveDataToCheckout () {
-      this.updatePhoneNumber();
-      this.$v.$touch();
+      const isFormValid = await this.validateAndGoToFirstError();
 
-      if (this.$v.$invalid) {
-        await this.$nextTick();
-        vuelidateScrollToFirstError(this.$el);
+      if (!isFormValid) {
         return;
       }
+
+      const shippingRef = toRef(this, 'shipping');
+      const shouldProceed = await this.validateAddress(shippingRef);
+
+      if (!shouldProceed) {
+        return;
+      }
+
+      this.completeAddressValidation();
 
       this.$store.commit(
         SET_PERSISTED_CUSTOMER_FIRST_NAME,
@@ -424,10 +241,6 @@ export default {
       this.sendDataToCheckout();
       await this.$store.dispatch('cart/syncTotals', { forceServerSync: true });
       this.$store.dispatch('cart/pullEstimatedShipments');
-    },
-    validateCountryRelatedFields () {
-      this.$v.shipping.region_id.$touch();
-      this.$v.formattedPhoneNumber.$touch();
     },
     fillLastUsedCustomerData () {
       const customerFirstName = this.$store
@@ -455,33 +268,11 @@ export default {
         this.shipping.country = customerShippingCountry;
       }
     },
-    updatePhoneNumber () {
-      this.$v.formattedPhoneNumber.$touch();
-
-      if (!this.formattedPhoneNumber) {
-        this.shipping.phoneNumber = '';
-        return;
-      }
-
-      const normalizedNumber = phoneHelpers.formatPhoneNumberToE164(this.formattedPhoneNumber, this.shipping.country);
-
-      if (normalizedNumber === this.shipping.phoneNumber) {
-        this.updateFormattedPhoneNumber(normalizedNumber);
-      }
-
-      if (normalizedNumber) {
-        this.shipping.phoneNumber = normalizedNumber;
-      }
-    },
     formatPrice (price) {
       price = price * this.currencyExchangeRate;
 
       return PriceHelper.formatPrice(price, this.selectedCurrency.symbol);
-    },
-    updateFormattedPhoneNumber (phoneNumber) {
-      this.formattedPhoneNumber = phoneHelpers.formatPhoneNumberForDisplay(phoneNumber, this.shipping.country);
     }
-
   },
   mounted () {
     createSmoothscroll(document.documentElement.scrollTop || document.body.scrollTop, 0);
@@ -491,46 +282,15 @@ export default {
   },
   beforeDestroy () {
     EventBus.$off('user-after-loggedin', this.fillLastUsedCustomerData);
-  },
-  watch: {
-    'shipping.phoneNumber': {
-      handler (value) {
-        this.updateFormattedPhoneNumber(value);
-      },
-      immediate: true
-    },
-    getZipCode: {
-      handler () {
-        this.fZipCodeChanged = true;
-      },
-      immediate: true
-    },
-    isSelectedCountryHasStates: {
-      handler (val) {
-        if (val) {
-          this.shipping.state = '';
-          return;
-        }
-
-        this.shipping.region_id = null;
-      }
-    },
-    showVatIdField: {
-      handler (val) {
-        if (!val) {
-          this.shipping.vat_id = '';
-        }
-      }
-    }
-
   }
-};
+});
 </script>
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .title {
   --heading-padding: var(--spacer-base) 0;
+
   @include for-desktop {
     --heading-padding: var(--spacer-xl) 0 var(--spacer-base) 0;
     &:last-of-type {

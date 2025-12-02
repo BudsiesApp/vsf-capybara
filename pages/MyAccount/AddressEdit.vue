@@ -35,7 +35,7 @@ export default defineComponent({
       );
     });
 
-    const editedAddress = ref(null);
+    const editedAddress = ref<any>(null);
 
     function updateEditedAddress () {
       const _address = address.value;
@@ -45,23 +45,22 @@ export default defineComponent({
         return;
       }
 
-      const street = `${_address.street[0]} ${_address.street[1] ? _address.street[1] : ''}`;
-
       editedAddress.value = {
         id: _address.id,
         firstName: _address.firstname,
         lastName: _address.lastname,
-        streetAddress: street.trim(),
+        streetAddress: _address.street[0],
+        apartmentNumber: _address.street[1] || '',
         zipCode: _address.postcode,
         city: _address.city,
         state: _address.region.region,
-        regionId: _address.region.region_id,
+        region_id: _address.region.region_id,
         country: _address.country_id,
         phoneNumber: _address.telephone,
         defaultBilling: _address.default_billing,
         defaultShipping: _address.default_shipping,
         customerId: _address.customer_id,
-        vatId: _address.vat_id
+        vat_id: _address.vat_id
       }
     }
 
