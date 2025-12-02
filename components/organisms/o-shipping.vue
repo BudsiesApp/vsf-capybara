@@ -22,6 +22,7 @@
         v-model="shipping"
         :is-form-fields-disabled="shipToMyAddress"
         :get-field-anchor-name="getFieldAnchorName"
+        :is-phone-required="true"
         @country-changed="onChangeCountry"
         @zip-code-blur="onZipCodeBlur"
       />
