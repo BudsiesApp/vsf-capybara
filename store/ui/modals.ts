@@ -1,3 +1,5 @@
+import { ADDRESS_VALIDATION_MODAL_NAME } from 'src/modules/address';
+
 /**
  * List of modal names
  */
@@ -31,6 +33,7 @@ export const modalComponents = new Map([
   [ModalList.WebsiteLeaving, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-website-leaving.vue')],
   [ModalList.OrderError, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-order-error.vue')],
   [ModalList.ImagesGallery, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-images-gallery.vue')],
+  [ADDRESS_VALIDATION_MODAL_NAME, () => import(/* webpackChunkName: "vsf-modals" */ 'src/modules/address/components/modal-address-validation.vue')],
   [ModalList.RafflePreviousWinningTickets, () => import(/* webpackChunkName: "vsf-modals" */ 'src/modules/raffle/components/modal-previous-winning-tickets.vue')]
 ])
 
