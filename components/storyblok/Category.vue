@@ -40,13 +40,13 @@ export default Blok.extend({
     }
   },
   async beforeMount (): Promise<void> {
-    await this.loadCategory();
+    await this.loadCategoryProducts();
   },
   async serverPrefetch (): Promise<void> {
-    await (this as any).loadCategory();
+    await (this as any).loadCategoryProducts();
   },
   methods: {
-    async loadCategory (): Promise<void> {
+    async loadCategoryProducts (): Promise<void> {
       const products = this.$store.getters['product/getProductByCategoryIdDictionary'];
 
       if (products[this.itemData.id]?.length) {
@@ -71,7 +71,7 @@ export default Blok.extend({
   },
   watch: {
     async item (): Promise<void> {
-      await this.loadCategory()
+      await this.loadCategoryProducts()
     }
   }
 });

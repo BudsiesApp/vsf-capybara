@@ -50,9 +50,9 @@ export default defineComponent({
       type: Object as PropType<ColumnsCountField>,
       required: true
     },
-    contextLabel: {
+    contextName: {
       type: String,
-      default: undefined
+      default: ''
     }
   },
   setup (props, { root }) {
@@ -100,8 +100,8 @@ export default defineComponent({
     });
 
     const contextName = computed(() => {
-      if (props.contextLabel) {
-        return props.contextLabel;
+      if (props.contextName) {
+        return props.contextName;
       }
 
       return root.$route.fullPath;

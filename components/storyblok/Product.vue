@@ -71,6 +71,8 @@ export default Blok.extend({
 
       if (this.product.landing_page_url) {
         preparedProduct.link = this.product.landing_page_url;
+      } else if (typeof preparedProduct.link === 'object') {
+        preparedProduct.link = preparedProduct.link.fullPath || this.$router.resolve(preparedProduct.link).href;
       }
 
       return preparedProduct;
