@@ -14,8 +14,11 @@
 </template>
 
 <script lang="ts">
+import { SearchQuery } from 'storefront-query-builder';
+
+import config from 'config';
 import { Blok } from 'src/modules/vsf-storyblok-module/components'
-import ProductModel from 'core/modules/catalog/types/Product';
+import Product from 'core/modules/catalog/types/Product';
 import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog'
 import { PriceHelper } from 'src/modules/shared'
 import { ColumnsCountField } from 'src/modules/vsf-storyblok-module'
@@ -25,15 +28,23 @@ import { prepareCategoryProduct } from 'theme/helpers'
 import ProductGridRenderer from './ProductGridRenderer.vue'
 import ProductListData from './interfaces/product-list-data.interface';
 
+function getSearchQuery (ids: number[]) {
+  let productsQuery = new SearchQuery()
+  productsQuery = productsQuery
+    .applyFilter({ key: 'id', value: { 'in': ids } })
+    .applyFilter({ key: 'status', value: { 'in': [1] } });
+
+  if (config.products.listOutOfStockProducts === false) {
+    productsQuery = productsQuery.applyFilter({ key: 'stock.is_in_stock', value: { 'eq': true } });
+  }
+
+  return productsQuery;
+}
+
 export default Blok.extend({
   name: 'StoryblokProductListBlock',
   components: {
     ProductGridRenderer
-  },
-  data: function () {
-    return {
-      products: [] as ProductModel[]
-    }
   },
   computed: {
     itemData (): ProductListData {
@@ -45,12 +56,20 @@ export default Blok.extend({
     selectedCurrency (): Currency {
       return this.$store.getters[GET_ACTIVE_CURRENCY];
     },
-    preparedProducts (): any[] {
-      if (!this.products || !this.products.length) {
-        return [];
+    preparedProducts (): ReturnType<typeof prepareCategoryProduct>[] {
+      const products: Product[] = [];
+
+      const loadedProducts = this.$store.getters['product/getProductByIdDictionary'];
+
+      for (const id of this.itemData.products) {
+        if (!loadedProducts[id]) {
+          continue;
+        }
+
+        products.push(loadedProducts[id]);
       }
 
-      return this.products.map(
+      return products.map(
         (product) => prepareCategoryProduct(
           product,
           this.productPriceDictionary,
@@ -62,34 +81,29 @@ export default Blok.extend({
       return this.itemData.columns_count;
     }
   },
-  async created (): Promise<void> {
-    if (this.products.length) {
-      return
-    }
-
+  async beforeMount (): Promise<void> {
     await this.loadProducts()
+  },
+  async serverPrefetch (): Promise<void> {
+    await (this as any).loadProducts()
   },
   methods: {
     async loadProducts (): Promise<void> {
-      if (!this.itemData.products || !this.itemData.products.length) {
-        return;
+      const loadedProducts = this.$store.getters['product/getProductByIdDictionary'];
+      const missingProductIds: number[] = [];
+
+      for (const id of this.itemData.products) {
+        if (!loadedProducts[id]) {
+          missingProductIds.push(id);
+        }
       }
 
-      const productPromises = this.itemData.products.map(
-        (productId: number) => this.$store.dispatch(
-          'product/single',
-          {
-            options: {
-              id: productId
-            },
-            key: 'id',
-            skipCache: true,
-            setCurrent: false
-          }
-        )
-      );
-
-      this.products = await Promise.all(productPromises);
+      await this.$store.dispatch('product/findProducts', {
+        query: getSearchQuery(missingProductIds),
+        options: {
+          prefetchGroupProducts: false
+        }
+      });
     }
   },
   watch: {
