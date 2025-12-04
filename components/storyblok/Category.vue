@@ -1,8 +1,15 @@
 <template>
-  <div class="storyblok-category layout-regular-component" v-if="products.length">
-    <div v-for="product in productsList" :key="product.sku" class="col-xs-12" :class="[colSizeLg]">
-      <product :product="product" />
-    </div>
+  <div
+    class="storyblok-category layout-regular-component"
+    :class="cssClasses"
+    v-if="preparedProducts.length"
+  >
+    <editor-block-icons :item="itemData" />
+
+    <product-grid-renderer
+      :products="preparedProducts"
+      :columns-count="columnsCount"
+    />
   </div>
 </template>
 
@@ -12,14 +19,20 @@ import { CategoryService } from '@vue-storefront/core/data-resolver/CategoryServ
 import { SearchQuery } from 'storefront-query-builder'
 import ProductModel from 'core/modules/catalog/types/Product';
 import { Category } from 'core/modules/catalog-next/types/Category'
+import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog'
+import { PriceHelper } from 'src/modules/shared'
+import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency'
+import { ColumnsCountField } from 'src/modules/vsf-storyblok-module';
+import { prepareCategoryProduct } from 'theme/helpers'
 
-import Product from './Product.vue'
 import CategoryData from './interfaces/category-data.interface';
+
+import ProductGridRenderer from './ProductGridRenderer.vue'
 
 export default Blok.extend({
   name: 'StoryblokCategoryBlock',
   components: {
-    Product
+    ProductGridRenderer
   },
   data: function () {
     return {
@@ -31,15 +44,27 @@ export default Blok.extend({
     itemData (): CategoryData {
       return this.item as CategoryData;
     },
-    productsList (): ProductModel[] {
-      if (!this.products) {
-        return []
+    productPriceDictionary (): Record<string, PriceHelper.ProductPrice> {
+      return this.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY] || {};
+    },
+    selectedCurrency (): Currency {
+      return this.$store.getters[GET_ACTIVE_CURRENCY];
+    },
+    preparedProducts (): any[] {
+      if (!this.products || !this.products.length) {
+        return [];
       }
 
-      return this.products
+      return this.products.map(
+        (product) => prepareCategoryProduct(
+          product,
+          this.productPriceDictionary,
+          this.selectedCurrency
+        )
+      );
     },
-    colSizeLg (): string {
-      return 'col-lg-' + Math.floor(12 / parseInt(this.itemData.products_count))
+    columnsCount (): ColumnsCountField {
+      return this.itemData.columns_count;
     }
   },
   async created (): Promise<void> {
@@ -64,6 +89,10 @@ export default Blok.extend({
       this.category = categories.shift()
     },
     async loadProducts (): Promise<void> {
+      if (!this.category) {
+        return;
+      }
+
       let searchQuery = new SearchQuery()
       searchQuery = searchQuery.applyFilter({ key: 'category_ids', value: { 'in': [this.category.id] } })
 
@@ -85,6 +114,9 @@ export default Blok.extend({
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+
 .storyblok-category {
   @include display-property-handling;
 }
