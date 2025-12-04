@@ -104,7 +104,7 @@ export default defineComponent({
         return props.contextName;
       }
 
-      return root.$route.fullPath;
+      return root.$route.path;
     });
 
     function onProductCardClick (productSku: string): void {
