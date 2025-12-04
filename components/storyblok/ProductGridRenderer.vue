@@ -4,13 +4,13 @@
     :class="cssClasses"
   >
     <div
-      v-for="product in products"
+      v-for="product in preparedProducts"
       :key="product.id"
       class="_item"
     >
       <o-product-card
         :product="product"
-        :link="product.landing_page_url ? product.landing_page_url : undefined"
+        :link="product.link"
         link-tag="router-link"
         :wishlist-icon="false"
         class="_component"
@@ -24,10 +24,15 @@
 
 <script lang="ts">
 import { defineComponent, computed, PropType } from '@vue/composition-api';
+
 import Product from 'core/modules/catalog/types/Product';
+import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog'
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
-import { ProductEvent } from 'src/modules/shared';
+import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency'
+import { ProductEvent, PriceHelper } from 'src/modules/shared';
 import { ColumnsCountField, SizeValue } from 'src/modules/vsf-storyblok-module';
+
+import { prepareCategoryProduct } from 'theme/helpers'
 
 import OProductCard from 'theme/components/organisms/o-product-card.vue';
 
@@ -38,7 +43,7 @@ export default defineComponent({
   },
   props: {
     products: {
-      type: Array as PropType<any[]>,
+      type: Array as PropType<Product[]>,
       required: true
     },
     columnsCount: {
@@ -53,6 +58,45 @@ export default defineComponent({
   setup (props, { root }) {
     const productBySkuDictionary = computed<Record<string, Product>>(() => {
       return root.$store.getters['product/getProductBySkuDictionary'];
+    });
+
+    const productPriceDictionary = computed<Record<string, PriceHelper.ProductPrice>>(() => {
+      return root.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY];
+    });
+    const selectedCurrency = computed<Currency>(() => {
+      return root.$store.getters[GET_ACTIVE_CURRENCY];
+    });
+
+    const preparedProducts = computed<ReturnType<typeof prepareCategoryProduct>[]>(() => {
+      const products: ReturnType<typeof prepareCategoryProduct>[] = [];
+
+      const _productPriceDictionary = productPriceDictionary.value;
+      const _selectedCurrency = selectedCurrency.value;
+
+      for (const product of props.products) {
+        if (
+          !product.landing_page_url &&
+          !['simple', 'configurable'].includes(product.type_id)
+        ) {
+          continue;
+        }
+
+        const preparedProduct = prepareCategoryProduct(
+          product,
+          _productPriceDictionary,
+          _selectedCurrency
+        );
+
+        if (product.landing_page_url) {
+          preparedProduct.link = product.landing_page_url;
+        } else if (typeof preparedProduct.link === 'object') {
+          preparedProduct.link = preparedProduct.link.fullPath || root.$router.resolve(preparedProduct.link).href;
+        }
+
+        products.push(preparedProduct);
+      }
+
+      return products;
     });
 
     const contextName = computed(() => {
@@ -104,6 +148,7 @@ export default defineComponent({
 
     return {
       cssClasses,
+      preparedProducts,
       onProductCardClick
     };
   }

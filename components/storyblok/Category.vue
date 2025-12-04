@@ -2,12 +2,12 @@
   <div
     class="storyblok-category layout-regular-component"
     :class="cssClasses"
-    v-if="preparedProducts.length"
+    v-if="products.length"
   >
     <editor-block-icons :item="itemData" />
 
     <product-grid-renderer
-      :products="preparedProducts"
+      :products="products"
       :columns-count="columnsCount"
     />
   </div>
@@ -17,11 +17,7 @@
 import { Blok } from 'src/modules/vsf-storyblok-module/components'
 import { SearchQuery } from 'storefront-query-builder'
 import Product from 'core/modules/catalog/types/Product';
-import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog'
-import { PriceHelper } from 'src/modules/shared'
-import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency'
 import { ColumnsCountField } from 'src/modules/vsf-storyblok-module';
-import { prepareCategoryProduct } from 'theme/helpers'
 
 import CategoryData from './interfaces/category-data.interface';
 
@@ -36,23 +32,8 @@ export default Blok.extend({
     itemData (): CategoryData {
       return this.item as CategoryData;
     },
-    productPriceDictionary (): Record<string, PriceHelper.ProductPrice> {
-      return this.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY] || {};
-    },
-    selectedCurrency (): Currency {
-      return this.$store.getters[GET_ACTIVE_CURRENCY];
-    },
     products (): Product[] {
       return this.$store.getters['product/getProductByCategoryIdDictionary'][this.itemData.id] || [];
-    },
-    preparedProducts (): ReturnType<typeof prepareCategoryProduct>[] {
-      return this.products.map(
-        (product) => prepareCategoryProduct(
-          product,
-          this.productPriceDictionary,
-          this.selectedCurrency
-        )
-      );
     },
     columnsCount (): ColumnsCountField {
       return this.itemData.columns_count;

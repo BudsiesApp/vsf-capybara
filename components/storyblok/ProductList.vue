@@ -2,12 +2,12 @@
   <div
     class="storyblok-product-list layout-regular-component"
     :class="cssClasses"
-    v-if="preparedProducts.length"
+    v-if="products.length"
   >
     <editor-block-icons :item="itemData" />
 
     <product-grid-renderer
-      :products="preparedProducts"
+      :products="products"
       :columns-count="columnsCount"
     />
   </div>
@@ -19,11 +19,7 @@ import { SearchQuery } from 'storefront-query-builder';
 import config from 'config';
 import { Blok } from 'src/modules/vsf-storyblok-module/components'
 import Product from 'core/modules/catalog/types/Product';
-import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog'
-import { PriceHelper } from 'src/modules/shared'
 import { ColumnsCountField } from 'src/modules/vsf-storyblok-module'
-import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency'
-import { prepareCategoryProduct } from 'theme/helpers'
 
 import ProductGridRenderer from './ProductGridRenderer.vue'
 import ProductListData from './interfaces/product-list-data.interface';
@@ -50,32 +46,22 @@ export default Blok.extend({
     itemData (): ProductListData {
       return this.item as ProductListData;
     },
-    productPriceDictionary (): Record<string, PriceHelper.ProductPrice> {
-      return this.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY] || {};
-    },
-    selectedCurrency (): Currency {
-      return this.$store.getters[GET_ACTIVE_CURRENCY];
-    },
-    preparedProducts (): ReturnType<typeof prepareCategoryProduct>[] {
+    products (): Product[] {
       const products: Product[] = [];
 
       const loadedProducts = this.$store.getters['product/getProductByIdDictionary'];
 
       for (const id of this.itemData.products) {
-        if (!loadedProducts[id]) {
+        const product: Product | undefined = loadedProducts[id];
+
+        if (!product) {
           continue;
         }
 
-        products.push(loadedProducts[id]);
+        products.push(product);
       }
 
-      return products.map(
-        (product) => prepareCategoryProduct(
-          product,
-          this.productPriceDictionary,
-          this.selectedCurrency
-        )
-      );
+      return products;
     },
     columnsCount (): ColumnsCountField {
       return this.itemData.columns_count;

@@ -8,7 +8,7 @@
 
     <o-product-card
       :product="preparedProduct"
-      :link="preparedProduct.landing_page_url ? preparedProduct.landing_page_url : undefined"
+      :link="product.link"
       link-tag="router-link"
       class="_product"
       :wishlist-icon="false"
@@ -56,11 +56,24 @@ export default Blok.extend({
         return;
       }
 
-      return prepareCategoryProduct(
+      if (
+        !this.product.landing_page_url &&
+        !['simple', 'configurable'].includes(this.product.type_id)
+      ) {
+        return;
+      }
+
+      const preparedProduct = prepareCategoryProduct(
         this.product,
         this.productPriceDictionary,
         this.selectedCurrency
       );
+
+      if (this.product.landing_page_url) {
+        preparedProduct.link = this.product.landing_page_url;
+      }
+
+      return preparedProduct;
     }
   },
   async beforeMount (): Promise<void> {
