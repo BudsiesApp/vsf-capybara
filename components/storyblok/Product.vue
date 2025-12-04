@@ -36,12 +36,10 @@ export default Blok.extend({
   components: {
     OProductCard
   },
-  data: function () {
-    return {
-      product: undefined as Product | undefined
-    }
-  },
   computed: {
+    product (): Product | undefined {
+      return this.$store.getters['product/getProductByIdDictionary'][this.itemData.product_id];
+    },
     productPriceDictionary (): Record<string, PriceHelper.ProductPrice> {
       return this.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY] || {};
     },
@@ -51,8 +49,10 @@ export default Blok.extend({
     selectedCurrency (): Currency {
       return this.$store.getters[GET_ACTIVE_CURRENCY];
     },
-    preparedProduct (): any {
-      if (!this.product) return undefined;
+    preparedProduct (): ReturnType<typeof prepareCategoryProduct> | undefined {
+      if (!this.product) {
+        return;
+      }
 
       return prepareCategoryProduct(
         this.product,
@@ -61,23 +61,26 @@ export default Blok.extend({
       );
     }
   },
-  created: async function (): Promise<void> {
-    if (this.product) {
-      return
-    }
-
+  async beforeMount (): Promise<void> {
     await this.loadData()
+  },
+  async serverPrefetch (): Promise<void> {
+    await (this as any).loadData();
   },
   methods: {
     async loadData () {
-      this.product = await this.$store.dispatch(
+      if (this.product) {
+        return;
+      }
+
+      await this.$store.dispatch(
         'product/single',
         {
           options: {
             id: this.itemData.product_id
           },
           key: 'id',
-          skipCache: true
+          skipCache: false
         }
       )
     },
