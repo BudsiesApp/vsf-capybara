@@ -48,8 +48,9 @@ export default Blok.extend({
   methods: {
     async loadCategoryProducts (): Promise<void> {
       const products = this.$store.getters['product/getProductByCategoryIdDictionary'];
+      const loadedProducts = products[this.itemData.id]?.length || 0;
 
-      if (products[this.itemData.id]?.length) {
+      if (loadedProducts >= this.itemData.products_count) {
         return;
       }
 
