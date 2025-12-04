@@ -15,10 +15,8 @@
 
 <script lang="ts">
 import { Blok } from 'src/modules/vsf-storyblok-module/components'
-import { CategoryService } from '@vue-storefront/core/data-resolver/CategoryService'
 import { SearchQuery } from 'storefront-query-builder'
-import ProductModel from 'core/modules/catalog/types/Product';
-import { Category } from 'core/modules/catalog-next/types/Category'
+import Product from 'core/modules/catalog/types/Product';
 import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog'
 import { PriceHelper } from 'src/modules/shared'
 import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency'
@@ -34,12 +32,6 @@ export default Blok.extend({
   components: {
     ProductGridRenderer
   },
-  data: function () {
-    return {
-      products: [] as ProductModel[],
-      category: undefined as Category | undefined
-    }
-  },
   computed: {
     itemData (): CategoryData {
       return this.item as CategoryData;
@@ -50,11 +42,10 @@ export default Blok.extend({
     selectedCurrency (): Currency {
       return this.$store.getters[GET_ACTIVE_CURRENCY];
     },
-    preparedProducts (): any[] {
-      if (!this.products || !this.products.length) {
-        return [];
-      }
-
+    products (): Product[] {
+      return this.$store.getters['product/getProductByCategoryIdDictionary'][this.itemData.id] || [];
+    },
+    preparedProducts (): ReturnType<typeof prepareCategoryProduct>[] {
       return this.products.map(
         (product) => prepareCategoryProduct(
           product,
@@ -67,47 +58,36 @@ export default Blok.extend({
       return this.itemData.columns_count;
     }
   },
-  async created (): Promise<void> {
-    if (!this.category) {
-      await this.loadCategory()
-    }
-
-    if (this.products.length) {
-      return
-    }
-
-    await this.loadProducts()
+  async beforeMount (): Promise<void> {
+    await this.loadCategory();
+  },
+  async serverPrefetch (): Promise<void> {
+    await (this as any).loadCategory();
   },
   methods: {
     async loadCategory (): Promise<void> {
-      let categories = await CategoryService.getCategories({
-        filters: {
-          id: this.itemData.id
-        }
-      })
+      const products = this.$store.getters['product/getProductByCategoryIdDictionary'];
 
-      this.category = categories.shift()
-    },
-    async loadProducts (): Promise<void> {
-      if (!this.category) {
+      if (products[this.itemData.id]?.length) {
         return;
       }
 
-      let searchQuery = new SearchQuery()
-      searchQuery = searchQuery.applyFilter({ key: 'category_ids', value: { 'in': [this.category.id] } })
+      let searchQuery = new SearchQuery();
 
-      let { items } = await this.$store.dispatch('product/findProducts', {
+      searchQuery = searchQuery.applyFilter({
+        key: 'category_ids',
+        value: { 'in': [this.itemData.id] }
+      });
+
+      await this.$store.dispatch('product/findProducts', {
         query: searchQuery,
         size: +this.itemData.products_count
-      })
-
-      this.products = items
+      });
     }
   },
   watch: {
     async item (): Promise<void> {
       await this.loadCategory()
-      await this.loadProducts()
     }
   }
 });
