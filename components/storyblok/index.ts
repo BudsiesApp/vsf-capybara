@@ -28,8 +28,10 @@ export default function registerComponents () {
   add('product_reviews', () => import(/* webpackChunkName: "vsf-storyblok" */ './ProductReviews.vue'))
   add('reviews', () => import(/* webpackChunkName: "vsf-storyblok" */ './Reviews.vue'))
 
-  // add('product', () => import('./Product.vue'))
-  // add('category', () => import('./Category.vue'))
+  add('product', () => import(/* webpackChunkName: "vsf-storyblok" */ './Product.vue'))
+  add('category', () => import(/* webpackChunkName: "vsf-storyblok" */ './Category.vue'))
+  add('product_list', () => import(/* webpackChunkName: "vsf-storyblok" */ './ProductList.vue'))
+
   // add('ciLink', () => import('./Link.vue'))
   // Overwrite an existing component
   // add('tile', () => import('./Tile.vue'), { force: true })
