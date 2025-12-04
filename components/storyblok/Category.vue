@@ -81,7 +81,10 @@ export default Blok.extend({
 
       await this.$store.dispatch('product/findProducts', {
         query: searchQuery,
-        size: +this.itemData.products_count
+        size: +this.itemData.products_count,
+        options: {
+          prefetchGroupProducts: false
+        }
       });
     }
   },

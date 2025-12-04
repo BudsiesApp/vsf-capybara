@@ -20,6 +20,8 @@
 </template>
 
 <script lang="ts">
+import { SearchQuery } from 'storefront-query-builder'
+
 import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import Product from 'core/modules/catalog/types/Product';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
@@ -73,16 +75,20 @@ export default Blok.extend({
         return;
       }
 
-      await this.$store.dispatch(
-        'product/single',
-        {
-          options: {
-            id: this.itemData.product_id
-          },
-          key: 'id',
-          skipCache: false
+      let searchQuery = new SearchQuery();
+
+      searchQuery = searchQuery.applyFilter({
+        key: 'id',
+        value: { 'in': [this.itemData.product_id] }
+      });
+
+      await this.$store.dispatch('product/findProducts', {
+        query: searchQuery,
+        size: 1,
+        options: {
+          prefetchGroupProducts: false
         }
-      )
+      });
     },
     onProductCardClick () {
       EventBus.$emit(
