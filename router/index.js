@@ -55,6 +55,8 @@ const OrderItemsBulkCustomize = () =>
   import(/* webpackChunkName: "vsf-order-items-bulk-customize" */ 'theme/pages/OrderItemsBulkCustomize');
 const OrderItemDeliverablesDownload = () =>
   import(/* webpackChunkName: "vsf-order-item-deliverables" */ 'theme/pages/OrderItemDeliverablesDownload');
+const TaxIdRequest = () =>
+  import(/* webpackChunkName: "vsf-tax-id-request" */ 'src/modules/orders-history/components/TaxIdRequest');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -804,6 +806,17 @@ let routes = [
         orderItemId
       }
     },
+    meta: {
+      auth: true
+    }
+  },
+  {
+    path: '/order/tax-id-request/',
+    name: 'tax-id-request',
+    component: TaxIdRequest,
+    props: (route) => ({
+      orderId: route.query.orderId
+    }),
     meta: {
       auth: true
     }
