@@ -84,6 +84,10 @@ export default Blok.extend({
         }
       }
 
+      if (!missingProductIds.length) {
+        return;
+      }
+
       await this.$store.dispatch('product/findProducts', {
         query: getSearchQuery(missingProductIds),
         options: {
