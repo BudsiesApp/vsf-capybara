@@ -2,142 +2,118 @@
   <div
     class="storyblok-product layout-regular-component"
     :class="cssClasses"
-    v-if="product"
+    v-if="preparedProduct"
   >
     <editor-block-icons :item="itemData" />
 
-    <router-link
-      class=""
-      :to="link"
-    >
-      <div
-        class="_product-image"
-      >
-        <product-image
-          :image="thumbnailObj"
-          :alt="name | htmlDecode"
-          :calc-ratio="false"
-        />
-      </div>
-
-      <p class="">
-        {{ name | htmlDecode }}
-      </p>
-
-      <span class="">{{ formattedPrice }}</span>
-    </router-link>
+    <o-product-card
+      :product="preparedProduct"
+      :link="product.link"
+      link-tag="router-link"
+      class="_product"
+      :wishlist-icon="false"
+      :image-height="352"
+      :image-width="352"
+      @click.native.capture="onProductCardClick"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { productThumbnailPath } from '@vue-storefront/core/helpers';
-import { currentStoreView } from '@vue-storefront/core/lib/multistore';
-import { formatProductLink } from '@vue-storefront/core/modules/url/helpers';
-import ProductImage from '../core/ProductImage.vue';
-import { LocalizedRoute, StoreView } from 'core/lib/types';
-import config from 'config';
+import { SearchQuery } from 'storefront-query-builder'
+
 import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import Product from 'core/modules/catalog/types/Product';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
-import { PriceHelper } from 'src/modules/shared';
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
+import { ProductEvent, PriceHelper } from 'src/modules/shared';
+import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
+import { prepareCategoryProduct } from 'theme/helpers'
+import OProductCard from 'theme/components/organisms/o-product-card.vue';
 
 import ProductData from './interfaces/product-data.interface';
-import getProductImagePlaceholder from '@vue-storefront/core/modules/cart/helpers/getProductImagePlaceholder';
-import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 
 export default Blok.extend({
   name: 'StoryblokProductBlock',
   components: {
-    ProductImage
-  },
-  data: function () {
-    return {
-      placeholder: getProductImagePlaceholder(),
-      product: undefined as Product | undefined
-    }
+    OProductCard
   },
   computed: {
+    product (): Product | undefined {
+      return this.$store.getters['product/getProductByIdDictionary'][this.itemData.product_id];
+    },
     productPriceDictionary (): Record<string, PriceHelper.ProductPrice> {
-      return this.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY];
+      return this.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY] || {};
     },
     itemData (): ProductData {
       return this.item as ProductData;
     },
-    currentStoreView (): () => StoreView {
-      return currentStoreView;
-    },
-    price (): number | undefined {
-      if (!this.product) {
-        return undefined;
-      }
-
-      const price = this.productPriceDictionary[this.product.id];
-
-      return PriceHelper.getFinalPrice(price);
-    },
-    formattedPrice (): string {
-      if (!this.price) {
-        return '';
-      }
-
-      return PriceHelper.formatPrice(this.price, this.selectedCurrency.symbol);
-    },
-    name (): string {
-      if (!this.product) {
-        return ''
-      }
-      return this.product.name
-    },
-    link (): string | LocalizedRoute {
-      if (!this.product) {
-        return ''
-      }
-
-      if (!this.product.slug) {
-        return '';
-      }
-
-      return formatProductLink(this.product, currentStoreView().storeCode)
-    },
-    thumbnail (): string {
-      if (!this.product) {
-        return ''
-      }
-      let thumbnail = productThumbnailPath(this.product)
-
-      // TODO: Figure out correct type definition
-      return (this as any).getThumbnail(thumbnail, config.products.thumbnails.width, config.products.thumbnails.height)
-    },
-    thumbnailObj (): {src: string, loading: string, error: string} {
-      return {
-        src: this.thumbnail,
-        loading: this.placeholder,
-        error: this.placeholder
-      }
-    },
     selectedCurrency (): Currency {
       return this.$store.getters[GET_ACTIVE_CURRENCY];
+    },
+    preparedProduct (): ReturnType<typeof prepareCategoryProduct> | undefined {
+      if (!this.product) {
+        return;
+      }
+
+      if (
+        !this.product.landing_page_url &&
+        !['simple', 'configurable'].includes(this.product.type_id)
+      ) {
+        return;
+      }
+
+      const preparedProduct = prepareCategoryProduct(
+        this.product,
+        this.productPriceDictionary,
+        this.selectedCurrency
+      );
+
+      if (this.product.landing_page_url) {
+        preparedProduct.link = this.product.landing_page_url;
+      } else if (typeof preparedProduct.link === 'object') {
+        preparedProduct.link = preparedProduct.link.fullPath || this.$router.resolve(preparedProduct.link).href;
+      }
+
+      return preparedProduct;
     }
   },
-  created: async function (): Promise<void> {
-    if (this.product) {
-      return
-    }
-
+  async beforeMount (): Promise<void> {
     await this.loadData()
+  },
+  async serverPrefetch (): Promise<void> {
+    await (this as any).loadData();
   },
   methods: {
     async loadData () {
-      this.product = await this.$store.dispatch(
-        'product/single',
-        {
-          options: {
-            id: this.itemData.product_id
-          },
-          key: 'id',
-          skipCache: true
+      if (this.product) {
+        return;
+      }
+
+      let searchQuery = new SearchQuery();
+
+      searchQuery = searchQuery.applyFilter({
+        key: 'id',
+        value: { 'in': [this.itemData.product_id] }
+      });
+
+      await this.$store.dispatch('product/findProducts', {
+        query: searchQuery,
+        size: 1,
+        options: {
+          prefetchGroupProducts: false
         }
-      )
+      });
+    },
+    onProductCardClick () {
+      EventBus.$emit(
+        ProductEvent.PRODUCT_CARD_CLICK,
+        {
+          product: this.product,
+          categoryName: this.$route.fullPath,
+          categoryId: this.$route.fullPath
+        }
+      );
     }
   },
   watch: {
@@ -153,25 +129,19 @@ export default Blok.extend({
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 .storyblok-product {
-  display: flex;
-  justify-content: center;
+  @include display-property-handling;
 
-  ._product-image {
-    background-color: #f2f2f2;
+  ._product {
 
-    img {
-      position: relative;
-      top: 0;
-      left: 0;
-      transform: none;
-    }
+    margin: var(--spacer-sm);
+    display: flex;
+    justify-content: center;
 
-    .product-image {
-      width: auto;
-      height: auto;
+    ::v-deep {
+      .sf-product-card {
+        --product-card-max-width: 100%;
+      }
     }
   }
-
-  @include display-property-handling;
 }
 </style>
