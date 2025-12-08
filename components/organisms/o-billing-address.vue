@@ -181,11 +181,6 @@ export default defineComponent({
   },
   methods: {
     async onChangeCountry () {
-      await this.$nextTick();
-
-      this.payment.state = '';
-      this.payment.region_id = null;
-
       await Promise.all([
         this.$store.dispatch('checkout/updatePaymentDetails', { country: this.payment.country }),
         this.$store.dispatch('cart/syncPaymentMethods', { forceServerSync: true })
