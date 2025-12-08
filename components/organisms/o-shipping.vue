@@ -193,11 +193,6 @@ export default defineComponent({
     },
     async onChangeCountry () {
       this.changeCountry();
-
-      await this.$nextTick();
-
-      this.shipping.state = '';
-      this.shipping.region_id = null;
     },
     onZipCodeBlur () {
       this.$bus.$emit('checkout-before-shippingMethods', this.shipping.country)

@@ -518,6 +518,11 @@ export default defineComponent({
     const onChangeCountry = async (): Promise<void> => {
       await nextTick();
       validateCountryRelatedFields();
+
+      state.value = '';
+      region_id.value = null;
+      streetAddress.value = '';
+
       emit('country-changed');
     };
 
@@ -553,17 +558,6 @@ export default defineComponent({
 
       await onAutocompleteAddressSelected(placeId);
     };
-
-    watch(country, (after, before) => {
-      if (after && before && after !== before) {
-        state.value = '';
-        region_id.value = null;
-
-        if (streetAddress.value) {
-          streetAddress.value = '';
-        }
-      }
-    }, { immediate: true });
 
     watch(phoneNumber, (value: string) => {
       updateFormattedPhoneNumber(value);
