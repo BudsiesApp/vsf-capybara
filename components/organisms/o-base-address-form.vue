@@ -127,7 +127,7 @@
     >
       <validation-provider
         slim
-        rules="required"
+        :rules="stateValidationRules"
         name="'State'"
         ref="stateValidator"
         v-slot="{errors}"
@@ -139,7 +139,7 @@
           autocomplete="address-level1"
           :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
           :label="$t('State / Province')"
-          :required="true"
+          :required="isStateRequired"
           id-field="id"
           label-field="name"
           :options="statesForSelectedCountry"
@@ -246,6 +246,7 @@ import { stateCodeAutocompleteOptionSearch, createPhoneHelpers } from 'src/modul
 import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 import { useAddressAutocomplete } from 'src/modules/address/composables/use-address-autocomplete';
 import { googleMapsAttributionLogo } from 'src/modules/address';
+import { isStateOptional } from 'src/modules/address/helpers/is-state-optional';
 
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
 import MSuggestionsList from 'theme/components/molecules/m-suggestions-list.vue';
@@ -437,6 +438,14 @@ export default defineComponent({
       return states.hasOwnProperty(props.value.country);
     });
 
+    const isStateRequired = computed<boolean>(() => {
+      return isSelectedCountryHasStates.value && !isStateOptional(country.value);
+    });
+
+    const stateValidationRules = computed<any>(() => {
+      return isStateRequired.value ? { required: true } : {};
+    });
+
     const phoneValidationRules = computed<any>(() => {
       return {
         required: isPhoneNumberRequired.value,
@@ -591,6 +600,8 @@ export default defineComponent({
       selectAutocompleteSuggestion,
       isPhoneNumberRequired,
       isSelectedCountryHasStates,
+      isStateRequired,
+      stateValidationRules,
       phoneValidationRules,
       city,
       country,
