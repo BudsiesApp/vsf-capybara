@@ -450,14 +450,6 @@ export default defineComponent({
       return isSelectedCountryHasStates.value && checkIfStateHidden(country.value);
     });
 
-    const isStateRequired = computed<boolean>(() => {
-      return isSelectedCountryHasStates.value && !isStateHidden.value;
-    });
-
-    const stateValidationRules = computed<any>(() => {
-      return isStateRequired.value ? { required: true } : {};
-    });
-
     const phoneValidationRules = computed<any>(() => {
       return {
         required: isPhoneNumberRequired.value,
@@ -614,8 +606,6 @@ export default defineComponent({
       isPhoneNumberRequired,
       isSelectedCountryHasStates,
       isStateHidden,
-      isStateRequired,
-      stateValidationRules,
       phoneValidationRules,
       city,
       country,
