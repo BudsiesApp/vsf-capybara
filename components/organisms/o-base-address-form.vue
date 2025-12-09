@@ -5,6 +5,7 @@
       rules="required|min:2"
       name="'First name'"
       v-slot="{errors}"
+      key="firstName"
     >
       <SfInput
         v-model="firstName"
@@ -25,6 +26,7 @@
       rules="required"
       name="'Last name'"
       v-slot="{errors}"
+      key="lastName"
     >
       <SfInput
         v-model="lastName"
@@ -45,6 +47,7 @@
       rules="required"
       name="'Country'"
       v-slot="{errors}"
+      key="country"
     >
       <MMultiselect
         v-model="country"
@@ -69,6 +72,7 @@
       rules="required"
       name="'Address'"
       v-slot="{errors}"
+      key="streetAddress"
     >
       <MSuggestionsList
         v-model="streetAddress"
@@ -106,54 +110,58 @@
       autocomplete="address-line2"
       :label="$t('Apartment, suite, etc.(Optional)')"
       :disabled="isFormFieldsDisabled"
+      key="apartment"
     />
 
-    <SfInput
-      v-if="!isSelectedCountryHasStates"
-      key="state"
-      v-model="state"
-      :ref="getFieldAnchorName('State')"
-      class="form__element form__element--half"
-      name="address-level1"
-      autocomplete="address-level1"
-      :label="$t('State / Province')"
-      :disabled="isFormFieldsDisabled"
-    />
+    <template v-if="!isStateHidden">
+      <SfInput
+        v-if="!isSelectedCountryHasStates"
+        key="state"
+        v-model="state"
+        :ref="getFieldAnchorName('State')"
+        class="form__element form__element--half"
+        name="address-level1"
+        autocomplete="address-level1"
+        :label="$t('State / Province')"
+        :disabled="isFormFieldsDisabled"
+      />
 
-    <div
-      class="form__element form__element--half form__select"
-      key="stateMultiselect"
-      v-else
-    >
-      <validation-provider
-        slim
-        rules="required"
-        name="'State'"
-        ref="stateValidator"
-        v-slot="{errors}"
+      <div
+        class="form__element form__element--half form__select"
+        key="stateMultiselect"
+        v-else
       >
-        <MMultiselect
-          v-model="region_id"
-          :ref="getFieldAnchorName('State')"
-          name="address-level1"
-          autocomplete="address-level1"
-          :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
-          :label="$t('State / Province')"
-          :required="true"
-          id-field="id"
-          label-field="name"
-          :options="statesForSelectedCountry"
-          :valid="!errors.length"
-          :error-message="errors[0]"
-          :disabled="isFormFieldsDisabled"
-        />
-      </validation-provider>
-    </div>
+        <validation-provider
+          slim
+          rules="required"
+          name="'State'"
+          ref="stateValidator"
+          v-slot="{errors}"
+        >
+          <MMultiselect
+            v-model="region_id"
+            :ref="getFieldAnchorName('State')"
+            name="address-level1"
+            autocomplete="address-level1"
+            :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
+            :label="$t('State / Province')"
+            :required="true"
+            id-field="id"
+            label-field="name"
+            :options="statesForSelectedCountry"
+            :valid="!errors.length"
+            :error-message="errors[0]"
+            :disabled="isFormFieldsDisabled"
+          />
+        </validation-provider>
+      </div>
+    </template>
 
     <validation-provider
       slim
       rules="required"
       name="'City'"
+      key="city"
       v-slot="{errors}"
     >
       <SfInput
@@ -175,6 +183,7 @@
       rules="required|min:3"
       name="'Zip Code'"
       v-slot="{errors}"
+      key="zipCode"
     >
       <SfInput
         v-model="zipCode"
@@ -196,6 +205,7 @@
       :rules="phoneValidationRules"
       name="'Phone number'"
       ref="phoneValidator"
+      key="phoneNumber"
       slim
     >
       <SfInput
@@ -246,6 +256,7 @@ import { stateCodeAutocompleteOptionSearch, createPhoneHelpers } from 'src/modul
 import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 import { useAddressAutocomplete } from 'src/modules/address/composables/use-address-autocomplete';
 import { googleMapsAttributionLogo } from 'src/modules/address';
+import { isStateHidden as checkIfStateHidden } from 'src/modules/address/helpers/is-state-hidden';
 
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
 import MSuggestionsList from 'theme/components/molecules/m-suggestions-list.vue';
@@ -437,6 +448,10 @@ export default defineComponent({
       return states.hasOwnProperty(props.value.country);
     });
 
+    const isStateHidden = computed<boolean>(() => {
+      return checkIfStateHidden(country.value);
+    });
+
     const phoneValidationRules = computed<any>(() => {
       return {
         required: isPhoneNumberRequired.value,
@@ -563,6 +578,13 @@ export default defineComponent({
       region_id.value = null;
     }, { immediate: true });
 
+    watch(isStateHidden, (hidden) => {
+      if (hidden) {
+        state.value = '';
+        region_id.value = null;
+      }
+    });
+
     watch(showVatIdField, (value) => {
       if (!value) {
         vat_id.value = '';
@@ -585,6 +607,7 @@ export default defineComponent({
       selectAutocompleteSuggestion,
       isPhoneNumberRequired,
       isSelectedCountryHasStates,
+      isStateHidden,
       phoneValidationRules,
       city,
       country,
