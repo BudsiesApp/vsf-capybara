@@ -113,47 +113,49 @@
       key="apartment"
     />
 
-    <SfInput
-      v-if="!isSelectedCountryHasStates"
-      key="state"
-      v-model="state"
-      :ref="getFieldAnchorName('State')"
-      class="form__element form__element--half"
-      name="address-level1"
-      autocomplete="address-level1"
-      :label="$t('State / Province')"
-      :disabled="isFormFieldsDisabled"
-    />
+    <template v-if="!isStateHidden">
+      <SfInput
+        v-if="!isSelectedCountryHasStates"
+        key="state"
+        v-model="state"
+        :ref="getFieldAnchorName('State')"
+        class="form__element form__element--half"
+        name="address-level1"
+        autocomplete="address-level1"
+        :label="$t('State / Province')"
+        :disabled="isFormFieldsDisabled"
+      />
 
-    <div
-      class="form__element form__element--half form__select"
-      key="stateMultiselect"
-      v-else-if="!isStateHidden"
-    >
-      <validation-provider
-        slim
-        rules="required"
-        name="'State'"
-        ref="stateValidator"
-        v-slot="{errors}"
+      <div
+        class="form__element form__element--half form__select"
+        key="stateMultiselect"
+        v-else
       >
-        <MMultiselect
-          v-model="region_id"
-          :ref="getFieldAnchorName('State')"
-          name="address-level1"
-          autocomplete="address-level1"
-          :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
-          :label="$t('State / Province')"
-          :required="true"
-          id-field="id"
-          label-field="name"
-          :options="statesForSelectedCountry"
-          :valid="!errors.length"
-          :error-message="errors[0]"
-          :disabled="isFormFieldsDisabled"
-        />
-      </validation-provider>
-    </div>
+        <validation-provider
+          slim
+          rules="required"
+          name="'State'"
+          ref="stateValidator"
+          v-slot="{errors}"
+        >
+          <MMultiselect
+            v-model="region_id"
+            :ref="getFieldAnchorName('State')"
+            name="address-level1"
+            autocomplete="address-level1"
+            :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
+            :label="$t('State / Province')"
+            :required="true"
+            id-field="id"
+            label-field="name"
+            :options="statesForSelectedCountry"
+            :valid="!errors.length"
+            :error-message="errors[0]"
+            :disabled="isFormFieldsDisabled"
+          />
+        </validation-provider>
+      </div>
+    </template>
 
     <validation-provider
       slim
@@ -447,7 +449,7 @@ export default defineComponent({
     });
 
     const isStateHidden = computed<boolean>(() => {
-      return isSelectedCountryHasStates.value && checkIfStateHidden(country.value);
+      return checkIfStateHidden(country.value);
     });
 
     const phoneValidationRules = computed<any>(() => {
