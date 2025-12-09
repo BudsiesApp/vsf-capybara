@@ -123,11 +123,11 @@
     <div
       class="form__element form__element--half form__select"
       key="stateMultiselect"
-      v-else
+      v-else-if="!isStateHidden"
     >
       <validation-provider
         slim
-        :rules="stateValidationRules"
+        rules="required"
         name="'State'"
         ref="stateValidator"
         v-slot="{errors}"
@@ -139,7 +139,7 @@
           autocomplete="address-level1"
           :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
           :label="$t('State / Province')"
-          :required="isStateRequired"
+          :required="true"
           id-field="id"
           label-field="name"
           :options="statesForSelectedCountry"
@@ -246,7 +246,7 @@ import { stateCodeAutocompleteOptionSearch, createPhoneHelpers } from 'src/modul
 import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 import { useAddressAutocomplete } from 'src/modules/address/composables/use-address-autocomplete';
 import { googleMapsAttributionLogo } from 'src/modules/address';
-import { isStateOptional } from 'src/modules/address/helpers/is-state-optional';
+import { isStateHidden as checkIfStateHidden } from 'src/modules/address/helpers/is-state-hidden';
 
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
 import MSuggestionsList from 'theme/components/molecules/m-suggestions-list.vue';
@@ -438,8 +438,12 @@ export default defineComponent({
       return states.hasOwnProperty(props.value.country);
     });
 
+    const isStateHidden = computed<boolean>(() => {
+      return isSelectedCountryHasStates.value && checkIfStateHidden(country.value);
+    });
+
     const isStateRequired = computed<boolean>(() => {
-      return isSelectedCountryHasStates.value && !isStateOptional(country.value);
+      return isSelectedCountryHasStates.value && !isStateHidden.value;
     });
 
     const stateValidationRules = computed<any>(() => {
@@ -572,6 +576,13 @@ export default defineComponent({
       region_id.value = null;
     }, { immediate: true });
 
+    watch(isStateHidden, (hidden) => {
+      if (hidden) {
+        state.value = '';
+        region_id.value = null;
+      }
+    });
+
     watch(showVatIdField, (value) => {
       if (!value) {
         vat_id.value = '';
@@ -594,6 +605,7 @@ export default defineComponent({
       selectAutocompleteSuggestion,
       isPhoneNumberRequired,
       isSelectedCountryHasStates,
+      isStateHidden,
       isStateRequired,
       stateValidationRules,
       phoneValidationRules,
