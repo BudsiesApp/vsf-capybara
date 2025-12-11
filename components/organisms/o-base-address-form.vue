@@ -283,6 +283,9 @@ extend('phone', {
   message: 'Please, enter valid phone number'
 });
 
+const SINGAPORE_COUNTRY_CODE = 'SG';
+const SINGAPORE_CITY_NAME = 'Singapore';
+
 export default defineComponent({
   name: 'OBaseAddressForm',
   props: {
@@ -594,6 +597,18 @@ export default defineComponent({
     watch(zipCode, () => {
       fZipCodeChanged.value = true;
     }, { immediate: true });
+
+    watch(
+      country,
+      (value) => {
+        if (value.toLowerCase() !== SINGAPORE_COUNTRY_CODE.toLowerCase()) {
+          return;
+        }
+
+        city.value = SINGAPORE_CITY_NAME;
+      },
+      { immediate: true }
+    );
 
     return {
       states,
