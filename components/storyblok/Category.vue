@@ -1,90 +1,87 @@
 <template>
-  <div class="storyblok-category layout-regular-component" v-if="products.length">
-    <div v-for="product in productsList" :key="product.sku" class="col-xs-12" :class="[colSizeLg]">
-      <product :product="product" />
-    </div>
+  <div
+    class="storyblok-category layout-regular-component"
+    :class="cssClasses"
+    v-if="products.length"
+  >
+    <editor-block-icons :item="itemData" />
+
+    <product-grid-renderer
+      :products="products"
+      :columns-count="columnsCount"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { Blok } from 'src/modules/vsf-storyblok-module/components'
-import { CategoryService } from '@vue-storefront/core/data-resolver/CategoryService'
 import { SearchQuery } from 'storefront-query-builder'
-import ProductModel from 'core/modules/catalog/types/Product';
-import { Category } from 'core/modules/catalog-next/types/Category'
+import Product from 'core/modules/catalog/types/Product';
+import { ColumnsCountField } from 'src/modules/vsf-storyblok-module';
 
-import Product from './Product.vue'
 import CategoryData from './interfaces/category-data.interface';
+
+import ProductGridRenderer from './ProductGridRenderer.vue'
 
 export default Blok.extend({
   name: 'StoryblokCategoryBlock',
   components: {
-    Product
-  },
-  data: function () {
-    return {
-      products: [] as ProductModel[],
-      category: undefined as Category | undefined
-    }
+    ProductGridRenderer
   },
   computed: {
     itemData (): CategoryData {
       return this.item as CategoryData;
     },
-    productsList (): ProductModel[] {
-      if (!this.products) {
-        return []
-      }
-
-      return this.products
+    products (): Product[] {
+      return this.$store.getters['product/getProductByCategoryIdDictionary'][this.itemData.id] || [];
     },
-    colSizeLg (): string {
-      return 'col-lg-' + Math.floor(12 / parseInt(this.itemData.products_count))
+    columnsCount (): ColumnsCountField {
+      return this.itemData.columns_count;
     }
   },
-  async created (): Promise<void> {
-    if (!this.category) {
-      await this.loadCategory()
-    }
-
-    if (this.products.length) {
-      return
-    }
-
-    await this.loadProducts()
+  async beforeMount (): Promise<void> {
+    await this.loadCategoryProducts();
+  },
+  async serverPrefetch (): Promise<void> {
+    await (this as any).loadCategoryProducts();
   },
   methods: {
-    async loadCategory (): Promise<void> {
-      let categories = await CategoryService.getCategories({
-        filters: {
-          id: this.itemData.id
-        }
-      })
+    async loadCategoryProducts (): Promise<void> {
+      const products = this.$store.getters['product/getProductByCategoryIdDictionary'];
+      const loadedProducts = products[this.itemData.id]?.length || 0;
 
-      this.category = categories.shift()
-    },
-    async loadProducts (): Promise<void> {
-      let searchQuery = new SearchQuery()
-      searchQuery = searchQuery.applyFilter({ key: 'category_ids', value: { 'in': [this.category.id] } })
+      if (loadedProducts >= this.itemData.products_count) {
+        return;
+      }
 
-      let { items } = await this.$store.dispatch('product/findProducts', {
+      let searchQuery = new SearchQuery();
+
+      searchQuery = searchQuery.applyFilter({
+        key: 'category_ids',
+        value: { 'in': [this.itemData.id] }
+      });
+
+      await this.$store.dispatch('product/findProducts', {
         query: searchQuery,
-        size: +this.itemData.products_count
-      })
-
-      this.products = items
+        size: +this.itemData.products_count,
+        options: {
+          prefetchGroupProducts: false
+        }
+      });
     }
   },
   watch: {
     async item (): Promise<void> {
-      await this.loadCategory()
-      await this.loadProducts()
+      await this.loadCategoryProducts()
     }
   }
 });
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+
 .storyblok-category {
   @include display-property-handling;
 }
