@@ -56,7 +56,7 @@ const OrderItemsBulkCustomize = () =>
 const OrderItemDeliverablesDownload = () =>
   import(/* webpackChunkName: "vsf-order-item-deliverables" */ 'theme/pages/OrderItemDeliverablesDownload');
 const TaxIdRequest = () =>
-  import(/* webpackChunkName: "vsf-tax-id-request" */ 'src/modules/orders-history/components/TaxIdRequest');
+  import(/* webpackChunkName: "vsf-tax-id-request" */ 'theme/pages/TaxIdRequest');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
