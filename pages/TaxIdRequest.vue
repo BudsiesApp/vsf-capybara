@@ -1,26 +1,27 @@
 <template>
-  <div class="tax-id-request">
-    <div v-if="error" class="_error-container">
-      <p class="_error-message">
-        {{ $t('Order not found') }}
-      </p>
+  <div id="tax-id-request">
+    <div v-if="error" class="_not-found">
+      <SfHeading :level="4" :title="$t('Order not found')" />
 
       <router-link
         :to="{ name: 'orders-history' }"
-        class="sf-button"
+        class="sf-button _order-history-link"
       >
         {{ $t('Go To Order History') }}
       </router-link>
     </div>
 
     <div v-else-if="isLoading" class="_loading">
-      {{ $t('Loading...') }}
+      <div class="_heading-placeholder _placeholder" />
+
+      <div class="_form-placeholder _placeholder" />
     </div>
 
     <div v-else class="_form-container">
       <SfHeading
         :title="$t('Tax ID Required for Order #{orderNumber}', { orderNumber })"
-        class="_heading"
+        :level="1"
+        class="_title"
       />
 
       <p class="_subtitle">
@@ -66,10 +67,6 @@
               {{ isSubmitting ? $t('Submitting...') : $t('Submit Tax ID') }}
             </SfButton>
           </div>
-
-          <div v-if="submitError" class="_submit-error">
-            {{ submitError }}
-          </div>
         </form>
       </validation-observer>
     </div>
@@ -77,7 +74,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted, onBeforeMount } from '@vue/composition-api';
+import { defineComponent, ref, computed, onBeforeMount } from '@vue/composition-api';
 import { extend, ValidationProvider, ValidationObserver } from 'vee-validate';
 import { required, max } from 'vee-validate/dist/rules';
 import { SfButton, SfCheckbox, SfHeading, SfInput } from '@storefront-ui/vue';
@@ -120,7 +117,6 @@ export default defineComponent({
     const isLoading = ref(true);
     const isSubmitting = ref(false);
     const error = ref(false);
-    const submitError = ref('');
     const order = ref<Order | null>(null);
 
     const orderNumber = computed(() => {
@@ -172,15 +168,13 @@ export default defineComponent({
         default_shipping: true,
         default_billing: defaultShippingAddress.value.default_billing,
         customer_id: defaultShippingAddress.value.customer_id,
-        vat_id: defaultShippingAddress.value.vat_id,
-        tax_id: taxIdValue.value
+        vat_id: taxIdValue.value
       };
 
       await root.$store.dispatch('budsies/updateAddress', { address: addressToUpdate });
     }
 
     async function onSubmit () {
-      submitError.value = '';
       isSubmitting.value = true;
 
       try {
@@ -204,7 +198,6 @@ export default defineComponent({
         root.$router.push({ name: 'orders-history' });
       } catch (e) {
         const errorMessage = (e as Error).message || String(i18n.t('Failed to submit Tax ID'));
-        submitError.value = errorMessage;
 
         root.$store.dispatch('notification/spawnNotification', {
           type: 'danger',
@@ -226,79 +219,104 @@ export default defineComponent({
       isLoading,
       isSubmitting,
       error,
-      submitError,
       orderNumber,
       hasDefaultShippingAddress,
       onSubmit
+    };
+  },
+  metaInfo (): any {
+    return {
+      title: this.$t('Tax Id Request')
     };
   }
 });
 </script>
 
 <style lang="scss" scoped>
-.tax-id-request {
-  max-width: 1272px;
-  width: 100%;
-  margin: 0 auto;
-  padding: var(--spacer-xl);
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "theme/css/mixins/form-placeholder-item.scss";
+
+#tax-id-request {
   box-sizing: border-box;
 
-  ._error-container {
-    text-align: center;
-    padding: var(--spacer-xl);
+  ._title {
+    --heading-padding: 0;
 
-    ._error-message {
-      font-size: var(--font-size--lg);
-      margin-bottom: var(--spacer-lg);
-      color: var(--c-danger);
+    margin-top: var(--spacer-lg);
+    padding: 0 var(--spacer-sm);
+  }
+
+  ._not-found {
+    margin-top: var(--spacer-xl);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  ._order-history-link {
+    margin-top: var(--spacer-base);
+
+    &:hover {
+      color: var(--c-white);
     }
   }
 
-  ._loading {
-    text-align: center;
-    padding: var(--spacer-xl);
-    font-size: var(--font-size--lg);
+  ._placeholder {
+    @include form-placeholder-item;
+  }
+
+  ._heading-placeholder,
+  ._form-placeholder {
+    margin: var(--spacer-lg) auto 0;
+  }
+
+  ._heading-placeholder {
+    max-width: 46rem;
+    height: 5rem;
+  }
+
+  ._form-placeholder {
+    height: 12rem;
+    max-width: 32rem;
   }
 
   ._form-container {
-    ._heading {
-      font-size: var(--font-size--xl);
-      font-weight: var(--font-weight--bold);
-      margin-bottom: var(--spacer-md);
-      color: var(--c-text);
-    }
+    padding: 0 var(--spacer-sm);
 
     ._subtitle {
+      text-align: center;
       font-size: var(--font-size--base);
-      line-height: 1.6;
       margin-bottom: var(--spacer-xl);
       color: var(--c-text-muted);
-      text-align: center;
     }
 
     ._form {
       max-width: 32rem;
       margin: 0 auto;
+    }
+  }
 
-      ._button-container {
-        margin-top: var(--spacer-base);
-      }
+  ._button-container {
+    margin-top: var(--spacer-base);
+  }
 
-      ._submit-button {
-        width: 100%;
-      }
+  ._submit-button {
+    width: 100%;
+  }
 
-      ._submit-error {
-        margin-top: var(--spacer-md);
-        color: var(--c-danger);
-        font-size: var(--font-size--sm);
-      }
+  @media (min-width: $tablet-min) {
+    max-width: 1272px;
+    width: 100%;
+    margin: 0 auto;
 
-      ._submit-success {
-        margin-top: var(--spacer-md);
-        color: var(--c-success);
-        font-size: var(--font-size--sm);
-      }
+    ._button-container {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    ._submit-button {
+      width: auto;
     }
   }
 }
