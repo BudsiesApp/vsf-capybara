@@ -124,9 +124,7 @@ export default defineComponent({
     });
 
     const defaultShippingAddress = computed(() => {
-      const user = root.$store.state.user?.current;
-      const addresses = user?.addresses || [];
-      return addresses.find((address: any) => !!address.default_shipping);
+      return root.$store.getters['user/defaultShippingAddress'];
     });
 
     const hasDefaultShippingAddress = computed(() => {
@@ -156,18 +154,7 @@ export default defineComponent({
       }
 
       const addressToUpdate = {
-        id: defaultShippingAddress.value.id,
-        firstname: defaultShippingAddress.value.firstname,
-        lastname: defaultShippingAddress.value.lastname,
-        street: defaultShippingAddress.value.street,
-        city: defaultShippingAddress.value.city,
-        region: defaultShippingAddress.value.region,
-        postcode: defaultShippingAddress.value.postcode,
-        country_id: defaultShippingAddress.value.country_id,
-        telephone: defaultShippingAddress.value.telephone,
-        default_shipping: true,
-        default_billing: defaultShippingAddress.value.default_billing,
-        customer_id: defaultShippingAddress.value.customer_id,
+        ...defaultShippingAddress.value,
         vat_id: taxIdValue.value
       };
 
