@@ -62,7 +62,7 @@
         :options="countries"
         :valid="!errors.length"
         :error-message="errors[0]"
-        :disabled="isFormFieldsDisabled"
+        :disabled="isFormFieldsDisabled || isCountryFieldDisabled"
         @change="onChangeCountry"
       />
     </validation-provider>
@@ -123,7 +123,7 @@
         name="address-level1"
         autocomplete="address-level1"
         :label="$t('State / Province')"
-        :disabled="isFormFieldsDisabled"
+        :disabled="isFormFieldsDisabled || isStateFieldDisabled"
       />
 
       <div
@@ -151,7 +151,7 @@
             :options="statesForSelectedCountry"
             :valid="!errors.length"
             :error-message="errors[0]"
-            :disabled="isFormFieldsDisabled"
+            :disabled="isFormFieldsDisabled || isStateFieldDisabled"
           />
         </validation-provider>
       </div>
@@ -299,6 +299,14 @@ export default defineComponent({
       required: true
     },
     isPhoneRequired: {
+      type: Boolean,
+      default: false
+    },
+    isCountryFieldDisabled: {
+      type: Boolean,
+      default: false
+    },
+    isStateFieldDisabled: {
       type: Boolean,
       default: false
     }
@@ -522,6 +530,10 @@ export default defineComponent({
     };
 
     const onChangeCountry = async (): Promise<void> => {
+      if (props.isCountryFieldDisabled) {
+        return;
+      }
+
       await nextTick();
       validateCountryRelatedFields();
 
