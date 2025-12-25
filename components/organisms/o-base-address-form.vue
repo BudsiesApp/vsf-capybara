@@ -256,7 +256,7 @@ import { stateCodeAutocompleteOptionSearch, createPhoneHelpers } from 'src/modul
 import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 import { useAddressAutocomplete } from 'src/modules/address/composables/use-address-autocomplete';
 import { googleMapsAttributionLogo } from 'src/modules/address';
-import { isStateHidden as checkIfStateHidden } from 'src/modules/address/helpers/is-state-hidden';
+import { isStateNonPostal } from 'src/modules/address/helpers/is-state-non-postal';
 
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
 import MSuggestionsList from 'theme/components/molecules/m-suggestions-list.vue';
@@ -282,6 +282,9 @@ extend('phone', {
   },
   message: 'Please, enter valid phone number'
 });
+
+const SINGAPORE_COUNTRY_CODE = 'SG';
+const SINGAPORE_CITY_NAME = 'Singapore';
 
 export default defineComponent({
   name: 'OBaseAddressForm',
@@ -449,7 +452,7 @@ export default defineComponent({
     });
 
     const isStateHidden = computed<boolean>(() => {
-      return checkIfStateHidden(country.value);
+      return isStateNonPostal(country.value);
     });
 
     const phoneValidationRules = computed<any>(() => {
@@ -594,6 +597,18 @@ export default defineComponent({
     watch(zipCode, () => {
       fZipCodeChanged.value = true;
     }, { immediate: true });
+
+    watch(
+      country,
+      (value) => {
+        if (value.toLowerCase() !== SINGAPORE_COUNTRY_CODE.toLowerCase()) {
+          return;
+        }
+
+        city.value = SINGAPORE_CITY_NAME;
+      },
+      { immediate: true }
+    );
 
     return {
       states,
