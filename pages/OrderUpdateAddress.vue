@@ -66,7 +66,7 @@ import isAddressesEquals from '@vue-storefront/core/modules/checkout/helpers/is-
 import i18n from '@vue-storefront/i18n';
 
 import { useAddressValidation } from 'src/modules/address';
-import { useOrderHistoryOrder } from 'src/modules/orders-history';
+import { useOrderHistoryOrder, SUBMIT_ORDER_ADDRESS_UPDATE_REQUEST_ACTION } from 'src/modules/orders-history';
 import { OrderAddress } from 'src/modules/orders-history/types/order-address';
 
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
@@ -153,7 +153,7 @@ export default defineComponent({
 
     function mapBaseAddressDetailsToOrderAddress (address: BaseAddressDetails): OrderAddress {
       return {
-        ...order.value.shippingAddress,
+        ...((order as any).value as Order).shipping_address,
         firstname: address.firstName,
         lastname: address.lastName,
         country_id: address.country,
@@ -220,7 +220,12 @@ export default defineComponent({
     }
 
     async function submitOrderAddressUpdateRequest (): Promise<void> {
+      const orderAddressPayload = mapBaseAddressDetailsToOrderAddress((addressFormModel as any).value);
 
+      await root.$store.dispatch(SUBMIT_ORDER_ADDRESS_UPDATE_REQUEST_ACTION, {
+        orderId: props.orderId,
+        address: orderAddressPayload
+      });
     }
 
     async function updateDefaultShippingAddress (): Promise<void> {
