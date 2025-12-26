@@ -61,8 +61,9 @@ import { defineComponent, ref, computed, watch } from '@vue/composition-api';
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfCheckbox, SfHeading } from '@storefront-ui/vue';
 
-import i18n from '@vue-storefront/i18n';
 import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
+import isAddressesEquals from '@vue-storefront/core/modules/checkout/helpers/is-addresses-equals.function';
+import i18n from '@vue-storefront/i18n';
 
 import { useAddressValidation } from 'src/modules/address';
 import { useOrderHistoryOrder } from 'src/modules/orders-history';
@@ -134,33 +135,81 @@ export default defineComponent({
       return root.$store.getters['user/defaultShippingAddress'];
     });
 
-    const shouldShowDefaultAddressCheckbox = computed<boolean>(() => {
-      if (!defaultShippingAddress.value) {
-        return false;
-      }
-    });
-
     function mapOrderAddressToFormModel (orderAddress: OrderAddress): BaseAddressDetails {
       return {
         firstName: orderAddress.firstname,
         lastName: orderAddress.lastname,
         country: orderAddress.country_id,
-        streetAddress: orderAddress.street[0] || '',
-        apartmentNumber: orderAddress.street[1] || '',
+        streetAddress: orderAddress.street.join(', '),
+        apartmentNumber: '',
         city: orderAddress.city,
         state: orderAddress.region || '',
-        region_id: orderAddress.region_id,
+        region_id: orderAddress.region_id || null,
         zipCode: orderAddress.postcode,
         phoneNumber: orderAddress.telephone || '',
         vat_id: orderAddress.vat_id || ''
       };
     }
 
-    watch(order, (newOrder: Order) => {
-      if (newOrder?.shipping_address) {
-        ((addressFormModel as any).value as BaseAddressDetails) = mapOrderAddressToFormModel(newOrder.shipping_address);
+    function mapBaseAddressDetailsToOrderAddress (address: BaseAddressDetails): OrderAddress {
+      return {
+        ...order.value.shippingAddress,
+        firstname: address.firstName,
+        lastname: address.lastName,
+        country_id: address.country,
+        street: [address.streetAddress, address.apartmentNumber],
+        city: address.city,
+        region: address.state || '',
+        region_id: address.region_id || null,
+        postcode: address.zipCode,
+        telephone: address.phoneNumber || '',
+        vat_id: address.vat_id || ''
+      }
+    }
+
+    function mapUserAddressToFormModel (address: any): BaseAddressDetails {
+      return {
+        firstName: address.firstname,
+        lastName: address.lastname,
+        streetAddress: address.street.join(', '),
+        apartmentNumber: '',
+        zipCode: address.postcode,
+        city: address.city,
+        state: address.region.region || '',
+        region_id: address.region.region_id || null,
+        country: address.country_id,
+        phoneNumber: address.telephone || '',
+        vat_id: address.vat_id || ''
+      }
+    }
+
+    const shouldShowDefaultAddressCheckbox = computed<boolean>(() => {
+      if (!defaultShippingAddress.value || !(order as any).value.shipping_address) {
+        return false;
+      }
+
+      const mappedOrderAddress = mapOrderAddressToFormModel((order as any).value.shipping_address);
+      const mappedUserDefaultAddress = mapUserAddressToFormModel(defaultShippingAddress.value);
+
+      try {
+        return isAddressesEquals(
+          mappedOrderAddress,
+          mappedUserDefaultAddress
+        );
+      } catch (e) {
+        return false;
       }
     });
+
+    watch(
+      order,
+      (newOrder: Order) => {
+        if (newOrder?.shipping_address) {
+          ((addressFormModel as any).value as BaseAddressDetails) = mapOrderAddressToFormModel(newOrder.shipping_address);
+        }
+      },
+      { immediate: true }
+    );
 
     function onFailure (message: string): void {
       root.$store.dispatch('notification/spawnNotification', {
@@ -171,6 +220,7 @@ export default defineComponent({
     }
 
     async function submitOrderAddressUpdateRequest (): Promise<void> {
+
     }
 
     async function updateDefaultShippingAddress (): Promise<void> {
