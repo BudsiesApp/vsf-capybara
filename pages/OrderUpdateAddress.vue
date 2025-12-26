@@ -70,6 +70,7 @@ import { OrderAddress } from 'src/modules/orders-history/types/order-address';
 
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 import OBaseAddressForm from 'theme/components/organisms/o-base-address-form.vue';
+import { Order } from 'src/modules/orders-history/types/order';
 
 export default defineComponent({
   name: 'OrderUpdateAddress',
@@ -134,8 +135,9 @@ export default defineComponent({
     });
 
     const shouldShowDefaultAddressCheckbox = computed<boolean>(() => {
-      // TODO
-      return false;
+      if (!defaultShippingAddress.value) {
+        return false;
+      }
     });
 
     function mapOrderAddressToFormModel (orderAddress: OrderAddress): BaseAddressDetails {
@@ -154,9 +156,9 @@ export default defineComponent({
       };
     }
 
-    watch(order, (newOrder) => {
-      if (newOrder?.order_address) {
-        addressFormModel.value = mapOrderAddressToFormModel(newOrder.order_address);
+    watch(order, (newOrder: Order) => {
+      if (newOrder?.shipping_address) {
+        ((addressFormModel as any).value as BaseAddressDetails) = mapOrderAddressToFormModel(newOrder.shipping_address);
       }
     });
 
@@ -178,20 +180,22 @@ export default defineComponent({
         return;
       }
 
+      const _addressFormModel = (addressFormModel as any).value as BaseAddressDetails;
+
       const addressToUpdate = {
         id: defaultAddress.id,
-        firstname: addressFormModel.value.firstName,
-        lastname: addressFormModel.value.lastName,
-        street: [addressFormModel.value.streetAddress, addressFormModel.value.apartmentNumber || ''],
-        city: addressFormModel.value.city,
-        region: { region: addressFormModel.value.state, region_id: addressFormModel.value.region_id },
-        postcode: addressFormModel.value.zipCode,
-        country_id: addressFormModel.value.country,
-        telephone: addressFormModel.value.phoneNumber,
+        firstname: _addressFormModel.firstName,
+        lastname: _addressFormModel.lastName,
+        street: [_addressFormModel.streetAddress, _addressFormModel.apartmentNumber || ''],
+        city: _addressFormModel.city,
+        region: { region: _addressFormModel.state, region_id: _addressFormModel.region_id },
+        postcode: _addressFormModel.zipCode,
+        country_id: _addressFormModel.country,
+        telephone: _addressFormModel.phoneNumber,
         default_shipping: defaultAddress.default_shipping,
         default_billing: defaultAddress.default_billing,
         customer_id: defaultAddress.customer_id,
-        vat_id: addressFormModel.value.vat_id
+        vat_id: _addressFormModel.vat_id
       };
 
       await root.$store.dispatch('budsies/updateAddress', { address: addressToUpdate });

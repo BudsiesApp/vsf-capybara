@@ -117,10 +117,10 @@ export default defineComponent({
     const shouldSaveToDefaultAddress = ref(false);
     const isSubmitting = ref(false);
 
-    const { order, isLoading, isError: error, loadOrder } = useOrderHistoryOrder(context, props.orderId);
+    const { order, isLoading, isError: error } = useOrderHistoryOrder(context, props.orderId);
 
     const orderNumber = computed(() => {
-      return order.value?.increment_id || '';
+      return ((order as any).value as (Order | null))?.increment_id || '';
     });
 
     const defaultShippingAddress = computed(() => {
