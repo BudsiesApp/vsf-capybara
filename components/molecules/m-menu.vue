@@ -421,18 +421,21 @@ export default Vue.extend({
     }
 
     .sf-mega-menu__menu {
-      flex-wrap: wrap;
-      flex: 0 1 auto;
+      flex: 4;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
     }
 
     .sf-mega-menu__aside {
-       --mega-menu-section-flex: 1 0 25%;
+       --mega-menu-section-flex: 1;
        --mega-menu-aside-content-padding: var(--spacer-xl) var(--spacer-xl) 0 0;
     }
 
     .sf-mega-menu-column {
-      --mega-menu-margin: var(--spacer-xl) var(--spacer-2xl) 0 0;
+      --mega-menu-margin: var(--spacer-xl) var(--spacer-xl) 0 0;
       --list-item-margin: var(--spacer-base) 0 0 0;
+
+      white-space: nowrap;
     }
 
     ._menu-item {
@@ -445,6 +448,12 @@ export default Vue.extend({
           display: block;
         }
       }
+    }
+  }
+
+  @media (min-width: 1256px) {
+    .sf-mega-menu__menu {
+      grid-template-columns: 1fr 1fr 1fr 1fr;
     }
   }
 
