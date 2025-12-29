@@ -18,7 +18,7 @@ function getYouTubeImageSrc (videoId: string, quality: YoutubeImageQuality): str
 
 export function getZoomGalleryAssetForVideoData (videoData: VideoData): ZoomGalleryAsset {
   if (!supportedProviders.includes(videoData.url.provider)) {
-    throw new Error(`Provider ${!supportedProviders.includes(videoData.url.provider)} is unsupported`);
+    throw new Error(`Provider ${videoData.url.provider} is unsupported`);
   }
 
   const videoId = videoData.url.video_id;
