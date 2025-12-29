@@ -25,18 +25,18 @@ const fedexAvailableAddress: AddressData = {
 
 const USPS_SHIPPING_COUNTRY_CODE = 'US';
 const USPS_SHIPPING_COUNTRY_LABEL = 'United States';
-const USPS_SHIPPING_STATE_LABEL = 'California';
+const USPS_SHIPPING_STATE_LABEL = 'Georgia';
 const USPS_LABEL = 'USPS Priority';
 const uspsAvailableAddress: AddressData = {
   firstName: FIRST_NAME,
   lastName: LAST_NAME,
-  address: 'Street name, 128, 2',
+  address: '15 Bridge Creek Rd',
   country: USPS_SHIPPING_COUNTRY_LABEL,
   countryId: USPS_SHIPPING_COUNTRY_CODE,
   state: USPS_SHIPPING_STATE_LABEL,
-  regionId: 12,
-  city: 'Test city',
-  zipCode: '12345',
+  regionId: 19,
+  city: 'Tiger',
+  zipCode: '30576',
   phoneNumber: '+17472920712'
 };
 
@@ -83,6 +83,7 @@ test('shipping address form has correct validation', async ({ cartPage, checkout
 
   await expect(shippingStepAddressForm.stateSelectorFormField.formField).toBeVisible();
   await expect(shippingStepAddressForm.stateInputFormField.formField).toBeHidden();
+  await checkoutPage.shippingStep.continueToPaymentButton.click();
 
   await shippingStepAddressForm.expectCorrectValidation();
 });
@@ -99,6 +100,7 @@ test('billing address form has correct validation', async ({ cartPage, checkoutP
   await checkoutPage.fillShippingAddress();
 
   await checkoutPage.billingStep.useShippingAddressCheckbox.click();
+  await checkoutPage.billingStep.goToReviewButton.click();
   await checkoutPage.billingStep.addressForm.expectCorrectValidation();
 });
 
@@ -164,7 +166,8 @@ test('shipping step is visible if cart contains virtual gift card and other prod
   await checkoutPage.expectStepToBeVisible(checkoutPage.stepsName.shipping);
 });
 
-test('shipping step is visible if cart contains only gift card with "Send physical" option enabled', async ({ giftCardProductPage, checkoutPage }) => {
+// Currently "Send physical" option is disabled
+test.skip('shipping step is visible if cart contains only gift card with "Send physical" option enabled', async ({ giftCardProductPage, checkoutPage }) => {
   await giftCardProductPage.goto();
   await giftCardProductPage.fillFormData(undefined, undefined, undefined, true);
   await giftCardProductPage.addToCartButton.click();

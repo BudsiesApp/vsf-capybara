@@ -33,6 +33,7 @@ import { FeraModule } from 'src/modules/fera';
 
 import registerStoryblokComponents from 'theme/components/storyblok'
 import { KlaviyoModule, ModuleConfig } from 'src/modules/klaviyo'
+import { AmazonPay } from 'src/modules/vsf-amazon-pay'
 
 const extendUrlVuex = {
   actions: {
@@ -86,6 +87,7 @@ export function registerClientModules () {
   registerModule(OrdersHistoryModule)
   registerModule(CurrencyModule)
   registerModule(FeraModule)
+  registerModule(AmazonPay)
 
   const klaviyoModuleConfig: ModuleConfig = {
     updateEmailMutation: SET_PERSISTED_CUSTOMER_EMAIL,

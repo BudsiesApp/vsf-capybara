@@ -25,7 +25,8 @@
         {{ $t('Go to checkout') }}
       </SfButton>
     </div>
-    <SfLoader v-if="isUpdatingQuantity" :loading="isUpdatingQuantity" />
+
+    <SfLoader v-if="isCartSyncing" :loading="isCartSyncing" />
   </div>
 </template>
 <script>
@@ -35,14 +36,15 @@ import {
   SfButton
 } from '@storefront-ui/vue';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 
 import { registerModule } from '@vue-storefront/core/lib/modules'
 import { Braintree } from 'src/modules/payment-braintree';
+import { IS_CART_SYNCING } from '@vue-storefront/core/modules/cart';
 
 import APromoCode from 'theme/components/atoms/a-promo-code.vue';
 import MPriceSummary from 'theme/components/molecules/m-price-summary.vue';
-import ExpressCheckoutButtons from 'src/modules/payment-braintree/components/express-checkout-buttons.vue';
+import ExpressCheckoutButtons from 'theme/components/checkout/express-checkout-buttons.vue';
 
 export default {
   name: 'OrderSummary',
@@ -54,14 +56,13 @@ export default {
     SfHeading,
     SfButton
   },
-  props: {
-    isUpdatingQuantity: {
-      type: Boolean,
-      required: true
-    }
-  },
   beforeMount () {
     registerModule(Braintree)
+  },
+  computed: {
+    ...mapGetters({
+      isCartSyncing: IS_CART_SYNCING
+    })
   },
   methods: {
     ...mapActions('ui', {

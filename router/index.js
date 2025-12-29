@@ -53,6 +53,8 @@ const OrderItemCustomize = () =>
   import(/* webpackChunkName: "vsf-order-item-customize" */ 'theme/pages/OrderItemCustomize');
 const OrderItemsBulkCustomize = () =>
   import(/* webpackChunkName: "vsf-order-items-bulk-customize" */ 'theme/pages/OrderItemsBulkCustomize');
+const OrderItemDeliverablesDownload = () =>
+  import(/* webpackChunkName: "vsf-order-item-deliverables" */ 'theme/pages/OrderItemDeliverablesDownload');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -750,12 +752,58 @@ let routes = [
     }
   },
   {
+    name: 'golf-head-covers-customize',
+    path: '/golf-head-covers/customize/',
+    component: OrderItemCustomize,
+    props: (route) => ({
+      orderItemId: route.query.orderItemId,
+      layout: LayoutType.CREATION_WIZARD,
+      sku: route.query.sku,
+      plushieType: PlushieType.GOLF_COVERS
+    }),
+    meta: {
+      auth: true
+    }
+  },
+  {
+    name: 'printed-product-customize',
+    path: '/printed-product/customize/',
+    component: OrderItemCustomize,
+    props: (route) => ({
+      orderItemId: route.query.orderItemId,
+      layout: LayoutType.WITH_IMAGES_GALLERY,
+      sku: route.query.sku
+    }),
+    meta: {
+      auth: true
+    }
+  },
+  {
     path: '/order-items/bulk-customize/',
     name: 'order-items-bulk-customize',
     component: OrderItemsBulkCustomize,
     props: (route) => ({
       orderItemIds: route.query.orderItemIds
     }),
+    meta: {
+      auth: true
+    }
+  },
+  {
+    path: '/order-items/deliverables/download/',
+    name: 'order-item-deliverables-download',
+    component: OrderItemDeliverablesDownload,
+    props: (route) => {
+      let orderItemId = Number(route.query['order_item_id']);
+
+      if (Number.isNaN(orderItemId)) {
+        orderItemId = undefined;
+      }
+
+      return {
+        orderItemId
+      }
+    },
     meta: {
       auth: true
     }

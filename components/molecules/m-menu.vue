@@ -272,13 +272,12 @@ export default Vue.extend({
           },
           thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.Figurines), 320, 320)
         },
-        {
-          label: this.$t('Face Masks'),
-          url: {
-            name: 'printed-masks-creation-page'
-          },
-          thumbnail: getThumbnailPath(productThumbnailPath(productThumbnailData.FeltedMagnets), 320, 320)
-        },
+        // {
+        //   label: this.$t('Face Masks'),
+        //   url: {
+        //     name: 'printed-masks-creation-page'
+        //   }
+        // },
         {
           label: this.$t('Pet Keychains'),
           url: {

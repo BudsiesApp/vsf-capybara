@@ -48,7 +48,7 @@
                 <template #input>
                   <SfQuantitySelector
                     :qty="product.qty"
-                    :disabled="isCartItemProcessing"
+                    :disabled="isCartSyncing"
                     :title="$t('Quantity')"
                     @input="changeProductQuantity(product, $event)"
                     v-if="showQuantitySelectorForProduct(product)"
@@ -67,7 +67,7 @@
                   <SfButton
                     v-if="showEditButton(product.sku)"
                     class="sf-button--text actions__button"
-                    :disabled="isCartItemProcessing"
+                    :disabled="isCartSyncing"
                     @click="editHandler(product)"
                   >
                     Edit
@@ -75,7 +75,7 @@
 
                   <SfButton
                     class="sf-button--text sf-collected-product__remove sf-collected-product__remove--text actions__button"
-                    :disabled="isCartItemProcessing"
+                    :disabled="isCartSyncing"
                     @click="removeHandler(product)"
                   >
                     Remove
@@ -148,7 +148,7 @@
       </div>
 
       <div v-if="totalItems" class="detailed-cart__aside">
-        <OrderSummary :is-updating-quantity="isCartItemProcessing" />
+        <OrderSummary />
 
         <div class="_shipping-handling-block">
           <MBlockStory story-slug="cart_shipping_handling" />
@@ -173,7 +173,7 @@ import { mapGetters, mapState } from 'vuex';
 import { PriceHelper } from 'src/modules/shared';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
-import { CART_ITEM_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/cart';
+import { CART_ITEM_LOCALIZED_PRICE_DICTIONARY, IS_CART_SYNCING } from '@vue-storefront/core/modules/cart';
 import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-item-key.function';
 import CartEvents from 'src/modules/shared/types/cart-events';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
@@ -269,7 +269,6 @@ export default {
   },
   data () {
     return {
-      isCartItemProcessing: false,
       isDropdownOpen: false,
       dropdownActions: [
         {
@@ -315,12 +314,12 @@ export default {
             name: 'printed-socks-creation-page'
           }
         },
-        {
-          label: 'Face Masks',
-          url: {
-            name: 'printed-masks-creation-page'
-          }
-        },
+        // {
+        //   label: 'Face Masks',
+        //   url: {
+        //     name: 'printed-masks-creation-page'
+        //   }
+        // },
         {
           label: 'Bobbleheads & Figurines',
           url: '/pet-bobblehead-figurines/'
@@ -389,7 +388,8 @@ export default {
       cartIsLoaded: (state) => state.cart.cartIsLoaded
     }),
     ...mapGetters({
-      products: 'cart/getCartItems'
+      products: 'cart/getCartItems',
+      isCartSyncing: IS_CART_SYNCING
     }),
     ...mapMobileObserver(),
     cartItemPriceDictionary () {
@@ -513,17 +513,11 @@ export default {
       return PriceHelper.formatProductPrice(price, this.selectedCurrency.symbol);
     },
     async removeHandler (product) {
-      if (this.isCartItemProcessing) {
+      if (this.isCartSyncing) {
         return;
       }
 
-      this.isCartItemProcessing = true;
-
-      try {
-        await this.$store.dispatch('cart/removeItem', { product: product });
-      } finally {
-        this.isCartItemProcessing = false;
-      }
+      await this.$store.dispatch('cart/removeItem', { product: product });
     },
     getThumbnailForProductExtend (product) {
       const customizationSystemThumbnail =
@@ -558,19 +552,13 @@ export default {
       return getProductMaxSaleQuantity(product) > 1;
     },
     syncQuantity () {
-      if (this.isCartItemProcessing) {
+      if (this.isCartSyncing) {
         return;
       }
 
-      this.isCartItemProcessing = true;
-
-      return this.$store
-        .dispatch('cart/sync', {
-          forceClientState: true
-        })
-        .finally(() => {
-          this.isCartItemProcessing = false;
-        });
+      return this.$store.dispatch('cart/sync', {
+        forceClientState: true
+      });
     },
     onDropdownActionClick (action) {
       EventBus.$emit(CartEvents.MAKE_ANOTHER_FROM_CART, action.label);

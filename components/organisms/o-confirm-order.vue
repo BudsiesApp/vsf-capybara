@@ -174,7 +174,7 @@
 
       <div class="form__radio-group">
         <component
-          v-for="method in paymentMethods"
+          v-for="method in filteredPaymentMethods"
           :key="method.code"
           :ref="method.code"
           :braintree-client="braintreeClient"
@@ -182,6 +182,7 @@
           :show-content="payment.paymentMethod === method.code"
           :is-order-placement-disabled="isPlaceOrderButtonDisabled"
           @success="placeOrder"
+          @cancelled="isCheckoutInProgress = false"
         >
           <template>
             <SfRadio
@@ -264,6 +265,7 @@ import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { AFFIRM_MODAL_CLOSED } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';
 import { getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
 import { PAYMENT_ERROR_EVENT, PriceHelper } from 'src/modules/shared';
+import { SupportedMethodCodes as AmazonSupportedMethodCodes } from 'src/modules/vsf-amazon-pay';
 
 import { createSmoothscroll } from 'theme/helpers';
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
@@ -377,6 +379,9 @@ export default {
     },
     selectedCurrency () {
       return this.$store.getters[GET_ACTIVE_CURRENCY];
+    },
+    filteredPaymentMethods () {
+      return this.paymentMethods.filter((method) => method.code !== AmazonSupportedMethodCodes.AMAZON_PAY);
     }
   },
   beforeCreate () {
