@@ -7,7 +7,6 @@ import Product from 'core/modules/catalog/types/Product';
 import { Customization } from 'src/modules/customization-system';
 
 import ZoomGalleryAsset from 'theme/interfaces/zoom-gallery-asset.interface';
-import { AspectRatio, VideoProvider } from 'src/modules/shared';
 
 export function useProductGallery (
   product: Ref<Product>,
@@ -53,42 +52,10 @@ export function useProductGallery (
 
     return result;
   });
-  function appendVideos (assets: ZoomGalleryAsset[]): ZoomGalleryAsset[] {
-    if (!assets.length) {
-      return assets;
-    }
-
-    const videoDefs: { aspectRatio: AspectRatio, videoId: string, displayControls: boolean }[] = [
-      { aspectRatio: AspectRatio.A16_9, videoId: 'F-dt-tCjtmI', displayControls: true },
-      { aspectRatio: AspectRatio.A4_3, videoId: 'dCAP4DnO2DY', displayControls: false },
-      { aspectRatio: AspectRatio.A16_10, videoId: 'C21wgj31wqU', displayControls: true },
-      { aspectRatio: AspectRatio.A9_16, videoId: 'zlUZutWwQds', displayControls: false }
-    ];
-
-    const videos: ZoomGalleryAsset[] = videoDefs.map((v) => {
-      return {
-        stage: `https://img.youtube.com/vi/${v.videoId}/maxresdefault.jpg`,
-        thumb: `https://img.youtube.com/vi/${v.videoId}/maxresdefault.jpg`,
-        big: `https://img.youtube.com/vi/${v.videoId}/maxresdefault.jpg`,
-        alt: '',
-        title: '',
-        video: {
-          videoId: v.videoId,
-          provider: VideoProvider.youtube,
-          aspectRatio: v.aspectRatio,
-          displayControls: v.displayControls,
-          autoplay: false
-        }
-      };
-    });
-
-    return [...videos, ...assets];
-  }
 
   const galleryImages = computed<ZoomGalleryAsset[]>(() => {
     if (!selectedOptionValuesIds.value.length) {
-      const base = mainProductImages.value;
-      return appendVideos(base);
+      return mainProductImages.value;
     }
 
     const selectedOptionValuesImages: ZoomGalleryAsset[] = [];
@@ -108,10 +75,10 @@ export function useProductGallery (
     }
 
     if (!selectedOptionValuesImages.length) {
-      return appendVideos(mainProductImages.value);
+      return mainProductImages.value;
     }
 
-    return appendVideos(selectedOptionValuesImages);
+    return selectedOptionValuesImages;
   });
 
   return {

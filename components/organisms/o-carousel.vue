@@ -322,9 +322,6 @@ export default Vue.extend({
       }
 
       this.swiper.slideTo(index);
-    },
-    getAllItems () {
-      return this.$refs.items;
     }
   },
   watch: {

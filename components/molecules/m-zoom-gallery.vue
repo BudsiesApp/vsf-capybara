@@ -95,8 +95,6 @@
               />
 
               <div v-else class="_video-wrapper">
-                <div class="_video-overlay mobile-only" />
-
                 <StreamingVideo
                   v-if="asset.video"
                   class="_streaming-video"
@@ -181,8 +179,7 @@ export default Vue.extend({
       fWindowResizeHandler: undefined as unknown as () => void | undefined,
       fIsCloudZoomInitialized: false,
       slidesToShow: 5,
-      STAGE_SLIDES_PER_VIEW,
-      streamingVideoRefs: [] as InstanceType<typeof StreamingVideo>[]
+      STAGE_SLIDES_PER_VIEW
     };
   },
   computed: {
@@ -259,48 +256,6 @@ export default Vue.extend({
     window.removeEventListener('resize', this.fWindowResizeHandler);
   },
   methods: {
-    onVideoOverlayClick () {
-      const stageCarousel = this.getStageCarousel();
-
-      stageCarousel.$el.querySelectorAll('._streaming-video').forEach((element) => {
-        const youtubeFacade = element.querySelector('._youtube-facade');
-
-        if (!youtubeFacade || !youtubeFacade.shadowRoot) {
-          return;
-        }
-
-        const iframe: HTMLIFrameElement | null = youtubeFacade.shadowRoot.querySelector('iframe');
-
-        if (!iframe) {
-          return;
-        }
-
-        // const element1 = iframe.contentDocument?.body.querySelector('.ytp-cued-thumbnail-overlay-image');
-        //
-        // if (element1) {
-        //   element1.addEventListener('pointermove', () => console.log('moved'));
-        //   element1.addEventListener('touchmove', () => console.log('moved'));
-        // }
-        //
-        // iframe.addEventListener('pointermove', () => console.log('moved true'), true);
-        // iframe.addEventListener('pointermove', () => console.log('moved false'), false);
-        // iframe.addEventListener('touchmove', () => console.log('moved'));
-
-        const controlOverlay = iframe.contentDocument?.body.querySelector('#player-control-overlay');
-
-        debugger;
-
-        if (!controlOverlay) {
-          return;
-        }
-
-        debugger;
-
-        (controlOverlay as any).click();
-        // iframe.contentDocument?.body.addEventListener('pointermove', () => console.log('moved true'), true);
-        // iframe.contentDocument?.body.addEventListener('touchmove', () => console.log('moved false'), false);
-      });
-    },
     getThumbnailAlt (asset: ZoomGalleryAsset): string {
       if (!asset.alt) {
         return this.$t('Select to view image').toString();
@@ -310,7 +265,18 @@ export default Vue.extend({
         alt: asset.alt
       }).toString();
     },
+
     onStageActiveIndexChanged (realIndex: number): void {
+      this.stopVideos();
+      this.setCurrentIndex(realIndex);
+      this.getCarousel().slideTo(realIndex);
+    },
+    onThumbnailSlideClicked (realIndex: number): void {
+      const stageCarousel = this.getStageCarousel();
+
+      stageCarousel.slideTo(realIndex);
+    },
+    stopVideos () {
       const stageCarousel = this.getStageCarousel();
 
       stageCarousel.$el.querySelectorAll('._streaming-video').forEach((element) => {
@@ -326,32 +292,11 @@ export default Vue.extend({
           return;
         }
 
-        // const element1 = iframe.contentDocument?.body.querySelector('.ytp-cued-thumbnail-overlay-image');
-        //
-        // if (element1) {
-        //   element1.addEventListener('pointermove', () => console.log('moved'));
-        //   element1.addEventListener('touchmove', () => console.log('moved'));
-        // }
-        //
-        // iframe.addEventListener('pointermove', () => console.log('moved true'), true);
-        // iframe.addEventListener('pointermove', () => console.log('moved false'), false);
-        // iframe.addEventListener('touchmove', () => console.log('moved'));
-
         iframe.contentWindow?.postMessage(
           '{"event":"command","func":"pauseVideo","args":""}',
           '*'
         );
-        // iframe.contentDocument?.body.addEventListener('pointermove', () => console.log('moved true'), true);
-        // iframe.contentDocument?.body.addEventListener('touchmove', () => console.log('moved false'), false);
       });
-
-      this.setCurrentIndex(realIndex);
-      this.getCarousel().slideTo(realIndex);
-    },
-    onThumbnailSlideClicked (realIndex: number): void {
-      const stageCarousel = this.getStageCarousel();
-
-      stageCarousel.slideTo(realIndex);
     },
     getStageCarousel (): InstanceType<typeof OCarousel> {
       return this.$refs.stageCarousel as InstanceType<typeof OCarousel>;
@@ -626,33 +571,6 @@ $bullet-size: 8px;
       &.-video {
         padding-bottom: 100%;
       }
-    }
-
-    ._video-overlay {
-      --window-size: 80px;
-      --left-point: calc(50% - (var(--window-size) / 2));
-      --right-point: calc(50% + (var(--window-size) / 2));
-
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      left: 0;
-      width: 100%;
-      height: 35%;
-      // background: red;
-      z-index: 2;
-      clip-path: polygon(
-        0% 0%,
-        0% 100%,
-        var(--left-point) 100%,
-        var(--left-point) var(--left-point),
-        var(--right-point) var(--left-point),
-        var(--right-point) var(--right-point),
-        var(--left-point) var(--right-point),
-        var(--left-point) 100%,
-        100% 100%,
-        100% 0%
-        );
     }
 
     ._video-wrapper {
