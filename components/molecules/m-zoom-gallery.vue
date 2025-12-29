@@ -268,7 +268,6 @@ export default Vue.extend({
         alt: asset.alt
       }).toString();
     },
-
     onStageActiveIndexChanged (realIndex: number): void {
       this.stopVideos();
       this.setCurrentIndex(realIndex);

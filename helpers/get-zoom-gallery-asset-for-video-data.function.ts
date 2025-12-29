@@ -3,7 +3,7 @@ import { VideoProvider } from 'src/modules/shared';
 import ZoomGalleryAsset from 'theme/interfaces/zoom-gallery-asset.interface';
 import VideoData from 'theme/components/storyblok/interfaces/video-data.interface';
 
-const supportedProviders: VideoProvider[] = [VideoProvider.youtubeShorts, VideoProvider.youtube];
+const supportedProviders: readonly VideoProvider[] = [VideoProvider.youtubeShorts, VideoProvider.youtube];
 
 enum YoutubeImageQuality {
   STANDARD = 'sddefault',
