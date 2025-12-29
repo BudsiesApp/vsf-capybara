@@ -1,5 +1,9 @@
 <template>
-  <div class="o-billing-address">
+  <validation-observer
+    class="o-billing-address"
+    ref="validationObserver"
+    tag="div"
+  >
     <SfHeading
       :title="`${$t('Billing address')}`"
       :level="3"
@@ -25,151 +29,12 @@
         class="_form-fields"
         v-show="showAddressFormFields"
       >
-        <SfInput
-          v-model.trim="payment.firstName"
-          class="form__element form__element--half"
-          :class="{[vuelidateErrorClassName]: $v.payment.firstName.$error}"
-          name="first-name"
-          autocomplete="given-name"
-          :label="$t('First name')"
-          :required="true"
-          :valid="!$v.payment.firstName.$error"
-          :error-message="
-            !$v.payment.firstName.required
-              ? $t('Field is required')
-              : $t('Name must have at least 2 letters.')
-          "
-          @blur="$v.payment.firstName.$touch()"
-        />
-        <SfInput
-          v-model.trim="payment.lastName"
-          class="form__element form__element--half"
-          :class="{[vuelidateErrorClassName]: $v.payment.lastName.$error}"
-          name="last-name"
-          autocomplete="family-name"
-          :label="$t('Last name')"
-          :required="true"
-          :valid="!$v.payment.lastName.$error"
-          :error-message="$t('Field is required')"
-          @blur="$v.payment.lastName.$touch()"
-        />
-        <SfInput
-          v-model.trim="payment.streetAddress"
-          class="form__element"
-          :class="{[vuelidateErrorClassName]: $v.payment.streetAddress.$error}"
-          name="street-address"
-          autocomplete="street-address"
-          :label="$t('Address')"
-          :required="true"
-          :valid="!$v.payment.streetAddress.$error"
-          :error-message="$t('Field is required')"
-          @blur="$v.payment.streetAddress.$touch()"
-        />
-
-        <MMultiselect
-          v-model="payment.country"
-          class="
-          form__element
-          form__element--half
-          form__select
-        "
-          :class="{[vuelidateErrorClassName]: $v.payment.country.$error}"
-          name="country-name"
-          autocomplete="country-name"
-          :label="$t('Country')"
-          :required="true"
-          id-field="code"
-          label-field="name"
-          :options="countries"
-          :valid="!$v.payment.country.$error"
-          :error-message="$t('Field is required')"
-          @change="onChangeCountry"
-        />
-
-        <SfInput
-          v-if="!isSelectedCountryHasStates"
-          v-model.trim="payment.state"
-          class="form__element form__element--half"
-          name="address-level1"
-          autocomplete="address-level1"
-          :label="$t('State / Province')"
-        />
-
-        <MMultiselect
-          v-else
-          v-model="payment.region_id"
-          name="address-level1"
-          autocomplete="address-level1"
-          :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
-          class="
-          form__element
-          form__element--half
-          form__select
-        "
-          :class="{[vuelidateErrorClassName]: $v.payment.region_id.$error}"
-          :label="$t('State / Province')"
-          :required="true"
-          id-field="id"
-          label-field="name"
-          :options="getStatesForSelectedCountry"
-          :valid="!$v.payment.region_id.$error"
-          :error-message="$t('Field is required')"
-        />
-
-        <SfInput
-          v-model.trim="payment.city"
-          class="form__element form__element--half"
-          :class="{[vuelidateErrorClassName]: $v.payment.city.$error}"
-          name="city"
-          autocomplete="address-level2"
-          :label="$t('City')"
-          :required="true"
-          :valid="!$v.payment.city.$error"
-          :error-message="$t('Field is required')"
-          @blur="$v.payment.city.$touch()"
-        />
-        <SfInput
-          v-model.trim="payment.zipCode"
-          class="form__element form__element--half"
-          :class="{[vuelidateErrorClassName]: $v.payment.zipCode.$error}"
-          name="zipCode"
-          autocomplete="postal-code"
-          :label="$t('Zip-code')"
-          :required="true"
-          :valid="!$v.payment.zipCode.$error"
-          :error-message="
-            !$v.payment.zipCode.required
-              ? $t('Field is required')
-              : $t('Zip-code must have at least {number} characters.', { number: 3 })
-          "
-          @blur="$v.payment.zipCode.$touch()"
-        />
-        <SfInput
-          v-model="formattedPhoneNumber"
-          :required="isPhoneNumberRequired"
-          :valid="!$v.formattedPhoneNumber.$error"
-          :error-message="
-            !$v.formattedPhoneNumber || !$v.formattedPhoneNumber.required
-              ? $t('Field is required')
-              : $t('Please, enter valid phone number')
-          "
-          class="form__element"
-          :class="{
-            [vuelidateErrorClassName]: $v.formattedPhoneNumber.$error,
-            'form__element--half': showVatIdField
-          }"
-          name="phone"
-          autocomplete="tel"
-          :label="$t('Phone number')"
-          @blur="updatePhoneNumber"
-        />
-
-        <SfInput
-          v-if="showVatIdField"
-          v-model.trim="payment.vat_id"
-          class="form__element form__element--half"
-          name="vat_id"
-          :label="$t('Tax ID')"
+        <OBaseAddressForm
+          ref="baseAddressForm"
+          v-model="payment"
+          :is-form-fields-disabled="isAddressFormDisabled"
+          :get-field-anchor-name="getFieldAnchorName"
+          @country-changed="onChangeCountry"
         />
       </div>
     </div>
@@ -178,6 +43,7 @@
       <div class="form__action">
         <SfButton
           class="sf-button--full-width form__action-button"
+          :disabled="isValidatingAddress"
           @click="onGoReviewButtonClicked"
         >
           {{ $t('Go review the order') }}
@@ -200,16 +66,13 @@
     <!-- This dummy container below is needed because src\modules\payment-cash-on-delivery\index.ts
          tries to inject here a component with payment description -->
     <div v-show="false" id="checkout-order-review-additional-container" />
-  </div>
+  </validation-observer>
 </template>
 <script>
-import { parsePhoneNumberWithError } from 'libphonenumber-js';
-import { required, requiredIf, minLength } from 'vuelidate/lib/validators';
+import { defineComponent, ref, toRef } from '@vue/composition-api';
 import { mapGetters } from 'vuex';
-import {
-  unicodeAlpha,
-  unicodeAlphaNum
-} from '@vue-storefront/core/helpers/validators';
+import { ValidationObserver } from 'vee-validate';
+
 import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
 import {
   SfInput,
@@ -222,107 +85,62 @@ import MMultiselect from 'theme/components/molecules/m-multiselect';
 import { PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_BILLING_ADDRESS } from 'src/modules/persisted-customer-data';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
-import {
-  KEY as AMAZON_PAY_MODULE_KEY,
-  METHOD_CODE as AMAZON_PAY_PAYMENT_METHOD_CODE
-} from 'src/modules/vsf-amazon-pay/index';
-import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
-import { stateCodeAutocompleteOptionSearch, createPhoneHelpers } from 'src/modules/shared';
+import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
+import { useAddressValidation } from 'src/modules/address';
+import OBaseAddressForm from './o-base-address-form.vue';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
 
-const unitedStatesCountryCode = 'US';
-const phoneHelpers = createPhoneHelpers(parsePhoneNumberWithError);
-
-export default {
+export default defineComponent({
   name: 'OBillingAddress',
   components: {
     SfInput,
     SfButton,
     SfHeading,
     SfCheckbox,
-    MMultiselect
+    MMultiselect,
+    OBaseAddressForm,
+    ValidationObserver
   },
   mixins: [Payment],
-  validations () {
-    const rules = {
-      firstName: {
-        required,
-        minLength: minLength(2),
-        unicodeAlpha
-      },
-      lastName: {
-        required,
-        unicodeAlpha
-      },
-      country: {
-        required
-      },
-      region_id: {
-        required: requiredIf(function () {
-          return this.isSelectedCountryHasStates;
-        })
-      },
-      streetAddress: {
-        required,
-        unicodeAlphaNum
-      },
-      zipCode: {
-        required,
-        minLength: minLength(3),
-        unicodeAlphaNum
-      },
-      city: {
-        required,
-        unicodeAlpha
+  setup (_, context) {
+    const validationObserver = ref(null);
+    const baseAddressForm = ref(null);
+
+    const { validateAddress, isValidating: isValidatingAddress, completeValidation: completeAddressValidation } = useAddressValidation(context);
+
+    const { validateAndGoToFirstError } = useFormValidation(
+      validationObserver,
+      () => {
+        const baseAddressFormComponent = baseAddressForm.value;
+        return {
+          ...context.refs,
+          ...(baseAddressFormComponent?.$refs || {})
+        };
       }
-    };
+    );
 
     return {
-      payment: {
-        ...rules
-      },
-      formattedPhoneNumber: {
-        required: requiredIf(function () { return this.isPhoneNumberRequired }),
-        phoneValid: function (value) {
-          return !value || phoneHelpers.isValidPhoneNumber(value, this.payment.country || unitedStatesCountryCode)
-        }
-      }
+      validationObserver,
+      baseAddressForm,
+      validateAddress,
+      isValidatingAddress,
+      completeAddressValidation,
+      validateAndGoToFirstError,
+      getFieldAnchorName
     };
   },
   data: () => {
     return {
-      states: States,
-      vuelidateErrorClassName,
-      formattedPhoneNumber: ''
+      states: States
     };
   },
   computed: {
     ...mapGetters({
       isVirtualCart: 'cart/isVirtualCart'
     }),
-    isPhoneNumberRequired () {
-      return this.payment.country && this.payment.country !== unitedStatesCountryCode;
-    },
     isAddressFormDisabled () {
       return this.sendToShippingAddress || this.sendToBillingAddress;
-    },
-    isSelectedCountryHasStates () {
-      if (!this.payment.country || !this.states) {
-        return false;
-      }
-
-      return this.states.hasOwnProperty(this.payment.country);
-    },
-    getStatesForSelectedCountry () {
-      if (!this.isSelectedCountryHasStates) {
-        return [];
-      }
-
-      return this.states[this.payment.country];
-    },
-    getPaymentCountry () {
-      return this.payment.country;
     },
     cartItems () {
       return this.$store.getters['cart/getCartItems'];
@@ -330,15 +148,19 @@ export default {
     showAddressFormFields () {
       return !this.sendToShippingAddress;
     },
-    showVatIdField () {
-      return !!this.payment.country && this.payment.country !== unitedStatesCountryCode;
-    },
     selectedRegionName () {
-      if (!this.isSelectedCountryHasStates || !this.payment.region_id) {
+      if (!this.payment.region_id) {
         return '';
       }
 
-      const state = this.getStatesForSelectedCountry.find(
+      const hasStates = this.payment.country && States.hasOwnProperty(this.payment.country);
+
+      if (!hasStates) {
+        return '';
+      }
+
+      const statesList = States[this.payment.country];
+      const state = statesList.find(
         ({ id }) => this.payment.region_id === id
       );
 
@@ -358,29 +180,30 @@ export default {
     EventBus.$off('user-after-loggedin', this.fillLastUsedCustomerData);
   },
   methods: {
-    stateCodeAutocompleteOptionSearch,
     async onChangeCountry () {
-      await this.$nextTick();
-
-      this.payment.state = '';
-      this.payment.region_id = null;
-
-      this.validateCountryRelatedFields();
-    },
-    async changeCountry () {
       await Promise.all([
         this.$store.dispatch('checkout/updatePaymentDetails', { country: this.payment.country }),
         this.$store.dispatch('cart/syncPaymentMethods', { forceServerSync: true })
       ]);
     },
     async onGoReviewButtonClicked () {
-      this.updatePhoneNumber();
-      this.$v.$touch();
+      const shouldValidate = !this.sendToShippingAddress;
 
-      if (this.$v.$invalid) {
-        await this.$nextTick();
-        vuelidateScrollToFirstError(this.$el);
-        return;
+      if (shouldValidate) {
+        const isFormValid = await this.validateAndGoToFirstError();
+
+        if (!isFormValid) {
+          return;
+        }
+
+        const paymentRef = toRef(this, 'payment');
+        const shouldProceed = await this.validateAddress(paymentRef);
+
+        if (!shouldProceed) {
+          return;
+        }
+
+        this.completeAddressValidation();
       }
 
       this.$store.commit(
@@ -414,28 +237,6 @@ export default {
       this.sendDataToCheckout();
       this.$store.dispatch('cart/syncPaymentMethods', { forceServerSync: true });
     },
-    validateCountryRelatedFields () {
-      this.$v.payment.region_id.$touch();
-      this.$v.formattedPhoneNumber.$touch();
-    },
-    updatePhoneNumber () {
-      this.$v.formattedPhoneNumber.$touch();
-
-      if (!this.formattedPhoneNumber) {
-        this.payment.phoneNumber = '';
-        return;
-      }
-
-      const normalizedNumber = phoneHelpers.formatPhoneNumberToE164(this.formattedPhoneNumber, this.payment.country);
-
-      if (normalizedNumber === this.payment.phoneNumber) {
-        this.updateFormattedPhoneNumber(normalizedNumber);
-      }
-
-      if (normalizedNumber) {
-        this.payment.phoneNumber = normalizedNumber;
-      }
-    },
     fillLastUsedCustomerData () {
       const customerFirstName = this.$store
         .getters[PERSISTED_CUSTOMER_FIRST_NAME];
@@ -455,42 +256,11 @@ export default {
       if (customerPhoneNumber && !this.payment.phoneNumber) {
         this.payment.phoneNumber = customerPhoneNumber;
       }
-    },
-    updateFormattedPhoneNumber (phoneNumber) {
-      this.formattedPhoneNumber = phoneHelpers.formatPhoneNumberForDisplay(phoneNumber, this.payment.country);
     }
   },
   watch: {
-    'payment.phoneNumber': {
-      handler (value) {
-        this.updateFormattedPhoneNumber(value);
-      },
-      immediate: true
-    },
-    getPaymentCountry (after, before) {
-      if (after && before !== after) {
-        this.changeCountry();
-      }
-    },
-    isSelectedCountryHasStates: {
-      handler (val) {
-        if (val) {
-          this.payment.state = '';
-          return;
-        }
-
-        this.payment.region_id = null;
-      }
-    },
-    showVatIdField: {
-      handler (val) {
-        if (!val) {
-          this.payment.vat_id = '';
-        }
-      }
-    }
   }
-};
+});
 </script>
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";

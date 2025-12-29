@@ -67,7 +67,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue';
+import { defineComponent, ref, PropType } from '@vue/composition-api';
 import Multiselect from 'vue-multiselect';
 import { SfChevron } from '@storefront-ui/vue';
 import {
@@ -80,19 +80,43 @@ import {
   clearAllBodyScrollLocks
 } from 'body-scroll-lock';
 import { logAutocompleteOptionNotFound } from 'src/modules/error-logging';
+import { use1PasswordDisable } from 'src/themes/petsies-capybara/helpers/use-1password-disable';
 
 type Option = Record<string, any> | string;
 
 let instanceId = 0;
 
-const onePasswordInputIgnoreAttribute = 'data-1p-ignore';
-
-export default Vue.extend({
+export default defineComponent({
   name: 'MMultiselect',
   inheritAttrs: false,
   components: {
     Multiselect,
     SfChevron
+  },
+  setup () {
+    const multiselect = ref<Multiselect | null>(null);
+
+    const getMultiselect = (): Multiselect | undefined => {
+      return (multiselect as any).value as Multiselect | undefined;
+    };
+
+    const getMultiselectInput = (): Element | undefined => {
+      const multiselectInstance = getMultiselect();
+
+      if (!multiselectInstance) {
+        return;
+      }
+
+      return multiselectInstance.$refs.search as Element | undefined;
+    };
+
+    use1PasswordDisable(getMultiselectInput);
+
+    return {
+      multiselect,
+      getMultiselect,
+      getMultiselectInput
+    };
   },
   created: function (): void {
     this.instanceId = instanceId.toString();
@@ -108,9 +132,6 @@ export default Vue.extend({
 
     const option = this.getCustomOptionForValue(this.value);
     this.customOptions.push(option);
-  },
-  mounted (): void {
-    this.disableOnePasswordForMultiselect();
   },
   props: {
     placeholder: {
@@ -240,15 +261,6 @@ export default Vue.extend({
     onAutocompleteOptionNotFound (value: string): void {
       logAutocompleteOptionNotFound(this.autocomplete, value);
     },
-    disableOnePasswordForMultiselect (): void {
-      const input = this.getMultiselectInput();
-
-      if (!input) {
-        return;
-      }
-
-      input.setAttribute(onePasswordInputIgnoreAttribute, '');
-    },
     enableBodyScroll (): void {
       const scrollableContainer = this.getMultiselectScrollableContainer();
 
@@ -268,18 +280,6 @@ export default Vue.extend({
         [this.idField]: value,
         [this.labelField]: value
       };
-    },
-    getMultiselect (): Multiselect | undefined {
-      return this.$refs['multiselect'] as Multiselect | undefined;
-    },
-    getMultiselectInput (): Element | undefined {
-      const multiselect = this.getMultiselect();
-
-      if (!multiselect) {
-        return;
-      }
-
-      return multiselect.$refs.search as Element | undefined;
     },
     getMultiselectScrollableContainer (): Element | null {
       const multiselect = this.getMultiselect();
