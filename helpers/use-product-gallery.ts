@@ -38,8 +38,8 @@ export function useProductGallery (
         }
 
         result[value.id] = value.galleryImages
-          .sort((a: any, b: any) => a.sn - b.sn)
-          .map((image: any) => {
+          .sort((a, b) => a.sn - b.sn)
+          .map((image) => {
             return {
               stage: getThumbnailPath(image.imageUrl, config.products.gallery.width, config.products.gallery.height, ''),
               thumb: getThumbnailPath(image.imageUrl, config.products.gallery.width, config.products.gallery.height, ''),

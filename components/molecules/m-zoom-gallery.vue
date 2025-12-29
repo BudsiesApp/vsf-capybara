@@ -151,6 +151,9 @@ const debounceTime = 300;
 // hack to make one slide working with `loop` correctly.
 const STAGE_SLIDES_PER_VIEW = 1.00001;
 
+const STREAMING_VIDEO_SELECTOR = '._streaming-video';
+const YOUTUBE_FACADE_SELECTOR = '._youtube-facade';
+
 export default Vue.extend({
   name: 'MZoomGallery',
   components: {
@@ -279,8 +282,8 @@ export default Vue.extend({
     stopVideos () {
       const stageCarousel = this.getStageCarousel();
 
-      stageCarousel.$el.querySelectorAll('._streaming-video').forEach((element) => {
-        const youtubeFacade = element.querySelector('._youtube-facade');
+      stageCarousel.$el.querySelectorAll(STREAMING_VIDEO_SELECTOR).forEach((element) => {
+        const youtubeFacade = element.querySelector(YOUTUBE_FACADE_SELECTOR);
 
         if (!youtubeFacade || !youtubeFacade.shadowRoot) {
           return;

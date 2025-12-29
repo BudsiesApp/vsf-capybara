@@ -3,18 +3,24 @@ import { VideoProvider } from 'src/modules/shared';
 import ZoomGalleryAsset from 'theme/interfaces/zoom-gallery-asset.interface';
 import VideoData from 'theme/components/storyblok/interfaces/video-data.interface';
 
-enum YouTubeImageQuality {
+const supportedProviders: VideoProvider[] = [VideoProvider.youtubeShorts, VideoProvider.youtube];
+
+enum YoutubeImageQuality {
   STANDARD = 'sddefault',
   MEDIUM = 'mqdefault',
   HIGH = 'hqdefault',
   MAX = 'maxresdefault',
 }
 
-function getYouTubeImageSrc (videoId: string, quality: YouTubeImageQuality): string {
+function getYouTubeImageSrc (videoId: string, quality: YoutubeImageQuality): string {
   return `https://img.youtube.com/vi/${videoId}/${quality}.jpg`;
 }
 
 export function getZoomGalleryAssetForVideoData (videoData: VideoData): ZoomGalleryAsset {
+  if (!supportedProviders.includes(videoData.url.provider)) {
+    throw new Error(`Provider ${!supportedProviders.includes(videoData.url.provider)} is unsupported`);
+  }
+
   const videoId = videoData.url.video_id;
 
   const asset: ZoomGalleryAsset = {
@@ -35,9 +41,9 @@ export function getZoomGalleryAssetForVideoData (videoData: VideoData): ZoomGall
   switch (videoData.url.provider) {
     case VideoProvider.youtube:
     case VideoProvider.youtubeShorts:
-      asset.stage = getYouTubeImageSrc(videoId, YouTubeImageQuality.MAX);
-      asset.thumb = getYouTubeImageSrc(videoId, YouTubeImageQuality.STANDARD);
-      asset.big = getYouTubeImageSrc(videoId, YouTubeImageQuality.MAX);
+      asset.stage = getYouTubeImageSrc(videoId, YoutubeImageQuality.MAX);
+      asset.thumb = getYouTubeImageSrc(videoId, YoutubeImageQuality.STANDARD);
+      asset.big = getYouTubeImageSrc(videoId, YoutubeImageQuality.MAX);
       break;
   }
 

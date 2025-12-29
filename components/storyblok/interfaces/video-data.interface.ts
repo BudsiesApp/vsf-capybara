@@ -18,5 +18,5 @@ export function isVideoData (item: any): item is VideoData {
     return false;
   }
 
-  return url.video_id && url.video_url && url.provider;
+  return !!(url.video_id && url.video_url && url.provider);
 }
