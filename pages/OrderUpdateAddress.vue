@@ -310,39 +310,59 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "theme/css/mixins/form-placeholder-item.scss";
+
 #order-update-address {
+  box-sizing: border-box;
+
+  ._title {
+    --heading-padding: 0;
+
+    margin-top: var(--spacer-lg);
+    padding: 0 var(--spacer-sm);
+  }
+
   ._not-found {
+    margin-top: var(--spacer-xl);
+    text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--spacer-xl);
-    padding: var(--spacer-xl) 0;
+  }
 
-    ._order-history-link {
-      text-decoration: none;
+  ._order-history-link {
+    margin-top: var(--spacer-base);
+
+    &:hover {
+      color: var(--c-white);
     }
   }
 
-  ._loading {
-    ._placeholder {
-      background: var(--c-light);
-      border-radius: var(--border-radius);
-      animation: pulse 1.5s ease-in-out infinite;
-    }
+  ._placeholder {
+    @include form-placeholder-item;
+  }
 
-    ._heading-placeholder {
-      height: 40px;
-      width: 300px;
-      margin-bottom: var(--spacer-xl);
-    }
+  ._heading-placeholder,
+  ._form-placeholder {
+    margin: var(--spacer-lg) auto 0;
+  }
 
-    ._form-placeholder {
-      height: 400px;
-      width: 100%;
-    }
+  ._heading-placeholder {
+    max-width: 46rem;
+    height: 5rem;
+  }
+
+  ._form-placeholder {
+    height: 40rem;
+    max-width: 40rem;
   }
 
   ._form-container {
+    padding: 0 var(--spacer-sm);
+    max-width: 40rem;
+    margin: 0 auto;
+
     ._title {
       margin-bottom: var(--spacer-lg);
     }
@@ -354,17 +374,23 @@ export default defineComponent({
     ._button-container {
       display: flex;
       justify-content: flex-end;
-      margin-top: var(--spacer-lg);
+      margin-top: var(--spacer-base);
     }
   }
-}
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
+  @media (min-width: $tablet-min) {
+    max-width: 1272px;
+    width: 100%;
+    margin: 0 auto;
+
+    ._button-container {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    ._submit-button {
+      width: auto;
+    }
   }
 }
 </style>
