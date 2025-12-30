@@ -41,7 +41,8 @@
     <div class="_stage">
       <div class="_stage-content">
         <div
-          class="_arrow -left desktop-only"
+          class="_arrow -left"
+          :class="{ 'desktop-only': !stageAsset.video }"
           v-show="canShowArrows"
           @click="goToPreviousImage"
         />
@@ -109,12 +110,16 @@
         </o-carousel>
 
         <div
-          class="_arrow -right desktop-only"
+          class="_arrow -right"
+          :class="{ 'desktop-only': !stageAsset.video }"
           v-show="canShowArrows"
           @click="goToNextImage"
         />
 
-        <div class="_mobile-swipe-hint mobile-only" v-show="canShowArrows">
+        <div
+          class="_mobile-swipe-hint mobile-only"
+          v-show="canShowArrows && !stageAsset.video"
+        >
           <div
             class="_bullets"
           >
