@@ -3,7 +3,7 @@ import { VideoProvider } from 'src/modules/shared';
 import ZoomGalleryAsset from 'theme/interfaces/zoom-gallery-asset.interface';
 import VideoData from 'theme/components/storyblok/interfaces/video-data.interface';
 
-const supportedProviders: readonly VideoProvider[] = [VideoProvider.youtubeShorts, VideoProvider.youtube];
+const supportedVideoProviders: readonly VideoProvider[] = [VideoProvider.youtubeShorts, VideoProvider.youtube];
 
 enum YoutubeImageQuality {
   STANDARD = 'sddefault',
@@ -17,7 +17,7 @@ function getYouTubeImageSrc (videoId: string, quality: YoutubeImageQuality): str
 }
 
 export function getZoomGalleryAssetForVideoData (videoData: VideoData): ZoomGalleryAsset {
-  if (!supportedProviders.includes(videoData.url.provider)) {
+  if (!supportedVideoProviders.includes(videoData.url.provider)) {
     throw new Error(`Provider ${videoData.url.provider} is unsupported`);
   }
 
