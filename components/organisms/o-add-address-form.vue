@@ -181,8 +181,7 @@ export default defineComponent({
         telephone: address.value.phoneNumber,
         default_shipping: false,
         vat_id: address.value.vat_id,
-        extenstion_attributes: address.value.extension_attributes
-
+        extension_attributes: address.value.extension_attributes
       };
 
       try {
