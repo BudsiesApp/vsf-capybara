@@ -34,6 +34,21 @@
         slim
       >
         <form @submit.prevent="passes(onSubmit)" class="_form">
+          <template
+            v-if="orderAddress"
+          >
+            <SfHeading
+              :title="$t('Shipping Address')"
+              :level="4"
+              class="_address-title"
+            />
+
+            <address-card
+              :address="orderAddress"
+              class="_address"
+            />
+          </template>
+
           <validation-provider
             v-slot="{ errors }"
             rules="required|max:64"
@@ -42,7 +57,7 @@
           >
             <SfInput
               v-model="taxIdValue"
-              class="_input"
+              class="_input _field"
               :label="$t('Tax ID')"
               :disabled="isSubmitting"
               :valid="!errors.length"
@@ -50,7 +65,7 @@
             />
           </validation-provider>
 
-          <div v-if="hasDefaultShippingAddress" class="_checkbox-container">
+          <div v-if="hasDefaultShippingAddress" class="_checkbox-container _field">
             <SfCheckbox
               v-model="shouldSaveToDefaultAddress"
               :label="$t('Save this Tax ID to my default shipping address')"
@@ -80,12 +95,15 @@ import { required, max } from 'vee-validate/dist/rules';
 import { SfButton, SfCheckbox, SfHeading, SfInput } from '@storefront-ui/vue';
 
 import i18n from '@vue-storefront/i18n';
+import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 
+import { AddressCard } from 'src/modules/address';
 import { usePersistedVatId } from 'src/modules/persisted-customer-data';
 import {
   FETCH_ORDER_DETAILS_ACTION,
   SUBMIT_TAX_ID_UPDATE_REQUEST_ACTION,
-  Order
+  Order,
+  OrderAddress
 } from 'src/modules/orders-history';
 
 extend('required', {
@@ -98,6 +116,7 @@ extend('max', max);
 export default defineComponent({
   name: 'TaxIdRequest',
   components: {
+    AddressCard,
     SfButton,
     SfCheckbox,
     SfHeading,
@@ -121,6 +140,32 @@ export default defineComponent({
 
     const orderNumber = computed(() => {
       return ((order as any).value as (Order | null))?.increment_id || '';
+    });
+
+    function mapOrderAddressToFormModel (orderAddress: OrderAddress): BaseAddressDetails {
+      return {
+        firstName: orderAddress.firstname,
+        lastName: orderAddress.lastname,
+        country: orderAddress.country_id,
+        streetAddress: orderAddress.street.join(', '),
+        apartmentNumber: '',
+        city: orderAddress.city,
+        state: orderAddress.region || '',
+        region_id: orderAddress.region_id || null,
+        zipCode: orderAddress.postcode,
+        phoneNumber: orderAddress.telephone || '',
+        vat_id: orderAddress.vat_id || ''
+      };
+    }
+
+    const orderAddress = computed<BaseAddressDetails | undefined>(() => {
+      const _order = (order as any).value as (Order | null);
+
+      if (!_order) {
+        return;
+      }
+
+      return mapOrderAddressToFormModel(_order.shipping_address);
     });
 
     const defaultShippingAddress = computed(() => {
@@ -201,14 +246,15 @@ export default defineComponent({
     });
 
     return {
-      taxIdValue,
-      shouldSaveToDefaultAddress,
+      error,
+      hasDefaultShippingAddress,
       isLoading,
       isSubmitting,
-      error,
+      orderAddress,
       orderNumber,
-      hasDefaultShippingAddress,
-      onSubmit
+      onSubmit,
+      shouldSaveToDefaultAddress,
+      taxIdValue
     };
   },
   metaInfo (): any {
@@ -274,13 +320,12 @@ export default defineComponent({
     ._subtitle {
       text-align: center;
       font-size: var(--font-size--base);
-      margin-bottom: var(--spacer-xl);
       color: var(--c-text-muted);
     }
 
     ._form {
       max-width: 32rem;
-      margin: 0 auto;
+      margin: var(--spacer-xl) auto 0;
     }
   }
 
@@ -290,6 +335,19 @@ export default defineComponent({
 
   ._submit-button {
     width: 100%;
+  }
+
+  ._address,
+  ._field {
+    margin-top: var(--spacer-sm);
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  ._address-title {
+    text-align: start;
   }
 
   @media (min-width: $tablet-min) {
