@@ -180,7 +180,9 @@ export default defineComponent({
         country_id: address.value.country,
         telephone: address.value.phoneNumber,
         default_shipping: false,
-        vat_id: address.value.vat_id
+        vat_id: address.value.vat_id,
+        extenstion_attributes: address.value.extension_attributes
+
       };
 
       try {
