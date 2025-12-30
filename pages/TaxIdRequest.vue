@@ -103,7 +103,7 @@ import {
   FETCH_ORDER_DETAILS_ACTION,
   SUBMIT_TAX_ID_UPDATE_REQUEST_ACTION,
   Order,
-  OrderAddress
+  mapOrderAddressToBaseAddressDetails
 } from 'src/modules/orders-history';
 
 extend('required', {
@@ -142,22 +142,6 @@ export default defineComponent({
       return ((order as any).value as (Order | null))?.increment_id || '';
     });
 
-    function mapOrderAddressToFormModel (orderAddress: OrderAddress): BaseAddressDetails {
-      return {
-        firstName: orderAddress.firstname,
-        lastName: orderAddress.lastname,
-        country: orderAddress.country_id,
-        streetAddress: orderAddress.street.join(', '),
-        apartmentNumber: '',
-        city: orderAddress.city,
-        state: orderAddress.region || '',
-        region_id: orderAddress.region_id || null,
-        zipCode: orderAddress.postcode,
-        phoneNumber: orderAddress.telephone || '',
-        vat_id: orderAddress.vat_id || ''
-      };
-    }
-
     const orderAddress = computed<BaseAddressDetails | undefined>(() => {
       const _order = (order as any).value as (Order | null);
 
@@ -165,7 +149,7 @@ export default defineComponent({
         return;
       }
 
-      return mapOrderAddressToFormModel(_order.shipping_address);
+      return mapOrderAddressToBaseAddressDetails(_order.shipping_address);
     });
 
     const defaultShippingAddress = computed(() => {
