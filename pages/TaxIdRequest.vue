@@ -19,13 +19,15 @@
 
     <div v-else class="_form-container">
       <SfHeading
-        :title="$t('Tax ID Required for Order #{orderNumber}', { orderNumber })"
+        :title="$t('Tax Identification Required')"
         :level="1"
         class="_title"
       />
 
       <p class="_subtitle">
-        {{ $t('To ensure your package clears customs without delay, the destination country requires your Tax ID for delivery.') }}
+        {{ $t('To comply with {country} customs regulations, we need your tax ID (VAT ID) for the shipping documentation.', { country: destinationCountry }) }}
+        <br>
+        {{ $t('Please provide it below so we can ship your order as soon as production is complete.') }}
       </p>
 
       <validation-observer
@@ -34,42 +36,58 @@
         slim
       >
         <form @submit.prevent="passes(onSubmit)" class="_form">
+          <div class="_order-reference-section">
+            <SfHeading
+              :title="$t('Order Reference')"
+              :level="4"
+              class="_heading"
+            />
+
+            <div>
+              #{{ orderNumber }}
+            </div>
+          </div>
           <template
             v-if="orderAddress"
           >
-            <SfHeading
-              :title="$t('Shipping Address')"
-              :level="4"
-              class="_address-title"
-            />
+            <div class="_shipping-address-section">
+              <SfHeading
+                :title="$t('Shipping Address')"
+                :level="4"
+                class="_heading"
+              />
 
-            <address-card
-              :address="orderAddress"
-              class="_address"
-            />
+              <address-card
+                :address="orderAddress"
+                class="_address"
+              />
+            </div>
           </template>
 
-          <validation-provider
-            v-slot="{ errors }"
-            rules="required|max:64"
-            slim
-            name="Tax ID"
-          >
-            <SfInput
-              v-model="taxIdValue"
-              class="_input _field"
-              :label="$t('Tax ID')"
-              :disabled="isSubmitting"
-              :valid="!errors.length"
-              :error-message="errors[0]"
-            />
-          </validation-provider>
+          <div class="_tax-id-section">
+            <validation-provider
+              v-slot="{ errors }"
+              rules="required|max:64"
+              slim
+              name="Tax ID"
+            >
+              <SfInput
+                v-model="taxIdValue"
+                class="_input _field"
+                :label="$t('Tax ID')"
+                :disabled="isSubmitting"
+                :valid="!errors.length"
+                :error-message="errors[0]"
+              />
+            </validation-provider>
+          </div>
 
-          <div v-if="hasDefaultShippingAddress" class="_checkbox-container _field">
+          <div v-if="hasDefaultShippingAddress" class="_update-default-field _checkbox-container _field">
             <SfCheckbox
               v-model="shouldSaveToDefaultAddress"
               :label="$t('Save this Tax ID to my default shipping address')"
               :disabled="isSubmitting"
+              class="_checkbox"
             />
           </div>
 
@@ -152,6 +170,10 @@ export default defineComponent({
       return mapOrderAddressToBaseAddressDetails(_order.shipping_address);
     });
 
+    const destinationCountry = computed(() => {
+      return orderAddress.value?.country || 'your country';
+    });
+
     const defaultShippingAddress = computed(() => {
       return root.$store.getters['user/defaultShippingAddress'];
     });
@@ -230,6 +252,7 @@ export default defineComponent({
     });
 
     return {
+      destinationCountry,
       error,
       hasDefaultShippingAddress,
       isLoading,
@@ -279,6 +302,11 @@ export default defineComponent({
     }
   }
 
+  ._loading,
+  ._form-container {
+    padding: 0 var(--spacer-sm);
+  }
+
   ._placeholder {
     @include form-placeholder-item;
   }
@@ -294,13 +322,11 @@ export default defineComponent({
   }
 
   ._form-placeholder {
-    height: 12rem;
+    height: 24rem;
     max-width: 32rem;
   }
 
   ._form-container {
-    padding: 0 var(--spacer-sm);
-
     ._subtitle {
       text-align: center;
       font-size: var(--font-size--base);
@@ -321,27 +347,40 @@ export default defineComponent({
     width: 100%;
   }
 
-  ._address,
-  ._field {
-    margin-top: var(--spacer-sm);
+  ._order-reference-section,
+  ._shipping-address-section,
+  ._tax-id-section {
+    margin-top: var(--spacer-lg);
+
+    ._heading {
+      --heading-title-font-weight: var(--font-semibold);
+      --heading-title-margin: 0 0 var(--spacer-sm) 0;
+      --heading-padding: 0;
+    }
 
     &:first-child {
       margin-top: 0;
     }
   }
 
-  ._address-title {
-    text-align: start;
+  ._update-default-field {
+    margin-top: var(--spacer-sm);
+
+    ._checkbox {
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+    }
   }
 
   @media (min-width: $tablet-min) {
-    max-width: 1272px;
+    max-width: 960px;
     width: 100%;
-    margin: 0 auto;
+    margin: auto;
 
     ._button-container {
       display: flex;
-      justify-content: flex-end;
+      justify-content: center;
     }
 
     ._submit-button {
