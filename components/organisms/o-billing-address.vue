@@ -82,7 +82,7 @@ import {
 } from '@storefront-ui/vue';
 import { createSmoothscroll } from 'theme/helpers';
 import MMultiselect from 'theme/components/molecules/m-multiselect';
-import { PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_BILLING_ADDRESS } from 'src/modules/persisted-customer-data';
+import { PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, PERSISTED_CUSTOMER_PHONE_NUMBER, PERSISTED_CUSTOMER_VAT_ID, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_BILLING_ADDRESS, SET_PERSISTED_CUSTOMER_VAT_ID } from 'src/modules/persisted-customer-data';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
@@ -222,6 +222,11 @@ export default defineComponent({
       );
 
       this.$store.commit(
+        SET_PERSISTED_CUSTOMER_VAT_ID,
+        this.payment.vat_id
+      );
+
+      this.$store.commit(
         SET_PERSISTED_CUSTOMER_BILLING_ADDRESS,
         {
           firstName: this.payment.firstName,
@@ -245,6 +250,9 @@ export default defineComponent({
       const customerPhoneNumber = this.$store
         .getters[PERSISTED_CUSTOMER_PHONE_NUMBER];
 
+      const customerVatId = this.$store
+        .getters[PERSISTED_CUSTOMER_VAT_ID];
+
       if (customerFirstName && !this.payment.firstName) {
         this.payment.firstName = customerFirstName;
       }
@@ -255,6 +263,10 @@ export default defineComponent({
 
       if (customerPhoneNumber && !this.payment.phoneNumber) {
         this.payment.phoneNumber = customerPhoneNumber;
+      }
+
+      if (customerVatId && !this.payment.vat_id) {
+        this.payment.vat_id = customerVatId;
       }
     }
   },
