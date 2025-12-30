@@ -53,7 +53,11 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
       for (const sliderItem of this.itemData.slider_items) {
         if (isVideoData(sliderItem)) {
           const videoSlide = getZoomGalleryAssetForVideoData(sliderItem);
-          slides.push(videoSlide);
+
+          if (videoSlide) {
+            slides.push(videoSlide);
+          }
+
           continue;
         }
 
