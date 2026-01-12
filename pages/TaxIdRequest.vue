@@ -171,7 +171,7 @@ export default defineComponent({
     });
 
     const destinationCountry = computed(() => {
-      return orderAddress.value?.country || 'your country';
+      return orderAddress.value?.country || root.$t('your country').toString();
     });
 
     const defaultShippingAddress = computed(() => {
