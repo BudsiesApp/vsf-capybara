@@ -166,7 +166,7 @@ export class AddressForm {
     await this.zipCodeFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
 
     await this.countrySelectorFormField.selectByOptionTitle(COUNTRY_WITHOUT_STATES_LIST);
-    await expect(this.stateInputFormField.formField).toBeVisible();
+    await expect(this.stateInputFormField.formField).toBeHidden();
     await expect(this.stateSelectorFormField.formField).toBeHidden();
     await this.phoneFormField.expectToHaveErrorMessage(REQUIRED_FIELD_ERROR_MESSAGE);
   }

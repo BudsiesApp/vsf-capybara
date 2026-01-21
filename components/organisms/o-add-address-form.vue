@@ -36,7 +36,7 @@ import { SfButton } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
 import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 
-import { usePersistedFirstName, usePersistedLastName, usePersistedPhoneNumber } from 'src/modules/persisted-customer-data';
+import { usePersistedFirstName, usePersistedLastName, usePersistedPhoneNumber, usePersistedVatId } from 'src/modules/persisted-customer-data';
 import { useAddressValidation } from 'src/modules/address';
 
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
@@ -45,7 +45,7 @@ import OBaseAddressForm from './o-base-address-form.vue';
 
 type AddressData = Pick<
 BaseAddressDetails,
-'city' | 'country' | 'state' | 'streetAddress' | 'apartmentNumber' | 'zipCode' | 'region_id' | 'vat_id'
+'city' | 'country' | 'state' | 'streetAddress' | 'apartmentNumber' | 'zipCode' | 'region_id'
 >
 
 export default defineComponent({
@@ -62,6 +62,7 @@ export default defineComponent({
     const firstName = ref('');
     const lastName = ref('');
     const phoneNumber = ref('');
+    const vatId = ref('');
     const isSubmitting = ref(false);
 
     const addressData = ref<AddressData>({
@@ -71,18 +72,19 @@ export default defineComponent({
       streetAddress: '',
       apartmentNumber: '',
       zipCode: '',
-      region_id: null,
-      vat_id: ''
+      region_id: null
     });
 
     const {
       persistLastUsedCustomerFirstName,
       persistLastUsedCustomerLastName,
-      persistLastUsedCustomerPhoneNumber
+      persistLastUsedCustomerPhoneNumber,
+      persistLastUsedCustomerVatId
     } = {
       ...usePersistedFirstName(firstName),
       ...usePersistedLastName(lastName),
-      ...usePersistedPhoneNumber(phoneNumber)
+      ...usePersistedPhoneNumber(phoneNumber),
+      ...usePersistedVatId(vatId)
     };
 
     const {
@@ -120,7 +122,7 @@ export default defineComponent({
           lastName: lastName.value,
           phoneNumber: phoneNumber.value,
           region_id: _addressData.region_id,
-          vat_id: _addressData.vat_id
+          vat_id: vatId.value
         }
       },
       set (newAddress: BaseAddressDetails) {
@@ -133,11 +135,11 @@ export default defineComponent({
         _addressData.apartmentNumber = newAddress.apartmentNumber;
         _addressData.zipCode = newAddress.zipCode;
         _addressData.region_id = newAddress.region_id;
-        _addressData.vat_id = newAddress.vat_id;
 
         firstName.value = newAddress.firstName;
         lastName.value = newAddress.lastName;
         phoneNumber.value = newAddress.phoneNumber;
+        vatId.value = newAddress.vat_id;
       }
     });
 
@@ -189,6 +191,7 @@ export default defineComponent({
         persistLastUsedCustomerFirstName(firstName.value);
         persistLastUsedCustomerLastName(lastName.value);
         persistLastUsedCustomerPhoneNumber(phoneNumber.value);
+        persistLastUsedCustomerVatId(vatId.value);
 
         emit('address-added');
       } catch (error) {
