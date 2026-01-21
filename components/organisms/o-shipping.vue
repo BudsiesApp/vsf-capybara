@@ -105,7 +105,7 @@ import { Shipping } from '@vue-storefront/core/modules/checkout/components/Shipp
 import { createSmoothscroll } from 'theme/helpers';
 import MMultiselect from 'theme/components/molecules/m-multiselect';
 import { GET_ACTIVE_CURRENCY, GET_CURRENCY_EXCHANGE_RATE } from 'src/modules/currency';
-import { PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, PERSISTED_CUSTOMER_PHONE_NUMBER, PERSISTED_CUSTOMER_SHIPPING_COUNTRY, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_SHIPPING_COUNTRY } from 'src/modules/persisted-customer-data';
+import { PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, PERSISTED_CUSTOMER_PHONE_NUMBER, PERSISTED_CUSTOMER_SHIPPING_COUNTRY, PERSISTED_CUSTOMER_VAT_ID, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_PHONE_NUMBER, SET_PERSISTED_CUSTOMER_SHIPPING_COUNTRY, SET_PERSISTED_CUSTOMER_VAT_ID } from 'src/modules/persisted-customer-data';
 import { PriceHelper } from 'src/modules/shared';
 import { useAddressValidation } from 'src/modules/address';
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
@@ -233,6 +233,11 @@ export default defineComponent({
         this.shipping.country
       );
 
+      this.$store.commit(
+        SET_PERSISTED_CUSTOMER_VAT_ID,
+        this.shipping.vat_id
+      );
+
       this.sendDataToCheckout();
       await this.$store.dispatch('cart/syncTotals', { forceServerSync: true });
       this.$store.dispatch('cart/pullEstimatedShipments');
@@ -246,6 +251,8 @@ export default defineComponent({
         .getters[PERSISTED_CUSTOMER_PHONE_NUMBER];
       const customerShippingCountry = this.$store
         .getters[PERSISTED_CUSTOMER_SHIPPING_COUNTRY];
+      const customerVatId = this.$store
+        .getters[PERSISTED_CUSTOMER_VAT_ID];
 
       if (customerFirstName && !this.shipping.firstName) {
         this.shipping.firstName = customerFirstName;
@@ -257,6 +264,10 @@ export default defineComponent({
 
       if (customerPhoneNumber && !this.shipping.phoneNumber) {
         this.shipping.phoneNumber = customerPhoneNumber;
+      }
+
+      if (customerVatId && !this.shipping.vat_id) {
+        this.shipping.vat_id = customerVatId;
       }
 
       if (customerShippingCountry) {
