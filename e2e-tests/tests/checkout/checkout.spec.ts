@@ -29,7 +29,7 @@ const fedexAvailableAddress: AddressData = {
 const USPS_SHIPPING_COUNTRY_CODE = 'US';
 const USPS_SHIPPING_COUNTRY_LABEL = 'United States';
 const USPS_SHIPPING_STATE_LABEL = 'Georgia';
-const USPS_LABEL = 'USPS Priority';
+const USPS_LABEL = 'USPS or local equivalent';
 const uspsAvailableAddress: AddressData = {
   firstName: FIRST_NAME,
   lastName: LAST_NAME,
