@@ -279,7 +279,7 @@ export default Vue.extend({
       }).toString();
     },
     onStageActiveIndexChanged (realIndex: number): void {
-      this.stopVideos();
+      this.pauseActiveVideoPlayers();
       this.setCurrentIndex(realIndex);
       this.getCarousel().slideTo(realIndex);
     },
@@ -288,7 +288,7 @@ export default Vue.extend({
 
       stageCarousel.slideTo(realIndex);
     },
-    stopVideos () {
+    pauseActiveVideoPlayers () {
       const stageCarousel = this.getStageCarousel();
 
       stageCarousel.$el.querySelectorAll(STREAMING_VIDEO_SELECTOR).forEach((element) => {
@@ -614,7 +614,7 @@ $bullet-size: 8px;
       height: 100%;
       position: absolute;
 
-      .streaming-video {
+      ._streaming-video {
         height: 100%;
         padding-top: 0;
       }
