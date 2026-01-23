@@ -46,7 +46,7 @@
       <div class="_stage-content">
         <div
           class="_arrow -left"
-          :class="{ 'desktop-only': !stageAsset.video }"
+          :class="{ 'desktop-only': !wasVideoItemShown}"
           v-show="canShowArrows"
           @click="goToPreviousImage"
         />
@@ -115,7 +115,7 @@
 
         <div
           class="_arrow -right"
-          :class="{ 'desktop-only': !stageAsset.video }"
+          :class="{ 'desktop-only': !wasVideoItemShown }"
           v-show="canShowArrows"
           @click="goToNextImage"
         />
@@ -191,7 +191,8 @@ export default Vue.extend({
       fWindowResizeHandler: undefined as unknown as () => void | undefined,
       fIsCloudZoomInitialized: false,
       slidesToShow: 5,
-      STAGE_SLIDES_PER_VIEW
+      STAGE_SLIDES_PER_VIEW,
+      wasVideoItemShown: false
     };
   },
   computed: {
@@ -464,6 +465,14 @@ export default Vue.extend({
         }
       },
       immediate: true
+    },
+    stageAsset: {
+      handler (value: ZoomGalleryAsset | undefined) {
+        if (value?.video) {
+          this.wasVideoItemShown = true;
+        }
+      },
+      immediate: true
     }
   }
 });
@@ -533,12 +542,14 @@ $bullet-size: 8px;
           content: '';
           width: 36px;
           height: 36px;
+          max-width: 50%;
           position: absolute;
           top: 0;
           right: 0;
 
           background: url("../../assets/images/video-icon.svg");
           background-size: 100%;
+          background-repeat: no-repeat;
         }
       }
     }
