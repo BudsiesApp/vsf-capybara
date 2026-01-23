@@ -20,7 +20,11 @@
         @slide-clicked="onThumbnailSlideClicked"
       >
         <template #default="{ item: asset }">
-          <div :key="JSON.stringify(asset.thumb)" class="_thumbnail-item">
+          <div
+            :key="JSON.stringify(asset.thumb)"
+            class="_thumbnail-item"
+            :class="{'-video': asset.video}"
+          >
             <div class="_thumbnail-item-content-wrapper">
               <BaseImage
                 class="_image"
@@ -523,6 +527,20 @@ $bullet-size: 8px;
       cursor: pointer;
       padding-top: 100%;
       margin-bottom: 8.1%;
+
+      &.-video {
+        &::after {
+          content: '';
+          width: 36px;
+          height: 36px;
+          position: absolute;
+          top: 0;
+          right: 0;
+
+          background: url("../../assets/images/video-icon.svg");
+          background-size: 100%;
+        }
+      }
     }
 
     ._thumbnail-item-content-wrapper {
