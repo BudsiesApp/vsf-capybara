@@ -19,13 +19,15 @@
 
     <div v-else class="_form-container">
       <SfHeading
-        :title="$t('Tax ID Required for Order #{orderNumber}', { orderNumber })"
+        :title="$t('Tax Identification Required')"
         :level="1"
         class="_title"
       />
 
       <p class="_subtitle">
-        {{ $t('To ensure your package clears customs without delay, the destination country requires your Tax ID for delivery.') }}
+        {{ $t('To comply with {country} customs regulations, we need your tax ID (VAT ID) for the shipping documentation.', { country: destinationCountry }) }}
+        <br>
+        {{ $t('Please provide it below so we can ship your order as soon as production is complete.') }}
       </p>
 
       <validation-observer
@@ -34,27 +36,58 @@
         slim
       >
         <form @submit.prevent="passes(onSubmit)" class="_form">
-          <validation-provider
-            v-slot="{ errors }"
-            rules="required|max:64"
-            slim
-            name="Tax ID"
-          >
-            <SfInput
-              v-model="taxIdValue"
-              class="_input"
-              :label="$t('Tax ID')"
-              :disabled="isSubmitting"
-              :valid="!errors.length"
-              :error-message="errors[0]"
+          <div class="_order-reference-section">
+            <SfHeading
+              :title="$t('Order Reference')"
+              :level="4"
+              class="_heading"
             />
-          </validation-provider>
 
-          <div v-if="hasDefaultShippingAddress" class="_checkbox-container">
+            <div>
+              #{{ orderNumber }}
+            </div>
+          </div>
+          <template
+            v-if="orderAddress"
+          >
+            <div class="_shipping-address-section">
+              <SfHeading
+                :title="$t('Shipping Address')"
+                :level="4"
+                class="_heading"
+              />
+
+              <address-card
+                :address="orderAddress"
+                class="_address"
+              />
+            </div>
+          </template>
+
+          <div class="_tax-id-section">
+            <validation-provider
+              v-slot="{ errors }"
+              rules="required|max:64"
+              slim
+              name="Tax ID"
+            >
+              <SfInput
+                v-model="taxIdValue"
+                class="_input _field"
+                :label="$t('Tax ID')"
+                :disabled="isSubmitting"
+                :valid="!errors.length"
+                :error-message="errors[0]"
+              />
+            </validation-provider>
+          </div>
+
+          <div v-if="hasDefaultShippingAddress" class="_update-default-field _checkbox-container _field">
             <SfCheckbox
               v-model="shouldSaveToDefaultAddress"
               :label="$t('Save this Tax ID to my default shipping address')"
               :disabled="isSubmitting"
+              class="_checkbox"
             />
           </div>
 
@@ -80,12 +113,15 @@ import { required, max } from 'vee-validate/dist/rules';
 import { SfButton, SfCheckbox, SfHeading, SfInput } from '@storefront-ui/vue';
 
 import i18n from '@vue-storefront/i18n';
+import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 
+import { AddressCard } from 'src/modules/address';
 import { usePersistedVatId } from 'src/modules/persisted-customer-data';
 import {
   SUBMIT_TAX_ID_UPDATE_REQUEST_ACTION,
   Order,
-  useOrderHistoryOrder
+  useOrderHistoryOrder,
+  mapOrderAddressToBaseAddressDetails
 } from 'src/modules/orders-history';
 
 extend('required', {
@@ -95,9 +131,24 @@ extend('required', {
 
 extend('max', max);
 
+const Countries = require('@vue-storefront/i18n/resource/countries.json');
+
+function getCountryNameByCode (code: string): string {
+  let country = Countries.find(
+    (country: {name: string, code: string}) => country.code.toLowerCase() === code.toLowerCase()
+  );
+
+  if (!country) {
+    return code;
+  }
+
+  return country.name;
+}
+
 export default defineComponent({
   name: 'TaxIdRequest',
   components: {
+    AddressCard,
     SfButton,
     SfCheckbox,
     SfHeading,
@@ -121,6 +172,24 @@ export default defineComponent({
 
     const orderNumber = computed(() => {
       return ((order as any).value as (Order | null))?.increment_id || '';
+    });
+
+    const orderAddress = computed<BaseAddressDetails | undefined>(() => {
+      const _order = (order as any).value as (Order | null);
+
+      if (!_order) {
+        return;
+      }
+
+      return mapOrderAddressToBaseAddressDetails(_order.shipping_address);
+    });
+
+    const destinationCountry = computed(() => {
+      if (!orderAddress.value?.country) {
+        return root.$t('your country').toString();
+      }
+
+      return getCountryNameByCode(orderAddress.value.country);
     });
 
     const defaultShippingAddress = computed(() => {
@@ -182,14 +251,16 @@ export default defineComponent({
     }
 
     return {
-      taxIdValue,
-      shouldSaveToDefaultAddress,
+      destinationCountry,
+      error,
+      hasDefaultShippingAddress,
       isLoading,
       isSubmitting,
-      error,
+      orderAddress,
       orderNumber,
-      hasDefaultShippingAddress,
-      onSubmit
+      onSubmit,
+      shouldSaveToDefaultAddress,
+      taxIdValue
     };
   },
   metaInfo (): any {
@@ -230,6 +301,11 @@ export default defineComponent({
     }
   }
 
+  ._loading,
+  ._form-container {
+    padding: 0 var(--spacer-sm);
+  }
+
   ._placeholder {
     @include form-placeholder-item;
   }
@@ -245,23 +321,20 @@ export default defineComponent({
   }
 
   ._form-placeholder {
-    height: 12rem;
+    height: 24rem;
     max-width: 32rem;
   }
 
   ._form-container {
-    padding: 0 var(--spacer-sm);
-
     ._subtitle {
       text-align: center;
       font-size: var(--font-size--base);
-      margin-bottom: var(--spacer-xl);
       color: var(--c-text-muted);
     }
 
     ._form {
       max-width: 32rem;
-      margin: 0 auto;
+      margin: var(--spacer-xl) auto 0;
     }
   }
 
@@ -273,14 +346,40 @@ export default defineComponent({
     width: 100%;
   }
 
+  ._order-reference-section,
+  ._shipping-address-section,
+  ._tax-id-section {
+    margin-top: var(--spacer-lg);
+
+    ._heading {
+      --heading-title-font-weight: var(--font-semibold);
+      --heading-title-margin: 0 0 var(--spacer-sm) 0;
+      --heading-padding: 0;
+    }
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  ._update-default-field {
+    margin-top: var(--spacer-sm);
+
+    ._checkbox {
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
   @media (min-width: $tablet-min) {
-    max-width: 1272px;
+    max-width: 960px;
     width: 100%;
-    margin: 0 auto;
+    margin: auto;
 
     ._button-container {
       display: flex;
-      justify-content: flex-end;
+      justify-content: center;
     }
 
     ._submit-button {
