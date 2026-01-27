@@ -131,6 +131,20 @@ extend('required', {
 
 extend('max', max);
 
+const Countries = require('@vue-storefront/i18n/resource/countries.json');
+
+function getCountryNameByCode (code: string): string {
+  let country = Countries.find(
+    (country: {name: string, code: string}) => country.code.toLowerCase() === code.toLowerCase()
+  );
+
+  if (!country) {
+    return code;
+  }
+
+  return country.name;
+}
+
 export default defineComponent({
   name: 'TaxIdRequest',
   components: {
@@ -171,7 +185,11 @@ export default defineComponent({
     });
 
     const destinationCountry = computed(() => {
-      return orderAddress.value?.country || 'your country';
+      if (!orderAddress.value?.country) {
+        return root.$t('your country').toString();
+      }
+
+      return getCountryNameByCode(orderAddress.value.country);
     });
 
     const defaultShippingAddress = computed(() => {
