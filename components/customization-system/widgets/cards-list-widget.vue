@@ -3,12 +3,13 @@
     <ul class="_list">
       <li
         class="_item"
+        :disabled="isDisabled || valuesInCart.includes(optionValue.id)"
         v-for="optionValue in sortedValues"
         :key="optionValue.id"
       >
         <m-checkbox
           class="_checkbox"
-          :disabled="isDisabled"
+          :disabled="isDisabled || valuesInCart.includes(optionValue.id)"
           :valid="isValid"
           :value="optionValue.id"
           v-model="selectedOption"
@@ -32,9 +33,13 @@
                   {{ optionValue.name }}
                 </div>
 
+                <div class="_price" v-if="valuesInCart.includes(optionValue.id)">
+                  {{ $t('Added to Cart') }}
+                </div>
+
                 <div
                   class="_price"
-                  v-if="optionValuePriceDictionary[optionValue.id]"
+                  v-else-if="optionValuePriceDictionary[optionValue.id]"
                 >
                   <strong> + </strong>
 
@@ -134,6 +139,11 @@ export default defineComponent({
     values: {
       type: Array as PropType<OptionValue[]>,
       default: () => []
+    },
+    // TODO: mock
+    valuesInCart: {
+      type: Array as PropType<string[]>,
+      default: () => []
     }
   },
   setup (props, context) {
@@ -177,6 +187,10 @@ export default defineComponent({
 
   ._item {
     cursor: pointer;
+
+    &:disabled {
+      cursor: default;
+    }
   }
 
   ._checkbox {

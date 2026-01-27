@@ -40,6 +40,7 @@
         :error="errors[0]"
         :is-disabled="isDisabled"
         :is="widget.component"
+        :values-in-cart="valuesInCart"
         v-bind="widget.props"
         v-model="selectedOption"
         @widget-busy-changed="onWidgetBusyChanged"
@@ -142,6 +143,11 @@ export default defineComponent({
     fieldNamePrefix: {
       type: String as PropType<string | undefined>,
       default: undefined
+    },
+    // TODO: mock
+    valuesInCart: {
+      type: Array as PropType<string[]>,
+      default: () => []
     }
   },
   setup (props, context) {
