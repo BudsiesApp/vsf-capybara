@@ -112,7 +112,8 @@ export default defineComponent({
         default_shipping: existingAddress.value.defaultShipping,
         default_billing: existingAddress.value.defaultBilling,
         customer_id: existingAddress.value.customerId,
-        vat_id: existingAddress.value.vat_id
+        vat_id: existingAddress.value.vat_id,
+        extension_attributes: existingAddress.value.extension_attributes
       };
 
       return root.$store.dispatch('budsies/updateAddress', { address: addressToUpdate });
