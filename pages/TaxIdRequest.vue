@@ -107,7 +107,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, onBeforeMount } from '@vue/composition-api';
+import { defineComponent, ref, computed } from '@vue/composition-api';
 import { extend, ValidationProvider, ValidationObserver } from 'vee-validate';
 import { required, max } from 'vee-validate/dist/rules';
 import { SfButton, SfCheckbox, SfHeading, SfInput } from '@storefront-ui/vue';
@@ -118,9 +118,9 @@ import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/Base
 import { AddressCard } from 'src/modules/address';
 import { usePersistedVatId } from 'src/modules/persisted-customer-data';
 import {
-  FETCH_ORDER_DETAILS_ACTION,
   SUBMIT_TAX_ID_UPDATE_REQUEST_ACTION,
   Order,
+  useOrderDetails,
   mapOrderAddressToBaseAddressDetails
 } from 'src/modules/orders-history';
 
@@ -162,13 +162,13 @@ export default defineComponent({
       required: true
     }
   },
-  setup (props, { root }) {
+  setup (props, context) {
+    const { root } = context;
     const taxIdValue = ref('');
     const shouldSaveToDefaultAddress = ref(false);
-    const isLoading = ref(true);
     const isSubmitting = ref(false);
-    const error = ref(false);
-    const order = ref<Order | null>(null);
+
+    const { order, isLoading, isError: error } = useOrderDetails(context, props.orderId);
 
     const orderNumber = computed(() => {
       return ((order as any).value as (Order | null))?.increment_id || '';
@@ -201,21 +201,6 @@ export default defineComponent({
     });
 
     const { persistLastUsedCustomerVatId } = usePersistedVatId(taxIdValue);
-
-    async function fetchOrderDetails () {
-      try {
-        const result = await root.$store.dispatch(
-          FETCH_ORDER_DETAILS_ACTION,
-          { orderId: props.orderId }
-        );
-        ((order as any).value as (Order | null)) = result;
-        error.value = false;
-      } catch (e) {
-        error.value = true;
-      } finally {
-        isLoading.value = false;
-      }
-    }
 
     async function updateDefaultAddress () {
       if (!defaultShippingAddress.value) {
@@ -264,10 +249,6 @@ export default defineComponent({
         isSubmitting.value = false;
       }
     }
-
-    onBeforeMount(() => {
-      fetchOrderDetails();
-    });
 
     return {
       destinationCountry,
