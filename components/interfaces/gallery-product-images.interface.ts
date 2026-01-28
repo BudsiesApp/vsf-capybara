@@ -1,6 +1,6 @@
-import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
+import ZoomGalleryAsset from 'theme/interfaces/zoom-gallery-asset.interface';
 
 export default interface GalleryProductImages {
   sku: string,
-  images: ZoomGalleryImage[]
+  images: ZoomGalleryAsset[]
 }
