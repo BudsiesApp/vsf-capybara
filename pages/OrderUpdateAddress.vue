@@ -79,8 +79,7 @@ import { AddressExtensionAttributes, getRegionNameByCountryAndRegionId } from '@
 import i18n from '@vue-storefront/i18n';
 
 import { useAddressValidation, useExistingValidationResult } from 'src/modules/address';
-import { useOrderDetails, SUBMIT_ORDER_ADDRESS_UPDATE_REQUEST_ACTION } from 'src/modules/orders-history';
-import { OrderAddress } from 'src/modules/orders-history/types/order-address';
+import { useOrderDetails, OrderAddress, SUBMIT_ORDER_ADDRESS_UPDATE_REQUEST_ACTION } from 'src/modules/orders-history';
 
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 import OBaseAddressForm from 'theme/components/organisms/o-base-address-form.vue';
@@ -103,8 +102,8 @@ export default defineComponent({
   },
   setup (props, context) {
     const root = context.root;
-    const validationObserver = ref(null);
-    const baseAddressForm = ref(null);
+    const validationObserver = ref<InstanceType<typeof ValidationObserver> | null>(null);
+    const baseAddressForm = ref<InstanceType<typeof OBaseAddressForm> | null>(null);
     const wasFormSubmitted = ref(false);
 
     const { order, isLoading, isError: showNotFound } = useOrderDetails(context, props.orderId);
@@ -156,7 +155,7 @@ export default defineComponent({
     const { validateAndGoToFirstError } = useFormValidation(
       validationObserver,
       () => {
-        const baseAddressFormComponent = baseAddressForm.value as any;
+        const baseAddressFormComponent = baseAddressForm.value;
 
         return {
           ...(baseAddressFormComponent?.$refs || {})
