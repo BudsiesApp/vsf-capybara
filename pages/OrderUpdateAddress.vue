@@ -24,13 +24,25 @@
         class="_title"
       />
 
-      <validation-observer ref="validationObserver" slim>
+      <p
+        class="_existing-validation-warning"
+        v-if="showExistingValidationWarning"
+      >
+        {{ $t('Shipping address could not be validated. Please review and correct it.') }}
+      </p>
+
+      <validation-observer
+        ref="validationObserver"
+        tag="form"
+        class="_form"
+        @submit.native.prevent="onFormSubmit"
+      >
         <o-base-address-form
           ref="baseAddressForm"
           v-model="addressFormModel"
           :is-form-fields-disabled="isSubmitting"
           :is-country-field-disabled="true"
-          :is-state-field-disabled="true"
+          :is-state-field-disabled="isStateFieldDisabled"
           :get-field-anchor-name="getFieldAnchorName"
         />
 
@@ -44,7 +56,7 @@
 
         <div class="_button-container">
           <SfButton
-            @click="onFormSubmit"
+            type="submit"
             :disabled="isSubmitButtonDisabled"
             class="_submit-button"
           >
@@ -57,15 +69,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, watch } from '@vue/composition-api';
+import { defineComponent, ref, watch, computed } from '@vue/composition-api';
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfCheckbox, SfHeading } from '@storefront-ui/vue';
 
 import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 import isAddressesEquals from '@vue-storefront/core/modules/checkout/helpers/is-addresses-equals.function';
+import { AddressExtensionAttributes, getRegionNameByCountryAndRegionId } from '@vue-storefront/core/modules/shared';
 import i18n from '@vue-storefront/i18n';
 
-import { useAddressValidation } from 'src/modules/address';
+import { useAddressValidation, useExistingValidationResult } from 'src/modules/address';
 import { useOrderHistoryOrder, SUBMIT_ORDER_ADDRESS_UPDATE_REQUEST_ACTION } from 'src/modules/orders-history';
 import { OrderAddress } from 'src/modules/orders-history/types/order-address';
 
@@ -92,6 +105,7 @@ export default defineComponent({
     const root = context.root;
     const validationObserver = ref(null);
     const baseAddressForm = ref(null);
+    const wasFormSubmitted = ref(false);
 
     const { order, isLoading, isError: showNotFound } = useOrderHistoryOrder(context, props.orderId);
     const isSubmitting = ref(false);
@@ -112,9 +126,32 @@ export default defineComponent({
 
     const {
       validateAddress,
+      handleValidationResult,
       isValidating: isValidatingAddress,
       completeValidation: completeAddressValidation
     } = useAddressValidation(context);
+
+    const existingExtensionAttributes = computed<AddressExtensionAttributes | undefined>(() => {
+      const _order = (order as any)?.value as Order | undefined;
+      return _order?.shipping_address?.extension_attributes;
+    });
+
+    const {
+      handleExistingValidationResult,
+      validationResult: existingValidationResult
+    } = useExistingValidationResult(
+      existingExtensionAttributes,
+      addressFormModel,
+      handleValidationResult
+    );
+
+    const showExistingValidationWarning = computed<boolean>(() => {
+      if (wasFormSubmitted.value) {
+        return false;
+      }
+
+      return existingValidationResult.value?.verdict === 'FIX' && !!existingExtensionAttributes.value?.validation_warnings;
+    });
 
     const { validateAndGoToFirstError } = useFormValidation(
       validationObserver,
@@ -147,11 +184,17 @@ export default defineComponent({
         region_id: orderAddress.region_id || null,
         zipCode: orderAddress.postcode,
         phoneNumber: orderAddress.telephone || '',
-        vat_id: orderAddress.vat_id || ''
+        vat_id: orderAddress.vat_id || '',
+        extension_attributes: orderAddress.extension_attributes
       };
     }
 
     function mapBaseAddressDetailsToOrderAddress (address: BaseAddressDetails): OrderAddress {
+      // TODO: temporary since API shipping-information resource in cart handle the region differently and it's lead to address hash mismatch
+      const region = address.region_id
+        ? getRegionNameByCountryAndRegionId(address.country, address.region_id)
+        : address.state;
+
       return {
         ...((order as any).value as Order).shipping_address,
         firstname: address.firstName,
@@ -159,11 +202,12 @@ export default defineComponent({
         country_id: address.country,
         street: [address.streetAddress, address.apartmentNumber],
         city: address.city,
-        region: address.state || '',
+        region: region,
         region_id: address.region_id || null,
         postcode: address.zipCode,
         telephone: address.phoneNumber || '',
-        vat_id: address.vat_id || ''
+        vat_id: address.vat_id || '',
+        extension_attributes: address.extension_attributes
       }
     }
 
@@ -179,7 +223,8 @@ export default defineComponent({
         region_id: address.region.region_id || null,
         country: address.country_id,
         phoneNumber: address.telephone || '',
-        vat_id: address.vat_id || ''
+        vat_id: address.vat_id || '',
+        extension_attributes: address.extension_attributes
       }
     }
 
@@ -201,15 +246,23 @@ export default defineComponent({
       }
     });
 
-    watch(
-      order,
-      (newOrder: Order) => {
-        if (newOrder?.shipping_address) {
-          ((addressFormModel as any).value as BaseAddressDetails) = mapOrderAddressToFormModel(newOrder.shipping_address);
-        }
-      },
-      { immediate: true }
-    );
+    const isStateFieldDisabled = computed<boolean>(() => {
+      const _order = (order as any)?.value as Order | undefined;
+
+      if (!_order?.shipping_address) {
+        return false;
+      }
+
+      return !!(_order.shipping_address.region || _order.shipping_address.region_id);
+    });
+
+    async function tryToHandleExistingValidationResult (): Promise<void> {
+      const shouldProceed = await handleExistingValidationResult();
+
+      if (shouldProceed) {
+        return updateAddress();
+      }
+    }
 
     function onFailure (message: string): void {
       root.$store.dispatch('notification/spawnNotification', {
@@ -250,10 +303,29 @@ export default defineComponent({
         default_shipping: defaultAddress.default_shipping,
         default_billing: defaultAddress.default_billing,
         customer_id: defaultAddress.customer_id,
-        vat_id: _addressFormModel.vat_id
+        vat_id: _addressFormModel.vat_id,
+        extension_attributes: _addressFormModel.extension_attributes
       };
 
       await root.$store.dispatch('budsies/updateAddress', { address: addressToUpdate });
+    }
+
+    async function updateAddress (): Promise<void> {
+      isSubmitting.value = true;
+
+      try {
+        await submitOrderAddressUpdateRequest();
+
+        if (shouldUpdateDefaultAddress.value) {
+          await updateDefaultShippingAddress();
+        }
+
+        root.$router.push({ name: 'orders-history' });
+      } catch (error) {
+        onFailure(root.$t('Unable to update order shipping address') as string);
+      } finally {
+        isSubmitting.value = false;
+      }
     }
 
     async function onFormSubmit (): Promise<void> {
@@ -275,27 +347,26 @@ export default defineComponent({
 
       completeAddressValidation();
 
-      isSubmitting.value = true;
-
-      try {
-        await submitOrderAddressUpdateRequest();
-
-        if (shouldUpdateDefaultAddress.value) {
-          await updateDefaultShippingAddress();
-        }
-
-        root.$router.push({ name: 'orders-history' });
-      } catch (error) {
-        onFailure(root.$t('Unable to update order shipping address') as string);
-      } finally {
-        isSubmitting.value = false;
-      }
+      await updateAddress();
+      wasFormSubmitted.value = true;
     }
+
+    watch(
+      order,
+      (newOrder: Order) => {
+        if (newOrder?.shipping_address) {
+          ((addressFormModel as any).value as BaseAddressDetails) = mapOrderAddressToFormModel(newOrder.shipping_address);
+          tryToHandleExistingValidationResult();
+        }
+      },
+      { immediate: true }
+    );
 
     return {
       validationObserver,
       baseAddressForm,
       isLoading,
+      isStateFieldDisabled,
       isSubmitting,
       showNotFound,
       addressFormModel,
@@ -303,7 +374,9 @@ export default defineComponent({
       shouldShowDefaultAddressCheckbox,
       isSubmitButtonDisabled,
       getFieldAnchorName,
-      onFormSubmit
+      onFormSubmit,
+      showExistingValidationWarning,
+      existingExtensionAttributes
     };
   }
 });
@@ -318,8 +391,8 @@ export default defineComponent({
 
   ._title {
     --heading-padding: 0;
+    --heading-margin: 0;
 
-    margin-top: var(--spacer-lg);
     padding: 0 var(--spacer-sm);
   }
 
@@ -329,6 +402,16 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     align-items: center;
+  }
+
+  ._existing-validation-warning {
+    text-align: center;
+    font-size: var(--font-size-base);
+    color: var(--c-text-muted);
+  }
+
+  ._form {
+    margin-top: var(--spacer-xl);
   }
 
   ._order-history-link {
@@ -364,7 +447,7 @@ export default defineComponent({
     margin: 0 auto;
 
     ._title {
-      margin-bottom: var(--spacer-lg);
+      margin-top: var(--spacer-lg);
     }
 
     ._checkbox-container {
@@ -381,7 +464,7 @@ export default defineComponent({
   @media (min-width: $tablet-min) {
     max-width: 1272px;
     width: 100%;
-    margin: 0 auto;
+    margin: auto;
 
     ._button-container {
       display: flex;
