@@ -243,7 +243,7 @@ export default {
           }
         },
         {
-          name: this.$t('Gallery'),
+          name: this.$t('Reviews'),
           link: '/reviews/'
         },
         {
