@@ -25,10 +25,12 @@
       />
 
       <p
-        class="_existing-validation-warning"
         v-if="showExistingValidationWarning"
+        class="_existing-validation-warning"
       >
-        {{ $t('Shipping address could not be validated. Please review and correct it.') }}
+        {{ $t('Your shipping address failed validation.') }}
+        <br>
+        {{ $t('Please review and either fix the address or confirm it is correct.') }}
       </p>
 
       <validation-observer
@@ -188,11 +190,6 @@ export default defineComponent({
     }
 
     function mapBaseAddressDetailsToOrderAddress (address: BaseAddressDetails): OrderAddress {
-      // TODO: temporary since API shipping-information resource in cart handle the region differently and it's lead to address hash mismatch
-      const region = address.region_id
-        ? getRegionNameByCountryAndRegionId(address.country, address.region_id)
-        : address.state;
-
       return {
         ...((order as any).value as Order).shipping_address,
         firstname: address.firstName,
@@ -200,7 +197,7 @@ export default defineComponent({
         country_id: address.country,
         street: [address.streetAddress, address.apartmentNumber],
         city: address.city,
-        region: region,
+        region: address.state || '',
         region_id: address.region_id || null,
         postcode: address.zipCode,
         telephone: address.phoneNumber || '',
@@ -416,7 +413,7 @@ export default defineComponent({
   ._existing-validation-warning {
     text-align: center;
     font-size: var(--font-size-base);
-    color: var(--c-text-muted);
+    color: var(--c-danger-variant);
   }
 
   ._form {
