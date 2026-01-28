@@ -19,7 +19,7 @@
 
     <div v-else class="_form-container">
       <SfHeading
-        :title="$t('Update shipping address')"
+        :title="$t('Update Shipping Address')"
         :level="1"
         class="_title"
       />
@@ -317,6 +317,12 @@ export default defineComponent({
           await updateDefaultShippingAddress();
         }
 
+        root.$store.dispatch('notification/spawnNotification', {
+          type: 'success',
+          message: i18n.t('Shipping address updated successfully'),
+          action1: { label: i18n.t('OK') }
+        });
+
         root.$router.push({ name: 'orders-history' });
       } catch (error) {
         onFailure(root.$t('Unable to update order shipping address') as string);
@@ -375,7 +381,13 @@ export default defineComponent({
       showExistingValidationWarning,
       existingExtensionAttributes
     };
+  },
+  metaInfo (): any {
+    return {
+      title: this.$t('Update Shipping Address')
+    };
   }
+
 });
 </script>
 
