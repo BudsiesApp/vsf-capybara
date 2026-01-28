@@ -40,7 +40,7 @@
         <o-base-address-form
           ref="baseAddressForm"
           v-model="addressFormModel"
-          :is-form-fields-disabled="isSubmitting"
+          :is-form-fields-disabled="isFormDisabled"
           :is-country-field-disabled="true"
           :is-state-field-disabled="isStateFieldDisabled"
           :get-field-anchor-name="getFieldAnchorName"
@@ -57,7 +57,7 @@
         <div class="_button-container">
           <SfButton
             type="submit"
-            :disabled="isSubmitButtonDisabled"
+            :disabled="isFormDisabled"
             class="_submit-button"
           >
             {{ $t('Update Address') }}
@@ -164,7 +164,7 @@ export default defineComponent({
       }
     );
 
-    const isSubmitButtonDisabled = computed<boolean>(() => {
+    const isFormDisabled = computed<boolean>(() => {
       return isSubmitting.value || isValidatingAddress.value;
     });
 
@@ -372,7 +372,7 @@ export default defineComponent({
       addressFormModel,
       shouldUpdateDefaultAddress,
       shouldShowDefaultAddressCheckbox,
-      isSubmitButtonDisabled,
+      isFormDisabled,
       getFieldAnchorName,
       onFormSubmit,
       showExistingValidationWarning,
