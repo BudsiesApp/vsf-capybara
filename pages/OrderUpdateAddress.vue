@@ -79,7 +79,7 @@ import { AddressExtensionAttributes, getRegionNameByCountryAndRegionId } from '@
 import i18n from '@vue-storefront/i18n';
 
 import { useAddressValidation, useExistingValidationResult } from 'src/modules/address';
-import { useOrderDetails, OrderAddress, SUBMIT_ORDER_ADDRESS_UPDATE_REQUEST_ACTION } from 'src/modules/orders-history';
+import { useOrderDetails, OrderAddress, REQUEST_ORDER_SHIPPING_ADDRESS_UPDATE_ACTION } from 'src/modules/orders-history';
 
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 import OBaseAddressForm from 'theme/components/organisms/o-base-address-form.vue';
@@ -271,11 +271,10 @@ export default defineComponent({
       });
     }
 
-    async function submitOrderAddressUpdateRequest (): Promise<void> {
+    async function requestOrderShippingAddressUpdate (): Promise<void> {
       const orderAddressPayload = mapBaseAddressDetailsToOrderAddress((addressFormModel as any).value);
 
-      await root.$store.dispatch(SUBMIT_ORDER_ADDRESS_UPDATE_REQUEST_ACTION, {
-        orderId: props.orderId,
+      await root.$store.dispatch(REQUEST_ORDER_SHIPPING_ADDRESS_UPDATE_ACTION, {
         address: orderAddressPayload
       });
     }
@@ -313,7 +312,7 @@ export default defineComponent({
       isSubmitting.value = true;
 
       try {
-        await submitOrderAddressUpdateRequest();
+        await requestOrderShippingAddressUpdate();
 
         if (shouldUpdateDefaultAddress.value) {
           await updateDefaultShippingAddress();
