@@ -79,11 +79,10 @@ import { AddressExtensionAttributes, getRegionNameByCountryAndRegionId } from '@
 import i18n from '@vue-storefront/i18n';
 
 import { useAddressValidation, useExistingValidationResult } from 'src/modules/address';
-import { useOrderDetails, OrderAddress, REQUEST_ORDER_SHIPPING_ADDRESS_UPDATE_ACTION } from 'src/modules/orders-history';
+import { useOrderDetails, OrderAddress, Order, REQUEST_ORDER_SHIPPING_ADDRESS_UPDATE_ACTION } from 'src/modules/orders-history';
 
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 import OBaseAddressForm from 'theme/components/organisms/o-base-address-form.vue';
-import { Order } from 'src/modules/orders-history/types/order';
 
 export default defineComponent({
   name: 'OrderUpdateAddress',
