@@ -79,7 +79,7 @@ import { AddressExtensionAttributes, getRegionNameByCountryAndRegionId } from '@
 import i18n from '@vue-storefront/i18n';
 
 import { useAddressValidation, useExistingValidationResult } from 'src/modules/address';
-import { useOrderHistoryOrder, SUBMIT_ORDER_ADDRESS_UPDATE_REQUEST_ACTION } from 'src/modules/orders-history';
+import { useOrderDetails, SUBMIT_ORDER_ADDRESS_UPDATE_REQUEST_ACTION } from 'src/modules/orders-history';
 import { OrderAddress } from 'src/modules/orders-history/types/order-address';
 
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
@@ -107,7 +107,7 @@ export default defineComponent({
     const baseAddressForm = ref(null);
     const wasFormSubmitted = ref(false);
 
-    const { order, isLoading, isError: showNotFound } = useOrderHistoryOrder(context, props.orderId);
+    const { order, isLoading, isError: showNotFound } = useOrderDetails(context, props.orderId);
     const isSubmitting = ref(false);
     const addressFormModel = ref<BaseAddressDetails>({
       firstName: '',
@@ -353,7 +353,7 @@ export default defineComponent({
 
     watch(
       order,
-      (newOrder: Order) => {
+      (newOrder: Order | null) => {
         if (newOrder?.shipping_address) {
           ((addressFormModel as any).value as BaseAddressDetails) = mapOrderAddressToFormModel(newOrder.shipping_address);
           tryToHandleExistingValidationResult();

@@ -120,7 +120,7 @@ import { usePersistedVatId } from 'src/modules/persisted-customer-data';
 import {
   SUBMIT_TAX_ID_UPDATE_REQUEST_ACTION,
   Order,
-  useOrderHistoryOrder,
+  useOrderDetails,
   mapOrderAddressToBaseAddressDetails
 } from 'src/modules/orders-history';
 
@@ -168,7 +168,7 @@ export default defineComponent({
     const shouldSaveToDefaultAddress = ref(false);
     const isSubmitting = ref(false);
 
-    const { order, isLoading, isError: error } = useOrderHistoryOrder(context, props.orderId);
+    const { order, isLoading, isError: error } = useOrderDetails(context, props.orderId);
 
     const orderNumber = computed(() => {
       return ((order as any).value as (Order | null))?.increment_id || '';
