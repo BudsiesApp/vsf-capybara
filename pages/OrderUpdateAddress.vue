@@ -60,10 +60,10 @@
           <SfButton
             type="button"
             :disabled="isFormDisabled"
-            class="_use-entered-address-button color-secondary"
-            @click="goToOrderHistory"
+            class="_use-entered-address-button sf-button--text"
+            @click="useWithoutChanges"
           >
-            {{ $t('Use Entered Address') }}
+            {{ $t('Keep Current Address') }}
           </SfButton>
 
           <SfButton
@@ -86,7 +86,7 @@ import { SfButton, SfCheckbox, SfHeading } from '@storefront-ui/vue';
 
 import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 import isAddressesEquals from '@vue-storefront/core/modules/checkout/helpers/is-addresses-equals.function';
-import { AddressExtensionAttributes, getRegionNameByCountryAndRegionId } from '@vue-storefront/core/modules/shared';
+import { AddressExtensionAttributes } from '@vue-storefront/core/modules/shared';
 import i18n from '@vue-storefront/i18n';
 
 import { useAddressValidation, useExistingValidationResult } from 'src/modules/address';
@@ -278,8 +278,8 @@ export default defineComponent({
       });
     }
 
-    async function requestOrderShippingAddressUpdate (): Promise<void> {
-      const orderAddressPayload = mapBaseAddressDetailsToOrderAddress((addressFormModel as any).value);
+    async function requestOrderShippingAddressUpdate (address: BaseAddressDetails): Promise<void> {
+      const orderAddressPayload = mapBaseAddressDetailsToOrderAddress(address);
 
       await root.$store.dispatch(REQUEST_ORDER_SHIPPING_ADDRESS_UPDATE_ACTION, {
         address: orderAddressPayload
@@ -319,7 +319,7 @@ export default defineComponent({
       isSubmitting.value = true;
 
       try {
-        await requestOrderShippingAddressUpdate();
+        await requestOrderShippingAddressUpdate((addressFormModel as any).value);
 
         if (shouldUpdateDefaultAddress.value) {
           await updateDefaultShippingAddress();
@@ -377,6 +377,37 @@ export default defineComponent({
       root.$router.push({ name: AccountPageName.ORDERS_HISTORY });
     }
 
+    async function useWithoutChanges (): Promise<void> {
+      if (isSubmitting.value || !order.value?.shipping_address) {
+        return;
+      }
+
+      isSubmitting.value = true;
+
+      try {
+        const addressToUpdate = mapOrderAddressToFormModel(order.value.shipping_address)
+
+        if (!addressToUpdate.extension_attributes) {
+          addressToUpdate.extension_attributes = {};
+        }
+
+        addressToUpdate.extension_attributes.validation_customer_override = true;
+
+        await requestOrderShippingAddressUpdate(addressToUpdate);
+        goToOrderHistory();
+
+        root.$store.dispatch('notification/spawnNotification', {
+          type: 'success',
+          message: i18n.t('Current address kept'),
+          action1: { label: i18n.t('OK') }
+        });
+      } catch (error) {
+        onFailure(root.$t('Unable to kept current address') as string);
+      } finally {
+        isSubmitting.value = false;
+      }
+    }
+
     return {
       AccountPageName,
       validationObserver,
@@ -393,7 +424,8 @@ export default defineComponent({
       goToOrderHistory,
       onFormSubmit,
       showExistingValidationWarning,
-      existingExtensionAttributes
+      existingExtensionAttributes,
+      useWithoutChanges
     };
   },
   metaInfo (): any {
@@ -500,6 +532,11 @@ export default defineComponent({
       flex-direction: row;
       justify-content: flex-end;
       column-gap: var(--spacer-sm);
+    }
+
+    ._use-entered-address-button,
+    ._submit-button {
+      width: auto;
     }
   }
 }
