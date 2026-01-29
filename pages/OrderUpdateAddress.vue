@@ -58,6 +58,7 @@
 
         <div class="_buttons-container">
           <SfButton
+            v-if="shouldShowKeepCurrentAddressButton"
             type="button"
             :disabled="isFormDisabled"
             class="_use-entered-address-button sf-button--text"
@@ -162,6 +163,11 @@ export default defineComponent({
       }
 
       return existingValidationResult.value?.verdict === 'FIX' && !!existingExtensionAttributes.value?.validation_warnings;
+    });
+
+    const shouldShowKeepCurrentAddressButton = computed(() => {
+      const verdict = existingValidationResult.value?.verdict;
+      return verdict === 'FIX' || verdict === 'CONFIRM' || verdict === 'CONFIRM_ADD_SUBPREMISES';
     });
 
     const { validateAndGoToFirstError } = useFormValidation(
@@ -424,6 +430,7 @@ export default defineComponent({
       goToOrderHistory,
       onFormSubmit,
       showExistingValidationWarning,
+      shouldShowKeepCurrentAddressButton,
       existingExtensionAttributes,
       useWithoutChanges
     };
