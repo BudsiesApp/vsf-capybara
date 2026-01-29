@@ -4,7 +4,7 @@
       <SfHeading :level="4" :title="$t('Order not found')" />
 
       <router-link
-        :to="{ name: 'orders-history' }"
+        :to="{ name: AccountPageName.ORDERS_HISTORY }"
         class="sf-button _order-history-link"
       >
         {{ $t('Go To Order History') }}
@@ -56,7 +56,17 @@
           />
         </div>
 
-        <div class="_button-container">
+        <div class="_buttons-container">
+          <SfButton
+            v-if="shouldShowKeepCurrentAddressButton"
+            type="button"
+            :disabled="isFormDisabled"
+            class="_use-entered-address-button sf-button--text"
+            @click="useWithoutChanges"
+          >
+            {{ $t('Keep Current Address') }}
+          </SfButton>
+
           <SfButton
             type="submit"
             :disabled="isFormDisabled"
@@ -77,7 +87,7 @@ import { SfButton, SfCheckbox, SfHeading } from '@storefront-ui/vue';
 
 import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 import isAddressesEquals from '@vue-storefront/core/modules/checkout/helpers/is-addresses-equals.function';
-import { AddressExtensionAttributes, getRegionNameByCountryAndRegionId } from '@vue-storefront/core/modules/shared';
+import { AddressExtensionAttributes } from '@vue-storefront/core/modules/shared';
 import i18n from '@vue-storefront/i18n';
 
 import { useAddressValidation, useExistingValidationResult } from 'src/modules/address';
@@ -85,6 +95,8 @@ import { useOrderDetails, OrderAddress, Order, REQUEST_ORDER_SHIPPING_ADDRESS_UP
 
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 import OBaseAddressForm from 'theme/components/organisms/o-base-address-form.vue';
+
+import { AccountPageName } from './page-name';
 
 export default defineComponent({
   name: 'OrderUpdateAddress',
@@ -151,6 +163,11 @@ export default defineComponent({
       }
 
       return existingValidationResult.value?.verdict === 'FIX' && !!existingExtensionAttributes.value?.validation_warnings;
+    });
+
+    const shouldShowKeepCurrentAddressButton = computed(() => {
+      const verdict = existingValidationResult.value?.verdict;
+      return verdict === 'FIX' || verdict === 'CONFIRM' || verdict === 'CONFIRM_ADD_SUBPREMISES';
     });
 
     const { validateAndGoToFirstError } = useFormValidation(
@@ -267,8 +284,8 @@ export default defineComponent({
       });
     }
 
-    async function requestOrderShippingAddressUpdate (): Promise<void> {
-      const orderAddressPayload = mapBaseAddressDetailsToOrderAddress((addressFormModel as any).value);
+    async function requestOrderShippingAddressUpdate (address: BaseAddressDetails): Promise<void> {
+      const orderAddressPayload = mapBaseAddressDetailsToOrderAddress(address);
 
       await root.$store.dispatch(REQUEST_ORDER_SHIPPING_ADDRESS_UPDATE_ACTION, {
         address: orderAddressPayload
@@ -308,7 +325,7 @@ export default defineComponent({
       isSubmitting.value = true;
 
       try {
-        await requestOrderShippingAddressUpdate();
+        await requestOrderShippingAddressUpdate((addressFormModel as any).value);
 
         if (shouldUpdateDefaultAddress.value) {
           await updateDefaultShippingAddress();
@@ -320,7 +337,7 @@ export default defineComponent({
           action1: { label: i18n.t('OK') }
         });
 
-        root.$router.push({ name: 'orders-history' });
+        root.$router.push({ name: AccountPageName.ORDERS_HISTORY });
       } catch (error) {
         onFailure(root.$t('Unable to update order shipping address') as string);
       } finally {
@@ -362,7 +379,43 @@ export default defineComponent({
       { immediate: true }
     );
 
+    function goToOrderHistory (): void {
+      root.$router.push({ name: AccountPageName.ORDERS_HISTORY });
+    }
+
+    async function useWithoutChanges (): Promise<void> {
+      if (isSubmitting.value || !order.value?.shipping_address) {
+        return;
+      }
+
+      isSubmitting.value = true;
+
+      try {
+        const addressToUpdate = mapOrderAddressToFormModel(order.value.shipping_address)
+
+        if (!addressToUpdate.extension_attributes) {
+          addressToUpdate.extension_attributes = {};
+        }
+
+        addressToUpdate.extension_attributes.validation_customer_override = true;
+
+        await requestOrderShippingAddressUpdate(addressToUpdate);
+        goToOrderHistory();
+
+        root.$store.dispatch('notification/spawnNotification', {
+          type: 'success',
+          message: i18n.t('Current address kept'),
+          action1: { label: i18n.t('OK') }
+        });
+      } catch (error) {
+        onFailure(root.$t('Unable to kept current address') as string);
+      } finally {
+        isSubmitting.value = false;
+      }
+    }
+
     return {
+      AccountPageName,
       validationObserver,
       baseAddressForm,
       isLoading,
@@ -374,9 +427,12 @@ export default defineComponent({
       shouldShowDefaultAddressCheckbox,
       isFormDisabled,
       getFieldAnchorName,
+      goToOrderHistory,
       onFormSubmit,
       showExistingValidationWarning,
-      existingExtensionAttributes
+      shouldShowKeepCurrentAddressButton,
+      existingExtensionAttributes,
+      useWithoutChanges
     };
   },
   metaInfo (): any {
@@ -459,12 +515,18 @@ export default defineComponent({
     ._checkbox-container {
       margin: var(--spacer-lg) 0;
     }
+  }
 
-    ._button-container {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: var(--spacer-base);
-    }
+  ._buttons-container {
+    display: flex;
+    flex-direction: column-reverse;
+    row-gap: var(--spacer-sm);
+    margin-top: var(--spacer-base);
+  }
+
+  ._use-entered-address-button,
+  ._submit-button {
+    width: 100%;
   }
 
   @media (min-width: $tablet-min) {
@@ -472,11 +534,14 @@ export default defineComponent({
     width: 100%;
     margin: auto;
 
-    ._button-container {
+    ._buttons-container {
       display: flex;
+      flex-direction: row;
       justify-content: flex-end;
+      column-gap: var(--spacer-sm);
     }
 
+    ._use-entered-address-button,
     ._submit-button {
       width: auto;
     }
