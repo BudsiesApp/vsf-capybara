@@ -384,14 +384,14 @@ export default defineComponent({
     }
 
     async function useWithoutChanges (): Promise<void> {
-      if (isSubmitting.value || !order.value?.shipping_address) {
+      if (isSubmitting.value || !(order as any).value?.shipping_address) {
         return;
       }
 
       isSubmitting.value = true;
 
       try {
-        const addressToUpdate = mapOrderAddressToFormModel(order.value.shipping_address)
+        const addressToUpdate = mapOrderAddressToFormModel((order as any).value.shipping_address)
 
         if (!addressToUpdate.extension_attributes) {
           addressToUpdate.extension_attributes = {};
