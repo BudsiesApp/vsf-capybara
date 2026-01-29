@@ -69,13 +69,7 @@ import { SfBreadcrumbs, SfHeading, SfList } from '@storefront-ui/vue';
 import MyAccount from '@vue-storefront/core/pages/MyAccount';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 
-const RouteNames = {
-  ADDRESS_BOOK_LIST: 'address-book-list',
-  ADDRESS_BOOK_EDIT: 'address-book-edit',
-  ADDRESS_BOOK_ADD: 'address-book-add',
-  ORDERS_HISTORY: 'orders-history',
-  MY_ACCOUNT: 'profile'
-}
+import { AccountPageName } from './page-name';
 
 export default {
   components: {
@@ -86,8 +80,7 @@ export default {
   mixins: [MyAccount],
   data () {
     return {
-      RouteNames
-
+      AccountPageName
     };
   },
   computed: {
@@ -96,19 +89,19 @@ export default {
         {
           icon: 'shipping',
           label: this.$t('Order history'),
-          link: { name: RouteNames.ORDERS_HISTORY },
+          link: { name: AccountPageName.ORDERS_HISTORY },
           class: '-orders-history'
         },
         {
           icon: 'profile',
           label: this.$t('Profile'),
-          link: { name: RouteNames.MY_ACCOUNT },
+          link: { name: AccountPageName.MY_ACCOUNT },
           class: '-profile'
         },
         {
           icon: 'home',
           label: this.$t('Address book'),
-          link: { name: RouteNames.ADDRESS_BOOK_LIST },
+          link: { name: AccountPageName.ADDRESS_BOOK_LIST },
           class: '-address-book'
         }
       ];
@@ -125,64 +118,64 @@ export default {
           text: this.$t('My account'),
           route: {
             link: {
-              name: RouteNames.ORDERS_HISTORY
+              name: AccountPageName.ORDERS_HISTORY
             }
           }
         }
       ];
 
-      if (this.$route.name === RouteNames.ORDERS_HISTORY) {
+      if (this.$route.name === AccountPageName.ORDERS_HISTORY) {
         breadcrumbs.push({
           text: this.$t('Order history'),
           route: {
             link: {
-              name: RouteNames.ORDERS_HISTORY
+              name: AccountPageName.ORDERS_HISTORY
             }
           }
         });
       }
 
-      if (this.$route.name === RouteNames.MY_ACCOUNT) {
+      if (this.$route.name === AccountPageName.MY_ACCOUNT) {
         breadcrumbs.push({
           text: this.$t('My profile'),
           route: {
             link: {
-              name: RouteNames.MY_ACCOUNT
+              name: AccountPageName.MY_ACCOUNT
             }
           }
         });
       }
 
       if (
-        [RouteNames.ADDRESS_BOOK_LIST, RouteNames.ADDRESS_BOOK_EDIT, RouteNames.ADDRESS_BOOK_ADD].includes(this.$route.name)
+        [AccountPageName.ADDRESS_BOOK_LIST, AccountPageName.ADDRESS_BOOK_EDIT, AccountPageName.ADDRESS_BOOK_ADD].includes(this.$route.name)
       ) {
         breadcrumbs.push({
           text: this.$t('Address book'),
           route: {
             link: {
-              name: RouteNames.ADDRESS_BOOK_LIST
+              name: AccountPageName.ADDRESS_BOOK_LIST
             }
           }
         });
       }
 
-      if (this.$route.name === RouteNames.ADDRESS_BOOK_EDIT) {
+      if (this.$route.name === AccountPageName.ADDRESS_BOOK_EDIT) {
         breadcrumbs.push({
           text: this.$t('Edit address'),
           route: {
             link: {
-              name: RouteNames.ADDRESS_BOOK_EDIT
+              name: AccountPageName.ADDRESS_BOOK_EDIT
             }
           }
         });
       }
 
-      if (this.$route.name === RouteNames.ADDRESS_BOOK_ADD) {
+      if (this.$route.name === AccountPageName.ADDRESS_BOOK_ADD) {
         breadcrumbs.push({
           text: this.$t('Add new address'),
           route: {
             link: {
-              name: RouteNames.ADDRESS_BOOK_ADD
+              name: AccountPageName.ADDRESS_BOOK_ADD
             }
           }
         });
@@ -192,15 +185,15 @@ export default {
     },
     mobileTitle () {
       switch (this.$route.name) {
-        case RouteNames.ADDRESS_BOOK_LIST:
+        case AccountPageName.ADDRESS_BOOK_LIST:
           return this.$t('Address book');
-        case RouteNames.ORDERS_HISTORY:
+        case AccountPageName.ORDERS_HISTORY:
           return this.$t('Order history');
-        case RouteNames.MY_ACCOUNT:
+        case AccountPageName.MY_ACCOUNT:
           return this.$t('My profile');
-        case RouteNames.ADDRESS_BOOK_ADD:
+        case AccountPageName.ADDRESS_BOOK_ADD:
           return this.$t('Add new address');
-        case RouteNames.ADDRESS_BOOK_EDIT:
+        case AccountPageName.ADDRESS_BOOK_EDIT:
           return this.$t('Edit address');
         default:
           return this.$t('My Account');
