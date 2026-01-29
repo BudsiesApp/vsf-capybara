@@ -4,7 +4,7 @@
       <SfHeading :level="4" :title="$t('Order not found')" />
 
       <router-link
-        :to="{ name: 'orders-history' }"
+        :to="{ name: AccountPageName.ORDERS_HISTORY }"
         class="sf-button _order-history-link"
       >
         {{ $t('Go To Order History') }}
@@ -56,7 +56,16 @@
           />
         </div>
 
-        <div class="_button-container">
+        <div class="_buttons-container">
+          <SfButton
+            type="button"
+            :disabled="isFormDisabled"
+            class="_use-entered-address-button color-secondary"
+            @click="goToOrderHistory"
+          >
+            {{ $t('Use Entered Address') }}
+          </SfButton>
+
           <SfButton
             type="submit"
             :disabled="isFormDisabled"
@@ -85,6 +94,8 @@ import { useOrderDetails, OrderAddress, Order, REQUEST_ORDER_SHIPPING_ADDRESS_UP
 
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 import OBaseAddressForm from 'theme/components/organisms/o-base-address-form.vue';
+
+import { AccountPageName } from './page-name';
 
 export default defineComponent({
   name: 'OrderUpdateAddress',
@@ -320,7 +331,7 @@ export default defineComponent({
           action1: { label: i18n.t('OK') }
         });
 
-        root.$router.push({ name: 'orders-history' });
+        root.$router.push({ name: AccountPageName.ORDERS_HISTORY });
       } catch (error) {
         onFailure(root.$t('Unable to update order shipping address') as string);
       } finally {
@@ -362,7 +373,12 @@ export default defineComponent({
       { immediate: true }
     );
 
+    function goToOrderHistory (): void {
+      root.$router.push({ name: AccountPageName.ORDERS_HISTORY });
+    }
+
     return {
+      AccountPageName,
       validationObserver,
       baseAddressForm,
       isLoading,
@@ -374,6 +390,7 @@ export default defineComponent({
       shouldShowDefaultAddressCheckbox,
       isFormDisabled,
       getFieldAnchorName,
+      goToOrderHistory,
       onFormSubmit,
       showExistingValidationWarning,
       existingExtensionAttributes
@@ -459,12 +476,18 @@ export default defineComponent({
     ._checkbox-container {
       margin: var(--spacer-lg) 0;
     }
+  }
 
-    ._button-container {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: var(--spacer-base);
-    }
+  ._buttons-container {
+    display: flex;
+    flex-direction: column-reverse;
+    row-gap: var(--spacer-sm);
+    margin-top: var(--spacer-base);
+  }
+
+  ._use-entered-address-button,
+  ._submit-button {
+    width: 100%;
   }
 
   @media (min-width: $tablet-min) {
@@ -472,13 +495,11 @@ export default defineComponent({
     width: 100%;
     margin: auto;
 
-    ._button-container {
+    ._buttons-container {
       display: flex;
+      flex-direction: row;
       justify-content: flex-end;
-    }
-
-    ._submit-button {
-      width: auto;
+      column-gap: var(--spacer-sm);
     }
   }
 }
