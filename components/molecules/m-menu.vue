@@ -302,11 +302,6 @@ export default Vue.extend({
     const menu: any = this.$refs.menu;
     menu.active = menu.items;
     menu._computedWatchers.isMobile = undefined;
-  },
-  methods: {
-    getScrollingElement () {
-      return (this.$refs['menu'] as Vue).$el;
-    }
   }
 })
 </script>
@@ -383,7 +378,6 @@ export default Vue.extend({
       --mega-menu-margin: var(--spacer-base) var(--spacer-2xl) 0 0;
       --list-item-margin: var(--spacer-sm) 0 0 0;
       --mega-menu-column-title-margin: 0 0 var(--spacer-sm) 0;
-
     }
   }
 }
