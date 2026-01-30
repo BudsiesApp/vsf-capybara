@@ -20,10 +20,12 @@ import { InjectType } from 'src/modules/shared';
 import { ComponentWidthCalculator, SizeValue } from 'src/modules/vsf-storyblok-module';
 
 import MZoomGallery from 'theme/components/molecules/m-zoom-gallery.vue';
-import ZoomGalleryImage from 'theme/interfaces/zoom-gallery-image.interface';
+import ZoomGalleryAsset from 'theme/interfaces/zoom-gallery-asset.interface';
+import { getZoomGalleryAssetForVideoData } from 'theme/helpers/get-zoom-gallery-asset-for-video-data.function';
 
 import { Blok } from 'src/modules/vsf-storyblok-module/components'
 import SliderData from './interfaces/slider-data.interface';
+import { isVideoData } from './interfaces/video-data.interface';
 import { ThumbnailsPosition } from './interfaces/thumbnails-position.value';
 import generateBreakpointsSpecs from './generate-breakpoints-specs';
 import generateImageSourcesList from './generate-image-sources-list';
@@ -45,9 +47,20 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     itemData (): SliderData {
       return this.item as SliderData;
     },
-    slides (): ZoomGalleryImage[] {
-      const slides = [];
+    slides (): ZoomGalleryAsset[] {
+      const slides: ZoomGalleryAsset[] = [];
+
       for (const sliderItem of this.itemData.slider_items) {
+        if (isVideoData(sliderItem)) {
+          const videoSlide = getZoomGalleryAssetForVideoData(sliderItem);
+
+          if (videoSlide) {
+            slides.push(videoSlide);
+          }
+
+          continue;
+        }
+
         if (!sliderItem.image.filename) {
           continue;
         }
@@ -83,7 +96,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
           brakpointsList[SizeValue.xlarge]
         )
 
-        const slide: ZoomGalleryImage = {
+        const slide: ZoomGalleryAsset = {
           thumb: thumb.sourceItems,
           thumbFallback: thumb.fallbackSourceItem,
           stage: stage.sourceItems,
