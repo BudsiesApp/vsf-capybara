@@ -32,6 +32,25 @@
       </SfMegaMenuColumn>
 
       <SfMegaMenuColumn
+        :title="$t('Educators')"
+        class="mobile-only"
+      >
+        <SfList>
+          <SfListItem
+            v-for="item in educatorsItems"
+            :key="item.label"
+          >
+            <router-link
+              :to="item.url"
+              @click.native="$emit('close')"
+            >
+              <SfMenuItem :label="item.label" icon="" />
+            </router-link>
+          </SfListItem>
+        </SfList>
+      </SfMegaMenuColumn>
+
+      <SfMegaMenuColumn
         :title="$t('Apparel')"
       >
         <SfList>
@@ -154,6 +173,26 @@ export default Vue.extend({
         {
           label: this.$t('Specialty Commissions'),
           url: '/commissions/'
+        }
+      ],
+      educatorsItems: [
+        {
+          label: this.$t('Classroom Budsies'),
+          url: {
+            name: 'simple-product',
+            params: {
+              parentSku: 'classroomSelfie'
+            }
+          }
+        },
+        {
+          label: this.$t('Classroom Selfies'),
+          url: {
+            name: 'simple-product',
+            params: {
+              parentSku: 'classroomSelfie'
+            }
+          }
         }
       ],
       householdItems: [

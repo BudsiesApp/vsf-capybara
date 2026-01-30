@@ -2,7 +2,7 @@
   <div class="o-header">
     <SfOverlay
       class="overlay"
-      :visible="isHoveredMenu || isSearchPanelVisible"
+      :visible="isHoveredMenu || isEducatorsMenuHovered || isSearchPanelVisible"
       @click="$store.commit('ui/setSearchpanel', false)"
     />
     <SfHeader
@@ -31,6 +31,22 @@
             @close="onMainMenuClose"
           />
         </SfHeaderNavigationItem>
+
+        <SfHeaderNavigationItem
+          @mouseover="onEducatorsMenuMouseOver"
+          @mouseleave="isEducatorsMenuHovered = false"
+          class="_educators-menu"
+        >
+          <div class="o-header__submenu">
+            Educators
+          </div>
+
+          <MEducatorsMenu
+            :visible="isEducatorsMenuHovered && !isSearchPanelVisible"
+            @close="onEducatorsMenuClose"
+          />
+        </SfHeaderNavigationItem>
+
         <SfHeaderNavigationItem>
           <router-link
             :to="{ name: 'gift-cards' }"
@@ -43,13 +59,6 @@
             to="/reviews/"
           >
             Reviews
-          </router-link>
-        </SfHeaderNavigationItem>
-        <SfHeaderNavigationItem>
-          <router-link
-            to="/pricing/"
-          >
-            Pricing
           </router-link>
         </SfHeaderNavigationItem>
 
@@ -80,6 +89,7 @@ import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
 import { mapState, mapGetters } from 'vuex';
 import MMenu from 'theme/components/molecules/m-menu';
+import MEducatorsMenu from 'theme/components/molecules/m-educators-menu';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
 export default {
@@ -90,6 +100,7 @@ export default {
     AAccountIcon,
     ADetailedCartIcon,
     MMenu,
+    MEducatorsMenu,
     SfOverlay,
     MCtaButton,
     CurrencySelector
@@ -97,7 +108,8 @@ export default {
   data () {
     return {
       isHoveredMenu: false,
-      isMouseOverLocked: false
+      isMouseOverLocked: false,
+      isEducatorsMenuHovered: false
     }
   },
   computed: {
@@ -124,6 +136,12 @@ export default {
     async onMainMenuTransitionEnd () {
       await this.$nextTick();
       this.isMouseOverLocked = false;
+    },
+    onEducatorsMenuClose () {
+      this.isEducatorsMenuHovered = false;
+    },
+    onEducatorsMenuMouseOver () {
+      this.isEducatorsMenuHovered = true;
     }
   }
 };
@@ -182,7 +200,8 @@ export default {
     }
 
     &:hover {
-      .m-menu {
+      .m-menu,
+      .m-educators-menu {
         opacity: 1;
         visibility: visible;
       }
