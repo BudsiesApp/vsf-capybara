@@ -32,6 +32,25 @@
       </SfMegaMenuColumn>
 
       <SfMegaMenuColumn
+        :title="$t('Educators')"
+        class="mobile-only"
+      >
+        <SfList>
+          <SfListItem
+            v-for="item in educatorsItems"
+            :key="item.label"
+          >
+            <router-link
+              :to="item.url"
+              @click.native="$emit('close')"
+            >
+              <SfMenuItem :label="item.label" icon="" />
+            </router-link>
+          </SfListItem>
+        </SfList>
+      </SfMegaMenuColumn>
+
+      <SfMegaMenuColumn
         :title="$t('Apparel')"
       >
         <SfList>
@@ -156,6 +175,26 @@ export default Vue.extend({
           url: '/commissions/'
         }
       ],
+      educatorsItems: [
+        {
+          label: this.$t('Classroom Budsies'),
+          url: {
+            name: 'simple-product',
+            params: {
+              parentSku: 'classroomSelfie'
+            }
+          }
+        },
+        {
+          label: this.$t('Classroom Selfies'),
+          url: {
+            name: 'simple-product',
+            params: {
+              parentSku: 'classroomSelfie'
+            }
+          }
+        }
+      ],
       householdItems: [
         {
           label: this.$t('Pillows'),
@@ -263,11 +302,6 @@ export default Vue.extend({
     const menu: any = this.$refs.menu;
     menu.active = menu.items;
     menu._computedWatchers.isMobile = undefined;
-  },
-  methods: {
-    getScrollingElement () {
-      return (this.$refs['menu'] as Vue).$el;
-    }
   }
 })
 </script>
@@ -344,7 +378,6 @@ export default Vue.extend({
       --mega-menu-margin: var(--spacer-base) var(--spacer-2xl) 0 0;
       --list-item-margin: var(--spacer-sm) 0 0 0;
       --mega-menu-column-title-margin: 0 0 var(--spacer-sm) 0;
-
     }
   }
 }
