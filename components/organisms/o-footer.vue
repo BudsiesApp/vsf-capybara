@@ -1,5 +1,5 @@
 <template>
-  <footer class="o-footer">
+  <div class="o-footer">
     <div class="o-footer__logo" />
     <div class="o-footer__slogan">
       Handmade pet keepsakes
@@ -88,7 +88,7 @@
         </template>
       </div>
     </SfFooter>
-  </footer>
+  </div>
 </template>
 
 <script>
@@ -440,6 +440,12 @@ export default {
 
     ._services-column {
       --_footer-column-width: auto;
+
+      ._column-list {
+        display: grid;
+        grid-template-rows: repeat(9, auto);
+        grid-auto-flow: column;
+      }
     }
 
     ._column-list {
