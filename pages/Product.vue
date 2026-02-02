@@ -88,6 +88,7 @@ export default {
     return {
       stock: {
         isLoading: false,
+        isLoaded: false,
         max: 0,
         manageQuantity: true,
         isInStock: false
@@ -237,11 +238,14 @@ export default {
     async getQuantity () {
       if (this.stock.isLoading) return; // stock info is already loading
       this.stock.isLoading = true;
+      this.stock.isLoaded = false;
+
       try {
         const res = await this.$store.dispatch('stock/check', {
           product: this.getCurrentProduct,
           qty: this.getCurrentProduct.qty
         });
+        this.stock.isLoaded = true;
         this.stock.manageQuantity = !!res.isManageStock;
         this.stock.max = res.isManageStock ? res.qty : null;
         this.stock.isInStock = res.isInStock;
