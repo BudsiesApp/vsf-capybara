@@ -1,5 +1,5 @@
 <template>
-  <footer class="o-footer">
+  <div class="o-footer">
     <SfFooter :column="5" :multiple="true" class="_footer">
       <SfFooterColumn :title="$t('Industry Awards')" class="desktop-only">
         <div class="_awards-container">
@@ -101,7 +101,7 @@
         </div>
       </template>
     </div>
-  </footer>
+  </div>
 </template>
 
 <script>
