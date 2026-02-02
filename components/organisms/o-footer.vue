@@ -1,5 +1,5 @@
 <template>
-  <footer class="o-footer">
+  <div class="o-footer">
     <div class="o-footer__logo" />
     <SfFooter :column="6" :multiple="true">
       <SfFooterColumn
@@ -76,7 +76,7 @@
         </template>
       </div>
     </SfFooter>
-  </footer>
+  </div>
 </template>
 
 <script>
