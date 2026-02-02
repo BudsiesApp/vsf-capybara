@@ -1,6 +1,6 @@
 
 <template>
-  <footer class="o-footer">
+  <div class="o-footer">
     <SfFooter
       :column="5"
       :multiple="true"
@@ -85,7 +85,7 @@
         </div>
       </template>
     </div>
-  </footer>
+  </div>
 </template>
 
 <script>

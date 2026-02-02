@@ -81,6 +81,10 @@ export default Vue.extend({
       return !this.isOnline || this.stock.isInStock || !this.stock.manageQuantity
     },
     alert () {
+      if (!this.stock.isLoaded) {
+        return false;
+      }
+
       if (this.qtyValidationError) {
         return {
           type: 'danger',
@@ -93,6 +97,7 @@ export default Vue.extend({
           message: this.$t('Selected variant is out of stock')
         }
       }
+
       return false
     }
   },
