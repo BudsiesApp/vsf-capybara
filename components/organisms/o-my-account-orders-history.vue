@@ -5,6 +5,7 @@
         <div v-if="showOrdersHistoryList" class="_content">
           <orders-history-list
             :orders="activeOrdersList"
+            :alteration-products="alterationProductsByOrderItemId"
             :title="$t('Active Orders')"
             v-if="activeOrdersList.length"
           />
@@ -13,6 +14,7 @@
 
           <orders-history-list
             :orders="completedOrdersList"
+            :alteration-products="alterationProductsByOrderItemId"
             :title="$t('Completed Orders')"
             v-if="completedOrdersList.length"
           />
@@ -38,7 +40,11 @@
 import { defineComponent, computed } from '@vue/composition-api';
 import { SfLoader, SfTabs } from '@storefront-ui/vue';
 
-import { OrdersHistoryList, useOrderHistoryList } from 'src/modules/orders-history';
+import {
+  OrdersHistoryList,
+  useOrderHistoryList,
+  useAlterationProductsLoader
+} from 'src/modules/orders-history';
 
 import OrdersHistorySuggestedItems from 'src/themes/petsies-capybara/components/orders-history/orders-history-suggested-items.vue';
 
@@ -59,6 +65,20 @@ export default defineComponent({
       ordersList
     } = useOrderHistoryList(context);
 
+    const allOrderItems = computed(() => {
+      const items = [];
+
+      for (const order of ordersList.value) {
+        items.push(...order.items);
+      }
+
+      return items;
+    });
+
+    const {
+      alterationProductsByOrderItemId
+    } = useAlterationProductsLoader(allOrderItems);
+
     const showLoadingIndicator = computed<boolean>(() => {
       return isLoading.value && !isError.value;
     });
@@ -71,6 +91,7 @@ export default defineComponent({
 
     return {
       activeOrdersList,
+      alterationProductsByOrderItemId,
       completedOrdersList,
       isError,
       isLoading,
