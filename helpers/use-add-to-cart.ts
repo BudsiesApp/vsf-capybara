@@ -14,7 +14,8 @@ export function useAddToCart (
   customizationStateItems: Ref<CustomizationStateItem[]>,
   bundleOptions: Ref<Record<number, SelectedBundleOption>>,
   existingCartItem: Ref<CartItem | undefined>,
-  { root }: SetupContext
+  { root }: SetupContext,
+  existingPlushieId?: string
 ) {
   const isSubmitting = ref<boolean>(false);
 
@@ -49,7 +50,8 @@ export function useAddToCart (
       qty: quantity.value,
       product_option: productOption,
       extension_attributes: {
-        customization_state: filterCustomizationState(customizationStateItems.value)
+        customization_state: filterCustomizationState(customizationStateItems.value),
+        plushie_id: existingPlushieId
       }
     };
 
@@ -92,7 +94,8 @@ export function useAddToCart (
       product_option: productOption,
       extension_attributes: {
         ...existingCartItem.value.extension_attributes,
-        customization_state: filterCustomizationState(customizationStateItems.value)
+        customization_state: filterCustomizationState(customizationStateItems.value),
+        plushie_id: existingPlushieId
       }
     };
 

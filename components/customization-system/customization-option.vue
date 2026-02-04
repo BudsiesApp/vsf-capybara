@@ -40,7 +40,7 @@
         :error="errors[0]"
         :is-disabled="isDisabled"
         :is="widget.component"
-        :values-in-cart="valuesInCart"
+        :disabled-option-values="disabledOptionValues"
         v-bind="widget.props"
         v-model="selectedOption"
         @widget-busy-changed="onWidgetBusyChanged"
@@ -144,14 +144,13 @@ export default defineComponent({
       type: String as PropType<string | undefined>,
       default: undefined
     },
-    // TODO: mock
-    valuesInCart: {
-      type: Array as PropType<string[]>,
-      default: () => []
+    disabledOptionValues: {
+      type: Object as PropType<{ids: string[], message: string} | undefined>,
+      default: undefined
     }
   },
   setup (props, context) {
-    const { customization, disableValidation, fieldNamePrefix, optionValues, productId, value } = toRefs(props);
+    const { customization, disableValidation, fieldNamePrefix, optionValues, productId, value, disabledOptionValues } = toRefs(props);
 
     const optionLabel = computed<string>(() => {
       return customization.value.title || customization.value.name;
@@ -185,7 +184,8 @@ export default defineComponent({
         customization,
         optionValues,
         productId,
-        context
+        context,
+        disabledOptionValues
       ),
       ...useWidgetBusyState(
         customization,

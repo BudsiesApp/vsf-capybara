@@ -183,6 +183,7 @@ import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
 import { CartItemConfiguration, getCustomizationSystemThumbnail } from 'src/modules/customization-system';
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
+import isAlterationProduct from 'src/modules/shared/helpers/is-alteration-product.function';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
@@ -549,6 +550,10 @@ export default {
       }
     },
     showQuantitySelectorForProduct (product) {
+      if (isAlterationProduct(product.id)) {
+        return false;
+      }
+
       return getProductMaxSaleQuantity(product) > 1;
     },
     syncQuantity () {

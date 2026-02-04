@@ -3,13 +3,13 @@
     <ul class="_list">
       <li
         class="_item"
-        :disabled="isDisabled || valuesInCart.includes(optionValue.id)"
+        :disabled="isDisabled || disabledOptionValues.ids.includes(optionValue.id)"
         v-for="optionValue in sortedValues"
         :key="optionValue.id"
       >
         <m-checkbox
           class="_checkbox"
-          :disabled="isDisabled || valuesInCart.includes(optionValue.id)"
+          :disabled="isDisabled || disabledOptionValues.ids.includes(optionValue.id)"
           :valid="isValid"
           :value="optionValue.id"
           v-model="selectedOption"
@@ -33,8 +33,8 @@
                   {{ optionValue.name }}
                 </div>
 
-                <div class="_price" v-if="valuesInCart.includes(optionValue.id)">
-                  {{ $t('Added to Cart') }}
+                <div class="_price" v-if="disabledOptionValues.message && disabledOptionValues.ids.includes(optionValue.id)">
+                  {{ disabledOptionValues.message }}
                 </div>
 
                 <div
@@ -140,10 +140,9 @@ export default defineComponent({
       type: Array as PropType<OptionValue[]>,
       default: () => []
     },
-    // TODO: mock
-    valuesInCart: {
-      type: Array as PropType<string[]>,
-      default: () => []
+    disabledOptionValues: {
+      type: Object as PropType<{ids: string[], message: string}>,
+      default: () => ({ ids: [], message: '' })
     }
   },
   setup (props, context) {
