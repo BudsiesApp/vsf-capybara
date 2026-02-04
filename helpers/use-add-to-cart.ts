@@ -40,7 +40,7 @@ export function useAddToCart (
     const productOption = setBundleProductOptionsAsync(
       null,
       {
-        product: existingCartItem.value,
+        product: product.value,
         bundleOptions: bundleOptions.value
       }
     );
