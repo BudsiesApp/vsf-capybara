@@ -48,6 +48,8 @@ import {
 
 import OrdersHistorySuggestedItems from 'src/themes/petsies-capybara/components/orders-history/orders-history-suggested-items.vue';
 
+import AlterationProductForm from 'theme/components/customization-system/forms/alteration-product-form.vue';
+
 export default defineComponent({
   name: 'OMyAccountOrdersHistory',
   components: {
@@ -55,6 +57,9 @@ export default defineComponent({
     SfTabs,
     OrdersHistoryList,
     OrdersHistorySuggestedItems
+  },
+  provide: {
+    AlterationProductForm
   },
   setup (_, context) {
     const {
