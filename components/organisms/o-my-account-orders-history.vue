@@ -5,7 +5,7 @@
         <div v-if="showOrdersHistoryList" class="_content">
           <orders-history-list
             :orders="activeOrdersList"
-            :alteration-products="alterationProductsByOrderItemId"
+            :alteration-products="alterationProductByOrderItemId"
             :title="$t('Active Orders')"
             v-if="activeOrdersList.length"
           />
@@ -14,7 +14,7 @@
 
           <orders-history-list
             :orders="completedOrdersList"
-            :alteration-products="alterationProductsByOrderItemId"
+            :alteration-products="alterationProductByOrderItemId"
             :title="$t('Completed Orders')"
             v-if="completedOrdersList.length"
           />
@@ -81,7 +81,7 @@ export default defineComponent({
     });
 
     const {
-      alterationProductsByOrderItemId
+      alterationProductByOrderItemId
     } = useAlterationProductsLoader(allOrderItems, context);
 
     const showLoadingIndicator = computed<boolean>(() => {
@@ -96,7 +96,7 @@ export default defineComponent({
 
     return {
       activeOrdersList,
-      alterationProductsByOrderItemId,
+      alterationProductByOrderItemId,
       completedOrdersList,
       isError,
       isLoading,
