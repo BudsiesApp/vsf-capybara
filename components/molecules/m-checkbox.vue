@@ -18,6 +18,7 @@
         :disabled="disabled"
         class="sf-checkbox__input"
         @change="inputHandler"
+        @click="onClick"
       >
       <!-- @slot Custom check mark markup -->
       <slot name="checkmark" v-bind="{ isChecked, disabled }">
@@ -107,6 +108,15 @@ export default {
     }
   },
   methods: {
+    onClick () {
+      if (this.inputType !== 'radio') {
+        return;
+      }
+
+      if (this.selected === this.value) {
+        this.$emit('change', undefined);
+      }
+    },
     inputHandler () {
       if (typeof this.selected === 'boolean') {
         this.$emit('change', !this.selected);

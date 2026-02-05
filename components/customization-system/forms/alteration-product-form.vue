@@ -251,8 +251,7 @@ export default defineComponent({
       optionValuesFilter
     } = useAlterationProductCustomizations(
       orderItem,
-      alterationProduct,
-      existingCartItem
+      alterationProduct
     );
 
     const { customizationDisableConfigById } = useExistingCartItemCustomizationsDisable(
