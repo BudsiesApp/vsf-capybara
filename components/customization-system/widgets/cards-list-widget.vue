@@ -3,13 +3,13 @@
     <ul class="_list">
       <li
         class="_item"
-        :disabled="isDisabled || disabledOptionValues.ids.includes(optionValue.id)"
+        :disabled="isDisabled || disabledOptionValueById[optionValue.id]"
         v-for="optionValue in sortedValues"
         :key="optionValue.id"
       >
         <m-checkbox
           class="_checkbox"
-          :disabled="isDisabled || disabledOptionValues.ids.includes(optionValue.id)"
+          :disabled="isDisabled || disabledOptionValueById[optionValue.id]"
           :valid="isValid"
           :value="optionValue.id"
           v-model="selectedOption"
@@ -33,8 +33,11 @@
                   {{ optionValue.name }}
                 </div>
 
-                <div class="_price" v-if="disabledOptionValues.message && disabledOptionValues.ids.includes(optionValue.id)">
-                  {{ disabledOptionValues.message }}
+                <div
+                  class="_price"
+                  v-if="customizationDisableConfig && customizationDisableConfig.message && disabledOptionValueById[optionValue.id]"
+                >
+                  {{ customizationDisableConfig.message }}
                 </div>
 
                 <div
@@ -94,6 +97,7 @@
 <script lang="ts">
 import {
   computed,
+  ComputedRef,
   defineComponent,
   PropType,
   toRefs
@@ -103,6 +107,7 @@ import { getThumbnailPath } from '@vue-storefront/core/helpers';
 
 import { BaseImage } from 'src/modules/budsies';
 import {
+  CustomizationDisableConfig,
   OptionValue,
   useListWidget,
   useOptionValuesPrice,
@@ -140,9 +145,9 @@ export default defineComponent({
       type: Array as PropType<OptionValue[]>,
       default: () => []
     },
-    disabledOptionValues: {
-      type: Object as PropType<{ids: string[], message: string}>,
-      default: () => ({ ids: [], message: '' })
+    customizationDisableConfig: {
+      type: Object as PropType<CustomizationDisableConfig | undefined>,
+      default: undefined
     }
   },
   setup (props, context) {
@@ -161,7 +166,22 @@ export default defineComponent({
 
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
 
+    const disabledOptionValueById: ComputedRef<Record<string, boolean>> = computed(() => {
+      const result: Record<string, boolean> = {};
+
+      if (!props.customizationDisableConfig) {
+        return result;
+      }
+
+      for (const id of props.customizationDisableConfig.disabledOptionValuesIds) {
+        result[id] = true;
+      }
+
+      return result;
+    });
+
     return {
+      disabledOptionValueById,
       getItemImage,
       isValid,
       ...listWidgetFields,

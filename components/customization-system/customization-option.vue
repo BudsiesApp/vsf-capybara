@@ -40,7 +40,6 @@
         :error="errors[0]"
         :is-disabled="isDisabled"
         :is="widget.component"
-        :disabled-option-values="disabledOptionValues"
         v-bind="widget.props"
         v-model="selectedOption"
         @widget-busy-changed="onWidgetBusyChanged"
@@ -67,6 +66,7 @@ import { ValidationProvider } from 'vee-validate';
 
 import {
   Customization,
+  CustomizaitonDisableConfig,
   CustomizationOptionValue,
   OptionValue,
   useCustomizationOptionValidation,
@@ -144,13 +144,13 @@ export default defineComponent({
       type: String as PropType<string | undefined>,
       default: undefined
     },
-    disabledOptionValues: {
-      type: Object as PropType<{ids: string[], message: string} | undefined>,
+    customizationDisableConfig: {
+      type: Object as PropType<CustomizaitonDisableConfig | undefined>,
       default: undefined
     }
   },
   setup (props, context) {
-    const { customization, disableValidation, fieldNamePrefix, optionValues, productId, value, disabledOptionValues } = toRefs(props);
+    const { customization, disableValidation, fieldNamePrefix, optionValues, productId, value, customizationDisableConfig } = toRefs(props);
 
     const optionLabel = computed<string>(() => {
       return customization.value.title || customization.value.name;
@@ -185,7 +185,7 @@ export default defineComponent({
         optionValues,
         productId,
         context,
-        disabledOptionValues
+        customizationDisableConfig
       ),
       ...useWidgetBusyState(
         customization,
