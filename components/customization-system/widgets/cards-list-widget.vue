@@ -12,6 +12,7 @@
           :disabled="isDisabled || disabledOptionValueById[optionValue.id]"
           :valid="isValid"
           :value="optionValue.id"
+          :input-type="inputType"
           v-model="selectedOption"
         >
           <template #checkmark="{ isChecked }">
