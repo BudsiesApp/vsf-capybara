@@ -141,7 +141,7 @@ import {
   useCustomizationsOptionsDefaultValue,
   useCustomizationState,
   useEntityBusyState,
-  useExistingCartItemCustomizationsDisable,
+  useExistingCartItemCustomizationsDisabling,
   useOptionValueActions
 } from 'src/modules/customization-system';
 import {
@@ -255,7 +255,7 @@ export default defineComponent({
       alterationProduct
     );
 
-    const { customizationDisableConfigById } = useExistingCartItemCustomizationsDisable(
+    const { customizationDisableConfigById } = useExistingCartItemCustomizationsDisabling(
       availableCustomizations,
       existingCartItemCustomizationOptionValue,
       context.root.$t('Added to Cart').toString()
