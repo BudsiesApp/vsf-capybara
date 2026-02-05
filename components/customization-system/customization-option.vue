@@ -66,7 +66,7 @@ import { ValidationProvider } from 'vee-validate';
 
 import {
   Customization,
-  CustomizaitonDisableConfig,
+  CustomizationDisableConfig,
   CustomizationOptionValue,
   OptionValue,
   useCustomizationOptionValidation,
@@ -145,7 +145,7 @@ export default defineComponent({
       default: undefined
     },
     customizationDisableConfig: {
-      type: Object as PropType<CustomizaitonDisableConfig | undefined>,
+      type: Object as PropType<CustomizationDisableConfig | undefined>,
       default: undefined
     }
   },

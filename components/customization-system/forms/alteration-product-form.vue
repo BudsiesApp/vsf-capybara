@@ -137,12 +137,11 @@ import {
   useAvailableCustomizations,
   useAvailableOptionsValuesFilter,
   useCustomizationsBundleOptions,
-  useCollapsedCustomizationsView,
   useCustomizationsFilter,
   useCustomizationsOptionsDefaultValue,
   useCustomizationState,
   useEntityBusyState,
-  useExistingcartItemCustomizationsDisable,
+  useExistingCartItemCustomizationsDisable,
   useOptionValueActions
 } from 'src/modules/customization-system';
 import {
@@ -152,6 +151,7 @@ import {
 } from 'src/modules/orders-history';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
+import { useCollapsedCustomizationsView } from 'theme/helpers/use-collapsed-customizations-view';
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
@@ -255,7 +255,7 @@ export default defineComponent({
       existingCartItem
     );
 
-    const { customizationDisableConfigById } = useExistingcartItemCustomizationsDisable(
+    const { customizationDisableConfigById } = useExistingCartItemCustomizationsDisable(
       availableCustomizations,
       existingCartItemCustomizationOptionValue,
       context.root.$t('Added to Cart').toString()

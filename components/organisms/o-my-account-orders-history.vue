@@ -82,7 +82,7 @@ export default defineComponent({
 
     const {
       alterationProductsByOrderItemId
-    } = useAlterationProductsLoader(allOrderItems);
+    } = useAlterationProductsLoader(allOrderItems, context);
 
     const showLoadingIndicator = computed<boolean>(() => {
       return isLoading.value && !isError.value;
