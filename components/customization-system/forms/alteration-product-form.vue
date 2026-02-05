@@ -146,9 +146,10 @@ import {
 } from 'src/modules/customization-system';
 import {
   canOrderItemHaveUpgrades,
-  OrderItem,
-  useAlterationProductCustomizations
+  OrderItem
 } from 'src/modules/orders-history';
+
+import { useAlterationProductCustomizations } from 'theme/helpers/use-alteration-product-customizations';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useCollapsedCustomizationsView } from 'theme/helpers/use-collapsed-customizations-view';
