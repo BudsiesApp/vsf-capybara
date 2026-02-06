@@ -12,15 +12,7 @@
 
       <template v-if="collapsedViewItems.length > 0">
         <SfButton
-          v-if="!isExpanded"
-          class="sf-button--text"
-          @click="onShowDetailsClick"
-        >
-          {{ $t('Show More') }}
-        </SfButton>
-
-        <SfButton
-          v-else
+          v-if="isExpanded"
           class="sf-button--text"
           @click="onHideDetailsClick"
         >
@@ -42,7 +34,8 @@
           :image-width="144"
           :image-height="144"
           class="_product"
-          @click.native.prevent="onShowDetailsClick"
+          :class="{ '-show-more': item.isShowMore }"
+          @click.native.prevent="onCollapsedViewItemClick(item)"
         />
       </div>
     </div>
@@ -127,7 +120,9 @@ import {
 } from '@vue/composition-api';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 import { ValidationObserver } from 'vee-validate';
+
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
+import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 
 import {
   Customization,
@@ -152,7 +147,7 @@ import {
 import { useAlterationProductCustomizations } from 'theme/helpers/use-alteration-product-customizations';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
-import { useCollapsedCustomizationsView } from 'theme/helpers/use-collapsed-customizations-view';
+import { useCollapsedCustomizationsView, CollapsedViewItem } from 'theme/helpers/use-collapsed-customizations-view';
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
@@ -238,6 +233,7 @@ export default defineComponent({
 
     const {
       availableCustomizations,
+      availableCustomization: availableCustomizationDictionary,
       availableOptionValues,
       customizationAvailableOptionValues
     } = useAvailableCustomizations(
@@ -367,7 +363,10 @@ export default defineComponent({
       return hasAvailableUpgrades.value;
     });
 
-    const { collapsedViewItems } = useCollapsedCustomizationsView(
+    const {
+      collapsedViewItems,
+      getCollapsedViewItemCustomizationOptionValue
+    } = useCollapsedCustomizationsView(
       filteredCustomizations,
       existingCartItemCustomizationOptionValue,
       filteredOptionValuesIdsByCustomizationId,
@@ -397,6 +396,20 @@ export default defineComponent({
       isExpanded.value = false;
     }
 
+    function onCollapsedViewItemClick (item: CollapsedViewItem) {
+      if (item.isShowMore) {
+        onShowDetailsClick();
+        return;
+      }
+
+      const value = getCollapsedViewItemCustomizationOptionValue(
+        item,
+        availableCustomizationDictionary.value,
+        customizationOptionValue.value
+      );
+      onCustomizationOptionInput(value);
+    }
+
     async function onAddToCart () {
       if (!canAddToCart.value || isSubmitting.value) {
         return;
@@ -408,7 +421,31 @@ export default defineComponent({
         return;
       }
 
-      await addToCartHandler();
+      try {
+        await addToCartHandler();
+
+        const notification = {
+          type: 'info',
+          message: context.root.$t('Upgrades were added to the cart').toString(),
+          timeToLive: 10 * 1000,
+          action1: { label: context.root.$t('OK') },
+          action2: {
+            label: context.root.$t('Proceed to checkout'),
+            action: () => context.root.$router.push({ name: 'checkout' })
+          }
+        };
+
+        context.root.$store.dispatch(
+          'notification/spawnNotification',
+          notification
+        );
+      } catch (error) {
+        context.root.$store.dispatch('notification/spawnNotification', {
+          type: 'danger',
+          message: (error as Error).message,
+          action1: { label: context.root.$t('OK') }
+        });
+      }
     }
 
     return {
@@ -424,6 +461,7 @@ export default defineComponent({
       isSomeEntityBusy,
       isSubmitting,
       onAddToCart,
+      onCollapsedViewItemClick,
       onCustomizationOptionInput,
       onEntityBusyChanged,
       onHideDetailsClick,
@@ -482,6 +520,13 @@ export default defineComponent({
     --product-card-title-font-line-height: 1.2;
 
     max-width: 160px;
+
+    &.-show-more {
+      --product-card-height: 100%;
+
+      text-align: center;
+      height: 100%;
+    }
 
     ::v-deep {
       .sf-product-card {
@@ -560,6 +605,8 @@ export default defineComponent({
     --customization-option-description-display: none;
 
     &.-widget-CardsListWidget {
+      --image-container-max-height: 120px;
+
       width: 100%;
 
       ::v-deep {

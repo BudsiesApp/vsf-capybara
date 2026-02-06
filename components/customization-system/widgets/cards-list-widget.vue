@@ -284,6 +284,7 @@ export default defineComponent({
     ._image-container {
       position: relative;
       display: flex;
+      max-height: var(--image-container-max-height, auto);
     }
 
     ._image {

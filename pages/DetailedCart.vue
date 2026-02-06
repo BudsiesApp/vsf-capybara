@@ -23,7 +23,7 @@
                 :image="getThumbnailForProductExtend(product)"
                 image-width="140"
                 image-height="140"
-                :title="product.name"
+                :title="productTitle[getCartItemKey(product)]"
                 class="sf-collected-product--detailed collected-product"
               >
                 <template #image="{image}">
@@ -410,6 +410,22 @@ export default {
     },
     selectedCurrency () {
       return this.$store.getters[GET_ACTIVE_CURRENCY];
+    },
+    productTitle () {
+      const result = {};
+
+      for (const cartItem of this.products) {
+        const key = getCartItemKey(cartItem);
+        result[key] = cartItem.name;
+
+        if (!isAlterationProduct(cartItem.id) || !cartItem.extension_attributes?.plushie_id) {
+          continue;
+        }
+
+        result[key] += ` (#${cartItem.extension_attributes.plushie_id})`;
+      }
+
+      return result;
     }
   },
   async mounted () {

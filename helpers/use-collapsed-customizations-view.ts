@@ -6,7 +6,9 @@ import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { Customization, CustomizationOptionValue, isFileUploadValue } from 'src/modules/customization-system';
 import { getOptionValuePrice } from 'src/modules/customization-system/helpers/get-option-value-price';
 
-interface CollapsedViewItem {
+import dotsIcon from 'theme/assets/images/dots-icon.svg';
+
+export interface CollapsedViewItem {
   id: string,
   title: string,
   image: string,
@@ -14,7 +16,9 @@ interface CollapsedViewItem {
     regular: string,
     special: string | null
   },
-  link: string
+  link: string,
+  customizationId: string,
+  isShowMore: boolean
 }
 
 const COLLAPSED_VIEW_MAX_ITEMS = 4;
@@ -91,15 +95,76 @@ export function useCollapsedCustomizationsView (
           title: optionValue.name || '',
           image: getThumbnailPath(optionValue.thumbnailUrl, 144, 144, ''),
           price,
-          link: ''
+          link: '',
+          customizationId: customization.id,
+          isShowMore: false
         });
       }
     }
 
-    return values.slice(0, COLLAPSED_VIEW_MAX_ITEMS);
+    const sliced = values.slice(0, COLLAPSED_VIEW_MAX_ITEMS - 1);
+
+    sliced.push(
+      {
+        id: 'show_more',
+        title: root.$t('Show more').toString(),
+        image: dotsIcon,
+        price: {
+          regular: '',
+          special: null
+        },
+        link: '',
+        customizationId: 'show_more',
+        isShowMore: true
+      }
+    );
+
+    return sliced;
   });
 
+  function getCollapsedViewItemCustomizationOptionValue (
+    collapsedViewItem: CollapsedViewItem,
+    availableCustomizationDictionary: Record<string, Customization>,
+    customizationOptionValue: Record<string, CustomizationOptionValue>
+  ): {
+      customizationId: string,
+      value: CustomizationOptionValue
+    } {
+    let value: CustomizationOptionValue;
+    const customization = availableCustomizationDictionary[collapsedViewItem.customizationId];
+    const isOptionValueArray = !customization.optionData?.maxValuesCount || (customization.optionData?.maxValuesCount && customization.optionData.maxValuesCount > 1);
+    const selectedCustomizationOptionValue = customizationOptionValue[collapsedViewItem.customizationId];
+
+    if (!selectedCustomizationOptionValue) {
+      return {
+        customizationId: collapsedViewItem.customizationId,
+        value: isOptionValueArray ? [collapsedViewItem.id] : collapsedViewItem.id
+      };
+    }
+
+    if (isFileUploadValue(selectedCustomizationOptionValue)) {
+      return {
+        customizationId: collapsedViewItem.customizationId,
+        value: selectedCustomizationOptionValue
+      };
+    }
+
+    if (isOptionValueArray) {
+      value = Array.isArray(selectedCustomizationOptionValue)
+        ? [...selectedCustomizationOptionValue, collapsedViewItem.id]
+        : [selectedCustomizationOptionValue, collapsedViewItem.id];
+    } else {
+      value = collapsedViewItem.id;
+    }
+
+    return {
+      customizationId: collapsedViewItem.customizationId,
+      value
+    }
+  }
+
   return {
-    collapsedViewItems
+    collapsedViewItems,
+    getCollapsedViewItemCustomizationOptionValue
   }
 }
