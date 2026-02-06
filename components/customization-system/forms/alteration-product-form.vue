@@ -378,8 +378,9 @@ export default defineComponent({
     }
 
     function onCollapsedViewItemClick (item: CollapsedViewItem) {
+      onShowDetailsClick();
+
       if (item.isShowMore) {
-        onShowDetailsClick();
         return;
       }
 
