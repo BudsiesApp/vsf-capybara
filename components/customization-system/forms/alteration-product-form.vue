@@ -43,68 +43,67 @@
     <div
       class="_content"
       :class="{ '-expanded': isExpanded || collapsedViewItems.length == 0 }"
-      :style="contentStyle"
-      @transitionend="onTransitionEnd"
-      ref="contentBlock"
     >
-      <validation-observer
-        v-slot="{ errors: formErrors }"
-        tag="form"
-        ref="validationObserver"
-        @submit.prevent.native="onAddToCart"
-      >
-        <div
-          class="_customization"
-          v-for="customization in filteredCustomizations"
-          :key="customization.id"
+      <div class="_content-inner">
+        <validation-observer
+          v-slot="{ errors: formErrors }"
+          tag="form"
+          ref="validationObserver"
+          @submit.prevent.native="onAddToCart"
         >
-          <customization-option
-            class="_customization-option"
-            ref="customizationOption"
-            :customization="customization"
-            :is-disabled="isSomeEntityBusy || isSubmitting"
-            :option-values="filteredOptionValues[customization.id]"
-            :product-id="alterationProduct ? Number(alterationProduct.id) : 0"
-            :value="customizationOptionValue[customization.id]"
-            :disable-validation="false"
-            :added-to-cart-message-config="addedToCartMessageConfigByCustomizationId[customization.id]"
-            @input="onCustomizationOptionInput"
-            @customization-option-busy-state-changed="onEntityBusyChanged"
+          <div
+            class="_customization"
+            v-for="customization in filteredCustomizations"
+            :key="customization.id"
           >
-            <template #label="{label, isFieldRequired}">
-              <label
-                class="_option-label"
-                :class="{ '-required': isFieldRequired && !addedToCartMessageConfigByCustomizationId[customization.id].isCustomizationAlreadyInCart}"
-              >
-                {{ label }}
-
-                <span
-                  class="_disabled-hint"
-                  v-if="addedToCartMessageConfigByCustomizationId[customization.id].isCustomizationAlreadyInCart"
+            <customization-option
+              class="_customization-option"
+              ref="customizationOption"
+              :customization="customization"
+              :is-disabled="isSomeEntityBusy || isSubmitting"
+              :option-values="filteredOptionValues[customization.id]"
+              :product-id="alterationProduct ? Number(alterationProduct.id) : 0"
+              :value="customizationOptionValue[customization.id]"
+              :disable-validation="false"
+              :added-to-cart-message-config="addedToCartMessageConfigByCustomizationId[customization.id]"
+              @input="onCustomizationOptionInput"
+              @customization-option-busy-state-changed="onEntityBusyChanged"
+            >
+              <template #label="{label, isFieldRequired}">
+                <label
+                  class="_option-label"
+                  :class="{ '-required': isFieldRequired && !addedToCartMessageConfigByCustomizationId[customization.id].isCustomizationAlreadyInCart}"
                 >
-                  {{ addedToCartMessageConfigByCustomizationId[customization.id].message }}
-                </span>
-              </label>
-            </template>
-          </customization-option>
-        </div>
+                  {{ label }}
 
-        <m-form-errors
-          class="_form-errors"
-          :form-errors="formErrors"
-          @item-click="goToFieldByName"
-        />
+                  <span
+                    class="_disabled-hint"
+                    v-if="addedToCartMessageConfigByCustomizationId[customization.id].isCustomizationAlreadyInCart"
+                  >
+                    {{ addedToCartMessageConfigByCustomizationId[customization.id].message }}
+                  </span>
+                </label>
+              </template>
+            </customization-option>
+          </div>
 
-        <div class="_buttons">
-          <SfButton
-            class="_add-to-cart color-primary"
-            type="submit"
-            :disabled="!canAddToCart || isSubmitting"
-          >
-            {{ addToCartButtonText }}
-          </SfButton>
-        </div>
-      </validation-observer>
+          <m-form-errors
+            class="_form-errors"
+            :form-errors="formErrors"
+            @item-click="goToFieldByName"
+          />
+
+          <div class="_buttons">
+            <SfButton
+              class="_add-to-cart color-primary"
+              type="submit"
+              :disabled="!canAddToCart || isSubmitting"
+            >
+              {{ addToCartButtonText }}
+            </SfButton>
+          </div>
+        </validation-observer>
+      </div>
     </div>
   </div>
 </template>
@@ -193,12 +192,7 @@ export default defineComponent({
   setup (props, context) {
     const { orderItem, alterationProduct } = toRefs(props);
     const isExpanded = ref(false);
-    const contentBlock: Ref<HTMLElement | null> = ref(null);
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
-    const contentStyle: Ref<Record<string, string>> = ref({
-      '--content-max-height': '0px',
-      '--content-max-height-collapsed': '0px'
-    });
 
     const plushieId = computed<string | undefined>(() => {
       return orderItem.value.plushie_id?.toString();
@@ -354,23 +348,8 @@ export default defineComponent({
       return context.root.$t('Add to Cart').toString();
     });
 
-    function onTransitionEnd () {
-      contentStyle.value = {
-        '--content-max-height': 'auto',
-        '--content-max-height-collapsed': '0px'
-      };
-    }
-
     function onShowDetailsClick () {
       isExpanded.value = true;
-
-      if (contentBlock.value) {
-        const scrollHeight = contentBlock.value.scrollHeight;
-        contentStyle.value = {
-          '--content-max-height': `${scrollHeight}px`,
-          '--content-max-height-collapsed': '0px'
-        };
-      }
     }
 
     function onHideDetailsClick () {
@@ -436,8 +415,6 @@ export default defineComponent({
       addToCartButtonText,
       canAddToCart,
       collapsedViewItems,
-      contentStyle,
-      contentBlock,
       filteredOptionValues,
       customizationOptionValue,
       isExpanded,
@@ -449,7 +426,6 @@ export default defineComponent({
       onEntityBusyChanged,
       onHideDetailsClick,
       onShowDetailsClick,
-      onTransitionEnd,
       showBlock,
       filteredCustomizations,
       validationObserver
@@ -536,12 +512,10 @@ export default defineComponent({
   }
 
   ._content {
-    display: flex;
-    flex-direction: column;
-    row-gap: var(--spacer-base);
-    max-height: var(--content-max-height-collapsed);
-    overflow: hidden;
-    position: relative;
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 300ms ease-in-out;
+    position: relative; // Keep position for the pseudo-element
 
     &::after {
       content: '';
@@ -554,14 +528,19 @@ export default defineComponent({
     }
 
     &.-expanded {
-      max-height: var(--content-max-height);
-      will-change: max-height;
-      transition: max-height 0.3s ease;
+      grid-template-rows: 1fr;
 
       &::after {
         display: none;
       }
     }
+  }
+
+  ._content-inner {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--spacer-base);
   }
 
   ._customization,
