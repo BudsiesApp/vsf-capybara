@@ -62,27 +62,27 @@
             class="_customization-option"
             ref="customizationOption"
             :customization="customization"
-            :is-disabled="isSomeEntityBusy || isSubmitting || customizationDisableConfigById[customization.id].isDisabled"
+            :is-disabled="isSomeEntityBusy || isSubmitting"
             :option-values="filteredOptionValues[customization.id]"
             :product-id="alterationProduct ? Number(alterationProduct.id) : 0"
             :value="customizationOptionValue[customization.id]"
             :disable-validation="false"
-            :customization-disable-config="customizationDisableConfigById[customization.id]"
+            :added-to-cart-message-config="addedToCartMessageConfigByCustomizationId[customization.id]"
             @input="onCustomizationOptionInput"
             @customization-option-busy-state-changed="onEntityBusyChanged"
           >
             <template #label="{label, isFieldRequired}">
               <label
                 class="_option-label"
-                :class="{ '-required': isFieldRequired && !customizationDisableConfigById[customization.id].isDisabled}"
+                :class="{ '-required': isFieldRequired && !addedToCartMessageConfigByCustomizationId[customization.id].isCustomizationAlreadyInCart}"
               >
                 {{ label }}
 
                 <span
                   class="_disabled-hint"
-                  v-if="customizationDisableConfigById[customization.id].isDisabled"
+                  v-if="addedToCartMessageConfigByCustomizationId[customization.id].isCustomizationAlreadyInCart"
                 >
-                  {{ customizationDisableConfigById[customization.id].message }}
+                  {{ addedToCartMessageConfigByCustomizationId[customization.id].message }}
                 </span>
               </label>
             </template>
@@ -101,7 +101,7 @@
             type="submit"
             :disabled="!canAddToCart || isSubmitting"
           >
-            {{ $t('Add to Cart') }}
+            {{ addToCartButtonText }}
           </SfButton>
         </div>
       </validation-observer>
@@ -122,7 +122,6 @@ import { SfButton, SfHeading } from '@storefront-ui/vue';
 import { ValidationObserver } from 'vee-validate';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
-import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 
 import {
   Customization,
@@ -136,7 +135,7 @@ import {
   useCustomizationsOptionsDefaultValue,
   useCustomizationState,
   useEntityBusyState,
-  useExistingCartItemCustomizationsDisabling,
+  useExistingCartItemAddedToCartMessage,
   useOptionValueActions
 } from 'src/modules/customization-system';
 import {
@@ -251,7 +250,7 @@ export default defineComponent({
       alterationProduct
     );
 
-    const { customizationDisableConfigById } = useExistingCartItemCustomizationsDisabling(
+    const { addedToCartMessageConfigByCustomizationId } = useExistingCartItemAddedToCartMessage(
       availableCustomizations,
       existingCartItemCustomizationOptionValue,
       context.root.$t('Added to Cart').toString()
@@ -318,33 +317,7 @@ export default defineComponent({
     );
 
     const canAddToCart = computed<boolean>(() => {
-      if (selectedOptionValuesIds.value.length === 0) {
-        return false;
-      }
-
-      const existingCartItemCustomizationState = existingCartItem.value?.extension_attributes?.customization_state || [];
-      const existingCartItemOptionValuesId: Record<string, boolean> = {};
-
-      for (const item of existingCartItemCustomizationState) {
-        if (isFileUploadValue(item.value)) {
-          continue;
-        }
-
-        if (Array.isArray(item.value)) {
-          for (const value of item.value) {
-            existingCartItemOptionValuesId[value] = true;
-          }
-          continue;
-        }
-
-        existingCartItemOptionValuesId[item.value] = true;
-      }
-
-      if (Object.keys(existingCartItemOptionValuesId).length === 0) {
-        return selectedOptionValuesIds.value.length > 0;
-      }
-
-      return selectedOptionValuesIds.value.some((id) => !existingCartItemOptionValuesId[id]);
+      return selectedOptionValuesIds.value.length !== 0;
     });
 
     const hasAvailableUpgrades = computed<boolean>(() => {
@@ -372,6 +345,14 @@ export default defineComponent({
       filteredOptionValuesIdsByCustomizationId,
       context
     );
+
+    const addToCartButtonText = computed<string>(() => {
+      if (existingCartItem.value) {
+        return context.root.$t('Update Cart').toString();
+      }
+
+      return context.root.$t('Add to Cart').toString();
+    });
 
     function onTransitionEnd () {
       contentStyle.value = {
@@ -450,11 +431,12 @@ export default defineComponent({
 
     return {
       ...formValidation,
+      addedToCartMessageConfigByCustomizationId,
+      addToCartButtonText,
       canAddToCart,
       collapsedViewItems,
       contentStyle,
       contentBlock,
-      customizationDisableConfigById,
       filteredOptionValues,
       customizationOptionValue,
       isExpanded,

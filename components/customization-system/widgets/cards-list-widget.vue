@@ -3,13 +3,13 @@
     <ul class="_list">
       <li
         class="_item"
-        :disabled="isDisabled || disabledOptionValueById[optionValue.id]"
+        :disabled="isDisabled"
         v-for="optionValue in sortedValues"
         :key="optionValue.id"
       >
         <m-checkbox
           class="_checkbox"
-          :disabled="isDisabled || disabledOptionValueById[optionValue.id]"
+          :disabled="isDisabled"
           :valid="isValid"
           :value="optionValue.id"
           :input-type="inputType"
@@ -36,9 +36,9 @@
 
                 <div
                   class="_price"
-                  v-if="customizationDisableConfig && customizationDisableConfig.message && disabledOptionValueById[optionValue.id]"
+                  v-if="addedToCartMessageConfig && addedToCartMessageConfig.message && addedToCartOptionValueById[optionValue.id]"
                 >
-                  {{ customizationDisableConfig.message }}
+                  {{ addedToCartMessageConfig.message }}
                 </div>
 
                 <div
@@ -108,7 +108,7 @@ import { getThumbnailPath } from '@vue-storefront/core/helpers';
 
 import { BaseImage } from 'src/modules/budsies';
 import {
-  CustomizationDisableConfig,
+  CustomizationAddedToCartMessageConfig,
   OptionValue,
   useListWidget,
   useOptionValuesPrice,
@@ -146,8 +146,8 @@ export default defineComponent({
       type: Array as PropType<OptionValue[]>,
       default: () => []
     },
-    customizationDisableConfig: {
-      type: Object as PropType<CustomizationDisableConfig | undefined>,
+    addedToCartMessageConfig: {
+      type: Object as PropType<CustomizationAddedToCartMessageConfig | undefined>,
       default: undefined
     }
   },
@@ -167,14 +167,14 @@ export default defineComponent({
 
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
 
-    const disabledOptionValueById: ComputedRef<Record<string, boolean>> = computed(() => {
+    const addedToCartOptionValueById: ComputedRef<Record<string, boolean>> = computed(() => {
       const result: Record<string, boolean> = {};
 
-      if (!props.customizationDisableConfig) {
+      if (!props.addedToCartMessageConfig) {
         return result;
       }
 
-      for (const id of props.customizationDisableConfig.disabledOptionValuesIds) {
+      for (const id of props.addedToCartMessageConfig.optionValueIdsAlreadyInCart) {
         result[id] = true;
       }
 
@@ -182,7 +182,7 @@ export default defineComponent({
     });
 
     return {
-      disabledOptionValueById,
+      addedToCartOptionValueById,
       getItemImage,
       isValid,
       ...listWidgetFields,
