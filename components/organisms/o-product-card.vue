@@ -39,6 +39,17 @@
           </span>
         </h3>
       </template>
+
+      <template #price v-if="isAddedToCart">
+        <div class="added-to-cart">
+          <SfIcon
+            icon="check"
+            size="xs"
+            class="added-to-cart__icon"
+          />
+          <span class="added-to-cart__text">In Cart</span>
+        </div>
+      </template>
     </SfProductCard>
   </div>
 </template>
@@ -46,14 +57,15 @@
 <script lang="ts">
 import { defineComponent, computed, inject } from '@vue/composition-api';
 import config from 'config';
-import { SfProductCard } from '@storefront-ui/vue';
+import { SfProductCard, SfIcon } from '@storefront-ui/vue';
 import BaseImage from 'src/modules/budsies/components/BaseImage.vue';
 
 export default defineComponent({
   name: 'OProductCard',
   components: {
     BaseImage,
-    SfProductCard
+    SfProductCard,
+    SfIcon
   },
   props: {
     imageWidth: {
@@ -83,6 +95,10 @@ export default defineComponent({
     turnaroundTime: {
       type: Number,
       default: undefined
+    },
+    isAddedToCart: {
+      type: Boolean,
+      default: false
     }
   },
   setup (props) {
@@ -138,6 +154,20 @@ $border-width: 2px;
 
   @include for-tablet-up {
     --o-product-card-badge-size: 58px;
+  }
+
+  .added-to-cart {
+    display: flex;
+    align-items: center;
+    color: var(--c-primary);
+    font-size: var(--font-sm);
+    font-weight: var(--font-bold);
+    margin-top: var(--spacer-xs);
+
+    &__icon {
+      --icon-color: var(--c-primary);
+      margin-right: var(--spacer-xs);
+    }
   }
 }
 </style>

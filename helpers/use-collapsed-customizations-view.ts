@@ -15,7 +15,8 @@ export interface CollapsedViewItem {
     special: string | null
   },
   link: string,
-  customizationId: string
+  customizationId: string,
+  isAddedToCart: boolean
 }
 
 export function useCollapsedCustomizationsView (
@@ -73,18 +74,14 @@ export function useCollapsedCustomizationsView (
           special: null
         };
 
-        if (isInCart) {
-          price.regular = root.$t('Added').toString();
-        } else {
-          const productPrice = getOptionValuePrice(
-            optionValue,
-            productBySkuDictionary,
-            productPriceDictionary
-          );
+        const productPrice = getOptionValuePrice(
+          optionValue,
+          productBySkuDictionary,
+          productPriceDictionary
+        );
 
-          if (productPrice) {
-            price = PriceHelper.formatProductPrice(productPrice, selectedCurrency.symbol);
-          }
+        if (productPrice) {
+          price = PriceHelper.formatProductPrice(productPrice, selectedCurrency.symbol);
         }
 
         values.push({
@@ -93,7 +90,8 @@ export function useCollapsedCustomizationsView (
           image: getThumbnailPath(optionValue.thumbnailUrl, 300, 300, ''),
           price,
           link: '',
-          customizationId: customization.id
+          customizationId: customization.id,
+          isAddedToCart: isInCart
         });
       }
     }

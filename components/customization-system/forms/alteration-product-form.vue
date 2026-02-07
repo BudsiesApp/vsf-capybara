@@ -35,6 +35,7 @@
           :key="item.id"
           :product="item"
           :wishlist-icon="false"
+          :is-added-to-cart="item.isAddedToCart"
           :image-width="300"
           :image-height="300"
           class="_product -upgrade"
