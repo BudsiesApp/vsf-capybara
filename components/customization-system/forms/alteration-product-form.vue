@@ -25,18 +25,36 @@
       class="_collapsed-preview"
       :class="{ '-hidden': isExpanded || collapsedViewItems.length == 0 }"
     >
-      <div class="_products">
+      <div
+        class="_products"
+        :class="{ '-has-more-desktop': hasMoreDesktop, '-has-more-mobile': hasMoreMobile }"
+        :style="gridStyle"
+      >
         <o-product-card
-          v-for="item in collapsedViewItems"
+          v-for="(item, index) in collapsedViewItems"
           :key="item.id"
           :product="item"
           :wishlist-icon="false"
-          :image-width="144"
-          :image-height="144"
-          class="_product"
-          :class="{ '-show-more': item.isShowMore }"
+          :image-width="300"
+          :image-height="300"
+          class="_product -upgrade"
+          :class="{ '-hidden-desktop': isItemHiddenOnDesktop(index), '-hidden-mobile': isItemHiddenOnMobile(index) }"
           @click.native.prevent="onCollapsedViewItemClick(item)"
         />
+        <div
+          class="_show-more-tile"
+          @click="onShowDetailsClick"
+        >
+          <span>
+            {{ $t('More') }}<br>
+            {{ $t('Upgrades') }}
+          </span>
+          <SfIcon
+            icon="chevron_down"
+            size="xxs"
+            view-box="0 0 24 24"
+          />
+        </div>
       </div>
     </div>
 
@@ -117,7 +135,7 @@ import {
   ref,
   toRefs
 } from '@vue/composition-api';
-import { SfButton, SfHeading } from '@storefront-ui/vue';
+import { SfButton, SfHeading, SfIcon } from '@storefront-ui/vue';
 import { ValidationObserver } from 'vee-validate';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -177,6 +195,7 @@ export default defineComponent({
     OProductCard,
     SfButton,
     SfHeading,
+    SfIcon,
     ValidationObserver
   },
   props: {
@@ -359,10 +378,6 @@ export default defineComponent({
     function onCollapsedViewItemClick (item: CollapsedViewItem) {
       onShowDetailsClick();
 
-      if (item.isShowMore) {
-        return;
-      }
-
       const value = getCollapsedViewItemCustomizationOptionValue(
         item,
         availableCustomizationDictionary.value,
@@ -409,6 +424,27 @@ export default defineComponent({
       }
     }
 
+    const DESKTOP_TILES_CAP = 6;
+    const MOBILE_TILES_CAP = 3;
+    const hasMoreDesktop = computed(() => collapsedViewItems.value.length > DESKTOP_TILES_CAP);
+    const hasMoreMobile = computed(() => collapsedViewItems.value.length > MOBILE_TILES_CAP);
+
+    const gridStyle = {
+      '--desktop-cols': DESKTOP_TILES_CAP,
+      '--mobile-cols': MOBILE_TILES_CAP
+    };
+
+    function isItemHiddenOnDesktop (index: number) {
+      // If we have more items than desktop cap, we need to make room for "More Upgrades" tile
+      // So we show (CAP - 1) items, and hide the rest.
+      // Index is 0-based. So if CAP is 6, we show 0,1,2,3,4. Index 5+ are hidden.
+      return index >= (DESKTOP_TILES_CAP - 1);
+    }
+
+    function isItemHiddenOnMobile (index: number) {
+      return index >= (MOBILE_TILES_CAP - 1);
+    }
+
     return {
       ...formValidation,
       addedToCartMessageConfigByCustomizationId,
@@ -428,7 +464,12 @@ export default defineComponent({
       onShowDetailsClick,
       showBlock,
       filteredCustomizations,
-      validationObserver
+      validationObserver,
+      hasMoreDesktop,
+      hasMoreMobile,
+      isItemHiddenOnDesktop,
+      isItemHiddenOnMobile,
+      gridStyle
     };
   }
 });
@@ -465,7 +506,7 @@ export default defineComponent({
 
   ._products {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(var(--desktop-cols), 1fr);
     margin-top: var(--spacer-sm);
     column-gap: var(--spacer-sm);
   }
@@ -479,13 +520,6 @@ export default defineComponent({
     --product-card-title-font-line-height: 1.2;
 
     max-width: 160px;
-
-    &.-show-more {
-      --product-card-height: 100%;
-
-      text-align: center;
-      height: 100%;
-    }
 
     ::v-deep {
       .sf-product-card {
@@ -506,6 +540,28 @@ export default defineComponent({
     }
   }
 
+  ._show-more-tile {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    row-gap: var(--spacer-xs);
+    cursor: pointer;
+    text-align: center;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-medium);
+  }
+
+  ._products.-has-more-desktop {
+    ._show-more-tile {
+      display: flex;
+    }
+
+    ._product.-upgrade.-hidden-desktop {
+      display: none;
+    }
+  }
+
   ._disabled-hint {
     color: var(--c-accent);
     font-size: var(--font-base);
@@ -515,17 +571,6 @@ export default defineComponent({
     display: grid;
     grid-template-rows: 0fr;
     transition: grid-template-rows 300ms ease-in-out;
-    position: relative; // Keep position for the pseudo-element
-
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 24px;
-      box-shadow: inset 0 -12px 12px 4px var(--c-white);
-    }
 
     &.-expanded {
       grid-template-rows: 1fr;
@@ -581,12 +626,18 @@ export default defineComponent({
 
   @media (max-width: $mobile-max) {
     ._products {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(var(--mobile-cols), 1fr);
       column-gap: var(--spacer-xs);
     }
 
-    ._product:nth-child(n+4) {
-      display: none;
+    ._products.-has-more-mobile {
+      ._show-more-tile {
+        display: flex;
+      }
+
+      ._product.-upgrade.-hidden-mobile {
+        display: none;
+      }
     }
   }
 }

@@ -6,8 +6,6 @@ import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { Customization, CustomizationOptionValue, isFileUploadValue } from 'src/modules/customization-system';
 import { getOptionValuePrice } from 'src/modules/customization-system/helpers/get-option-value-price';
 
-import dotsIcon from 'theme/assets/images/dots-icon.svg';
-
 export interface CollapsedViewItem {
   id: string,
   title: string,
@@ -17,11 +15,8 @@ export interface CollapsedViewItem {
     special: string | null
   },
   link: string,
-  customizationId: string,
-  isShowMore: boolean
+  customizationId: string
 }
-
-const COLLAPSED_VIEW_MAX_ITEMS = 4;
 
 export function useCollapsedCustomizationsView (
   filteredAvailableCustomizations: ComputedRef<Customization[]>,
@@ -44,7 +39,9 @@ export function useCollapsedCustomizationsView (
         continue;
       }
 
-      for (const optionValue of customization.optionData.values) {
+      const customizationValues = customization.optionData.values.sort((a, b) => (a.sn ?? 0) - (b.sn ?? 0));
+
+      for (const optionValue of customizationValues) {
         if (!optionValue.thumbnailUrl) {
           continue;
         }
@@ -93,33 +90,15 @@ export function useCollapsedCustomizationsView (
         values.push({
           id: optionValue.id,
           title: optionValue.name || '',
-          image: getThumbnailPath(optionValue.thumbnailUrl, 144, 144, ''),
+          image: getThumbnailPath(optionValue.thumbnailUrl, 300, 300, ''),
           price,
           link: '',
-          customizationId: customization.id,
-          isShowMore: false
+          customizationId: customization.id
         });
       }
     }
 
-    const sliced = values.slice(0, COLLAPSED_VIEW_MAX_ITEMS - 1);
-
-    sliced.push(
-      {
-        id: 'show_more',
-        title: root.$t('Show more').toString(),
-        image: dotsIcon,
-        price: {
-          regular: '',
-          special: null
-        },
-        link: '',
-        customizationId: 'show_more',
-        isShowMore: true
-      }
-    );
-
-    return sliced;
+    return values;
   });
 
   function getCollapsedViewItemCustomizationOptionValue (
