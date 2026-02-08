@@ -306,7 +306,6 @@ $desktop-max-products-count: 5;
 
       ::v-deep {
         .base-image {
-          max-width: 80px;
           margin: 0 auto;
           display: block;
         }
