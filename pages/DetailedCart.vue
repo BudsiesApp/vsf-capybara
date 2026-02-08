@@ -422,7 +422,7 @@ export default {
           continue;
         }
 
-        result[key] += ` (#${cartItem.extension_attributes.plushie_id})`;
+        result[key] += ` (for #${cartItem.extension_attributes.plushie_id})`;
       }
 
       return result;
