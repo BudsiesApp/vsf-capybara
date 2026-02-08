@@ -152,10 +152,6 @@ $border-width: 2px;
     pointer-events: none;
   }
 
-  @include for-tablet-up {
-    --o-product-card-badge-size: 58px;
-  }
-
   .added-to-cart {
     display: flex;
     align-items: center;
@@ -166,8 +162,12 @@ $border-width: 2px;
 
     &__icon {
       --icon-color: var(--c-primary);
-      margin-right: var(--spacer-xs);
+      margin-right: var(--spacer-2xs);
     }
+  }
+
+  @include for-tablet-up {
+    --o-product-card-badge-size: 58px;
   }
 }
 </style>
