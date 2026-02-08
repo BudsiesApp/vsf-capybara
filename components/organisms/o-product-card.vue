@@ -138,6 +138,7 @@ $border-width: 2px;
   --badge-font-weight: 800;
   --badge-background: var(--c-white);
   --badge-font-size: var(--font-sm);
+  --product-card-margin: var(--spacer-xs) 0 0;
 
   ._turnaround-time {
     font-size: var(--font-xs);
