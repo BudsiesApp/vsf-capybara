@@ -3,22 +3,24 @@
     class="alteration-product-form"
     v-if="showBlock"
   >
-    <div class="_heading-container">
+    <div
+      class="_heading-container -expandable"
+      :class="{ '-expanded': isExpanded }"
+      role="button"
+      tabindex="0"
+      @click="onHeadingClick"
+      @keydown.enter.prevent="onHeadingClick"
+      @keydown.space.prevent="onHeadingClick"
+    >
       <SfHeading
         class="_heading"
         :level="5"
         :title="$t('Upgrade Your Plush')"
       />
 
-      <template v-if="collapsedViewItems.length > 0">
-        <SfButton
-          v-if="isExpanded"
-          class="sf-button--text"
-          @click="onHideDetailsClick"
-        >
-          {{ $t('Show Less') }}
-        </SfButton>
-      </template>
+      <SfChevron
+        class="_heading-chevron"
+      />
     </div>
 
     <div
@@ -46,15 +48,10 @@
           class="_show-more-tile"
           @click="onShowDetailsClick"
         >
-          <span>
+          <a href="javascript:void(0)">
             {{ $t('More') }}<br>
             {{ $t('Upgrades') }}
-          </span>
-          <SfIcon
-            icon="chevron_down"
-            size="xxs"
-            view-box="0 0 24 24"
-          />
+          </a>
         </div>
       </div>
     </div>
@@ -136,7 +133,7 @@ import {
   ref,
   toRefs
 } from '@vue/composition-api';
-import { SfButton, SfHeading, SfIcon } from '@storefront-ui/vue';
+import { SfButton, SfChevron, SfHeading } from '@storefront-ui/vue';
 import { ValidationObserver } from 'vee-validate';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -195,8 +192,8 @@ export default defineComponent({
     MFormErrors,
     OProductCard,
     SfButton,
+    SfChevron,
     SfHeading,
-    SfIcon,
     ValidationObserver
   },
   props: {
@@ -376,6 +373,15 @@ export default defineComponent({
       isExpanded.value = false;
     }
 
+    function onHeadingClick () {
+      if (isExpanded.value) {
+        onHideDetailsClick();
+        return;
+      }
+
+      onShowDetailsClick();
+    }
+
     function onCollapsedViewItemClick (item: CollapsedViewItem) {
       onShowDetailsClick();
 
@@ -461,6 +467,7 @@ export default defineComponent({
       onCollapsedViewItemClick,
       onCustomizationOptionInput,
       onEntityBusyChanged,
+      onHeadingClick,
       onHideDetailsClick,
       onShowDetailsClick,
       showBlock,
@@ -480,11 +487,25 @@ export default defineComponent({
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .alteration-product-form {
+  border: 1px solid var(--c-secondary);
+  padding: var(--spacer-sm);
+
   ._heading-container {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    column-gap: var(--spacer-sm);
+    justify-content: flex-start;
+    column-gap: var(--spacer-xs);
+  }
+
+  ._heading-container.-expandable {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  ._heading-container.-expanded {
+    ::v-deep .sf-chevron {
+      rotate: 180deg;
+    }
   }
 
   ._heading {
@@ -493,7 +514,13 @@ export default defineComponent({
     --heading-title-margin: 0;
     --heading-padding: 0;
 
+    flex: 0 0 auto;
+
     text-align: left;
+  }
+
+  ._heading-chevron {
+    flex: 0 0 auto;
   }
 
   ._collapsed-preview {
@@ -605,7 +632,7 @@ export default defineComponent({
     --customization-option-align-items: flex-start;
     --customization-option-label-align: left;
     --customization-option-label-weight: var(--font-medium);
-    --customization-option-label-size: var(--font-base);
+    --customization-option-label-size: var(--font-size-base);
     --customization-option-description-align: left;
     --customization-option-hint-align: left;
 
