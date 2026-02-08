@@ -526,6 +526,7 @@ export default defineComponent({
   ._collapsed-preview {
     display: flex;
     flex-direction: column;
+    --product-card-height: 100%;
 
     &.-hidden {
       display: none;
