@@ -547,8 +547,6 @@ export default defineComponent({
     --price-old-font-size: var(--font-size-base);
     --product-card-title-font-line-height: 1.2;
 
-    max-width: 160px;
-
     ::v-deep {
       .sf-product-card {
         --product-card-padding: var(--spacer-xs);
