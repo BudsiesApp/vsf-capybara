@@ -40,7 +40,9 @@ export function useCollapsedCustomizationsView (
         continue;
       }
 
-      const customizationValues = customization.optionData.values.sort((a, b) => (a.sn ?? 0) - (b.sn ?? 0));
+      const customizationValues = [...customization.optionData.values].sort(
+        (a, b) => (a.sn === null || a.sn === undefined ? 0 : a.sn) - (b.sn === null || b.sn === undefined ? 0 : b.sn)
+      );
 
       for (const optionValue of customizationValues) {
         if (!optionValue.thumbnailUrl) {
