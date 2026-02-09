@@ -66,7 +66,6 @@ import { ValidationProvider } from 'vee-validate';
 
 import {
   Customization,
-  CustomizationAddedToCartMessageConfig,
   CustomizationOptionValue,
   OptionValue,
   useCustomizationOptionValidation,
@@ -144,13 +143,13 @@ export default defineComponent({
       type: String as PropType<string | undefined>,
       default: undefined
     },
-    addedToCartMessageConfig: {
-      type: Object as PropType<CustomizationAddedToCartMessageConfig | undefined>,
+    addedToCartOptionValueId: {
+      type: Object as PropType<Record<string, boolean> | undefined>,
       default: undefined
     }
   },
   setup (props, context) {
-    const { customization, disableValidation, fieldNamePrefix, optionValues, productId, value, addedToCartMessageConfig } = toRefs(props);
+    const { customization, disableValidation, fieldNamePrefix, optionValues, productId, value, addedToCartOptionValueId } = toRefs(props);
 
     const optionLabel = computed<string>(() => {
       return customization.value.title || customization.value.name;
@@ -185,7 +184,7 @@ export default defineComponent({
         optionValues,
         productId,
         context,
-        addedToCartMessageConfig
+        addedToCartOptionValueId
       ),
       ...useWidgetBusyState(
         customization,

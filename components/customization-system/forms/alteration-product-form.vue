@@ -81,26 +81,10 @@
               :product-id="alterationProduct ? Number(alterationProduct.id) : 0"
               :value="customizationOptionValue[customization.id]"
               :disable-validation="false"
-              :added-to-cart-message-config="addedToCartMessageConfigByCustomizationId[customization.id]"
+              :added-to-cart-option-value-id="addedToCartOptionValueId[customization.id]"
               @input="onCustomizationOptionInput"
               @customization-option-busy-state-changed="onEntityBusyChanged"
-            >
-              <template #label="{label, isFieldRequired}">
-                <label
-                  class="_option-label"
-                  :class="{ '-required': isFieldRequired && !addedToCartMessageConfigByCustomizationId[customization.id].isCustomizationAlreadyInCart}"
-                >
-                  {{ label }}
-
-                  <span
-                    class="_disabled-hint"
-                    v-if="addedToCartMessageConfigByCustomizationId[customization.id].isCustomizationAlreadyInCart"
-                  >
-                    {{ addedToCartMessageConfigByCustomizationId[customization.id].message }}
-                  </span>
-                </label>
-              </template>
-            </customization-option>
+            />
           </div>
 
           <m-form-errors
@@ -150,7 +134,7 @@ import {
   useCustomizationsOptionsDefaultValue,
   useCustomizationState,
   useEntityBusyState,
-  useExistingCartItemAddedToCartMessage,
+  useExistingCartItemOptionValues,
   useOptionValueActions
 } from 'src/modules/customization-system';
 import {
@@ -261,10 +245,9 @@ export default defineComponent({
       alterationProduct
     );
 
-    const { addedToCartMessageConfigByCustomizationId } = useExistingCartItemAddedToCartMessage(
+    const { addedToCartOptionValueId } = useExistingCartItemOptionValues(
       availableCustomizations,
-      existingCartItemCustomizationOptionValue,
-      context.root.$t('Added to Cart').toString()
+      existingCartItemCustomizationOptionValue
     );
 
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
@@ -454,7 +437,7 @@ export default defineComponent({
 
     return {
       ...formValidation,
-      addedToCartMessageConfigByCustomizationId,
+      addedToCartOptionValueId,
       addToCartButtonText,
       canAddToCart,
       collapsedViewItems,

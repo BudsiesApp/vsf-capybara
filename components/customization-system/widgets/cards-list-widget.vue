@@ -34,12 +34,9 @@
                   {{ optionValue.name }}
                 </div>
 
-                <div
-                  class="_price"
-                  v-if="addedToCartMessageConfig && addedToCartMessageConfig.message && addedToCartOptionValueById[optionValue.id]"
-                >
-                  {{ addedToCartMessageConfig.message }}
-                </div>
+                <a-added-to-cart
+                  v-if="addedToCartOptionValueId && addedToCartOptionValueId[optionValue.id]"
+                />
 
                 <div
                   class="_price"
@@ -98,7 +95,6 @@
 <script lang="ts">
 import {
   computed,
-  ComputedRef,
   defineComponent,
   PropType,
   toRefs
@@ -108,18 +104,19 @@ import { getThumbnailPath } from '@vue-storefront/core/helpers';
 
 import { BaseImage } from 'src/modules/budsies';
 import {
-  CustomizationAddedToCartMessageConfig,
   OptionValue,
   useListWidget,
   useOptionValuesPrice,
   useValuesSort
 } from 'src/modules/customization-system';
 
+import AAddedToCart from 'theme/components/atoms/a-added-to-cart.vue';
 import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
 
 export default defineComponent({
   name: 'CardsListWidget',
   components: {
+    AAddedToCart,
     BaseImage,
     MCheckbox,
     SfIcon,
@@ -146,8 +143,8 @@ export default defineComponent({
       type: Array as PropType<OptionValue[]>,
       default: () => []
     },
-    addedToCartMessageConfig: {
-      type: Object as PropType<CustomizationAddedToCartMessageConfig | undefined>,
+    addedToCartOptionValueId: {
+      type: Object as PropType<Record<string, boolean> | undefined>,
       default: undefined
     }
   },
@@ -167,22 +164,7 @@ export default defineComponent({
 
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
 
-    const addedToCartOptionValueById: ComputedRef<Record<string, boolean>> = computed(() => {
-      const result: Record<string, boolean> = {};
-
-      if (!props.addedToCartMessageConfig) {
-        return result;
-      }
-
-      for (const id of props.addedToCartMessageConfig.optionValueIdsAlreadyInCart) {
-        result[id] = true;
-      }
-
-      return result;
-    });
-
     return {
-      addedToCartOptionValueById,
       getItemImage,
       isValid,
       ...listWidgetFields,

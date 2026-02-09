@@ -41,14 +41,7 @@
       </template>
 
       <template #price v-if="isAddedToCart">
-        <div class="added-to-cart">
-          <SfIcon
-            icon="check"
-            size="xs"
-            class="added-to-cart__icon"
-          />
-          <span class="added-to-cart__text">In Cart</span>
-        </div>
+        <a-added-to-cart class="_added-to-cart" />
       </template>
     </SfProductCard>
   </div>
@@ -57,15 +50,18 @@
 <script lang="ts">
 import { defineComponent, computed, inject } from '@vue/composition-api';
 import config from 'config';
-import { SfProductCard, SfIcon } from '@storefront-ui/vue';
+import { SfProductCard } from '@storefront-ui/vue';
+
 import BaseImage from 'src/modules/budsies/components/BaseImage.vue';
+
+import AAddedToCart from 'theme/components/atoms/a-added-to-cart.vue';
 
 export default defineComponent({
   name: 'OProductCard',
   components: {
+    AAddedToCart,
     BaseImage,
-    SfProductCard,
-    SfIcon
+    SfProductCard
   },
   props: {
     imageWidth: {
@@ -153,18 +149,8 @@ $border-width: 2px;
     pointer-events: none;
   }
 
-  .added-to-cart {
-    display: flex;
-    align-items: center;
-    color: var(--c-primary);
-    font-size: var(--font-sm);
-    font-weight: var(--font-bold);
+  ._added-to-cart {
     margin-top: var(--spacer-xs);
-
-    &__icon {
-      --icon-color: var(--c-primary);
-      margin-right: var(--spacer-2xs);
-    }
   }
 
   @include for-tablet-up {
