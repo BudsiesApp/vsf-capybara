@@ -26,7 +26,7 @@
         >
           <div
             class="_customization"
-            v-for="customization in filteredCustomizations"
+            v-for="customization in (isContentExpanded ? filteredCustomizations : collapsedViewCustomizations)"
             v-show="isContentExpanded || (collapsedViewItemsByCustomization[customization.id] && collapsedViewItemsByCustomization[customization.id].length > 0)"
             :key="customization.id"
           >
@@ -316,7 +316,8 @@ export default defineComponent({
     });
 
     const {
-      collapsedViewItemsByCustomization
+      collapsedViewItemsByCustomization,
+      collapsedViewCustomizations
       // getCollapsedViewItemCustomizationOptionValue
     } = useCollapsedCustomizationsView(
       filteredCustomizations,
@@ -404,8 +405,8 @@ export default defineComponent({
     const hasMoreDesktop = computed(() => {
       let totalCollapsedOptionValues = 0;
 
-      for (const optionValues of Object.values(collapsedViewItemsByCustomization.value)) {
-        totalCollapsedOptionValues += optionValues.length;
+      for (const customization of filteredCustomizations.value) {
+        totalCollapsedOptionValues += customization.optionData?.values?.length || 0;
       }
 
       return totalCollapsedOptionValues > DESKTOP_TILES_CAP;
@@ -491,7 +492,8 @@ export default defineComponent({
       hasMoreMobile,
       isItemHiddenOnDesktop,
       isItemHiddenOnMobile,
-      gridStyle
+      gridStyle,
+      collapsedViewCustomizations
     };
   }
 });
@@ -625,11 +627,21 @@ export default defineComponent({
 
     &:not(.-expanded) {
       ._customization-option {
+        --customization-option-widget-margin: 0;
+
+        &:first-child {
+          --customization-option-widget-margin: var(--spacer-sm) 0 0;
+        }
+
         ::v-deep {
           ._item {
             &:nth-child(n+4) {
               display: none;
             }
+          }
+
+          ._error-message {
+            display: none;
           }
         }
       }

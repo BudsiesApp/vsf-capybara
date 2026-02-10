@@ -65,10 +65,12 @@
                 </div>
               </div>
 
-              <SfChevron
-                class="_expand-chevron"
-                @click.native.stop.prevent="$emit('expand-clicked', optionValue.id)"
-              />
+              <div
+                class="_expand-chevron-container"
+                @click.stop.prevent="$emit('expand-clicked', optionValue.id)"
+              >
+                <SfChevron />
+              </div>
             </div>
           </template>
 
@@ -235,13 +237,19 @@ export default defineComponent({
     padding: var(--spacer-sm);
     transition: background-color 0.15s cubic-bezier(0.65, 0.05, 0.35, 1);
 
-    ._expand-chevron {
+    ._expand-chevron-container {
+      display: flex;
+      padding: var(--spacer-2xs);
       display: none;
     }
 
     &.-expandable {
-      ._expand-chevron {
-        display: block;
+      padding: var(--spacer-xs) var(--spacer-sm);
+      transition: padding 300ms ease-in-out;
+      will-change: padding;
+
+      ._expand-chevron-container {
+        display: flex;
       }
 
       ._label-container {
@@ -258,6 +266,8 @@ export default defineComponent({
       }
 
       &.-expanded {
+        padding: var(--spacer-sm);
+
         ._label-container {
           grid-template-rows: 1fr;
         }

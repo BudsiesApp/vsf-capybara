@@ -74,6 +74,24 @@ export function useCollapsedCustomizationsView (
     return values;
   });
 
+  const collapsedViewCustomizations: ComputedRef<Customization[]> = computed(() => {
+    const result: Customization[] = [];
+    let valuesLength = 0;
+
+    for (const customization of filteredAvailableCustomizations.value) {
+      const optionValuesLength = (collapsedViewItemsByCustomization.value[customization.id] && collapsedViewItemsByCustomization.value[customization.id].length) || 0;
+
+      if (valuesLength >= 3) {
+        return result;
+      }
+
+      valuesLength += optionValuesLength;
+      result.push(customization);
+    }
+
+    return result;
+  });
+
   // function getCollapsedViewItemCustomizationOptionValue (
   //   collapsedViewItem: CollapsedViewItem,
   //   availableCustomizationDictionary: Record<string, Customization>,
@@ -116,7 +134,8 @@ export function useCollapsedCustomizationsView (
   // }
 
   return {
-    collapsedViewItemsByCustomization
+    collapsedViewItemsByCustomization,
+    collapsedViewCustomizations
     // getCollapsedViewItemCustomizationOptionValue
   }
 }
