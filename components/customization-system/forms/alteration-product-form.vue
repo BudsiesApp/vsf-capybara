@@ -626,6 +626,10 @@ export default defineComponent({
     }
 
     &:not(.-expanded) {
+      ._buttons {
+        margin-top: var(--spacer-sm);
+      }
+
       ._customization-option {
         --customization-option-widget-margin: 0;
 
@@ -660,6 +664,7 @@ export default defineComponent({
     justify-content: flex-end;
     gap: var(--spacer-sm);
     margin-top: var(--spacer-base);
+    transition: margin-top 300ms ease-in-out;
   }
 
   ._customization-option {
