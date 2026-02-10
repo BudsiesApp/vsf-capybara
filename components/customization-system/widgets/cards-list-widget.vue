@@ -9,6 +9,10 @@
       >
         <m-checkbox
           class="_checkbox"
+          :class="{
+            '-expandable': expandConfig && expandConfig[optionValue.id] && expandConfig[optionValue.id].isExpandable,
+            '-expanded': expandConfig && expandConfig[optionValue.id] && expandConfig[optionValue.id].isExpanded
+          }"
           :disabled="isDisabled"
           :valid="isValid"
           :value="optionValue.id"
@@ -16,70 +20,79 @@
           v-model="selectedOption"
         >
           <template #checkmark="{ isChecked }">
-            <div class="_checkmark-container">
-              <div
-                class="sf-checkbox__checkmark"
-                :class="{ 'sf-checkbox__checkmark--is-active': isChecked }"
-              >
-                <SfIcon
-                  v-show="isChecked"
-                  icon="check"
-                  size="12px"
-                  color="white"
-                />
-              </div>
-
-              <div class="sf-checkbox__label _title-wrapper">
-                <div class="_title" v-if="optionValue.name">
-                  {{ optionValue.name }}
-                </div>
-
-                <a-added-to-cart
-                  v-if="addedToCartOptionValueId && addedToCartOptionValueId[optionValue.id]"
-                />
-
+            <div class="_checkmark-wrapper">
+              <div class="_checkmark-container">
                 <div
-                  class="_price"
-                  v-else-if="optionValuePriceDictionary[optionValue.id]"
+                  class="sf-checkbox__checkmark"
+                  :class="{ 'sf-checkbox__checkmark--is-active': isChecked }"
                 >
-                  <strong> + </strong>
-
-                  <SfPrice
-                    :regular="
-                      formatPrice(
-                        optionValuePriceDictionary[optionValue.id].regular
-                      )
-                    "
-                    :special="
-                      formatPrice(
-                        optionValuePriceDictionary[optionValue.id].special
-                      )
-                    "
+                  <SfIcon
+                    v-show="isChecked"
+                    icon="check"
+                    size="12px"
+                    color="white"
                   />
                 </div>
+
+                <div class="sf-checkbox__label _title-wrapper">
+                  <div class="_title" v-if="optionValue.name">
+                    {{ optionValue.name }}
+                  </div>
+
+                  <a-added-to-cart
+                    v-if="addedToCartOptionValueId && addedToCartOptionValueId[optionValue.id]"
+                  />
+
+                  <div
+                    class="_price"
+                    v-else-if="optionValuePriceDictionary[optionValue.id]"
+                  >
+                    <strong> + </strong>
+
+                    <SfPrice
+                      :regular="
+                        formatPrice(
+                          optionValuePriceDictionary[optionValue.id].regular
+                        )
+                      "
+                      :special="
+                        formatPrice(
+                          optionValuePriceDictionary[optionValue.id].special
+                        )
+                      "
+                    />
+                  </div>
+                </div>
               </div>
+
+              <SfChevron
+                class="_expand-chevron"
+                @click.native.stop.prevent="$emit('expand-clicked', optionValue.id)"
+              />
             </div>
           </template>
 
           <template #label>
-            <div class="_description-wrapper">
-              <div class="_media" v-if="getItemImage(optionValue)">
-                <div class="_image-container">
-                  <base-image
-                    class="_image"
-                    v-if="getItemImage(optionValue)"
-                    :aspect-ratio="1"
-                    :src="getItemImage(optionValue)"
-                    alt=""
-                  />
+            <div class="_label-container">
+              <div class="_description-wrapper">
+                <div class="_media" v-if="getItemImage(optionValue)">
+                  <div class="_image-container">
+                    <base-image
+                      class="_image"
+                      v-if="getItemImage(optionValue)"
+                      :aspect-ratio="1"
+                      :src="getItemImage(optionValue)"
+                      alt=""
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div
-                class="_description"
-                v-html="optionValue.description"
-                v-if="optionValue.description"
-              />
+                <div
+                  class="_description"
+                  v-html="optionValue.description"
+                  v-if="optionValue.description"
+                />
+              </div>
             </div>
           </template>
         </m-checkbox>
@@ -99,7 +112,7 @@ import {
   PropType,
   toRefs
 } from '@vue/composition-api';
-import { SfIcon, SfPrice } from '@storefront-ui/vue';
+import { SfChevron, SfIcon, SfPrice } from '@storefront-ui/vue';
 import { getThumbnailPath } from '@vue-storefront/core/helpers';
 
 import { BaseImage } from 'src/modules/budsies';
@@ -119,6 +132,7 @@ export default defineComponent({
     AAddedToCart,
     BaseImage,
     MCheckbox,
+    SfChevron,
     SfIcon,
     SfPrice
   },
@@ -146,6 +160,13 @@ export default defineComponent({
     addedToCartOptionValueId: {
       type: Object as PropType<Record<string, boolean> | undefined>,
       default: undefined
+    },
+    expandConfig: {
+      type: Object as PropType<{
+        isExpandable: boolean,
+        isExpanded: boolean
+      } | undefined>,
+      default: undefined
     }
   },
   setup (props, context) {
@@ -164,7 +185,13 @@ export default defineComponent({
 
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
 
+    function onExpandClicked (optionValueId: string, event: Event): void {
+      event.stopPropagation()
+      context.emit('expand-clicked', optionValueId);
+    }
+
     return {
+      onExpandClicked,
       getItemImage,
       isValid,
       ...listWidgetFields,
@@ -195,12 +222,55 @@ export default defineComponent({
     }
   }
 
+  ._label-container {
+    display: grid;
+    grid-template-rows: 1fr;
+    width: 100%;
+  }
+
   ._checkbox {
     --checkbox-font-size: var(--font-size-base);
     --m-checkbox-align-items: flex-start;
 
     padding: var(--spacer-sm);
     transition: background-color 0.15s cubic-bezier(0.65, 0.05, 0.35, 1);
+
+    ._expand-chevron {
+      display: none;
+    }
+
+    &.-expandable {
+      ._expand-chevron {
+        display: block;
+      }
+
+      ._label-container {
+        grid-template-rows: 0fr;
+        transition: grid-template-rows 300ms ease-in-out;
+        will-change: grid-template-rows;
+      }
+
+      ._description-wrapper {
+        overflow: hidden;
+        margin-top: 0;
+        transition: margin-top 300ms ease-in-out;
+        will-change: margin-top;
+      }
+
+      &.-expanded {
+        ._label-container {
+          grid-template-rows: 1fr;
+        }
+
+        ._description-wrapper {
+          margin-top: var(--spacer-xs);
+        }
+
+        ::v-deep .sf-chevron {
+          rotate: 180deg;
+        }
+      }
+    }
 
     &.sf-checkbox--is-active {
       background-color: var(--c-secondary);
@@ -211,6 +281,13 @@ export default defineComponent({
         flex-direction: column;
       }
     }
+  }
+
+  ._checkmark-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
   }
 
   ._checkmark-container {

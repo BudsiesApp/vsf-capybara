@@ -43,6 +43,7 @@
         v-bind="widget.props"
         v-model="selectedOption"
         @widget-busy-changed="onWidgetBusyChanged"
+        @expand-clicked="(optionValueId) => $emit('expand-clicked', optionValueId)"
       />
     </validation-provider>
 
@@ -146,10 +147,17 @@ export default defineComponent({
     addedToCartOptionValueId: {
       type: Object as PropType<Record<string, boolean> | undefined>,
       default: undefined
+    },
+    expandConfig: {
+      type: Object as PropType<{
+        isExpandable: boolean,
+        isExpanded: boolean
+      } | undefined>,
+      default: undefined
     }
   },
   setup (props, context) {
-    const { customization, disableValidation, fieldNamePrefix, optionValues, productId, value, addedToCartOptionValueId } = toRefs(props);
+    const { customization, disableValidation, fieldNamePrefix, optionValues, productId, value, addedToCartOptionValueId, expandConfig } = toRefs(props);
 
     const optionLabel = computed<string>(() => {
       return customization.value.title || customization.value.name;
@@ -184,7 +192,8 @@ export default defineComponent({
         optionValues,
         productId,
         context,
-        addedToCartOptionValueId
+        addedToCartOptionValueId,
+        expandConfig
       ),
       ...useWidgetBusyState(
         customization,

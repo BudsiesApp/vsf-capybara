@@ -5,60 +5,17 @@
   >
     <div
       class="_heading-container -expandable"
-      :class="{ '-expanded': isExpanded }"
-      role="button"
-      tabindex="0"
-      @click="onHeadingClick"
-      @keydown.enter.prevent="onHeadingClick"
-      @keydown.space.prevent="onHeadingClick"
     >
       <SfHeading
         class="_heading"
         :level="5"
         :title="$t('Upgrade Your Plush')"
       />
-
-      <SfChevron
-        class="_heading-chevron"
-      />
-    </div>
-
-    <div
-      class="_collapsed-preview"
-      :class="{ '-hidden': isExpanded || collapsedViewItems.length == 0 }"
-    >
-      <div
-        class="_products"
-        :class="{ '-has-more-desktop': hasMoreDesktop, '-has-more-mobile': hasMoreMobile }"
-        :style="gridStyle"
-      >
-        <o-product-card
-          v-for="(item, index) in collapsedViewItems"
-          :key="item.id"
-          :product="item"
-          :wishlist-icon="false"
-          :is-added-to-cart="item.isAddedToCart"
-          :image-width="300"
-          :image-height="300"
-          class="_product -upgrade"
-          :class="{ '-hidden-desktop': isItemHiddenOnDesktop(index), '-hidden-mobile': isItemHiddenOnMobile(index) }"
-          @click.native.prevent="onCollapsedViewItemClick(item)"
-        />
-        <div
-          class="_show-more-tile"
-          @click="onShowDetailsClick"
-        >
-          <a href="javascript:void(0)">
-            {{ $t('More') }}<br>
-            {{ $t('Upgrades') }}
-          </a>
-        </div>
-      </div>
     </div>
 
     <div
       class="_content"
-      :class="{ '-expanded': isExpanded || collapsedViewItems.length == 0 }"
+      :class="{ '-expanded': isContentExpanded, '-has-more-desktop': hasMoreDesktop, '-has-more-mobile': hasMoreMobile }"
     >
       <div class="_content-inner">
         <validation-observer
@@ -70,6 +27,7 @@
           <div
             class="_customization"
             v-for="customization in filteredCustomizations"
+            v-show="isContentExpanded || (collapsedViewItemsByCustomization[customization.id] && collapsedViewItemsByCustomization[customization.id].length > 0)"
             :key="customization.id"
           >
             <customization-option
@@ -77,13 +35,15 @@
               ref="customizationOption"
               :customization="customization"
               :is-disabled="isSomeEntityBusy || isSubmitting"
-              :option-values="filteredOptionValues[customization.id]"
+              :option-values="isContentExpanded ? filteredOptionValues[customization.id] : collapsedViewItemsByCustomization[customization.id]"
               :product-id="alterationProduct ? Number(alterationProduct.id) : 0"
               :value="customizationOptionValue[customization.id]"
               :disable-validation="false"
               :added-to-cart-option-value-id="addedToCartOptionValueId[customization.id]"
+              :expand-config="expandConfigByCustomization[customization.id]"
               @input="onCustomizationOptionInput"
               @customization-option-busy-state-changed="onEntityBusyChanged"
+              @expand-clicked="onOptionValueExpandClicked"
             />
           </div>
 
@@ -94,10 +54,29 @@
           />
 
           <div class="_buttons">
+            <div
+              class="_show-more-tile"
+              @click="onHeadingClick"
+              v-show="hasMoreDesktop"
+            >
+              <a href="javascript:void(0)">
+                <template v-if="isExpanded">
+                  {{ $t('Less') }}
+                </template>
+
+                <template v-else>
+                  {{ $t('More') }}
+                </template>
+
+                {{ $t('Upgrades') }}
+              </a>
+            </div>
+
             <SfButton
               class="_add-to-cart color-primary"
               type="submit"
               :disabled="!canAddToCart || isSubmitting"
+              v-show="isContentExpanded"
             >
               {{ addToCartButtonText }}
             </SfButton>
@@ -112,10 +91,12 @@
 import {
   computed,
   defineComponent,
+  ComputedRef,
   PropType,
   Ref,
   ref,
-  toRefs
+  toRefs,
+  set
 } from '@vue/composition-api';
 import { SfButton, SfChevron, SfHeading } from '@storefront-ui/vue';
 import { ValidationObserver } from 'vee-validate';
@@ -272,6 +253,10 @@ export default defineComponent({
     }) {
       updateCustomizationOptionValue(payload);
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
+
+      if (!isExpanded.value) {
+        isExpanded.value = true;
+      }
     }
 
     useCustomizationsOptionsDefaultValue(
@@ -331,8 +316,8 @@ export default defineComponent({
     });
 
     const {
-      collapsedViewItems,
-      getCollapsedViewItemCustomizationOptionValue
+      collapsedViewItemsByCustomization
+      // getCollapsedViewItemCustomizationOptionValue
     } = useCollapsedCustomizationsView(
       filteredCustomizations,
       existingCartItemCustomizationOptionValue,
@@ -365,16 +350,16 @@ export default defineComponent({
       onShowDetailsClick();
     }
 
-    function onCollapsedViewItemClick (item: CollapsedViewItem) {
-      onShowDetailsClick();
-
-      const value = getCollapsedViewItemCustomizationOptionValue(
-        item,
-        availableCustomizationDictionary.value,
-        customizationOptionValue.value
-      );
-      onCustomizationOptionInput(value);
-    }
+    // function onCollapsedViewItemClick (item: CollapsedViewItem) {
+    //   onShowDetailsClick();
+    //
+    //   const value = getCollapsedViewItemCustomizationOptionValue(
+    //     item,
+    //     availableCustomizationDictionary.value,
+    //     customizationOptionValue.value
+    //   );
+    //   onCustomizationOptionInput(value);
+    // }
 
     async function onAddToCart () {
       if (!canAddToCart.value || isSubmitting.value) {
@@ -414,10 +399,26 @@ export default defineComponent({
       }
     }
 
-    const DESKTOP_TILES_CAP = 6;
+    const DESKTOP_TILES_CAP = 3;
     const MOBILE_TILES_CAP = 3;
-    const hasMoreDesktop = computed(() => collapsedViewItems.value.length > DESKTOP_TILES_CAP);
-    const hasMoreMobile = computed(() => collapsedViewItems.value.length > MOBILE_TILES_CAP);
+    const hasMoreDesktop = computed(() => {
+      let totalCollapsedOptionValues = 0;
+
+      for (const optionValues of Object.values(collapsedViewItemsByCustomization.value)) {
+        totalCollapsedOptionValues += optionValues.length;
+      }
+
+      return totalCollapsedOptionValues > DESKTOP_TILES_CAP;
+    });
+    const hasMoreMobile = computed(() => {
+      let totalCollapsedOptionValues = 0;
+
+      for (const optionValues of Object.values(collapsedViewItemsByCustomization.value)) {
+        totalCollapsedOptionValues += optionValues.length;
+      }
+
+      return totalCollapsedOptionValues > MOBILE_TILES_CAP;
+    });
 
     const gridStyle = {
       '--desktop-cols': DESKTOP_TILES_CAP,
@@ -435,20 +436,50 @@ export default defineComponent({
       return index >= (MOBILE_TILES_CAP - 1);
     }
 
+    const expandedOptionValues: Ref<Record<string, boolean>> = ref({});
+
+    function onOptionValueExpandClicked (optionValueId: string): void {
+      set(expandedOptionValues.value, optionValueId, !expandedOptionValues.value[optionValueId]);
+    }
+
+    const expandConfigByCustomization: ComputedRef<Record<string, Record<string, {isExpandable: boolean, isExpanded: boolean}>>> = computed(() => {
+      const result: Record<string, Record<string, {isExpandable: boolean, isExpanded: boolean}>> = {};
+
+      for (const customization of filteredCustomizations.value) {
+        result[customization.id] = {};
+
+        for (const optionValue of (customization.optionData?.values || [])) {
+          result[customization.id][optionValue.id] = {
+            isExpandable: true,
+            isExpanded: !!expandedOptionValues.value[optionValue.id]
+          };
+        }
+      }
+
+      return result;
+    });
+
+    const isContentExpanded = computed(() => {
+      return isExpanded.value || !hasMoreDesktop.value;
+    });
+
     return {
       ...formValidation,
       addedToCartOptionValueId,
       addToCartButtonText,
       canAddToCart,
-      collapsedViewItems,
       filteredOptionValues,
+      isContentExpanded,
       customizationOptionValue,
+      expandConfigByCustomization,
+      onOptionValueExpandClicked,
       isExpanded,
       isSomeEntityBusy,
       isSubmitting,
       onAddToCart,
-      onCollapsedViewItemClick,
+      // onCollapsedViewItemClick,
       onCustomizationOptionInput,
+      collapsedViewItemsByCustomization,
       onEntityBusyChanged,
       onHeadingClick,
       onHideDetailsClick,
@@ -483,12 +514,6 @@ export default defineComponent({
   ._heading-container.-expandable {
     cursor: pointer;
     user-select: none;
-  }
-
-  ._heading-container.-expanded {
-    ::v-deep .sf-chevron {
-      rotate: 180deg;
-    }
   }
 
   ._heading {
@@ -562,12 +587,12 @@ export default defineComponent({
     font-weight: var(--font-medium);
   }
 
-  ._products.-has-more-desktop {
+  ._content.-has-more-desktop {
     ._show-more-tile {
       display: flex;
     }
 
-    ._product.-upgrade.-hidden-desktop {
+    ._content.-upgrade.-hidden-desktop {
       display: none;
     }
   }
@@ -579,14 +604,34 @@ export default defineComponent({
 
   ._content {
     display: grid;
-    grid-template-rows: 0fr;
+    grid-template-rows: 1fr;
     transition: grid-template-rows 300ms ease-in-out;
+    will-change: grid-template-rows;
 
     &.-expanded {
-      grid-template-rows: 1fr;
+      ._customization,
+      ._form-errors {
+        margin-top: var(--spacer-base);
+      }
+
+      ._customization-option {
+        --customization-option-label-display: block;
+      }
 
       &::after {
         display: none;
+      }
+    }
+
+    &:not(.-expanded) {
+      ._customization-option {
+        ::v-deep {
+          ._item {
+            &:nth-child(n+4) {
+              display: none;
+            }
+          }
+        }
       }
     }
   }
@@ -596,11 +641,6 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     row-gap: var(--spacer-base);
-  }
-
-  ._customization,
-  ._form-errors {
-    margin-top: var(--spacer-base);
   }
 
   ._buttons {
@@ -617,6 +657,8 @@ export default defineComponent({
     --customization-option-label-size: var(--font-size-base);
     --customization-option-description-align: left;
     --customization-option-hint-align: left;
+
+    --customization-option-label-display: none;
 
     --customization-option-hint-display: none;
     --customization-option-description-display: none;
