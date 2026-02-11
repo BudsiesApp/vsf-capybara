@@ -607,13 +607,6 @@ export default defineComponent({
         --cards-list-checkbox-padding: var(--spacer-xs);
         --checkbox-label-margin:  0 0 0 var(--spacer-xs);
         --cards-list-checkmark-align-items: flex-start;
-
-        ::v-deep {
-          ._title-wrapper {
-            flex-wrap: wrap;
-            row-gap: 0;
-          }
-        }
       }
     }
   }
