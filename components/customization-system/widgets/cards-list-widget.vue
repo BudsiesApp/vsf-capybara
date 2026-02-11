@@ -262,6 +262,7 @@ export default defineComponent({
     ._expand-chevron-container {
       display: flex;
       padding: var(--spacer-2xs);
+      padding-right: 0;
       display: none;
     }
 
