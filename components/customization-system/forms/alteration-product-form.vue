@@ -3,19 +3,15 @@
     class="alteration-product-form"
     v-if="showBlock"
   >
-    <div
-      class="_heading-container -expandable"
-    >
-      <SfHeading
-        class="_heading"
-        :level="5"
-        :title="$t('Upgrade Your Plush')"
-      />
-    </div>
+    <SfHeading
+      class="_heading"
+      :level="5"
+      :title="$t('Upgrade Your Plush')"
+    />
 
     <div
       class="_content"
-      :class="{ '-expanded': isContentExpanded, '-has-more-desktop': hasMoreDesktop, '-has-more-mobile': hasMoreMobile }"
+      :class="{ '-expanded': isContentExpanded, '-has-more': hasMore }"
     >
       <div class="_content-inner">
         <validation-observer
@@ -26,8 +22,10 @@
         >
           <div
             class="_customization"
-            v-for="customization in (isContentExpanded ? filteredCustomizations : collapsedViewCustomizations)"
-            v-show="isContentExpanded || (collapsedViewItemsByCustomization[customization.id] && collapsedViewItemsByCustomization[customization.id].length > 0)"
+            v-for="customization in filteredCustomizations"
+            :class="{
+              '-hidden': !isContentExpanded && collapsedViewItemsByCustomization[customization.id].isCustomizationFullyHidden
+            }"
             :key="customization.id"
           >
             <customization-option
@@ -35,16 +33,28 @@
               ref="customizationOption"
               :customization="customization"
               :is-disabled="isSomeEntityBusy || isSubmitting"
-              :option-values="isContentExpanded ? filteredOptionValues[customization.id] : collapsedViewItemsByCustomization[customization.id]"
+              :option-values="filteredOptionValues[customization.id]"
               :product-id="alterationProduct ? Number(alterationProduct.id) : 0"
               :value="customizationOptionValue[customization.id]"
               :disable-validation="false"
               :added-to-cart-option-value-id="addedToCartOptionValueId[customization.id]"
               :expand-config="expandConfigByCustomization[customization.id]"
+              :hidden-option-values="isContentExpanded ? {} : collapsedViewItemsByCustomization[customization.id].hiddenOptionValues"
               @input="onCustomizationOptionInput"
               @customization-option-busy-state-changed="onEntityBusyChanged"
               @expand-clicked="onOptionValueExpandClicked"
-            />
+            >
+              <template #label="{ label, isFieldRequired }">
+                <div class="_option-label-container">
+                  <label
+                    class="_option-label"
+                    :class="{ '-required': isFieldRequired }"
+                  >
+                    {{ label }}
+                  </label>
+                </div>
+              </template>
+            </customization-option>
           </div>
 
           <m-form-errors
@@ -56,8 +66,8 @@
           <div class="_buttons">
             <div
               class="_show-more-tile"
-              @click="onHeadingClick"
-              v-show="hasMoreDesktop"
+              @click="onToggleButtonClick"
+              v-show="hasMore"
             >
               <a href="javascript:void(0)">
                 <template v-if="isExpanded">
@@ -106,7 +116,6 @@ import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import {
   Customization,
   CustomizationOptionValue,
-  isFileUploadValue,
   requiredCustomizationsFilter,
   useAvailableCustomizations,
   useAvailableOptionsValuesFilter,
@@ -126,7 +135,7 @@ import {
 import { useAlterationProductCustomizations } from 'theme/helpers/use-alteration-product-customizations';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
-import { useCollapsedCustomizationsView, CollapsedViewItem } from 'theme/helpers/use-collapsed-customizations-view';
+import { useCollapsedCustomizationsView } from 'theme/helpers/use-collapsed-customizations-view';
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
@@ -317,13 +326,11 @@ export default defineComponent({
 
     const {
       collapsedViewItemsByCustomization,
-      collapsedViewCustomizations
-      // getCollapsedViewItemCustomizationOptionValue
+      hasMore
     } = useCollapsedCustomizationsView(
       filteredCustomizations,
       existingCartItemCustomizationOptionValue,
-      filteredOptionValuesIdsByCustomizationId,
-      context
+      filteredOptionValuesIdsByCustomizationId
     );
 
     const addToCartButtonText = computed<string>(() => {
@@ -342,7 +349,7 @@ export default defineComponent({
       isExpanded.value = false;
     }
 
-    function onHeadingClick () {
+    function onToggleButtonClick () {
       if (isExpanded.value) {
         onHideDetailsClick();
         return;
@@ -350,17 +357,6 @@ export default defineComponent({
 
       onShowDetailsClick();
     }
-
-    // function onCollapsedViewItemClick (item: CollapsedViewItem) {
-    //   onShowDetailsClick();
-    //
-    //   const value = getCollapsedViewItemCustomizationOptionValue(
-    //     item,
-    //     availableCustomizationDictionary.value,
-    //     customizationOptionValue.value
-    //   );
-    //   onCustomizationOptionInput(value);
-    // }
 
     async function onAddToCart () {
       if (!canAddToCart.value || isSubmitting.value) {
@@ -400,43 +396,6 @@ export default defineComponent({
       }
     }
 
-    const DESKTOP_TILES_CAP = 3;
-    const MOBILE_TILES_CAP = 3;
-    const hasMoreDesktop = computed(() => {
-      let totalCollapsedOptionValues = 0;
-
-      for (const customization of filteredCustomizations.value) {
-        totalCollapsedOptionValues += customization.optionData?.values?.length || 0;
-      }
-
-      return totalCollapsedOptionValues > DESKTOP_TILES_CAP;
-    });
-    const hasMoreMobile = computed(() => {
-      let totalCollapsedOptionValues = 0;
-
-      for (const optionValues of Object.values(collapsedViewItemsByCustomization.value)) {
-        totalCollapsedOptionValues += optionValues.length;
-      }
-
-      return totalCollapsedOptionValues > MOBILE_TILES_CAP;
-    });
-
-    const gridStyle = {
-      '--desktop-cols': DESKTOP_TILES_CAP,
-      '--mobile-cols': MOBILE_TILES_CAP
-    };
-
-    function isItemHiddenOnDesktop (index: number) {
-      // If we have more items than desktop cap, we need to make room for "More Upgrades" tile
-      // So we show (CAP - 1) items, and hide the rest.
-      // Index is 0-based. So if CAP is 6, we show 0,1,2,3,4. Index 5+ are hidden.
-      return index >= (DESKTOP_TILES_CAP - 1);
-    }
-
-    function isItemHiddenOnMobile (index: number) {
-      return index >= (MOBILE_TILES_CAP - 1);
-    }
-
     const expandedOptionValues: Ref<Record<string, boolean>> = ref({});
 
     function onOptionValueExpandClicked (optionValueId: string): void {
@@ -461,7 +420,7 @@ export default defineComponent({
     });
 
     const isContentExpanded = computed(() => {
-      return isExpanded.value || !hasMoreDesktop.value;
+      return isExpanded.value || !hasMore.value;
     });
 
     return {
@@ -478,22 +437,14 @@ export default defineComponent({
       isSomeEntityBusy,
       isSubmitting,
       onAddToCart,
-      // onCollapsedViewItemClick,
       onCustomizationOptionInput,
       collapsedViewItemsByCustomization,
       onEntityBusyChanged,
-      onHeadingClick,
-      onHideDetailsClick,
-      onShowDetailsClick,
+      onToggleButtonClick,
       showBlock,
       filteredCustomizations,
       validationObserver,
-      hasMoreDesktop,
-      hasMoreMobile,
-      isItemHiddenOnDesktop,
-      isItemHiddenOnMobile,
-      gridStyle,
-      collapsedViewCustomizations
+      hasMore
     };
   }
 });
@@ -506,18 +457,6 @@ export default defineComponent({
   border: 1px solid var(--c-secondary);
   padding: var(--spacer-sm);
 
-  ._heading-container {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    column-gap: var(--spacer-xs);
-  }
-
-  ._heading-container.-expandable {
-    cursor: pointer;
-    user-select: none;
-  }
-
   ._heading {
     --heading-title-font-size: var(--font-base);
     --heading-title-font-weight: var(--font-semibold);
@@ -527,54 +466,6 @@ export default defineComponent({
     flex: 0 0 auto;
 
     text-align: left;
-  }
-
-  ._heading-chevron {
-    flex: 0 0 auto;
-  }
-
-  ._collapsed-preview {
-    display: flex;
-    flex-direction: column;
-    --product-card-height: 100%;
-
-    &.-hidden {
-      display: none;
-    }
-  }
-
-  ._products {
-    display: grid;
-    grid-template-columns: repeat(var(--desktop-cols), 1fr);
-    margin-top: var(--spacer-sm);
-    column-gap: var(--spacer-sm);
-  }
-
-  ._product {
-    --o-product-card-badge-size: 48px;
-    --product-card-title-font-size: var(--font-size-base);
-    --price-regular-font-size: var(--font-size-base);
-    --price-special-font-size: var(--font-size-base);
-    --price-old-font-size: var(--font-size-base);
-    --product-card-title-font-line-height: 1.2;
-
-    ::v-deep {
-      .sf-product-card {
-        --product-card-padding: var(--spacer-xs);
-      }
-
-      .sf-badge {
-        z-index: 2;
-      }
-
-      .base-image {
-        width: 100%;
-      }
-
-      .sf-price {
-        flex-wrap: wrap;
-      }
-    }
   }
 
   ._show-more-tile {
@@ -589,19 +480,20 @@ export default defineComponent({
     font-weight: var(--font-medium);
   }
 
-  ._content.-has-more-desktop {
+  ._content.-has-more {
     ._show-more-tile {
       display: flex;
     }
-
-    ._content.-upgrade.-hidden-desktop {
-      display: none;
-    }
   }
 
-  ._disabled-hint {
-    color: var(--c-accent);
-    font-size: var(--font-base);
+  ._customization {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows, margin 300ms ease-in-out;
+
+    &.-hidden {
+      grid-template-rows: 0fr;
+    }
   }
 
   ._content {
@@ -611,13 +503,13 @@ export default defineComponent({
     will-change: grid-template-rows;
 
     &.-expanded {
+      ._customization {
+        grid-template-rows: 1fr;
+      }
+
       ._customization,
       ._form-errors {
         margin-top: var(--spacer-base);
-      }
-
-      ._customization-option {
-        --customization-option-label-display: block;
       }
 
       &::after {
@@ -637,13 +529,11 @@ export default defineComponent({
           --customization-option-widget-margin: var(--spacer-sm) 0 0;
         }
 
-        ::v-deep {
-          ._item {
-            &:nth-child(n+4) {
-              display: none;
-            }
-          }
+        ._option-label-container {
+          grid-template-rows: 0fr;
+        }
 
+        ::v-deep {
           ._error-message {
             display: none;
           }
@@ -675,10 +565,23 @@ export default defineComponent({
     --customization-option-description-align: left;
     --customization-option-hint-align: left;
 
-    --customization-option-label-display: none;
-
     --customization-option-hint-display: none;
     --customization-option-description-display: none;
+
+    overflow: hidden;
+    transition: margin 300ms ease-in-out;
+
+    ._option-label-container {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows 300ms ease-in-out;
+    }
+
+    ::v-deep {
+      ._option-label {
+        overflow: hidden;
+      }
+    }
 
     &.-widget-CardsListWidget {
       --image-container-max-height: 120px;
@@ -694,18 +597,20 @@ export default defineComponent({
   }
 
   @media (max-width: $mobile-max) {
-    ._products {
-      grid-template-columns: repeat(var(--mobile-cols), 1fr);
-      column-gap: var(--spacer-xs);
-    }
+    padding: var(--spacer-xs);
 
-    ._products.-has-more-mobile {
-      ._show-more-tile {
-        display: flex;
-      }
+    ._customization-option {
+      &.-widget-CardsListWidget {
+        --cards-list-checkbox-padding: var(--spacer-xs);
+        --checkbox-label-margin:  0 0 0 var(--spacer-xs);
+        --cards-list-checkmark-align-items: flex-start;
 
-      ._product.-upgrade.-hidden-mobile {
-        display: none;
+        ::v-deep {
+          ._title-wrapper {
+            flex-wrap: wrap;
+            row-gap: 0;
+          }
+        }
       }
     }
   }

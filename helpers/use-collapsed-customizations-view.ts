@@ -1,38 +1,33 @@
 import { computed, ComputedRef, SetupContext } from '@vue/composition-api';
 
-import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
-import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { Customization, CustomizationOptionValue, isFileUploadValue, OptionValue, WidgetType } from 'src/modules/customization-system';
 
 export interface CollapsedViewItem {
-  id: string,
-  title: string,
-  image: string,
-  price: {
-    regular: string,
-    special: string | null
-  },
-  link: string,
-  customizationId: string,
-  isAddedToCart: boolean
+  isCustomizationFullyHidden: boolean,
+  hiddenOptionValues: Record<string, boolean>
 }
+
+const MAX_OPTION_VALUES_TO_SHOW = 3;
 
 export function useCollapsedCustomizationsView (
   filteredAvailableCustomizations: ComputedRef<Customization[]>,
   existingCartItemCustomizationOptionValue: ComputedRef<Record<string, CustomizationOptionValue>>,
-  filteredOptionValuesIdsByCustomizationId: ComputedRef<Record<string, Record<string, boolean>>>,
-  // TODO: remove
-  { root }: SetupContext
-
+  filteredOptionValuesIdsByCustomizationId: ComputedRef<Record<string, Record<string, boolean>>>
 ) {
-  const collapsedViewItemsByCustomization: ComputedRef<Record<string, OptionValue[]>> = computed(() => {
-    const values: Record<string, OptionValue[]> = {};
+  const collapsedViewItemsByCustomization: ComputedRef<Record<string, CollapsedViewItem>> = computed(() => {
+    const values: Record<string, CollapsedViewItem> = {};
     const _filteredAvailableCustomizations = filteredAvailableCustomizations.value;
     const _filteredOptionValuesIdsByCustomizationId = filteredOptionValuesIdsByCustomizationId.value;
     const _existingCartItemCustomizationOptionValue = existingCartItemCustomizationOptionValue.value;
 
+    let optionValuesAdded = 0;
+
     for (const customization of _filteredAvailableCustomizations) {
       if (!customization.optionData?.values || customization.optionData.displayWidget !== WidgetType.CARDS_LIST) {
+        values[customization.id] = {
+          isCustomizationFullyHidden: true,
+          hiddenOptionValues: {}
+        };
         continue;
       }
 
@@ -68,74 +63,50 @@ export function useCollapsedCustomizationsView (
         optionValues.push(optionValue);
       }
 
-      values[customization.id] = optionValues;
+      const availableOptionValueToShow = MAX_OPTION_VALUES_TO_SHOW - optionValuesAdded;
+
+      if (availableOptionValueToShow <= 0) {
+        values[customization.id] = {
+          isCustomizationFullyHidden: true,
+          hiddenOptionValues: {}
+        };
+        continue;
+      }
+
+      optionValuesAdded += Math.min(optionValues.length, availableOptionValueToShow);
+
+      if (optionValues.length > availableOptionValueToShow) {
+        const hiddenOptionValues: Record<string, boolean> = {};
+
+        for (const optionValue of optionValues.slice(availableOptionValueToShow, optionValues.length)) {
+          hiddenOptionValues[optionValue.id] = true;
+        }
+
+        values[customization.id] = {
+          isCustomizationFullyHidden: false,
+          hiddenOptionValues
+        };
+
+        continue;
+      }
+
+      values[customization.id] = {
+        isCustomizationFullyHidden: false,
+        hiddenOptionValues: {}
+      };
     }
 
     return values;
   });
 
-  const collapsedViewCustomizations: ComputedRef<Customization[]> = computed(() => {
-    const result: Customization[] = [];
-    let valuesLength = 0;
+  const hasMore: ComputedRef<boolean> = computed(() => {
+    const collapsedViewItems = Object.values(collapsedViewItemsByCustomization.value);
 
-    for (const customization of filteredAvailableCustomizations.value) {
-      const optionValuesLength = (collapsedViewItemsByCustomization.value[customization.id] && collapsedViewItemsByCustomization.value[customization.id].length) || 0;
-
-      if (valuesLength >= 3) {
-        return result;
-      }
-
-      valuesLength += optionValuesLength;
-      result.push(customization);
-    }
-
-    return result;
+    return collapsedViewItems.some((item) => item.isCustomizationFullyHidden || Object.values(item.hiddenOptionValues).some((isHidden) => isHidden));
   });
-
-  // function getCollapsedViewItemCustomizationOptionValue (
-  //   collapsedViewItem: CollapsedViewItem,
-  //   availableCustomizationDictionary: Record<string, Customization>,
-  //   customizationOptionValue: Record<string, CustomizationOptionValue>
-  // ): {
-  //     customizationId: string,
-  //     value: CustomizationOptionValue
-  //   } {
-  //   let value: CustomizationOptionValue;
-  //   const customization = availableCustomizationDictionary[collapsedViewItem.customizationId];
-  //   const isOptionValueArray = !customization.optionData?.maxValuesCount || (customization.optionData?.maxValuesCount && customization.optionData.maxValuesCount > 1);
-  //   const selectedCustomizationOptionValue = customizationOptionValue[collapsedViewItem.customizationId];
-  //
-  //   if (!selectedCustomizationOptionValue) {
-  //     return {
-  //       customizationId: collapsedViewItem.customizationId,
-  //       value: isOptionValueArray ? [collapsedViewItem.id] : collapsedViewItem.id
-  //     };
-  //   }
-  //
-  //   if (isFileUploadValue(selectedCustomizationOptionValue)) {
-  //     return {
-  //       customizationId: collapsedViewItem.customizationId,
-  //       value: selectedCustomizationOptionValue
-  //     };
-  //   }
-  //
-  //   if (isOptionValueArray) {
-  //     value = Array.isArray(selectedCustomizationOptionValue)
-  //       ? [...selectedCustomizationOptionValue, collapsedViewItem.id]
-  //       : [selectedCustomizationOptionValue, collapsedViewItem.id];
-  //   } else {
-  //     value = collapsedViewItem.id;
-  //   }
-  //
-  //   return {
-  //     customizationId: collapsedViewItem.customizationId,
-  //     value
-  //   }
-  // }
 
   return {
     collapsedViewItemsByCustomization,
-    collapsedViewCustomizations
-    // getCollapsedViewItemCustomizationOptionValue
+    hasMore
   }
 }

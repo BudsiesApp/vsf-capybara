@@ -154,10 +154,14 @@ export default defineComponent({
         isExpanded: boolean
       } | undefined>,
       default: undefined
+    },
+    hiddenOptionValues: {
+      type: Object as PropType<Record<string, boolean> | undefined>,
+      default: undefined
     }
   },
   setup (props, context) {
-    const { customization, disableValidation, fieldNamePrefix, optionValues, productId, value, addedToCartOptionValueId, expandConfig } = toRefs(props);
+    const { customization, disableValidation, fieldNamePrefix, optionValues, productId, value, addedToCartOptionValueId, expandConfig, hiddenOptionValues } = toRefs(props);
 
     const optionLabel = computed<string>(() => {
       return customization.value.title || customization.value.name;
@@ -193,7 +197,8 @@ export default defineComponent({
         productId,
         context,
         addedToCartOptionValueId,
-        expandConfig
+        expandConfig,
+        hiddenOptionValues
       ),
       ...useWidgetBusyState(
         customization,

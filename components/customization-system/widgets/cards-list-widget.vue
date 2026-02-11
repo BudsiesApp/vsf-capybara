@@ -3,6 +3,10 @@
     <ul class="_list">
       <li
         class="_item"
+        :class="{
+          '-can-hide': hiddenOptionValues,
+          '-hidden': hiddenOptionValues && hiddenOptionValues[optionValue.id]
+        }"
         :disabled="isDisabled"
         v-for="optionValue in sortedValues"
         :key="optionValue.id"
@@ -169,6 +173,10 @@ export default defineComponent({
         isExpanded: boolean
       } | undefined>,
       default: undefined
+    },
+    hiddenOptionValues: {
+      type: Object as PropType<Record<string, boolean> | undefined>,
+      default: undefined
     }
   },
   setup (props, context) {
@@ -187,13 +195,7 @@ export default defineComponent({
 
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
 
-    function onExpandClicked (optionValueId: string, event: Event): void {
-      event.stopPropagation()
-      context.emit('expand-clicked', optionValueId);
-    }
-
     return {
-      onExpandClicked,
       getItemImage,
       isValid,
       ...listWidgetFields,
@@ -222,6 +224,26 @@ export default defineComponent({
     &:disabled {
       cursor: default;
     }
+
+    &.-can-hide {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows 300ms ease-in-out;
+
+      ._checkbox {
+        transition: padding 300ms ease-in-out;
+        will-change: padding;
+        overflow: hidden;
+      }
+
+      &.-hidden {
+        grid-template-rows: 0fr;
+
+        ._checkbox {
+          padding: 0;
+        }
+      }
+    }
   }
 
   ._label-container {
@@ -234,7 +256,7 @@ export default defineComponent({
     --checkbox-font-size: var(--font-size-base);
     --m-checkbox-align-items: flex-start;
 
-    padding: var(--spacer-sm);
+    padding: var(--cards-list-checkbox-padding, var(--spacer-sm));
     transition: background-color 0.15s cubic-bezier(0.65, 0.05, 0.35, 1);
 
     ._expand-chevron-container {
@@ -244,10 +266,6 @@ export default defineComponent({
     }
 
     &.-expandable {
-      padding: var(--spacer-xs) var(--spacer-sm);
-      transition: padding 300ms ease-in-out;
-      will-change: padding;
-
       ._expand-chevron-container {
         display: flex;
       }
@@ -266,8 +284,6 @@ export default defineComponent({
       }
 
       &.-expanded {
-        padding: var(--spacer-sm);
-
         ._label-container {
           grid-template-rows: 1fr;
         }
@@ -296,7 +312,7 @@ export default defineComponent({
   ._checkmark-wrapper {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: var(--cards-list-checkmark-align-items, center);
     width: 100%;
   }
 
