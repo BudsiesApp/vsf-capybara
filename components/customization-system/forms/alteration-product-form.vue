@@ -522,12 +522,15 @@ export default defineComponent({
         margin-top: var(--spacer-sm);
       }
 
-      ._customization-option {
-        --customization-option-widget-margin: 0;
+      ._customization {
 
         &:first-child {
-          --customization-option-widget-margin: var(--spacer-sm) 0 0;
+          margin: var(--spacer-sm) 0 0;
         }
+      }
+
+      ._customization-option {
+        --customization-option-widget-margin: 0;
 
         ._option-label-container {
           grid-template-rows: 0fr;
