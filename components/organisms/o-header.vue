@@ -22,9 +22,9 @@
           @mouseover="onMainMenuMouseOver"
           @mouseleave="isHoveredMenu = false"
         >
-          <div class="o-header__submenu">
+          <router-link to="/plush-services/" class="o-header__submenu">
             Products
-          </div>
+          </router-link>
           <MMenu
             :visible="isHoveredMenu && !isSearchPanelVisible"
             @transitionend.native="onMainMenuTransitionEnd"
@@ -37,9 +37,13 @@
           @mouseleave="isEducatorsMenuHovered = false"
           class="_educators-menu"
         >
-          <div class="o-header__submenu">
+          <router-link
+            @click.native="isEducatorsMenuHovered = false"
+            to="/teachers/"
+            class="o-header__submenu"
+          >
             Educators
-          </div>
+          </router-link>
 
           <MEducatorsMenu
             :visible="isEducatorsMenuHovered && !isSearchPanelVisible"

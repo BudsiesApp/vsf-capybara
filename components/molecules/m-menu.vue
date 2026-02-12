@@ -33,8 +33,20 @@
 
       <SfMegaMenuColumn
         :title="$t('Educators')"
-        class="mobile-only"
+        class="_educators mobile-only"
       >
+        <template #title="{title}">
+          <h3 class="sf-mega-menu-column__title">
+            <router-link
+              to="/teachers/"
+              class="_link"
+              @click.native="$emit('close')"
+            >
+              {{ title }}
+            </router-link>
+          </h3>
+        </template>
+
         <SfList>
           <SfListItem
             v-for="item in educatorsItems"
@@ -348,6 +360,16 @@ export default Vue.extend({
     right: var(--spacer-sm);
     top: var(--spacer-base);
     z-index: 3;
+  }
+
+  ._educators {
+     --mega-menu-column-title-padding: 0;
+
+    ._link {
+      padding: var(--spacer-sm);
+      display: block;
+      color: var(--c-text);
+    }
   }
 
   @include for-desktop {
