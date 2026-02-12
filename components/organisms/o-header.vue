@@ -22,9 +22,9 @@
           @mouseover="onMainMenuMouseOver"
           @mouseleave="isHoveredMenu = false"
         >
-          <div class="o-header__submenu">
+          <router-link to="/pet-gifts/" class="o-header__submenu">
             Products
-          </div>
+          </router-link>
           <MMenu
             :visible="isHoveredMenu && !isSearchPanelVisible"
             @transitionend.native="onMainMenuTransitionEnd"
