@@ -3,11 +3,25 @@
     class="alteration-product-form"
     v-if="showBlock"
   >
-    <SfHeading
-      class="_heading"
-      :level="5"
-      :title="$t('Upgrade Your Plush')"
-    />
+    <div
+      class="_heading-container"
+      :class="{ '-expanded': isExpanded, '-expandable': hasMore}"
+      role="button"
+      tabindex="0"
+      @click="onToggleButtonClick"
+      @keydown.enter.prevent="onToggleButtonClick"
+      @keydown.space.prevent="onToggleButtonClick"
+    >
+      <SfHeading
+        class="_heading"
+        :level="5"
+        :title="$t('Upgrade Your Plush')"
+      />
+
+      <SfChevron
+        class="_heading-chevron"
+      />
+    </div>
 
     <div
       class="_content"
@@ -67,18 +81,10 @@
             <div
               class="_show-more-tile"
               @click="onToggleButtonClick"
-              v-show="hasMore"
+              v-show="hasMore && !isExpanded"
             >
               <a href="javascript:void(0)">
-                <template v-if="isExpanded">
-                  {{ $t('Less') }}
-                </template>
-
-                <template v-else>
-                  {{ $t('More') }}
-                </template>
-
-                {{ $t('Upgrades') }}
+                {{ $t('See more') }}
               </a>
             </div>
 
@@ -351,6 +357,10 @@ export default defineComponent({
     }
 
     function onToggleButtonClick () {
+      if (!hasMore.value) {
+        return;
+      }
+
       if (isExpanded.value) {
         onHideDetailsClick();
         return;
@@ -458,6 +468,32 @@ export default defineComponent({
   border: 1px solid var(--c-secondary);
   padding: var(--spacer-sm);
 
+  ._heading-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    column-gap: var(--spacer-xs);
+
+    ._heading-chevron {
+      display: none;
+    }
+  }
+
+  ._heading-container.-expandable {
+    cursor: pointer;
+    user-select: none;
+
+    ._heading-chevron {
+      display: block;
+    }
+  }
+
+  ._heading-container.-expanded {
+    ::v-deep .sf-chevron {
+      rotate: 180deg;
+    }
+  }
+
   ._heading {
     --heading-title-font-size: var(--font-base);
     --heading-title-font-weight: var(--font-semibold);
@@ -469,6 +505,9 @@ export default defineComponent({
     text-align: left;
   }
 
+  ._heading-chevron {
+    flex: 0 0 auto;
+  }
   ._show-more-tile {
     display: none;
     flex-direction: column;
@@ -585,6 +624,10 @@ export default defineComponent({
       ._option-label {
         overflow: hidden;
       }
+
+      ._error-message {
+        text-align: center;
+      }
     }
 
     &.-widget-CardsListWidget {
@@ -601,13 +644,15 @@ export default defineComponent({
   }
 
   @media (max-width: $mobile-max) {
-    padding: var(--spacer-xs);
+    padding: var(--spacer-sm) var(--spacer-xs);
 
     ._customization-option {
       &.-widget-CardsListWidget {
         --cards-list-checkbox-padding: var(--spacer-xs);
         --checkbox-label-margin:  0 0 0 var(--spacer-xs);
         --cards-list-checkmark-align-items: flex-start;
+        --cards-list-title-justify-content: space-between;
+        --cards-list-checkmark-container-width: 100%;
       }
     }
   }

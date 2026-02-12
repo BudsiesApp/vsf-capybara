@@ -319,12 +319,14 @@ export default defineComponent({
 
   ._checkmark-container {
     display: flex;
+    width: var(--cards-list-checkmark-container-width, auto);
   }
 
   ._title-wrapper {
     display: flex;
     align-items: flex-start;
     flex-direction: row;
+    justify-content: var(--cards-list-title-justify-content, flex-start);
     gap: var(--spacer-xs);
   }
 
