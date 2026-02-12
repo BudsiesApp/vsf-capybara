@@ -22,9 +22,9 @@
           @mouseover="onMainMenuMouseOver"
           @mouseleave="isHoveredMenu = false"
         >
-          <div class="o-header__submenu">
+          <a :href="petsiesGiftPageUrl" class="o-header__submenu">
             Products
-          </div>
+          </a>
           <MMenu
             :visible="isHoveredMenu && !isSearchPanelVisible"
             @transitionend.native="onMainMenuTransitionEnd"
@@ -37,9 +37,13 @@
           @mouseleave="isEducatorsMenuHovered = false"
           class="_educators-menu"
         >
-          <div class="o-header__submenu">
+          <router-link
+            @click.native="isEducatorsMenuHovered = false"
+            to="/teachers/"
+            class="o-header__submenu"
+          >
             Educators
-          </div>
+          </router-link>
 
           <MEducatorsMenu
             :visible="isEducatorsMenuHovered && !isSearchPanelVisible"
@@ -84,6 +88,8 @@ import { SfHeader, SfOverlay } from '@storefront-ui/vue';
 
 import { CurrencySelector } from 'src/modules/currency';
 
+import { PETSIES_GIFT_PAGE_URL } from 'theme/helpers/petsies-gift-page-url';
+
 import ALogo from 'theme/components/atoms/a-logo';
 import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
@@ -119,6 +125,9 @@ export default {
     ...mapGetters('user', ['isLoggedIn']),
     activeIcon () {
       return this.isLoggedIn ? 'account' : '';
+    },
+    petsiesGiftPageUrl () {
+      return PETSIES_GIFT_PAGE_URL;
     }
   },
   methods: {
