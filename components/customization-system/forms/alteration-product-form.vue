@@ -529,7 +529,9 @@ export default defineComponent({
   ._customization {
     display: grid;
     grid-template-rows: 1fr;
-    transition: grid-template-rows, margin 300ms ease-in-out;
+    transition-property: grid-template-rows, margin;
+    transition-duration: 300ms;
+    transition-timing-function: ease-in-out;
 
     &.-hidden {
       grid-template-rows: 0fr;
