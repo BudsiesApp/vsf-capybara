@@ -22,9 +22,9 @@
           @mouseover="onMainMenuMouseOver"
           @mouseleave="isHoveredMenu = false"
         >
-          <a :href="petsiesGiftPageUrl" class="o-header__submenu">
+          <router-link to="/plush-services/" class="o-header__submenu">
             Products
-          </a>
+          </router-link>
           <MMenu
             :visible="isHoveredMenu && !isSearchPanelVisible"
             @transitionend.native="onMainMenuTransitionEnd"
@@ -88,8 +88,6 @@ import { SfHeader, SfOverlay } from '@storefront-ui/vue';
 
 import { CurrencySelector } from 'src/modules/currency';
 
-import { PETSIES_GIFT_PAGE_URL } from 'theme/helpers/petsies-gift-page-url';
-
 import ALogo from 'theme/components/atoms/a-logo';
 import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
@@ -125,9 +123,6 @@ export default {
     ...mapGetters('user', ['isLoggedIn']),
     activeIcon () {
       return this.isLoggedIn ? 'account' : '';
-    },
-    petsiesGiftPageUrl () {
-      return PETSIES_GIFT_PAGE_URL;
     }
   },
   methods: {
