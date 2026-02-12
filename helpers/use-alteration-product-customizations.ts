@@ -1,4 +1,4 @@
-import { computed, Ref } from '@vue/composition-api';
+import { computed, ComputedRef, Ref } from '@vue/composition-api';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
@@ -33,8 +33,19 @@ function mapOrderItemOptionValueIdToAlterationProduct (
 
 export function useAlterationProductCustomizations (
   orderItem: Ref<OrderItem>,
-  alterationProduct: Ref<Product | undefined>
+  alterationProduct: Ref<Product | undefined>,
+  alterationProductCustomizationDictionary: Ref<Record<string, Customization>>
 ) {
+  const orderItemCustomizationValueById: ComputedRef<Record<string, CustomizationOptionValue>> = computed(() => {
+    const result: Record<string, CustomizationOptionValue> = {};
+
+    for (const item of (orderItem.value.extension_attributes?.customization_states || [])) {
+      result[item.customization_id] = item.value;
+    }
+
+    return result;
+  });
+
   const orderItemCustomizationNameByIdDictionary = computed<Record<string, string>>(() => {
     const result: Record<string, string> = {};
     const extensionAttributes = orderItem.value.extension_attributes;
@@ -121,19 +132,36 @@ export function useAlterationProductCustomizations (
 
   const orderItemOptionValue = computed<Record<string, CustomizationOptionValue>>(() => {
     const result: Record<string, CustomizationOptionValue> = {};
-    const extensionAttributes = orderItem.value.extension_attributes;
+    const orderItemExtensionAttributes = orderItem.value.extension_attributes;
     const _orderItemCustomizationNameByIdDictionary = orderItemCustomizationNameByIdDictionary.value;
     const _orderItemOptionValueNameByIdAndCustomizationId = orderItemOptionValueNameByIdAndCustomizationId.value;
     const _alterationProductCustomizationsByName = alterationProductCustomizationsByName.value;
     const _alterationProductOptionValueIdByNameAndCustomizationId = alterationProductOptionValueIdByNameAndCustomizationId.value;
     const alterationProductCustomizations = alterationProduct.value?.customizations;
 
-    if (!extensionAttributes || !alterationProductCustomizations) {
+    if (!orderItemExtensionAttributes || !alterationProductCustomizations) {
       return result;
     }
 
-    for (const item of extensionAttributes.customization_states) {
+    for (const item of orderItemExtensionAttributes.customization_states) {
       if (isFileUploadValue(item.value)) {
+        continue;
+      }
+
+      // Alteration products customizations added to the main plushie customization state as is. Don't need to map.
+      if (alterationProductCustomizationDictionary.value[item.customization_id]) {
+        const existingResult = result[item.customization_id];
+
+        if (isFileUploadValue(existingResult)) {
+          continue;
+        }
+
+        if (existingResult && Array.isArray(item.value)) {
+          result[item.customization_id] = [...existingResult, ...item.value]
+          continue;
+        }
+
+        result[item.customization_id] = item.value;
         continue;
       }
 
@@ -195,6 +223,20 @@ export function useAlterationProductCustomizations (
         }
 
         if (mappedIds.length > 0) {
+          const existingRecord = result[alterationProductCustomization.id];
+
+          if (isFileUploadValue(existingRecord)) {
+            continue;
+          }
+
+          if (existingRecord && Array.isArray(existingRecord)) {
+            result[alterationProductCustomization.id] = [...existingRecord, ...mappedIds];
+            continue;
+          } else if (existingRecord) {
+            // TODO: temporary - current TS version don't handle `value` type right in this case
+            mappedIds.push(existingRecord as string);
+          }
+
           result[alterationProductCustomization.id] = mappedIds;
         }
       }

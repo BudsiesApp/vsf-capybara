@@ -232,7 +232,8 @@ export default defineComponent({
       optionValuesFilter
     } = useAlterationProductCustomizations(
       orderItem,
-      alterationProduct
+      alterationProduct,
+      productCustomization
     );
 
     const { addedToCartOptionValueId } = useExistingCartItemOptionValues(
