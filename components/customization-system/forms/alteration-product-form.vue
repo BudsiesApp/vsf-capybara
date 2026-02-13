@@ -122,6 +122,7 @@ import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import {
   Customization,
   CustomizationOptionValue,
+  isFileUploadValue,
   requiredCustomizationsFilter,
   useAvailableCustomizations,
   useAvailableOptionsValuesFilter,
@@ -139,6 +140,8 @@ import {
 } from 'src/modules/orders-history';
 
 import { useAlterationProductCustomizations } from 'theme/helpers/use-alteration-product-customizations';
+import { useAlterationProductAvailabilityRules } from 'theme/helpers/use-alteration-product-availability-rules';
+import { useOrderItemAndAlterationProductMapping } from 'theme/helpers/use-order-item-and-alteration-product-mapping';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useCollapsedCustomizationsView } from 'theme/helpers/use-collapsed-customizations-view';
@@ -197,8 +200,16 @@ export default defineComponent({
 
     const { existingCartItem } = useExistingCartItem(plushieId, context);
 
+    const mapping = useOrderItemAndAlterationProductMapping(orderItem, alterationProduct);
+
+    const { alterationCustomizationsWithMergedAvailabilityRules } = useAlterationProductAvailabilityRules(
+      orderItem,
+      alterationProduct,
+      mapping
+    );
+
     const productCustomizations = computed<Customization[]>(() => {
-      return props.alterationProduct?.customizations || [];
+      return alterationCustomizationsWithMergedAvailabilityRules.value;
     });
 
     const productCustomization = computed<Record<string, Customization>>(() => {
@@ -222,24 +233,26 @@ export default defineComponent({
     } = useCustomizationState(existingCartItem);
 
     const {
+      customizationsFilter: alterationProductCustomizationsFilter,
+      orderItemSelectedOptionValueIds,
+      optionValuesFilter
+    } = useAlterationProductCustomizations(
+      orderItem,
+      alterationProduct,
+      productCustomization,
+      mapping
+    );
+
+    const {
       availableCustomizations,
-      availableCustomization: availableCustomizationDictionary,
       availableOptionValues,
       customizationAvailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
       selectedOptionValuesIds,
       customizationOptionValue,
-      updateCustomizationOptionValue
-    );
-
-    const {
-      customizationsFilter: alterationProductCustomizationsFilter,
-      optionValuesFilter
-    } = useAlterationProductCustomizations(
-      orderItem,
-      alterationProduct,
-      productCustomization
+      updateCustomizationOptionValue,
+      orderItemSelectedOptionValueIds
     );
 
     const { addedToCartOptionValueId } = useExistingCartItemOptionValues(
