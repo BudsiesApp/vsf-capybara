@@ -122,7 +122,6 @@ import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import {
   Customization,
   CustomizationOptionValue,
-  isFileUploadValue,
   requiredCustomizationsFilter,
   useAvailableCustomizations,
   useAvailableOptionsValuesFilter,
