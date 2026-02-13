@@ -149,10 +149,10 @@ export default defineComponent({
       default: undefined
     },
     expandConfig: {
-      type: Object as PropType<{
+      type: Object as PropType<Record<string, {
         isExpandable: boolean,
         isExpanded: boolean
-      } | undefined>,
+      }> | undefined>,
       default: undefined
     },
     hiddenOptionValues: {
