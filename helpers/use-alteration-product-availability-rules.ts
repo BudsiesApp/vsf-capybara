@@ -34,10 +34,8 @@ export function useAlterationProductAvailabilityRules (
       return result;
     }
 
-    const customizationNameById = mapping.orderItemCustomizationNameById.value;
-
     for (const customization of extensionAttributes.customizations) {
-      const normalizedName = customizationNameById[customization.id];
+      const normalizedName = customization.name?.toLowerCase();
       if (normalizedName) {
         result[normalizedName] = customization;
       }
@@ -80,7 +78,9 @@ export function useAlterationProductAvailabilityRules (
 
       const mainValuesByName: Record<string, OptionValue> = {};
       const mainValues = mainCustomization?.optionData?.values || [];
-      const mainOptionValueNameById = mapping.orderItemOptionValueNameByIdByCustomizationId.value[mainCustomization?.id || ''] || {};
+      const mainOptionValueNameById = mainCustomization
+        ? (mapping.orderItemOptionValueNameByIdByCustomizationId.value[mainCustomization.id] || {})
+        : {};
 
       for (const value of mainValues) {
         const valueName = mainOptionValueNameById[value.id] || value.name?.toLowerCase();
