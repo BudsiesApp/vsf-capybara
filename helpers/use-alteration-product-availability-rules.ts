@@ -26,8 +26,6 @@ export function useAlterationProductAvailabilityRules (
   alterationProduct: Ref<Product | undefined>,
   mapping: OrderItemAndAlterationProductMapping
 ) {
-  const resolvedMapping = mapping;
-
   const mainCustomizationByNormalizedName = computed<Record<string, Customization>>(() => {
     const result: Record<string, Customization> = {};
     const extensionAttributes = orderItem.value.extension_attributes;
@@ -36,7 +34,7 @@ export function useAlterationProductAvailabilityRules (
       return result;
     }
 
-    const customizationNameById = resolvedMapping.orderItemCustomizationNameById.value;
+    const customizationNameById = mapping.orderItemCustomizationNameById.value;
 
     for (const customization of extensionAttributes.customizations) {
       const normalizedName = customizationNameById[customization.id];
@@ -49,7 +47,7 @@ export function useAlterationProductAvailabilityRules (
   });
 
   const alterationCustomizationsWithMergedAvailabilityRules = computed<Customization[]>(() => {
-    const alterationProductCustomizations = alterationProduct.value?.customizations as Customization[] | undefined;
+    const alterationProductCustomizations = alterationProduct.value?.customizations;
 
     if (!alterationProductCustomizations?.length) {
       return [];
@@ -82,7 +80,7 @@ export function useAlterationProductAvailabilityRules (
 
       const mainValuesByName: Record<string, OptionValue> = {};
       const mainValues = mainCustomization?.optionData?.values || [];
-      const mainOptionValueNameById = resolvedMapping.orderItemOptionValueNameByIdByCustomizationId.value[mainCustomization?.id || ''] || {};
+      const mainOptionValueNameById = mapping.orderItemOptionValueNameByIdByCustomizationId.value[mainCustomization?.id || ''] || {};
 
       for (const value of mainValues) {
         const valueName = mainOptionValueNameById[value.id] || value.name?.toLowerCase();
@@ -91,7 +89,7 @@ export function useAlterationProductAvailabilityRules (
         }
       }
 
-      const mergedOptionValues: OptionValue[] = (optionValues as OptionValue[]).map((alterationValue) => {
+      const mergedOptionValues: OptionValue[] = optionValues.map((alterationValue) => {
         const valueName = alterationValue.name?.toLowerCase();
         const mainValue = valueName ? mainValuesByName[valueName] : undefined;
 

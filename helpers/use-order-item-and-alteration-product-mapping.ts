@@ -74,7 +74,7 @@ export function useOrderItemAndAlterationProductMapping (
       return result;
     }
 
-    for (const customization of product.customizations as Customization[]) {
+    for (const customization of product.customizations) {
       result[customization.id] = customization;
     }
 
@@ -89,7 +89,7 @@ export function useOrderItemAndAlterationProductMapping (
       return result;
     }
 
-    for (const customization of product.customizations as Customization[]) {
+    for (const customization of product.customizations) {
       const name = normalizeName(customization.name);
       if (name) {
         result[name] = customization;
@@ -107,7 +107,7 @@ export function useOrderItemAndAlterationProductMapping (
       return result;
     }
 
-    for (const customization of product.customizations as Customization[]) {
+    for (const customization of product.customizations) {
       result[customization.id] = {};
 
       const values = customization.optionData?.values || [];
