@@ -215,7 +215,9 @@ export default {
         },
         {
           name: this.$t('Shirts'),
-          link: '/custom-shirts/'
+          link: {
+            name: 'golf-shirts-creation'
+          }
         },
         {
           name: this.$t('Blankets'),

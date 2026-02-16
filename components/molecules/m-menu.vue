@@ -254,7 +254,9 @@ export default Vue.extend({
         },
         {
           label: this.$t('Shirts'),
-          url: '/custom-shirts/'
+          url: {
+            name: 'golf-shirts-creation'
+          }
         }
       ],
       otherProductsItems: [
