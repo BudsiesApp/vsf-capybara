@@ -129,6 +129,7 @@ export default defineComponent({
         const canShowPrice = !_isOptionValuesSamePrice || sortedValues.value.length === 1;
         let label = optionValue.name || '';
 
+        // TODO: quick fix to avoid breaking dropdown prices formatting and add support for production time customization relative prices
         if (_isProductionTimeDefaultOption) {
           label += `: +${PriceHelper.formatPrice(finalPrice, selectedCurrency.value.symbol)}`;
         } else if (canShowPrice && finalPrice) {
