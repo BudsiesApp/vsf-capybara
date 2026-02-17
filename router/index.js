@@ -771,13 +771,9 @@ let routes = [
   {
     name: 'hawaiian-shirts-creation',
     path: '/clothes/hawaiian-shirts/create/',
-    component: CustomizableProduct,
-    props: (route) => ({
-      sku: 'customHawaiianShirts_bundle',
-      productDesign: route.query.product_design,
-      existingPlushieId: route.query.existingPlushieId,
-      layout: 'with-images-gallery'
-    })
+    redirect: {
+      name: 'golf-shirts-creation'
+    }
   },
   {
     name: 'golf-shirts-creation',

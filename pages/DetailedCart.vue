@@ -322,7 +322,9 @@ export default {
         },
         {
           label: this.$t('Shirts'),
-          url: '/custom-shirts/'
+          url: {
+            name: 'golf-shirts-creation'
+          }
         },
         {
           label: this.$t('Blankets'),
