@@ -105,6 +105,7 @@ export default {
 
 html {
   font-size: var(--font-size-base);
+  background-color: var(--c-white);
 }
 
 body {
@@ -117,6 +118,7 @@ body {
   --bar-height: 3.125rem;
   --notification-font-size: var(--font-sm);
 
+  background-color: var(--c-white);
   font-family: var(--font-family-secondary);
   font-weight: var(--font-normal);
   line-height: #{$line-height-base};
