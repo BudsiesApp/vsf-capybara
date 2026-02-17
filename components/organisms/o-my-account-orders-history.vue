@@ -70,19 +70,9 @@ export default defineComponent({
       ordersList
     } = useOrderHistoryList(context);
 
-    const allOrderItems = computed(() => {
-      const items = [];
-
-      for (const order of ordersList.value) {
-        items.push(...order.items);
-      }
-
-      return items;
-    });
-
     const {
       alterationProductByOrderItemId
-    } = useAlterationProductsLoader(allOrderItems, context);
+    } = useAlterationProductsLoader(ordersList, context);
 
     const showLoadingIndicator = computed<boolean>(() => {
       return isLoading.value && !isError.value;
