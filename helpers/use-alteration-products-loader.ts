@@ -114,6 +114,8 @@ export function useAlterationProductsLoader (
       }
     }
 
+    isLoading.value = true;
+
     if (notLoadedSkus.length === 0) {
       try {
         await root.$store.dispatch(
@@ -126,8 +128,6 @@ export function useAlterationProductsLoader (
 
       return;
     }
-
-    isLoading.value = true;
 
     try {
       await Promise.all([
@@ -150,7 +150,7 @@ export function useAlterationProductsLoader (
   watch(
     alterationProductSkus,
     () => {
-      loadAlterationProducts();
+      void loadAlterationProducts();
     },
     { immediate: true }
   );
