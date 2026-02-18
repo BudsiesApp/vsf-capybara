@@ -115,10 +115,16 @@ export function useAlterationProductsLoader (
     }
 
     if (notLoadedSkus.length === 0) {
-      return root.$store.dispatch(
-        'budsies/loadProductsRushAddons',
-        { productSku: '' }
-      );
+      try {
+        await root.$store.dispatch(
+          'budsies/loadProductsRushAddons',
+          { productSku: '' }
+        );
+      } finally {
+        isLoading.value = false;
+      }
+
+      return;
     }
 
     isLoading.value = true;
@@ -143,8 +149,8 @@ export function useAlterationProductsLoader (
 
   watch(
     alterationProductSkus,
-    async () => {
-      await loadAlterationProducts();
+    () => {
+      loadAlterationProducts();
     },
     { immediate: true }
   );
