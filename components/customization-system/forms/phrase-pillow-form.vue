@@ -492,7 +492,7 @@ export default defineComponent({
 
     padding: 0 0.8em;
 
-    &.-widget-ProductionTimeSelector {
+    &.-widget-DropdownWidget {
       --select-width: 100%;
     }
 

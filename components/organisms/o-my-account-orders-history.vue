@@ -42,13 +42,13 @@ import { SfLoader, SfTabs } from '@storefront-ui/vue';
 
 import {
   OrdersHistoryList,
-  useOrderHistoryList,
-  useAlterationProductsLoader
+  useOrderHistoryList
 } from 'src/modules/orders-history';
 
-import OrdersHistorySuggestedItems from 'src/themes/petsies-capybara/components/orders-history/orders-history-suggested-items.vue';
+import { useAlterationProductsLoader } from 'theme/helpers/use-alteration-products-loader';
 
 import AlterationProductForm from 'theme/components/customization-system/forms/alteration-product-form.vue';
+import OrdersHistorySuggestedItems from 'theme/components/orders-history/orders-history-suggested-items.vue';
 
 export default defineComponent({
   name: 'OMyAccountOrdersHistory',
@@ -70,19 +70,9 @@ export default defineComponent({
       ordersList
     } = useOrderHistoryList(context);
 
-    const allOrderItems = computed(() => {
-      const items = [];
-
-      for (const order of ordersList.value) {
-        items.push(...order.items);
-      }
-
-      return items;
-    });
-
     const {
       alterationProductByOrderItemId
-    } = useAlterationProductsLoader(allOrderItems, context);
+    } = useAlterationProductsLoader(ordersList, context);
 
     const showLoadingIndicator = computed<boolean>(() => {
       return isLoading.value && !isError.value;
