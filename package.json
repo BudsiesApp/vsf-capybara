@@ -33,6 +33,7 @@
     "filepond-plugin-image-transform": "^3.7.3",
     "jquery": "^3.0.0",
     "js-video-url-parser": "^0.4.3",
+    "jszip": "^3.10.1",
     "lodash.debounce": "^4.0.8",
     "lodash.throttle": "^4.1.1",
     "quicklink": "^2.0.0-alpha",
