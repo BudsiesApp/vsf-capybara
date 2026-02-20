@@ -139,7 +139,6 @@ import {
 } from 'src/modules/orders-history';
 
 import { useAlterationProductCustomizations } from 'theme/helpers/use-alteration-product-customizations';
-import { useAlterationProductAvailabilityRules } from 'theme/helpers/use-alteration-product-availability-rules';
 import { useOrderItemAndAlterationProductMapping } from 'theme/helpers/use-order-item-and-alteration-product-mapping';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
@@ -201,14 +200,8 @@ export default defineComponent({
 
     const mapping = useOrderItemAndAlterationProductMapping(orderItem, alterationProduct);
 
-    const { alterationCustomizationsWithMergedAvailabilityRules } = useAlterationProductAvailabilityRules(
-      orderItem,
-      alterationProduct,
-      mapping
-    );
-
     const productCustomizations = computed<Customization[]>(() => {
-      return alterationCustomizationsWithMergedAvailabilityRules.value;
+      return alterationProduct.value?.customizations || [];
     });
 
     const productCustomization = computed<Record<string, Customization>>(() => {
