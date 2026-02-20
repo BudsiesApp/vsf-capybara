@@ -6,6 +6,8 @@ import {
   Customization,
   CustomizationOptionValue,
   isFileUploadValue,
+  OptionType,
+  PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID,
   OptionValue
 } from 'src/modules/customization-system';
 
@@ -149,6 +151,10 @@ export function useAlterationProductCustomizations (
   });
 
   function optionValuesFilter (customizationId: string, optionValue: OptionValue): boolean {
+    if (optionValue.id === PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID) {
+      return false;
+    }
+
     const value = orderItemOptionValue.value[customizationId];
 
     if (isFileUploadValue(value)) {

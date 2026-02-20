@@ -89,7 +89,7 @@ export function useAlterationProductsLoader (
         root.$store,
         {
           shippingCountryId,
-          addDefaultOptionValue: false
+          makeProductionTimeRequired: false
         }
       );
 
