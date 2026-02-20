@@ -8,25 +8,21 @@ import {
 } from 'src/modules/customization-system';
 import { OrderItem } from 'src/modules/orders-history';
 
-function normalizeName (name: string | undefined): string | undefined {
-  return name ? name.toLowerCase() : undefined;
-}
-
 export interface OrderItemAndAlterationProductMapping {
-  orderItemCustomizationNameById: ComputedRef<Record<string, string>>,
-  orderItemOptionValueNameByIdByCustomizationId: ComputedRef<Record<string, Record<string, string>>>,
+  orderItemCustomizationById: ComputedRef<Record<string, Customization>>,
+  orderItemOptionValueByIdByCustomizationId: ComputedRef<Record<string, Record<string, OptionValue>>>,
 
-  alterationCustomizationByName: ComputedRef<Record<string, Customization>>,
+  alterationCustomizationByOriginalId: ComputedRef<Record<string, Customization>>,
   alterationCustomizationById: ComputedRef<Record<string, Customization>>,
-  alterationOptionValueByNameByCustomizationId: ComputedRef<Record<string, Record<string, OptionValue>>>
+  alterationOptionValueByOriginalIdByCustomizationId: ComputedRef<Record<string, Record<string, OptionValue>>>
 }
 
 export function useOrderItemAndAlterationProductMapping (
   orderItem: Ref<OrderItem>,
   alterationProduct: Ref<Product | undefined>
 ): OrderItemAndAlterationProductMapping {
-  const orderItemCustomizationNameById = computed<Record<string, string>>(() => {
-    const result: Record<string, string> = {};
+  const orderItemCustomizationById = computed<Record<string, Customization>>(() => {
+    const result: Record<string, Customization> = {};
     const extensionAttributes = orderItem.value.extension_attributes;
 
     if (!extensionAttributes?.customizations?.length) {
@@ -34,17 +30,14 @@ export function useOrderItemAndAlterationProductMapping (
     }
 
     for (const customization of extensionAttributes.customizations) {
-      const name = normalizeName(customization.name);
-      if (name) {
-        result[customization.id] = name;
-      }
+      result[customization.id] = customization;
     }
 
     return result;
   });
 
-  const orderItemOptionValueNameByIdByCustomizationId = computed<Record<string, Record<string, string>>>(() => {
-    const result: Record<string, Record<string, string>> = {};
+  const orderItemOptionValueByIdByCustomizationId = computed<Record<string, Record<string, OptionValue>>>(() => {
+    const result: Record<string, Record<string, OptionValue>> = {};
     const extensionAttributes = orderItem.value.extension_attributes;
 
     if (!extensionAttributes?.customizations?.length) {
@@ -56,10 +49,7 @@ export function useOrderItemAndAlterationProductMapping (
 
       const values = customization.optionData?.values || [];
       for (const value of values) {
-        const valueName = normalizeName(value.name);
-        if (valueName) {
-          result[customization.id][value.id] = valueName;
-        }
+        result[customization.id][value.id] = value;
       }
     }
 
@@ -81,7 +71,7 @@ export function useOrderItemAndAlterationProductMapping (
     return result;
   });
 
-  const alterationCustomizationByName = computed<Record<string, Customization>>(() => {
+  const alterationCustomizationByOriginalId = computed<Record<string, Customization>>(() => {
     const result: Record<string, Customization> = {};
     const product = alterationProduct.value;
 
@@ -90,16 +80,15 @@ export function useOrderItemAndAlterationProductMapping (
     }
 
     for (const customization of product.customizations) {
-      const name = normalizeName(customization.name);
-      if (name) {
-        result[name] = customization;
+      if (customization.originalCustomizationId) {
+        result[customization.originalCustomizationId] = customization;
       }
     }
 
     return result;
   });
 
-  const alterationOptionValueByNameByCustomizationId = computed<Record<string, Record<string, OptionValue>>>(() => {
+  const alterationOptionValueByOriginalIdByCustomizationId = computed<Record<string, Record<string, OptionValue>>>(() => {
     const result: Record<string, Record<string, OptionValue>> = {};
     const product = alterationProduct.value;
 
@@ -112,9 +101,8 @@ export function useOrderItemAndAlterationProductMapping (
 
       const values = customization.optionData?.values || [];
       for (const value of values) {
-        const valueName = normalizeName(value.name);
-        if (valueName) {
-          result[customization.id][valueName] = value;
+        if (value.originalOptionValueId) {
+          result[customization.id][value.originalOptionValueId] = value;
         }
       }
     }
@@ -123,10 +111,10 @@ export function useOrderItemAndAlterationProductMapping (
   });
 
   return {
-    orderItemCustomizationNameById,
-    orderItemOptionValueNameByIdByCustomizationId,
-    alterationCustomizationByName,
+    orderItemCustomizationById,
+    orderItemOptionValueByIdByCustomizationId,
+    alterationCustomizationByOriginalId,
     alterationCustomizationById,
-    alterationOptionValueByNameByCustomizationId
+    alterationOptionValueByOriginalIdByCustomizationId
   };
 }

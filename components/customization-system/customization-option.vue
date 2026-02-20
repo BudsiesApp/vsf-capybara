@@ -80,7 +80,6 @@ import CheckboxWidget from './widgets/checkbox-widget.vue';
 import ColorsListWidget from './widgets/colors-list-widget.vue';
 import DropdownWidget from './widgets/dropdown-widget.vue';
 import ImageUploadWidget from './widgets/image-upload-widget.vue';
-import ProductionTimeSelector from './production-time-selector.vue';
 import SearchFieldWidget from './widgets/search-field-widget.vue';
 import TextAreaWidget from './widgets/textarea-widget.vue';
 import TextInputWidget from './widgets/text-input-widget.vue';
@@ -91,7 +90,6 @@ InstanceType<typeof CheckboxWidget> |
 InstanceType<typeof ColorsListWidget> |
 InstanceType<typeof DropdownWidget> |
 InstanceType<typeof ImageUploadWidget> |
-InstanceType<typeof ProductionTimeSelector> |
 InstanceType<typeof SearchFieldWidget> |
 InstanceType<typeof TextAreaWidget> |
 InstanceType<typeof TextInputWidget> |
@@ -108,7 +106,6 @@ export default defineComponent({
     ColorsListWidget,
     DropdownWidget,
     ImageUploadWidget,
-    ProductionTimeSelector,
     SearchFieldWidget,
     TextAreaWidget,
     TextInputWidget,

@@ -6,32 +6,14 @@ import {
   Customization,
   CustomizationOptionValue,
   isFileUploadValue,
+  OptionType,
+  PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID,
   OptionValue
 } from 'src/modules/customization-system';
 
 import { OrderItem } from 'src/modules/orders-history';
 
 import { OrderItemAndAlterationProductMapping } from './use-order-item-and-alteration-product-mapping';
-
-function mapOrderItemOptionValueIdToAlterationProduct (
-  orderItemOptionValueId: string,
-  orderItemOptionValueNameById: Record<string, string>,
-  alterationProductOptionValueByName: Record<string, OptionValue>
-): string | undefined {
-  const optionValueName = orderItemOptionValueNameById[orderItemOptionValueId];
-
-  if (!optionValueName) {
-    return undefined;
-  }
-
-  const optionValue = alterationProductOptionValueByName[optionValueName];
-
-  if (!optionValue) {
-    return undefined;
-  }
-
-  return optionValue.id;
-}
 
 export function useAlterationProductCustomizations (
   orderItem: Ref<OrderItem>,
@@ -40,19 +22,15 @@ export function useAlterationProductCustomizations (
   mapping: OrderItemAndAlterationProductMapping
 ) {
   const {
-    orderItemCustomizationNameById,
-    orderItemOptionValueNameByIdByCustomizationId,
-    alterationCustomizationByName,
-    alterationOptionValueByNameByCustomizationId
+    alterationCustomizationByOriginalId,
+    alterationOptionValueByOriginalIdByCustomizationId
   } = mapping;
 
   const orderItemOptionValue = computed<Record<string, CustomizationOptionValue>>(() => {
     const result: Record<string, CustomizationOptionValue> = {};
     const orderItemExtensionAttributes = orderItem.value.extension_attributes;
-    const _orderItemCustomizationNameByIdDictionary = orderItemCustomizationNameById.value;
-    const _orderItemOptionValueNameByIdAndCustomizationId = orderItemOptionValueNameByIdByCustomizationId.value;
-    const _alterationProductCustomizationsByName = alterationCustomizationByName.value;
-    const _alterationProductOptionValueIdByNameAndCustomizationId = alterationOptionValueByNameByCustomizationId.value;
+    const _alterationCustomizationByOriginalId = alterationCustomizationByOriginalId.value;
+    const _alterationOptionValueByOriginalIdByCustomizationId = alterationOptionValueByOriginalIdByCustomizationId.value;
     const alterationProductCustomizations = alterationProduct.value?.customizations;
 
     if (!orderItemExtensionAttributes || !alterationProductCustomizations) {
@@ -81,36 +59,20 @@ export function useAlterationProductCustomizations (
         continue;
       }
 
-      const customizationName = _orderItemCustomizationNameByIdDictionary[item.customization_id];
-
-      if (!customizationName) {
-        continue;
-      }
-
-      const alterationProductCustomization = _alterationProductCustomizationsByName[customizationName];
+      const alterationProductCustomization = _alterationCustomizationByOriginalId[item.customization_id];
 
       if (!alterationProductCustomization) {
         continue;
       }
 
-      const optionValueNameDictionary = _orderItemOptionValueNameByIdAndCustomizationId[item.customization_id];
-
-      if (!optionValueNameDictionary) {
-        continue;
-      }
-
-      const alterationOptionValueDictionary = _alterationProductOptionValueIdByNameAndCustomizationId[alterationProductCustomization.id];
+      const alterationOptionValueDictionary = _alterationOptionValueByOriginalIdByCustomizationId[alterationProductCustomization.id];
 
       if (!alterationOptionValueDictionary) {
         continue;
       }
 
       if (typeof item.value === 'string') {
-        const mappedId = mapOrderItemOptionValueIdToAlterationProduct(
-          item.value,
-          optionValueNameDictionary,
-          alterationOptionValueDictionary
-        );
+        const mappedId = alterationOptionValueDictionary[item.value]?.id;
 
         if (mappedId) {
           result[alterationProductCustomization.id] = mappedId;
@@ -127,11 +89,7 @@ export function useAlterationProductCustomizations (
             continue;
           }
 
-          const mappedId = mapOrderItemOptionValueIdToAlterationProduct(
-            selectedId,
-            optionValueNameDictionary,
-            alterationOptionValueDictionary
-          );
+          const mappedId = alterationOptionValueDictionary[selectedId]?.id;
 
           if (mappedId) {
             mappedIds.push(mappedId);
@@ -193,6 +151,10 @@ export function useAlterationProductCustomizations (
   });
 
   function optionValuesFilter (customizationId: string, optionValue: OptionValue): boolean {
+    if (optionValue.id === PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID) {
+      return false;
+    }
+
     const value = orderItemOptionValue.value[customizationId];
 
     if (isFileUploadValue(value)) {
@@ -245,6 +207,7 @@ export function useAlterationProductCustomizations (
   return {
     customizationsFilter,
     orderItemSelectedOptionValueIds,
+    orderItemOptionValue,
     optionValuesFilter
   };
 }
