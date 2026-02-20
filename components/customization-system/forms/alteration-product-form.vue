@@ -157,6 +157,7 @@ function useStandardProductionTimeSelectionEnforcement (
   productionTimeCustomizationId: ComputedRef<string | undefined>,
   customizationAvailableOptionValues: ComputedRef<Record<string, OptionValue[]>>,
   customizationOptionValue: Ref<Record<string, CustomizationOptionValue>>,
+  orderItemOptionValue: Ref<Record<string, CustomizationOptionValue>>,
   onCustomizationOptionInput: (payload: { customizationId: string, value: CustomizationOptionValue }) => void
 ) {
   const hasStandardProductionTimeOptionValueSelected = computed<boolean>(() => {
@@ -166,31 +167,19 @@ function useStandardProductionTimeSelectionEnforcement (
       return false;
     }
 
-    const selectedValue = customizationOptionValue.value[customizationId];
+    const selectedValue = customizationOptionValue.value[customizationId] || orderItemOptionValue.value[customizationId];
 
     return selectedValue === PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID;
-  });
-
-  const hasStandardProductionTimeOptionValue = computed<boolean>(() => {
-    const customizationId = productionTimeCustomizationId.value;
-
-    if (!customizationId) {
-      return false;
-    }
-
-    const availableValues = customizationAvailableOptionValues.value[customizationId] || [];
-
-    return availableValues.some((value) => value.id === PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID);
   });
 
   function ensureSelected (): void {
     const customizationId = productionTimeCustomizationId.value;
 
-    if (!customizationId || !hasStandardProductionTimeOptionValue.value) {
+    if (!customizationId) {
       return;
     }
 
-    const selectedValue = customizationOptionValue.value[customizationId];
+    const selectedValue = customizationOptionValue.value[customizationId] || orderItemOptionValue.value[customizationId];
 
     if (selectedValue) {
       return;
@@ -307,6 +296,7 @@ export default defineComponent({
     const {
       customizationsFilter: alterationProductCustomizationsFilter,
       orderItemSelectedOptionValueIds,
+      orderItemOptionValue,
       optionValuesFilter
     } = useAlterationProductCustomizations(
       orderItem,
@@ -371,6 +361,7 @@ export default defineComponent({
       productionTimeCustomizationId,
       customizationAvailableOptionValues,
       customizationOptionValue,
+      orderItemOptionValue,
       onCustomizationOptionInput
     );
 

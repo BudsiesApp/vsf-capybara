@@ -207,6 +207,7 @@ export function useAlterationProductCustomizations (
   return {
     customizationsFilter,
     orderItemSelectedOptionValueIds,
+    orderItemOptionValue,
     optionValuesFilter
   };
 }
