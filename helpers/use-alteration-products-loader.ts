@@ -54,8 +54,8 @@ export function useAlterationProductsLoader (
     const skus = new Set<string>();
 
     for (const item of eligibleOrderItems.value) {
-      if (item.product.related_alteration_product) {
-        skus.add(item.product.related_alteration_product.sku);
+      if (item.extension_attributes?.alteration_product) {
+        skus.add(item.extension_attributes?.alteration_product.sku);
       }
     }
 
@@ -70,7 +70,7 @@ export function useAlterationProductsLoader (
     const dictionary: Record<number, Product> = {};
 
     for (const orderItem of eligibleOrderItems.value) {
-      const alterationSku = orderItem.product.related_alteration_product?.sku;
+      const alterationSku = orderItem.extension_attributes?.alteration_product?.sku;
 
       if (!alterationSku) {
         continue;

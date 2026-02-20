@@ -256,7 +256,7 @@ export default defineComponent({
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
 
     const plushieId = computed<string | undefined>(() => {
-      return orderItem.value.plushie_id?.toString();
+      return orderItem.value.extension_attributes?.plushie_id?.toString();
     });
 
     const { existingCartItem } = useExistingCartItem(plushieId, context);
