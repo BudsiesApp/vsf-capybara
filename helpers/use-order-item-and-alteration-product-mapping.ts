@@ -101,8 +101,8 @@ export function useOrderItemAndAlterationProductMapping (
 
       const values = customization.optionData?.values || [];
       for (const value of values) {
-        if (value.originalOptionValueId) {
-          result[customization.id][value.originalOptionValueId] = value;
+        if (value.originalValueId) {
+          result[customization.id][value.originalValueId] = value;
         }
       }
     }
