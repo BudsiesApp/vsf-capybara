@@ -82,7 +82,9 @@ import { BaseImage } from 'src/modules/budsies';
 import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { fetchOrderItemDeliverables, Deliverable } from 'src/modules/customization-system';
 import ImageHandlerService from 'src/modules/file-storage/image-handler.service';
-import { PriceHelper, ProductEvent, useImageDownload } from 'src/modules/shared';
+import { PriceHelper, ProductEvent } from 'src/modules/shared';
+
+import { useImageDownload } from 'theme/helpers/use-image-download';
 
 import { prepareCategoryProduct } from 'theme/helpers';
 import OProductCard from 'theme/components/organisms/o-product-card.vue';

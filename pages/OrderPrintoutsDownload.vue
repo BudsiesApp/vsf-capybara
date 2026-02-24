@@ -88,9 +88,13 @@ import i18n from '@vue-storefront/i18n';
 
 import { BaseImage } from 'src/modules/budsies';
 import { isFileUploadValue } from 'src/modules/customization-system/types/is-file-upload-value.typeguard';
-import { ImageHandlerService } from 'src/modules/file-storage';
-import { BudsieStatus, useBatchImageDownload, useImageDownload, useImagesPrint } from 'src/modules/shared';
+import ImageHandlerService from 'src/modules/file-storage/image-handler.service';
+import { BudsieStatus } from 'src/modules/shared';
 import { useOrderDetails } from 'src/modules/orders-history';
+
+import { useBatchImageDownload } from 'theme/helpers/use-batch-image-download';
+import { useImageDownload } from 'theme/helpers/use-image-download';
+import { useImagesPrint } from 'theme/helpers/use-images-print';
 
 export default defineComponent({
   name: 'OrderPrintoutsDownload',
