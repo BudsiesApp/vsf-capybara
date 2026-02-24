@@ -191,6 +191,7 @@ import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MDropdown from 'theme/components/molecules/m-dropdown.vue';
 
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
+import { getCartItemTitle } from 'theme/helpers/get-cart-item-title.function';
 
 const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
 
@@ -415,13 +416,7 @@ export default {
 
       for (const cartItem of this.products) {
         const key = getCartItemKey(cartItem);
-        result[key] = cartItem.name;
-
-        if (!cartItem?.is_alteration_product || !cartItem.extension_attributes?.plushie_id) {
-          continue;
-        }
-
-        result[key] += ` (for #${cartItem.extension_attributes.plushie_id})`;
+        result[key] = getCartItemTitle(cartItem);
       }
 
       return result;
