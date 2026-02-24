@@ -163,6 +163,16 @@ export default defineComponent({
     const { downloadImagesAsZip } = useBatchImageDownload(imageService);
     const { printImages } = useImagesPrint(imageService);
 
+    function onError (error: unknown): void {
+      const message = (error as Error)?.message || String(i18n.t('Something went wrong'));
+
+      root.$store.dispatch('notification/spawnNotification', {
+        type: 'danger',
+        message,
+        action1: { label: i18n.t('OK') }
+      });
+    }
+
     function getThumbnailUrl (url: string): string {
       return imageService.getThumbnailUrl(url, 320, 320);
     }
@@ -171,11 +181,7 @@ export default defineComponent({
       try {
         await downloadImage(item.artworkUrl, `artwork-${props.orderId}-${item.item_id}`);
       } catch (e) {
-        root.$store.dispatch('notification/spawnNotification', {
-          type: 'danger',
-          message: (e as Error).message || String(i18n.t('Something went wrong')),
-          action1: { label: i18n.t('OK') }
-        });
+        onError(e);
       }
     }
 
@@ -183,11 +189,7 @@ export default defineComponent({
       try {
         await printImages([item.artworkUrl]);
       } catch (e) {
-        root.$store.dispatch('notification/spawnNotification', {
-          type: 'danger',
-          message: (e as Error).message || String(i18n.t('Something went wrong')),
-          action1: { label: i18n.t('OK') }
-        });
+        onError(e);
       }
     }
 
@@ -196,17 +198,13 @@ export default defineComponent({
         const entries = eligibleItems.value.map((item) => {
           return {
             url: item.artworkUrl,
-            filename: `artwork-${props.orderId}-${item.item_id}.jpg`
+            filename: `artwork-${props.orderId}-${item.item_id}`
           };
         });
 
         await downloadImagesAsZip(entries, `artworks-${props.orderId}.zip`);
       } catch (e) {
-        root.$store.dispatch('notification/spawnNotification', {
-          type: 'danger',
-          message: (e as Error).message || String(i18n.t('Something went wrong')),
-          action1: { label: i18n.t('OK') }
-        });
+        onError(e);
       }
     }
 
@@ -216,11 +214,7 @@ export default defineComponent({
           eligibleItems.value.map((i) => i.artworkUrl)
         );
       } catch (e) {
-        root.$store.dispatch('notification/spawnNotification', {
-          type: 'danger',
-          message: (e as Error).message || String(i18n.t('Something went wrong')),
-          action1: { label: i18n.t('OK') }
-        });
+        onError(e);
       }
     }
 

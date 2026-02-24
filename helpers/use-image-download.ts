@@ -13,6 +13,10 @@ export function useImageDownload (imageHandlerService: ImageHandlerService) {
 
     const response = await fetch(imageUrl);
 
+    if (!response.ok) {
+      throw new Error('Failed to download image');
+    }
+
     const imageBlob = await response.blob();
     const imageObjectUrl = URL.createObjectURL(imageBlob);
 

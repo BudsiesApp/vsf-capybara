@@ -29,7 +29,7 @@ export function useBatchImageDownload (imageHandlerService: ImageHandlerService)
       return;
     }
 
-    const jszipModule: any = await import('jszip');
+    const jszipModule = await import('jszip');
     const JSZipCtor = jszipModule?.default;
 
     const zip = new JSZipCtor();
@@ -37,6 +37,10 @@ export function useBatchImageDownload (imageHandlerService: ImageHandlerService)
     const blobs = await Promise.all(entries.map(async (entry) => {
       const imageUrl = imageHandlerService.getOriginalImageUrl(entry.url);
       const response = await fetch(imageUrl);
+
+      if (!response.ok) {
+        throw new Error(`Failed to download image: ${entry.filename}`);
+      }
 
       return response.blob();
     }));
