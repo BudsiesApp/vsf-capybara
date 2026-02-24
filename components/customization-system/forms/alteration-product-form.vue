@@ -382,7 +382,9 @@ export default defineComponent({
       availableOptionValues
     );
 
-    const quantity = ref(1);
+    const quantity = computed(() => {
+      return orderItem.value.quantity;
+    });
 
     const { addToCartHandler, isSubmitting } = useAddToCart(
       alterationProduct,
