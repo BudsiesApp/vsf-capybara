@@ -19,7 +19,7 @@
     <div v-else class="_content">
       <SfHeading
         :level="1"
-        :title="$t('Download Printouts')"
+        :title="$t('Download Artworks')"
         class="_title"
       />
 
@@ -88,7 +88,7 @@ import i18n from '@vue-storefront/i18n';
 
 import { BaseImage } from 'src/modules/budsies';
 import { isFileUploadValue } from 'src/modules/customization-system/types/is-file-upload-value.typeguard';
-import ImageHandlerService from 'src/modules/file-storage/image-handler.service';
+import { ImageHandlerService } from 'src/modules/file-storage';
 import { BudsieStatus } from 'src/modules/shared';
 import { useOrderDetails } from 'src/modules/orders-history';
 
@@ -237,7 +237,7 @@ export default defineComponent({
   },
   metaInfo (): any {
     return {
-      title: this.$t('Download Printouts')
+      title: this.$t('Download Artworks')
     };
   }
 });
@@ -266,21 +266,29 @@ export default defineComponent({
 
   ._heading-placeholder {
     height: 2.5rem;
-    margin-bottom: var(--spacer-sm);
   }
 
   ._content-placeholder {
-    height: 18rem;
+    height: 32rem;
+    margin-top: var(--spacer-base);
   }
 
   ._not-found,
   ._empty {
+    margin-top: var(--spacer-xl);
     padding: 0 var(--spacer-sm);
-    margin-top: var(--spacer-lg);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   ._order-history-link {
     margin-top: var(--spacer-base);
+
+    &:hover {
+      color: var(--c-white);
+    }
   }
 
   ._batch-actions {

@@ -1,4 +1,4 @@
-import ImageHandlerService from 'src/modules/file-storage/image-handler.service';
+import { ImageHandlerService } from 'src/modules/file-storage';
 
 export function useImageDownload (imageHandlerService: ImageHandlerService) {
   async function downloadImage (

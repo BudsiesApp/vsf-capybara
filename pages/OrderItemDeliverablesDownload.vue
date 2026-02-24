@@ -81,7 +81,7 @@ import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { BaseImage } from 'src/modules/budsies';
 import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { fetchOrderItemDeliverables, Deliverable } from 'src/modules/customization-system';
-import ImageHandlerService from 'src/modules/file-storage/image-handler.service';
+import { ImageHandlerService } from 'src/modules/file-storage';
 import { PriceHelper, ProductEvent } from 'src/modules/shared';
 
 import { useImageDownload } from 'theme/helpers/use-image-download';
