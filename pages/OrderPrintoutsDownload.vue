@@ -37,7 +37,7 @@
       <template v-else>
         <div class="_batch-actions">
           <SfButton
-            class="_batch-action sf-button--text"
+            class="_batch-action color-secondary"
             type="button"
             @click="onDownloadAll"
           >
@@ -45,7 +45,7 @@
           </SfButton>
 
           <SfButton
-            class="_batch-action sf-button--text"
+            class="_batch-action"
             type="button"
             @click="onPrintAll"
           >
@@ -60,17 +60,16 @@
             class="_item"
           >
             <BaseImage
-              class="_image"
               :src="getThumbnailUrl(item.artworkUrl)"
               alt=""
             />
 
             <div class="_actions">
-              <SfButton type="button" @click="() => onDownload(item)">
+              <SfButton type="button" class="color-secondary" @click="() => onDownload(item)">
                 {{ $t('Download') }}
               </SfButton>
 
-              <SfButton type="button" class="color-secondary" @click="() => onPrint(item)">
+              <SfButton type="button" @click="() => onPrint(item)">
                 {{ $t('Print') }}
               </SfButton>
             </div>
@@ -91,7 +90,7 @@ import { BaseImage } from 'src/modules/budsies';
 import { isFileUploadValue } from 'src/modules/customization-system/types/is-file-upload-value.typeguard';
 import { ImageHandlerService } from 'src/modules/file-storage';
 import { BudsieStatus, useBatchImageDownload, useImageDownload, useImagesPrint } from 'src/modules/shared';
-import { useOrderDetails, Order } from 'src/modules/orders-history';
+import { useOrderDetails } from 'src/modules/orders-history';
 
 export default defineComponent({
   name: 'OrderPrintoutsDownload',
@@ -122,7 +121,7 @@ export default defineComponent({
     });
 
     const eligibleItems = computed(() => {
-      const _order = (order as any).value as Order | null;
+      const _order = order.value;
       const items = _order?.items || [];
 
       const list: { item_id: number, artworkUrl: string }[] = [];
@@ -141,7 +140,7 @@ export default defineComponent({
             continue;
           }
 
-          const value: any = stateItem.value;
+          const value = stateItem.value;
           artworkUrl = Array.isArray(value) ? value[0]?.url : value?.url;
           break;
         }
@@ -166,7 +165,7 @@ export default defineComponent({
 
     async function onDownload (item: { item_id: number, artworkUrl: string }): Promise<void> {
       try {
-        await downloadImage(item.artworkUrl, `printout-${props.orderId}-${item.item_id}`);
+        await downloadImage(item.artworkUrl, `artwork-${props.orderId}-${item.item_id}`);
       } catch (e) {
         root.$store.dispatch('notification/spawnNotification', {
           type: 'danger',
@@ -190,14 +189,14 @@ export default defineComponent({
 
     async function onDownloadAll (): Promise<void> {
       try {
-        const entries = eligibleItems.value.map((item, index) => {
+        const entries = eligibleItems.value.map((item) => {
           return {
             url: item.artworkUrl,
-            filename: `printout-${props.orderId}-${index + 1}.jpg`
+            filename: `artwork-${props.orderId}-${item.item_id}.jpg`
           };
         });
 
-        await downloadImagesAsZip(entries, `printouts-${props.orderId}.zip`);
+        await downloadImagesAsZip(entries, `artworks-${props.orderId}.zip`);
       } catch (e) {
         root.$store.dispatch('notification/spawnNotification', {
           type: 'danger',
@@ -301,19 +300,21 @@ export default defineComponent({
     padding: var(--spacer-sm);
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     gap: var(--spacer-sm);
-  }
-
-  ._image {
-    width: 100%;
-    height: auto;
-    object-fit: contain;
   }
 
   ._actions {
     display: flex;
+    justify-content: center;
     gap: var(--spacer-sm);
     flex-wrap: wrap;
+  }
+
+  @media (min-width: $tablet-min) {
+    max-width: 1272px;
+    width: 100%;
+    margin: 0 auto;
   }
 }
 </style>
