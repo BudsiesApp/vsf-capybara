@@ -50,10 +50,17 @@ export function useAddToCart (
       qty: quantity.value,
       product_option: productOption,
       extension_attributes: {
-        customization_state: filterCustomizationState(customizationStateItems.value),
-        plushie_id: existingPlushieId
+        customization_state: filterCustomizationState(customizationStateItems.value)
       }
     };
+
+    if (existingPlushieId) {
+      if (!productToAddData.extension_attributes) {
+        productToAddData.extension_attributes = {};
+      }
+
+      productToAddData.extension_attributes.plushie_id = existingPlushieId;
+    }
 
     try {
       await root.$store.dispatch('cart/addItem', {
@@ -94,10 +101,17 @@ export function useAddToCart (
       product_option: productOption,
       extension_attributes: {
         ...existingCartItem.value.extension_attributes,
-        customization_state: filterCustomizationState(customizationStateItems.value),
-        plushie_id: existingPlushieId
+        customization_state: filterCustomizationState(customizationStateItems.value)
       }
     };
+
+    if (existingPlushieId) {
+      if (!cartItemForUpdate.extension_attributes) {
+        cartItemForUpdate.extension_attributes = {};
+      }
+
+      cartItemForUpdate.extension_attributes.plushie_id = existingPlushieId;
+    }
 
     try {
       await updateClientAndServerItem({
