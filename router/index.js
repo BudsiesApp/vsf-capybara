@@ -819,7 +819,7 @@ let routes = [
     name: 'orders-printouts-download',
     component: OrderPrintoutsDownload,
     props: (route) => ({
-      orderId: route.query.orderId
+      orderId: route.query.orderId || ''
     }),
     meta: {
       auth: true
@@ -830,7 +830,7 @@ let routes = [
     name: 'tax-id-request',
     component: TaxIdRequest,
     props: (route) => ({
-      orderId: route.query.orderId || ''
+      orderId: route.query.orderId
     }),
     meta: {
       auth: true
