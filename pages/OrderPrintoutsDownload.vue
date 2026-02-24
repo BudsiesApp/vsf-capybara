@@ -196,9 +196,16 @@ export default defineComponent({
     async function onDownloadAll (): Promise<void> {
       try {
         const entries = eligibleItems.value.map((item) => {
+          const extension = item.artworkUrl.split('.')[1];
+          let filename = `artwork-${props.orderId}-${item.item_id}`;
+
+          if (extension) {
+            filename += `.${extension}`;
+          }
+
           return {
             url: item.artworkUrl,
-            filename: `artwork-${props.orderId}-${item.item_id}`
+            filename
           };
         });
 
