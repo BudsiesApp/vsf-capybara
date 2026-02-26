@@ -1,4 +1,4 @@
-import { computed, ComputedRef, Ref } from '@vue/composition-api';
+import { computed, Ref } from '@vue/composition-api';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
@@ -6,137 +6,31 @@ import {
   Customization,
   CustomizationOptionValue,
   isFileUploadValue,
+  OptionType,
+  PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID,
   OptionValue
 } from 'src/modules/customization-system';
 
 import { OrderItem } from 'src/modules/orders-history';
 
-function mapOrderItemOptionValueIdToAlterationProduct (
-  orderItemOptionValueId: string,
-  orderItemOptionValueNameById: Record<string, string>,
-  alterationProductOptionValueByName: Record<string, OptionValue>
-): string | undefined {
-  const optionValueName = orderItemOptionValueNameById[orderItemOptionValueId];
-
-  if (!optionValueName) {
-    return undefined;
-  }
-
-  const optionValue = alterationProductOptionValueByName[optionValueName];
-
-  if (!optionValue) {
-    return undefined;
-  }
-
-  return optionValue.id;
-}
+import { OrderItemAndAlterationProductMapping } from './use-order-item-and-alteration-product-mapping';
 
 export function useAlterationProductCustomizations (
   orderItem: Ref<OrderItem>,
   alterationProduct: Ref<Product | undefined>,
-  alterationProductCustomizationDictionary: Ref<Record<string, Customization>>
+  alterationProductCustomizationDictionary: Ref<Record<string, Customization>>,
+  mapping: OrderItemAndAlterationProductMapping
 ) {
-  const orderItemCustomizationValueById: ComputedRef<Record<string, CustomizationOptionValue>> = computed(() => {
-    const result: Record<string, CustomizationOptionValue> = {};
-
-    for (const item of (orderItem.value.extension_attributes?.customization_states || [])) {
-      result[item.customization_id] = item.value;
-    }
-
-    return result;
-  });
-
-  const orderItemCustomizationNameByIdDictionary = computed<Record<string, string>>(() => {
-    const result: Record<string, string> = {};
-    const extensionAttributes = orderItem.value.extension_attributes;
-
-    if (!extensionAttributes?.customizations) {
-      return result;
-    }
-
-    for (const customization of extensionAttributes.customizations) {
-      result[customization.id] = customization.name.toLowerCase();
-    }
-
-    return result;
-  });
-
-  const orderItemOptionValueNameByIdAndCustomizationId = computed<Record<string, Record<string, string> | undefined>>(() => {
-    const result: Record<string, Record<string, string>> = {};
-
-    const extensionAttributes = orderItem.value.extension_attributes;
-
-    if (!extensionAttributes?.customizations) {
-      return result;
-    }
-
-    for (const customization of extensionAttributes.customizations) {
-      result[customization.id] = {};
-
-      if (!customization.optionData?.values) {
-        continue;
-      }
-
-      for (const optionValue of customization.optionData.values) {
-        if (!optionValue.name) {
-          continue;
-        }
-
-        result[customization.id][optionValue.id] = optionValue.name.toLowerCase();
-      }
-    }
-
-    return result;
-  });
-
-  const alterationProductOptionValueIdByNameAndCustomizationId = computed<Record<string, Record<string, OptionValue> | undefined>>(() => {
-    const result: Record<string, Record<string, OptionValue>> = {};
-
-    if (!alterationProduct.value?.customizations) {
-      return result;
-    }
-
-    for (const customization of alterationProduct.value.customizations) {
-      result[customization.id] = {};
-
-      if (!customization.optionData?.values) {
-        continue;
-      }
-
-      for (const optionValue of customization.optionData.values) {
-        if (!optionValue.name) {
-          continue;
-        }
-
-        result[customization.id][optionValue.name.toLowerCase()] = optionValue;
-      }
-    }
-
-    return result;
-  });
-
-  const alterationProductCustomizationsByName = computed<Record<string, Customization>>(() => {
-    const result: Record<string, Customization> = {};
-    const product = alterationProduct.value;
-
-    if (!product || !product.customizations) {
-      return result;
-    }
-
-    for (const customization of product.customizations as Customization[]) {
-      result[customization.name.toLowerCase()] = customization;
-    }
-
-    return result;
-  });
+  const {
+    alterationCustomizationByOriginalId,
+    alterationOptionValueByOriginalIdByCustomizationId
+  } = mapping;
 
   const orderItemOptionValue = computed<Record<string, CustomizationOptionValue>>(() => {
     const result: Record<string, CustomizationOptionValue> = {};
     const orderItemExtensionAttributes = orderItem.value.extension_attributes;
-    const _orderItemCustomizationNameByIdDictionary = orderItemCustomizationNameByIdDictionary.value;
-    const _orderItemOptionValueNameByIdAndCustomizationId = orderItemOptionValueNameByIdAndCustomizationId.value;
-    const _alterationProductCustomizationsByName = alterationProductCustomizationsByName.value;
-    const _alterationProductOptionValueIdByNameAndCustomizationId = alterationProductOptionValueIdByNameAndCustomizationId.value;
+    const _alterationCustomizationByOriginalId = alterationCustomizationByOriginalId.value;
+    const _alterationOptionValueByOriginalIdByCustomizationId = alterationOptionValueByOriginalIdByCustomizationId.value;
     const alterationProductCustomizations = alterationProduct.value?.customizations;
 
     if (!orderItemExtensionAttributes || !alterationProductCustomizations) {
@@ -165,36 +59,20 @@ export function useAlterationProductCustomizations (
         continue;
       }
 
-      const customizationName = _orderItemCustomizationNameByIdDictionary[item.customization_id];
-
-      if (!customizationName) {
-        continue;
-      }
-
-      const alterationProductCustomization = _alterationProductCustomizationsByName[customizationName];
+      const alterationProductCustomization = _alterationCustomizationByOriginalId[item.customization_id];
 
       if (!alterationProductCustomization) {
         continue;
       }
 
-      const optionValueNameDictionary = _orderItemOptionValueNameByIdAndCustomizationId[item.customization_id];
-
-      if (!optionValueNameDictionary) {
-        continue;
-      }
-
-      const alterationOptionValueDictionary = _alterationProductOptionValueIdByNameAndCustomizationId[alterationProductCustomization.id];
+      const alterationOptionValueDictionary = _alterationOptionValueByOriginalIdByCustomizationId[alterationProductCustomization.id];
 
       if (!alterationOptionValueDictionary) {
         continue;
       }
 
       if (typeof item.value === 'string') {
-        const mappedId = mapOrderItemOptionValueIdToAlterationProduct(
-          item.value,
-          optionValueNameDictionary,
-          alterationOptionValueDictionary
-        );
+        const mappedId = alterationOptionValueDictionary[item.value]?.id;
 
         if (mappedId) {
           result[alterationProductCustomization.id] = mappedId;
@@ -211,11 +89,7 @@ export function useAlterationProductCustomizations (
             continue;
           }
 
-          const mappedId = mapOrderItemOptionValueIdToAlterationProduct(
-            selectedId,
-            optionValueNameDictionary,
-            alterationOptionValueDictionary
-          );
+          const mappedId = alterationOptionValueDictionary[selectedId]?.id;
 
           if (mappedId) {
             mappedIds.push(mappedId);
@@ -245,7 +119,42 @@ export function useAlterationProductCustomizations (
     return result;
   });
 
+  const orderItemSelectedOptionValueIds = computed<string[]>(() => {
+    const extensionAttributes = orderItem.value.extension_attributes;
+
+    if (!extensionAttributes?.customization_states?.length) {
+      return [];
+    }
+
+    const result: string[] = [];
+
+    for (const state of extensionAttributes.customization_states) {
+      if (isFileUploadValue(state.value)) {
+        continue;
+      }
+
+      if (typeof state.value === 'string') {
+        result.push(state.value);
+        continue;
+      }
+
+      if (Array.isArray(state.value)) {
+        for (const id of state.value) {
+          if (typeof id === 'string') {
+            result.push(id);
+          }
+        }
+      }
+    }
+
+    return result;
+  });
+
   function optionValuesFilter (customizationId: string, optionValue: OptionValue): boolean {
+    if (optionValue.id === PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID) {
+      return false;
+    }
+
     const value = orderItemOptionValue.value[customizationId];
 
     if (isFileUploadValue(value)) {
@@ -297,6 +206,8 @@ export function useAlterationProductCustomizations (
 
   return {
     customizationsFilter,
+    orderItemSelectedOptionValueIds,
+    orderItemOptionValue,
     optionValuesFilter
   };
 }

@@ -183,7 +183,6 @@ import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
 import { CartItemConfiguration, getCustomizationSystemThumbnail } from 'src/modules/customization-system';
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
-import isAlterationProduct from 'src/modules/shared/helpers/is-alteration-product.function';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
@@ -192,6 +191,7 @@ import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MDropdown from 'theme/components/molecules/m-dropdown.vue';
 
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
+import { getCartItemTitle } from 'theme/helpers/get-cart-item-title.function';
 
 const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
 
@@ -416,13 +416,7 @@ export default {
 
       for (const cartItem of this.products) {
         const key = getCartItemKey(cartItem);
-        result[key] = cartItem.name;
-
-        if (!isAlterationProduct(cartItem.id) || !cartItem.extension_attributes?.plushie_id) {
-          continue;
-        }
-
-        result[key] += ` (for #${cartItem.extension_attributes.plushie_id})`;
+        result[key] = getCartItemTitle(cartItem);
       }
 
       return result;
@@ -566,7 +560,7 @@ export default {
       }
     },
     showQuantitySelectorForProduct (product) {
-      if (isAlterationProduct(product.id)) {
+      if (product?.is_alteration_product) {
         return false;
       }
 

@@ -587,7 +587,7 @@ export default defineComponent({
   }
 
   ._customization-option {
-    &.-widget-ProductionTimeSelector {
+    &.-widget-DropdownWidget {
       --select-width: 100%;
     }
   }

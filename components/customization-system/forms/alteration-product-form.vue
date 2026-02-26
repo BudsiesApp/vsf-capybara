@@ -111,6 +111,7 @@ import {
   PropType,
   Ref,
   ref,
+  watch,
   toRefs,
   set
 } from '@vue/composition-api';
@@ -122,6 +123,9 @@ import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import {
   Customization,
   CustomizationOptionValue,
+  OptionType,
+  OptionValue,
+  PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID,
   requiredCustomizationsFilter,
   useAvailableCustomizations,
   useAvailableOptionsValuesFilter,
@@ -139,6 +143,7 @@ import {
 } from 'src/modules/orders-history';
 
 import { useAlterationProductCustomizations } from 'theme/helpers/use-alteration-product-customizations';
+import { useOrderItemAndAlterationProductMapping } from 'theme/helpers/use-order-item-and-alteration-product-mapping';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useCollapsedCustomizationsView } from 'theme/helpers/use-collapsed-customizations-view';
@@ -147,6 +152,65 @@ import { useFormValidation } from 'theme/helpers/use-form-validation';
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import OProductCard from 'theme/components/organisms/o-product-card.vue';
+
+function useStandardProductionTimeSelectionEnforcement (
+  productionTimeCustomizationId: ComputedRef<string | undefined>,
+  customizationAvailableOptionValues: ComputedRef<Record<string, OptionValue[]>>,
+  customizationOptionValue: Ref<Record<string, CustomizationOptionValue>>,
+  orderItemOptionValue: Ref<Record<string, CustomizationOptionValue>>,
+  onCustomizationOptionInput: (payload: { customizationId: string, value: CustomizationOptionValue }) => void
+) {
+  const hasStandardProductionTimeOptionValueSelected = computed<boolean>(() => {
+    const customizationId = productionTimeCustomizationId.value;
+
+    if (!customizationId) {
+      return false;
+    }
+
+    const selectedValue = customizationOptionValue.value[customizationId] || orderItemOptionValue.value[customizationId];
+
+    return selectedValue === PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID;
+  });
+
+  function ensureSelected (): void {
+    const customizationId = productionTimeCustomizationId.value;
+
+    if (!customizationId) {
+      return;
+    }
+
+    const selectedValue = customizationOptionValue.value[customizationId] || orderItemOptionValue.value[customizationId];
+
+    if (selectedValue) {
+      return;
+    }
+
+    if (hasStandardProductionTimeOptionValueSelected.value) {
+      return;
+    }
+
+    onCustomizationOptionInput({
+      customizationId,
+      value: PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID
+    });
+  }
+
+  watch(
+    [productionTimeCustomizationId, customizationAvailableOptionValues],
+    () => {
+      ensureSelected();
+    },
+    { immediate: true, deep: true }
+  );
+
+  watch(
+    customizationOptionValue,
+    () => {
+      ensureSelected();
+    },
+    { deep: true }
+  );
+}
 
 function getAllFormRefs (
   refs: Record<string, Vue | Element | Vue[] | Element[]>
@@ -192,13 +256,15 @@ export default defineComponent({
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
 
     const plushieId = computed<string | undefined>(() => {
-      return orderItem.value.plushie_id?.toString();
+      return orderItem.value.extension_attributes?.plushie_id?.toString();
     });
 
     const { existingCartItem } = useExistingCartItem(plushieId, context);
 
+    const mapping = useOrderItemAndAlterationProductMapping(orderItem, alterationProduct);
+
     const productCustomizations = computed<Customization[]>(() => {
-      return props.alterationProduct?.customizations || [];
+      return alterationProduct.value?.customizations || [];
     });
 
     const productCustomization = computed<Record<string, Customization>>(() => {
@@ -209,6 +275,12 @@ export default defineComponent({
       }
 
       return dictionary;
+    });
+
+    const productionTimeCustomizationId = computed<string | undefined>(() => {
+      const customization = productCustomizations.value.find((item) => item.optionData?.type === OptionType.PRODUCTION_TIME);
+
+      return customization?.id;
     });
 
     const {
@@ -222,24 +294,27 @@ export default defineComponent({
     } = useCustomizationState(existingCartItem);
 
     const {
+      customizationsFilter: alterationProductCustomizationsFilter,
+      orderItemSelectedOptionValueIds,
+      orderItemOptionValue,
+      optionValuesFilter
+    } = useAlterationProductCustomizations(
+      orderItem,
+      alterationProduct,
+      productCustomization,
+      mapping
+    );
+
+    const {
       availableCustomizations,
-      availableCustomization: availableCustomizationDictionary,
       availableOptionValues,
       customizationAvailableOptionValues
     } = useAvailableCustomizations(
       productCustomizations,
       selectedOptionValuesIds,
       customizationOptionValue,
-      updateCustomizationOptionValue
-    );
-
-    const {
-      customizationsFilter: alterationProductCustomizationsFilter,
-      optionValuesFilter
-    } = useAlterationProductCustomizations(
-      orderItem,
-      alterationProduct,
-      productCustomization
+      updateCustomizationOptionValue,
+      orderItemSelectedOptionValueIds
     );
 
     const { addedToCartOptionValueId } = useExistingCartItemOptionValues(
@@ -282,6 +357,14 @@ export default defineComponent({
       onCustomizationOptionInput
     );
 
+    useStandardProductionTimeSelectionEnforcement(
+      productionTimeCustomizationId,
+      customizationAvailableOptionValues,
+      customizationOptionValue,
+      orderItemOptionValue,
+      onCustomizationOptionInput
+    );
+
     const { filteredOptionValues, filteredOptionValuesIdsByCustomizationId } = useAvailableOptionsValuesFilter(
       customizationAvailableOptionValues,
       [optionValuesFilter]
@@ -299,7 +382,9 @@ export default defineComponent({
       availableOptionValues
     );
 
-    const quantity = ref(1);
+    const quantity = computed(() => {
+      return orderItem.value.quantity;
+    });
 
     const { addToCartHandler, isSubmitting } = useAddToCart(
       alterationProduct,
