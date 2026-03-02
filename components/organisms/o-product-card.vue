@@ -39,6 +39,10 @@
           </span>
         </h3>
       </template>
+
+      <template #price v-if="isAddedToCart">
+        <a-added-to-cart class="_added-to-cart" />
+      </template>
     </SfProductCard>
   </div>
 </template>
@@ -47,11 +51,15 @@
 import { defineComponent, computed, inject } from '@vue/composition-api';
 import config from 'config';
 import { SfProductCard } from '@storefront-ui/vue';
+
 import BaseImage from 'src/modules/budsies/components/BaseImage.vue';
+
+import AAddedToCart from 'theme/components/atoms/a-added-to-cart.vue';
 
 export default defineComponent({
   name: 'OProductCard',
   components: {
+    AAddedToCart,
     BaseImage,
     SfProductCard
   },
@@ -83,6 +91,10 @@ export default defineComponent({
     turnaroundTime: {
       type: Number,
       default: undefined
+    },
+    isAddedToCart: {
+      type: Boolean,
+      default: false
     }
   },
   setup (props) {
@@ -122,6 +134,7 @@ $border-width: 2px;
   --badge-font-weight: 800;
   --badge-background: var(--c-white);
   --badge-font-size: var(--font-sm);
+  --product-card-margin: var(--spacer-xs) 0 0;
 
   ._turnaround-time {
     font-size: var(--font-xs);
@@ -134,6 +147,10 @@ $border-width: 2px;
     color: var(--c-accent);
     line-height: calc(var(--o-product-card-badge-size) - #{$border-width} * 2);
     pointer-events: none;
+  }
+
+  ._added-to-cart {
+    margin-top: var(--spacer-xs);
   }
 
   @include for-tablet-up {

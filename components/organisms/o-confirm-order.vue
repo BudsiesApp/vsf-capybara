@@ -84,7 +84,7 @@
                 :key="getCartItemKey(product)"
                 v-model="product.qty"
                 :image="getThumbnailForProduct(product)"
-                :title="product.name | htmlDecode"
+                :title="productTitle[getCartItemKey(product)] | htmlDecode"
                 :regular-price="formatPrice(cartItemPriceDictionary[getCartItemKey(product)].regular)"
                 :special-price="formatPrice(cartItemPriceDictionary[getCartItemKey(product)].special)"
                 class="collected-product"
@@ -264,6 +264,7 @@ import { SupportedMethodCodes as AmazonSupportedMethodCodes } from 'src/modules/
 
 import { createSmoothscroll } from 'theme/helpers';
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
+import { getCartItemTitle } from 'theme/helpers/get-cart-item-title.function';
 
 import APromoCode from 'theme/components/atoms/a-promo-code';
 import MPriceSummary from 'theme/components/molecules/m-price-summary';
@@ -375,6 +376,16 @@ export default {
     },
     filteredPaymentMethods () {
       return this.paymentMethods.filter((method) => method.code !== AmazonSupportedMethodCodes.AMAZON_PAY);
+    },
+    productTitle () {
+      const result = {};
+
+      for (const cartItem of this.productsInCart) {
+        const key = getCartItemKey(cartItem);
+        result[key] = getCartItemTitle(cartItem);
+      }
+
+      return result;
     }
   },
   beforeCreate () {

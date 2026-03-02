@@ -322,11 +322,10 @@ export default defineComponent({
         updateCustomizationOptionValue
       );
 
-    useCustomizationsBundleOptions(
+    const { bundleOptions } = useCustomizationsBundleOptions(
       productCustomizations,
       customizationOptionValue,
-      availableOptionValues,
-      context
+      availableOptionValues
     );
 
     const { setDefaultValues } = useCustomizationsOptionsDefaultValue(
@@ -345,6 +344,7 @@ export default defineComponent({
       product,
       quantity,
       customizationState,
+      bundleOptions,
       existingCartItem,
       context
     );

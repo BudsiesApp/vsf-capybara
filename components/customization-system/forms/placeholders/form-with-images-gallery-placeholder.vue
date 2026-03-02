@@ -180,7 +180,7 @@ $section-height: 160px;
   }
 
   ._customization-option {
-    &.-widget-ProductionTimeSelector {
+    &.-widget-DropdownWidget {
       --select-width: 100%;
     }
   }
