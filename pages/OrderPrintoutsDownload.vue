@@ -93,6 +93,7 @@ import { BudsieStatus } from 'src/modules/shared';
 import { useOrderDetails } from 'src/modules/orders-history';
 
 import { useBatchImageDownload } from 'theme/helpers/use-batch-image-download';
+import { getFileExtensionFromUrl } from 'theme/helpers/get-file-extension-from-url';
 import { useImageDownload } from 'theme/helpers/use-image-download';
 import { useImagesPrint } from 'theme/helpers/use-images-print';
 
@@ -179,7 +180,15 @@ export default defineComponent({
 
     async function onDownload (item: { item_id: number, artworkUrl: string }): Promise<void> {
       try {
-        await downloadImage(item.artworkUrl, `artwork-${props.orderId}-${item.item_id}`);
+        let filename = `artwork-${props.orderId}-${item.item_id}`;
+
+        const extension = getFileExtensionFromUrl(item.artworkUrl);
+
+        if (extension) {
+          filename += `.${extension}`;
+        }
+
+        await downloadImage(item.artworkUrl, filename);
       } catch (e) {
         onError(e);
       }
@@ -196,7 +205,7 @@ export default defineComponent({
     async function onDownloadAll (): Promise<void> {
       try {
         const entries = eligibleItems.value.map((item) => {
-          const extension = item.artworkUrl.split('.')[1];
+          const extension = getFileExtensionFromUrl(item.artworkUrl);
           let filename = `artwork-${props.orderId}-${item.item_id}`;
 
           if (extension) {
