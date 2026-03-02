@@ -23,7 +23,7 @@
                 :image="getThumbnailForProductExtend(product)"
                 image-width="140"
                 image-height="140"
-                :title="product.name"
+                :title="productTitle[getCartItemKey(product)]"
                 class="sf-collected-product--detailed collected-product"
               >
                 <template #image="{image}">
@@ -187,6 +187,7 @@ import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 import MDropdown from 'theme/components/molecules/m-dropdown.vue';
 
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
+import { getCartItemTitle } from 'theme/helpers/get-cart-item-title.function';
 
 const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
 
@@ -313,6 +314,16 @@ export default {
     },
     selectedCurrency () {
       return this.$store.getters[GET_ACTIVE_CURRENCY];
+    },
+    productTitle () {
+      const result = {};
+
+      for (const cartItem of this.products) {
+        const key = getCartItemKey(cartItem);
+        result[key] = getCartItemTitle(cartItem);
+      }
+
+      return result;
     },
     skinClass () {
       return getCurrentThemeClass();
@@ -449,6 +460,10 @@ export default {
       }
     },
     showQuantitySelectorForProduct (product) {
+      if (product?.is_alteration_product) {
+        return false;
+      }
+
       return getProductMaxSaleQuantity(product) > 1;
     },
     syncQuantity () {

@@ -2,6 +2,7 @@ import { Ref, SetupContext, ref } from '@vue/composition-api';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
+import { SelectedBundleOption } from '@vue-storefront/core/modules/catalog/types/BundleOption';
 import { setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { CustomizationStateItem, filterCustomizationState } from 'src/modules/customization-system';
@@ -11,8 +12,10 @@ export function useAddToCart (
   product: Ref<Product | undefined>,
   quantity: Ref<number>,
   customizationStateItems: Ref<CustomizationStateItem[]>,
+  bundleOptions: Ref<Record<number, SelectedBundleOption>>,
   existingCartItem: Ref<CartItem | undefined>,
-  { root }: SetupContext
+  { root }: SetupContext,
+  existingPlushieId?: string
 ) {
   const isSubmitting = ref<boolean>(false);
 
@@ -28,26 +31,36 @@ export function useAddToCart (
     if (!product.value) {
       throw new Error('Product is not defined during adding to cart');
     }
+
     if (isSubmitting.value) {
       return;
     }
 
     isSubmitting.value = true;
 
-    await root.$store.dispatch(
-      'product/setBundleOptions',
+    const productOption = setBundleProductOptionsAsync(
+      null,
       {
         product: product.value,
-        bundleOptions: root.$store.state.product.current_bundle_options
+        bundleOptions: bundleOptions.value
       }
     );
 
     const productToAddData: Partial<CartItem> = {
       qty: quantity.value,
+      product_option: productOption,
       extension_attributes: {
         customization_state: filterCustomizationState(customizationStateItems.value)
       }
     };
+
+    if (existingPlushieId) {
+      if (!productToAddData.extension_attributes) {
+        productToAddData.extension_attributes = {};
+      }
+
+      productToAddData.extension_attributes.plushie_id = existingPlushieId;
+    }
 
     try {
       await root.$store.dispatch('cart/addItem', {
@@ -79,7 +92,7 @@ export function useAddToCart (
       null,
       {
         product: existingCartItem.value,
-        bundleOptions: root.$store.state.product.current_bundle_options
+        bundleOptions: bundleOptions.value
       }
     );
 
@@ -91,6 +104,14 @@ export function useAddToCart (
         customization_state: filterCustomizationState(customizationStateItems.value)
       }
     };
+
+    if (existingPlushieId) {
+      if (!cartItemForUpdate.extension_attributes) {
+        cartItemForUpdate.extension_attributes = {};
+      }
+
+      cartItemForUpdate.extension_attributes.plushie_id = existingPlushieId;
+    }
 
     try {
       await updateClientAndServerItem({

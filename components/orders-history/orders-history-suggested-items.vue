@@ -254,8 +254,7 @@ $desktop-max-products-count: 5;
     --price-special-font-size: var(--font-size-base);
     --price-old-font-size: var(--font-size-base);
     --product-card-title-font-line-height: 1.2;
-
-    max-width: 160px;
+    --product-card-height: 100%;
 
     ::v-deep {
       .sf-product-card {
@@ -306,7 +305,6 @@ $desktop-max-products-count: 5;
 
       ::v-deep {
         .base-image {
-          max-width: 80px;
           margin: 0 auto;
           display: block;
         }
