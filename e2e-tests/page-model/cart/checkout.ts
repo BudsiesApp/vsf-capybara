@@ -139,8 +139,8 @@ export class AddressForm {
     zipCode: string = DEFAULT_ZIP_CODE,
     phone: string = DEFAULT_PHONE
   ) {
-    await this.streetAddressFormField.fill(address);
     await this.countrySelectorFormField.selectByOptionTitle(country);
+    await this.streetAddressFormField.fill(address);
 
     if (state) {
       await this.stateSelectorFormField.selectByOptionTitle(state);
