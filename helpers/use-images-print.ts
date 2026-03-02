@@ -1,15 +1,25 @@
 import { ImageHandlerService } from 'src/modules/file-storage';
 
+const PRINT_IFRAME_ID = 'app-print-iframe';
+
 function createHiddenIframe (): HTMLIFrameElement {
+  const existingIframe = document.getElementById(PRINT_IFRAME_ID);
+
+  if (existingIframe && existingIframe.parentNode) {
+    existingIframe.parentNode.removeChild(existingIframe);
+  }
+
   const iframe = document.createElement('iframe');
 
   iframe.style.position = 'fixed';
-  iframe.style.right = '0';
-  iframe.style.bottom = '0';
-  iframe.style.width = '0';
-  iframe.style.height = '0';
+  iframe.style.left = '-9999px';
+  iframe.style.top = '-9999px';
+  iframe.style.width = '100vw';
+  iframe.style.height = '100vh';
   iframe.style.border = '0';
-  iframe.style.visibility = 'hidden';
+  iframe.style.pointerEvents = 'none';
+
+  iframe.id = PRINT_IFRAME_ID;
 
   document.body.appendChild(iframe);
 
@@ -20,7 +30,7 @@ function buildPrintHtml (imageUrls: string[]): string {
   const imagesHtml = imageUrls.map((url) => {
     return `
       <div class="page">
-        <img src="${url}" alt="" />
+        <img src="${url}" alt=""/>
       </div>
     `;
   }).join('');
@@ -33,17 +43,30 @@ function buildPrintHtml (imageUrls: string[]): string {
           @page { size: letter; margin: 0; }
           html, body { height: 100%; margin: 0; padding: 0; }
           .page {
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             page-break-after: always;
             break-after: page;
+            position: relative;
+            overflow: hidden;
           }
-          img {
-            max-width: 100vw;
-            max-height: 100vh;
+          .img-portrait {
+            height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+          }
+          .img-landscape {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            max-width: 100vh;
+            max-height: 100vw;
+            width: 100vh;
+            height: 100vw;
+            transform: translate(-50%, -50%) rotate(90deg);
             object-fit: contain;
           }
         </style>
@@ -70,6 +93,18 @@ async function waitForImagesToLoad (doc: Document): Promise<void> {
   }));
 }
 
+function updateImagesOrientation (doc: Document): void {
+  const images = Array.prototype.slice.call(doc.images || []) as HTMLImageElement[];
+
+  for (const img of images) {
+    if (img.naturalWidth > img.naturalHeight) {
+      img.className = 'img-landscape';
+    } else {
+      img.className = 'img-portrait';
+    }
+  }
+}
+
 export function useImagesPrint (imageHandlerService: ImageHandlerService) {
   async function printImages (imageUrls: string[]): Promise<void> {
     if (!imageUrls || imageUrls.length === 0) {
@@ -81,6 +116,16 @@ export function useImagesPrint (imageHandlerService: ImageHandlerService) {
     const iframe = createHiddenIframe();
 
     try {
+      iframe.srcdoc = buildPrintHtml(resolvedUrls);
+
+      const onLoad = new Promise<void>((resolve) => {
+        iframe.onload = () => {
+          resolve();
+        }
+      });
+
+      await onLoad;
+
       const contentWindow = iframe.contentWindow;
       const doc = contentWindow && contentWindow.document;
 
@@ -88,15 +133,12 @@ export function useImagesPrint (imageHandlerService: ImageHandlerService) {
         throw new Error('Print iframe is not available');
       }
 
-      doc.open();
-      doc.write(buildPrintHtml(resolvedUrls));
-      doc.close();
-
       await waitForImagesToLoad(doc);
+      updateImagesOrientation(doc)
 
       contentWindow.focus();
       contentWindow.print();
-    } finally {
+    } catch (e) {
       if (iframe.parentNode) {
         iframe.parentNode.removeChild(iframe);
       }
