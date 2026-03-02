@@ -3,77 +3,102 @@
     <ul class="_list">
       <li
         class="_item"
+        :class="{
+          '-can-hide': hiddenOptionValues,
+          '-hidden': hiddenOptionValues && hiddenOptionValues[optionValue.id]
+        }"
+        :disabled="isDisabled"
         v-for="optionValue in sortedValues"
         :key="optionValue.id"
       >
         <m-checkbox
           class="_checkbox"
+          :class="{
+            '-expandable': expandConfig && expandConfig[optionValue.id] && expandConfig[optionValue.id].isExpandable,
+            '-expanded': expandConfig && expandConfig[optionValue.id] && expandConfig[optionValue.id].isExpanded
+          }"
           :disabled="isDisabled"
           :valid="isValid"
           :value="optionValue.id"
+          :input-type="inputType"
           v-model="selectedOption"
         >
           <template #checkmark="{ isChecked }">
-            <div class="_checkmark-container">
-              <div
-                class="sf-checkbox__checkmark"
-                :class="{ 'sf-checkbox__checkmark--is-active': isChecked }"
-              >
-                <SfIcon
-                  v-show="isChecked"
-                  icon="check"
-                  size="12px"
-                  color="white"
-                />
-              </div>
-
-              <div class="sf-checkbox__label _title-wrapper">
-                <div class="_title" v-if="optionValue.name">
-                  {{ optionValue.name }}
-                </div>
-
+            <div class="_checkmark-wrapper">
+              <div class="_checkmark-container">
                 <div
-                  class="_price"
-                  v-if="optionValuePriceDictionary[optionValue.id]"
+                  class="sf-checkbox__checkmark"
+                  :class="{ 'sf-checkbox__checkmark--is-active': isChecked }"
                 >
-                  <strong> + </strong>
-
-                  <SfPrice
-                    :regular="
-                      formatPrice(
-                        optionValuePriceDictionary[optionValue.id].regular
-                      )
-                    "
-                    :special="
-                      formatPrice(
-                        optionValuePriceDictionary[optionValue.id].special
-                      )
-                    "
+                  <SfIcon
+                    v-show="isChecked"
+                    icon="check"
+                    size="12px"
+                    color="white"
                   />
                 </div>
+
+                <div class="sf-checkbox__label _title-wrapper">
+                  <div class="_title" v-if="optionValue.name">
+                    {{ optionValue.name }}
+                  </div>
+
+                  <a-added-to-cart
+                    v-if="addedToCartOptionValueId && addedToCartOptionValueId[optionValue.id]"
+                  />
+
+                  <div
+                    class="_price"
+                    v-else-if="optionValuePriceDictionary[optionValue.id]"
+                  >
+                    <strong> + </strong>
+
+                    <SfPrice
+                      :regular="
+                        formatPrice(
+                          optionValuePriceDictionary[optionValue.id].regular
+                        )
+                      "
+                      :special="
+                        formatPrice(
+                          optionValuePriceDictionary[optionValue.id].special
+                        )
+                      "
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="_expand-chevron-container"
+                @click.stop.prevent="$emit('expand-clicked', optionValue.id)"
+              >
+                <SfChevron />
               </div>
             </div>
           </template>
 
           <template #label>
-            <div class="_description-wrapper">
-              <div class="_media" v-if="getItemImage(optionValue)">
-                <div class="_image-container">
-                  <base-image
-                    class="_image"
-                    v-if="getItemImage(optionValue)"
-                    :aspect-ratio="1"
-                    :src="getItemImage(optionValue)"
-                    alt=""
-                  />
+            <div class="_label-container">
+              <div class="_description-wrapper">
+                <div class="_media" v-if="getItemImage(optionValue)">
+                  <div class="_image-container">
+                    <base-image
+                      class="_image"
+                      v-if="getItemImage(optionValue)"
+                      :aspect-ratio="1"
+                      :src="getItemImage(optionValue)"
+                      alt=""
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div
-                class="_description"
-                v-html="optionValue.description"
-                v-if="optionValue.description"
-              />
+                <div
+                  class="_description"
+                  v-html="optionValue.description"
+                  v-if="optionValue.description"
+                />
+              </div>
             </div>
           </template>
         </m-checkbox>
@@ -93,7 +118,7 @@ import {
   PropType,
   toRefs
 } from '@vue/composition-api';
-import { SfIcon, SfPrice } from '@storefront-ui/vue';
+import { SfChevron, SfIcon, SfPrice } from '@storefront-ui/vue';
 import { getThumbnailPath } from '@vue-storefront/core/helpers';
 
 import { BaseImage } from 'src/modules/budsies';
@@ -104,13 +129,16 @@ import {
   useValuesSort
 } from 'src/modules/customization-system';
 
+import AAddedToCart from 'theme/components/atoms/a-added-to-cart.vue';
 import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
 
 export default defineComponent({
   name: 'CardsListWidget',
   components: {
+    AAddedToCart,
     BaseImage,
     MCheckbox,
+    SfChevron,
     SfIcon,
     SfPrice
   },
@@ -134,6 +162,21 @@ export default defineComponent({
     values: {
       type: Array as PropType<OptionValue[]>,
       default: () => []
+    },
+    addedToCartOptionValueId: {
+      type: Object as PropType<Record<string, boolean> | undefined>,
+      default: undefined
+    },
+    expandConfig: {
+      type: Object as PropType<Record<string, {
+        isExpandable: boolean,
+        isExpanded: boolean
+      }> | undefined>,
+      default: undefined
+    },
+    hiddenOptionValues: {
+      type: Object as PropType<Record<string, boolean> | undefined>,
+      default: undefined
     }
   },
   setup (props, context) {
@@ -177,14 +220,84 @@ export default defineComponent({
 
   ._item {
     cursor: pointer;
+
+    &:disabled {
+      cursor: default;
+    }
+
+    &.-can-hide {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows 300ms ease-in-out;
+
+      ._checkbox {
+        transition: padding 300ms ease-in-out;
+        will-change: padding;
+        overflow: hidden;
+      }
+
+      &.-hidden {
+        grid-template-rows: 0fr;
+
+        ._checkbox {
+          padding: 0;
+        }
+      }
+    }
+  }
+
+  ._label-container {
+    display: grid;
+    grid-template-rows: 1fr;
+    width: 100%;
   }
 
   ._checkbox {
     --checkbox-font-size: var(--font-size-base);
     --m-checkbox-align-items: flex-start;
 
-    padding: var(--spacer-sm);
+    padding: var(--cards-list-checkbox-padding, var(--spacer-sm));
     transition: background-color 0.15s cubic-bezier(0.65, 0.05, 0.35, 1);
+
+    ._expand-chevron-container {
+      display: flex;
+      padding: var(--spacer-2xs);
+      padding-right: 0;
+      display: none;
+    }
+
+    &.-expandable {
+      ._expand-chevron-container {
+        display: flex;
+      }
+
+      ._label-container {
+        grid-template-rows: 0fr;
+        transition: grid-template-rows 300ms ease-in-out;
+        will-change: grid-template-rows;
+      }
+
+      ._description-wrapper {
+        overflow: hidden;
+        margin-top: 0;
+        transition: margin-top 300ms ease-in-out;
+        will-change: margin-top;
+      }
+
+      &.-expanded {
+        ._label-container {
+          grid-template-rows: 1fr;
+        }
+
+        ._description-wrapper {
+          margin-top: var(--spacer-xs);
+        }
+
+        ::v-deep .sf-chevron {
+          rotate: 180deg;
+        }
+      }
+    }
 
     &.sf-checkbox--is-active {
       background-color: var(--c-secondary);
@@ -197,14 +310,23 @@ export default defineComponent({
     }
   }
 
+  ._checkmark-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: var(--cards-list-checkmark-align-items, center);
+    width: 100%;
+  }
+
   ._checkmark-container {
     display: flex;
+    width: var(--cards-list-checkmark-container-width, auto);
   }
 
   ._title-wrapper {
     display: flex;
     align-items: flex-start;
     flex-direction: row;
+    justify-content: var(--cards-list-title-justify-content, flex-start);
     gap: var(--spacer-xs);
   }
 
@@ -250,6 +372,7 @@ export default defineComponent({
     ._image-container {
       position: relative;
       display: flex;
+      max-height: var(--image-container-max-height, auto);
     }
 
     ._image {

@@ -240,7 +240,7 @@ export default defineComponent({
     --customization-option-description-align: center;
     --customization-option-hint-align: center;
 
-    &.-widget-ProductionTimeSelector {
+    &.-widget-DropdownWidget {
       --select-width: 100%;
     }
   }

@@ -5,6 +5,7 @@
         <div v-if="showOrdersHistoryList" class="_content">
           <orders-history-list
             :orders="activeOrdersList"
+            :alteration-products="alterationProductByOrderItemId"
             :title="$t('Active Orders')"
             v-if="activeOrdersList.length"
           />
@@ -13,6 +14,7 @@
 
           <orders-history-list
             :orders="completedOrdersList"
+            :alteration-products="alterationProductByOrderItemId"
             :title="$t('Completed Orders')"
             v-if="completedOrdersList.length"
           />
@@ -38,9 +40,15 @@
 import { defineComponent, computed } from '@vue/composition-api';
 import { SfLoader, SfTabs } from '@storefront-ui/vue';
 
-import { OrdersHistoryList, useOrderHistoryList } from 'src/modules/orders-history';
+import {
+  OrdersHistoryList,
+  useOrderHistoryList
+} from 'src/modules/orders-history';
 
-import OrdersHistorySuggestedItems from 'src/themes/petsies-capybara/components/orders-history/orders-history-suggested-items.vue';
+import { useAlterationProductsLoader } from 'theme/helpers/use-alteration-products-loader';
+
+import AlterationProductForm from 'theme/components/customization-system/forms/alteration-product-form.vue';
+import OrdersHistorySuggestedItems from 'theme/components/orders-history/orders-history-suggested-items.vue';
 
 export default defineComponent({
   name: 'OMyAccountOrdersHistory',
@@ -50,6 +58,9 @@ export default defineComponent({
     OrdersHistoryList,
     OrdersHistorySuggestedItems
   },
+  provide: {
+    AlterationProductForm
+  },
   setup (_, context) {
     const {
       activeOrdersList,
@@ -58,6 +69,10 @@ export default defineComponent({
       isLoading,
       ordersList
     } = useOrderHistoryList(context);
+
+    const {
+      alterationProductByOrderItemId
+    } = useAlterationProductsLoader(ordersList, context);
 
     const showLoadingIndicator = computed<boolean>(() => {
       return isLoading.value && !isError.value;
@@ -71,6 +86,7 @@ export default defineComponent({
 
     return {
       activeOrdersList,
+      alterationProductByOrderItemId,
       completedOrdersList,
       isError,
       isLoading,
