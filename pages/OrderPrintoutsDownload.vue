@@ -65,11 +65,11 @@
             />
 
             <div class="_actions">
-              <SfButton type="button" class="color-secondary" @click="() => onDownload(item)">
+              <SfButton type="button" class="_item-action color-secondary" @click="() => onDownload(item)">
                 {{ $t('Download') }}
               </SfButton>
 
-              <SfButton type="button" @click="() => onPrint(item)">
+              <SfButton type="button" class="_item-action" @click="() => onPrint(item)">
                 {{ $t('Print') }}
               </SfButton>
             </div>
@@ -296,8 +296,9 @@ export default defineComponent({
     display: flex;
     gap: var(--spacer-sm);
     padding: 0 var(--spacer-sm);
-    margin-top: var(--spacer-base);
+    margin-top: var(--spacer-xl);
     flex-wrap: wrap;
+    justify-content: center;
   }
 
   ._items {
@@ -324,10 +325,20 @@ export default defineComponent({
     flex-wrap: wrap;
   }
 
+  ._batch-action,
+  ._item-action {
+    --button-font-size: var(--font-sm);
+    --button-padding: var(--spacer-xs) var(--spacer-sm);
+  }
+
   @media (min-width: $tablet-min) {
     max-width: 1272px;
     width: 100%;
     margin: 0 auto;
+
+    ._batch-actions {
+      justify-content: flex-start;
+    }
   }
 }
 </style>
