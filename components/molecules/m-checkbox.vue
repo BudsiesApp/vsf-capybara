@@ -10,7 +10,7 @@
     <label class="sf-checkbox__container" :for="inputId">
       <input
         v-focus
-        type="checkbox"
+        :type="inputType"
         :id="inputId"
         :name="name"
         :value="value"
@@ -18,6 +18,7 @@
         :disabled="disabled"
         class="sf-checkbox__input"
         @change="inputHandler"
+        @click="onClick"
       >
       <!-- @slot Custom check mark markup -->
       <slot name="checkmark" v-bind="{ isChecked, disabled }">
@@ -79,8 +80,12 @@ export default {
       default: true
     },
     selected: {
-      type: [Array, Boolean],
+      type: [Array, Boolean, String],
       default: () => []
+    },
+    inputType: {
+      type: String,
+      default: 'checkbox'
     }
   },
   data () {
@@ -95,15 +100,28 @@ export default {
     isChecked () {
       if (typeof this.selected === 'boolean') {
         return this.selected;
+      } else if (typeof this.selected === 'string') {
+        return this.selected === this.value;
       } else {
         return this.selected.includes(this.value);
       }
     }
   },
   methods: {
+    onClick () {
+      if (this.inputType !== 'radio') {
+        return;
+      }
+
+      if (this.selected === this.value) {
+        this.$emit('change', undefined);
+      }
+    },
     inputHandler () {
       if (typeof this.selected === 'boolean') {
         this.$emit('change', !this.selected);
+      } else if (typeof this.selected === 'string') {
+        this.$emit('change', this.value);
       } else {
         let selected = [...this.selected];
         if (selected.includes(this.value)) {
