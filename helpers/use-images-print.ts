@@ -1,3 +1,4 @@
+import { Logger } from '@vue-storefront/core/lib/logger';
 import { ImageHandlerService } from 'src/modules/file-storage';
 
 const PRINT_IFRAME_ID = 'app-print-iframe';
@@ -138,7 +139,9 @@ export function useImagesPrint (imageHandlerService: ImageHandlerService) {
 
       contentWindow.focus();
       contentWindow.print();
-    } catch (e) {
+    } catch (error) {
+      Logger.error('Image print error: ' + error, 'images-print')();
+
       if (iframe.parentNode) {
         iframe.parentNode.removeChild(iframe);
       }
