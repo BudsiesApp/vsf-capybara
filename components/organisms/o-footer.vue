@@ -61,6 +61,7 @@
                 class="social-icon__link"
                 :class="'-' + item.name"
                 target="_blank"
+                rel="noopener noreferrer"
               />
             </div>
           </SfListItem>
@@ -271,11 +272,6 @@ export default {
         padding-left: 0;
         background-position-x: left;
       }
-    }
-
-    &.mobile-only {
-      justify-content: center;
-      padding-bottom: 0;
     }
 
     &__link {
