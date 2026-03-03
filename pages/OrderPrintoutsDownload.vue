@@ -97,7 +97,7 @@ import { getFileExtensionFromUrl } from 'theme/helpers/get-file-extension-from-u
 import { useImageDownload } from 'theme/helpers/use-image-download';
 import { useImagesPrint } from 'theme/helpers/use-images-print';
 
-const ELIGEBLE_PRODUCTS_SKUS = new Set<string>([
+const ELIGIBLE_PRODUCTS_SKUS = new Set<string>([
   'CustomBudsie1_bundle',
   'CustomSelfie_bundle',
   'classroomSelfie_bundle',
@@ -139,7 +139,7 @@ export default defineComponent({
       const list: { item_id: number, artworkUrl: string }[] = [];
 
       for (const item of items) {
-        if (!ELIGEBLE_PRODUCTS_SKUS.has(item.product.sku)) {
+        if (!ELIGIBLE_PRODUCTS_SKUS.has(item.product.sku)) {
           continue;
         }
 
