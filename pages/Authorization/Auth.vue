@@ -163,23 +163,25 @@ export default defineComponent({
     );
 
     async function onLoginAgain (): Promise<void> {
-      const query: Record<string, string> = {};
+      const query: Record<string, string | (string | null)[]> = {};
 
       for (const [key, value] of Object.entries(root.$route.query)) {
         if (key === 'token') {
           continue;
         }
 
-        if (typeof value === 'string') {
-          query[key] = value;
-        }
+        query[key] = value;
       }
 
-      const redirectTarget: string | undefined =
-        (typeof root.$route.query[REDIRECT_TARGET_QUERY_KEY] === 'string'
-          ? root.$route.query[REDIRECT_TARGET_QUERY_KEY] as string
-          : undefined) ||
-        (await getPersistedPostAuthRedirectPath());
+      const existingRedirectTargetValue = root.$route.query[REDIRECT_TARGET_QUERY_KEY];
+
+      let redirectTarget = typeof existingRedirectTargetValue === 'string'
+        ? existingRedirectTargetValue
+        : undefined;
+
+      if (!redirectTarget) {
+        redirectTarget = await getPersistedPostAuthRedirectPath();
+      }
 
       if (redirectTarget) {
         query[REDIRECT_TARGET_QUERY_KEY] = redirectTarget;
