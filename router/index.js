@@ -45,6 +45,8 @@ const OrderItemsBulkCustomize = () =>
   import(/* webpackChunkName: "vsf-order-items-bulk-customize" */ 'theme/pages/OrderItemsBulkCustomize');
 const OrderItemDeliverablesDownload = () =>
   import(/* webpackChunkName: "vsf-order-item-deliverables" */ 'theme/pages/OrderItemDeliverablesDownload');
+const OrderPrintoutsDownload = () =>
+  import(/* webpackChunkName: "vsf-order-printouts-download" */ 'theme/pages/OrderPrintoutsDownload');
 const TaxIdRequest = () =>
   import(/* webpackChunkName: "vsf-tax-id-request" */ 'theme/pages/TaxIdRequest');
 const OrderUpdateAddress = () =>
@@ -352,6 +354,17 @@ let routes = [
         orderItemId
       }
     },
+    meta: {
+      auth: true
+    }
+  },
+  {
+    path: '/orders/printouts-download/',
+    name: 'orders-printouts-download',
+    component: OrderPrintoutsDownload,
+    props: (route) => ({
+      orderId: route.query.orderId || ''
+    }),
     meta: {
       auth: true
     }
