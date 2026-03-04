@@ -28,9 +28,14 @@ export function useAuthorizationRouteRestoration (
     reset();
   }
 
+  async function getPersistedPostAuthRedirectPath (): Promise<string | undefined> {
+    return urlStorage.getItem(postAuthRedirectPathLocalStorageKey);
+  }
+
   return {
     persistPostAuthRedirectPath: persist,
     navigateToPostAuthRedirectPath: restore,
-    resetPostAuthRedirectPath: reset
+    resetPostAuthRedirectPath: reset,
+    getPersistedPostAuthRedirectPath
   };
 }

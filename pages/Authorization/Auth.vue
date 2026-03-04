@@ -8,6 +8,13 @@
     <div v-else-if="errorMessage" class="error-message">
       <h2>{{ $t('Authentication Failed') }}</h2>
       <p>{{ errorMessage }}</p>
+
+      <SfButton
+        class="sf-button--full-width login-again-button"
+        @click="onLoginAgain"
+      >
+        {{ $t('Login again') }}
+      </SfButton>
     </div>
 
     <div v-else-if="isSuccess" class="success-message">
@@ -35,13 +42,15 @@ import {
   watch,
   computed
 } from '@vue/composition-api';
-import { SfLoader, SfHeading } from '@storefront-ui/vue';
+import { SfLoader, SfHeading, SfButton } from '@storefront-ui/vue';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { AuthenticateRequestResponse } from '@vue-storefront/core/modules/user';
 
+import { REDIRECT_TARGET_QUERY_KEY } from 'theme/interfaces/redirect-target-query-key';
 import { useRegistrationForm } from 'theme/helpers/use-registration-form';
+import { PageName } from 'theme/pages/page-name';
 
 import MRegister from 'theme/components/molecules/m-register.vue';
 import { useAuthorizationRouteRestoration } from 'theme/helpers/use-authorization-route-restoration';
@@ -50,6 +59,7 @@ export default defineComponent({
   name: 'Auth',
   components: {
     MRegister,
+    SfButton,
     SfHeading,
     SfLoader
   },
@@ -74,7 +84,11 @@ export default defineComponent({
       onRegistrationRequired,
       registrationToken
     } = useRegistrationForm();
-    const { navigateToPostAuthRedirectPath } = useAuthorizationRouteRestoration(context);
+    const {
+      navigateToPostAuthRedirectPath,
+      persistPostAuthRedirectPath,
+      getPersistedPostAuthRedirectPath
+    } = useAuthorizationRouteRestoration(context);
 
     const isUserLoggedIn = computed<boolean>(() => {
       return root.$store.getters['user/isLoggedIn'];
@@ -148,10 +162,38 @@ export default defineComponent({
       }
     );
 
+    async function onLoginAgain (): Promise<void> {
+      const query: Record<string, string> = {};
+
+      for (const [key, value] of Object.entries(root.$route.query)) {
+        if (key === 'token') {
+          continue;
+        }
+
+        if (typeof value === 'string') {
+          query[key] = value;
+        }
+      }
+
+      const redirectTarget: string | undefined =
+        (typeof root.$route.query[REDIRECT_TARGET_QUERY_KEY] === 'string'
+          ? root.$route.query[REDIRECT_TARGET_QUERY_KEY] as string
+          : undefined) ||
+        (await getPersistedPostAuthRedirectPath());
+
+      if (redirectTarget) {
+        query[REDIRECT_TARGET_QUERY_KEY] = redirectTarget;
+        await persistPostAuthRedirectPath(redirectTarget);
+      }
+
+      root.$router.push({ name: PageName.SIGN_IN, query });
+    }
+
     return {
       isLoading,
       isSuccess,
       errorMessage,
+      onLoginAgain,
       showRegistrationForm,
       registrationToken
     };
