@@ -163,9 +163,12 @@ export default defineComponent({
     );
 
     async function onLoginAgain (): Promise<void> {
-      const query: Record<string, string | (string | null)[]> = {};
+      type RouteQueryValue = string | (string | null)[] | null | undefined;
 
-      for (const [key, value] of Object.entries(root.$route.query)) {
+      const query: Record<string, RouteQueryValue> = {};
+      const currentRouteQuery = root.$route.query as Record<string, RouteQueryValue>;
+
+      for (const [key, value] of Object.entries(currentRouteQuery)) {
         if (key === 'token') {
           continue;
         }
