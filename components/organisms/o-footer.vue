@@ -48,6 +48,23 @@
               />
             </router-link>
           </SfListItem>
+
+          <SfListItem class="social-column">
+            <div
+              class="social-icon"
+              v-for="item in social"
+              :key="item.name + ';' + item.url"
+            >
+              <a
+                :href="item.url"
+                :aria-label="item.label"
+                class="social-icon__link"
+                :class="'-' + item.name"
+                target="_blank"
+                rel="noopener noreferrer"
+              />
+            </div>
+          </SfListItem>
         </SfList>
       </SfFooterColumn>
 
@@ -83,6 +100,8 @@ import get from 'lodash-es/get';
 
 import { PrivacyPolicyLink } from 'src/modules/shared';
 
+import { socialServices } from 'theme/interfaces/social-services';
+
 import MBudsiesBrands from '../molecules/m-budsies-brands.vue';
 
 export default {
@@ -102,6 +121,17 @@ export default {
   },
   computed: {
     ...mapGetters('user', ['isLoggedIn']),
+    social () {
+      const { name } = currentStoreView();
+
+      return socialServices.map((service) => {
+        return {
+          name: service.name,
+          url: service.url,
+          label: this.$t('{brand} {service} page', { brand: name, service: service.serviceLabel })
+        };
+      });
+    },
     multistoreEnabled () {
       return get(config, 'storeViews.multistore', false);
     },
@@ -173,6 +203,8 @@ export default {
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .o-footer {
+  $brand-icons-path: '../../assets/brands';
+
   background-color: var(--c-footer);
   padding-bottom: var(--spacer-lg);
   margin-top: calc(var(--spacer-2xl) + var(--spacer-xl));
@@ -222,6 +254,41 @@ export default {
     &__bar {
       &:after {
         --chevron-color: var(--c-light-variant);
+      }
+    }
+  }
+
+  .social-column {
+    display: flex;
+    gap: var(--spacer-xs);
+  }
+
+  .social-icon {
+    display: flex;
+    justify-content: flex-start;
+
+    &:first-child {
+      .social-icon__link {
+        padding-left: 0;
+        background-position-x: left;
+      }
+    }
+
+    &__link {
+      display: block;
+      height: 16px;
+      width: 16px;
+      padding: var(--spacer-xs);
+      background-size: 16px 16px;
+      background-repeat: no-repeat;
+      background-position: center;
+
+      &.-facebook {
+        background-image: url('#{$brand-icons-path}/facebook.svg');
+      }
+
+      &.-linkedin {
+        background-image: url('#{$brand-icons-path}/linkedin.svg');
       }
     }
   }
