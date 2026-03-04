@@ -81,8 +81,10 @@ import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { BaseImage } from 'src/modules/budsies';
 import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { fetchOrderItemDeliverables, Deliverable } from 'src/modules/customization-system';
-import ImageHandlerService from 'src/modules/file-storage/image-handler.service';
+import { ImageHandlerService } from 'src/modules/file-storage';
 import { PriceHelper, ProductEvent } from 'src/modules/shared';
+
+import { useImageDownload } from 'theme/helpers/use-image-download';
 
 import { prepareCategoryProduct } from 'theme/helpers';
 import OProductCard from 'theme/components/organisms/o-product-card.vue';
@@ -121,6 +123,12 @@ export default defineComponent({
   },
   setup (props, context) {
     const qaPhotosHandlerService = inject<ImageHandlerService>('QaPhotosHandlerService');
+
+    if (!qaPhotosHandlerService) {
+      throw new Error('Image Handler Service is not defined');
+    }
+
+    const { downloadImage } = useImageDownload(qaPhotosHandlerService);
 
     const deliverables = ref<Deliverable[]>([]);
     const isLoading = ref(true);
@@ -244,20 +252,7 @@ export default defineComponent({
     });
 
     async function downloadDeliverable (deliverable: Deliverable) {
-      const imageSrc = getAbsoluteImageUrl(deliverable.storage_item_url);
-
-      const image = await fetch(imageSrc);
-      const imageBlob = await image.blob();
-      const imageURL = URL.createObjectURL(imageBlob);
-
-      const link = document.createElement('a');
-      link.href = imageURL;
-      link.download = props.orderItemId.toString();
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(imageURL);
+      await downloadImage(deliverable.storage_item_url, props.orderItemId.toString());
     }
 
     function onProductCardClick (productSku: string): void {
