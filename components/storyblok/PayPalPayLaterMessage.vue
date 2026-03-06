@@ -1,12 +1,12 @@
 <template>
   <div
-    class="storyblok-paypal-pay-later-messaging"
+    class="storyblok-paypal-pay-later-message"
     :class="cssClasses"
     :style="styles"
   >
     <editor-block-icons :item="item" />
 
-    <PayPalPayLaterMessaging
+    <PayPalPayLaterMessage
       v-if="amount > 0"
       :amount="amount"
       :alignment="alignment"
@@ -23,15 +23,14 @@ import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { registerModule } from '@vue-storefront/core/lib/modules'
 import { PriceHelper } from 'src/modules/shared';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
-import PayPalPayLaterMessaging from 'src/modules/payment-braintree/components/PayPalPayLaterMessaging.vue';
-import { Braintree } from 'src/modules/payment-braintree';
+import { Braintree, PayPalPayLaterMessage } from 'src/modules/payment-braintree';
 
 import PayPalPayLaterMessageData from './interfaces/paypal-pay-later-message-data.interface';
 
 export default (Blok as VueConstructor<InstanceType<typeof Blok>>).extend({
-  name: 'StoryblokPayPalPayLaterMessaging',
+  name: 'StoryblokPayPalPayLaterMessage',
   components: {
-    PayPalPayLaterMessaging
+    PayPalPayLaterMessage
   },
   data () {
     return {
@@ -88,9 +87,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok>>).extend({
 <style lang="scss" scoped>
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
-.storyblok-paypal-pay-later-messaging {
-  @include defaults;
-
+.storyblok-paypal-pay-later-message {
   &.-editor-preview-mode {
     pointer-events: none;
   }
