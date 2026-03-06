@@ -405,18 +405,21 @@ export default {
       return result;
     },
     showPaymentPayPal () {
-      return [braintreeSupportedMethodsCodes.PAY_PAL, braintreeSupportedMethodsCodes.PAY_PAL_PAY_LATER].includes(this.payment.paymentMethod);
+      return [
+        braintreeSupportedMethodsCodes.PAY_PAL,
+        braintreeSupportedMethodsCodes.PAY_PAL_PAY_LATER
+      ].includes(this.paymentDetails.paymentMethod);
     },
     paymentPayPalFundingSources () {
       if (!window.paypal) {
         return [];
       }
 
-      if (this.payment.paymentMethod === braintreeSupportedMethodsCodes.PAY_PAL) {
+      if (this.paymentDetails.paymentMethod === braintreeSupportedMethodsCodes.PAY_PAL) {
         return [window.paypal.FUNDING.PAYPAL];
       }
 
-      if (this.payment.paymentMethod === braintreeSupportedMethodsCodes.PAY_PAL_PAY_LATER) {
+      if (this.paymentDetails.paymentMethod === braintreeSupportedMethodsCodes.PAY_PAL_PAY_LATER) {
         return [window.paypal.FUNDING.PAYLATER];
       }
 

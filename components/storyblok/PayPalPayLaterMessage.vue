@@ -84,3 +84,15 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok>>).extend({
   }
 });
 </script>
+
+<style lang="scss" scoped>
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
+
+.storyblok-paypal-pay-later-messaging {
+  @include defaults;
+
+  &.-editor-preview-mode {
+    pointer-events: none;
+  }
+}
+</style>
