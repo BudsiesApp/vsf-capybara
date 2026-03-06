@@ -101,7 +101,16 @@ const ELIGIBLE_PRODUCTS_SKUS = new Set<string>([
   'CustomBudsie1_bundle',
   'CustomSelfie_bundle',
   'classroomSelfie_bundle',
-  'classroomBudsie_bundle'
+  'classroomBudsie_bundle',
+  'customPals_bundle',
+  'budsiesPuppet_bundle',
+  'selfiesPuppet_bundle',
+  'ForeversDog_bundle',
+  'ForeversCat_bundle',
+  'ForeversOther_bundle',
+  'ShopifyForeversDog_bundle',
+  'ShopifyForeversCat_bundle',
+  'petsiesHuggables_bundle'
 ]);
 
 export default defineComponent({
