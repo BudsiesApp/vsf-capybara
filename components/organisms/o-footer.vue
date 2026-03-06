@@ -260,26 +260,18 @@ export default {
 
   .social-column {
     display: flex;
-    gap: var(--spacer-xs);
+    gap: var(--spacer-sm);
   }
 
   .social-icon {
     display: flex;
     justify-content: flex-start;
 
-    &:first-child {
-      .social-icon__link {
-        padding-left: 0;
-        background-position-x: left;
-      }
-    }
-
     &__link {
       display: block;
-      height: 16px;
-      width: 16px;
-      padding: var(--spacer-xs);
-      background-size: 16px 16px;
+      height: 32px;
+      width: 32px;
+      background-size: 32px 32px;
       background-repeat: no-repeat;
       background-position: center;
 
