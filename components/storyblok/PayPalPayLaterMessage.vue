@@ -1,6 +1,6 @@
 <template>
   <div
-    class="storyblok-paypal-pay-later-message"
+    class="storyblok-paypal-pay-later-message layout-regular-component"
     :class="cssClasses"
     :style="styles"
   >
@@ -85,11 +85,14 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok>>).extend({
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 .storyblok-paypal-pay-later-message {
   &.-editor-preview-mode {
     pointer-events: none;
   }
+
+  @include display-property-handling;
 }
 </style>
