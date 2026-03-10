@@ -220,6 +220,15 @@
       >
         {{ $t('Place the order') }}
       </SfButton>
+
+      <PaymentPayPal
+        v-if="showPaymentPayPal"
+        :braintree-client="braintreeClient"
+        :show-content="true"
+        :is-order-placement-disabled="isPlaceOrderButtonDisabled"
+        :funding-sources="paymentPayPalFundingSources"
+        @success="placeOrder"
+      />
     </div>
 
     <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
@@ -258,7 +267,7 @@ import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-i
 
 import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { AFFIRM_MODAL_CLOSED } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';
-import { getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
+import { PaymentPayPal, getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
 import { PAYMENT_ERROR_EVENT, PriceHelper } from 'src/modules/shared';
 import { SupportedMethodCodes as AmazonSupportedMethodCodes } from 'src/modules/vsf-amazon-pay';
 
@@ -285,7 +294,8 @@ export default {
     SfButton,
     SfHeading,
     SfAccordion,
-    SfCollectedProduct
+    SfCollectedProduct,
+    PaymentPayPal
   },
   mixins: [OrderReview, Payment],
   inject: {
@@ -343,8 +353,7 @@ export default {
     },
     showPlaceOrderButton () {
       return !this.isBraintreeMethodSelected ||
-       (this.isBraintreeMethodSelected &&
-        this.paymentDetails.paymentMethod !== braintreeSupportedMethodsCodes.PAY_PAL);
+       (this.isBraintreeMethodSelected && !this.showPaymentPayPal);
     },
     componentsByMethodCode () {
       const componentsByMethodCode = {};
@@ -386,6 +395,27 @@ export default {
       }
 
       return result;
+    },
+    showPaymentPayPal () {
+      return [
+        braintreeSupportedMethodsCodes.PAY_PAL,
+        braintreeSupportedMethodsCodes.PAY_PAL_PAY_LATER
+      ].includes(this.paymentDetails.paymentMethod);
+    },
+    paymentPayPalFundingSources () {
+      if (!window.paypal) {
+        return [];
+      }
+
+      if (this.paymentDetails.paymentMethod === braintreeSupportedMethodsCodes.PAY_PAL) {
+        return [window.paypal.FUNDING.PAYPAL];
+      }
+
+      if (this.paymentDetails.paymentMethod === braintreeSupportedMethodsCodes.PAY_PAL_PAY_LATER) {
+        return [window.paypal.FUNDING.PAYLATER];
+      }
+
+      return [];
     }
   },
   beforeCreate () {
