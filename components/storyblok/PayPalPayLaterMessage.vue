@@ -11,6 +11,7 @@
       :amount="amount"
       :alignment="alignment"
       placement="product"
+      class="_message"
     />
   </div>
 </template>
@@ -89,10 +90,12 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok>>).extend({
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 .storyblok-paypal-pay-later-message {
-  &.-editor-preview-mode {
-    pointer-events: none;
-  }
-
   @include display-property-handling;
+
+  &.-editor-preview-mode {
+    ._message {
+      pointer-events: none;
+    }
+  }
 }
 </style>
