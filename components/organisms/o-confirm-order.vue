@@ -231,7 +231,7 @@
         :braintree-client="braintreeClient"
         :show-content="true"
         :is-order-placement-disabled="isPlaceOrderButtonDisabled"
-        :payment-methods="paymentPayPalPaymentMethods"
+        :funding-sources="paymentPayPalFundingSources"
         @success="placeOrder"
       />
     </div>
@@ -272,7 +272,7 @@ import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-i
 
 import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { AFFIRM_MODAL_CLOSED } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';
-import { getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
+import { PaymentPayPal, getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
 import { PAYMENT_ERROR_EVENT, PriceHelper } from 'src/modules/shared';
 import { SupportedMethodCodes as AmazonSupportedMethodCodes } from 'src/modules/vsf-amazon-pay';
 
@@ -367,8 +367,7 @@ export default {
       ];
 
       return !this.isBraintreeMethodSelected ||
-       (this.isBraintreeMethodSelected &&
-        !autoPlacedMethods.includes(this.paymentDetails.paymentMethod));
+       (this.isBraintreeMethodSelected && !this.showPaymentPayPal);
     },
     componentsByMethodCode () {
       const componentsByMethodCode = {};
@@ -409,9 +408,6 @@ export default {
 
       return [];
     },
-    showPaymentPayPal () {
-      return [braintreeSupportedMethodsCodes.PAY_PAL, braintreeSupportedMethodsCodes.VENMO].includes(this.payment.paymentMethod);
-    },
     sortedPaymentMethods () {
       const sorted = this.paymentMethods
         .filter((method) => method.code !== AmazonSupportedMethodCodes.AMAZON_PAY);
@@ -437,6 +433,28 @@ export default {
       }
 
       return result;
+    },
+    showPaymentPayPal () {
+      return [
+        braintreeSupportedMethodsCodes.PAY_PAL,
+        braintreeSupportedMethodsCodes.PAY_PAL_PAY_LATER,
+        braintreeSupportedMethodsCodes.VENMO
+      ].includes(this.paymentDetails.paymentMethod);
+    },
+    paymentPayPalFundingSources () {
+      if (!window.paypal) {
+        return [];
+      }
+
+      if (this.paymentDetails.paymentMethod === braintreeSupportedMethodsCodes.PAY_PAL) {
+        return [window.paypal.FUNDING.PAYPAL];
+      }
+
+      if (this.paymentDetails.paymentMethod === braintreeSupportedMethodsCodes.PAY_PAL_PAY_LATER) {
+        return [window.paypal.FUNDING.PAYLATER];
+      }
+
+      return [];
     }
   },
   beforeCreate () {
