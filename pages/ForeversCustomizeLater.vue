@@ -2,13 +2,14 @@
   <div id="forevers-customize-later">
     <product-structured-data v-if="currentProduct" :product="currentProduct" />
 
-    <div v-if="activeProduct" class="_form-container">
+    <div v-if="showForm" class="_form-container">
       <form-with-images-gallery
         :can-use-persisted-customization-state="canUsePersistedCustomizationState"
         :customization-availability-flow="customizationAvailabilityFlow"
         :existing-cart-item="existingCartItem"
-        :key="activeProduct.sku"
-        :product="activeProduct"
+        :key="currentProduct && currentProduct.sku"
+        :product="currentProduct"
+        @hook:mounted="onFormMounted"
       >
         <template #product-details-extra>
           <div class="_product-type-buttons">
@@ -28,6 +29,11 @@
         </template>
       </form-with-images-gallery>
     </div>
+
+    <form-with-images-gallery-placeholder
+      v-show="showPlaceholder"
+      class="_placeholder"
+    />
   </div>
 </template>
 
@@ -43,21 +49,20 @@ import {
 import { SfHeading } from '@storefront-ui/vue';
 
 import { htmlDecode } from '@vue-storefront/core/filters';
+import { isServer } from '@vue-storefront/core/helpers';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
-import Product from 'core/modules/catalog/types/Product';
 import { ProductStructuredData } from 'src/modules/budsies';
-import {
-  CustomizationAvailabilityFlow,
-  updateProductProductionTimeCustomizationData
-} from 'src/modules/customization-system';
+import { CustomizationAvailabilityFlow } from 'src/modules/customization-system';
 import { getCanonicalUrl } from 'src/modules/shared';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
 import FormWithImagesGallery from 'theme/components/customization-system/forms/form-with-images-gallery.vue';
+import FormWithImagesGalleryPlaceholder from 'theme/components/customization-system/forms/placeholders/form-with-images-gallery-placeholder.vue';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import getForeversTypeByBundleSku from 'theme/helpers/get-forevers-type-by-bundle-sku.function';
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 import getPlushieSkuByTypes from 'theme/helpers/get-plushie-sku-by-types.function';
+import { useMultiProductsPage } from 'theme/helpers/use-multi-products-page';
 import PlushieProductType from 'theme/interfaces/plushie-product-type';
 import { PlushieType } from 'theme/interfaces/plushie.type';
 import i18n from '@vue-storefront/core/i18n';
@@ -66,6 +71,7 @@ export default defineComponent({
   name: 'ForeversCustomizeLater',
   components: {
     FormWithImagesGallery,
+    FormWithImagesGalleryPlaceholder,
     MBlockStory,
     ProductStructuredData,
     SfHeading
@@ -87,8 +93,8 @@ export default defineComponent({
     const customizationAvailabilityFlow = ref<CustomizationAvailabilityFlow>(
       CustomizationAvailabilityFlow.CUSTOMIZE_LATER_PURCHASE
     );
-    const isProductsLoading = ref<boolean>(false);
-    const preloadedProductsByType = ref<Record<string, Product>>({});
+    const isFormMounted = ref(isServer);
+    const isLeavePage = ref(false);
 
     const foreversProductTypeButtons = computed<ProductTypeButton[]>(() => {
       return [
@@ -117,18 +123,6 @@ export default defineComponent({
 
     const selectedProductType = ref<string | undefined>(preselectedProductType.value);
 
-    const currentProduct = computed<Product | undefined>(
-      () => context.root.$store.getters['product/getCurrentProduct']
-    );
-
-    const activeProduct = computed<Product | undefined>(() => {
-      if (!selectedProductType.value) {
-        return currentProduct.value;
-      }
-
-      return preloadedProductsByType.value[selectedProductType.value] || currentProduct.value;
-    });
-
     function getDefaultProductType (): string {
       if (existingCartItem.value?.sku) {
         return getForeversTypeByBundleSku(existingCartItem.value.sku);
@@ -141,72 +135,38 @@ export default defineComponent({
       return foreversProductTypeButtons.value[0].type;
     }
 
-    async function loadProductBySku (sku: string): Promise<Product | undefined> {
-      let [product] = await Promise.all([
-        context.root.$store.dispatch('product/loadProduct', {
-          parentSku: sku,
-          childSku: null,
-          setCurrent: false
-        }),
-        context.root.$store.dispatch('budsies/loadProductsRushAddons', {
-          productSku: sku
-        })
-      ]);
+    const productSkus = computed<string[]>(() => {
+      return foreversProductTypeButtons.value.map((button) => {
+        return getPlushieSkuByTypes(button.type, plushieType.value);
+      });
+    });
 
-      if (!product) {
-        return;
-      }
+    const {
+      currentProduct,
+      isDataLoaded,
+      selectProduct
+    } = useMultiProductsPage(productSkus, context);
 
-      return updateProductProductionTimeCustomizationData(product, context.root.$store);
-    }
+    const showForm = computed<boolean>(() => {
+      return isDataLoaded.value && !!currentProduct.value;
+    });
 
-    async function preloadProducts (): Promise<void> {
-      isProductsLoading.value = true;
-
-      try {
-        const entries = await Promise.all(
-          foreversProductTypeButtons.value.map(async (button) => {
-            const sku = getPlushieSkuByTypes(button.type, plushieType.value);
-            const product = await loadProductBySku(sku);
-
-            return [button.type, product] as [string, Product | undefined];
-          })
-        );
-
-        const nextProductsByType: Record<string, Product> = {};
-
-        for (const [type, product] of entries) {
-          if (!product) {
-            continue;
-          }
-
-          nextProductsByType[type] = product;
-        }
-
-        preloadedProductsByType.value = nextProductsByType;
-      } finally {
-        isProductsLoading.value = false;
-      }
-    }
+    const showPlaceholder = computed<boolean>(() => {
+      return !isLeavePage.value && (!showForm.value || !isFormMounted.value);
+    });
 
     async function setActiveProductType (type: string): Promise<void> {
-      const product = preloadedProductsByType.value[type];
-
-      if (!product) {
-        return;
-      }
-
       selectedProductType.value = type;
-      await context.root.$store.dispatch('product/setCurrent', product);
+      await selectProduct(getPlushieSkuByTypes(type, plushieType.value));
     }
 
     function setSelectedProductTypeFromProduct (): void {
-      if (!activeProduct.value?.sku) {
+      if (!currentProduct.value?.sku) {
         return;
       }
 
       try {
-        selectedProductType.value = getForeversTypeByBundleSku(activeProduct.value.sku);
+        selectedProductType.value = getForeversTypeByBundleSku(currentProduct.value.sku);
       } catch (error) {
         if (!selectedProductType.value) {
           selectedProductType.value = getDefaultProductType();
@@ -219,28 +179,32 @@ export default defineComponent({
         return;
       }
 
+      isFormMounted.value = false;
       await setActiveProductType(type);
     }
 
-    void preloadProducts().then(async () => {
-      await setActiveProductType(getDefaultProductType());
-    });
+    function onFormMounted (): void {
+      isFormMounted.value = true;
+    }
 
-    watch(activeProduct, () => {
+    watch(currentProduct, () => {
       setSelectedProductTypeFromProduct();
     }, { immediate: true });
 
     return {
-      activeProduct,
       canUsePersistedCustomizationState,
       currentProduct,
       customizationAvailabilityFlow,
       existingCartItem,
-      isProductsLoading,
+      isDataLoaded,
+      isLeavePage,
       isSelectorDisabled,
+      onFormMounted,
       onProductTypeClick,
       productTypeButtonsList: foreversProductTypeButtons,
-      selectedProductType
+      selectedProductType,
+      showForm,
+      showPlaceholder
     };
   },
   beforeRouteEnter (to, from, next) {
@@ -250,6 +214,7 @@ export default defineComponent({
   },
   beforeRouteLeave (to, from, next) {
     this.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
+    this.isLeavePage = true;
     next();
   },
   metaInfo () {
@@ -290,6 +255,10 @@ export default defineComponent({
     .form-with-images-gallery {
       margin-top: var(--spacer-lg);
     }
+  }
+
+  ._placeholder {
+    margin-top: var(--spacer-lg);
   }
 
   ._product-type-buttons {
