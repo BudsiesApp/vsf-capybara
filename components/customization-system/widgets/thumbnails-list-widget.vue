@@ -13,7 +13,6 @@
         <base-image
           class="_image"
           :src="getItemImage(option)"
-          :alt="`Select ${option.name}`"
           :aspect-ratio="1"
           alt=""
           v-if="getItemImage(option)"
@@ -90,6 +89,13 @@ export default defineComponent({
       if (!optionValue.thumbnailUrl) {
         return;
       }
+
+      const isAbsoluteUrl = optionValue.thumbnailUrl.includes('https://');
+
+      if (isAbsoluteUrl) {
+        return optionValue.thumbnailUrl;
+      }
+
       return getThumbnailPath(optionValue.thumbnailUrl, 210, 210, '');
     }
 

@@ -46,7 +46,7 @@ export function useMultiProductsPage (
   async function selectProduct (sku: string): Promise<void> {
     const product = productBySkuDictionary.value[sku];
 
-    if (!product) {
+    if (!product || currentProduct.value?.sku === sku) {
       return;
     }
 

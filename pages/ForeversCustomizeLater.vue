@@ -12,19 +12,17 @@
         @hook:mounted="onFormMounted"
       >
         <template #product-details-extra>
-          <div class="_product-type-buttons">
-            <button
-              v-for="button in productTypeButtonsList"
-              :key="button.type"
-              class="_product-type-button"
-              :class="{ '-active': selectedProductType === button.type, '-disabled': isSelectorDisabled }"
-              type="button"
-              :disabled="isSelectorDisabled"
-              @click="onProductTypeClick(button.type)"
-            >
-              <img :src="button.imageSrc" :alt="button.title" class="_product-type-button-image">
-              <span>{{ button.title }}</span>
-            </button>
+          <div class="_product-type-selector">
+            <customization-option
+              class="_customization-option"
+              :customization="productTypeCustomization"
+              :is-disabled="isSelectorDisabled"
+              :option-values="productTypeSelectorOptions"
+              :product-id="currentProductId"
+              :value="selectedProductTypeOptionValueId"
+              :disable-validation="true"
+              @input="onProductTypeChange"
+            />
           </div>
         </template>
       </form-with-images-gallery>
@@ -51,25 +49,37 @@ import { SfHeading } from '@storefront-ui/vue';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { isServer } from '@vue-storefront/core/helpers';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
+import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-headers.function';
 import { ProductStructuredData } from 'src/modules/budsies';
-import { CustomizationAvailabilityFlow } from 'src/modules/customization-system';
+import {
+  Customization,
+  CustomizationAvailabilityFlow,
+  CustomizationOptionValue,
+  OptionType,
+  OptionValue,
+  WidgetType
+} from 'src/modules/customization-system';
+import { CustomizationType } from 'src/modules/customization-system/types/customization-type';
 import { getCanonicalUrl } from 'src/modules/shared';
 
-import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
+import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import FormWithImagesGallery from 'theme/components/customization-system/forms/form-with-images-gallery.vue';
 import FormWithImagesGalleryPlaceholder from 'theme/components/customization-system/forms/placeholders/form-with-images-gallery-placeholder.vue';
+import {
+  FOREVERS_CAT_BUNDLE_SKU,
+  FOREVERS_DOG_BUNDLE_SKU,
+  FOREVERS_OTHER_BUNDLE_SKU
+} from 'theme/helpers/forevers-product-skus';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import getForeversTypeByBundleSku from 'theme/helpers/get-forevers-type-by-bundle-sku.function';
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
-import getPlushieSkuByTypes from 'theme/helpers/get-plushie-sku-by-types.function';
 import { useMultiProductsPage } from 'theme/helpers/use-multi-products-page';
-import PlushieProductType from 'theme/interfaces/plushie-product-type';
-import { PlushieType } from 'theme/interfaces/plushie.type';
 import i18n from '@vue-storefront/core/i18n';
 
 export default defineComponent({
   name: 'ForeversCustomizeLater',
   components: {
+    CustomizationOption,
     FormWithImagesGallery,
     FormWithImagesGalleryPlaceholder,
     MBlockStory,
@@ -80,65 +90,100 @@ export default defineComponent({
     existingPlushieId: {
       type: String as PropType<string | undefined>,
       default: undefined
-    },
-    preselectedProductType: {
-      type: String as PropType<string | undefined>,
-      default: undefined
     }
   },
   setup (props, context) {
-    const { existingPlushieId, preselectedProductType } = toRefs(props);
-    const plushieType = ref<PlushieType>(PlushieType.FOREVERS);
+    const { existingPlushieId } = toRefs(props);
     const canUsePersistedCustomizationState = ref<boolean>(false);
     const customizationAvailabilityFlow = ref<CustomizationAvailabilityFlow>(
       CustomizationAvailabilityFlow.CUSTOMIZE_LATER_PURCHASE
     );
     const isFormMounted = ref(isServer);
     const isLeavePage = ref(false);
-
-    const foreversProductTypeButtons = computed<ProductTypeButton[]>(() => {
-      return [
-        {
-          title: i18n.t('Forevers Dog').toString(),
-          type: PlushieProductType.DOG,
-          imageSrc: '/assets/plushies/dog-icon1_1.png'
-        },
-        {
-          title: i18n.t('Forevers Cat').toString(),
-          type: PlushieProductType.CAT,
-          imageSrc: '/assets/plushies/cat-icon1_1.png'
-        },
-        {
-          title: i18n.t('Forevers Other').toString(),
-          type: PlushieProductType.OTHER,
-          imageSrc: '/assets/plushies/other-icon1_1.png'
-        }
-      ];
-    });
+    const productSkus = ref<string[]>([
+      FOREVERS_DOG_BUNDLE_SKU,
+      FOREVERS_CAT_BUNDLE_SKU,
+      FOREVERS_OTHER_BUNDLE_SKU
+    ]);
 
     const { existingCartItem } = useExistingCartItem(existingPlushieId, context);
     const isSelectorDisabled = computed<boolean>(() => {
       return !!existingCartItem.value;
     });
 
-    const selectedProductType = ref<string | undefined>(preselectedProductType.value);
+    const storeUrl = computed<string>(() => {
+      const host = context.ssrContext
+        ? getHostFromHeaders((context.ssrContext.server.request as any).headers)
+        : window.location.host;
 
-    function getDefaultProductType (): string {
-      if (existingCartItem.value?.sku) {
-        return getForeversTypeByBundleSku(existingCartItem.value.sku);
-      }
+      return `https://${host}`;
+    });
 
-      if (preselectedProductType.value) {
-        return preselectedProductType.value;
-      }
+    const productTypeSelectorOptions = computed<OptionValue[]>(() => {
+      return [
+        {
+          id: FOREVERS_DOG_BUNDLE_SKU,
+          name: i18n.t('Forevers Dog').toString(),
+          description: i18n.t('Forevers Dog').toString(),
+          thumbnailUrl: `${storeUrl.value}/assets/plushies/dog-icon1_1.png`,
+          isEnabled: true,
+          isDefault: false,
+          sn: 0,
+          galleryImages: []
+        },
+        {
+          id: FOREVERS_CAT_BUNDLE_SKU,
+          name: i18n.t('Forevers Cat').toString(),
+          description: i18n.t('Forevers Cat').toString(),
+          thumbnailUrl: `${storeUrl.value}/assets/plushies/cat-icon1_1.png`,
+          isEnabled: true,
+          isDefault: false,
+          sn: 1,
+          galleryImages: []
+        },
+        {
+          id: FOREVERS_OTHER_BUNDLE_SKU,
+          name: i18n.t('Forevers Other').toString(),
+          description: i18n.t('Forevers Other').toString(),
+          thumbnailUrl: `${storeUrl.value}/assets/plushies/other-icon1_1.png`,
+          isEnabled: true,
+          isDefault: false,
+          sn: 2,
+          galleryImages: []
+        }
+      ];
+    });
 
-      return foreversProductTypeButtons.value[0].type;
-    }
+    const productTypeCustomization = computed<Customization>(() => {
+      const customization: Customization = {
+        id: 'forevers-product-type-selector',
+        name: i18n.t('Choose your Forevers type').toString(),
+        title: i18n.t('Choose your Forevers type').toString(),
+        type: CustomizationType.OPTION,
+        sn: 0,
+        isEnabled: true,
+        isLocked: false,
+        showInCart: false,
+        availabilityRules: {
+          forActivatedOptionValueIds: []
+        },
+        optionData: {
+          type: OptionType.GENERIC,
+          isRequired: false,
+          maxValuesCount: 1,
+          displayWidget: WidgetType.THUMBNAILS_LIST,
+          hasDetailedDescription: false,
+          hasGalleryImages: false,
+          showInUrlQuery: false,
+          displayWidgetOptions: {
+            shape: 'round',
+            alignment: 'left'
+          },
+          values: []
+        }
+      };
 
-    const productSkus = computed<string[]>(() => {
-      return foreversProductTypeButtons.value.map((button) => {
-        return getPlushieSkuByTypes(button.type, plushieType.value);
-      });
+      return customization;
     });
 
     const {
@@ -155,44 +200,38 @@ export default defineComponent({
       return !isLeavePage.value && (!showForm.value || !isFormMounted.value);
     });
 
-    async function setActiveProductType (type: string): Promise<void> {
-      selectedProductType.value = type;
-      await selectProduct(getPlushieSkuByTypes(type, plushieType.value));
-    }
+    const currentProductId = computed<number>(() => {
+      return Number(currentProduct.value?.id) || 0;
+    });
 
-    function setSelectedProductTypeFromProduct (): void {
-      if (!currentProduct.value?.sku) {
-        return;
-      }
+    const selectedProductTypeOptionValueId = computed<string | undefined>(() => {
+      return currentProduct.value?.sku;
+    });
 
-      try {
-        selectedProductType.value = getForeversTypeByBundleSku(currentProduct.value.sku);
-      } catch (error) {
-        if (!selectedProductType.value) {
-          selectedProductType.value = getDefaultProductType();
-        }
-      }
-    }
-
-    async function onProductTypeClick (type: string): Promise<void> {
+    async function onProductTypeChange ({ value }: {
+      customizationId: string,
+      value: CustomizationOptionValue
+    }): Promise<void> {
       if (isSelectorDisabled.value) {
         return;
       }
 
-      isFormMounted.value = false;
-      await setActiveProductType(type);
+      const nextType = Array.isArray(value) ? value[0] : value;
+
+      if (typeof nextType !== 'string' || nextType === currentProduct.value?.sku) {
+        return;
+      }
+
+      await selectProduct(nextType);
     }
 
     function onFormMounted (): void {
       isFormMounted.value = true;
     }
 
-    watch(currentProduct, () => {
-      setSelectedProductTypeFromProduct();
-    }, { immediate: true });
-
     return {
       canUsePersistedCustomizationState,
+      currentProductId,
       currentProduct,
       customizationAvailabilityFlow,
       existingCartItem,
@@ -200,9 +239,10 @@ export default defineComponent({
       isLeavePage,
       isSelectorDisabled,
       onFormMounted,
-      onProductTypeClick,
-      productTypeButtonsList: foreversProductTypeButtons,
-      selectedProductType,
+      onProductTypeChange,
+      productTypeCustomization,
+      productTypeSelectorOptions,
+      selectedProductTypeOptionValueId,
       showForm,
       showPlaceholder
     };
@@ -259,38 +299,6 @@ export default defineComponent({
 
   ._placeholder {
     margin-top: var(--spacer-lg);
-  }
-
-  ._product-type-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacer-sm);
-    margin: 0 0 var(--spacer-base);
-  }
-
-  ._product-type-button {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--spacer-xs);
-    padding: var(--spacer-sm) var(--spacer-base);
-    border: 1px solid var(--c-light);
-    background: var(--c-white);
-    cursor: pointer;
-
-    &.-active {
-      border-color: var(--c-primary);
-    }
-
-    &.-disabled {
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-  }
-
-  ._product-type-button-image {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
   }
 
   @media (min-width: $tablet-min) {

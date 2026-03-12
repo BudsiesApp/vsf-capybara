@@ -8,6 +8,8 @@ const Product = () =>
   import(/* webpackChunkName: "vsf-product" */ 'theme/pages/Product');
 const PlushieProduct = () =>
   import(/* webpackChunkName: "vsf-forevers-product" */ 'theme/pages/PlushieProduct');
+const ForeversCustomizeLater = () =>
+  import(/* webpackChunkName: "vsf-forevers-customize-later" */ 'theme/pages/ForeversCustomizeLater');
 const Category = () =>
   import(/* webpackChunkName: "vsf-category" */ 'theme/pages/Category');
 const Checkout = () =>
@@ -230,6 +232,14 @@ let routes = [
       existingPlushieId: route.query.id,
       preselectedProductSize: route.query.size,
       preselectedProductType: route.query.product
+    })
+  },
+  {
+    name: 'forevers-customize-later',
+    path: '/forevers/customize-later/',
+    component: ForeversCustomizeLater,
+    props: (route) => ({
+      existingPlushieId: route.query.id
     })
   },
   {

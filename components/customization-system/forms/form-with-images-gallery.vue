@@ -38,6 +38,12 @@
           :product-id="product.id"
           class="_product-rating"
         />
+
+        <slot
+          name="product-details-extra"
+          :product="product"
+        />
+
         <validation-observer
           v-slot="{ errors: formErrors }"
           slim
@@ -136,10 +142,13 @@ import { ValidationObserver, ValidationProvider } from 'vee-validate';
 import config from 'config';
 import { useABTestingCustomizationsFilter } from 'src/modules/a-b-testing';
 import {
+  CustomizationAvailabilityFlow,
   Customization,
   CustomizationOptionValue,
+  DEFAULT_CUSTOMIZATION_AVAILABILITY_FLOW,
   requiredCustomizationsFilter,
   useAvailableCustomizations,
+  useCustomizationAvailabilityFlowFilter,
   useCustomizationProductDescription,
   useCustomizationsBundleOptions,
   useEntityBusyState,
@@ -212,6 +221,10 @@ export default defineComponent({
       type: String as PropType<CustomizableProductFlowType>,
       default: CustomizableProductFlowType.ADD_TO_CART
     },
+    customizationAvailabilityFlow: {
+      type: String as PropType<CustomizationAvailabilityFlow>,
+      default: DEFAULT_CUSTOMIZATION_AVAILABILITY_FLOW
+    },
     canUsePersistedCustomizationState: {
       type: Boolean,
       default: false
@@ -239,7 +252,15 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
-    const { canUsePersistedCustomizationState, existingCartItem, imageUrl, product, flow, draftOrderItem } = toRefs(props);
+    const {
+      canUsePersistedCustomizationState,
+      existingCartItem,
+      imageUrl,
+      product,
+      flow,
+      draftOrderItem,
+      customizationAvailabilityFlow
+    } = toRefs(props);
 
     const productRatingComponent = inject('ProductRatingComponent', null);
     const shouldShowProductRating = computed(() => {
@@ -427,6 +448,11 @@ export default defineComponent({
       context.ssrContext
     );
 
+    const { flowFilteredCustomizations } = useCustomizationAvailabilityFlowFilter(
+      availableOptionCustomizations,
+      customizationAvailabilityFlow
+    );
+
     const { confirmCustomization, isSubmitting: isSubmittingCustomize } = useCustomizeAction(
       customizationState,
       draftOrderItem,
@@ -478,8 +504,14 @@ export default defineComponent({
       return isSubmitting.value;
     });
 
+    const { filteredCustomizations } = useCustomizationsFilter(
+      flowFilteredCustomizations,
+      customizationAvailableOptionValues,
+      [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter, lockedCustomizationsFilter]
+    );
+
     const isSubmitButtonDisabled = computed<boolean>(() => {
-      return isSomeEntityBusy.value || isDisabled.value;
+      return isSomeEntityBusy.value || isDisabled.value || filteredCustomizations.value.length === 0;
     });
 
     const submitButtonText = computed<string>(() => {
@@ -495,11 +527,6 @@ export default defineComponent({
     });
 
     return {
-      ...useCustomizationsFilter(
-        availableOptionCustomizations,
-        customizationAvailableOptionValues,
-        [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter, lockedCustomizationsFilter]
-      ),
       ...useProductGallery(
         product,
         productCustomizations,
@@ -523,6 +550,7 @@ export default defineComponent({
       customizationOption,
       customizationOptionValue,
       filteredCustomizationAvailableOptionValues,
+      filteredCustomizations,
       isDisabled,
       isCustomizeFlow,
       isSubmitButtonDisabled,
