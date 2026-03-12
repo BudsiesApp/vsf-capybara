@@ -421,7 +421,9 @@ export default defineComponent({
       customizationState,
       bundleOptions,
       existingCartItem,
-      context
+      context,
+      undefined,
+      customizationAvailabilityFlow.value
     );
 
     const { isUnmounted } = useComponentUnmountedChecker();

@@ -41,8 +41,7 @@ import {
   defineComponent,
   PropType,
   ref,
-  toRefs,
-  watch
+  toRefs
 } from '@vue/composition-api';
 import { SfHeading } from '@storefront-ui/vue';
 
@@ -71,7 +70,6 @@ import {
   FOREVERS_OTHER_BUNDLE_SKU
 } from 'theme/helpers/forevers-product-skus';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
-import getForeversTypeByBundleSku from 'theme/helpers/get-forevers-type-by-bundle-sku.function';
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 import { useMultiProductsPage } from 'theme/helpers/use-multi-products-page';
 import i18n from '@vue-storefront/core/i18n';
