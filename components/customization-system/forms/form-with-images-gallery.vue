@@ -148,7 +148,6 @@ import {
   requiredCustomizationsFilter,
   ProductPurchaseFlow,
   useAvailableCustomizations,
-  useCustomizationAvailabilityFlowFilter,
   useCustomizationProductDescription,
   useCustomizationsBundleOptions,
   useEntityBusyState,
@@ -164,6 +163,7 @@ import {
   DraftOrderItem,
   CustomizationStateItem,
   LockedCustomizationsFilterType,
+  usePurchaseFlowCustomizations,
   useLockedCustomizations,
   useAvailableOptionsValuesFilter
 } from 'src/modules/customization-system';
@@ -450,9 +450,13 @@ export default defineComponent({
       context.ssrContext
     );
 
-    const { flowFilteredCustomizations } = useCustomizationAvailabilityFlowFilter(
+    const {
+      flowFilteredCustomizations
+    } = usePurchaseFlowCustomizations(
       availableOptionCustomizations,
-      productPurchaseFlow
+      productPurchaseFlow,
+      onCustomizationOptionInput,
+      customizationOptionValue
     );
 
     const { confirmCustomization, isSubmitting: isSubmittingCustomize } = useCustomizeAction(
