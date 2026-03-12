@@ -5,7 +5,7 @@ import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import { SelectedBundleOption } from '@vue-storefront/core/modules/catalog/types/BundleOption';
 import { setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
-import { CustomizationAvailabilityFlow, CustomizationStateItem, filterCustomizationState, normalizeCustomizationAvailabilityFlow } from 'src/modules/customization-system';
+import { CustomizationStateItem, filterCustomizationState, normalizeProductPurchaseFlow, ProductPurchaseFlow } from 'src/modules/customization-system';
 import { ServerError } from 'src/modules/shared';
 
 export function useAddToCart (
@@ -16,7 +16,7 @@ export function useAddToCart (
   existingCartItem: Ref<CartItem | undefined>,
   { root }: SetupContext,
   existingPlushieId?: string,
-  customizationAvailabilityFlow?: CustomizationAvailabilityFlow
+  productPurchaseFlow?: ProductPurchaseFlow
 ) {
   const isSubmitting = ref<boolean>(false);
 
@@ -51,9 +51,8 @@ export function useAddToCart (
       qty: quantity.value,
       product_option: productOption,
       extension_attributes: {
-        customization_state: filterCustomizationState(customizationStateItems.value)
-        // TODO: uncomment when API will support this field
-        // flow: normalizeCustomizationAvailabilityFlow(customizationAvailabilityFlow)
+        customization_state: filterCustomizationState(customizationStateItems.value),
+        flow: normalizeProductPurchaseFlow(productPurchaseFlow)
       }
     };
 
@@ -104,9 +103,8 @@ export function useAddToCart (
       product_option: productOption,
       extension_attributes: {
         ...existingCartItem.value.extension_attributes,
-        customization_state: filterCustomizationState(customizationStateItems.value)
-        // TODO: uncomment when API will support this field
-        // flow: normalizeCustomizationAvailabilityFlow(customizationAvailabilityFlow)
+        customization_state: filterCustomizationState(customizationStateItems.value),
+        flow: normalizeProductPurchaseFlow(productPurchaseFlow)
       }
     };
 

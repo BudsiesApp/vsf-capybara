@@ -181,7 +181,12 @@ import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-obser
 import { CART_UPD_ITEM } from '@vue-storefront/core/modules/cart/store/mutation-types';
 import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
-import { CartItemConfiguration, getCustomizationSystemThumbnail } from 'src/modules/customization-system';
+import {
+  CartItemConfiguration,
+  getCustomizationSystemThumbnail,
+  normalizeProductPurchaseFlow,
+  ProductPurchaseFlow
+} from 'src/modules/customization-system';
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
@@ -440,6 +445,8 @@ export default {
   methods: {
     getCartItemOptions,
     editHandler (product) {
+      const productFlow = normalizeProductPurchaseFlow(product.extension_attributes?.flow);
+
       if (product.sku === customPetsiesHuggablesSku) {
         this.$router.push({
           name: 'huggables-creation-page',
@@ -483,7 +490,9 @@ export default {
         });
       } else if (foreversProductsSkus.includes(product.sku)) {
         this.$router.push({
-          name: 'forevers-create',
+          name: productFlow === ProductPurchaseFlow.CUSTOMIZE_LATER
+            ? 'forevers-customize-later'
+            : 'forevers-create',
           query: { id: product.extension_attributes?.plushie_id }
         });
       } else if (Object.keys(printedProductSkuRouteNameDictionary).includes(product.sku)) {

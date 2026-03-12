@@ -142,11 +142,11 @@ import { ValidationObserver, ValidationProvider } from 'vee-validate';
 import config from 'config';
 import { useABTestingCustomizationsFilter } from 'src/modules/a-b-testing';
 import {
-  CustomizationAvailabilityFlow,
   Customization,
   CustomizationOptionValue,
-  DEFAULT_CUSTOMIZATION_AVAILABILITY_FLOW,
+  DEFAULT_PRODUCT_PURCHASE_FLOW,
   requiredCustomizationsFilter,
+  ProductPurchaseFlow,
   useAvailableCustomizations,
   useCustomizationAvailabilityFlowFilter,
   useCustomizationProductDescription,
@@ -221,9 +221,9 @@ export default defineComponent({
       type: String as PropType<CustomizableProductFlowType>,
       default: CustomizableProductFlowType.ADD_TO_CART
     },
-    customizationAvailabilityFlow: {
-      type: String as PropType<CustomizationAvailabilityFlow>,
-      default: DEFAULT_CUSTOMIZATION_AVAILABILITY_FLOW
+    productPurchaseFlow: {
+      type: String as PropType<ProductPurchaseFlow>,
+      default: DEFAULT_PRODUCT_PURCHASE_FLOW
     },
     canUsePersistedCustomizationState: {
       type: Boolean,
@@ -259,7 +259,7 @@ export default defineComponent({
       product,
       flow,
       draftOrderItem,
-      customizationAvailabilityFlow
+      productPurchaseFlow
     } = toRefs(props);
 
     const productRatingComponent = inject('ProductRatingComponent', null);
@@ -423,7 +423,7 @@ export default defineComponent({
       existingCartItem,
       context,
       undefined,
-      customizationAvailabilityFlow.value
+      productPurchaseFlow.value
     );
 
     const { isUnmounted } = useComponentUnmountedChecker();
@@ -452,7 +452,7 @@ export default defineComponent({
 
     const { flowFilteredCustomizations } = useCustomizationAvailabilityFlowFilter(
       availableOptionCustomizations,
-      customizationAvailabilityFlow
+      productPurchaseFlow
     );
 
     const { confirmCustomization, isSubmitting: isSubmittingCustomize } = useCustomizeAction(

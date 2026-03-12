@@ -5,7 +5,7 @@
     <div v-if="showForm" class="_form-container">
       <form-with-images-gallery
         :can-use-persisted-customization-state="canUsePersistedCustomizationState"
-        :customization-availability-flow="customizationAvailabilityFlow"
+        :product-purchase-flow="productPurchaseFlow"
         :existing-cart-item="existingCartItem"
         :key="currentProduct && currentProduct.sku"
         :product="currentProduct"
@@ -52,10 +52,10 @@ import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-heade
 import { ProductStructuredData } from 'src/modules/budsies';
 import {
   Customization,
-  CustomizationAvailabilityFlow,
   CustomizationOptionValue,
   OptionType,
   OptionValue,
+  ProductPurchaseFlow,
   WidgetType
 } from 'src/modules/customization-system';
 import { CustomizationType } from 'src/modules/customization-system/types/customization-type';
@@ -93,8 +93,8 @@ export default defineComponent({
   setup (props, context) {
     const { existingPlushieId } = toRefs(props);
     const canUsePersistedCustomizationState = ref<boolean>(false);
-    const customizationAvailabilityFlow = ref<CustomizationAvailabilityFlow>(
-      CustomizationAvailabilityFlow.CUSTOMIZE_LATER_PURCHASE
+    const productPurchaseFlow = ref<ProductPurchaseFlow>(
+      ProductPurchaseFlow.CUSTOMIZE_LATER
     );
     const isFormMounted = ref(isServer);
     const isLeavePage = ref(false);
@@ -231,13 +231,13 @@ export default defineComponent({
       canUsePersistedCustomizationState,
       currentProductId,
       currentProduct,
-      customizationAvailabilityFlow,
       existingCartItem,
       isDataLoaded,
       isLeavePage,
       isSelectorDisabled,
       onFormMounted,
       onProductTypeChange,
+      productPurchaseFlow,
       productTypeCustomization,
       productTypeSelectorOptions,
       selectedProductTypeOptionValueId,
