@@ -39,7 +39,7 @@
               :option-values="
                 customizationAvailableOptionValues[customization.id]
               "
-              :product-id="Number(product.id)"
+              :product-id="product.id"
               :value="customizationOptionValue[customization.id]"
               @input="onCustomizationOptionInput"
               @customization-option-busy-state-changed="
