@@ -26,7 +26,7 @@
         <div class="_short-description" v-html="shortDescription" />
 
         <a-custom-price
-          v-if="!isCustomizeFlow"
+          v-if="!isCustomizeMode"
           class="_price"
           :regular="totalPrice.regular"
           :special-price="totalPrice.special"
@@ -71,7 +71,7 @@
               :ref="getFieldAnchorName('Quantity')"
             >
               <validation-provider
-                v-if="!isCustomizeFlow"
+                v-if="!isCustomizeMode"
                 v-slot="{ errors }"
                 rules="required"
                 :name="'Quantity'"
@@ -159,7 +159,7 @@ import {
   useEmailCustomization,
   useOptionValueActions,
   useSelectedOptionValueUrlQuery,
-  CustomizableProductFlowType,
+  ProductCustomizationMode,
   DraftOrderItem,
   CustomizationStateItem,
   LockedCustomizationsFilterType,
@@ -217,9 +217,9 @@ export default defineComponent({
       type: String as PropType<string | undefined>,
       default: undefined
     },
-    flow: {
-      type: String as PropType<CustomizableProductFlowType>,
-      default: CustomizableProductFlowType.ADD_TO_CART
+    customizationMode: {
+      type: String as PropType<ProductCustomizationMode>,
+      default: ProductCustomizationMode.ADD_TO_CART
     },
     productPurchaseFlow: {
       type: String as PropType<ProductPurchaseFlow>,
@@ -257,7 +257,7 @@ export default defineComponent({
       existingCartItem,
       imageUrl,
       product,
-      flow,
+      customizationMode,
       draftOrderItem,
       productPurchaseFlow
     } = toRefs(props);
@@ -267,8 +267,8 @@ export default defineComponent({
       return config.products.showRating && !!productRatingComponent && !!product.value.id;
     });
 
-    const isCustomizeFlow = computed<boolean>(() => {
-      return flow.value === CustomizableProductFlowType.CUSTOMIZE;
+    const isCustomizeMode = computed<boolean>(() => {
+      return customizationMode.value === ProductCustomizationMode.CUSTOMIZE;
     });
 
     const customizationOption = ref<InstanceType<typeof CustomizationOption>[] | null>(null);
@@ -346,7 +346,7 @@ export default defineComponent({
     );
 
     const preservationStorageKey = computed<string>(() => {
-      const key = isCustomizeFlow.value && draftOrderItem.value
+      const key = isCustomizeMode.value && draftOrderItem.value
         ? draftOrderItem.value.id
         : productSku.value;
       return String(key);
@@ -435,7 +435,7 @@ export default defineComponent({
     } = useLockedCustomizations(
       customizationOptionValue,
       productCustomizations,
-      flow,
+      customizationMode,
       LockedCustomizationsFilterType.UNSELECTED
     );
 
@@ -471,7 +471,7 @@ export default defineComponent({
       if (!isValid) return;
 
       try {
-        if (isCustomizeFlow.value) {
+        if (isCustomizeMode.value) {
           await confirmCustomization();
         } else {
           await addToCartHandler();
@@ -484,7 +484,7 @@ export default defineComponent({
           return;
         };
 
-        if (isCustomizeFlow.value) {
+        if (isCustomizeMode.value) {
           context.root.$router.push({ name: 'orders-history' });
           return;
         }
@@ -521,7 +521,7 @@ export default defineComponent({
     });
 
     const submitButtonText = computed<string>(() => {
-      if (isCustomizeFlow.value) {
+      if (isCustomizeMode.value) {
         return i18n.t('Confirm Customization').toString();
       }
 
@@ -558,7 +558,7 @@ export default defineComponent({
       filteredCustomizationAvailableOptionValues,
       filteredCustomizations,
       isDisabled,
-      isCustomizeFlow,
+      isCustomizeMode,
       isSubmitButtonDisabled,
       lockedCustomizationDictionary,
       onEntityBusyChanged,

@@ -149,6 +149,8 @@ import { useABTestingCustomizationsFilter } from 'src/modules/a-b-testing';
 import {
   Customization,
   CustomizationOptionValue,
+  DEFAULT_PRODUCT_PURCHASE_FLOW,
+  ProductPurchaseFlow,
   requiredCustomizationsFilter,
   useAvailableCustomizations,
   useCustomizationsBundleOptions,
@@ -156,6 +158,7 @@ import {
   useCustomizationsFilter,
   useCustomizationsGroups,
   useCustomizationsOptionsDefaultValue,
+  usePurchaseFlowCustomizations,
   useCustomizationState,
   useCustomizationStatePreservation,
   useEmailCustomization,
@@ -209,6 +212,10 @@ export default defineComponent({
       type: Object as PropType<CartItem | undefined>,
       default: undefined
     },
+    productPurchaseFlow: {
+      type: String as PropType<ProductPurchaseFlow>,
+      default: DEFAULT_PRODUCT_PURCHASE_FLOW
+    },
     product: {
       type: Object as PropType<Product>,
       required: true
@@ -230,7 +237,7 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
-    const { canUsePersistedCustomizationState, existingCartItem, product } = toRefs(props);
+    const { canUsePersistedCustomizationState, existingCartItem, product, productPurchaseFlow } = toRefs(props);
 
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
@@ -332,6 +339,13 @@ export default defineComponent({
       availableOptionValues
     );
 
+    const { flowFilteredCustomizations } = usePurchaseFlowCustomizations(
+      availableCustomizations,
+      productPurchaseFlow,
+      onCustomizationOptionInput,
+      customizationOptionValue
+    );
+
     const { setDefaultValues } = useCustomizationsOptionsDefaultValue(
       availableCustomizations,
       customizationAvailableOptionValues,
@@ -350,7 +364,9 @@ export default defineComponent({
       customizationState,
       bundleOptions,
       existingCartItem,
-      context
+      context,
+      undefined,
+      productPurchaseFlow.value
     );
 
     const shouldMakeAnother = ref<boolean>(false);
@@ -444,7 +460,7 @@ export default defineComponent({
     );
 
     const { filteredCustomizations } = useCustomizationsFilter(
-      availableCustomizations,
+      flowFilteredCustomizations,
       customizationAvailableOptionValues,
       [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter]
     );

@@ -14,7 +14,7 @@
       :product="currentProduct"
       :plushie-type="plushieType"
       :can-use-persisted-customization-state="true"
-      :flow="CustomizableProductFlowType.CUSTOMIZE"
+      :customization-mode="ProductCustomizationMode.CUSTOMIZE"
       :draft-order-item="draftOrderItem"
       @hook:mounted="onFormMounted"
     />
@@ -39,7 +39,7 @@ import {
 import { SfHeading } from '@storefront-ui/vue';
 
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
-import { CustomizableProductFlowType } from 'src/modules/customization-system';
+import { ProductCustomizationMode } from 'src/modules/customization-system';
 
 import { PlushieType } from 'theme/interfaces/plushie.type';
 import { useDraftOrderItem } from 'theme/helpers/use-draft-order-item';
@@ -155,7 +155,7 @@ export default defineComponent({
     });
 
     return {
-      CustomizableProductFlowType,
+      ProductCustomizationMode,
       currentProduct,
       draftOrderItem,
       formComponent,

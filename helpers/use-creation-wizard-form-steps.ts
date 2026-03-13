@@ -2,7 +2,7 @@ import debounce from 'lodash.debounce';
 import { computed, nextTick, Ref, SetupContext, watch } from '@vue/composition-api';
 
 import CartItem from 'core/modules/cart/types/CartItem';
-import { CustomizableProductFlowType, Customization } from 'src/modules/customization-system';
+import { ProductCustomizationMode, Customization } from 'src/modules/customization-system';
 
 import { useFormSteps } from './use-form-steps';
 
@@ -18,7 +18,7 @@ export function useCreationWizardFormSteps (
   customizationRootGroups: Ref<Customization[]>,
   existingCartItem: Ref<CartItem | undefined>,
   afterStepChanged: (previousStepCustomization?: Customization) => void,
-  flow: Ref<CustomizableProductFlowType>,
+  customizationMode: Ref<ProductCustomizationMode>,
   { root }: SetupContext
 ) {
   const {
@@ -40,9 +40,9 @@ export function useCreationWizardFormSteps (
   });
 
   const stepsList = computed<string[]>(() => {
-    const stepsNames = customizationRootGroups.value.map(({ name }) => name);
+    const stepsNames = customizationRootGroups.value.map((customization: Customization) => customization.name);
 
-    if (flow.value !== CustomizableProductFlowType.CUSTOMIZE) {
+    if (customizationMode.value !== ProductCustomizationMode.CUSTOMIZE) {
       stepsNames.unshift(productTypeChooseStepName);
     }
 
