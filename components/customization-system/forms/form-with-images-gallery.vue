@@ -58,7 +58,7 @@
               :customization="customization"
               :is-disabled="isDisabled || !!lockedCustomizationDictionary[customization.id]"
               :option-values="filteredCustomizationAvailableOptionValues[customization.id]"
-              :product-id="product.id"
+              :product-id="Number(product.id)"
               :value="customizationOptionValue[customization.id]"
               @input="onCustomizationOptionInput"
               @customization-option-busy-state-changed="
