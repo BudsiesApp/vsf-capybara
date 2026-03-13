@@ -39,7 +39,7 @@
               :option-values="
                 customizationAvailableOptionValues[customization.id]
               "
-              :product-id="product.id"
+              :product-id="Number(product.id)"
               :value="customizationOptionValue[customization.id]"
               @input="onCustomizationOptionInput"
               @customization-option-busy-state-changed="
@@ -150,6 +150,7 @@ import {
   Customization,
   CustomizationOptionValue,
   DEFAULT_PRODUCT_PURCHASE_FLOW,
+  ProductCustomizationMode,
   ProductPurchaseFlow,
   requiredCustomizationsFilter,
   useAvailableCustomizations,
@@ -212,6 +213,10 @@ export default defineComponent({
       type: Object as PropType<CartItem | undefined>,
       default: undefined
     },
+    customizationMode: {
+      type: String as PropType<ProductCustomizationMode>,
+      default: ProductCustomizationMode.ADD_TO_CART
+    },
     productPurchaseFlow: {
       type: String as PropType<ProductPurchaseFlow>,
       default: DEFAULT_PRODUCT_PURCHASE_FLOW
@@ -237,7 +242,13 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
-    const { canUsePersistedCustomizationState, existingCartItem, product, productPurchaseFlow } = toRefs(props);
+    const {
+      canUsePersistedCustomizationState,
+      customizationMode,
+      existingCartItem,
+      product,
+      productPurchaseFlow
+    } = toRefs(props);
 
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
@@ -343,7 +354,8 @@ export default defineComponent({
       availableCustomizations,
       productPurchaseFlow,
       onCustomizationOptionInput,
-      customizationOptionValue
+      customizationOptionValue,
+      customizationMode
     );
 
     const { setDefaultValues } = useCustomizationsOptionsDefaultValue(

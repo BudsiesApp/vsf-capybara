@@ -456,7 +456,8 @@ export default defineComponent({
       availableOptionCustomizations,
       productPurchaseFlow,
       onCustomizationOptionInput,
-      customizationOptionValue
+      customizationOptionValue,
+      customizationMode
     );
 
     const { confirmCustomization, isSubmitting: isSubmittingCustomize } = useCustomizeAction(

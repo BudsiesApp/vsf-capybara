@@ -368,7 +368,8 @@ export default defineComponent({
       availableCustomizations,
       productPurchaseFlow,
       onCustomizationOptionInput,
-      customizationOptionValue
+      customizationOptionValue,
+      customizationMode
     );
 
     const { filteredCustomizations } = useCustomizationsFilter(

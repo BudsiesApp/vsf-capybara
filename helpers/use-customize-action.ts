@@ -1,6 +1,6 @@
 import { ref, Ref, SetupContext } from '@vue/composition-api';
 
-import { CustomizationStateItem, DraftOrderItem, saveOrderItemCustomizationsState, submitOrderItemCustomizationsState } from 'src/modules/customization-system';
+import { CustomizationStateItem, DraftOrderItem, filterCustomizationState, saveOrderItemCustomizationsState, submitOrderItemCustomizationsState } from 'src/modules/customization-system';
 
 export function useCustomizeAction (
   customizationStateItems: Ref<CustomizationStateItem[]>,
@@ -25,7 +25,7 @@ export function useCustomizeAction (
       const saveResult = await saveOrderItemCustomizationsState(
         [{
           id: draftOrderItem.value.id,
-          customization_state: customizationStateItems.value,
+          customization_state: filterCustomizationState(customizationStateItems.value),
           status_id: draftOrderItem.value.status_id
         }],
         userToken
