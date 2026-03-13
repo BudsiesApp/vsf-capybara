@@ -11,7 +11,8 @@ import { updateProductProductionTimeCustomizationData } from 'src/modules/custom
 
 export function useMultiProductsPage (
   skus: Ref<string[]>,
-  { root }: SetupContext
+  { root }: SetupContext,
+  initialSku?: Ref<string | undefined>
 ) {
   const isDataLoaded = ref<boolean>(false);
 
@@ -66,7 +67,13 @@ export function useMultiProductsPage (
       }
     });
 
-    await selectProduct(skus.value[0]);
+    const preferredSku = initialSku?.value && skus.value.includes(initialSku.value)
+      ? initialSku.value
+      : skus.value[0];
+
+    if (preferredSku) {
+      await selectProduct(preferredSku);
+    }
 
     if (currentProduct.value) {
       catalogHooksExecutors.productPageVisited(currentProduct.value);
