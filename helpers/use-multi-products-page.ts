@@ -54,6 +54,12 @@ export function useMultiProductsPage (
     const productUpdated = updateProductProductionTimeCustomizationData(product, root.$store);
     root.$store.commit('product/product/PRODUCT_SET_PRODUCT_BY_SKU', productUpdated);
     await root.$store.dispatch('product/setCurrent', productUpdated);
+
+    if (!currentProduct.value) {
+      return;
+    }
+
+    EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, currentProduct.value);
   }
 
   async function loadData (): Promise<void> {
@@ -92,12 +98,6 @@ export function useMultiProductsPage (
     }
 
     isDataLoaded.value = true;
-
-    if (!currentProduct.value) {
-      return;
-    }
-
-    EventBus.$emit(ProductEvent.PRODUCT_PAGE_SHOW, currentProduct.value);
   });
 
   return {
