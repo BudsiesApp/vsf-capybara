@@ -40,7 +40,7 @@ export function useCreationWizardFormSteps (
   });
 
   const stepsList = computed<string[]>(() => {
-    const stepsNames = customizationRootGroups.value.map((customization: Customization) => customization.name);
+    const stepsNames = customizationRootGroups.value.map(({ name }) => name);
 
     if (customizationMode.value !== ProductCustomizationMode.CUSTOMIZE) {
       stepsNames.unshift(productTypeChooseStepName);
