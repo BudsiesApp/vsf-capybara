@@ -90,7 +90,7 @@ export default defineComponent({
         return;
       }
 
-      const isAbsoluteUrl = optionValue.thumbnailUrl.includes('https://');
+      const isAbsoluteUrl = /^https?:\/\//.test(optionValue.thumbnailUrl);
 
       if (isAbsoluteUrl) {
         return optionValue.thumbnailUrl;

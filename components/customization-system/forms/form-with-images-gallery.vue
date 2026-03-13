@@ -517,7 +517,7 @@ export default defineComponent({
     );
 
     const isSubmitButtonDisabled = computed<boolean>(() => {
-      return isSomeEntityBusy.value || isDisabled.value || filteredCustomizations.value.length === 0;
+      return isSomeEntityBusy.value || isDisabled.value;
     });
 
     const submitButtonText = computed<string>(() => {

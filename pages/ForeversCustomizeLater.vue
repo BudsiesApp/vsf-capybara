@@ -43,7 +43,6 @@ import {
   ref,
   toRefs
 } from '@vue/composition-api';
-import { SfHeading } from '@storefront-ui/vue';
 
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { isServer } from '@vue-storefront/core/helpers';
@@ -68,7 +67,6 @@ import {
   FOREVERS_DOG_BUNDLE_SKU,
   FOREVERS_OTHER_BUNDLE_SKU
 } from 'theme/helpers/forevers-product-skus';
-import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 import { useMultiProductsPage } from 'theme/helpers/use-multi-products-page';
 import i18n from '@vue-storefront/core/i18n';
@@ -79,9 +77,7 @@ export default defineComponent({
     CustomizationOption,
     FormWithImagesGallery,
     FormWithImagesGalleryPlaceholder,
-    MBlockStory,
-    ProductStructuredData,
-    SfHeading
+    ProductStructuredData
   },
   props: {
     existingPlushieId: {

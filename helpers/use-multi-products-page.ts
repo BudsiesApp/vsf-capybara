@@ -33,7 +33,7 @@ export function useMultiProductsPage (
     const product = root.$store.getters['product/getCurrentProduct'];
 
     if (!product?.sku) {
-      return null;
+      return;
     }
 
     return product;
@@ -52,7 +52,7 @@ export function useMultiProductsPage (
 
     const productUpdated = updateProductProductionTimeCustomizationData(product, root.$store);
     root.$store.commit('product/product/PRODUCT_SET_PRODUCT_BY_SKU', productUpdated);
-    await root.$store.dispatch('product/setCurrent', product);
+    await root.$store.dispatch('product/setCurrent', productUpdated);
   }
 
   async function loadData (): Promise<void> {
