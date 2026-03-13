@@ -44,6 +44,7 @@ import {
   toRefs
 } from '@vue/composition-api';
 
+import i18n from '@vue-storefront/core/i18n';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { isServer } from '@vue-storefront/core/helpers';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
@@ -52,11 +53,11 @@ import { ProductStructuredData } from 'src/modules/budsies';
 import {
   Customization,
   CustomizationOptionValue,
+  CustomizationType,
   OptionType,
   OptionValue,
   WidgetType
 } from 'src/modules/customization-system';
-import { CustomizationType } from 'src/modules/customization-system/types/customization-type';
 import {
   FOREVERS_CAT_BUNDLE_SKU,
   FOREVERS_DOG_BUNDLE_SKU,
@@ -65,12 +66,12 @@ import {
   ProductPurchaseFlow
 } from 'src/modules/shared';
 
+import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
+import { useMultiProductsPage } from 'theme/helpers/use-multi-products-page';
+
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import FormWithImagesGallery from 'theme/components/customization-system/forms/form-with-images-gallery.vue';
 import FormWithImagesGalleryPlaceholder from 'theme/components/customization-system/forms/placeholders/form-with-images-gallery-placeholder.vue';
-import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
-import { useMultiProductsPage } from 'theme/helpers/use-multi-products-page';
-import i18n from '@vue-storefront/core/i18n';
 
 export default defineComponent({
   name: 'ForeversCustomizeLater',
