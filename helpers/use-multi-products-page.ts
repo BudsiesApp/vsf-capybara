@@ -62,7 +62,7 @@ export function useMultiProductsPage (
     await root.$store.dispatch('product/findProducts', {
       query: getSearchQuery(skus.value),
       options: {
-        prefetchGroupProducts: false
+        prefetchGroupProducts: true
       }
     });
 
