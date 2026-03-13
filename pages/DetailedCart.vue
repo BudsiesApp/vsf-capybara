@@ -170,7 +170,6 @@ import {
 } from '@storefront-ui/vue';
 import { OrderSummary } from './DetailedCart/index.js';
 import { mapGetters, mapState } from 'vuex';
-import { PriceHelper } from 'src/modules/shared';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
 import { CART_ITEM_LOCALIZED_PRICE_DICTIONARY, IS_CART_SYNCING } from '@vue-storefront/core/modules/cart';
@@ -183,10 +182,9 @@ import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
 import {
   CartItemConfiguration,
-  getCustomizationSystemThumbnail,
-  normalizeProductPurchaseFlow,
-  ProductPurchaseFlow
+  getCustomizationSystemThumbnail
 } from 'src/modules/customization-system';
+import { normalizeProductPurchaseFlow, ProductPurchaseFlow, PriceHelper } from 'src/modules/shared';
 import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';

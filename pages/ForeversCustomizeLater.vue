@@ -55,11 +55,10 @@ import {
   CustomizationOptionValue,
   OptionType,
   OptionValue,
-  ProductPurchaseFlow,
   WidgetType
 } from 'src/modules/customization-system';
 import { CustomizationType } from 'src/modules/customization-system/types/customization-type';
-import { getCanonicalUrl } from 'src/modules/shared';
+import { getCanonicalUrl, ProductPurchaseFlow } from 'src/modules/shared';
 
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import FormWithImagesGallery from 'theme/components/customization-system/forms/form-with-images-gallery.vue';

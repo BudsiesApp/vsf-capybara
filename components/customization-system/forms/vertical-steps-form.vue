@@ -149,9 +149,7 @@ import { useABTestingCustomizationsFilter } from 'src/modules/a-b-testing';
 import {
   Customization,
   CustomizationOptionValue,
-  DEFAULT_PRODUCT_PURCHASE_FLOW,
   ProductCustomizationMode,
-  ProductPurchaseFlow,
   requiredCustomizationsFilter,
   useAvailableCustomizations,
   useCustomizationsBundleOptions,
@@ -166,6 +164,7 @@ import {
   useOptionValueActions,
   useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
+import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow } from 'src/modules/shared';
 import i18n from '@vue-storefront/core/i18n';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';

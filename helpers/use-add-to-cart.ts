@@ -5,8 +5,8 @@ import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import { SelectedBundleOption } from '@vue-storefront/core/modules/catalog/types/BundleOption';
 import { setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
-import { CustomizationStateItem, filterCustomizationState, normalizeProductPurchaseFlow, ProductPurchaseFlow } from 'src/modules/customization-system';
-import { ServerError } from 'src/modules/shared';
+import { CustomizationStateItem, filterCustomizationState } from 'src/modules/customization-system';
+import { normalizeProductPurchaseFlow, ProductPurchaseFlow, ServerError } from 'src/modules/shared';
 
 export function useAddToCart (
   product: Ref<Product | undefined>,

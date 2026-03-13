@@ -127,7 +127,6 @@ import { useABTestingCustomizationsFilter } from 'src/modules/a-b-testing';
 import {
   ProductCustomizationMode,
   Customization,
-  DEFAULT_PRODUCT_PURCHASE_FLOW,
   useCustomizationState,
   useAvailableCustomizations,
   useOptionValueActions,
@@ -145,10 +144,10 @@ import {
   PersistedData,
   DraftOrderItem,
   CustomizationStateItem,
-  ProductPurchaseFlow,
   useAvailableOptionsValuesFilter,
   usePurchaseFlowCustomizations
 } from 'src/modules/customization-system';
+import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow } from 'src/modules/shared';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
