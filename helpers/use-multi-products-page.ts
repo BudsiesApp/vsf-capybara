@@ -3,7 +3,7 @@ import config from 'config';
 import { SearchQuery } from 'storefront-query-builder';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
-import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
+import { PRODUCT_SET_PRODUCT_BY_SKU, PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import Product from 'core/modules/catalog/types/Product';
 import { ProductEvent } from 'src/modules/shared';
@@ -52,7 +52,7 @@ export function useMultiProductsPage (
     }
 
     const productUpdated = updateProductProductionTimeCustomizationData(product, root.$store);
-    root.$store.commit('product/product/PRODUCT_SET_PRODUCT_BY_SKU', productUpdated);
+    root.$store.commit(`product/${PRODUCT_SET_PRODUCT_BY_SKU}`, productUpdated);
     await root.$store.dispatch('product/setCurrent', productUpdated);
 
     if (!currentProduct.value) {
