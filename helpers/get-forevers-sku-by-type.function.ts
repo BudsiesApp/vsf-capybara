@@ -4,7 +4,7 @@ import {
   FOREVERS_CAT_BUNDLE_SKU,
   FOREVERS_DOG_BUNDLE_SKU,
   FOREVERS_OTHER_BUNDLE_SKU
-} from './forevers-product-skus';
+} from 'src/modules/shared';
 
 export default function getForeversSkuByType (type: string): string {
   switch (type) {

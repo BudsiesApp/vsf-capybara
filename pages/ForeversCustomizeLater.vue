@@ -57,16 +57,17 @@ import {
   WidgetType
 } from 'src/modules/customization-system';
 import { CustomizationType } from 'src/modules/customization-system/types/customization-type';
-import { getCanonicalUrl, ProductPurchaseFlow } from 'src/modules/shared';
+import {
+  FOREVERS_CAT_BUNDLE_SKU,
+  FOREVERS_DOG_BUNDLE_SKU,
+  FOREVERS_OTHER_BUNDLE_SKU,
+  getCanonicalUrl,
+  ProductPurchaseFlow
+} from 'src/modules/shared';
 
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import FormWithImagesGallery from 'theme/components/customization-system/forms/form-with-images-gallery.vue';
 import FormWithImagesGalleryPlaceholder from 'theme/components/customization-system/forms/placeholders/form-with-images-gallery-placeholder.vue';
-import {
-  FOREVERS_CAT_BUNDLE_SKU,
-  FOREVERS_DOG_BUNDLE_SKU,
-  FOREVERS_OTHER_BUNDLE_SKU
-} from 'theme/helpers/forevers-product-skus';
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 import { useMultiProductsPage } from 'theme/helpers/use-multi-products-page';
 import i18n from '@vue-storefront/core/i18n';
@@ -287,6 +288,12 @@ export default defineComponent({
   ._form-container {
     .form-with-images-gallery {
       margin-top: var(--spacer-lg);
+
+      ::v-deep {
+        .base-list-widget ._options-list.-alignment-center {
+          justify-content: flex-start;
+        }
+      }
     }
   }
 
