@@ -163,7 +163,7 @@ export default defineComponent({
         },
         optionData: {
           type: OptionType.GENERIC,
-          isRequired: false,
+          isRequired: true,
           maxValuesCount: 1,
           displayWidget: WidgetType.THUMBNAILS_LIST,
           hasDetailedDescription: false,
