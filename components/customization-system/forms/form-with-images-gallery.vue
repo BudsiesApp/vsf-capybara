@@ -134,7 +134,8 @@ import {
   PropType,
   ref,
   Ref,
-  toRefs
+  toRefs,
+  watch
 } from '@vue/composition-api';
 import { SfButton } from '@storefront-ui/vue';
 import { ValidationObserver, ValidationProvider } from 'vee-validate';
@@ -304,6 +305,7 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
+      resetCustomizationState,
       selectedOptionValuesIds,
       updateCustomizationOptionValue,
       mergeCustomizationState
@@ -378,7 +380,8 @@ export default defineComponent({
         undefined,
         onCustomizationStateRestored,
         undefined,
-        onCustomizationStateRestored
+        onCustomizationStateRestored,
+        resetCustomizationState
       );
 
     const { emailCustomizationFilter, persistCustomerEmail } =
@@ -414,6 +417,19 @@ export default defineComponent({
     );
 
     const { quantity } = useProductQuantity(existingCartItem);
+
+    watch(productSku, (newValue, oldValue) => {
+      if (newValue === oldValue || existingCartItem.value) {
+        return;
+      }
+
+      quantity.value = 1;
+
+      if (validationObserver.value) {
+        validationObserver.value.reset();
+      }
+    });
+
     const { addToCartHandler, isSubmitting: isSubmittingAddToCart } = useAddToCart(
       product,
       quantity,

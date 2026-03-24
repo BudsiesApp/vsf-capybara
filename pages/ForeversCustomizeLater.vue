@@ -7,7 +7,6 @@
         :can-use-persisted-customization-state="canUsePersistedCustomizationState"
         :product-purchase-flow="productPurchaseFlow"
         :existing-cart-item="existingCartItem"
-        :key="currentProduct && currentProduct.sku"
         :product="currentProduct"
         @hook:mounted="onFormMounted"
       >
