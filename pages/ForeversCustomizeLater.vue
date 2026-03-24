@@ -290,6 +290,10 @@ export default defineComponent({
       margin-top: var(--spacer-lg);
 
       ::v-deep {
+        .base-list-widget.thumbnails-list-widget {
+          --thumbnails-list-widget-item-width: 33%;
+        }
+
         .base-list-widget ._options-list.-alignment-center {
           justify-content: flex-start;
         }
