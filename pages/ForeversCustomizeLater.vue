@@ -8,8 +8,17 @@
         :product-purchase-flow="productPurchaseFlow"
         :existing-cart-item="existingCartItem"
         :product="currentProduct"
+        :show-gallery="false"
         @hook:mounted="onFormMounted"
       >
+        <template #description>
+          <MBlockStory
+            :story-slug="topStorySlug"
+            class="_top-block"
+            v-if="topStorySlug"
+          />
+        </template>
+
         <template #product-details-extra>
           <div class="_product-type-selector">
             <customization-option
@@ -71,6 +80,7 @@ import { useMultiProductsPage } from 'theme/helpers/use-multi-products-page';
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import FormWithImagesGallery from 'theme/components/customization-system/forms/form-with-images-gallery.vue';
 import FormWithImagesGalleryPlaceholder from 'theme/components/customization-system/forms/placeholders/form-with-images-gallery-placeholder.vue';
+import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 
 export default defineComponent({
   name: 'ForeversCustomizeLater',
@@ -78,6 +88,7 @@ export default defineComponent({
     CustomizationOption,
     FormWithImagesGallery,
     FormWithImagesGalleryPlaceholder,
+    MBlockStory,
     ProductStructuredData
   },
   props: {
@@ -171,7 +182,7 @@ export default defineComponent({
           showInUrlQuery: false,
           displayWidgetOptions: {
             shape: 'round',
-            alignment: 'left'
+            alignment: 'center'
           },
           values: []
         }
@@ -188,6 +199,14 @@ export default defineComponent({
 
     const showForm = computed<boolean>(() => {
       return isDataLoaded.value && !!currentProduct.value;
+    });
+
+    const topStorySlug = computed<string>(() => {
+      if (!currentProduct.value?.sku) {
+        return '';
+      }
+
+      return `${currentProduct.value.sku}_customize_later_page_top`;
     });
 
     const showPlaceholder = computed<boolean>(() => {
@@ -238,7 +257,8 @@ export default defineComponent({
       productTypeSelectorOptions,
       selectedProductTypeOptionValueId,
       showForm,
-      showPlaceholder
+      showPlaceholder,
+      topStorySlug
     };
   },
   beforeRouteEnter (to, from, next) {
@@ -292,10 +312,6 @@ export default defineComponent({
       ::v-deep {
         .base-list-widget.thumbnails-list-widget {
           --thumbnails-list-widget-item-width: 33%;
-        }
-
-        .base-list-widget ._options-list.-alignment-center {
-          justify-content: flex-start;
         }
       }
     }

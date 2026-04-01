@@ -1,7 +1,10 @@
 <template>
-  <div class="form-with-images-gallery">
+  <div
+    class="form-with-images-gallery"
+    :class="{ '-align-center': !showGallery }"
+  >
     <div class="_product">
-      <div>
+      <div v-if="showGallery">
         <header class="sf-heading sf-heading--no-underline sf-heading--left">
           <h1 class="_product-name-mobile sf-heading__title">
             {{ product.name }}
@@ -17,13 +20,21 @@
       </div>
 
       <div>
-        <header class="sf-heading sf-heading--no-underline sf-heading--left">
-          <h1 class="_product-name-desktop sf-heading__title">
+        <header
+          class="sf-heading sf-heading--no-underline"
+          :class="{'sf-heading--left': showGallery}"
+        >
+          <h1
+            class="sf-heading__title"
+            :class="{ '_product-name-desktop': showGallery }"
+          >
             {{ product.name }}
           </h1>
         </header>
 
-        <div class="_short-description" v-html="shortDescription" />
+        <slot name="description">
+          <div class="_short-description" v-html="shortDescription" />
+        </slot>
 
         <a-custom-price
           v-if="!isCustomizeMode"
@@ -236,6 +247,10 @@ export default defineComponent({
     product: {
       type: Object as PropType<Product>,
       required: true
+    },
+    showGallery: {
+      type: Boolean,
+      default: true
     }
   },
   components: {
@@ -650,6 +665,21 @@ export default defineComponent({
   ._price,
   ._product-rating {
     margin-top: var(--spacer-base);
+  }
+
+  &.-align-center {
+  --price-justify-content: center;
+  --customization-option-label-align: center;
+
+    text-align: center;
+
+    ._product {
+      justify-content: center;
+    }
+
+    ._product-rating {
+      justify-content: center;
+    }
   }
 
   @media (min-width: $tablet-min) {
