@@ -424,7 +424,7 @@ export default defineComponent({
     const additionalStepNames = computed<string[]>(() => {
       return additionalSteps.value.map((step: CreationWizardFormAdditionalStep) => step.name);
     });
-    const isAdditionalStepLoading: Ref<boolean> = ref(false);
+    const isAdditionalStepsDataLoading: Ref<boolean> = ref(false);
 
     const formSteps = useCreationWizardFormSteps(
       customizationGroups.customizationRootGroups,
@@ -562,7 +562,7 @@ export default defineComponent({
           let isAdditionalStepsDataLoaded = true;
 
           if (props.loadAdditionalStepsData) {
-            isAdditionalStepLoading.value = true;
+            isAdditionalStepsDataLoading.value = true;
 
             try {
               await props.loadAdditionalStepsData();
@@ -570,7 +570,7 @@ export default defineComponent({
               isAdditionalStepsDataLoaded = false;
             }
 
-            isAdditionalStepLoading.value = false;
+            isAdditionalStepsDataLoading.value = false;
           }
 
           if (isAdditionalStepsDataLoaded) {
@@ -603,7 +603,7 @@ export default defineComponent({
     });
 
     const isDisabled = computed<boolean>(() => {
-      return isSubmitting.value || productTypeStep.isProductLoading.value || isAdditionalStepLoading.value;
+      return isSubmitting.value || productTypeStep.isProductLoading.value || isAdditionalStepsDataLoading.value;
     });
 
     const submitButtonText = computed<string>(() => {
