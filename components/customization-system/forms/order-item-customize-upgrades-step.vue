@@ -78,13 +78,11 @@ export default defineComponent({
 
 .order-item-customize-upgrades-step {
   --alteration-form-buttons-flex-direction: column-reverse;
-  --alteration-form-buttons-justify-content: center;
 
   border: none;
 
   @include for-desktop() {
     --alteration-form-buttons-flex-direction: row;
-    --alteration-form-buttons-justify-content: flex-end;
   }
 }
 </style>
