@@ -152,7 +152,7 @@ export default defineComponent({
         return false;
       }
 
-      if (orderDetails.isLoading) {
+      if (orderDetails.isLoading.value) {
         return true;
       }
 
