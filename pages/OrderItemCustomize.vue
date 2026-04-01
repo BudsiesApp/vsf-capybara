@@ -121,17 +121,7 @@ export default defineComponent({
       context
     );
 
-    const shouldLoadOrder = computed<boolean>(() => {
-      return !!orderId.value;
-    });
-
-    const orderDetails = shouldLoadOrder.value
-      ? useOrderDetails(context, orderId.value as string)
-      : {
-        order: computed(() => undefined),
-        isLoading: computed(() => false),
-        loadOrder: async () => {}
-      };
+    const orderDetails = useOrderDetails(context, orderId.value || '')
 
     const order = computed(() => {
       return orderDetails.order.value || undefined;
