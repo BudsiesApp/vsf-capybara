@@ -759,6 +759,7 @@ let routes = [
     component: OrderItemCustomize,
     props: (route) => ({
       orderItemId: route.query.orderItemId,
+      orderId: route.query.orderId,
       layout: LayoutType.CREATION_WIZARD,
       sku: route.query.sku,
       plushieType: PlushieType.FOREVERS
@@ -773,6 +774,7 @@ let routes = [
     component: OrderItemCustomize,
     props: (route) => ({
       orderItemId: route.query.orderItemId,
+      orderId: route.query.orderId,
       layout: LayoutType.CREATION_WIZARD,
       sku: route.query.sku,
       plushieType: PlushieType.GOLF_COVERS
@@ -787,6 +789,7 @@ let routes = [
     component: OrderItemCustomize,
     props: (route) => ({
       orderItemId: route.query.orderItemId,
+      orderId: route.query.orderId,
       layout: LayoutType.WITH_IMAGES_GALLERY,
       sku: route.query.sku
     }),

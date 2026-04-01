@@ -16,6 +16,8 @@
       :can-use-persisted-customization-state="true"
       :customization-mode="ProductCustomizationMode.CUSTOMIZE"
       :draft-order-item="draftOrderItem"
+      :additional-steps="additionalSteps"
+      :load-additional-steps-data="loadAdditionalStepsData"
       @hook:mounted="onFormMounted"
     />
 
@@ -40,14 +42,18 @@ import { SfHeading } from '@storefront-ui/vue';
 
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { ProductCustomizationMode } from 'src/modules/customization-system';
+import { OrderItem, useOrderDetails } from 'src/modules/orders-history';
 
 import { PlushieType } from 'theme/interfaces/plushie.type';
 import { useDraftOrderItem } from 'theme/helpers/use-draft-order-item';
+import { useOrderItemAlterationProductLoader } from 'theme/helpers/use-order-item-alteration-product-loader';
 import { useProductPage } from 'theme/helpers/use-product-page';
 import {
   LayoutType,
   useProductFormLayout
 } from 'theme/helpers/use-product-form-layout';
+import { CreationWizardFormAdditionalStep } from 'theme/components/customization-system/forms/creation-wizard-form.vue';
+import OrderItemCustomizeUpgradesStep from 'theme/components/customization-system/forms/order-item-customize-upgrades-step.vue';
 
 import FormWithImagesGalleryPlaceholder from 'theme/components/customization-system/forms/placeholders/form-with-images-gallery-placeholder.vue';
 import VerticalStepsFormPlaceholder from 'theme/components/customization-system/forms/placeholders/vertical-steps-form-placeholder.vue';
@@ -90,6 +96,10 @@ export default defineComponent({
       type: String,
       required: true
     },
+    orderId: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
     layout: {
       type: String as PropType<LayoutType>,
       default: () => LayoutType.WITH_IMAGES_GALLERY
@@ -100,7 +110,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const { sku, orderItemId, layout, plushieType } = toRefs(props);
+    const { sku, orderItemId, orderId, layout, plushieType } = toRefs(props);
 
     const { currentProduct, isDataLoaded: isProductLoaded } = useProductPage(
       sku,
@@ -111,10 +121,80 @@ export default defineComponent({
       context
     );
 
+    const shouldLoadOrder = computed<boolean>(() => {
+      return !!orderId.value;
+    });
+
+    const orderDetails = shouldLoadOrder.value
+      ? useOrderDetails(context, orderId.value as string)
+      : {
+        order: computed(() => undefined),
+        isLoading: computed(() => false),
+        loadOrder: async () => {}
+      };
+
+    const order = computed(() => {
+      return orderDetails.order.value || undefined;
+    });
+
+    const orderItem = computed<OrderItem | undefined>(() => {
+      if (!order.value) {
+        return;
+      }
+
+      const targetOrderItemId = Number(orderItemId.value);
+
+      return order.value.items.find((item) => item.item_id === targetOrderItemId);
+    });
+
+    const shouldWaitForAlterationProduct = computed<boolean>(() => {
+      if (!orderId.value) {
+        return false;
+      }
+
+      if (orderDetails.isLoading) {
+        return true;
+      }
+
+      return !!orderItem.value?.extension_attributes?.alteration_product;
+    });
+
+    const {
+      alterationProduct
+    } = useOrderItemAlterationProductLoader(
+      orderItem,
+      order,
+      context
+    );
+
+    const additionalSteps = computed<CreationWizardFormAdditionalStep[]>(() => {
+      if (!orderItem.value || !alterationProduct.value) {
+        return [];
+      }
+
+      return [
+        {
+          name: 'Upgrades',
+          component: OrderItemCustomizeUpgradesStep,
+          props: {
+            orderItem: orderItem.value,
+            alterationProduct: alterationProduct.value
+          }
+        }
+      ];
+    });
+
+    function loadAdditionalStepsData (): Promise<void> {
+      return orderDetails.loadOrder();
+    }
+
     const showForm = computed<boolean>(() => {
+      const isAlterationProductReady = !shouldWaitForAlterationProduct.value || !!alterationProduct.value;
+
       return (
         isProductLoaded.value &&
         isDraftOrderItemLoaded.value &&
+        isAlterationProductReady &&
         !!currentProduct.value &&
         !!draftOrderItem.value
       );
@@ -155,16 +235,19 @@ export default defineComponent({
     });
 
     return {
+      LayoutType,
       ProductCustomizationMode,
       currentProduct,
       draftOrderItem,
+      additionalSteps,
       formComponent,
       formPlaceholderComponent,
       mainTitleText,
       onFormMounted,
       showForm,
       showPlaceholder,
-      topStorySlug
+      topStorySlug,
+      loadAdditionalStepsData
     };
   },
   beforeRouteLeave (to, from, next) {

@@ -4,7 +4,7 @@
       <div class="_steps-container">
         <sf-steps
           :active="currentStep"
-          :can-go-back="canGoBack && !isSubmitButtonDisabled"
+          :can-go-back="canGoBack && !isSubmitButtonDisabled && !isCurrentStepAdditional"
           :steps="stepsList"
           @change="onStepChanged"
           class="_steps"
@@ -95,6 +95,17 @@
                 "
               />
             </sf-step>
+
+            <sf-step
+              v-for="step in additionalSteps"
+              :key="step.name"
+              :name="step.name"
+            >
+              <component
+                :is="step.component"
+                v-bind="step.props || {}"
+              />
+            </sf-step>
           </template>
         </sf-steps>
       </div>
@@ -109,6 +120,7 @@
 </template>
 
 <script lang="ts">
+import { Component } from 'vue';
 import {
   computed,
   defineComponent,
@@ -187,6 +199,12 @@ function getAllFormRefs (
   return refsDictionary;
 }
 
+export interface CreationWizardFormAdditionalStep {
+  name: string,
+  component: Component,
+  props?: Record<string, any>
+}
+
 export default defineComponent({
   name: 'CreationWizardForm',
   props: {
@@ -225,6 +243,14 @@ export default defineComponent({
     productTypeButtonsList: {
       type: Array as PropType<ProductTypeButton[]>,
       default: () => []
+    },
+    additionalSteps: {
+      type: Array as PropType<CreationWizardFormAdditionalStep[]>,
+      default: () => []
+    },
+    loadAdditionalStepsData: {
+      type: Function as PropType<(() => Promise<void>) | undefined>,
+      default: undefined
     }
   },
   components: {
@@ -245,6 +271,7 @@ export default defineComponent({
       draftOrderItem,
       customizationMode,
       existingCartItem,
+      additionalSteps,
       productPurchaseFlow,
       plushieType,
       preselectedProductSize,
@@ -394,8 +421,14 @@ export default defineComponent({
       emailValue
     )
 
+    const additionalStepNames = computed<string[]>(() => {
+      return additionalSteps.value.map((step: CreationWizardFormAdditionalStep) => step.name);
+    });
+    const isAdditionalStepLoading: Ref<boolean> = ref(false);
+
     const formSteps = useCreationWizardFormSteps(
       customizationGroups.customizationRootGroups,
+      additionalStepNames,
       existingCartItem,
       onStepSubmit,
       customizationMode,
@@ -525,6 +558,27 @@ export default defineComponent({
           return;
         }
 
+        if (additionalSteps.value.length > 0) {
+          let isAdditionalStepsDataLoaded = true;
+
+          if (props.loadAdditionalStepsData) {
+            isAdditionalStepLoading.value = true;
+
+            try {
+              await props.loadAdditionalStepsData();
+            } catch (e) {
+              isAdditionalStepsDataLoaded = false;
+            }
+
+            isAdditionalStepLoading.value = false;
+          }
+
+          if (isAdditionalStepsDataLoaded) {
+            await formSteps.nextStep();
+            return;
+          }
+        }
+
         if (isCustomizeMode.value) {
           context.root.$router.push({
             name: 'orders-history'
@@ -549,7 +603,7 @@ export default defineComponent({
     });
 
     const isDisabled = computed<boolean>(() => {
-      return isSubmitting.value || productTypeStep.isProductLoading.value;
+      return isSubmitting.value || productTypeStep.isProductLoading.value || isAdditionalStepLoading.value;
     });
 
     const submitButtonText = computed<string>(() => {
