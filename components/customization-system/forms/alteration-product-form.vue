@@ -689,7 +689,8 @@ export default defineComponent({
 
   ._buttons {
     display: flex;
-    justify-content: flex-end;
+    flex-direction: var(--alteration-form-buttons-flex-direction, row);
+    justify-content: var(--alteration-form-buttons-justify-content, flex-end);
     gap: var(--spacer-sm);
     margin-top: var(--spacer-base);
     transition: margin-top 300ms ease-in-out;

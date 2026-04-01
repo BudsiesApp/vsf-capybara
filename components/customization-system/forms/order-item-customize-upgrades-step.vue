@@ -74,7 +74,17 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
+
 .order-item-customize-upgrades-step {
+  --alteration-form-buttons-flex-direction: column-reverse;
+  --alteration-form-buttons-justify-content: center;
+
   border: none;
+
+  @include for-desktop() {
+    --alteration-form-buttons-flex-direction: row;
+    --alteration-form-buttons-justify-content: flex-end;
+  }
 }
 </style>
