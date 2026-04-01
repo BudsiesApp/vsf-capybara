@@ -669,12 +669,15 @@ export default defineComponent({
 
   &.-align-center {
   --price-justify-content: center;
-  // --customization-option-align-items: center;
   --customization-option-label-align: center;
 
     text-align: center;
 
     ._product {
+      justify-content: center;
+    }
+
+    ._product-rating {
       justify-content: center;
     }
   }
