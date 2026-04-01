@@ -81,7 +81,7 @@ export function useCreationWizardFormSteps (
   }
 
   async function goToStep (index: number): Promise<void> {
-    if (index < 0 || index >= stepsList.value.length - 1) {
+    if (index < 0 || index > stepsList.value.length) {
       return;
     }
 
