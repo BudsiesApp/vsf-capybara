@@ -175,7 +175,8 @@ export default {
             { name: this.$t('Plush Guide 101'), link: '/plush-guide/' },
             { name: this.$t('NDA'), link: '/nda/' },
             { name: this.$t('Production Times'), link: '/production-times/' },
-            { name: this.$t('Shipping/Freight'), link: '/shipping/' }
+            { name: this.$t('Shipping/Freight'), link: '/shipping/' },
+            { name: this.$t('Fulfillment'), link: '/fulfillment/' }
           ]
         }
       };
