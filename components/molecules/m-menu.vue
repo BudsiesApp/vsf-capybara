@@ -141,6 +141,10 @@ export default Vue.extend({
           link: '/about/'
         },
         {
+          label: this.$t('Fulfillment'),
+          link: '/fulfillment/'
+        },
+        {
           label: this.$t('How To Order'),
           link: '/how-to-order/'
         },

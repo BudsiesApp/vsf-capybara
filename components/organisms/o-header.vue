@@ -2,7 +2,7 @@
   <div class="o-header">
     <SfOverlay
       class="overlay"
-      :visible="isHoveredMenu || isSearchPanelVisible"
+      :visible="isAboutMenuHovered || isHoveredMenu || isSearchPanelVisible"
       @click="$store.commit('ui/setSearchpanel', false)"
     />
     <SfHeader
@@ -19,10 +19,19 @@
       </template>
 
       <template #navigation>
-        <SfHeaderNavigationItem>
-          <router-link class="o-header__submenu" to="/about/">
+        <SfHeaderNavigationItem
+          @mouseover="onAboutMenuMouseOver"
+          @mouseleave="isAboutMenuHovered = false"
+        >
+          <div class="o-header__submenu">
             {{ $t('About') }}
-          </router-link>
+          </div>
+
+          <MAboutMenu
+            :visible="isAboutMenuHovered && !isSearchPanelVisible"
+            @transitionend.native="onAboutMenuTransitionEnd"
+            @close="onAboutMenuClose"
+          />
         </SfHeaderNavigationItem>
 
         <SfHeaderNavigationItem
@@ -76,7 +85,8 @@
 </template>
 
 <script>
-import { SfButton, SfHeader, SfOverlay } from '@storefront-ui/vue';
+import Vue from 'vue';
+import { SfHeader, SfOverlay } from '@storefront-ui/vue';
 import { mapState, mapGetters } from 'vuex';
 
 import { CurrencySelector } from 'src/modules/currency';
@@ -84,10 +94,11 @@ import { CurrencySelector } from 'src/modules/currency';
 import ALogo from 'theme/components/atoms/a-logo';
 import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
+import MAboutMenu from 'theme/components/molecules/m-about-menu';
 import MMenu from 'theme/components/molecules/m-menu';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
-export default {
+export default Vue.extend({
   name: 'OHeader',
   components: {
     SfHeader,
@@ -95,16 +106,18 @@ export default {
     AAccountIcon,
     ADetailedCartIcon,
     SfOverlay,
-    SfButton,
+    MAboutMenu,
     MMenu,
     MCtaButton,
     CurrencySelector
   },
   data () {
     return {
+      isAboutMenuHovered: false,
+      isAboutMouseOverLocked: false,
       isHoveredMenu: false,
       isMouseOverLocked: false
-    }
+    };
   },
   computed: {
     ...mapState({
@@ -116,6 +129,21 @@ export default {
     }
   },
   methods: {
+    onAboutMenuClose () {
+      this.isAboutMenuHovered = false;
+      this.isAboutMouseOverLocked = true;
+    },
+    onAboutMenuMouseOver () {
+      if (this.isAboutMouseOverLocked) {
+        return;
+      }
+
+      this.isAboutMenuHovered = true;
+    },
+    async onAboutMenuTransitionEnd () {
+      await this.$nextTick();
+      this.isAboutMouseOverLocked = false;
+    },
     onMainMenuClose () {
       this.isHoveredMenu = false;
       this.isMouseOverLocked = true;
@@ -132,7 +160,7 @@ export default {
       this.isMouseOverLocked = false;
     }
   }
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -192,6 +220,7 @@ export default {
     }
 
     &:hover {
+      .m-about-menu,
       .m-menu {
         opacity: 1;
         visibility: visible;
