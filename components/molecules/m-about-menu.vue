@@ -20,7 +20,7 @@
             :key="item.label"
           >
             <router-link
-              :href="item.link"
+              :to="item.link"
               @click.native="emitClose"
             >
               <SfMenuItem :label="item.label" icon="" />
