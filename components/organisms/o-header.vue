@@ -29,6 +29,7 @@
 
           <MAboutMenu
             :visible="isAboutMenuHovered && !isSearchPanelVisible"
+            @transitionend.native="onAboutMenuTransitionEnd"
             @close="onAboutMenuClose"
           />
         </SfHeaderNavigationItem>
@@ -84,7 +85,8 @@
 </template>
 
 <script>
-import { SfButton, SfHeader, SfOverlay } from '@storefront-ui/vue';
+import Vue from 'vue';
+import { SfHeader, SfOverlay } from '@storefront-ui/vue';
 import { mapState, mapGetters } from 'vuex';
 
 import { CurrencySelector } from 'src/modules/currency';
@@ -96,7 +98,7 @@ import MAboutMenu from 'theme/components/molecules/m-about-menu';
 import MMenu from 'theme/components/molecules/m-menu';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
-export default {
+export default Vue.extend({
   name: 'OHeader',
   components: {
     SfHeader,
@@ -104,7 +106,6 @@ export default {
     AAccountIcon,
     ADetailedCartIcon,
     SfOverlay,
-    SfButton,
     MAboutMenu,
     MMenu,
     MCtaButton,
@@ -113,9 +114,10 @@ export default {
   data () {
     return {
       isAboutMenuHovered: false,
+      isAboutMouseOverLocked: false,
       isHoveredMenu: false,
       isMouseOverLocked: false
-    }
+    };
   },
   computed: {
     ...mapState({
@@ -129,9 +131,18 @@ export default {
   methods: {
     onAboutMenuClose () {
       this.isAboutMenuHovered = false;
+      this.isAboutMouseOverLocked = true;
     },
     onAboutMenuMouseOver () {
+      if (this.isAboutMouseOverLocked) {
+        return;
+      }
+
       this.isAboutMenuHovered = true;
+    },
+    async onAboutMenuTransitionEnd () {
+      await this.$nextTick();
+      this.isAboutMouseOverLocked = false;
     },
     onMainMenuClose () {
       this.isHoveredMenu = false;
@@ -149,7 +160,7 @@ export default {
       this.isMouseOverLocked = false;
     }
   }
-};
+});
 </script>
 
 <style lang="scss" scoped>

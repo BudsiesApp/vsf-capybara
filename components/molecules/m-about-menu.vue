@@ -10,7 +10,6 @@
 
     <SfMegaMenu
       ref="menu"
-      :title="title"
       :visible="visible"
     >
       <SfMegaMenuColumn :title="$t('About')">
@@ -58,10 +57,6 @@ export default defineComponent({
     visible: {
       type: Boolean,
       default: true
-    },
-    title: {
-      type: String,
-      default: ''
     }
   },
   setup (_, { emit, refs, root }) {
