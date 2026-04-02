@@ -182,7 +182,6 @@ import { CART_UPD_ITEM } from '@vue-storefront/core/modules/cart/store/mutation-
 import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
 import { CartItemConfiguration, getCustomizationSystemThumbnail } from 'src/modules/customization-system';
-import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
@@ -406,7 +405,7 @@ export default {
       return !this.isMounted || !this.cartIsLoaded;
     },
     canShowProductionSpotCountdown () {
-      return this.products.some((product) => isCustomProduct(product.id));
+      return this.products.some((product) => Boolean(product.is_custom_product));
     },
     selectedCurrency () {
       return this.$store.getters[GET_ACTIVE_CURRENCY];
