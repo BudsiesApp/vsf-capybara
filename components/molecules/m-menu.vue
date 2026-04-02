@@ -13,26 +13,6 @@
       :title="title"
       :visible="visible"
     >
-      <SfMegaMenuColumn
-        :title="$t('About')"
-        class="mobile-only"
-      >
-        <SfList>
-          <SfListItem
-            v-for="item in aboutItems"
-            :key="item.label"
-          >
-            <router-link
-              class="_item-link"
-              :to="item.link"
-              @click.native="$emit('close')"
-            >
-              <SfMenuItem :label="item.label" icon="" />
-            </router-link>
-          </SfListItem>
-        </SfList>
-      </SfMegaMenuColumn>
-
       <SfMegaMenuColumn :title="$t('Custom Plush Products')">
         <SfList>
           <SfListItem
@@ -111,16 +91,6 @@ export default Vue.extend({
   },
   data () {
     return {
-      aboutItems: [
-        {
-          label: this.$t('Who We Are'),
-          link: '/about/'
-        },
-        {
-          label: this.$t('Fulfillment'),
-          link: '/fulfillment/'
-        }
-      ],
       customPlushProductsItems: [
         {
           label: this.$t('Mascots'),
@@ -166,6 +136,14 @@ export default Vue.extend({
         }
       ],
       usefulLinksItems: [
+        {
+          label: this.$t('About'),
+          link: '/about/'
+        },
+        {
+          label: this.$t('Fulfillment'),
+          link: '/fulfillment/'
+        },
         {
           label: this.$t('How To Order'),
           link: '/how-to-order/'
