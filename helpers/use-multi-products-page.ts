@@ -66,12 +66,18 @@ export function useMultiProductsPage (
     isDataLoaded.value = false;
     root.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
 
-    await root.$store.dispatch('product/findProducts', {
-      query: getSearchQuery(skus.value),
-      options: {
-        prefetchGroupProducts: true
-      }
-    });
+    await Promise.all([
+      root.$store.dispatch('product/findProducts', {
+        query: getSearchQuery(skus.value),
+        options: {
+          prefetchGroupProducts: true
+        }
+      }),
+      root.$store.dispatch(
+        'budsies/loadProductsRushAddons',
+        { productSku: '' }
+      )
+    ]);
 
     const preferredSku = initialSku?.value && skus.value.includes(initialSku.value)
       ? initialSku.value
