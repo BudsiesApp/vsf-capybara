@@ -16,6 +16,7 @@ function getStepQueryValue (step: number, stepsList: string[]): string {
 
 export function useCreationWizardFormSteps (
   customizationRootGroups: Ref<Customization[]>,
+  additionalStepNames: Ref<string[]>,
   existingCartItem: Ref<CartItem | undefined>,
   afterStepChanged: (previousStepCustomization?: Customization) => void,
   customizationMode: Ref<ProductCustomizationMode>,
@@ -31,8 +32,14 @@ export function useCreationWizardFormSteps (
     return groups.slice(0, groups.length - 1);
   });
 
+  const hasTypeSelectorStep = computed<boolean>(() => {
+    return customizationMode.value !== ProductCustomizationMode.CUSTOMIZE;
+  });
+
   const isLastStep = computed<boolean>(() => {
-    return currentStep.value === customizationRootGroups.value.length;
+    const offset = hasTypeSelectorStep.value ? 0 : -1;
+
+    return currentStep.value === customizationRootGroups.value.length + offset;
   });
 
   const canGoBack = computed<boolean>(() => {
@@ -40,9 +47,13 @@ export function useCreationWizardFormSteps (
   });
 
   const stepsList = computed<string[]>(() => {
-    const stepsNames = customizationRootGroups.value.map(({ name }) => name);
+    const stepsNames = customizationRootGroups.value.map((group: Customization) => group.name);
 
-    if (customizationMode.value !== ProductCustomizationMode.CUSTOMIZE) {
+    if (additionalStepNames.value.length) {
+      stepsNames.push(...additionalStepNames.value);
+    }
+
+    if (hasTypeSelectorStep.value) {
       stepsNames.unshift(productTypeChooseStepName);
     }
 
@@ -51,6 +62,11 @@ export function useCreationWizardFormSteps (
 
   const previousStepCustomization = computed<Customization | undefined>(() => {
     return customizationRootGroups.value[currentStep.value - previousCustomizationStepOffset];
+  });
+
+  const isCurrentStepAdditional = computed<boolean>(() => {
+    const offset = hasTypeSelectorStep.value ? -1 : 0;
+    return currentStep.value + offset >= customizationRootGroups.value.length;
   });
 
   function scrollToTop (): void {
@@ -65,7 +81,7 @@ export function useCreationWizardFormSteps (
   }
 
   async function goToStep (index: number): Promise<void> {
-    if (index < 0 || index > customizationRootGroups.value.length) {
+    if (index < 0 || index >= stepsList.value.length) {
       return;
     }
 
@@ -113,6 +129,7 @@ export function useCreationWizardFormSteps (
   return {
     canGoBack,
     currentStep,
+    isCurrentStepAdditional,
     goToStep,
     isLastStep,
     lastStepCustomization,
