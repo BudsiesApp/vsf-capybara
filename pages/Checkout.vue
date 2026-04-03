@@ -45,7 +45,6 @@
 import Checkout from '@vue-storefront/core/pages/Checkout';
 import { SfSteps } from '@storefront-ui/vue';
 import { mapGetters } from 'vuex';
-import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
@@ -141,7 +140,7 @@ export default {
       return this.availableSteps[this.currentStep].key === orderReviewStepKey;
     },
     canShowProductionSpotCountdown () {
-      return this.productsInCart.some((product) => isCustomProduct(product.id));
+      return this.productsInCart.some((product) => Boolean(product.is_custom_product));
     }
   },
   beforeMount () {

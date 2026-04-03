@@ -45,7 +45,7 @@ import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { FETCH_SUGGESTED_PRODUCTS_ACTION, SUGGESTED_PRODUCTS_IDS_GETTER } from 'src/modules/orders-history';
-import { isCustomProduct, ProductEvent, useMobileObserver } from 'src/modules/shared';
+import { ProductEvent, useMobileObserver } from 'src/modules/shared';
 
 import { prepareCategoryProduct } from 'theme/helpers';
 
@@ -105,7 +105,7 @@ export default defineComponent({
           continue;
         }
 
-        const hasLandingPage = !!product.landing_page_url || !isCustomProduct(+product.id);
+        const hasLandingPage = !!product.landing_page_url || !product.is_custom_product;
 
         if (!hasLandingPage) {
           continue;
