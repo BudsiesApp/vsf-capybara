@@ -149,6 +149,7 @@ import { useABTestingCustomizationsFilter } from 'src/modules/a-b-testing';
 import {
   Customization,
   CustomizationOptionValue,
+  ProductCustomizationMode,
   requiredCustomizationsFilter,
   useAvailableCustomizations,
   useCustomizationsBundleOptions,
@@ -156,12 +157,14 @@ import {
   useCustomizationsFilter,
   useCustomizationsGroups,
   useCustomizationsOptionsDefaultValue,
+  usePurchaseFlowCustomizations,
   useCustomizationState,
   useCustomizationStatePreservation,
   useEmailCustomization,
   useOptionValueActions,
   useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
+import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow } from 'src/modules/shared';
 import i18n from '@vue-storefront/core/i18n';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
@@ -209,6 +212,14 @@ export default defineComponent({
       type: Object as PropType<CartItem | undefined>,
       default: undefined
     },
+    customizationMode: {
+      type: String as PropType<ProductCustomizationMode>,
+      default: ProductCustomizationMode.ADD_TO_CART
+    },
+    productPurchaseFlow: {
+      type: String as PropType<ProductPurchaseFlow>,
+      default: DEFAULT_PRODUCT_PURCHASE_FLOW
+    },
     product: {
       type: Object as PropType<Product>,
       required: true
@@ -230,7 +241,13 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
-    const { canUsePersistedCustomizationState, existingCartItem, product } = toRefs(props);
+    const {
+      canUsePersistedCustomizationState,
+      customizationMode,
+      existingCartItem,
+      product,
+      productPurchaseFlow
+    } = toRefs(props);
 
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
@@ -332,6 +349,14 @@ export default defineComponent({
       availableOptionValues
     );
 
+    const { flowFilteredCustomizations } = usePurchaseFlowCustomizations(
+      availableCustomizations,
+      productPurchaseFlow,
+      onCustomizationOptionInput,
+      customizationOptionValue,
+      customizationMode
+    );
+
     const { setDefaultValues } = useCustomizationsOptionsDefaultValue(
       availableCustomizations,
       customizationAvailableOptionValues,
@@ -350,7 +375,9 @@ export default defineComponent({
       customizationState,
       bundleOptions,
       existingCartItem,
-      context
+      context,
+      undefined,
+      productPurchaseFlow.value
     );
 
     const shouldMakeAnother = ref<boolean>(false);
@@ -444,7 +471,7 @@ export default defineComponent({
     );
 
     const { filteredCustomizations } = useCustomizationsFilter(
-      availableCustomizations,
+      flowFilteredCustomizations,
       customizationAvailableOptionValues,
       [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter]
     );

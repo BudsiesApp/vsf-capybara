@@ -1,13 +1,19 @@
 import PlushieProductType from 'theme/interfaces/plushie-product-type';
 
+import {
+  FOREVERS_CAT_BUNDLE_SKU,
+  FOREVERS_DOG_BUNDLE_SKU,
+  FOREVERS_OTHER_BUNDLE_SKU
+} from 'src/modules/shared';
+
 export default function getForeversSkuByType (type: string): string {
   switch (type) {
     case PlushieProductType.DOG:
-      return 'ForeversDog_bundle'
+      return FOREVERS_DOG_BUNDLE_SKU
     case PlushieProductType.CAT:
-      return 'ForeversCat_bundle'
+      return FOREVERS_CAT_BUNDLE_SKU
     case PlushieProductType.OTHER:
-      return 'ForeversOther_bundle'
+      return FOREVERS_OTHER_BUNDLE_SKU
     default:
       throw new Error('Unknown product type: ' + type);
   }
