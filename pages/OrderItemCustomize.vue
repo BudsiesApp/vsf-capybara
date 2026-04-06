@@ -16,8 +16,6 @@
       :can-use-persisted-customization-state="true"
       :customization-mode="ProductCustomizationMode.CUSTOMIZE"
       :draft-order-item="draftOrderItem"
-      :additional-steps="additionalSteps"
-      :load-additional-steps-data="loadAdditionalStepsData"
       @hook:mounted="onFormMounted"
     />
 
@@ -52,8 +50,6 @@ import {
   LayoutType,
   useProductFormLayout
 } from 'theme/helpers/use-product-form-layout';
-import { CreationWizardFormAdditionalStep } from 'theme/components/customization-system/forms/creation-wizard-form.vue';
-import OrderItemCustomizeUpgradesStep from 'theme/components/customization-system/forms/order-item-customize-upgrades-step.vue';
 
 import FormWithImagesGalleryPlaceholder from 'theme/components/customization-system/forms/placeholders/form-with-images-gallery-placeholder.vue';
 import VerticalStepsFormPlaceholder from 'theme/components/customization-system/forms/placeholders/vertical-steps-form-placeholder.vue';
@@ -157,27 +153,6 @@ export default defineComponent({
       context
     );
 
-    const additionalSteps = computed<CreationWizardFormAdditionalStep[]>(() => {
-      if (!orderItem.value || !alterationProduct.value) {
-        return [];
-      }
-
-      return [
-        {
-          name: 'Upgrades',
-          component: OrderItemCustomizeUpgradesStep,
-          props: {
-            orderItem: orderItem.value,
-            alterationProduct: alterationProduct.value
-          }
-        }
-      ];
-    });
-
-    function loadAdditionalStepsData (): Promise<void> {
-      return orderDetails.loadOrder();
-    }
-
     const showForm = computed<boolean>(() => {
       const isAlterationProductReady = !shouldWaitForAlterationProduct.value || !!alterationProduct.value;
 
@@ -229,15 +204,13 @@ export default defineComponent({
       ProductCustomizationMode,
       currentProduct,
       draftOrderItem,
-      additionalSteps,
       formComponent,
       formPlaceholderComponent,
       mainTitleText,
       onFormMounted,
       showForm,
       showPlaceholder,
-      topStorySlug,
-      loadAdditionalStepsData
+      topStorySlug
     };
   },
   beforeRouteLeave (to, from, next) {
