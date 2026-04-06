@@ -6,7 +6,7 @@ import { SelectedBundleOption } from '@vue-storefront/core/modules/catalog/types
 import { setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { CustomizationStateItem, filterCustomizationState } from 'src/modules/customization-system';
-import { ServerError } from 'src/modules/shared';
+import { normalizeProductPurchaseFlow, ProductPurchaseFlow, ServerError } from 'src/modules/shared';
 
 export function useAddToCart (
   product: Ref<Product | undefined>,
@@ -15,7 +15,8 @@ export function useAddToCart (
   bundleOptions: Ref<Record<number, SelectedBundleOption>>,
   existingCartItem: Ref<CartItem | undefined>,
   { root }: SetupContext,
-  existingPlushieId?: string
+  existingPlushieId?: string,
+  productPurchaseFlow?: ProductPurchaseFlow
 ) {
   const isSubmitting = ref<boolean>(false);
 
@@ -50,7 +51,8 @@ export function useAddToCart (
       qty: quantity.value,
       product_option: productOption,
       extension_attributes: {
-        customization_state: filterCustomizationState(customizationStateItems.value)
+        customization_state: filterCustomizationState(customizationStateItems.value),
+        flow: normalizeProductPurchaseFlow(productPurchaseFlow)
       }
     };
 
@@ -101,7 +103,8 @@ export function useAddToCart (
       product_option: productOption,
       extension_attributes: {
         ...existingCartItem.value.extension_attributes,
-        customization_state: filterCustomizationState(customizationStateItems.value)
+        customization_state: filterCustomizationState(customizationStateItems.value),
+        flow: normalizeProductPurchaseFlow(productPurchaseFlow)
       }
     };
 

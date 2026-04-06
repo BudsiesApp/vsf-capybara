@@ -7,7 +7,6 @@ import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
 import { Dictionary } from 'src/modules/budsies';
-import isCustomProduct from 'src/modules/shared/helpers/is-custom-product.function';
 
 import { prepareCategoryProduct } from 'theme/helpers';
 import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
@@ -89,7 +88,7 @@ export function useRelatedProducts (
         // VSF replace sku with it's default variant SKU for configurable and bundle products
         // So as workaround better to use parentSku instead sku to compare
         const isSkusListIncludesProduct = product.parentSku === sku;
-        const hasLandingPage = !!product.landing_page_url || !isCustomProduct(+product.id);
+        const hasLandingPage = !!product.landing_page_url || !product.is_custom_product;
 
         if (
           isSkusListIncludesProduct &&
