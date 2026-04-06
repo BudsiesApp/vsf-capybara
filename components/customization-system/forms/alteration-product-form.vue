@@ -5,12 +5,13 @@
   >
     <div
       class="_heading-container"
-      :class="{ '-expanded': isExpanded, '-expandable': hasMore}"
+      :class="{ '-expanded': isExpanded, '-expandable': hasMore }"
       role="button"
       tabindex="0"
       @click="onToggleButtonClick"
       @keydown.enter.prevent="onToggleButtonClick"
       @keydown.space.prevent="onToggleButtonClick"
+      v-if="isExpandable"
     >
       <SfHeading
         class="_heading"
@@ -25,7 +26,7 @@
 
     <div
       class="_content"
-      :class="{ '-expanded': isContentExpanded, '-has-more': hasMore }"
+      :class="{ '-expanded': isContentExpanded, '-has-more': isExpandable && hasMore }"
     >
       <div class="_content-inner">
         <validation-observer
@@ -81,12 +82,14 @@
             <div
               class="_show-more-tile"
               @click="onToggleButtonClick"
-              v-show="hasMore && !isExpanded"
+              v-show="isExpandable && hasMore && !isExpanded"
             >
               <a href="javascript:void(0)">
                 {{ $t('See more') }}
               </a>
             </div>
+
+            <slot name="actions" />
 
             <SfButton
               class="_add-to-cart color-primary"
@@ -248,10 +251,14 @@ export default defineComponent({
     alterationProduct: {
       type: Object as PropType<Product | undefined>,
       default: undefined
+    },
+    isExpandable: {
+      type: Boolean,
+      default: true
     }
   },
   setup (props, context) {
-    const { orderItem, alterationProduct } = toRefs(props);
+    const { orderItem, alterationProduct, isExpandable } = toRefs(props);
     const isExpanded = ref(false);
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
 
@@ -345,7 +352,7 @@ export default defineComponent({
       updateCustomizationOptionValue(payload);
       executeActionsByCustomizationIdAndCustomizationOptionValue(payload);
 
-      if (!isExpanded.value) {
+      if (isExpandable.value && !isExpanded.value) {
         isExpanded.value = true;
       }
     }
@@ -442,7 +449,7 @@ export default defineComponent({
     }
 
     function onToggleButtonClick () {
-      if (!hasMore.value) {
+      if (!isExpandable.value || !hasMore.value) {
         return;
       }
 
@@ -467,6 +474,7 @@ export default defineComponent({
 
       try {
         await addToCartHandler();
+        context.emit('added-to-cart');
 
         const notification = {
           type: 'info',
@@ -506,7 +514,7 @@ export default defineComponent({
 
         for (const optionValue of (customization.optionData?.values || [])) {
           result[customization.id][optionValue.id] = {
-            isExpandable: true,
+            isExpandable: isExpandable.value,
             isExpanded: !!expandedOptionValues.value[optionValue.id]
           };
         }
@@ -516,7 +524,7 @@ export default defineComponent({
     });
 
     const isContentExpanded = computed(() => {
-      return isExpanded.value || !hasMore.value;
+      return !isExpandable.value || isExpanded.value || !hasMore.value;
     });
 
     return {
@@ -681,7 +689,9 @@ export default defineComponent({
 
   ._buttons {
     display: flex;
+    flex-direction: var(--alteration-form-buttons-flex-direction, row);
     justify-content: flex-end;
+    align-items: center;
     gap: var(--spacer-sm);
     margin-top: var(--spacer-base);
     transition: margin-top 300ms ease-in-out;
