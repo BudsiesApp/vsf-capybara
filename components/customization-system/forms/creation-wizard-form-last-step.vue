@@ -18,7 +18,7 @@
         ref="customizationOption"
         :key="customization.id"
         :customization="customization"
-        :is-disabled="isDisabled"
+        :is-disabled="true"
         :option-values="customizationAvailableOptionValues[customization.id]"
         :product-id="product.id"
         :value="customizationOptionValue[customization.id]"
