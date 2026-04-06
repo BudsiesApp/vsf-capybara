@@ -8,6 +8,8 @@ const Product = () =>
   import(/* webpackChunkName: "vsf-product" */ 'theme/pages/Product');
 const PlushieProduct = () =>
   import(/* webpackChunkName: "vsf-forevers-product" */ 'theme/pages/PlushieProduct');
+const ForeversCustomizeLater = () =>
+  import(/* webpackChunkName: "vsf-forevers-customize-later" */ 'theme/pages/ForeversCustomizeLater');
 const Category = () =>
   import(/* webpackChunkName: "vsf-category" */ 'theme/pages/Category');
 const Checkout = () =>
@@ -230,6 +232,14 @@ let routes = [
       existingPlushieId: route.query.id,
       preselectedProductSize: route.query.size,
       preselectedProductType: route.query.product
+    })
+  },
+  {
+    name: 'forevers-customize-later',
+    path: '/forevers/customize-later/',
+    component: ForeversCustomizeLater,
+    props: (route) => ({
+      existingPlushieId: route.query.id
     })
   },
   {
@@ -749,6 +759,7 @@ let routes = [
     component: OrderItemCustomize,
     props: (route) => ({
       orderItemId: route.query.orderItemId,
+      orderId: route.query.orderId,
       layout: LayoutType.CREATION_WIZARD,
       sku: route.query.sku,
       plushieType: PlushieType.FOREVERS
@@ -763,6 +774,7 @@ let routes = [
     component: OrderItemCustomize,
     props: (route) => ({
       orderItemId: route.query.orderItemId,
+      orderId: route.query.orderId,
       layout: LayoutType.CREATION_WIZARD,
       sku: route.query.sku,
       plushieType: PlushieType.GOLF_COVERS
@@ -777,6 +789,7 @@ let routes = [
     component: OrderItemCustomize,
     props: (route) => ({
       orderItemId: route.query.orderItemId,
+      orderId: route.query.orderId,
       layout: LayoutType.WITH_IMAGES_GALLERY,
       sku: route.query.sku
     }),

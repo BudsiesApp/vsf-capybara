@@ -170,7 +170,6 @@ import {
 } from '@storefront-ui/vue';
 import { OrderSummary } from './DetailedCart/index.js';
 import { mapGetters, mapState } from 'vuex';
-import { PriceHelper } from 'src/modules/shared';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
 import { CART_ITEM_LOCALIZED_PRICE_DICTIONARY, IS_CART_SYNCING } from '@vue-storefront/core/modules/cart';
@@ -181,7 +180,11 @@ import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-obser
 import { CART_UPD_ITEM } from '@vue-storefront/core/modules/cart/store/mutation-types';
 import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
-import { CartItemConfiguration, getCustomizationSystemThumbnail } from 'src/modules/customization-system';
+import {
+  CartItemConfiguration,
+  getCustomizationSystemThumbnail
+} from 'src/modules/customization-system';
+import { normalizeProductPurchaseFlow, ProductPurchaseFlow, PriceHelper } from 'src/modules/shared';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
@@ -439,6 +442,8 @@ export default {
   methods: {
     getCartItemOptions,
     editHandler (product) {
+      const productFlow = normalizeProductPurchaseFlow(product.extension_attributes?.flow);
+
       if (product.sku === customPetsiesHuggablesSku) {
         this.$router.push({
           name: 'huggables-creation-page',
@@ -482,7 +487,9 @@ export default {
         });
       } else if (foreversProductsSkus.includes(product.sku)) {
         this.$router.push({
-          name: 'forevers-create',
+          name: productFlow === ProductPurchaseFlow.CUSTOMIZE_LATER
+            ? 'forevers-customize-later'
+            : 'forevers-create',
           query: { id: product.extension_attributes?.plushie_id }
         });
       } else if (Object.keys(printedProductSkuRouteNameDictionary).includes(product.sku)) {

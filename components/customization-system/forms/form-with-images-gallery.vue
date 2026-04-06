@@ -1,7 +1,10 @@
 <template>
-  <div class="form-with-images-gallery">
+  <div
+    class="form-with-images-gallery"
+    :class="{ '-align-center': !showGallery }"
+  >
     <div class="_product">
-      <div>
+      <div v-if="showGallery">
         <header class="sf-heading sf-heading--no-underline sf-heading--left">
           <h1 class="_product-name-mobile sf-heading__title">
             {{ product.name }}
@@ -17,16 +20,24 @@
       </div>
 
       <div>
-        <header class="sf-heading sf-heading--no-underline sf-heading--left">
-          <h1 class="_product-name-desktop sf-heading__title">
+        <header
+          class="sf-heading sf-heading--no-underline"
+          :class="{'sf-heading--left': showGallery}"
+        >
+          <h1
+            class="sf-heading__title"
+            :class="{ '_product-name-desktop': showGallery }"
+          >
             {{ product.name }}
           </h1>
         </header>
 
-        <div class="_short-description" v-html="shortDescription" />
+        <slot name="description">
+          <div class="_short-description" v-html="shortDescription" />
+        </slot>
 
         <a-custom-price
-          v-if="!isCustomizeFlow"
+          v-if="!isCustomizeMode"
           class="_price"
           :regular="totalPrice.regular"
           :special-price="totalPrice.special"
@@ -38,6 +49,12 @@
           :product-id="product.id"
           class="_product-rating"
         />
+
+        <slot
+          name="product-details-extra"
+          :product="product"
+        />
+
         <validation-observer
           v-slot="{ errors: formErrors }"
           slim
@@ -65,7 +82,7 @@
               :ref="getFieldAnchorName('Quantity')"
             >
               <validation-provider
-                v-if="!isCustomizeFlow"
+                v-if="!isCustomizeMode"
                 v-slot="{ errors }"
                 rules="required"
                 :name="'Quantity'"
@@ -128,7 +145,8 @@ import {
   PropType,
   ref,
   Ref,
-  toRefs
+  toRefs,
+  watch
 } from '@vue/composition-api';
 import { SfButton } from '@storefront-ui/vue';
 import { ValidationObserver, ValidationProvider } from 'vee-validate';
@@ -151,13 +169,15 @@ import {
   useEmailCustomization,
   useOptionValueActions,
   useSelectedOptionValueUrlQuery,
-  CustomizableProductFlowType,
+  ProductCustomizationMode,
   DraftOrderItem,
   CustomizationStateItem,
   LockedCustomizationsFilterType,
+  usePurchaseFlowCustomizations,
   useLockedCustomizations,
   useAvailableOptionsValuesFilter
 } from 'src/modules/customization-system';
+import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow } from 'src/modules/shared';
 import i18n from '@vue-storefront/core/i18n';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -208,9 +228,13 @@ export default defineComponent({
       type: String as PropType<string | undefined>,
       default: undefined
     },
-    flow: {
-      type: String as PropType<CustomizableProductFlowType>,
-      default: CustomizableProductFlowType.ADD_TO_CART
+    customizationMode: {
+      type: String as PropType<ProductCustomizationMode>,
+      default: ProductCustomizationMode.ADD_TO_CART
+    },
+    productPurchaseFlow: {
+      type: String as PropType<ProductPurchaseFlow>,
+      default: DEFAULT_PRODUCT_PURCHASE_FLOW
     },
     canUsePersistedCustomizationState: {
       type: Boolean,
@@ -223,6 +247,10 @@ export default defineComponent({
     product: {
       type: Object as PropType<Product>,
       required: true
+    },
+    showGallery: {
+      type: Boolean,
+      default: true
     }
   },
   components: {
@@ -239,15 +267,23 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
-    const { canUsePersistedCustomizationState, existingCartItem, imageUrl, product, flow, draftOrderItem } = toRefs(props);
+    const {
+      canUsePersistedCustomizationState,
+      existingCartItem,
+      imageUrl,
+      product,
+      customizationMode,
+      draftOrderItem,
+      productPurchaseFlow
+    } = toRefs(props);
 
     const productRatingComponent = inject('ProductRatingComponent', null);
     const shouldShowProductRating = computed(() => {
       return config.products.showRating && !!productRatingComponent && !!product.value.id;
     });
 
-    const isCustomizeFlow = computed<boolean>(() => {
-      return flow.value === CustomizableProductFlowType.CUSTOMIZE;
+    const isCustomizeMode = computed<boolean>(() => {
+      return customizationMode.value === ProductCustomizationMode.CUSTOMIZE;
     });
 
     const customizationOption = ref<InstanceType<typeof CustomizationOption>[] | null>(null);
@@ -284,6 +320,7 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       removeCustomizationOptionValue,
+      resetCustomizationState,
       selectedOptionValuesIds,
       updateCustomizationOptionValue,
       mergeCustomizationState
@@ -325,7 +362,7 @@ export default defineComponent({
     );
 
     const preservationStorageKey = computed<string>(() => {
-      const key = isCustomizeFlow.value && draftOrderItem.value
+      const key = isCustomizeMode.value && draftOrderItem.value
         ? draftOrderItem.value.id
         : productSku.value;
       return String(key);
@@ -358,7 +395,8 @@ export default defineComponent({
         undefined,
         onCustomizationStateRestored,
         undefined,
-        onCustomizationStateRestored
+        onCustomizationStateRestored,
+        resetCustomizationState
       );
 
     const { emailCustomizationFilter, persistCustomerEmail } =
@@ -394,13 +432,28 @@ export default defineComponent({
     );
 
     const { quantity } = useProductQuantity(existingCartItem);
+
+    watch(productSku, (newValue, oldValue) => {
+      if (newValue === oldValue || existingCartItem.value) {
+        return;
+      }
+
+      quantity.value = 1;
+
+      if (validationObserver.value) {
+        validationObserver.value.reset();
+      }
+    });
+
     const { addToCartHandler, isSubmitting: isSubmittingAddToCart } = useAddToCart(
       product,
       quantity,
       customizationState,
       bundleOptions,
       existingCartItem,
-      context
+      context,
+      undefined,
+      productPurchaseFlow.value
     );
 
     const { isUnmounted } = useComponentUnmountedChecker();
@@ -412,7 +465,7 @@ export default defineComponent({
     } = useLockedCustomizations(
       customizationOptionValue,
       productCustomizations,
-      flow,
+      customizationMode,
       LockedCustomizationsFilterType.UNSELECTED
     );
 
@@ -427,6 +480,16 @@ export default defineComponent({
       context.ssrContext
     );
 
+    const {
+      flowFilteredCustomizations
+    } = usePurchaseFlowCustomizations(
+      availableOptionCustomizations,
+      productPurchaseFlow,
+      onCustomizationOptionInput,
+      customizationOptionValue,
+      customizationMode
+    );
+
     const { confirmCustomization, isSubmitting: isSubmittingCustomize } = useCustomizeAction(
       customizationState,
       draftOrderItem,
@@ -439,7 +502,7 @@ export default defineComponent({
       if (!isValid) return;
 
       try {
-        if (isCustomizeFlow.value) {
+        if (isCustomizeMode.value) {
           await confirmCustomization();
         } else {
           await addToCartHandler();
@@ -452,7 +515,7 @@ export default defineComponent({
           return;
         };
 
-        if (isCustomizeFlow.value) {
+        if (isCustomizeMode.value) {
           context.root.$router.push({ name: 'orders-history' });
           return;
         }
@@ -478,12 +541,18 @@ export default defineComponent({
       return isSubmitting.value;
     });
 
+    const { filteredCustomizations } = useCustomizationsFilter(
+      flowFilteredCustomizations,
+      customizationAvailableOptionValues,
+      [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter, lockedCustomizationsFilter]
+    );
+
     const isSubmitButtonDisabled = computed<boolean>(() => {
       return isSomeEntityBusy.value || isDisabled.value;
     });
 
     const submitButtonText = computed<string>(() => {
-      if (isCustomizeFlow.value) {
+      if (isCustomizeMode.value) {
         return i18n.t('Confirm Customization').toString();
       }
 
@@ -495,11 +564,6 @@ export default defineComponent({
     });
 
     return {
-      ...useCustomizationsFilter(
-        availableOptionCustomizations,
-        customizationAvailableOptionValues,
-        [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter, lockedCustomizationsFilter]
-      ),
       ...useProductGallery(
         product,
         productCustomizations,
@@ -523,8 +587,9 @@ export default defineComponent({
       customizationOption,
       customizationOptionValue,
       filteredCustomizationAvailableOptionValues,
+      filteredCustomizations,
       isDisabled,
-      isCustomizeFlow,
+      isCustomizeMode,
       isSubmitButtonDisabled,
       lockedCustomizationDictionary,
       onEntityBusyChanged,
@@ -600,6 +665,21 @@ export default defineComponent({
   ._price,
   ._product-rating {
     margin-top: var(--spacer-base);
+  }
+
+  &.-align-center {
+  --price-justify-content: center;
+  --customization-option-label-align: center;
+
+    text-align: center;
+
+    ._product {
+      justify-content: center;
+    }
+
+    ._product-rating {
+      justify-content: center;
+    }
   }
 
   @media (min-width: $tablet-min) {

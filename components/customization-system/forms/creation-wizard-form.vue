@@ -4,7 +4,7 @@
       <div class="_steps-container">
         <sf-steps
           :active="currentStep"
-          :can-go-back="canGoBack && !isSubmitButtonDisabled"
+          :can-go-back="canGoBack && !isSubmitButtonDisabled && !isCurrentStepAdditional"
           :steps="stepsList"
           @change="onStepChanged"
           class="_steps"
@@ -88,11 +88,22 @@
                 :submit-button-text="submitButtonText"
                 :quantity.sync="quantity"
                 :locked-customizations="filteredSelectedLockedCustomizations"
-                :show-quantity="!isCustomizeFlow"
+                :show-quantity="!isCustomizeMode"
                 @input="onCustomizationOptionInput"
                 @customization-option-busy-state-changed="
                   onEntityBusyChanged
                 "
+              />
+            </sf-step>
+
+            <sf-step
+              v-for="step in additionalSteps"
+              :key="step.name"
+              :name="step.name"
+            >
+              <component
+                :is="step.component"
+                v-bind="step.props || {}"
               />
             </sf-step>
           </template>
@@ -109,6 +120,7 @@
 </template>
 
 <script lang="ts">
+import { Component } from 'vue';
 import {
   computed,
   defineComponent,
@@ -125,7 +137,7 @@ import Product from 'core/modules/catalog/types/Product';
 import i18n from '@vue-storefront/core/i18n';
 import { useABTestingCustomizationsFilter } from 'src/modules/a-b-testing';
 import {
-  CustomizableProductFlowType,
+  ProductCustomizationMode,
   Customization,
   useCustomizationState,
   useAvailableCustomizations,
@@ -144,8 +156,10 @@ import {
   PersistedData,
   DraftOrderItem,
   CustomizationStateItem,
-  useAvailableOptionsValuesFilter
+  useAvailableOptionsValuesFilter,
+  usePurchaseFlowCustomizations
 } from 'src/modules/customization-system';
+import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow } from 'src/modules/shared';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
@@ -185,6 +199,12 @@ function getAllFormRefs (
   return refsDictionary;
 }
 
+export interface CreationWizardFormAdditionalStep {
+  name: string,
+  component: Component,
+  props?: Record<string, any>
+}
+
 export default defineComponent({
   name: 'CreationWizardForm',
   props: {
@@ -192,9 +212,9 @@ export default defineComponent({
       type: Object as PropType<DraftOrderItem | undefined>,
       default: undefined
     },
-    flow: {
-      type: String as PropType<CustomizableProductFlowType>,
-      default: CustomizableProductFlowType.ADD_TO_CART
+    customizationMode: {
+      type: String as PropType<ProductCustomizationMode>,
+      default: ProductCustomizationMode.ADD_TO_CART
     },
     canUsePersistedCustomizationState: {
       type: Boolean,
@@ -216,9 +236,21 @@ export default defineComponent({
       type: String as PropType<string | undefined>,
       default: undefined
     },
+    productPurchaseFlow: {
+      type: String as PropType<ProductPurchaseFlow>,
+      default: DEFAULT_PRODUCT_PURCHASE_FLOW
+    },
     productTypeButtonsList: {
       type: Array as PropType<ProductTypeButton[]>,
       default: () => []
+    },
+    additionalSteps: {
+      type: Array as PropType<CreationWizardFormAdditionalStep[]>,
+      default: () => []
+    },
+    loadAdditionalStepsData: {
+      type: Function as PropType<(() => Promise<void>) | undefined>,
+      default: undefined
     }
   },
   components: {
@@ -237,15 +269,17 @@ export default defineComponent({
     const {
       canUsePersistedCustomizationState,
       draftOrderItem,
-      flow,
+      customizationMode,
       existingCartItem,
+      additionalSteps,
+      productPurchaseFlow,
       plushieType,
       preselectedProductSize,
       preselectedProductType
     } = toRefs(props);
 
-    const isCustomizeFlow = computed<boolean>(() => {
-      return flow.value === CustomizableProductFlowType.CUSTOMIZE;
+    const isCustomizeMode = computed<boolean>(() => {
+      return customizationMode.value === ProductCustomizationMode.CUSTOMIZE;
     });
 
     const currentProduct = computed<Product | undefined>(() => {
@@ -321,7 +355,7 @@ export default defineComponent({
     } = useLockedCustomizations(
       customizationOptionValue,
       productCustomizations,
-      flow
+      customizationMode
     );
 
     const { filteredCustomizations: filteredSelectedLockedCustomizations } = useCustomizationsFilter(
@@ -356,8 +390,16 @@ export default defineComponent({
       context.ssrContext
     );
 
-    const { filteredCustomizations } = useCustomizationsFilter(
+    const { flowFilteredCustomizations } = usePurchaseFlowCustomizations(
       availableCustomizations,
+      productPurchaseFlow,
+      onCustomizationOptionInput,
+      customizationOptionValue,
+      customizationMode
+    );
+
+    const { filteredCustomizations } = useCustomizationsFilter(
+      flowFilteredCustomizations,
       customizationAvailableOptionValues,
       [
         emailCustomizationFilter,
@@ -379,11 +421,17 @@ export default defineComponent({
       emailValue
     )
 
+    const additionalStepNames = computed<string[]>(() => {
+      return additionalSteps.value.map((step: CreationWizardFormAdditionalStep) => step.name);
+    });
+    const isAdditionalStepsDataLoading: Ref<boolean> = ref(false);
+
     const formSteps = useCreationWizardFormSteps(
       customizationGroups.customizationRootGroups,
+      additionalStepNames,
       existingCartItem,
       onStepSubmit,
-      flow,
+      customizationMode,
       context
     );
 
@@ -429,7 +477,7 @@ export default defineComponent({
     );
 
     const showProductTypeChooseStep = computed<boolean>(() => {
-      return !isCustomizeFlow.value;
+      return !isCustomizeMode.value;
     });
 
     const beforeCustomizationStateMerge = async (preservedState: PersistedData): Promise<boolean> => {
@@ -456,7 +504,7 @@ export default defineComponent({
     }
 
     const preservationStorageKey = computed<string>(() => {
-      return isCustomizeFlow.value && draftOrderItem.value
+      return isCustomizeMode.value && draftOrderItem.value
         ? draftOrderItem.value.id
         : plushieType.value;
     });
@@ -482,7 +530,9 @@ export default defineComponent({
       customizationState,
       bundleOptions,
       existingCartItem,
-      context
+      context,
+      undefined,
+      productPurchaseFlow.value
     );
 
     const { confirmCustomization, isSubmitting: isSubmittingCustomize } = useCustomizeAction(
@@ -495,7 +545,7 @@ export default defineComponent({
 
     async function onFormSubmit (): Promise<void> {
       try {
-        if (isCustomizeFlow.value) {
+        if (isCustomizeMode.value) {
           await confirmCustomization();
         } else {
           await addToCartHandler();
@@ -508,7 +558,28 @@ export default defineComponent({
           return;
         }
 
-        if (isCustomizeFlow.value) {
+        if (additionalSteps.value.length > 0) {
+          let isAdditionalStepsDataLoaded = true;
+
+          if (props.loadAdditionalStepsData) {
+            isAdditionalStepsDataLoading.value = true;
+
+            try {
+              await props.loadAdditionalStepsData();
+            } catch (e) {
+              isAdditionalStepsDataLoaded = false;
+            }
+
+            isAdditionalStepsDataLoading.value = false;
+          }
+
+          if (isAdditionalStepsDataLoaded) {
+            await formSteps.nextStep();
+            return;
+          }
+        }
+
+        if (isCustomizeMode.value) {
           context.root.$router.push({
             name: 'orders-history'
           });
@@ -532,11 +603,11 @@ export default defineComponent({
     });
 
     const isDisabled = computed<boolean>(() => {
-      return isSubmitting.value || productTypeStep.isProductLoading.value;
+      return isSubmitting.value || productTypeStep.isProductLoading.value || isAdditionalStepsDataLoading.value;
     });
 
     const submitButtonText = computed<string>(() => {
-      if (isCustomizeFlow.value) {
+      if (isCustomizeMode.value) {
         return i18n.t('Confirm Customization').toString();
       }
 
@@ -578,7 +649,7 @@ export default defineComponent({
       submitButtonText,
       quantity,
       validationObserver,
-      isCustomizeFlow,
+      isCustomizeMode,
       filteredSelectedLockedCustomizations,
       showProductTypeChooseStep
     };
