@@ -386,10 +386,7 @@ export default defineComponent({
         return;
       }
 
-      const isConfirm = isOrderAddressConfirmationSubmission(shippingAddress, address);
-      debugger;
-
-      if (isConfirm) {
+      if (isOrderAddressConfirmationSubmission(shippingAddress, address)) {
         await confirmCurrentAddress();
         return;
       }
