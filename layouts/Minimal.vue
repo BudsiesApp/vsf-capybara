@@ -12,10 +12,13 @@
 </template>
 
 <script>
+import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
+
+import Head from 'theme/head';
+
+import MCookieNotification from 'theme/components/molecules/m-cookie-notification';
 import OHeaderMinimal from 'theme/components/organisms/o-header-minimal';
 import OFooter from 'theme/components/organisms/o-footer';
-import MCookieNotification from 'theme/components/molecules/m-cookie-notification';
-import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
 
 export default {
   components: {
@@ -27,7 +30,8 @@ export default {
     isStoryblokPreviewMode () {
       return isStoryblokPreview();
     }
-  }
+  },
+  metaInfo: Head
 }
 </script>
 
