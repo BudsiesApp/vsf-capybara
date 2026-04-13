@@ -369,11 +369,11 @@ export default defineComponent({
 
         root.$store.dispatch('notification/spawnNotification', {
           type: 'success',
-          message: i18n.t('Current address kept'),
+          message: i18n.t('Address confirmed successfully'),
           action1: { label: i18n.t('OK') }
         });
       } catch (error) {
-        onFailure(root.$t('Unable to kept current address') as string);
+        onFailure(root.$t('Unable to confirm address') as string);
       } finally {
         isSubmitting.value = false;
       }
