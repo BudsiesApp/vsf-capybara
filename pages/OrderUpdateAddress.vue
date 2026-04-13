@@ -81,7 +81,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, computed } from '@vue/composition-api';
+import { defineComponent, ref, watch, computed, Ref, ComputedRef } from '@vue/composition-api';
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfCheckbox, SfHeading } from '@storefront-ui/vue';
 
@@ -91,7 +91,15 @@ import { AddressExtensionAttributes } from '@vue-storefront/core/modules/shared'
 import i18n from '@vue-storefront/i18n';
 
 import { useAddressValidation, useExistingValidationResult } from 'src/modules/address';
-import { useOrderDetails, OrderAddress, Order, REQUEST_ORDER_SHIPPING_ADDRESS_UPDATE_ACTION } from 'src/modules/orders-history';
+import {
+  useOrderDetails,
+  mapOrderAddressToBaseAddressDetails,
+  isOrderAddressConfirmationSubmission,
+  OrderAddress,
+  Order,
+  REQUEST_ORDER_SHIPPING_ADDRESS_UPDATE_ACTION,
+  REQUEST_ORDER_SHIPPING_ADDRESS_CONFIRMATION_ACTION
+} from 'src/modules/orders-history';
 
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 import OBaseAddressForm from 'theme/components/organisms/o-base-address-form.vue';
@@ -121,7 +129,7 @@ export default defineComponent({
 
     const { order, isLoading, isError: showNotFound } = useOrderDetails(context, props.orderId);
     const isSubmitting = ref(false);
-    const addressFormModel = ref<BaseAddressDetails>({
+    const addressFormModel: Ref<BaseAddressDetails> = ref({
       firstName: '',
       lastName: '',
       country: '',
@@ -143,9 +151,8 @@ export default defineComponent({
       completeValidation: completeAddressValidation
     } = useAddressValidation(context);
 
-    const existingExtensionAttributes = computed<AddressExtensionAttributes | undefined>(() => {
-      const _order = (order as any)?.value as Order | undefined;
-      return _order?.shipping_address?.extension_attributes;
+    const existingExtensionAttributes: ComputedRef<AddressExtensionAttributes | undefined> = computed(() => {
+      return currentShippingAddress.value?.extension_attributes;
     });
 
     const {
@@ -157,7 +164,7 @@ export default defineComponent({
       handleValidationResult
     );
 
-    const showExistingValidationWarning = computed<boolean>(() => {
+    const showExistingValidationWarning: ComputedRef<boolean> = computed(() => {
       if (wasFormSubmitted.value) {
         return false;
       }
@@ -181,8 +188,12 @@ export default defineComponent({
       }
     );
 
-    const isFormDisabled = computed<boolean>(() => {
+    const isFormDisabled: ComputedRef<boolean> = computed(() => {
       return isSubmitting.value || isValidatingAddress.value;
+    });
+
+    const currentShippingAddress: ComputedRef<OrderAddress | undefined> = computed(() => {
+      return order.value?.shipping_address;
     });
 
     const defaultShippingAddress = computed(() => {
@@ -191,24 +202,20 @@ export default defineComponent({
 
     function mapOrderAddressToFormModel (orderAddress: OrderAddress): BaseAddressDetails {
       return {
-        firstName: orderAddress.firstname,
-        lastName: orderAddress.lastname,
-        country: orderAddress.country_id,
-        streetAddress: orderAddress.street.join(', '),
-        apartmentNumber: '',
-        city: orderAddress.city,
-        state: orderAddress.region || '',
-        region_id: orderAddress.region_id || null,
-        zipCode: orderAddress.postcode,
-        phoneNumber: orderAddress.telephone || '',
-        vat_id: orderAddress.vat_id || '',
+        ...mapOrderAddressToBaseAddressDetails(orderAddress),
         extension_attributes: orderAddress.extension_attributes
       };
     }
 
     function mapBaseAddressDetailsToOrderAddress (address: BaseAddressDetails): OrderAddress {
+      const shippingAddress = currentShippingAddress.value;
+
+      if (!shippingAddress) {
+        throw new Error('Order shipping address is not available');
+      }
+
       return {
-        ...((order as any).value as Order).shipping_address,
+        ...shippingAddress,
         firstname: address.firstName,
         lastname: address.lastName,
         country_id: address.country,
@@ -240,12 +247,12 @@ export default defineComponent({
       }
     }
 
-    const shouldShowDefaultAddressCheckbox = computed<boolean>(() => {
-      if (!defaultShippingAddress.value || !(order as any).value.shipping_address) {
+    const shouldShowDefaultAddressCheckbox: ComputedRef<boolean> = computed(() => {
+      if (!defaultShippingAddress.value || !currentShippingAddress.value) {
         return false;
       }
 
-      const mappedOrderAddress = mapOrderAddressToFormModel((order as any).value.shipping_address);
+      const mappedOrderAddress = mapOrderAddressToFormModel(currentShippingAddress.value);
       const mappedUserDefaultAddress = mapUserAddressToFormModel(defaultShippingAddress.value);
 
       try {
@@ -258,21 +265,19 @@ export default defineComponent({
       }
     });
 
-    const isStateFieldDisabled = computed<boolean>(() => {
-      const _order = (order as any)?.value as Order | undefined;
-
-      if (!_order?.shipping_address) {
+    const isStateFieldDisabled: ComputedRef<boolean> = computed(() => {
+      if (!currentShippingAddress.value) {
         return false;
       }
 
-      return !!(_order.shipping_address.region || _order.shipping_address.region_id);
+      return !!(currentShippingAddress.value.region || currentShippingAddress.value.region_id);
     });
 
     async function tryToHandleExistingValidationResult (): Promise<void> {
       const shouldProceed = await handleExistingValidationResult();
 
       if (shouldProceed) {
-        return updateAddress();
+        return submitAddressByIntent(addressFormModel.value);
       }
     }
 
@@ -292,43 +297,47 @@ export default defineComponent({
       });
     }
 
-    async function updateDefaultShippingAddress (): Promise<void> {
+    async function requestOrderShippingAddressConfirmation (addressId: number): Promise<void> {
+      await root.$store.dispatch(REQUEST_ORDER_SHIPPING_ADDRESS_CONFIRMATION_ACTION, {
+        addressId
+      });
+    }
+
+    async function updateDefaultShippingAddress (address: BaseAddressDetails): Promise<void> {
       const defaultAddress = defaultShippingAddress.value;
 
       if (!defaultAddress) {
         return;
       }
 
-      const _addressFormModel = (addressFormModel as any).value as BaseAddressDetails;
-
       const addressToUpdate = {
         id: defaultAddress.id,
-        firstname: _addressFormModel.firstName,
-        lastname: _addressFormModel.lastName,
-        street: [_addressFormModel.streetAddress, _addressFormModel.apartmentNumber || ''],
-        city: _addressFormModel.city,
-        region: { region: _addressFormModel.state, region_id: _addressFormModel.region_id },
-        postcode: _addressFormModel.zipCode,
-        country_id: _addressFormModel.country,
-        telephone: _addressFormModel.phoneNumber,
+        firstname: address.firstName,
+        lastname: address.lastName,
+        street: [address.streetAddress, address.apartmentNumber || ''],
+        city: address.city,
+        region: { region: address.state, region_id: address.region_id },
+        postcode: address.zipCode,
+        country_id: address.country,
+        telephone: address.phoneNumber,
         default_shipping: defaultAddress.default_shipping,
         default_billing: defaultAddress.default_billing,
         customer_id: defaultAddress.customer_id,
-        vat_id: _addressFormModel.vat_id,
-        extension_attributes: _addressFormModel.extension_attributes
+        vat_id: address.vat_id,
+        extension_attributes: address.extension_attributes
       };
 
       await root.$store.dispatch('budsies/updateAddress', { address: addressToUpdate });
     }
 
-    async function updateAddress (): Promise<void> {
+    async function updateAddress (address: BaseAddressDetails): Promise<void> {
       isSubmitting.value = true;
 
       try {
-        await requestOrderShippingAddressUpdate((addressFormModel as any).value);
+        await requestOrderShippingAddressUpdate(address);
 
         if (shouldUpdateDefaultAddress.value) {
-          await updateDefaultShippingAddress();
+          await updateDefaultShippingAddress(address);
         }
 
         root.$store.dispatch('notification/spawnNotification', {
@@ -343,6 +352,46 @@ export default defineComponent({
       } finally {
         isSubmitting.value = false;
       }
+    }
+
+    async function confirmCurrentAddress (): Promise<void> {
+      const shippingAddress = currentShippingAddress.value;
+
+      if (!shippingAddress) {
+        return;
+      }
+
+      isSubmitting.value = true;
+
+      try {
+        await requestOrderShippingAddressConfirmation(shippingAddress.entity_id);
+        goToOrderHistory();
+
+        root.$store.dispatch('notification/spawnNotification', {
+          type: 'success',
+          message: i18n.t('Address confirmed successfully'),
+          action1: { label: i18n.t('OK') }
+        });
+      } catch (error) {
+        onFailure(root.$t('Unable to confirm address') as string);
+      } finally {
+        isSubmitting.value = false;
+      }
+    }
+
+    async function submitAddressByIntent (address: BaseAddressDetails): Promise<void> {
+      const shippingAddress = currentShippingAddress.value;
+
+      if (!shippingAddress) {
+        return;
+      }
+
+      if (isOrderAddressConfirmationSubmission(shippingAddress, address)) {
+        await confirmCurrentAddress();
+        return;
+      }
+
+      await updateAddress(address);
     }
 
     async function onFormSubmit (): Promise<void> {
@@ -364,7 +413,7 @@ export default defineComponent({
 
       completeAddressValidation();
 
-      await updateAddress();
+      await submitAddressByIntent(addressFormModel.value);
       wasFormSubmitted.value = true;
     }
 
@@ -372,7 +421,7 @@ export default defineComponent({
       order,
       (newOrder: Order | null) => {
         if (newOrder?.shipping_address) {
-          ((addressFormModel as any).value as BaseAddressDetails) = mapOrderAddressToFormModel(newOrder.shipping_address);
+          addressFormModel.value = mapOrderAddressToFormModel(newOrder.shipping_address);
           tryToHandleExistingValidationResult();
         }
       },
@@ -384,34 +433,11 @@ export default defineComponent({
     }
 
     async function useWithoutChanges (): Promise<void> {
-      if (isSubmitting.value || !(order as any).value?.shipping_address) {
+      if (isSubmitting.value || !currentShippingAddress.value) {
         return;
       }
 
-      isSubmitting.value = true;
-
-      try {
-        const addressToUpdate = mapOrderAddressToFormModel((order as any).value.shipping_address)
-
-        if (!addressToUpdate.extension_attributes) {
-          addressToUpdate.extension_attributes = {};
-        }
-
-        addressToUpdate.extension_attributes.validation_customer_override = true;
-
-        await requestOrderShippingAddressUpdate(addressToUpdate);
-        goToOrderHistory();
-
-        root.$store.dispatch('notification/spawnNotification', {
-          type: 'success',
-          message: i18n.t('Current address kept'),
-          action1: { label: i18n.t('OK') }
-        });
-      } catch (error) {
-        onFailure(root.$t('Unable to kept current address') as string);
-      } finally {
-        isSubmitting.value = false;
-      }
+      await confirmCurrentAddress();
     }
 
     return {
