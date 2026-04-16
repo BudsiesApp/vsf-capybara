@@ -543,7 +543,7 @@ export default defineComponent({
     });
 
     const { filteredCustomizations } = useCustomizationsFilter(
-      availableCustomizations,
+      availableOptionCustomizations,
       customizationAvailableOptionValues,
       [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter, lockedCustomizationsFilter]
     );
