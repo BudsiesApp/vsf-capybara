@@ -260,15 +260,6 @@ export default defineComponent({
     const productCustomizations = computed<Customization[]>(() => {
       return product.value.customizations || [];
     });
-    const productCustomization = computed<Record<string, Customization>>(() => {
-      const dictionary: Record<string, Customization> = {};
-
-      for (const customization of productCustomizations.value) {
-        dictionary[customization.id] = customization;
-      }
-
-      return dictionary;
-    });
 
     const {
       addCustomizationOptionValue,
@@ -282,13 +273,33 @@ export default defineComponent({
     } = useCustomizationState(existingCartItem);
 
     const {
+      flowAvailableCustomizations
+    } = usePurchaseFlowCustomizations(
+      productCustomizations,
+      productPurchaseFlow,
+      updateCustomizationOptionValue,
+      customizationOptionValue,
+      customizationMode
+    );
+
+    const flowAvailableProductCustomization = computed<Record<string, Customization>>(() => {
+      const dictionary: Record<string, Customization> = {};
+
+      for (const customization of flowAvailableCustomizations.value) {
+        dictionary[customization.id] = customization;
+      }
+
+      return dictionary;
+    });
+
+    const {
       availableCustomizations,
       availableOptionCustomizations,
       availableOptionValues,
       customizationAvailableOptionValues,
       removeUnavailableOptionValues
     } = useAvailableCustomizations(
-      productCustomizations,
+      flowAvailableCustomizations,
       selectedOptionValuesIds,
       customizationOptionValue,
       updateCustomizationOptionValue
@@ -296,8 +307,8 @@ export default defineComponent({
 
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
-        productCustomizations,
-        productCustomization,
+        flowAvailableCustomizations,
+        flowAvailableProductCustomization,
         customizationAvailableOptionValues,
         updateCustomizationOptionValue,
         removeCustomizationOptionValue,
@@ -316,7 +327,7 @@ export default defineComponent({
     }
 
     const { unhandledCustomizationsFilter } = useSelectedOptionValueUrlQuery(
-      productCustomizations,
+      flowAvailableCustomizations,
       availableOptionValues,
       customizationOptionValue,
       product,
@@ -344,17 +355,9 @@ export default defineComponent({
       );
 
     const { bundleOptions } = useCustomizationsBundleOptions(
-      productCustomizations,
+      flowAvailableCustomizations,
       customizationOptionValue,
       availableOptionValues
-    );
-
-    const { flowFilteredCustomizations } = usePurchaseFlowCustomizations(
-      availableCustomizations,
-      productPurchaseFlow,
-      onCustomizationOptionInput,
-      customizationOptionValue,
-      customizationMode
     );
 
     const { setDefaultValues } = useCustomizationsOptionsDefaultValue(
@@ -471,13 +474,13 @@ export default defineComponent({
     );
 
     const { filteredCustomizations } = useCustomizationsFilter(
-      flowFilteredCustomizations,
+      availableCustomizations,
       customizationAvailableOptionValues,
       [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter]
     );
 
     return {
-      ...useCustomizationsGroups(filteredCustomizations, productCustomization),
+      ...useCustomizationsGroups(filteredCustomizations, flowAvailableProductCustomization),
       ...useQuantityAndShippingDiscounts(),
       ...formValidation,
       ...useBulkImagesUpload(context),
