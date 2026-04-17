@@ -4,8 +4,11 @@
       <div class="loader" />
     </div>
 
-    <p v-if="errorMessage" class="extra-charge-purchase__message extra-charge-purchase__message--error">
-      {{ $t(errorMessage) }}
+    <p
+      v-if="errorMessage"
+      class="extra-charge-purchase__message extra-charge-purchase__message--error"
+    >
+      {{ errorMessage }}
     </p>
   </div>
 </template>
@@ -59,7 +62,7 @@ export function parseCustomizationStateQueryParam (
 
       result.push({
         customization_id: customizationId,
-        qty: quantity || 1,
+        qty: quantity && quantity > 0 ? quantity : 1,
         value: id
       });
 
@@ -153,7 +156,7 @@ export default defineComponent({
       props.plushieId
     );
 
-    const pendingSamePlushieCartItem = computed<CartItem | undefined>(() => {
+    const matchingAlterationCartItem = computed<CartItem | undefined>(() => {
       return cartItems.value.find((item) => {
         const plushieId = item.extension_attributes?.plushie_id;
 
@@ -224,8 +227,8 @@ export default defineComponent({
       }
     }
 
-    async function removePendingSamePlushieCartItem (): Promise<void> {
-      const existingCartItem = pendingSamePlushieCartItem.value;
+    async function removeMatchingAlterationCartItem (): Promise<void> {
+      const existingCartItem = matchingAlterationCartItem.value;
 
       if (!existingCartItem) {
         return;
@@ -248,7 +251,7 @@ export default defineComponent({
         isLoading.value = true;
         errorMessage.value = null;
 
-        await removePendingSamePlushieCartItem();
+        await removeMatchingAlterationCartItem();
         await addToCartHandler();
         await root.$router.replace({ name: 'detailed-cart' });
       } catch (error) {
