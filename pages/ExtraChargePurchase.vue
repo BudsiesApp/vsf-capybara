@@ -105,18 +105,13 @@ export default defineComponent({
       return root.$store.getters['cart/getCartItems'] || [];
     });
 
-    const initialCustomizationState = computed<CustomizationStateItem[]>(() => {
-      return parseCustomizationStateQueryParam(props.customizationValues);
-    });
-
     const {
-      mergeCustomizationState,
       selectedOptionValuesIds,
       updateCustomizationOptionValue,
       customizationOptionValue,
       customizationQuantity,
       customizationState
-    } = useCustomizationState(undefined, initialCustomizationState);
+    } = useCustomizationState();
 
     const quantity = computed<number>(() => {
       const parsedQuantity = Number(props.qty);
@@ -216,7 +211,13 @@ export default defineComponent({
           return false;
         }
 
-        mergeCustomizationState(resolvedCustomizationState);
+        for (const initialCustomizationStateItem of resolvedCustomizationState) {
+          updateCustomizationOptionValue({
+            customizationId: initialCustomizationStateItem.customization_id,
+            value: initialCustomizationStateItem.value
+          });
+        }
+
         return true;
       } catch (error) {
         errorMessage.value = INCORRECT_PURCHASE_LINK_MESSAGE;
