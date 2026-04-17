@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, onBeforeUnmount, ref } from '@vue/composition-api';
+import { computed, defineComponent, onMounted, onBeforeUnmount, ref, Ref } from '@vue/composition-api';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
@@ -29,7 +29,7 @@ import { getCustomizationIdByOptionValueId } from 'src/modules/customization-sys
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 
-export function getCustomizationStateFromProp (
+export function parseCustomizationStateQueryParam (
   customizationStateProp?: string,
   customizations: Customization[] = []
 ): CustomizationStateItem[] {
@@ -39,10 +39,6 @@ export function getCustomizationStateFromProp (
 
   try {
     const parsedValue = JSON.parse(customizationStateProp);
-
-    if (Array.isArray(parsedValue)) {
-      return parsedValue as CustomizationStateItem[];
-    }
 
     if (!parsedValue || typeof parsedValue !== 'object') {
       return [] as CustomizationStateItem[];
@@ -59,11 +55,11 @@ export function getCustomizationStateFromProp (
         return result;
       }
 
-      const quantity = Number((value as { qty?: number | string }).qty);
+      const quantity = Number((value as any).qty);
 
       result.push({
         customization_id: customizationId,
-        quantity: quantity || 1,
+        qty: quantity || 1,
         value: id
       });
 
@@ -97,8 +93,8 @@ export default defineComponent({
   setup (props, { root }) {
     const isLoading = ref<boolean>(true);
     const errorMessage = ref<string | null>(null);
-    const product = ref<Product | undefined>(undefined);
-    const existingCartItem = ref<CartItem | undefined>(undefined);
+    const product: Ref<Product | undefined> = ref(undefined);
+    const existingCartItem: Ref<CartItem | undefined> = ref(undefined);
 
     const INCORRECT_PURCHASE_LINK_MESSAGE = root.$t('Purchase link is incorrect.').toString();
 
@@ -107,7 +103,7 @@ export default defineComponent({
     });
 
     const initialCustomizationState = computed<CustomizationStateItem[]>(() => {
-      return getCustomizationStateFromProp(props.customizationValues);
+      return parseCustomizationStateQueryParam(props.customizationValues);
     });
 
     const {
@@ -167,12 +163,12 @@ export default defineComponent({
       });
     });
 
-    const isMalformedLink = computed<boolean>(() => {
+    const hasMissingRequiredParams = computed<boolean>(() => {
       return !props.sku || !props.plushieId || !props.qty || !props.customizationValues;
     });
 
     async function loadProduct (): Promise<boolean> {
-      if (isMalformedLink.value) {
+      if (hasMissingRequiredParams.value) {
         errorMessage.value = INCORRECT_PURCHASE_LINK_MESSAGE;
         isLoading.value = false;
         return false;
@@ -207,7 +203,7 @@ export default defineComponent({
 
         product.value = loadedProduct;
 
-        const resolvedCustomizationState = getCustomizationStateFromProp(
+        const resolvedCustomizationState = parseCustomizationStateQueryParam(
           props.customizationValues,
           loadedProduct.customizations || []
         );
@@ -279,12 +275,8 @@ export default defineComponent({
     });
 
     return {
-      customizationState,
       errorMessage,
-      isLoading,
-      pendingSamePlushieCartItem,
-      product,
-      removePendingSamePlushieCartItem
+      isLoading
     };
   }
 });
