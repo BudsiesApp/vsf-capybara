@@ -206,7 +206,7 @@ export default defineComponent({
         return '';
       }
 
-      return `${currentProduct.value.sku}_customize_later_page_top`;
+      return `forevers_customize_later_page_top`;
     });
 
     const showPlaceholder = computed<boolean>(() => {
