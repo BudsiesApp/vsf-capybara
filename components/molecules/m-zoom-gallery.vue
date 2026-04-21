@@ -148,9 +148,6 @@ import ZoomGalleryAsset from 'theme/interfaces/zoom-gallery-asset.interface';
 import OCarousel from '../organisms/o-carousel.vue';
 import { OCarouselItem } from '../interfaces/o-carousel-item.interface';
 
-require('@cabbiepete/cloud-zoom');
-require('@cabbiepete/cloud-zoom/cloud-zoom.css');
-
 type ImageKeys = keyof Omit<ZoomGalleryAsset, 'video'>;
 
 const debounceTime = 300;
@@ -162,6 +159,8 @@ const STREAMING_VIDEO_SELECTOR = '._streaming-video';
 const YOUTUBE_FACADE_SELECTOR = '._youtube-facade';
 
 let jQuery: JQueryStatic | undefined;
+let isCloudZoomLoaded = false;
+let cloudZoomLoadingPromise: Promise<void> | undefined;
 
 export default Vue.extend({
   name: 'MZoomGallery',
@@ -421,6 +420,30 @@ export default Vue.extend({
     getZoomGallery (): HTMLElement | undefined {
       return this.$refs.zoomGallery as HTMLElement | undefined;
     },
+    async loadCloudZoomDependencies (): Promise<void> {
+      if (isCloudZoomLoaded && jQuery) {
+        return;
+      }
+
+      if (!cloudZoomLoadingPromise) {
+        cloudZoomLoadingPromise = (async () => {
+          try {
+            const [jQueryModule] = await Promise.all([
+              import(/* webpackChunkName: "vsf-cloud-zoom" */ 'jquery'),
+              import(/* webpackChunkName: "vsf-cloud-zoom" */ '@cabbiepete/cloud-zoom'),
+              import(/* webpackChunkName: "vsf-cloud-zoom" */ '@cabbiepete/cloud-zoom/cloud-zoom.css')
+            ]);
+
+            jQuery = jQueryModule.default;
+            isCloudZoomLoaded = true;
+          } catch (error) {
+            cloudZoomLoadingPromise = undefined;
+          }
+        })();
+      }
+
+      await cloudZoomLoadingPromise;
+    },
     async initCloudZoom (): Promise<void> {
       if (this.fIsCloudZoomInitialized) {
         return;
@@ -432,12 +455,15 @@ export default Vue.extend({
         return;
       }
 
-      if (!jQuery) {
-        const jQueryImport = () => import('jquery');
-        jQuery = (await jQueryImport()).default;
+      await this.loadCloudZoomDependencies();
+
+      const currentJQuery = jQuery;
+
+      if (!currentJQuery) {
+        return;
       }
 
-      (jQuery(imageWrapper) as any).CloudZoom({
+      (currentJQuery(imageWrapper) as any).CloudZoom({
         adjustX: 10,
         showTitle: false,
         transparentImage:
