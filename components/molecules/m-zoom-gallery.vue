@@ -141,8 +141,6 @@
 import debounce from 'lodash.debounce';
 import Vue, { PropType } from 'vue';
 
-import jQuery from 'jquery';
-
 import { BaseImage, ImageSourceItem } from 'src/modules/budsies';
 import { BreakpointValue, StreamingVideo } from 'src/modules/shared';
 import ZoomGalleryAsset from 'theme/interfaces/zoom-gallery-asset.interface';
@@ -162,6 +160,8 @@ const STAGE_SLIDES_PER_VIEW = 1.00001;
 
 const STREAMING_VIDEO_SELECTOR = '._streaming-video';
 const YOUTUBE_FACADE_SELECTOR = '._youtube-facade';
+
+let jQuery: JQueryStatic | undefined;
 
 export default Vue.extend({
   name: 'MZoomGallery',
@@ -396,7 +396,7 @@ export default Vue.extend({
       }
     },
     detachZoom (): void {
-      if (!this.fIsCloudZoomInitialized) {
+      if (!this.fIsCloudZoomInitialized || !jQuery) {
         return;
       }
 
@@ -421,7 +421,7 @@ export default Vue.extend({
     getZoomGallery (): HTMLElement | undefined {
       return this.$refs.zoomGallery as HTMLElement | undefined;
     },
-    initCloudZoom (): void {
+    async initCloudZoom (): Promise<void> {
       if (this.fIsCloudZoomInitialized) {
         return;
       }
@@ -430,6 +430,11 @@ export default Vue.extend({
 
       if (!imageWrapper) {
         return;
+      }
+
+      if (!jQuery) {
+        const jQueryImport = () => import('jquery');
+        jQuery = (await jQueryImport()).default;
       }
 
       (jQuery(imageWrapper) as any).CloudZoom({
