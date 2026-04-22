@@ -62,7 +62,7 @@ export function parseCustomizationStateQueryParam (
 
       result.push({
         customization_id: customizationId,
-        qty: quantity && quantity > 0 ? quantity : 1,
+        quantity: quantity && quantity > 0 ? quantity : 1,
         value: id
       });
 
@@ -110,7 +110,9 @@ export default defineComponent({
       updateCustomizationOptionValue,
       customizationOptionValue,
       customizationQuantity,
-      customizationState
+      customizationState,
+      resetCustomizationState,
+      mergeCustomizationState
     } = useCustomizationState();
 
     const quantity = computed<number>(() => {
@@ -211,12 +213,8 @@ export default defineComponent({
           return false;
         }
 
-        for (const initialCustomizationStateItem of resolvedCustomizationState) {
-          updateCustomizationOptionValue({
-            customizationId: initialCustomizationStateItem.customization_id,
-            value: initialCustomizationStateItem.value
-          });
-        }
+        resetCustomizationState();
+        mergeCustomizationState(resolvedCustomizationState);
 
         return true;
       } catch (error) {
