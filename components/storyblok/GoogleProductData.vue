@@ -1,18 +1,9 @@
 <template>
-  <div
-    class="storyblok-google-product-data layout-regular-component"
-    :class="cssClasses"
-    :style="styles"
-    v-if="itemData.product_id"
-  >
-    <editor-block-icons :item="itemData" />
-
-    <component
-      v-if="resolvedProduct"
-      :is="productStructuredDataComponent"
-      :product="resolvedProduct"
-    />
-  </div>
+  <product-structured-data
+    class="storyblok-google-product-data"
+    :product="resolvedProduct"
+    v-if="resolvedProduct"
+  />
 </template>
 
 <script lang="ts">
@@ -29,12 +20,12 @@ import GoogleProductDataBlockData from './interfaces/google-product-data.interfa
 
 export default Blok.extend({
   name: 'StoryblokGoogleProductDataBlock',
+  components: {
+    ProductStructuredData
+  },
   computed: {
     itemData (): GoogleProductDataBlockData {
       return this.item as GoogleProductDataBlockData;
-    },
-    productStructuredDataComponent () {
-      return ProductStructuredData;
     },
     resolvedProduct () {
       const itemData = this.item as GoogleProductDataBlockData;
