@@ -6,7 +6,6 @@ import {
   Customization,
   CustomizationOptionValue,
   isFileUploadValue,
-  OptionType,
   PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID,
   OptionValue
 } from 'src/modules/customization-system';
@@ -23,14 +22,19 @@ export function useAlterationProductCustomizations (
 ) {
   const {
     alterationCustomizationByOriginalId,
-    alterationOptionValueByOriginalIdByCustomizationId
+    alterationCustomizationByExtraChargeId,
+    alterationOptionValueByOriginalIdByCustomizationId,
+    alterationOptionValueByExtraChargeIdByCustomizationId
   } = mapping;
 
   const orderItemOptionValue = computed<Record<string, CustomizationOptionValue>>(() => {
     const result: Record<string, CustomizationOptionValue> = {};
     const orderItemExtensionAttributes = orderItem.value.extension_attributes;
     const _alterationCustomizationByOriginalId = alterationCustomizationByOriginalId.value;
+    const _alterationCustomizationByExtraChargeId = alterationCustomizationByExtraChargeId.value;
     const _alterationOptionValueByOriginalIdByCustomizationId = alterationOptionValueByOriginalIdByCustomizationId.value;
+    const _alterationOptionValueByExtraChargeIdByCustomizationId = alterationOptionValueByExtraChargeIdByCustomizationId.value;
+
     const alterationProductCustomizations = alterationProduct.value?.customizations;
 
     if (!orderItemExtensionAttributes || !alterationProductCustomizations) {
@@ -59,13 +63,17 @@ export function useAlterationProductCustomizations (
         continue;
       }
 
-      const alterationProductCustomization = _alterationCustomizationByOriginalId[item.customization_id];
+      const originalAlterationProductCustomization = _alterationCustomizationByOriginalId[item.customization_id];
+      const extraChargeAlterationProductCustomization = _alterationCustomizationByExtraChargeId[item.customization_id];
+      const alterationProductCustomization = originalAlterationProductCustomization || extraChargeAlterationProductCustomization;
 
       if (!alterationProductCustomization) {
         continue;
       }
 
-      const alterationOptionValueDictionary = _alterationOptionValueByOriginalIdByCustomizationId[alterationProductCustomization.id];
+      const alterationOptionValueDictionary = originalAlterationProductCustomization
+        ? _alterationOptionValueByOriginalIdByCustomizationId[alterationProductCustomization.id]
+        : _alterationOptionValueByExtraChargeIdByCustomizationId[alterationProductCustomization.id];
 
       if (!alterationOptionValueDictionary) {
         continue;
