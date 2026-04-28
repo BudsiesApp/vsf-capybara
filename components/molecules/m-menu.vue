@@ -138,27 +138,38 @@ export default Vue.extend({
       usefulLinksItems: [
         {
           label: this.$t('About'),
-          link: '/about/'
+          link: '/about/',
+          target: undefined
         },
         {
           label: this.$t('Fulfillment'),
-          link: '/fulfillment/'
+          link: '/fulfillment/',
+          target: undefined
+        },
+        {
+          label: this.$t('Manufacturer Checklist'),
+          link: '/checklist/',
+          target: undefined
         },
         {
           label: this.$t('How To Order'),
-          link: '/how-to-order/'
+          link: '/how-to-order/',
+          target: undefined
         },
         {
           label: this.$t('Distributors'),
-          link: '/distributors/'
+          link: '/distributors/',
+          target: undefined
         },
         {
           label: this.$t('Reviews'),
-          link: '/reviews/'
+          link: '/reviews/',
+          target: undefined
         },
         {
           label: this.$t('Pricing'),
-          link: '/custom-plush-pricing/'
+          link: '/custom-plush-pricing/',
+          target: undefined
         }
       ]
     }

@@ -69,6 +69,10 @@ export default defineComponent({
       {
         label: root.$t('Fulfillment').toString(),
         link: '/fulfillment/'
+      },
+      {
+        label: root.$t('Manufacturer Checklist').toString(),
+        link: '/checklist/'
       }
     ];
 

@@ -176,7 +176,8 @@ export default {
             { name: this.$t('NDA'), link: '/nda/' },
             { name: this.$t('Production Times'), link: '/production-times/' },
             { name: this.$t('Shipping/Freight'), link: '/shipping/' },
-            { name: this.$t('Fulfillment'), link: '/fulfillment/' }
+            { name: this.$t('Fulfillment'), link: '/fulfillment/' },
+            { name: this.$t('Manufacturer Checklist'), link: '/checklist/' }
           ]
         }
       };
