@@ -17,6 +17,7 @@
 import { computed, defineComponent, onMounted, onBeforeUnmount, ref, Ref } from '@vue/composition-api';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
+import { Logger } from '@vue-storefront/core/lib/logger';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
@@ -44,18 +45,18 @@ export function parseCustomizationStateQueryParam (
     const parsedValue = JSON.parse(customizationStateProp);
 
     if (!parsedValue || typeof parsedValue !== 'object') {
-      return [] as CustomizationStateItem[];
+      throw new Error('Customization state is incorrect');
     }
 
     return Object.entries(parsedValue).reduce<CustomizationStateItem[]>((result, [id, value]) => {
       if (!value || typeof value !== 'object') {
-        return result;
+        throw new Error('Customization state is incorrect');
       }
 
       const customizationId = getCustomizationIdByOptionValueId(customizations, id);
 
       if (!customizationId) {
-        return result;
+        throw new Error('Customization state is incorrect');
       }
 
       const quantity = Number((value as any).qty);
@@ -193,6 +194,8 @@ export default defineComponent({
         if (!loadedProduct) {
           errorMessage.value = INCORRECT_PURCHASE_LINK_MESSAGE;
           product.value = undefined;
+
+          Logger.error(`Product is not loaded: ${props.sku}`, 'extra-charge-purchase')();
           return false;
         }
 
@@ -219,6 +222,7 @@ export default defineComponent({
         return true;
       } catch (error) {
         errorMessage.value = INCORRECT_PURCHASE_LINK_MESSAGE;
+        Logger.error((error as Error).message, 'extra-charge-purchase')();
         product.value = undefined;
         return false;
       } finally {
@@ -255,6 +259,7 @@ export default defineComponent({
         await root.$router.replace({ name: 'detailed-cart' });
       } catch (error) {
         errorMessage.value = root.$t('Sorry, we were unable to update your cart').toString();
+        Logger.error((error as Error).message, 'extra-charge-purchase')();
       } finally {
         isLoading.value = false;
       }
