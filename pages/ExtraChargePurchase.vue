@@ -172,8 +172,6 @@ export default defineComponent({
       if (hasMissingRequiredParams.value) {
         errorMessage.value = INCORRECT_PURCHASE_LINK_MESSAGE;
         isLoading.value = false;
-
-        Logger.error('Purchase link is incorrect', 'extra-charge-purchase')();
         return false;
       }
 
@@ -215,7 +213,6 @@ export default defineComponent({
 
         if (resolvedCustomizationState.length === 0) {
           errorMessage.value = INCORRECT_PURCHASE_LINK_MESSAGE;
-          Logger.error('Customizations are missing', 'extra-charge-purchase')();
           return false;
         }
 
