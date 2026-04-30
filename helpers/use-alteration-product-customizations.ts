@@ -80,11 +80,27 @@ export function useAlterationProductCustomizations (
       }
 
       if (typeof item.value === 'string') {
+        const existingResult = result[alterationProductCustomization.id];
+
+        if (isFileUploadValue(existingResult)) {
+          continue;
+        }
+
         const mappedId = alterationOptionValueDictionary[item.value]?.id;
 
-        if (mappedId) {
-          result[alterationProductCustomization.id] = mappedId;
+        if (!mappedId) {
+          continue;
         }
+
+        if (existingResult && Array.isArray(existingResult)) {
+          existingResult.push(mappedId);
+          continue;
+        } else if (typeof existingResult === 'string') {
+          result[alterationProductCustomization.id] = [mappedId, existingResult];
+          continue;
+        }
+
+        result[alterationProductCustomization.id] = mappedId;
 
         continue;
       }
