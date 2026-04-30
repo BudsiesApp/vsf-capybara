@@ -1,5 +1,12 @@
 <template>
   <div id="extra-charge-purchase">
+    <div
+      v-if="isLoading && !errorMessage"
+      class="loader-container"
+    >
+      <div class="loader" />
+    </div>
+
     <p class="_message">
       {{ errorMessage ? errorMessage : pageStatus }}
     </p>
@@ -290,6 +297,11 @@ export default defineComponent({
       isLoading,
       pageStatus
     };
+  },
+  metaInfo (): any {
+    return {
+      title: this.$t('Extra Charge Purchase')
+    };
   }
 });
 </script>
@@ -300,12 +312,32 @@ export default defineComponent({
   padding: 0 var(--spacer-xs);
   margin: auto;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
 
-  .extra-charge-purchase__message {
-    margin: 0;
+  .loader-container {
+    position: relative;
+    display: flex;
+    width: 4.8em;
+    height: 4.8em;
+    justify-content: center;
+    align-items: center;
+
+    .loader {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 100%;
+      border: 2px solid var(--c-secondary);
+      border-bottom-color: var(--c-primary);
+      animation: rotate 1s linear infinite;
+    }
+  }
+
+  ._message {
+    margin-top: var(--spacer-base);
   }
 }
 </style>
