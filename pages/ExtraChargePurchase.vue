@@ -1,14 +1,14 @@
 <template>
   <div id="extra-charge-purchase">
-    <div class="loader-container" v-if="isLoading">
+    <div
+      v-if="isLoading && !errorMessage"
+      class="loader-container"
+    >
       <div class="loader" />
     </div>
 
-    <p
-      v-if="errorMessage"
-      class="extra-charge-purchase__message extra-charge-purchase__message--error"
-    >
-      {{ errorMessage }}
+    <p class="_message">
+      {{ errorMessage ? errorMessage : pageStatus }}
     </p>
   </div>
 </template>
@@ -95,12 +95,16 @@ export default defineComponent({
     }
   },
   setup (props, { root }) {
+    const PREPARING_ITEM_MESSAGE = root.$t('Preparing your item...').toString();
+
     const isLoading = ref<boolean>(true);
     const errorMessage = ref<string | null>(null);
+    const pageStatus = ref<string>(PREPARING_ITEM_MESSAGE);
     const product: Ref<Product | undefined> = ref(undefined);
     const existingCartItem: Ref<CartItem | undefined> = ref(undefined);
 
     const INCORRECT_PURCHASE_LINK_MESSAGE = root.$t('Purchase link is incorrect.').toString();
+    const ADDING_TO_CART_MESSAGE = root.$t('Adding to cart...').toString();
 
     const cartItems = computed<CartItem[]>(() => {
       return root.$store.getters['cart/getCartItems'] || [];
@@ -171,12 +175,14 @@ export default defineComponent({
     async function loadProduct (): Promise<boolean> {
       if (hasMissingRequiredParams.value) {
         errorMessage.value = INCORRECT_PURCHASE_LINK_MESSAGE;
+        pageStatus.value = '';
         isLoading.value = false;
         return false;
       }
 
       isLoading.value = true;
       errorMessage.value = null;
+      pageStatus.value = PREPARING_ITEM_MESSAGE;
 
       try {
         let [loadedProduct] = await Promise.all(
@@ -193,6 +199,7 @@ export default defineComponent({
 
         if (!loadedProduct) {
           errorMessage.value = INCORRECT_PURCHASE_LINK_MESSAGE;
+          pageStatus.value = '';
           product.value = undefined;
 
           Logger.error(`Product is not loaded: ${props.sku}`, 'extra-charge-purchase')();
@@ -213,6 +220,7 @@ export default defineComponent({
 
         if (resolvedCustomizationState.length === 0) {
           errorMessage.value = INCORRECT_PURCHASE_LINK_MESSAGE;
+          pageStatus.value = '';
           return false;
         }
 
@@ -222,6 +230,7 @@ export default defineComponent({
         return true;
       } catch (error) {
         errorMessage.value = INCORRECT_PURCHASE_LINK_MESSAGE;
+        pageStatus.value = '';
         Logger.error((error as Error).message, 'extra-charge-purchase')();
         product.value = undefined;
         return false;
@@ -253,12 +262,14 @@ export default defineComponent({
       try {
         isLoading.value = true;
         errorMessage.value = null;
+        pageStatus.value = ADDING_TO_CART_MESSAGE;
 
         await removeMatchingAlterationCartItem();
         await addToCartHandler();
         await root.$router.replace({ name: 'detailed-cart' });
       } catch (error) {
         errorMessage.value = root.$t('Sorry, we were unable to update your cart').toString();
+        pageStatus.value = '';
         Logger.error((error as Error).message, 'extra-charge-purchase')();
       } finally {
         isLoading.value = false;
@@ -283,7 +294,13 @@ export default defineComponent({
 
     return {
       errorMessage,
-      isLoading
+      isLoading,
+      pageStatus
+    };
+  },
+  metaInfo (): any {
+    return {
+      title: this.$t('Extra Charge Purchase')
     };
   }
 });
@@ -295,27 +312,32 @@ export default defineComponent({
   padding: 0 var(--spacer-xs);
   margin: auto;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
 
   .loader-container {
     position: relative;
-    width: 100%;
-    height: 100%;
     display: flex;
+    width: 4.8em;
+    height: 4.8em;
     justify-content: center;
     align-items: center;
 
     .loader {
       position: absolute;
-      width: 4.8em;
-      height: 4.8em;
+      width: 100%;
+      height: 100%;
       border-radius: 100%;
       border: 2px solid var(--c-secondary);
       border-bottom-color: var(--c-primary);
       animation: rotate 1s linear infinite;
     }
+  }
+
+  ._message {
+    margin-top: var(--spacer-base);
   }
 }
 </style>
