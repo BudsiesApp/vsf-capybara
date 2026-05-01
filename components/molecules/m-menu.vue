@@ -250,16 +250,6 @@ export default Vue.extend({
           class: 'mobile-only'
         },
         {
-          label: this.$t('Gift Boxes'),
-          url: {
-            name: 'giftbox'
-          },
-          isActive: () => {
-            return this.$route.name === 'configurable-product' &&
-             this.$route.params?.parentSku === 'gift_box';
-          }
-        },
-        {
           label: this.$t('Gift Add-ons'),
           url: {
             name: 'category',
