@@ -140,10 +140,6 @@ export default Vue.extend({
           url: {
             name: 'tumblers-creation'
           }
-        },
-        {
-          label: 'Gift Box',
-          url: { name: 'giftbox' }
         }
       ],
       isDropdownOpen: false
