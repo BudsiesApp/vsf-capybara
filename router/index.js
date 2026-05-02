@@ -202,6 +202,20 @@ let routes = [
   },
   { name: 'page-not-found', path: '*', component: ErrorPage },
   { name: 'error', path: '/error/', component: ErrorPage, meta: { layout: 'minimal' } },
+  {
+    path: '/p/gift_box/',
+    redirect: (route) => ({
+      name: 'gift-cards',
+      query: route.query
+    })
+  },
+  {
+    path: '/p/gift_box/:childSku/',
+    redirect: (route) => ({
+      name: 'gift-cards',
+      query: route.query
+    })
+  },
   { name: 'virtual-product', path: '/p/:parentSku/', component: Product },
   { name: 'bundle-product', path: '/p/:parentSku/', component: Product },
   { name: 'simple-product', path: '/p/:parentSku/', component: Product },
