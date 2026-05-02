@@ -30,7 +30,7 @@
           />
         </validation-provider>
 
-        <MSpinnerButton :show-spinner="isSubmitting">
+        <MSpinnerButton class="_submit-button" :show-spinner="isSubmitting">
           {{ buttonText }}
         </MSpinnerButton>
       </form>
@@ -170,15 +170,35 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@import "theme/css/base/_breakpoints.scss";
+
 .m-subscription-form {
   --input-background: var(--_c-light-secondary);
 
   ._form {
     display: flex;
-    align-items: flex-start;
+    flex-direction: column;
 
     ._input {
-      flex: 1;
+      width: 100%;
+    }
+
+    ._submit-button {
+      --button-width: 100%;
+    }
+
+    @include for-tablet-up {
+      flex-direction: row;
+      align-items: flex-start;
+
+      ._input {
+        flex: 1;
+        width: auto;
+      }
+
+      ._submit-button {
+        --button-width: auto;
+      }
     }
   }
 
@@ -209,9 +229,16 @@ export default defineComponent({
   }
 
   .m-spinner-button {
-    margin-left: var(--spacer-base);
+    margin-top: var(--spacer-sm);
+    width: 100%;
     --button-font-size: var(--font-xs);
     --button-padding: calc(var(--spacer-base) * 0.56) var(--spacer-base);
+
+    @include for-tablet-up {
+      margin-top: 0;
+      margin-left: var(--spacer-base);
+      width: auto;
+    }
   }
 
   ._success-message {
