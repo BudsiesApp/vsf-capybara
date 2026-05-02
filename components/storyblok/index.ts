@@ -27,7 +27,7 @@ export default function registerComponents () {
   add('lightbox_gallery', () => import(/* webpackChunkName: "vsf-storyblok" */ './LightboxGallery.vue'))
   add('product_reviews', () => import(/* webpackChunkName: "vsf-storyblok" */ './ProductReviews.vue'))
   add('reviews', () => import(/* webpackChunkName: "vsf-storyblok" */ './Reviews.vue'))
-  add('google_product_data', () => import(/* webpackChunkName: "vsf-storyblok" */ './GoogleProductData.vue'))
+  add('product_structured_data', () => import(/* webpackChunkName: "vsf-storyblok" */ './ProductStructuredData.vue'))
 
   add('product', () => import(/* webpackChunkName: "vsf-storyblok" */ './Product.vue'))
   add('category', () => import(/* webpackChunkName: "vsf-storyblok" */ './Category.vue'))

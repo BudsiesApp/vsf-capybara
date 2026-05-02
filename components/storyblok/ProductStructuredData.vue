@@ -1,6 +1,6 @@
 <template>
   <product-structured-data
-    class="storyblok-google-product-data"
+    class="storyblok-product-structured-data"
     :product="resolvedProduct"
     v-if="resolvedProduct"
   />
@@ -15,20 +15,20 @@ import { Blok } from 'src/modules/vsf-storyblok-module/components';
 import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
 import { ProductEvent } from 'src/modules/shared';
 
-import ProductStructuredData from 'src/modules/budsies/components/ProductStructuredData.vue';
-import GoogleProductDataBlockData from './interfaces/google-product-data.interface';
+import ProductStructuredDataComponent from 'src/modules/budsies/components/ProductStructuredData.vue';
+import ProductStructuredData from './interfaces/product-structured-data.interface';
 
 export default Blok.extend({
-  name: 'StoryblokGoogleProductDataBlock',
+  name: 'StoryblokProductStructuredData',
   components: {
-    ProductStructuredData
+    ProductStructuredData: ProductStructuredDataComponent
   },
   computed: {
-    itemData (): GoogleProductDataBlockData {
-      return this.item as GoogleProductDataBlockData;
+    itemData (): ProductStructuredData {
+      return this.item as ProductStructuredData;
     },
     resolvedProduct () {
-      const itemData = this.item as GoogleProductDataBlockData;
+      const itemData = this.item as ProductStructuredData;
 
       return this.$store.getters['product/getProductByIdDictionary'][itemData.product_id];
     }
@@ -42,7 +42,7 @@ export default Blok.extend({
   },
   methods: {
     async loadData (): Promise<void> {
-      const itemData = this.item as GoogleProductDataBlockData;
+      const itemData = this.item as ProductStructuredData;
 
       if (!itemData.product_id || this.resolvedProduct) {
         return;
