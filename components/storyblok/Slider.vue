@@ -9,6 +9,7 @@
       :images="slides"
       :horizontal-thumbnails="isHorizontalThumbnails"
       :lazy-load-stage-image="itemData.delay_image_load"
+      :fetch-priority-stage-image="fetchPriority"
     />
   </div>
 </template>
@@ -46,6 +47,13 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
   computed: {
     itemData (): SliderData {
       return this.item as SliderData;
+    },
+    fetchPriority (): 'high' | 'low' | 'auto' {
+      if (this.itemData.delay_image_load) {
+        return 'low';
+      }
+
+      return 'high';
     },
     slides (): ZoomGalleryAsset[] {
       const slides: ZoomGalleryAsset[] = [];
