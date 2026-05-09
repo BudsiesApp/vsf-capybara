@@ -91,6 +91,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok>>).extend({
 
 .storyblok-paypal-pay-later-message {
   @include display-property-handling;
+  min-height: 3.3ex;
 
   &.-editor-preview-mode {
     ._message {
