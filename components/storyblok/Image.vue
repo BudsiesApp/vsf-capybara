@@ -14,7 +14,7 @@
 
     <BaseImage
       class="_image"
-      :lazy="itemData.delay_image_load"
+      :lazy="lazyLoad"
       :fetchpriority="fetchPriority"
       :srcsets="imageSources.sourceItems"
       :fallback-srcset="imageSources.fallbackSourceItem"
@@ -77,8 +77,15 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 
       return styles;
     },
+    lazyLoad (): boolean {
+      if (this.itemData.delay_image_load === undefined) {
+        return true;
+      }
+
+      return this.itemData.delay_image_load;
+    },
     fetchPriority (): 'high' | 'low' | 'auto' {
-      if (this.itemData.delay_image_load) {
+      if (this.lazyLoad) {
         return 'low';
       }
 

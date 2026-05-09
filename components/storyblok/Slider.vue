@@ -8,7 +8,7 @@
     <MZoomGallery
       :images="slides"
       :horizontal-thumbnails="isHorizontalThumbnails"
-      :lazy-load-stage-image="itemData.delay_image_load"
+      :lazy-load-stage-image="lazyLoad"
       :fetch-priority-stage-image="fetchPriority"
     />
   </div>
@@ -48,8 +48,15 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     itemData (): SliderData {
       return this.item as SliderData;
     },
+    lazyLoad (): boolean {
+      if (this.itemData.delay_image_load === undefined) {
+        return true;
+      }
+
+      return this.itemData.delay_image_load;
+    },
     fetchPriority (): 'high' | 'low' | 'auto' {
-      if (this.itemData.delay_image_load) {
+      if (this.lazyLoad) {
         return 'low';
       }
 
