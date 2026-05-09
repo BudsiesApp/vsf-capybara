@@ -14,6 +14,7 @@
         :title="itemData.title"
         class="_image"
         :lazy="false"
+        fetchpriority="high"
         v-if="itemData.image.filename"
       />
     </div>
