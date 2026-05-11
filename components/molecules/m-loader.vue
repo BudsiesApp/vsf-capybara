@@ -1,5 +1,5 @@
 <template>
-  <div class="m-loader" v-show="isVisible">
+  <div ref="loader" class="m-loader" v-show="isVisible">
     <div class="m-loader--container">
       <SfLoader :loading="true" />
       <div v-if="message" class="m-loader--message">
@@ -12,6 +12,7 @@
 <script>
 import { mapState } from 'vuex';
 import { SfLoader } from '@storefront-ui/vue';
+import { disableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
 
 export default {
   name: 'MLoader',
@@ -29,15 +30,33 @@ export default {
     this.$bus.$on('notification-progress-stop', this.hide);
   },
   beforeDestroy () {
+    this.unlockScroll();
+
     this.$bus.$off('notification-progress-start', this.show);
     this.$bus.$off('notification-progress-stop', this.hide);
   },
   methods: {
+    lockScroll () {
+      const loaderElement = this.$refs.loader;
+
+      if (!loaderElement) {
+        return;
+      }
+
+      disableBodyScroll(loaderElement);
+    },
+    unlockScroll () {
+      clearAllBodyScrollLocks();
+    },
     show (message = null) {
       this.message = message;
       this.$store.commit('ui/setLoader', true);
+      this.$nextTick(() => {
+        this.lockScroll();
+      });
     },
     hide () {
+      this.unlockScroll();
       this.$store.commit('ui/setLoader', false);
     }
   }
