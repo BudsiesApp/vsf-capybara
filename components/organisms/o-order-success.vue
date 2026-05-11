@@ -39,7 +39,12 @@
 
     <div class="_content">
       <div class="_left">
-        <img class="_success-icon" src="/assets/images/success-icon.jpg" alt="">
+        <BaseImage
+          class="_success-icon"
+          src="/assets/images/success-icon.jpg"
+          alt=""
+          :aspect-ratio="1.0"
+        />
       </div>
 
       <div class="_right">
@@ -152,6 +157,7 @@ import { SfButton, SfHeading } from '@storefront-ui/vue';
 
 import { CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION } from '@vue-storefront/core/modules/checkout';
 import { Order } from 'core/modules/order/types/Order';
+import { BaseImage } from 'src/modules/budsies';
 import { InjectType } from 'src/modules/shared';
 
 import MSocialSharing from 'theme/components/molecules/m-social-sharing.vue';
@@ -191,6 +197,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
     window: { from: 'WindowObject' }
   } as unknown as InjectType<InjectedServices>,
   components: {
+    BaseImage,
     MShareSpecialStoryForm,
     MShareBirthdayForm,
     MSocialSharing,
