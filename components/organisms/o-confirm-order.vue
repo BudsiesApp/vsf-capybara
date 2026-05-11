@@ -218,6 +218,7 @@
 
     <div class="actions">
       <SfButton
+        ref="placeOrderButton"
         v-show="showPlaceOrderButton"
         class="sf-button--full-width actions__button place-order-btn"
         :disabled="isPlaceOrderButtonDisabled"
@@ -532,11 +533,21 @@ export default {
       this.$bus.$emit('checkout-after-paymentMethodChanged', this.payment);
       this.changePaymentMethod();
     },
+    scrollToPlaceOrderButton () {
+      const placeOrderButton = this.$refs.placeOrderButton?.$el;
+
+      if (!placeOrderButton) {
+        return;
+      }
+
+      placeOrderButton.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    },
     onPlaceOrder () {
       if (this.isCheckoutInProgress) {
         return;
       }
 
+      this.scrollToPlaceOrderButton();
       this.isCheckoutInProgress = true;
 
       if (!this.isBraintreeMethodSelected) {
