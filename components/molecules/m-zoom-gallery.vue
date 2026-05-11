@@ -69,6 +69,7 @@
               :title="stageAsset.title"
               :aspect-ratio="1.0"
               :lazy="lazyLoadStageImage"
+              :fetchpriority="stageImageFetchPriority"
             />
           </div>
         </div>
@@ -96,7 +97,8 @@
                 :alt="asset.alt"
                 :title="asset.title"
                 :aspect-ratio="1.0"
-                :lazy="true"
+                :lazy="lazyLoadStageImage"
+                :fetchpriority="stageImageFetchPriority"
               />
 
               <div v-else class="_video-wrapper">
@@ -149,6 +151,7 @@ import OCarousel from '../organisms/o-carousel.vue';
 import { OCarouselItem } from '../interfaces/o-carousel-item.interface';
 
 type ImageKeys = keyof Omit<ZoomGalleryAsset, 'video'>;
+type FetchPriority = 'high' | 'low' | 'auto';
 
 const debounceTime = 300;
 
@@ -181,6 +184,10 @@ export default Vue.extend({
     lazyLoadStageImage: {
       type: Boolean,
       default: true
+    },
+    fetchPriorityStageImage: {
+      type: String as PropType<FetchPriority>,
+      default: 'auto'
     }
   },
   data () {
@@ -225,6 +232,19 @@ export default Vue.extend({
       }
 
       return this.images[this.currentIndex];
+    },
+    stageImageFetchPriority (): FetchPriority | undefined {
+      const fetchPriority = this.fetchPriorityStageImage;
+
+      if (
+        fetchPriority === 'high' ||
+        fetchPriority === 'low' ||
+        fetchPriority === 'auto'
+      ) {
+        return fetchPriority;
+      }
+
+      return undefined;
     },
     currentIndex: {
       get: function (): number | undefined {
