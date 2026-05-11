@@ -97,7 +97,8 @@
                 :alt="asset.alt"
                 :title="asset.title"
                 :aspect-ratio="1.0"
-                :lazy="true"
+                :lazy="lazyLoadStageImage"
+                :fetchpriority="stageImageFetchPriority"
               />
 
               <div v-else class="_video-wrapper">
