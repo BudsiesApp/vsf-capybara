@@ -68,8 +68,8 @@
               :alt="stageAsset.alt"
               :title="stageAsset.title"
               :aspect-ratio="1.0"
-              :lazy="lazyLoadStageImage"
-              :fetchpriority="stageImageFetchPriority"
+              :lazy="getStageImageLazyValue(stageAsset)"
+              :fetchpriority="getStageImageFetchPriorityValue(stageAsset)"
             />
           </div>
         </div>
@@ -97,8 +97,8 @@
                 :alt="asset.alt"
                 :title="asset.title"
                 :aspect-ratio="1.0"
-                :lazy="lazyLoadStageImage"
-                :fetchpriority="stageImageFetchPriority"
+                :lazy="getStageImageLazyValue(asset)"
+                :fetchpriority="getStageImageFetchPriorityValue(asset)"
               />
 
               <div v-else class="_video-wrapper">
@@ -405,6 +405,29 @@ export default Vue.extend({
       }
 
       return value;
+    },
+    isFirstImageAsset (asset: ZoomGalleryAsset | undefined): boolean {
+      if (!asset || !this.images.length) {
+        return false;
+      }
+
+      return this.images[0] === asset;
+    },
+    getStageImageLazyValue (asset: ZoomGalleryAsset | undefined): boolean {
+      if (!this.isFirstImageAsset(asset)) {
+        return true;
+      }
+
+      return this.lazyLoadStageImage;
+    },
+    getStageImageFetchPriorityValue (
+      asset: ZoomGalleryAsset | undefined
+    ): FetchPriority | undefined {
+      if (!this.isFirstImageAsset(asset)) {
+        return undefined;
+      }
+
+      return this.stageImageFetchPriority;
     },
     setCurrentIndex (index: number): void {
       const previousIndex = this.currentIndex;
