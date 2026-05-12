@@ -68,7 +68,8 @@
               :alt="stageAsset.alt"
               :title="stageAsset.title"
               :aspect-ratio="1.0"
-              :lazy="lazyLoadStageImage"
+              :lazy="getStageImageLazyValue(stageAsset)"
+              :fetchpriority="getStageImageFetchPriorityValue(stageAsset)"
             />
           </div>
         </div>
@@ -96,7 +97,8 @@
                 :alt="asset.alt"
                 :title="asset.title"
                 :aspect-ratio="1.0"
-                :lazy="true"
+                :lazy="getStageImageLazyValue(asset)"
+                :fetchpriority="getStageImageFetchPriorityValue(asset)"
               />
 
               <div v-else class="_video-wrapper">
@@ -141,8 +143,6 @@
 import debounce from 'lodash.debounce';
 import Vue, { PropType } from 'vue';
 
-import jQuery from 'jquery';
-
 import { BaseImage, ImageSourceItem } from 'src/modules/budsies';
 import { BreakpointValue, StreamingVideo } from 'src/modules/shared';
 import ZoomGalleryAsset from 'theme/interfaces/zoom-gallery-asset.interface';
@@ -150,10 +150,8 @@ import ZoomGalleryAsset from 'theme/interfaces/zoom-gallery-asset.interface';
 import OCarousel from '../organisms/o-carousel.vue';
 import { OCarouselItem } from '../interfaces/o-carousel-item.interface';
 
-require('@cabbiepete/cloud-zoom');
-require('@cabbiepete/cloud-zoom/cloud-zoom.css');
-
 type ImageKeys = keyof Omit<ZoomGalleryAsset, 'video'>;
+type FetchPriority = 'high' | 'low' | 'auto';
 
 const debounceTime = 300;
 
@@ -162,6 +160,10 @@ const STAGE_SLIDES_PER_VIEW = 1.00001;
 
 const STREAMING_VIDEO_SELECTOR = '._streaming-video';
 const YOUTUBE_FACADE_SELECTOR = '._youtube-facade';
+
+let jQuery: JQueryStatic | undefined;
+let isCloudZoomLoaded = false;
+let cloudZoomLoadingPromise: Promise<void> | undefined;
 
 export default Vue.extend({
   name: 'MZoomGallery',
@@ -182,6 +184,10 @@ export default Vue.extend({
     lazyLoadStageImage: {
       type: Boolean,
       default: true
+    },
+    fetchPriorityStageImage: {
+      type: String as PropType<FetchPriority>,
+      default: 'auto'
     }
   },
   data () {
@@ -226,6 +232,19 @@ export default Vue.extend({
       }
 
       return this.images[this.currentIndex];
+    },
+    stageImageFetchPriority (): FetchPriority | undefined {
+      const fetchPriority = this.fetchPriorityStageImage;
+
+      if (
+        fetchPriority === 'high' ||
+        fetchPriority === 'low' ||
+        fetchPriority === 'auto'
+      ) {
+        return fetchPriority;
+      }
+
+      return undefined;
     },
     currentIndex: {
       get: function (): number | undefined {
@@ -387,6 +406,29 @@ export default Vue.extend({
 
       return value;
     },
+    isFirstImageAsset (asset: ZoomGalleryAsset | undefined): boolean {
+      if (!asset || !this.images.length) {
+        return false;
+      }
+
+      return this.images[0] === asset;
+    },
+    getStageImageLazyValue (asset: ZoomGalleryAsset | undefined): boolean {
+      if (!this.isFirstImageAsset(asset)) {
+        return true;
+      }
+
+      return this.lazyLoadStageImage;
+    },
+    getStageImageFetchPriorityValue (
+      asset: ZoomGalleryAsset | undefined
+    ): FetchPriority | undefined {
+      if (!this.isFirstImageAsset(asset)) {
+        return undefined;
+      }
+
+      return this.stageImageFetchPriority;
+    },
     setCurrentIndex (index: number): void {
       const previousIndex = this.currentIndex;
       this.currentIndex = index;
@@ -396,7 +438,7 @@ export default Vue.extend({
       }
     },
     detachZoom (): void {
-      if (!this.fIsCloudZoomInitialized) {
+      if (!this.fIsCloudZoomInitialized || !jQuery) {
         return;
       }
 
@@ -421,7 +463,31 @@ export default Vue.extend({
     getZoomGallery (): HTMLElement | undefined {
       return this.$refs.zoomGallery as HTMLElement | undefined;
     },
-    initCloudZoom (): void {
+    async loadCloudZoomDependencies (): Promise<void> {
+      if (isCloudZoomLoaded && jQuery) {
+        return;
+      }
+
+      if (!cloudZoomLoadingPromise) {
+        cloudZoomLoadingPromise = (async () => {
+          try {
+            const [jQueryModule] = await Promise.all([
+              import(/* webpackChunkName: "vsf-cloud-zoom" */ 'jquery'),
+              import(/* webpackChunkName: "vsf-cloud-zoom" */ '@cabbiepete/cloud-zoom'),
+              import(/* webpackChunkName: "vsf-cloud-zoom" */ '@cabbiepete/cloud-zoom/cloud-zoom.css')
+            ]);
+
+            jQuery = jQueryModule.default;
+            isCloudZoomLoaded = true;
+          } catch (error) {
+            cloudZoomLoadingPromise = undefined;
+          }
+        })();
+      }
+
+      await cloudZoomLoadingPromise;
+    },
+    async initCloudZoom (): Promise<void> {
       if (this.fIsCloudZoomInitialized) {
         return;
       }
@@ -432,7 +498,15 @@ export default Vue.extend({
         return;
       }
 
-      (jQuery(imageWrapper) as any).CloudZoom({
+      await this.loadCloudZoomDependencies();
+
+      const currentJQuery = jQuery;
+
+      if (!currentJQuery) {
+        return;
+      }
+
+      (currentJQuery(imageWrapper) as any).CloudZoom({
         adjustX: 10,
         showTitle: false,
         transparentImage:
