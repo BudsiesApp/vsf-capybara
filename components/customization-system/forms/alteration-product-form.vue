@@ -262,13 +262,27 @@ export default defineComponent({
     const isExpanded = ref(false);
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
 
+    const productBySkuDictionary = computed<Record<string, Product>>(() => {
+      return context.root.$store.getters['product/getProductBySkuDictionary'] || {};
+    });
+
     const plushieId = computed<string | undefined>(() => {
       return orderItem.value.extension_attributes?.plushie_id?.toString();
     });
 
+    const extraChargesProduct = computed<Product | undefined>(() => {
+      const sku = orderItem.value.extension_attributes?.manufacturing_extra_charge_product?.sku;
+
+      if (!sku) {
+        return;
+      }
+
+      return productBySkuDictionary.value[sku];
+    });
+
     const { existingCartItem } = useExistingCartItem(plushieId, context);
 
-    const mapping = useOrderItemAndAlterationProductMapping(orderItem, alterationProduct);
+    const mapping = useOrderItemAndAlterationProductMapping(alterationProduct, extraChargesProduct);
 
     const productCustomizations = computed<Customization[]>(() => {
       return alterationProduct.value?.customizations || [];

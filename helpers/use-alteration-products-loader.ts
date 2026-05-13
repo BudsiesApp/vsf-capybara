@@ -4,7 +4,7 @@ import { SearchQuery } from 'storefront-query-builder';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
 import { updateProductProductionTimeCustomizationData } from 'src/modules/customization-system';
-import { canOrderItemHaveUpgrades, Order, OrderItem } from 'src/modules/orders-history';
+import { Order, OrderItem } from 'src/modules/orders-history';
 
 function getSearchQuery (skus: string[]): SearchQuery {
   let productsQuery = new SearchQuery();
@@ -46,16 +46,19 @@ export function useAlterationProductsLoader (
     return mapping;
   });
 
-  const eligibleOrderItems = computed<OrderItem[]>(() => {
-    return allOrderItems.value.filter((item: OrderItem) => canOrderItemHaveUpgrades(item));
-  });
-
   const alterationProductSkus = computed<string[]>(() => {
     const skus = new Set<string>();
 
-    for (const item of eligibleOrderItems.value) {
-      if (item.extension_attributes?.alteration_product) {
-        skus.add(item.extension_attributes?.alteration_product.sku);
+    for (const item of allOrderItems.value) {
+      const alterationSku = item.extension_attributes?.alteration_product?.sku;
+      const manufacturingExtraChargeSku = item.extension_attributes?.manufacturing_extra_charge_product?.sku;
+
+      if (alterationSku) {
+        skus.add(alterationSku);
+      }
+
+      if (manufacturingExtraChargeSku) {
+        skus.add(manufacturingExtraChargeSku);
       }
     }
 
@@ -69,7 +72,7 @@ export function useAlterationProductsLoader (
   const alterationProductByOrderItemId = computed<Record<number, Product>>(() => {
     const dictionary: Record<number, Product> = {};
 
-    for (const orderItem of eligibleOrderItems.value) {
+    for (const orderItem of allOrderItems.value) {
       const alterationSku = orderItem.extension_attributes?.alteration_product?.sku;
 
       if (!alterationSku) {
@@ -158,7 +161,6 @@ export function useAlterationProductsLoader (
   return {
     isLoading,
     alterationProductByOrderItemId,
-    eligibleOrderItems,
     loadAlterationProducts
   };
 }
