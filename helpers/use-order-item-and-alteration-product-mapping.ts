@@ -6,71 +6,18 @@ import {
   Customization,
   OptionValue
 } from 'src/modules/customization-system';
-import { OrderItem } from 'src/modules/orders-history';
 
 export interface OrderItemAndAlterationProductMapping {
-  orderItemCustomizationById: ComputedRef<Record<string, Customization>>,
-  orderItemOptionValueByIdByCustomizationId: ComputedRef<Record<string, Record<string, OptionValue>>>,
-
   alterationCustomizationByOriginalId: ComputedRef<Record<string, Customization>>,
-  alterationCustomizationById: ComputedRef<Record<string, Customization>>,
-  alterationOptionValueByOriginalIdByCustomizationId: ComputedRef<Record<string, Record<string, OptionValue>>>
+  alterationCustomizationByExtraChargeId: ComputedRef<Record<string, Customization>>,
+  alterationOptionValueByOriginalIdByCustomizationId: ComputedRef<Record<string, Record<string, OptionValue>>>,
+  alterationOptionValueByExtraChargeIdByCustomizationId: ComputedRef<Record<string, Record<string, OptionValue>>>
 }
 
 export function useOrderItemAndAlterationProductMapping (
-  orderItem: Ref<OrderItem>,
-  alterationProduct: Ref<Product | undefined>
+  alterationProduct: Ref<Product | undefined>,
+  extraChargesProduct: Ref<Product | undefined>
 ): OrderItemAndAlterationProductMapping {
-  const orderItemCustomizationById = computed<Record<string, Customization>>(() => {
-    const result: Record<string, Customization> = {};
-    const extensionAttributes = orderItem.value.extension_attributes;
-
-    if (!extensionAttributes?.customizations?.length) {
-      return result;
-    }
-
-    for (const customization of extensionAttributes.customizations) {
-      result[customization.id] = customization;
-    }
-
-    return result;
-  });
-
-  const orderItemOptionValueByIdByCustomizationId = computed<Record<string, Record<string, OptionValue>>>(() => {
-    const result: Record<string, Record<string, OptionValue>> = {};
-    const extensionAttributes = orderItem.value.extension_attributes;
-
-    if (!extensionAttributes?.customizations?.length) {
-      return result;
-    }
-
-    for (const customization of extensionAttributes.customizations) {
-      result[customization.id] = {};
-
-      const values = customization.optionData?.values || [];
-      for (const value of values) {
-        result[customization.id][value.id] = value;
-      }
-    }
-
-    return result;
-  });
-
-  const alterationCustomizationById = computed<Record<string, Customization>>(() => {
-    const result: Record<string, Customization> = {};
-    const product = alterationProduct.value;
-
-    if (!product?.customizations?.length) {
-      return result;
-    }
-
-    for (const customization of product.customizations) {
-      result[customization.id] = customization;
-    }
-
-    return result;
-  });
-
   const alterationCustomizationByOriginalId = computed<Record<string, Customization>>(() => {
     const result: Record<string, Customization> = {};
     const product = alterationProduct.value;
@@ -80,9 +27,13 @@ export function useOrderItemAndAlterationProductMapping (
     }
 
     for (const customization of product.customizations) {
-      if (customization.originalCustomizationId) {
-        result[customization.originalCustomizationId] = customization;
+      const originalCustomizationId = customization.originalCustomizationId;
+
+      if (!originalCustomizationId) {
+        continue;
       }
+
+      result[originalCustomizationId] = customization;
     }
 
     return result;
@@ -110,11 +61,77 @@ export function useOrderItemAndAlterationProductMapping (
     return result;
   });
 
+  const alterationCustomizationByExtraChargeId = computed<Record<string, Customization>>(() => {
+    const result: Record<string, Customization> = {};
+    const product = extraChargesProduct.value;
+    const _alterationCustomizationByOriginalId = alterationCustomizationByOriginalId.value;
+
+    if (!product?.customizations?.length) {
+      return result;
+    }
+
+    for (const customization of product.customizations) {
+      const originalCustomizationId = customization.originalCustomizationId;
+
+      if (!originalCustomizationId) {
+        continue;
+      }
+
+      const alterationCustomization = _alterationCustomizationByOriginalId[originalCustomizationId];
+
+      if (alterationCustomization) {
+        result[customization.id] = alterationCustomization;
+      }
+    }
+
+    return result;
+  });
+
+  const alterationOptionValueByExtraChargeIdByCustomizationId = computed<Record<string, Record<string, OptionValue>>>(() => {
+    const result: Record<string, Record<string, OptionValue>> = {};
+    const product = extraChargesProduct.value;
+    const _alterationCustomizationByExtraChargeId = alterationCustomizationByExtraChargeId.value;
+    const _alterationOptionValueByOriginalIdByCustomizationId = alterationOptionValueByOriginalIdByCustomizationId.value;
+
+    if (!product?.customizations?.length) {
+      return result;
+    }
+
+    for (const customization of product.customizations) {
+      const alterationCustomization = _alterationCustomizationByExtraChargeId[customization.id];
+
+      if (!alterationCustomization) {
+        continue;
+      }
+
+      const values = customization.optionData?.values || [];
+
+      const alterationOptionValueByOriginalId = _alterationOptionValueByOriginalIdByCustomizationId[alterationCustomization.id] || {};
+
+      result[alterationCustomization.id] = result[alterationCustomization.id] || {};
+
+      for (const value of values) {
+        const originalValueId = value.originalValueId;
+
+        if (!originalValueId) {
+          continue;
+        }
+
+        const alterationOptionValue = alterationOptionValueByOriginalId[originalValueId];
+
+        if (alterationOptionValue) {
+          result[alterationCustomization.id][value.id] = alterationOptionValue;
+        }
+      }
+    }
+
+    return result;
+  });
+
   return {
-    orderItemCustomizationById,
-    orderItemOptionValueByIdByCustomizationId,
     alterationCustomizationByOriginalId,
-    alterationCustomizationById,
-    alterationOptionValueByOriginalIdByCustomizationId
+    alterationCustomizationByExtraChargeId,
+    alterationOptionValueByOriginalIdByCustomizationId,
+    alterationOptionValueByExtraChargeIdByCustomizationId
   };
 }
