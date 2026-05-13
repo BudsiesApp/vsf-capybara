@@ -63,6 +63,8 @@ const TaxIdRequest = () =>
   import(/* webpackChunkName: "vsf-tax-id-request" */ 'theme/pages/TaxIdRequest');
 const OrderUpdateAddress = () =>
   import(/* webpackChunkName: "vsf-order-update-address" */ 'theme/pages/OrderUpdateAddress');
+const ExtraChargePurchase = () =>
+  import(/* webpackChunkName: "vsf-extra-charge-purchase" */ 'theme/pages/ExtraChargePurchase');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -814,6 +816,20 @@ let routes = [
     component: OrderItemsBulkCustomize,
     props: (route) => ({
       orderItemIds: route.query.orderItemIds
+    }),
+    meta: {
+      auth: true
+    }
+  },
+  {
+    path: '/extra-charge/purchase/',
+    name: 'extra-charge-purchase',
+    component: ExtraChargePurchase,
+    props: (route) => ({
+      sku: route.query.sku,
+      plushieId: route.query.plushieId,
+      qty: route.query.qty,
+      customizationValues: route.query.customizationValues
     }),
     meta: {
       auth: true
