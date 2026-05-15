@@ -2,7 +2,7 @@
   <div class="o-header">
     <SfOverlay
       class="overlay"
-      :visible="isHoveredMenu || isEducatorsMenuHovered || isSearchPanelVisible"
+      :visible="isHoveredMenu || isFocusedMenu || isEducatorsMenuHovered || isEducatorsMenuFocused || isSearchPanelVisible"
       @click="$store.commit('ui/setSearchpanel', false)"
     />
     <SfHeader
@@ -19,34 +19,47 @@
       </template>
       <template #navigation>
         <SfHeaderNavigationItem
+          ref="productsNavItem"
           @mouseover="onMainMenuMouseOver"
           @mouseleave="isHoveredMenu = false"
+          @focusin="onMainMenuFocusIn"
+          @focusout="onMainMenuFocusOut"
+          @keydown.esc="onMainMenuEscapeKey"
         >
-          <router-link to="/plush-services/" class="o-header__submenu">
+          <router-link
+            to="/plush-services/"
+            class="o-header__submenu"
+            :aria-expanded="String(isHoveredMenu || isFocusedMenu)"
+          >
             Products
           </router-link>
           <MMenu
-            :visible="isHoveredMenu && !isSearchPanelVisible"
+            :visible="(isHoveredMenu || isFocusedMenu) && !isSearchPanelVisible"
             @transitionend.native="onMainMenuTransitionEnd"
             @close="onMainMenuClose"
           />
         </SfHeaderNavigationItem>
 
         <SfHeaderNavigationItem
+          ref="educatorsNavItem"
           @mouseover="onEducatorsMenuMouseOver"
           @mouseleave="isEducatorsMenuHovered = false"
+          @focusin="onEducatorsMenuFocusIn"
+          @focusout="onEducatorsMenuFocusOut"
+          @keydown.esc="onEducatorsMenuEscapeKey"
           class="_educators-menu"
         >
           <router-link
             @click.native="isEducatorsMenuHovered = false"
             to="/teachers/"
             class="o-header__submenu"
+            :aria-expanded="String(isEducatorsMenuHovered || isEducatorsMenuFocused)"
           >
             Educators
           </router-link>
 
           <MEducatorsMenu
-            :visible="isEducatorsMenuHovered && !isSearchPanelVisible"
+            :visible="(isEducatorsMenuHovered || isEducatorsMenuFocused) && !isSearchPanelVisible"
             @close="onEducatorsMenuClose"
           />
         </SfHeaderNavigationItem>
@@ -112,8 +125,10 @@ export default {
   data () {
     return {
       isHoveredMenu: false,
+      isFocusedMenu: false,
       isMouseOverLocked: false,
-      isEducatorsMenuHovered: false
+      isEducatorsMenuHovered: false,
+      isEducatorsMenuFocused: false
     }
   },
   computed: {
@@ -128,6 +143,7 @@ export default {
   methods: {
     onMainMenuClose () {
       this.isHoveredMenu = false;
+      this.isFocusedMenu = false;
       this.isMouseOverLocked = true;
     },
     onMainMenuMouseOver () {
@@ -141,11 +157,47 @@ export default {
       await this.$nextTick();
       this.isMouseOverLocked = false;
     },
+    onMainMenuFocusIn () {
+      this.isFocusedMenu = true;
+    },
+    onMainMenuFocusOut (event) {
+      if (
+        event.relatedTarget !== null &&
+        this.$refs.productsNavItem.$el.contains(event.relatedTarget)
+      ) {
+        return;
+      }
+
+      this.isFocusedMenu = false;
+    },
+    onMainMenuEscapeKey () {
+      this.isFocusedMenu = false;
+      this.isHoveredMenu = false;
+      this.$refs.productsNavItem.$el.querySelector('a').focus();
+    },
     onEducatorsMenuClose () {
       this.isEducatorsMenuHovered = false;
     },
     onEducatorsMenuMouseOver () {
       this.isEducatorsMenuHovered = true;
+    },
+    onEducatorsMenuFocusIn () {
+      this.isEducatorsMenuFocused = true;
+    },
+    onEducatorsMenuFocusOut (event) {
+      if (
+        event.relatedTarget !== null &&
+        this.$refs.educatorsNavItem.$el.contains(event.relatedTarget)
+      ) {
+        return;
+      }
+
+      this.isEducatorsMenuFocused = false;
+    },
+    onEducatorsMenuEscapeKey () {
+      this.isEducatorsMenuFocused = false;
+      this.isEducatorsMenuHovered = false;
+      this.$refs.educatorsNavItem.$el.querySelector('a').focus();
     }
   }
 };
@@ -199,11 +251,13 @@ export default {
       width: 0;
     }
 
-    &:hover > *:not(.sf-mega-menu) {
+    &:hover > *:not(.sf-mega-menu),
+    &:focus-within > *:not(.sf-mega-menu) {
       --header-navigation-item-color: var(--c-primary);
     }
 
-    &:hover {
+    &:hover,
+    &:focus-within {
       .m-menu,
       .m-educators-menu {
         opacity: 1;

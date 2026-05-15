@@ -9,9 +9,10 @@
         v-for="item in brandItems"
         :key="item.code"
         :class="item.className"
-        :aria-label="item.label"
+        :aria-label="item.label + ' ' + $t('opens in new tab')"
         class="_brand-item"
         target="_blank"
+        rel="noopener noreferrer"
         :href="item.link"
       />
     </div>
