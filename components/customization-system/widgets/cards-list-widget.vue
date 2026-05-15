@@ -1,6 +1,6 @@
 <template>
   <div class="cards-list-widget">
-    <ul class="_list">
+    <ul class="_list" :role="groupRole" :aria-labelledby="ariaLabelledby">
       <li
         class="_item"
         :class="{
@@ -123,6 +123,7 @@ import { getThumbnailPath } from '@vue-storefront/core/helpers';
 
 import { BaseImage } from 'src/modules/budsies';
 import {
+  ListWidgetInputType,
   OptionValue,
   useListWidget,
   useOptionValuesPrice,
@@ -177,6 +178,10 @@ export default defineComponent({
     hiddenOptionValues: {
       type: Object as PropType<Record<string, boolean> | undefined>,
       default: undefined
+    },
+    ariaLabelledby: {
+      type: String as PropType<string | undefined>,
+      default: undefined
     }
   },
   setup (props, context) {
@@ -195,7 +200,14 @@ export default defineComponent({
 
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
 
+    const groupRole = computed<string>(() => {
+      return listWidgetFields.inputType.value === ListWidgetInputType.RADIO
+        ? 'radiogroup'
+        : 'group';
+    });
+
     return {
+      groupRole,
       getItemImage,
       isValid,
       ...listWidgetFields,

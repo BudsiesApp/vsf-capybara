@@ -2,6 +2,7 @@
   <div class="image-upload-widget">
     <m-artwork-upload
       ref="artworkUpload"
+      :aria-labelledby="ariaLabelledby"
       :disabled="isDisabled"
       :product-id="backendProductId"
       :upload-url="artworkUploadUrl"
@@ -47,6 +48,10 @@ export default defineComponent({
     MArtworkUpload
   },
   props: {
+    ariaLabelledby: {
+      type: String,
+      default: undefined
+    },
     error: {
       type: String,
       default: undefined
