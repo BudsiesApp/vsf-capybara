@@ -152,6 +152,8 @@ export default {
       }
 
       this.isHoveredMenu = true;
+      this.isEducatorsMenuHovered = false;
+      this.isEducatorsMenuFocused = false;
     },
     async onMainMenuTransitionEnd () {
       await this.$nextTick();
@@ -159,6 +161,8 @@ export default {
     },
     onMainMenuFocusIn () {
       this.isFocusedMenu = true;
+      this.isEducatorsMenuHovered = false;
+      this.isEducatorsMenuFocused = false;
     },
     onMainMenuFocusOut (event) {
       if (
@@ -180,9 +184,13 @@ export default {
     },
     onEducatorsMenuMouseOver () {
       this.isEducatorsMenuHovered = true;
+      this.isHoveredMenu = false;
+      this.isFocusedMenu = false;
     },
     onEducatorsMenuFocusIn () {
       this.isEducatorsMenuFocused = true;
+      this.isHoveredMenu = false;
+      this.isFocusedMenu = false;
     },
     onEducatorsMenuFocusOut (event) {
       if (
