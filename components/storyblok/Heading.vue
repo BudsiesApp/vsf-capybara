@@ -71,14 +71,17 @@ export default Blok.extend({
     headingId (): string {
       return getHeaderId(this.headingSize, [{ type: 'text', text: this.itemData.title }]);
     },
-    containerAttributes (): Record<Partial<'link' | 'isNewWindow' | string>, LinkField | boolean> {
+    containerAttributes (): Record<Partial<'link' | 'isNewWindow' | 'ariaLabel' | string>, LinkField | boolean | string | undefined> {
       if (!this.isLink || !this.itemData.link_url) {
         return {}
       }
 
+      const isNewWindow = this.itemData.link_url.target === '_blank';
+
       return {
         link: this.itemData.link_url,
-        isNewWindow: this.itemData.link_url.target === '_blank'
+        isNewWindow,
+        ariaLabel: isNewWindow ? this.itemData.title : undefined
       }
     },
     containerComponent (): string {
