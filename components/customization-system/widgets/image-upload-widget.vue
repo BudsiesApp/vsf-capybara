@@ -15,7 +15,10 @@
       @is-busy-changed="$emit('widget-busy-changed', $event)"
     />
 
-    <div class="_error-message">
+    <div
+      class="_error-message"
+      aria-live="polite"
+    >
       {{ error }}
     </div>
   </div>

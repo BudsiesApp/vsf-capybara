@@ -55,7 +55,7 @@
       </li>
     </ul>
 
-    <div class="_error-message">
+    <div class="_error-message" aria-live="polite">
       {{ error }}
     </div>
   </div>
