@@ -272,10 +272,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       if (fileInput && fileInput.$el) {
         if (this.ariaLabelledby) {
           const input = fileInput.$el.querySelector('.filepond--label-action');
-          const nativeInput = fileInput.$el.querySelector('.filepond--browser');
 
           input?.setAttribute('aria-labelledby', this.ariaLabelledby);
-          nativeInput?.setAttribute('tabindex', '-1');
         }
       }
     },
