@@ -62,7 +62,7 @@ export function useFormValidation (
     );
 
     if (!focusable) {
-      (ref as HTMLElement).querySelector<HTMLElement>(
+      focusable = (ref as HTMLElement).querySelector<HTMLElement>(
         'input, select, textarea, [tabindex]:not([tabindex="-1"]), a[href], button:not([disabled])'
       );
     }
