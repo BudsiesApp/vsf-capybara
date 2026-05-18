@@ -57,9 +57,15 @@ export function useFormValidation (
 
     ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    const focusable = (ref as HTMLElement).querySelector<HTMLElement>(
-      'input, select, textarea, [tabindex]:not([tabindex="-1"]), a[href], button:not([disabled])'
+    let focusable = (ref as HTMLElement).querySelector<HTMLElement>(
+      '[tabindex="0"]'
     );
+
+    if (!focusable) {
+      (ref as HTMLElement).querySelector<HTMLElement>(
+        'input, select, textarea, [tabindex]:not([tabindex="-1"]), a[href], button:not([disabled])'
+      );
+    }
 
     focusable?.focus();
   }
