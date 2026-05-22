@@ -106,6 +106,7 @@ export default defineComponent({
   ._button-container {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
   }
 
   ._message {

@@ -7,8 +7,13 @@ export interface CartLineCouponOffer {
   couponCode: string
 }
 
+export interface CartLineCouponOfferMapping {
+  buttonText: string,
+  productSkus: string[]
+}
+
 export interface CartLineCouponOffersConfig {
-  mappings: Record<string, CartLineCouponOffer>
+  mappings: Record<string, CartLineCouponOfferMapping>
 }
 
 export function getCartLineCouponOffersConfig (): CartLineCouponOffersConfig {
@@ -23,14 +28,26 @@ export function getCartLineCouponOfferMappingKey (product: CartItem): string {
 
 export function resolveCartLineCouponOffer (
   product: CartItem,
-  mappings: Record<string, CartLineCouponOffer> = getCartLineCouponOffersConfig().mappings
+  mappings: Record<string, CartLineCouponOfferMapping> = getCartLineCouponOffersConfig().mappings
 ): CartLineCouponOffer | undefined {
   const mappingKey = getCartLineCouponOfferMappingKey(product);
-  const offer = mappings[mappingKey];
 
-  if (!offer || !offer.buttonText || !offer.couponCode) {
-    return undefined;
+  for (const couponCode in mappings) {
+    const mapping = mappings[couponCode];
+
+    if (!mapping || !mapping.buttonText || !Array.isArray(mapping.productSkus)) {
+      continue;
+    }
+
+    if (!mapping.productSkus.includes(mappingKey)) {
+      continue;
+    }
+
+    return {
+      buttonText: mapping.buttonText,
+      couponCode
+    };
   }
 
-  return offer;
+  return undefined;
 }
