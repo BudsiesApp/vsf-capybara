@@ -19,7 +19,13 @@ export interface CartLineCouponOffersConfig {
 export function getCartLineCouponOffersConfig (): CartLineCouponOffersConfig {
   const cartConfig = (config as any).cart || {};
 
-  return cartConfig.cartLineCouponOffers || { mappings: {} };
+  const cartLineCouponOffers = cartConfig.cartLineCouponOffers;
+
+  if (!cartLineCouponOffers?.mappings) {
+    return { mappings: {} };
+  }
+
+  return cartLineCouponOffers;
 }
 
 export function getCartLineCouponOfferMappingKey (product: CartItem): string {
