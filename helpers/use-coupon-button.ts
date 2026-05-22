@@ -77,7 +77,7 @@ export function useCouponButton (
     try {
       const result = await root.$store.dispatch('cart/applyCoupon', couponCode.value);
 
-      if (result && result.code && result.code !== 200) {
+      if (!result?.code || result.code !== 200) {
         return false;
       }
 
@@ -94,7 +94,6 @@ export function useCouponButton (
     isCartSyncing,
     isCouponProcessing,
     shouldRender,
-    shouldShowConflictMessage,
-    state
+    shouldShowConflictMessage
   };
 }

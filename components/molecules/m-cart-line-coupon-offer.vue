@@ -106,7 +106,8 @@ export default defineComponent({
   margin-top: var(--spacer-xs);
 
   ._button-container {
-    display: flex-column;
+    display: flex;
+    flex-direction: column;
   }
 
   ._message {
