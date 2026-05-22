@@ -71,8 +71,7 @@ export default defineComponent({
       isCartSyncing,
       isCouponProcessing,
       shouldRender,
-      shouldShowConflictMessage,
-      state
+      shouldShowConflictMessage
     } = useCouponButton(couponCode, context);
 
     const applyCouponOffer = async (): Promise<void> => {
@@ -90,8 +89,7 @@ export default defineComponent({
       isCouponProcessing,
       offerButtonText,
       shouldShowConflictMessage,
-      shouldRender,
-      state
+      shouldRender
     };
   }
 });
