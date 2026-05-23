@@ -173,12 +173,12 @@ export default defineComponent({
     justify-content: center;
     flex: 0 0 auto;
     padding: var(--spacer-sm) 0 var(--spacer-sm) var(--spacer-base);
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     line-height: 1;
   }
 
   ._title {
-    font-size: var(--font-base);
+    font-size: var(--font-sm);
     font-weight: var(--font-semibold);
     line-height: 1.2;
   }
@@ -196,12 +196,12 @@ export default defineComponent({
     align-items: center;
     justify-content: center;
     gap: 0.375rem;
-    flex: 0 0 6.875rem;
+    flex: 0 0 6rem;
     padding: var(--spacer-sm);
     border: 0;
     background: var(--coupon-idle-action-background);
     color: var(--c-white);
-    font-size: var(--font-sm);
+    font-size: 0.75rem;
     font-weight: var(--font-bold);
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -241,18 +241,18 @@ export default defineComponent({
     }
   }
 
-  @include for-mobile {
+  @include for-desktop {
     ._icon {
-      font-size: 1.25rem;
+      font-size: 1.5rem;
     }
 
     ._title {
-      font-size: var(--font-sm);
+      font-size: var(--font-base);
     }
 
     ._action {
-      flex-basis: 6rem;
-      font-size: 0.75rem;
+      flex-basis: 6.875rem;
+      font-size: var(--font-sm);
     }
   }
 }
