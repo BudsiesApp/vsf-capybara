@@ -784,7 +784,7 @@ export default {
 
     @media (min-width: 768px) {
       width: calc(100% - 140px);
-      max-width: 23rem;
+      max-width: 26rem;
       margin-left: calc(8.75rem + var(--spacer-sm));
     }
   }
