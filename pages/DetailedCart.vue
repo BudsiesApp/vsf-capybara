@@ -46,11 +46,6 @@
                       :product-options="getCartItemOptions(product)"
                       :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
                     />
-
-                    <MCartLineCouponOffer
-                      :product="product"
-                      class="collected-product__coupon-offer desktop-only"
-                    />
                   </template>
 
                   <template #input>
@@ -88,11 +83,6 @@
                     >
                       Remove
                     </SfButton>
-
-                    <MCartLineCouponOffer
-                      :product="product"
-                      class="collected-product__coupon-offer-mobile mobile-only"
-                    />
                   </template>
 
                   <template #remove>
@@ -112,7 +102,7 @@
 
                 <MCartLineCouponOffer
                   :product="product"
-                  class="collected-product__coupon-offer-small-mobile mobile-only"
+                  class="collected-product__coupon-offer"
                 />
               </div>
             </transition-group>
@@ -775,25 +765,28 @@ export default {
   text-align: left;
 }
 .collected-product {
-  --collected-product-padding: var(--spacer-sm) 0;
+  --collected-product-padding: 0;
+  --collected-product-item-padding: var(--spacer-sm) 0;
   --collected-product-title-font-size: var(--font-sm);
   --collected-product-title-font-weight: var(--font-semibold);
-  border: 1px solid var(--c-light);
-  border-width: 1px 0 0 0;
 
   &__item {
     display: flex;
     flex-direction: column;
+    padding: var(--spacer-sm) 0;
+    border: 1px solid var(--c-light);
+    border-width: 1px 0 0 0;
   }
 
   &__coupon-offer {
-    align-self: flex-start;
-    margin-top: var(--spacer-xs);
-  }
+    width: 100%;
+    margin: var(--spacer-base) 0 0;
 
-  &__coupon-offer-small-mobile {
-    align-self: flex-start;
-    margin: 0 0 var(--spacer-xs);
+    @media (min-width: 768px) {
+      width: calc(100% - 140px);
+      max-width: 23rem;
+      margin-left: calc(8.75rem + var(--spacer-sm));
+    }
   }
 
   ::v-deep {
@@ -807,25 +800,12 @@ export default {
     --collected-product-remove-bottom: var(--spacer-sm);
 
     &__item:first-of-type {
-      .collected-product {
-        border: none;
-      }
+      border: none;
     }
   }
-    @media (max-width: 467px) {
-      &__coupon-offer-mobile {
-        display: none;
-      }
-    }
-
-    @media (min-width: 468px) {
-      &__coupon-offer-small-mobile {
-        display: none;
-      }
-    }
 
   @include for-desktop {
-    --collected-product-padding: var(--spacer-lg) 0;
+    --collected-product-item-padding: var(--spacer-lg) 0;
     --collected-product-title-font-size: var(--font-base);
   }
 }

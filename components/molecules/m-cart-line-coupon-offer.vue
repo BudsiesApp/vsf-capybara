@@ -1,39 +1,33 @@
 <template>
-  <div v-if="shouldRender" class="m-cart-line-coupon-offer">
-    <template v-if="shouldShowConflictMessage">
-      <div class="_button-container">
-        <ACopyToClipboardButton
-          class="_copy-button color-secondary"
-          :value="copyValue"
-          :idle-text="$t('Copy code').toString()"
-          :success-text="$t('Copied').toString()"
-          :error-text="$t('Retry copy').toString()"
-        />
-
-        <div class="_message">
-          {{ $t('Another coupon is already applied.') }}
-        </div>
+  <div
+    v-if="shouldRender"
+    :class="['m-cart-line-coupon-offer', `-${state}`]"
+  >
+    <div class="_content">
+      <div class="_title">
+        {{ offerTitle }}
       </div>
-    </template>
 
-    <MSpinnerButton
-      v-else
-      :show-spinner="isCouponProcessing"
-      :disabled="isCartSyncing"
-      :title="offerButtonText"
-      button-class="_button color-secondary"
+      <div class="_code">
+        {{ $t('Code') }}: {{ couponCodeLabel }}
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="_action"
+      :disabled="isActionDisabled"
       @click="applyCouponOffer"
     >
-      {{ offerButtonText }}
-    </MSpinnerButton>
+      <span v-if="state === 'applying'" class="_spinner" />
+      <span>{{ actionText }}</span>
+    </button>
   </div>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
-import ACopyToClipboardButton from 'theme/components/atoms/a-copy-to-clipboard-button.vue';
-import MSpinnerButton from 'theme/components/molecules/m-spinner-button.vue';
 
 import {
   CartLineCouponOffer,
@@ -43,10 +37,6 @@ import { useCouponButton } from 'theme/helpers/use-coupon-button';
 
 export default defineComponent({
   name: 'MCartLineCouponOffer',
-  components: {
-    ACopyToClipboardButton,
-    MSpinnerButton
-  },
   props: {
     product: {
       required: true
@@ -63,16 +53,40 @@ export default defineComponent({
     const couponCode = computed<string | undefined>(() => {
       return offer.value ? offer.value.couponCode : undefined;
     });
-    const copyValue = computed<string>(() => {
+    const couponCodeLabel = computed<string>(() => {
       return couponCode.value || '';
     });
     const {
       applyCoupon,
       isCartSyncing,
-      isCouponProcessing,
-      shouldRender,
-      shouldShowConflictMessage
+      state,
+      shouldRender
     } = useCouponButton(couponCode, context);
+    const offerTitle = computed<string>(() => {
+      if (state.value === 'locked') {
+        return context.root.$t('Another coupon is already applied.').toString();
+      }
+
+      return offerButtonText.value;
+    });
+    const actionText = computed<string>(() => {
+      if (state.value === 'applying') {
+        return context.root.$t('Applying').toString();
+      }
+
+      if (state.value === 'applied') {
+        return context.root.$t('Applied').toString();
+      }
+
+      if (state.value === 'locked') {
+        return context.root.$t('Locked').toString();
+      }
+
+      return context.root.$t('Apply').toString();
+    });
+    const isActionDisabled = computed<boolean>(() => {
+      return isCartSyncing.value || state.value !== 'idle';
+    });
 
     const applyCouponOffer = async (): Promise<void> => {
       if (!offer.value) {
@@ -84,11 +98,12 @@ export default defineComponent({
 
     return {
       applyCouponOffer,
-      copyValue,
+      actionText,
+      couponCodeLabel,
+      isActionDisabled,
       isCartSyncing,
-      isCouponProcessing,
-      offerButtonText,
-      shouldShowConflictMessage,
+      offerTitle,
+      state,
       shouldRender
     };
   }
@@ -96,37 +111,144 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.m-cart-line-coupon-offer {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--spacer-xs);
-  margin-top: var(--spacer-xs);
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-  ._button-container {
+.m-cart-line-coupon-offer {
+  --coupon-idle-background: var(--c-secondary-lighten);
+  --coupon-idle-text: var(--c-blue);
+  --coupon-idle-action-background: var(--c-primary-lighten);
+  --coupon-spinner-track: rgba(var(--c-white-base), 0.4);
+  --coupon-applied-background: #dff3e9;
+  --coupon-applied-text: #0f5c49;
+  --coupon-applied-action-background: #20a87c;
+  --coupon-locked-background: var(--c-white-darken);
+  --coupon-locked-text: var(--c-gray);
+  --coupon-locked-action-background: var(--c-gray-light);
+  --coupon-locked-action-text: var(--c-dark);
+
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  margin-top: var(--spacer-sm);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  position: relative;
+  background: var(--coupon-idle-background);
+  color: var(--coupon-idle-text);
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 0.875rem;
+    height: 0.875rem;
+    margin-top: -0.4375rem;
+    border-radius: 50%;
+    background: var(--c-white);
+    z-index: 1;
+  }
+
+  &::before {
+    left: -0.4375rem;
+  }
+
+  &::after {
+    right: -0.4375rem;
+  }
+
+  ._content {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    justify-content: center;
+    min-width: 0;
+    flex: 1;
+    padding: var(--spacer-sm) var(--spacer-base);
   }
 
-  ._message {
-    margin-top: var(--spacer-xs);
-    color: var(--c-text-muted, var(--c-text));
+  ._title {
+    font-size: var(--font-base);
+    font-weight: var(--font-semibold);
+    line-height: 1.2;
+  }
+
+  ._code {
+    margin-top: 0.25rem;
     font-size: var(--font-xs);
-    line-height: 1.4;
-    text-align: left;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
-  ._copy-button {
-    --button-font-size: var(--font-xs);
-    --button-padding: var(--spacer-xs) var(--spacer-sm);
-    --button-min-height: 2rem;
+  ._action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    flex: 0 0 6.875rem;
+    padding: var(--spacer-sm);
+    border: 0;
+    background: var(--coupon-idle-action-background);
+    color: var(--c-white);
+    font-size: var(--font-sm);
+    font-weight: var(--font-bold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
   }
 
-  ::v-deep ._button {
-    --button-font-size: var(--font-xs);
-    --button-padding: var(--spacer-xs) var(--spacer-sm);
-    --button-min-height: 2rem;
+  ._action:disabled {
+    cursor: default;
+  }
+
+  ._spinner {
+    width: 0.875rem;
+    height: 0.875rem;
+    border: 2px solid var(--coupon-spinner-track);
+    border-top-color: var(--c-white);
+    border-radius: 50%;
+    animation: coupon-spin 0.8s linear infinite;
+  }
+
+  &.-applied {
+    background: var(--coupon-applied-background);
+    color: var(--coupon-applied-text);
+
+    ._action {
+      background: var(--coupon-applied-action-background);
+    }
+  }
+
+  &.-locked {
+    background: var(--coupon-locked-background);
+    color: var(--coupon-locked-text);
+
+    ._action {
+      background: var(--coupon-locked-action-background);
+      color: var(--coupon-locked-action-text);
+    }
+  }
+
+  @include for-mobile {
+    ._title {
+      font-size: var(--font-sm);
+    }
+
+    ._action {
+      flex-basis: 6rem;
+      font-size: 0.75rem;
+    }
+  }
+}
+
+@keyframes coupon-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
   }
 }
 </style>

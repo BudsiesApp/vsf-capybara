@@ -4,36 +4,46 @@ import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import { IS_CART_SYNCING, IS_COUPON_PROCESSING } from '@vue-storefront/core/modules/cart';
 import AppliedCoupon from '@vue-storefront/core/modules/cart/types/AppliedCoupon';
 
-export type CouponButtonState = 'conflict' | 'hidden' | 'ready' | 'unavailable'
+export type CouponButtonState = 'applied' | 'applying' | 'hidden' | 'idle' | 'locked'
+
+export interface CouponButtonResult {
+  applyCoupon: () => Promise<boolean>,
+  appliedCoupon: ComputedRef<AppliedCoupon | false>,
+  isCartSyncing: ComputedRef<boolean>,
+  isCouponProcessing: ComputedRef<boolean>,
+  state: ComputedRef<CouponButtonState>,
+  shouldRender: ComputedRef<boolean>
+}
 
 export function useCouponButton (
   couponCode: ComputedRef<string | undefined>,
   { root }: SetupContext
-) {
+): CouponButtonResult {
+  const isApplyingCoupon = ref<boolean>(false);
   const appliedCoupon = computed<AppliedCoupon | false>(() => {
     return root.$store.getters['cart/getCoupon'];
   });
   const state = computed<CouponButtonState>(() => {
     if (!couponCode.value) {
-      return 'unavailable';
-    }
-
-    if (!appliedCoupon.value) {
-      return 'ready';
-    }
-
-    if (appliedCoupon.value.code === couponCode.value) {
       return 'hidden';
     }
 
-    return 'conflict';
+    if (appliedCoupon.value && appliedCoupon.value.code === couponCode.value) {
+      return 'applied';
+    }
+
+    if (appliedCoupon.value) {
+      return 'locked';
+    }
+
+    if (isCouponProcessing.value && isApplyingCoupon.value) {
+      return 'applying';
+    }
+
+    return 'idle';
   });
-  const isConflictMessageVisible = ref<boolean>(false);
   const shouldRender = computed<boolean>(() => {
-    return state.value !== 'hidden' && state.value !== 'unavailable';
-  });
-  const shouldShowConflictMessage = computed<boolean>(() => {
-    return state.value === 'conflict' && isConflictMessageVisible.value;
+    return state.value !== 'hidden';
   });
   const isCartSyncing = computed<boolean>(() => {
     return root.$store.getters[IS_CART_SYNCING];
@@ -42,9 +52,9 @@ export function useCouponButton (
     return root.$store.getters[IS_COUPON_PROCESSING];
   });
 
-  watch(state, (value: CouponButtonState) => {
-    if (value !== 'conflict') {
-      isConflictMessageVisible.value = false;
+  watch(isCouponProcessing, (value: boolean) => {
+    if (!value) {
+      isApplyingCoupon.value = false;
     }
   });
 
@@ -65,14 +75,15 @@ export function useCouponButton (
       return false;
     }
 
-    if (state.value === 'conflict') {
-      isConflictMessageVisible.value = true;
+    if (state.value === 'applied' || state.value === 'hidden' || state.value === 'locked') {
       return false;
     }
 
-    if (state.value !== 'ready') {
+    if (state.value !== 'idle') {
       return false;
     }
+
+    isApplyingCoupon.value = true;
 
     try {
       const result = await root.$store.dispatch('cart/applyCoupon', couponCode.value);
@@ -93,7 +104,7 @@ export function useCouponButton (
     appliedCoupon,
     isCartSyncing,
     isCouponProcessing,
-    shouldRender,
-    shouldShowConflictMessage
+    state,
+    shouldRender
   };
 }
