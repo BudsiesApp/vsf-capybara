@@ -58,7 +58,7 @@ export default defineComponent({
     });
     const {
       applyCoupon,
-      isCartSyncing,
+      isCouponInteractionBlocked,
       state,
       shouldRender
     } = useCouponButton(couponCode, context);
@@ -85,7 +85,7 @@ export default defineComponent({
       return context.root.$t('Apply').toString();
     });
     const isActionDisabled = computed<boolean>(() => {
-      return isCartSyncing.value || state.value !== 'idle';
+      return isCouponInteractionBlocked.value || state.value !== 'idle';
     });
 
     const applyCouponOffer = async (): Promise<void> => {
@@ -101,7 +101,6 @@ export default defineComponent({
       actionText,
       couponCodeLabel,
       isActionDisabled,
-      isCartSyncing,
       offerTitle,
       state,
       shouldRender

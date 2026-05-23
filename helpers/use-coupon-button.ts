@@ -1,7 +1,7 @@
 import { ComputedRef, SetupContext, computed, ref, watch } from '@vue/composition-api';
 
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
-import { IS_CART_SYNCING, IS_COUPON_PROCESSING } from '@vue-storefront/core/modules/cart';
+import { IS_CART_SYNCING, IS_COUPON_INTERACTION_BLOCKED, IS_COUPON_PROCESSING } from '@vue-storefront/core/modules/cart';
 import AppliedCoupon from '@vue-storefront/core/modules/cart/types/AppliedCoupon';
 
 export type CouponButtonState = 'applied' | 'applying' | 'hidden' | 'idle' | 'locked'
@@ -10,6 +10,7 @@ export interface CouponButtonResult {
   applyCoupon: () => Promise<boolean>,
   appliedCoupon: ComputedRef<AppliedCoupon | false>,
   isCartSyncing: ComputedRef<boolean>,
+  isCouponInteractionBlocked: ComputedRef<boolean>,
   isCouponProcessing: ComputedRef<boolean>,
   state: ComputedRef<CouponButtonState>,
   shouldRender: ComputedRef<boolean>
@@ -22,6 +23,15 @@ export function useCouponButton (
   const isApplyingCoupon = ref<boolean>(false);
   const appliedCoupon = computed<AppliedCoupon | false>(() => {
     return root.$store.getters['cart/getCoupon'];
+  });
+  const isCartSyncing = computed<boolean>(() => {
+    return root.$store.getters[IS_CART_SYNCING];
+  });
+  const isCouponInteractionBlocked = computed<boolean>(() => {
+    return root.$store.getters[IS_COUPON_INTERACTION_BLOCKED];
+  });
+  const isCouponProcessing = computed<boolean>(() => {
+    return root.$store.getters[IS_COUPON_PROCESSING];
   });
   const state = computed<CouponButtonState>(() => {
     if (!couponCode.value) {
@@ -45,12 +55,6 @@ export function useCouponButton (
   const shouldRender = computed<boolean>(() => {
     return state.value !== 'hidden';
   });
-  const isCartSyncing = computed<boolean>(() => {
-    return root.$store.getters[IS_CART_SYNCING];
-  });
-  const isCouponProcessing = computed<boolean>(() => {
-    return root.$store.getters[IS_COUPON_PROCESSING];
-  });
 
   watch(isCouponProcessing, (value: boolean) => {
     if (!value) {
@@ -71,7 +75,7 @@ export function useCouponButton (
   };
 
   const applyCoupon = async (): Promise<boolean> => {
-    if (!couponCode.value || isCartSyncing.value || isCouponProcessing.value) {
+    if (!couponCode.value || isCouponInteractionBlocked.value) {
       return false;
     }
 
@@ -103,6 +107,7 @@ export function useCouponButton (
     applyCoupon,
     appliedCoupon,
     isCartSyncing,
+    isCouponInteractionBlocked,
     isCouponProcessing,
     state,
     shouldRender

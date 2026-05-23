@@ -9,14 +9,14 @@
         v-model="promoCode"
         name="promoCode"
         :placeholder="$t('Add a discount code')"
-        :disabled="isSubmitting || disabled"
+        :disabled="isInteractionDisabled"
         class="sf-input--filled a-promo-code__input"
         @keyup.enter="applyCoupon"
       />
 
       <MSpinnerButton
         :show-spinner="isSubmitting"
-        :disabled="disabled"
+        :disabled="isInteractionDisabled"
         :title="$t('Apply coupon')"
         class="_circle-button"
         button-class="sf-button -icon-button"
@@ -33,7 +33,7 @@
     <MSpinnerButton
       v-else-if="allowPromoCodeRemoval"
       :show-spinner="isSubmitting"
-      :disabled="disabled"
+      :disabled="isInteractionDisabled"
       class="a-promo-code__button"
       button-class="color-secondary"
       @click="removeCoupon"
@@ -54,6 +54,7 @@
 
 <script>
 import { SfIcon, SfInput, SfCircleIcon } from '@storefront-ui/vue';
+import { IS_COUPON_INTERACTION_BLOCKED } from '@vue-storefront/core/modules/cart';
 
 import MSpinnerButton from 'theme/components/molecules/m-spinner-button.vue';
 
@@ -85,6 +86,12 @@ export default {
     isCouponCode () {
       return this.$store.state.cart.platformTotals ? this.$store.state.cart.platformTotals.coupon_code : false;
     },
+    isCouponInteractionBlocked () {
+      return Boolean(this.$store.getters[IS_COUPON_INTERACTION_BLOCKED]);
+    },
+    isInteractionDisabled () {
+      return this.disabled || this.isSubmitting || this.isCouponInteractionBlocked;
+    },
     message: {
       set: function (message) {
         this.fMessage = message;
@@ -98,7 +105,7 @@ export default {
   },
   methods: {
     async applyCoupon () {
-      if (this.isSubmitting || this.disabled) {
+      if (this.isInteractionDisabled) {
         return;
       }
 
@@ -119,7 +126,7 @@ export default {
       }
     },
     async removeCoupon () {
-      if (this.isSubmitting || this.disabled) {
+      if (this.isInteractionDisabled) {
         return;
       }
 
