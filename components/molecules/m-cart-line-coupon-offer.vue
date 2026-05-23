@@ -3,6 +3,8 @@
     v-if="shouldRender"
     :class="['m-cart-line-coupon-offer', `-${state}`]"
   >
+    <span class="_icon" aria-hidden="true">🏷️</span>
+
     <div class="_content">
       <div class="_title">
         {{ offerTitle }}
@@ -162,7 +164,17 @@ export default defineComponent({
     justify-content: center;
     min-width: 0;
     flex: 1;
-    padding: var(--spacer-sm) var(--spacer-base);
+    padding: var(--spacer-sm) var(--spacer-base) var(--spacer-sm) var(--spacer-sm);
+  }
+
+  ._icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    padding: var(--spacer-sm) 0 var(--spacer-sm) var(--spacer-base);
+    font-size: 1.5rem;
+    line-height: 1;
   }
 
   ._title {
@@ -230,6 +242,10 @@ export default defineComponent({
   }
 
   @include for-mobile {
+    ._icon {
+      font-size: 1.25rem;
+    }
+
     ._title {
       font-size: var(--font-sm);
     }
