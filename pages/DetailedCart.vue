@@ -17,83 +17,94 @@
             class="collected-product-list"
           >
             <transition-group name="fade" tag="div">
-              <SfCollectedProduct
+              <div
                 v-for="product in products"
                 :key="getCartItemKey(product)"
-                :image="getThumbnailForProductExtend(product)"
-                image-width="140"
-                image-height="140"
-                :title="productTitle[getCartItemKey(product)]"
-                class="sf-collected-product--detailed collected-product"
+                class="collected-product__item"
               >
-                <template #image="{image}">
-                  <SfImage
-                    :src="image"
-                    alt=""
-                    width="140"
-                    height="140"
-                    class="sf-collected-product__image"
-                  />
-                </template>
+                <SfCollectedProduct
+                  :image="getThumbnailForProductExtend(product)"
+                  image-width="140"
+                  image-height="140"
+                  :title="productTitle[getCartItemKey(product)]"
+                  class="sf-collected-product--detailed collected-product"
+                >
+                  <template #image="{image}">
+                    <SfImage
+                      :src="image"
+                      alt=""
+                      width="140"
+                      height="140"
+                      class="sf-collected-product__image"
+                    />
+                  </template>
 
-                <template #configuration>
-                  <cart-item-configuration
-                    :customizations="product.customizations"
-                    :customization-state="(product.extension_attributes || {}).customization_state"
-                    :product-options="getCartItemOptions(product)"
-                    :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
-                  />
-                </template>
+                  <template #configuration>
+                    <cart-item-configuration
+                      :customizations="product.customizations"
+                      :customization-state="(product.extension_attributes || {}).customization_state"
+                      :product-options="getCartItemOptions(product)"
+                      :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
+                    />
+                  </template>
 
-                <template #input>
-                  <SfQuantitySelector
-                    :qty="product.qty"
-                    :disabled="isCartSyncing"
-                    :title="$t('Quantity')"
-                    @input="changeProductQuantity(product, $event)"
-                    v-if="showQuantitySelectorForProduct(product)"
-                  />
+                  <template #input>
+                    <SfQuantitySelector
+                      :qty="product.qty"
+                      :disabled="isCartSyncing"
+                      :title="$t('Quantity')"
+                      @input="changeProductQuantity(product, $event)"
+                      v-if="showQuantitySelectorForProduct(product)"
+                    />
 
-                  <div class="_quantity" v-else>
-                    {{ product.qty }}
-                  </div>
-                </template>
+                    <div class="_quantity" v-else>
+                      {{ product.qty }}
+                    </div>
+                  </template>
 
-                <template #price>
-                  <div />
-                </template>
+                  <template #price>
+                    <div />
+                  </template>
 
-                <template #actions>
-                  <SfButton
-                    v-if="showEditButton(product.sku)"
-                    class="sf-button--text actions__button"
-                    :disabled="isCartSyncing"
-                    @click="editHandler(product)"
-                  >
-                    Edit
-                  </SfButton>
+                  <template #actions>
+                    <SfButton
+                      v-if="showEditButton(product.sku)"
+                      class="sf-button--text actions__button"
+                      :disabled="isCartSyncing"
+                      @click="editHandler(product)"
+                    >
+                      Edit
+                    </SfButton>
 
-                  <SfButton
-                    class="sf-button--text sf-collected-product__remove sf-collected-product__remove--text actions__button"
-                    :disabled="isCartSyncing"
-                    @click="removeHandler(product)"
-                  >
-                    Remove
-                  </SfButton>
-                </template>
+                    <SfButton
+                      class="sf-button--text sf-collected-product__remove sf-collected-product__remove--text actions__button"
+                      :disabled="isCartSyncing"
+                      @click="removeHandler(product)"
+                    >
+                      Remove
+                    </SfButton>
+                  </template>
 
-                <template #remove>
-                  <SfPrice
-                    v-if="cartItemPriceDictionary[getCartItemKey(product)]"
-                    :regular="formatPrice(cartItemPriceDictionary[getCartItemKey(product)]).regular"
-                    :special="formatPrice(cartItemPriceDictionary[getCartItemKey(product)]).special"
-                  />
-                </template>
+                  <template #remove>
+                    <div class="collected-product__remove-column">
+                      <SfPrice
+                        v-if="cartItemPriceDictionary[getCartItemKey(product)]"
+                        :regular="formatPrice(cartItemPriceDictionary[getCartItemKey(product)]).regular"
+                        :special="formatPrice(cartItemPriceDictionary[getCartItemKey(product)]).special"
+                      />
+                    </div>
+                  </template>
 
-                <template #more-actions>
-                  <div />
-                </template>
-              </SfCollectedProduct>
+                  <template #more-actions>
+                    <div />
+                  </template>
+                </SfCollectedProduct>
+
+                <MCartLineCouponOffer
+                  :product="product"
+                  class="collected-product__coupon-offer"
+                />
+              </div>
             </transition-group>
 
             <div class="_dropdown-container">
@@ -190,6 +201,7 @@ import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
 import { ModalList } from 'theme/store/ui/modals';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
+import MCartLineCouponOffer from 'theme/components/molecules/m-cart-line-coupon-offer.vue';
 import MDropdown from 'theme/components/molecules/m-dropdown.vue';
 
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
@@ -259,6 +271,7 @@ export default {
   components: {
     CartItemConfiguration,
     MBlockStory,
+    MCartLineCouponOffer,
     MDropdown,
     SfImage,
     SfPrice,
@@ -752,11 +765,29 @@ export default {
   text-align: left;
 }
 .collected-product {
-  --collected-product-padding: var(--spacer-sm) 0;
+  --collected-product-padding: 0;
+  --collected-product-item-padding: var(--spacer-sm) 0;
   --collected-product-title-font-size: var(--font-sm);
   --collected-product-title-font-weight: var(--font-semibold);
-  border: 1px solid var(--c-light);
-  border-width: 1px 0 0 0;
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacer-sm) 0;
+    border: 1px solid var(--c-light);
+    border-width: 1px 0 0 0;
+  }
+
+  &__coupon-offer {
+    width: 100%;
+    margin: var(--spacer-base) 0 0;
+
+    @media (min-width: 768px) {
+      width: calc(100% - 140px);
+      max-width: 23rem;
+      margin-left: calc(8.75rem + var(--spacer-sm));
+    }
+  }
 
   ::v-deep {
     .sf-link {
@@ -767,12 +798,14 @@ export default {
 
   @include for-mobile {
     --collected-product-remove-bottom: var(--spacer-sm);
-    &:first-of-type {
+
+    &__item:first-of-type {
       border: none;
     }
   }
+
   @include for-desktop {
-    --collected-product-padding: var(--spacer-lg) 0;
+    --collected-product-item-padding: var(--spacer-lg) 0;
     --collected-product-title-font-size: var(--font-base);
   }
 }
