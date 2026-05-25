@@ -15,6 +15,7 @@
         <label
           class="_option-label"
           :class="{ '-required': isFieldRequired }"
+          :id="customization.id"
         >
           {{ optionLabel }}
         </label>

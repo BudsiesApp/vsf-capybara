@@ -2,6 +2,7 @@
   <div class="image-upload-widget">
     <m-artwork-upload
       ref="artworkUpload"
+      :aria-labelledby="ariaLabelledby"
       :disabled="isDisabled"
       :product-id="backendProductId"
       :upload-url="artworkUploadUrl"
@@ -14,7 +15,10 @@
       @is-busy-changed="$emit('widget-busy-changed', $event)"
     />
 
-    <div class="_error-message">
+    <div
+      class="_error-message"
+      aria-live="polite"
+    >
       {{ error }}
     </div>
   </div>
@@ -47,6 +51,10 @@ export default defineComponent({
     MArtworkUpload
   },
   props: {
+    ariaLabelledby: {
+      type: String,
+      default: undefined
+    },
     error: {
       type: String,
       default: undefined

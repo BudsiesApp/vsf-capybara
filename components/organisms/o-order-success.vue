@@ -118,7 +118,13 @@
           </div>
 
           <div class="_section_content">
-            <a :href="referralLink" target="_blank" class="_referral-link">
+            <a
+              :href="referralLink"
+              target="_blank"
+              class="_referral-link"
+              rel="noopener noreferrer"
+              :aria-label="$t('Referral Program') + ' ' + $t('opens in new tab')"
+            >
               <SfButton class="_button">
                 {{ $t('Referral Program') }}
               </SfButton>
