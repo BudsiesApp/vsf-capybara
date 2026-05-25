@@ -672,7 +672,7 @@ export default {
 
   .sf-collected-product {
     --collected-product-image-background: none;
-    --collected-product-main-margin: 0 var(--spacer-sm);
+    --collected-product-main-margin: 0 0 0 var(--spacer-sm);
 
     .sf-price {
       align-items: flex-start;
