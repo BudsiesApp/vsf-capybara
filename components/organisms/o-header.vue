@@ -2,7 +2,7 @@
   <div class="o-header">
     <SfOverlay
       class="overlay"
-      :visible="isHoveredMenu || isSearchPanelVisible"
+      :visible="isHoveredMenu || isFocusedMenu || isSearchPanelVisible"
       @click="$store.commit('ui/setSearchpanel', false)"
     />
     <SfHeader
@@ -19,14 +19,22 @@
       </template>
       <template #navigation>
         <SfHeaderNavigationItem
+          ref="productsNavItem"
           @mouseover="onMainMenuMouseOver"
           @mouseleave="isHoveredMenu = false"
+          @focusin="onMainMenuFocusIn"
+          @focusout="onMainMenuFocusOut"
+          @keydown.esc="onMainMenuEscapeKey"
         >
-          <router-link to="/pet-gifts/" class="o-header__submenu">
+          <router-link
+            to="/pet-gifts/"
+            class="o-header__submenu"
+            :aria-expanded="String(isHoveredMenu || isFocusedMenu)"
+          >
             Products
           </router-link>
           <MMenu
-            :visible="isHoveredMenu && !isSearchPanelVisible"
+            :visible="(isHoveredMenu || isFocusedMenu) && !isSearchPanelVisible"
             @transitionend.native="onMainMenuTransitionEnd"
             @close="onMainMenuClose"
           />
@@ -97,6 +105,7 @@ export default {
   data () {
     return {
       isHoveredMenu: false,
+      isFocusedMenu: false,
       isMouseOverLocked: false
     }
   },
@@ -112,6 +121,7 @@ export default {
   methods: {
     onMainMenuClose () {
       this.isHoveredMenu = false;
+      this.isFocusedMenu = false;
       this.isMouseOverLocked = true;
     },
     onMainMenuMouseOver () {
@@ -124,6 +134,24 @@ export default {
     async onMainMenuTransitionEnd () {
       await this.$nextTick();
       this.isMouseOverLocked = false;
+    },
+    onMainMenuFocusIn () {
+      this.isFocusedMenu = true;
+    },
+    onMainMenuFocusOut (event) {
+      if (
+        event.relatedTarget !== null &&
+        this.$refs.productsNavItem.$el.contains(event.relatedTarget)
+      ) {
+        return;
+      }
+
+      this.isFocusedMenu = false;
+    },
+    onMainMenuEscapeKey () {
+      this.isFocusedMenu = false;
+      this.isHoveredMenu = false;
+      this.$refs.productsNavItem.$el.querySelector('a').focus();
     }
   }
 };
@@ -181,7 +209,8 @@ export default {
       --header-navigation-item-color: var(--c-primary);
     }
 
-    &:hover {
+    &:hover,
+    &:focus-within {
       .m-menu {
         opacity: 1;
         visibility: visible;

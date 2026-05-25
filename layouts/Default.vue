@@ -24,9 +24,9 @@
         </LazyHydrate>
       </div>
 
-      <div class="content">
+      <main class="content">
         <slot />
-      </div>
+      </main>
 
       <LazyHydrate
         when-visible
