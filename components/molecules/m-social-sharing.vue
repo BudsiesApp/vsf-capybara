@@ -8,11 +8,13 @@
       :href="shareEmailHref"
       target="_blank"
       rel="noopener noreferrer"
+      :title="$t('Share via {service}', {service: 'Email'})"
       :aria-label="$t('Share via {service}', {service: 'Email'}) + ' ' + $t('opens in new tab')"
     />
     <a
       class="sharing-button -pinterest"
       :href="sharePinterestHref"
+      :title="$t('Share on {service}', {service: 'Pinterest'})"
       :aria-label="$t('Share on {service}', {service: 'Pinterest'}) + ' ' + $t('opens in new tab')"
       target="_blank"
       rel="noopener noreferrer"
@@ -21,6 +23,7 @@
     <a
       class="sharing-button -twitter"
       :href="shareTwitterHref"
+      :title="$t('Share on {service}', {service: 'Twitter'})"
       :aria-label="$t('Share on {service}', {service: 'Twitter'}) + ' ' + $t('opens in new tab')"
       target="_blank"
       rel="noopener noreferrer"
@@ -28,6 +31,7 @@
     <a
       class="sharing-button -facebook"
       :href="shareFacebookHref"
+      :title="$t('Share on {service}', {service: 'Facebook'})"
       :aria-label="$t('Share on {service}', {service: 'Facebook'}) + ' ' + $t('opens in new tab')"
       target="_blank"
       rel="noopener noreferrer"

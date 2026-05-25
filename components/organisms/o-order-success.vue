@@ -121,9 +121,9 @@
             <a
               :href="referralLink"
               target="_blank"
+              class="_referral-link"
               rel="noopener noreferrer"
               :aria-label="$t('Referral Program') + ' ' + $t('opens in new tab')"
-              class="_referral-link"
             >
               <SfButton class="_button">
                 {{ $t('Referral Program') }}

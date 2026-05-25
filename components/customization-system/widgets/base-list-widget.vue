@@ -1,5 +1,5 @@
 <template>
-  <div class="base-list-widget" :class="{ '-disabled': isDisabled }">
+  <div class="base-list-widget" :class="{ '-disabled': isDisabled }" :role="groupRole">
     <ul
       class="_options-list"
       :class="{ [`-alignment-${alignment}`]: true, '-round': isRound }"
@@ -55,7 +55,7 @@
       </li>
     </ul>
 
-    <div class="_error-message">
+    <div class="_error-message" aria-live="polite">
       {{ error }}
     </div>
   </div>
@@ -72,6 +72,7 @@ import { SfPrice } from '@storefront-ui/vue';
 
 import { BaseImage } from 'src/modules/budsies';
 import {
+  ListWidgetInputType,
   OptionValue,
   useListWidget,
   useOptionValuesPrice,
@@ -125,11 +126,18 @@ export default defineComponent({
 
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
 
+    const groupRole = computed<string>(() => {
+      return listWidgetFields.inputType.value === ListWidgetInputType.RADIO
+        ? 'radiogroup'
+        : 'group';
+    });
+
     function getOptionId (optionId: string): string {
       return `base-list-widget-option-${optionId}`;
     }
 
     return {
+      groupRole,
       isRound,
       getOptionId,
       ...listWidgetFields,

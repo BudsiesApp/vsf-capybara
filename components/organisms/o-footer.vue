@@ -82,7 +82,7 @@
         </div>
 
         <SfButton class="color-secondary _contact-button">
-          <a href="https://support.budsies.com/" target="_blank" rel="noopener noreferrer">
+          <a href="https://support.budsies.com/support/home" target="_blank" rel="noopener noreferrer">
             {{ $t('Contact Us') }}
           </a>
         </SfButton>
