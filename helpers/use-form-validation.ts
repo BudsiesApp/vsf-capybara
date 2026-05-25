@@ -56,6 +56,18 @@ export function useFormValidation (
     }
 
     ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    let focusable = (ref as HTMLElement).querySelector<HTMLElement>(
+      '[tabindex="0"]'
+    );
+
+    if (!focusable) {
+      focusable = (ref as HTMLElement).querySelector<HTMLElement>(
+        'input, select, textarea, a[href], button:not([disabled])'
+      );
+    }
+
+    focusable?.focus();
   }
 
   function validate (): Promise<boolean> {
@@ -84,6 +96,9 @@ export function useFormValidation (
     if (!validationObserver.value) {
       throw new Error('Validation observer is not defined');
     }
+
+    validationObserver.value.reset();
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     if (await validate()) {
       return true;

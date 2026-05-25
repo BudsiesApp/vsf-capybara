@@ -33,6 +33,7 @@
         @removefile="onFileRemove"
         @addfilestart="updateStatus"
         @processfilestart="updateStatus"
+        @init="onFilePondInit"
       />
 
       <div
@@ -145,6 +146,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     maxFiles: {
       type: Number as PropType<number | null>,
       default: null
+    },
+    ariaLabelledby: {
+      type: String as PropType<string | undefined>,
+      default: undefined
     }
   },
   data () {
@@ -261,6 +266,17 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     });
   },
   methods: {
+    onFilePondInit (): void {
+      const fileInput = this.getFileInput();
+
+      if (fileInput && fileInput.$el) {
+        if (this.ariaLabelledby) {
+          const input = fileInput.$el.querySelector('.filepond--label-action');
+
+          input?.setAttribute('aria-labelledby', this.ariaLabelledby);
+        }
+      }
+    },
     getFiles (): FilePondFile[] {
       const fileInput = this.getFileInput();
 
@@ -765,6 +781,11 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
 
                 .filepond--panel-root {
                     background-color: #fafafa;
+                }
+
+                .filepond--credits,
+                .filepond--browser {
+                    display: none;
                 }
             }
 

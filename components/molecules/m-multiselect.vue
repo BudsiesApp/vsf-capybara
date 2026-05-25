@@ -58,7 +58,7 @@
       </label>
     </div>
 
-    <div class="m-multiselect__error-message">
+    <div class="m-multiselect__error-message" aria-live="polite">
       <transition name="fade">
         <div v-if="!valid">
           {{ errorMessage }}

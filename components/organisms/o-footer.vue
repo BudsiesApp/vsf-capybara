@@ -13,6 +13,7 @@
             <router-link
               :to="localizedRoute(link.link)"
               :target="link.target"
+              :rel="link.target === '_blank' ? 'noopener noreferrer' : null"
               :event="link.event ? link.event : 'click'"
               @click.native="onLinkClick(link)"
               exact
@@ -128,7 +129,7 @@ export default {
         return {
           name: service.name,
           url: service.url,
-          label: this.$t('{brand} {service} page', { brand: name, service: service.serviceLabel })
+          label: this.$t('{brand} {service} page', { brand: name, service: service.serviceLabel }) + ' ' + this.$t('opens in new tab')
         };
       });
     },

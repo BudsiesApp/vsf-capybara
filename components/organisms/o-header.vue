@@ -2,7 +2,7 @@
   <div class="o-header">
     <SfOverlay
       class="overlay"
-      :visible="isAboutMenuHovered || isHoveredMenu || isSearchPanelVisible"
+      :visible="isAboutMenuHovered || isHoveredMenu || isFocusedMenu || isSearchPanelVisible"
       @click="$store.commit('ui/setSearchpanel', false)"
     />
     <SfHeader
@@ -35,15 +35,24 @@
         </SfHeaderNavigationItem>
 
         <SfHeaderNavigationItem
+          ref="productsNavItem"
           @mouseover="onMainMenuMouseOver"
           @mouseleave="isHoveredMenu = false"
+          @focusin="onMainMenuFocusIn"
+          @focusout="onMainMenuFocusOut"
+          @keydown.esc="onMainMenuEscapeKey"
         >
-          <div class="o-header__submenu">
+          <button
+            type="button"
+            class="o-header__submenu o-header__submenu-trigger"
+            :aria-expanded="String(isHoveredMenu || isFocusedMenu)"
+            aria-haspopup="true"
+          >
             {{ $t('Products') }}
-          </div>
+          </button>
 
           <MMenu
-            :visible="isHoveredMenu && !isSearchPanelVisible"
+            :visible="(isHoveredMenu || isFocusedMenu) && !isSearchPanelVisible"
             @transitionend.native="onMainMenuTransitionEnd"
             @close="onMainMenuClose"
           />
@@ -116,6 +125,7 @@ export default Vue.extend({
       isAboutMenuHovered: false,
       isAboutMouseOverLocked: false,
       isHoveredMenu: false,
+      isFocusedMenu: false,
       isMouseOverLocked: false
     };
   },
@@ -146,6 +156,7 @@ export default Vue.extend({
     },
     onMainMenuClose () {
       this.isHoveredMenu = false;
+      this.isFocusedMenu = false;
       this.isMouseOverLocked = true;
     },
     onMainMenuMouseOver () {
@@ -158,6 +169,32 @@ export default Vue.extend({
     async onMainMenuTransitionEnd () {
       await this.$nextTick();
       this.isMouseOverLocked = false;
+    },
+    onMainMenuFocusIn () {
+      this.isFocusedMenu = true;
+    },
+    onMainMenuFocusOut (event) {
+      const productsNavItem = this.$refs.productsNavItem && this.$refs.productsNavItem.$el;
+
+      if (
+        event.relatedTarget !== null &&
+        productsNavItem &&
+        productsNavItem.contains(event.relatedTarget)
+      ) {
+        return;
+      }
+
+      this.isFocusedMenu = false;
+    },
+    onMainMenuEscapeKey () {
+      this.isFocusedMenu = false;
+      this.isHoveredMenu = false;
+
+      const menuTrigger = this.$refs.productsNavItem && this.$refs.productsNavItem.$el.querySelector('button');
+
+      if (menuTrigger) {
+        menuTrigger.focus();
+      }
     }
   }
 });
@@ -193,6 +230,14 @@ export default Vue.extend({
     cursor: pointer;
   }
 
+  &__submenu-trigger {
+    background: none;
+    border: 0;
+    color: inherit;
+    font: inherit;
+    padding: 0;
+  }
+
   a {
     &.active {
       font-weight: bold;
@@ -220,7 +265,14 @@ export default Vue.extend({
     }
 
     &:hover {
-      .m-about-menu,
+      .m-about-menu {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+
+    &:hover,
+    &:focus-within {
       .m-menu {
         opacity: 1;
         visibility: visible;
