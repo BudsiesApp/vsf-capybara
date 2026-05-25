@@ -2,7 +2,7 @@
   <div class="o-header">
     <SfOverlay
       class="overlay"
-      :visible="isHoveredMenu || isSearchPanelVisible"
+      :visible="isSearchPanelVisible"
       @click="$store.commit('ui/setSearchpanel', false)"
     />
     <SfHeader
@@ -64,7 +64,6 @@ import ALogo from 'theme/components/atoms/a-logo';
 import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
 import { mapState, mapGetters } from 'vuex';
-import MMenu from 'theme/components/molecules/m-menu';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
 export default {
@@ -74,16 +73,9 @@ export default {
     ALogo,
     AAccountIcon,
     ADetailedCartIcon,
-    MMenu,
     SfOverlay,
     MCtaButton,
     CurrencySelector
-  },
-  data () {
-    return {
-      isHoveredMenu: false,
-      isMouseOverLocked: false
-    }
   },
   computed: {
     ...mapState({
@@ -92,23 +84,6 @@ export default {
     ...mapGetters('user', ['isLoggedIn']),
     activeIcon () {
       return this.isLoggedIn ? 'account' : '';
-    }
-  },
-  methods: {
-    onMainMenuClose () {
-      this.isHoveredMenu = false;
-      this.isMouseOverLocked = true;
-    },
-    onMainMenuMouseOver () {
-      if (this.isMouseOverLocked) {
-        return;
-      }
-
-      this.isHoveredMenu = true;
-    },
-    async onMainMenuTransitionEnd () {
-      await this.$nextTick();
-      this.isMouseOverLocked = false;
     }
   }
 };
@@ -138,10 +113,6 @@ export default {
     z-index: 200;
   }
 
-  &__submenu {
-    cursor: pointer;
-  }
-
   a {
     &.active {
       font-weight: bold;
@@ -166,7 +137,8 @@ export default {
       --header-navigation-item-color: var(--c-primary);
     }
 
-    &:hover {
+    &:hover,
+    &:focus-within {
       .m-menu {
         opacity: 1;
         visibility: visible;
