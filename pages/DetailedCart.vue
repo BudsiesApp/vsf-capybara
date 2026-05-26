@@ -46,6 +46,7 @@
                       :product-options="getCartItemOptions(product)"
                       :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
                       :cart-item-price="cartItemPriceDictionary[getCartItemKey(product)]"
+                      :cart-item-qty="product.qty"
                       :show-prices="true"
                     />
                   </template>
