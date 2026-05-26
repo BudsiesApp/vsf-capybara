@@ -45,6 +45,8 @@
                       :customization-state="(product.extension_attributes || {}).customization_state"
                       :product-options="getCartItemOptions(product)"
                       :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
+                      :cart-item-price="cartItemPriceDictionary[getCartItemKey(product)]"
+                      :show-prices="true"
                     />
                   </template>
 
