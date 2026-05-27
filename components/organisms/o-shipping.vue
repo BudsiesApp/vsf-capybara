@@ -30,12 +30,13 @@
       />
     </div>
     <SfHeading
+      id="shipping-method-heading"
       :title="$t('Shipping method')"
       :level="3"
       class="sf-heading--left sf-heading--no-underline title"
     />
     <div class="form">
-      <div class="form__radio-group">
+      <div class="form__radio-group" role="group" aria-labelledby="shipping-method-heading">
         <SfRadio
           v-for="method in shippingMethods"
           :key="method.method_code"

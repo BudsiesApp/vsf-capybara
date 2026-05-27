@@ -25,6 +25,7 @@
       :max-height="190"
       :autocomplete="autocomplete"
       :autocomplete-value-search="autocompleteValueSearch"
+      :labelled-by="labelledBy"
       open-direction="below"
       :disabled="disabled"
       ref="multiselect"
@@ -189,6 +190,10 @@ export default defineComponent({
     },
     autocompleteValueSearch: {
       type: Function as PropType<((option: any, value: string) => boolean) | undefined>,
+      default: undefined
+    },
+    labelledBy: {
+      type: String,
       default: undefined
     }
   },

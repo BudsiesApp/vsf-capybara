@@ -224,6 +224,7 @@ export default defineComponent({
     async onContinueButtonClick () {
       let isInvalid = false;
 
+      this.$v.personalDetails.$reset();
       this.$v.personalDetails.$touch();
       isInvalid = this.$v.personalDetails.$invalid;
 

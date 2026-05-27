@@ -165,6 +165,7 @@
       <MPriceSummary class="totals__element" />
     </div>
     <SfHeading
+      id="payment-method-heading"
       :title="$t('Payment method')"
       :level="3"
       class="sf-heading--left sf-heading--no-underline title"
@@ -175,7 +176,7 @@
         :disabled="isCheckoutInProgress"
       />
 
-      <div class="form__radio-group">
+      <div class="form__radio-group" role="group" aria-labelledby="payment-method-heading">
         <component
           v-for="method in filteredPaymentMethods"
           :key="method.code"
