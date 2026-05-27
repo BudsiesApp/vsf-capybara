@@ -5,6 +5,9 @@
         class="_main-title"
         :title="$t('Order Complete')"
         :level="1"
+        tabindex="-1"
+        ref="mainTitle"
+        role="heading"
       />
 
       <SfHeading
@@ -233,6 +236,9 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
       twitterDescription: this.$t('Now you can get a custom plush lookalike of your pet from @PetsiesOfficial. Check it out! https://t.co/YxtXW7CYJQ') as string,
       image: 'https://pbs.twimg.com/media/CqFVJ8bVYAI2fK0.jpg'
     };
+  },
+  mounted () {
+    ((this.$refs.mainTitle as Vue).$el as HTMLElement).focus();
   },
   destroyed () {
     this.$store.commit(CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION, undefined);
