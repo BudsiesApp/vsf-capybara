@@ -1,9 +1,12 @@
 <template>
   <div class="o-confirm-order">
     <SfHeading
+      ref="heading"
       :title="`${$t('Review')}`"
       :level="3"
       class="sf-heading--left sf-heading--no-underline title"
+      role="heading"
+      tabindex="-1"
     />
 
     <SfAccordion :open="$t('Totals')" class="accordion mobile-only">
@@ -531,6 +534,7 @@ export default {
   },
   mounted () {
     createSmoothscroll(document.documentElement.scrollTop || document.body.scrollTop, 0);
+    this.$refs.heading.$el.focus();
   }
 };
 </script>

@@ -1,6 +1,8 @@
 <template>
-  <div class="base-list-widget" :class="{ '-disabled': isDisabled }" :role="groupRole">
+  <div class="base-list-widget" :class="{ '-disabled': isDisabled }">
     <ul
+      :aria-labelledby="ariaLabelledby"
+      :role="groupRole"
       class="_options-list"
       :class="{ [`-alignment-${alignment}`]: true, '-round': isRound }"
     >
@@ -48,6 +50,7 @@
           class="_input"
           :disabled="isDisabled"
           :type="inputType"
+          :name="radioInputName"
           :value="option.id"
           :id="getOptionId(option.id)"
           v-model="selectedOption"
@@ -100,6 +103,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    ariaLabelledby: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
     maxValuesCount: {
       type: Number as PropType<number | undefined>,
       default: undefined
@@ -112,13 +119,17 @@ export default defineComponent({
       type: Array as PropType<OptionValue[]>,
       default: () => []
     },
+    radioGroupName: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
     shape: {
       type: String as PropType<WidgetOptionShape>,
       default: 'square'
     }
   },
   setup (props, context) {
-    const { maxValuesCount, shape, value, values } = toRefs(props);
+    const { maxValuesCount, radioGroupName, shape, value, values } = toRefs(props);
 
     const isRound = computed<boolean>(() => {
       return shape.value === 'round';
@@ -132,6 +143,12 @@ export default defineComponent({
         : 'group';
     });
 
+    const radioInputName = computed<string | undefined>(() => {
+      return listWidgetFields.inputType.value === ListWidgetInputType.RADIO
+        ? radioGroupName.value
+        : undefined;
+    });
+
     function getOptionId (optionId: string): string {
       return `base-list-widget-option-${optionId}`;
     }
@@ -139,6 +156,7 @@ export default defineComponent({
     return {
       groupRole,
       isRound,
+      radioInputName,
       getOptionId,
       ...listWidgetFields,
       ...useOptionValuesPrice(values, context, true),

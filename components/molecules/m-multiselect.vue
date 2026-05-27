@@ -28,8 +28,9 @@
       open-direction="below"
       :disabled="disabled"
       ref="multiselect"
-      @open="isOpen = !isOpen"
+      @open="onOpen"
       @close="onClose"
+      @search-change="onSearchChange"
       @autocomplete-option-not-found="onAutocompleteOptionNotFound"
     >
       <template #caret>
@@ -261,6 +262,47 @@ export default defineComponent({
     onAutocompleteOptionNotFound (value: string): void {
       logAutocompleteOptionNotFound(this.autocomplete, value);
     },
+    getSelectedOptionLabel (): string {
+      const option = this.selectedOption;
+
+      if (!option) {
+        return '';
+      }
+
+      if (typeof option === 'object' && this.labelField) {
+        return (option as Record<string, any>)[this.labelField] || '';
+      }
+
+      return String(option);
+    },
+    onOpen (): void {
+      this.isOpen = !this.isOpen;
+
+      const searchInput = this.getMultiselectInput();
+
+      if (!searchInput) {
+        return;
+      }
+
+      const label = this.getSelectedOptionLabel();
+
+      if (label) {
+        searchInput.setAttribute('aria-label', label);
+      }
+    },
+    onSearchChange (value: string): void {
+      if (!value) {
+        return;
+      }
+
+      const searchInput = this.getMultiselectInput();
+
+      if (!searchInput) {
+        return;
+      }
+
+      searchInput.removeAttribute('aria-label');
+    },
     enableBodyScroll (): void {
       const scrollableContainer = this.getMultiselectScrollableContainer();
 
@@ -311,6 +353,12 @@ export default defineComponent({
     },
     onClose (): void {
       this.isOpen = !this.isOpen;
+
+      const searchInput = this.getMultiselectInput();
+
+      if (searchInput) {
+        searchInput.removeAttribute('aria-label');
+      }
 
       if (!this.allowFreeText) {
         return;

@@ -1,9 +1,12 @@
 <template>
   <div class="o-personal-details">
     <SfHeading
+      ref="heading"
       :title="`${$t('Contact')}`"
       :level="3"
       class="sf-heading--left sf-heading--no-underline title"
+      role="heading"
+      tabindex="-1"
     />
 
     <div class="form">
@@ -196,6 +199,7 @@ export default defineComponent({
       0
     );
 
+    this.$refs.heading.$el.focus();
     this.fillLastUsedCustomerData();
   },
   methods: {

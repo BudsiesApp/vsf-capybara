@@ -5,9 +5,12 @@
     class="o-shipping"
   >
     <SfHeading
+      ref="heading"
       :title="`${$t('Shipping address')}`"
       :level="3"
       class="sf-heading--left sf-heading--no-underline title"
+      role="heading"
+      tabindex="-1"
     />
     <div class="form" :disabled="isAddressFormDisabled">
       <SfCheckbox
@@ -283,6 +286,7 @@ export default defineComponent({
   mounted () {
     createSmoothscroll(document.documentElement.scrollTop || document.body.scrollTop, 0);
 
+    this.$refs.heading.$el.focus();
     this.fillLastUsedCustomerData();
     EventBus.$on('user-after-loggedin', this.fillLastUsedCustomerData);
   },
