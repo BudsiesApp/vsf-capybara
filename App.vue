@@ -108,6 +108,12 @@ html {
   background-color: var(--c-white);
 }
 
+*:focus-visible {
+  outline: var(--c-black) auto 1px;
+  outline: -webkit-focus-ring-color auto 1px;
+  outline: AccentColor auto 1px;
+}
+
 body {
   @import "./css/components";
 

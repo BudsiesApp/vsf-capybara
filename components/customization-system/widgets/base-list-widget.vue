@@ -222,6 +222,12 @@ export default defineComponent({
     &.-round {
       padding: 0 var(--spacer-sm);
     }
+
+    &:has(._input:focus-visible) {
+      outline: var(--c-black) auto 1px;
+      outline: -webkit-focus-ring-color auto 1px;
+      outline: AccentColor auto 1px;
+    }
   }
 
   ._input {
