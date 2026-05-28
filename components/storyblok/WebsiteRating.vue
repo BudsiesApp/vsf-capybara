@@ -30,6 +30,8 @@
         <router-link
           :to="reviewsLink"
           target="_blank"
+          rel="noopener noreferrer"
+          :aria-label="reviewsLinkText + ' ' + $t('opens in new tab')"
         >
           {{ reviewsLinkText }}
         </router-link>
