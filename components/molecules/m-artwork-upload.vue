@@ -14,7 +14,7 @@
         accepted-file-types="image/gif, image/jpeg, image/png, image/heic, image/heif, application/pdf"
         image-transform-output-mime-type="image/jpeg"
         max-file-size="20MB"
-        label-idle="Drag + Drop or <span class='filepond--label-action'> Select File </span>"
+        label-idle="Drag + Drop or <span class='filepond--label-action' role='button'> Select File </span>"
         :max-files="maxFiles"
         :files="files"
         :allow-multiple="allowMultiple"
@@ -272,8 +272,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       if (fileInput && fileInput.$el) {
         if (this.ariaLabelledby) {
           const input = fileInput.$el.querySelector('.filepond--label-action');
+          const label = fileInput.$el.querySelector('.filepond--drop-label > label');
 
           input?.setAttribute('aria-labelledby', this.ariaLabelledby);
+          label?.removeAttribute('aria-hidden');
         }
       }
     },
@@ -803,6 +805,12 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
                     .filepond--item-panel {
                         background-color: var(--c-danger-variant);
                     }
+                }
+
+                .filepond--file-wrapper {
+                  legend {
+                    display: none;
+                  }
                 }
             }
         }
