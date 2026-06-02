@@ -38,7 +38,7 @@
         <SfChevron
           class="_chevron"
           :class="{'-hidden': hideDropdownArrow}"
-          @click.native.stop="() => onClick(toggle)"
+          @click.native.stop="toggle"
         />
       </template>
 
@@ -290,10 +290,6 @@ export default defineComponent({
     this.syncInputAccessibilityAttributes();
   },
   methods: {
-    onClick (toggle): void {
-      console.log('test')
-      toggle()
-    },
     syncInputAccessibilityAttributes (): void {
       const searchInput = this.getMultiselectInput() as HTMLElement | undefined;
 
