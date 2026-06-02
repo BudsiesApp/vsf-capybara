@@ -53,12 +53,18 @@
           :name="radioInputName"
           :value="option.id"
           :id="getOptionId(option.id)"
+          :aria-describedby="ariaDescribedby"
+          :aria-invalid="ariaInvalid"
           v-model="selectedOption"
         >
       </li>
     </ul>
 
-    <div class="_error-message" aria-live="polite">
+    <div
+      :id="errorMessageId"
+      aria-live="polite"
+      class="_error-message"
+    >
       {{ error }}
     </div>
   </div>
@@ -83,6 +89,7 @@ import {
   WidgetOptionAlignment,
   WidgetOptionShape
 } from 'src/modules/customization-system';
+import { useErrorAccessibility } from 'theme/helpers/use-error-accessibility';
 
 export default defineComponent({
   name: 'BaseListWidget',
@@ -130,6 +137,7 @@ export default defineComponent({
   },
   setup (props, context) {
     const { maxValuesCount, radioGroupName, shape, value, values } = toRefs(props);
+    const hasError = computed<boolean>(() => !!props.error);
 
     const isRound = computed<boolean>(() => {
       return shape.value === 'round';
@@ -149,11 +157,19 @@ export default defineComponent({
         : undefined;
     });
 
+    const { ariaDescribedby, ariaInvalid, errorMessageId } = useErrorAccessibility(
+      'base-list-widget',
+      hasError
+    );
+
     function getOptionId (optionId: string): string {
       return `base-list-widget-option-${optionId}`;
     }
 
     return {
+      ariaDescribedby,
+      ariaInvalid,
+      errorMessageId,
       groupRole,
       isRound,
       radioInputName,

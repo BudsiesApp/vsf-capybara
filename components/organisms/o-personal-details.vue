@@ -224,17 +224,16 @@ export default defineComponent({
     async onContinueButtonClick () {
       let isInvalid = false;
 
-      this.$v.personalDetails.$reset();
       this.$v.personalDetails.$touch();
       isInvalid = this.$v.personalDetails.$invalid;
 
       const loginForm = this.$refs['login-form'];
 
-      if (loginForm?.validateForm) {
-        const isLoginFormValid = await loginForm.validateForm();
+      if (loginForm?.validateAndGoToFirstError) {
+        const isLoginFormValid = await loginForm.validateAndGoToFirstError();
 
         if (!isLoginFormValid) {
-          isInvalid = true;
+          return;
         }
       }
 

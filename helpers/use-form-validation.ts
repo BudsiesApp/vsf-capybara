@@ -97,9 +97,6 @@ export function useFormValidation (
       throw new Error('Validation observer is not defined');
     }
 
-    validationObserver.value.reset();
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
     if (await validate()) {
       return true;
     }

@@ -58,7 +58,10 @@
       {{ label }}
     </label>
 
-    <div class="m-multiselect__error-message" aria-live="polite">
+    <div
+      :id="errorMessageId || undefined"
+      class="m-multiselect__error-message"
+    >
       <transition name="fade">
         <div v-if="!valid">
           {{ errorMessage }}
@@ -180,6 +183,10 @@ export default defineComponent({
       type: String,
       default: 'This field value is not correct.'
     },
+    errorMessageId: {
+      type: String,
+      default: ''
+    },
     autocomplete: {
       type: String,
       default: undefined
@@ -263,7 +270,36 @@ export default defineComponent({
     unMapMobileObserver();
     this.enableBodyScroll();
   },
+  mounted (): void {
+    this.syncInputAccessibilityAttributes();
+  },
   methods: {
+    syncInputAccessibilityAttributes (): void {
+      const searchInput = this.getMultiselectInput() as HTMLElement | undefined;
+
+      if (!searchInput) {
+        return;
+      }
+
+      if (this.required) {
+        searchInput.setAttribute('aria-required', 'true');
+      } else {
+        searchInput.removeAttribute('aria-required');
+      }
+
+      if (!this.valid) {
+        searchInput.setAttribute('aria-invalid', 'true');
+
+        if (this.errorMessageId) {
+          searchInput.setAttribute('aria-describedby', this.errorMessageId);
+        }
+
+        return;
+      }
+
+      searchInput.removeAttribute('aria-invalid');
+      searchInput.removeAttribute('aria-describedby');
+    },
     onAutocompleteOptionNotFound (value: string): void {
       logAutocompleteOptionNotFound(this.autocomplete, value);
     },
@@ -294,6 +330,8 @@ export default defineComponent({
       if (label) {
         searchInput.setAttribute('aria-label', label);
       }
+
+      this.syncInputAccessibilityAttributes();
     },
     onSearchChange (value: string): void {
       if (!value) {
@@ -365,6 +403,8 @@ export default defineComponent({
         searchInput.removeAttribute('aria-label');
       }
 
+      this.syncInputAccessibilityAttributes();
+
       if (!this.allowFreeText) {
         return;
       }
@@ -407,6 +447,30 @@ export default defineComponent({
     isMobile: {
       handler (): void {
         this.toggleBodyScrollLock();
+      },
+      immediate: true
+    },
+    valid: {
+      handler (): void {
+        this.$nextTick(() => {
+          this.syncInputAccessibilityAttributes();
+        });
+      },
+      immediate: true
+    },
+    errorMessageId: {
+      handler (): void {
+        this.$nextTick(() => {
+          this.syncInputAccessibilityAttributes();
+        });
+      },
+      immediate: true
+    },
+    required: {
+      handler (): void {
+        this.$nextTick(() => {
+          this.syncInputAccessibilityAttributes();
+        });
       },
       immediate: true
     }
