@@ -66,6 +66,7 @@
       </div>
       <div class="form__action">
         <SfButton
+          ref="submitStepButton"
           class="sf-button--full-width form__action-button"
           :disabled="isContinueButtonDisabled"
           @click="saveDataToCheckout"
@@ -180,6 +181,17 @@ export default defineComponent({
     }
   },
   methods: {
+    focusSubmitStepButton () {
+      const submitStepButton = this.$refs.submitStepButton;
+
+      if (!submitStepButton) {
+        return;
+      }
+
+      const submitStepButtonElement = submitStepButton.$el;
+
+      submitStepButtonElement?.focus();
+    },
     getCarrierTitle (method) {
       // It's the only way to separate M1 from M2
       if (method.hasOwnProperty('method_name')) {
@@ -212,6 +224,7 @@ export default defineComponent({
       const shouldProceed = await this.validateAddress(shippingRef);
 
       if (!shouldProceed) {
+        this.focusSubmitStepButton();
         return;
       }
 

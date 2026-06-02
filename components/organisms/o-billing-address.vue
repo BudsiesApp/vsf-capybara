@@ -45,6 +45,7 @@
     <div class="form">
       <div class="form__action">
         <SfButton
+          ref="submitStepButton"
           class="sf-button--full-width form__action-button"
           :disabled="isValidatingAddress"
           @click="onGoReviewButtonClicked"
@@ -184,6 +185,17 @@ export default defineComponent({
     EventBus.$off('user-after-loggedin', this.fillLastUsedCustomerData);
   },
   methods: {
+    focusSubmitStepButton () {
+      const submitStepButton = this.$refs.submitStepButton;
+
+      if (!submitStepButton) {
+        return;
+      }
+
+      const submitStepButtonElement = submitStepButton.$el;
+
+      submitStepButtonElement.focus();
+    },
     async onChangeCountry () {
       await Promise.all([
         this.$store.dispatch('checkout/updatePaymentDetails', { country: this.payment.country }),
@@ -204,6 +216,7 @@ export default defineComponent({
         const shouldProceed = await this.validateAddress(paymentRef);
 
         if (!shouldProceed) {
+          this.focusSubmitStepButton();
           return;
         }
 
