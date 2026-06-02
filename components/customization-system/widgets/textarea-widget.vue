@@ -99,10 +99,17 @@ export default defineComponent({
     );
     color: var(--input-color, var(--c-text));
     resize: vertical;
-    outline: none;
 
     &:focus {
       border-color: var(--c-primary);
+      outline: none;
+    }
+
+    &:focus-visible {
+      outline: var(--c-black) auto 1px;
+      outline: -webkit-focus-ring-color auto 1px;
+      outline: AccentColor auto 1px;
+      outline-offset: 2px;
     }
   }
 
