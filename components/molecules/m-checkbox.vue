@@ -163,5 +163,12 @@ export default {
   .sf-checkbox__container {
     align-items: var(--m-checkbox-align-items, center);
   }
+
+  &:has(.sf-checkbox__input:focus-visible) {
+      outline: var(--c-black) auto 1px;
+      outline: -webkit-focus-ring-color auto 1px;
+      outline: AccentColor auto 1px;
+      outline-offset: 2px;
+  }
 }
 </style>
