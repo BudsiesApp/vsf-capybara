@@ -489,8 +489,12 @@ export default {
     onOrderConflictEventHandler () {
       this.isCheckoutInProgress = false;
     },
-    onPaymentErrorEventHandler () {
+    onPaymentErrorEventHandler (hideNotification) {
       this.isCheckoutInProgress = false;
+
+      if (hideNotification) {
+        return;
+      }
 
       this.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
