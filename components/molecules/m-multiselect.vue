@@ -25,7 +25,7 @@
       :max-height="190"
       :autocomplete="autocomplete"
       :autocomplete-value-search="autocompleteValueSearch"
-      :labelled-by="labelledBy"
+      :labelled-by="resolvedLabelledBy"
       open-direction="below"
       :disabled="disabled"
       ref="multiselect"
@@ -34,10 +34,11 @@
       @search-change="onSearchChange"
       @autocomplete-option-not-found="onAutocompleteOptionNotFound"
     >
-      <template #caret>
+      <template #caret="{ toggle }">
         <SfChevron
           class="_chevron"
           :class="{'-hidden': hideDropdownArrow}"
+          @click.native.stop="() => onClick(toggle)"
         />
       </template>
 
@@ -48,6 +49,7 @@
 
     <label
       :for="inputId"
+      :id="labelId"
       class="m-multiselect__label"
       :class="{
         '--required': required,
@@ -249,6 +251,20 @@ export default defineComponent({
     inputId (): string {
       return 'm-multiselect-' + this.instanceId;
     },
+    labelId (): string {
+      return `${this.inputId}-label`;
+    },
+    resolvedLabelledBy (): string | undefined {
+      if (this.labelledBy) {
+        return this.labelledBy;
+      }
+
+      if (this.label) {
+        return this.labelId;
+      }
+
+      return undefined;
+    },
     allOptions (): any[] {
       const result = [...this.customOptions, ...this.options];
 
@@ -274,6 +290,10 @@ export default defineComponent({
     this.syncInputAccessibilityAttributes();
   },
   methods: {
+    onClick (toggle): void {
+      console.log('test')
+      toggle()
+    },
     syncInputAccessibilityAttributes (): void {
       const searchInput = this.getMultiselectInput() as HTMLElement | undefined;
 
@@ -571,6 +591,13 @@ export default defineComponent({
       .multiselect__tags {
         border-color: var(--input-border-color);
       }
+    }
+
+    &:focus-visible {
+      outline: var(--c-black) auto 1px;
+      outline: -webkit-focus-ring-color auto 1px;
+      outline: AccentColor auto 1px;
+      outline-offset: 2px;
     }
   }
 
