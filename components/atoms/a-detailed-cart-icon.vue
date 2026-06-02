@@ -1,6 +1,7 @@
 <template>
   <SfButton
     class="sf-button--pure a-microcart-icon a-detailed-cart-icon"
+    :aria-label="ariaLabel"
     :class="extraCssClasses"
     @click="openDetailedCart"
   >
@@ -8,7 +9,6 @@
       size="xs"
       :icon="floatingIcon ? 'add_to_cart' : 'empty_cart'"
       :class="floatingIcon ? 'sf-bottom-navigation__floating-icon' : 'sf-header__icon'"
-      :aria-label="$t('Open Cart')"
     >
       <template #badge>
         <SfBadge v-show="!floatingIcon && totalQuantity" class="sf-icon__badge sf-badge--number">
@@ -39,6 +39,17 @@ export default {
     }),
     extraCssClasses () {
       return [getCurrentThemeClass()];
+    },
+    ariaLabel () {
+      if (!this.totalQuantity) {
+        return this.$t('Open Cart');
+      }
+
+      const itemsCountText = this.totalQuantity > 1
+        ? this.$t('{count} items', { count: this.totalQuantity })
+        : this.$t('1 item');
+
+      return this.$t('Open Cart') + itemsCountText;
     }
   },
   methods: {
