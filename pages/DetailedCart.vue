@@ -39,30 +39,35 @@
                     />
                   </template>
 
+                  <template #title="{ title }">
+                    <div class="sf-collected-product__title-wraper">
+                      <label class="sf-collected-product__title">{{ title }}</label>
+
+                      <cart-item-shipment-promise
+                        :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
+                      />
+                    </div>
+                  </template>
+
                   <template #configuration>
-                    <cart-item-configuration
-                      :customizations="product.customizations"
-                      :customization-state="(product.extension_attributes || {}).customization_state"
-                      :product-options="getCartItemOptions(product)"
-                      :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
-                      :cart-item-price="cartItemPriceDictionary[getCartItemKey(product)]"
-                      :cart-item-qty="product.qty"
-                      :show-prices="true"
-                    />
+                    <m-expandable-section
+                      :title="$t('Customizations').toString()"
+                      :expanded="false"
+                    >
+                      <cart-item-configuration
+                        :customizations="product.customizations"
+                        :customization-state="(product.extension_attributes || {}).customization_state"
+                        :product-options="getCartItemOptions(product)"
+                        :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
+                        :cart-item-price="cartItemPriceDictionary[getCartItemKey(product)]"
+                        :cart-item-qty="product.qty"
+                        :show-prices="true"
+                      />
+                    </m-expandable-section>
                   </template>
 
                   <template #input>
-                    <SfQuantitySelector
-                      :qty="product.qty"
-                      :disabled="isCartSyncing"
-                      :title="$t('Quantity')"
-                      @input="changeProductQuantity(product, $event)"
-                      v-if="showQuantitySelectorForProduct(product)"
-                    />
-
-                    <div class="_quantity" v-else>
-                      {{ product.qty }}
-                    </div>
+                    <div />
                   </template>
 
                   <template #price>
@@ -70,22 +75,36 @@
                   </template>
 
                   <template #actions>
-                    <SfButton
-                      v-if="showEditButton(product.sku)"
-                      class="sf-button--text actions__button"
-                      :disabled="isCartSyncing"
-                      @click="editHandler(product)"
-                    >
-                      Edit
-                    </SfButton>
+                    <div class="_item-actions">
+                      <SfQuantitySelector
+                        v-if="showQuantitySelectorForProduct(product)"
+                        :qty="product.qty"
+                        :disabled="isCartSyncing"
+                        :title="$t('Quantity')"
+                        @input="changeProductQuantity(product, $event)"
+                      />
 
-                    <SfButton
-                      class="sf-button--text sf-collected-product__remove sf-collected-product__remove--text actions__button"
-                      :disabled="isCartSyncing"
-                      @click="removeHandler(product)"
-                    >
-                      Remove
-                    </SfButton>
+                      <div class="_quantity" v-else>
+                        {{ product.qty }}
+                      </div>
+
+                      <SfButton
+                        v-if="showEditButton(product.sku)"
+                        class="-small"
+                        :disabled="isCartSyncing"
+                        @click="editHandler(product)"
+                      >
+                        Edit
+                      </SfButton>
+
+                      <SfButton
+                        class="-small color-secondary"
+                        :disabled="isCartSyncing"
+                        @click="removeHandler(product)"
+                      >
+                        Remove
+                      </SfButton>
+                    </div>
                   </template>
 
                   <template #remove>
@@ -196,6 +215,7 @@ import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
 import {
   CartItemConfiguration,
+  CartItemShipmentPromise,
   getCustomizationSystemThumbnail
 } from 'src/modules/customization-system';
 import { normalizeProductPurchaseFlow, ProductPurchaseFlow, PriceHelper } from 'src/modules/shared';
@@ -206,6 +226,7 @@ import { ModalList } from 'theme/store/ui/modals';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MCartLineCouponOffer from 'theme/components/molecules/m-cart-line-coupon-offer.vue';
 import MDropdown from 'theme/components/molecules/m-dropdown.vue';
+import MExpandableSection from 'theme/components/molecules/m-expandable-section.vue';
 
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
 import { getCartItemTitle } from 'theme/helpers/get-cart-item-title.function';
@@ -273,9 +294,11 @@ export default {
   },
   components: {
     CartItemConfiguration,
+    CartItemShipmentPromise,
     MBlockStory,
     MCartLineCouponOffer,
     MDropdown,
+    MExpandableSection,
     SfImage,
     SfPrice,
     SfList,
@@ -673,17 +696,37 @@ export default {
     margin: var(--spacer-sm) 0;
   }
 
+  .sf-collected-product__title {
+    margin-bottom: 0;
+  }
+
+  .cart-item-shipment-promise {
+    margin-top: var(--spacer-2xs);
+  }
+
+  .m-expandable-section {
+    margin-top: var(--spacer-xs);
+  }
+
   .sf-collected-product {
     --collected-product-image-background: none;
     --collected-product-main-margin: 0 0 0 var(--spacer-sm);
+    --collected-product-actions-margin: 0;
+    --collected-product-configuration-margin: 0;
 
     .sf-price {
       align-items: flex-start;
-      flex-direction: column;
     }
 
     &__remove {
       position: static;
+    }
+
+    @include for-desktop() {
+      --collected-product-actions-margin: 0 0 0 var(--spacer-sm);
+      --collected-product-configuration-margin: 0 0 0 var(--spacer-sm);
+
+      --collected-product-main-flex-direction: row;
     }
   }
   ._dropdown-container {
@@ -773,6 +816,8 @@ export default {
   --collected-product-title-font-size: var(--font-sm);
   --collected-product-title-font-weight: var(--font-semibold);
 
+  --collected-product-main-flex-direction: column;
+
   &__item {
     display: flex;
     flex-direction: column;
@@ -812,12 +857,19 @@ export default {
     --collected-product-title-font-size: var(--font-base);
   }
 }
-.actions {
-  &__button {
-    margin-bottom: var(--spacer-xs);
-    align-self: flex-start;
+
+._item-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-xs);
+  margin-top: var(--spacer-sm);
+
+  .actions__button {
+    margin-bottom: 0;
+    align-self: center;
   }
 }
+
 .empty-cart {
   --heading-title-color: var(--c-primary);
   --heading-title-margin: var(--spacer-2xl) 0 var(--spacer-base) 0;
