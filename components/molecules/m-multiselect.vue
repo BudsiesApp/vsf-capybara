@@ -333,7 +333,7 @@ export default defineComponent({
       return String(option);
     },
     onOpen (): void {
-      this.isOpen = !this.isOpen;
+      this.isOpen = true;
 
       const searchInput = this.getMultiselectInput();
 
@@ -411,7 +411,7 @@ export default defineComponent({
       return option;
     },
     onClose (): void {
-      this.isOpen = !this.isOpen;
+      this.isOpen = false;
 
       const searchInput = this.getMultiselectInput();
 
