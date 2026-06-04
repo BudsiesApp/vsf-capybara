@@ -49,7 +49,7 @@ export default {
         ? this.$t('{count} items', { count: this.totalQuantity })
         : this.$t('1 item');
 
-      return this.$t('Open Cart') + itemsCountText;
+      return this.$t('Open Cart') + ', ' + itemsCountText;
     }
   },
   methods: {
