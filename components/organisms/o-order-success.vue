@@ -5,6 +5,9 @@
         class="_main-title"
         :title="$t('Order Complete')"
         :level="1"
+        tabindex="-1"
+        ref="mainTitle"
+        role="heading"
       />
 
       <SfHeading
@@ -178,6 +181,9 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
       twitterDescription: this.$t(`Now you can accessorize the cutest plush balls with @Waggables. Check it out!`) as string,
       image: `${baseUrl}/assets/images/sharing-image.jpg`
     };
+  },
+  mounted () {
+    ((this.$refs.mainTitle as Vue).$el as HTMLElement).focus();
   },
   destroyed () {
     this.$store.commit(CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION, undefined);

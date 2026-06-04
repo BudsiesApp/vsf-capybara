@@ -7,4 +7,7 @@
     --heading-title-color: var(--c-text-light);
   }
 
+  &:focus-visible {
+    outline: none;
+  }
 }

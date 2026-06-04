@@ -2,6 +2,8 @@
   <div class="image-upload-widget">
     <m-artwork-upload
       ref="artworkUpload"
+      :aria-describedby="ariaDescribedby"
+      :aria-invalid="ariaInvalid"
       :aria-labelledby="ariaLabelledby"
       :disabled="isDisabled"
       :product-id="backendProductId"
@@ -16,8 +18,9 @@
     />
 
     <div
-      class="_error-message"
+      :id="errorMessageId"
       aria-live="polite"
+      class="_error-message"
     >
       {{ error }}
     </div>
@@ -40,6 +43,7 @@ import {
   FileUploadValue,
   useFilesUpload
 } from 'src/modules/customization-system';
+import { useErrorAccessibility } from 'theme/helpers/use-error-accessibility';
 
 import { useBackendProductId } from 'theme/helpers/use-backend-product-id';
 
@@ -80,12 +84,18 @@ export default defineComponent({
   },
   setup (props, context) {
     const { maxValuesCount, productId, value } = toRefs(props);
+    const hasError = computed<boolean>(() => !!props.error);
 
     const artworkUpload = ref<InstanceType<typeof MArtworkUpload> | null>(null);
     const filesUploadFields = useFilesUpload(
       value,
       maxValuesCount,
       context
+    );
+
+    const { ariaDescribedby, ariaInvalid, errorMessageId } = useErrorAccessibility(
+      'image-upload-widget',
+      hasError
     );
 
     const canReplaceInitialItems = computed<boolean>(() => {
@@ -131,8 +141,11 @@ export default defineComponent({
     return {
       ...filesUploadFields,
       ...useBackendProductId(productId),
+      ariaDescribedby,
+      ariaInvalid,
       artworkUpload,
       artworkUploadUrl: config.images.fileuploaderUploadUrl as string,
+      errorMessageId,
       uploadImage
     };
   }
