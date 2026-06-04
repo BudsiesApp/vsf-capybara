@@ -5,9 +5,12 @@
     class="o-shipping"
   >
     <SfHeading
+      ref="heading"
       :title="`${$t('Shipping address')}`"
       :level="3"
       class="sf-heading--left sf-heading--no-underline title"
+      role="heading"
+      tabindex="-1"
     />
     <div class="form" :disabled="isAddressFormDisabled">
       <SfCheckbox
@@ -28,12 +31,13 @@
       />
     </div>
     <SfHeading
+      id="shipping-method-heading"
       :title="$t('Shipping method')"
       :level="3"
       class="sf-heading--left sf-heading--no-underline title"
     />
     <div class="form">
-      <div class="form__radio-group">
+      <div class="form__radio-group" role="group" aria-labelledby="shipping-method-heading">
         <SfRadio
           v-for="method in shippingMethods"
           :key="method.method_code"
@@ -63,6 +67,7 @@
       </div>
       <div class="form__action">
         <SfButton
+          ref="submitStepButton"
           class="sf-button--full-width form__action-button"
           :disabled="isContinueButtonDisabled"
           @click="saveDataToCheckout"
@@ -177,6 +182,17 @@ export default defineComponent({
     }
   },
   methods: {
+    focusSubmitStepButton () {
+      const submitStepButton = this.$refs.submitStepButton;
+
+      if (!submitStepButton) {
+        return;
+      }
+
+      const submitStepButtonElement = submitStepButton.$el;
+
+      submitStepButtonElement?.focus();
+    },
     getCarrierTitle (method) {
       // It's the only way to separate M1 from M2
       if (method.hasOwnProperty('method_name')) {
@@ -209,6 +225,7 @@ export default defineComponent({
       const shouldProceed = await this.validateAddress(shippingRef);
 
       if (!shouldProceed) {
+        this.focusSubmitStepButton();
         return;
       }
 
@@ -284,6 +301,7 @@ export default defineComponent({
   mounted () {
     createSmoothscroll(document.documentElement.scrollTop || document.body.scrollTop, 0);
 
+    this.$refs.heading.$el.focus();
     this.fillLastUsedCustomerData();
     EventBus.$on('user-after-loggedin', this.fillLastUsedCustomerData);
   },

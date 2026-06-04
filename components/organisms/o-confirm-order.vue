@@ -1,9 +1,12 @@
 <template>
   <div class="o-confirm-order">
     <SfHeading
+      ref="heading"
       :title="`${$t('Review')}`"
       :level="3"
       class="sf-heading--left sf-heading--no-underline title"
+      role="heading"
+      tabindex="-1"
     />
 
     <SfAccordion :open="$t('Totals')" class="accordion mobile-only">
@@ -162,12 +165,13 @@
       <MPriceSummary class="totals__element" />
     </div>
     <SfHeading
+      id="payment-method-heading"
       :title="$t('Payment method')"
       :level="3"
       class="sf-heading--left sf-heading--no-underline title"
     />
     <div class="form">
-      <div class="form__radio-group">
+      <div class="form__radio-group" role="group" aria-labelledby="payment-method-heading">
         <component
           v-for="method in filteredPaymentMethods"
           :key="method.code"
@@ -478,8 +482,12 @@ export default {
     onOrderConflictEventHandler () {
       this.isCheckoutInProgress = false;
     },
-    onPaymentErrorEventHandler () {
+    onPaymentErrorEventHandler (hideNotification) {
       this.isCheckoutInProgress = false;
+
+      if (hideNotification) {
+        return;
+      }
 
       this.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
@@ -524,6 +532,7 @@ export default {
   },
   mounted () {
     createSmoothscroll(document.documentElement.scrollTop || document.body.scrollTop, 0);
+    this.$refs.heading.$el.focus();
   }
 };
 </script>

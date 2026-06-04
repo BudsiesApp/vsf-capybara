@@ -1,5 +1,5 @@
 <template>
-  <div class="m-modal-order-error">
+  <div class="m-modal-order-error" role="alertdialog" aria-modal="true">
     <SfModal :visible="isVisible" class="_modal" @close="closeModal" :title="$t('Payment Error :(')">
       <div
         v-if="isFormSubmitted"

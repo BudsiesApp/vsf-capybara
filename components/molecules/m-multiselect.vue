@@ -26,17 +26,20 @@
         :max-height="190"
         :autocomplete="autocomplete"
         :autocomplete-value-search="autocompleteValueSearch"
+        :labelled-by="resolvedLabelledBy"
         open-direction="below"
         :disabled="disabled"
         ref="multiselect"
-        @open="isOpen = !isOpen"
+        @open="onOpen"
         @close="onClose"
+        @search-change="onSearchChange"
         @autocomplete-option-not-found="onAutocompleteOptionNotFound"
       >
-        <template #caret>
+        <template #caret="{ toggle }">
           <SfChevron
             class="_chevron"
             :class="{'-hidden': hideDropdownArrow}"
+            @click.native.stop="toggle"
           />
         </template>
 
@@ -47,6 +50,7 @@
 
       <label
         :for="inputId"
+        :id="labelId"
         class="m-multiselect__label"
         :class="{
           '--required': required,
@@ -58,7 +62,10 @@
       </label>
     </div>
 
-    <div class="m-multiselect__error-message" aria-live="polite">
+    <div
+      :id="errorMessageId || undefined"
+      class="m-multiselect__error-message"
+    >
       <transition name="fade">
         <div v-if="!valid">
           {{ errorMessage }}
@@ -180,6 +187,10 @@ export default defineComponent({
       type: String,
       default: 'This field value is not correct.'
     },
+    errorMessageId: {
+      type: String,
+      default: ''
+    },
     autocomplete: {
       type: String,
       default: undefined
@@ -190,6 +201,10 @@ export default defineComponent({
     },
     autocompleteValueSearch: {
       type: Function as PropType<((option: any, value: string) => boolean) | undefined>,
+      default: undefined
+    },
+    labelledBy: {
+      type: String,
       default: undefined
     }
   },
@@ -238,6 +253,20 @@ export default defineComponent({
     inputId (): string {
       return 'm-multiselect-' + this.instanceId;
     },
+    labelId (): string {
+      return `${this.inputId}-label`;
+    },
+    resolvedLabelledBy (): string | undefined {
+      if (this.labelledBy) {
+        return this.labelledBy;
+      }
+
+      if (this.label) {
+        return this.labelId;
+      }
+
+      return undefined;
+    },
     allOptions (): any[] {
       const result = [...this.customOptions, ...this.options];
 
@@ -259,9 +288,81 @@ export default defineComponent({
     unMapMobileObserver();
     this.enableBodyScroll();
   },
+  mounted (): void {
+    this.syncInputAccessibilityAttributes();
+  },
   methods: {
+    syncInputAccessibilityAttributes (): void {
+      const searchInput = this.getMultiselectInput() as HTMLElement | undefined;
+
+      if (!searchInput) {
+        return;
+      }
+
+      if (this.required) {
+        searchInput.setAttribute('aria-required', 'true');
+      } else {
+        searchInput.removeAttribute('aria-required');
+      }
+
+      if (!this.valid) {
+        searchInput.setAttribute('aria-invalid', 'true');
+
+        if (this.errorMessageId) {
+          searchInput.setAttribute('aria-describedby', this.errorMessageId);
+        }
+
+        return;
+      }
+
+      searchInput.removeAttribute('aria-invalid');
+      searchInput.removeAttribute('aria-describedby');
+    },
     onAutocompleteOptionNotFound (value: string): void {
       logAutocompleteOptionNotFound(this.autocomplete, value);
+    },
+    getSelectedOptionLabel (): string {
+      const option = this.selectedOption;
+
+      if (!option) {
+        return '';
+      }
+
+      if (typeof option === 'object' && this.labelField) {
+        return (option as Record<string, any>)[this.labelField] || '';
+      }
+
+      return String(option);
+    },
+    onOpen (): void {
+      this.isOpen = true;
+
+      const searchInput = this.getMultiselectInput();
+
+      if (!searchInput) {
+        return;
+      }
+
+      const label = this.getSelectedOptionLabel();
+
+      if (label) {
+        searchInput.setAttribute('aria-label', label);
+      }
+
+      this.syncInputAccessibilityAttributes();
+    },
+    onSearchChange (value: string): void {
+      if (!value) {
+        return;
+      }
+
+      const searchInput = this.getMultiselectInput();
+
+      if (!searchInput) {
+        return;
+      }
+
+      searchInput.removeAttribute('aria-label');
     },
     enableBodyScroll (): void {
       const scrollableContainer = this.getMultiselectScrollableContainer();
@@ -312,7 +413,15 @@ export default defineComponent({
       return option;
     },
     onClose (): void {
-      this.isOpen = !this.isOpen;
+      this.isOpen = false;
+
+      const searchInput = this.getMultiselectInput();
+
+      if (searchInput) {
+        searchInput.removeAttribute('aria-label');
+      }
+
+      this.syncInputAccessibilityAttributes();
 
       if (!this.allowFreeText) {
         return;
@@ -356,6 +465,30 @@ export default defineComponent({
     isMobile: {
       handler (): void {
         this.toggleBodyScrollLock();
+      },
+      immediate: true
+    },
+    valid: {
+      handler (): void {
+        this.$nextTick(() => {
+          this.syncInputAccessibilityAttributes();
+        });
+      },
+      immediate: true
+    },
+    errorMessageId: {
+      handler (): void {
+        this.$nextTick(() => {
+          this.syncInputAccessibilityAttributes();
+        });
+      },
+      immediate: true
+    },
+    required: {
+      handler (): void {
+        this.$nextTick(() => {
+          this.syncInputAccessibilityAttributes();
+        });
       },
       immediate: true
     }
@@ -468,6 +601,13 @@ export default defineComponent({
       .multiselect__tags {
         border-color: var(--input-border-color);
       }
+    }
+
+    &:focus-visible {
+      outline: var(--c-black) auto 1px;
+      outline: -webkit-focus-ring-color auto 1px;
+      outline: AccentColor auto 1px;
+      outline-offset: 2px;
     }
   }
 

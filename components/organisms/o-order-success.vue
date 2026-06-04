@@ -5,6 +5,9 @@
         class="_main-title"
         :title="$t('Let the plushification begin!')"
         :level="1"
+        tabindex="-1"
+        ref="mainTitle"
+        role="heading"
       />
 
       <SfHeading
@@ -208,6 +211,9 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
         imageSrc: '/assets/success/images/petsies-advertising-image.jpg'
       }
     ]
+  },
+  mounted () {
+    ((this.$refs.mainTitle as Vue).$el as HTMLElement).focus();
   },
   destroyed () {
     this.$store.commit(CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION, undefined);
