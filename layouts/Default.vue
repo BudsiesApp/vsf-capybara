@@ -24,7 +24,7 @@
         </LazyHydrate>
       </div>
 
-      <main class="content">
+      <main ref="main" tabindex="-1" class="content">
         <slot />
       </main>
 
@@ -144,6 +144,13 @@ export default {
       if (value && !!value.length) {
         this.shouldHydrateModals = true;
       }
+    },
+    '$route.path' (newValue, oldValue) {
+      if (newValue === oldValue) {
+        return;
+      }
+
+      this.$refs.main.focus();
     }
   },
   metaInfo: Head

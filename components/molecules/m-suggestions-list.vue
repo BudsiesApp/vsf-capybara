@@ -12,6 +12,11 @@
       :required="required"
       :valid="valid"
       :error-message="errorMessage"
+      role="combobox"
+      aria-haspopup="listbox"
+      :aria-controls="listboxId"
+      :aria-expanded="isExpanded"
+      :aria-activedescendant="activeDescendant"
       class="m-suggestions-list__input"
       @input="updateSearch"
       @focus.prevent="activate()"
@@ -29,10 +34,12 @@
       <ul
         class="m-suggestions-list__options"
         role="listbox"
+        :id="listboxId"
       >
         <li
           v-for="(suggestion, index) in suggestions"
           :key="suggestion.id"
+          :id="`suggestion-${componentId}-${index}`"
           :class="{
             'm-suggestions-list__option': true,
             'm-suggestions-list__option--active': index === pointer
@@ -52,11 +59,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref, watch } from '@vue/composition-api';
+import { defineComponent, PropType, ref, computed, watch } from '@vue/composition-api';
 import { SfInput } from '@storefront-ui/vue';
 
 import { AutocompleteSuggestion } from 'src/modules/address/types/autocomplete';
 import { use1PasswordDisable } from 'src/themes/petsies-capybara/helpers/use-1password-disable';
+
+let suggestionsInstanceId = 0;
 
 export default defineComponent({
   name: 'MSuggestionsList',
@@ -109,6 +118,8 @@ export default defineComponent({
     const input = ref<InstanceType<typeof SfInput> | null>(null);
     const isActive = ref<boolean>(false);
     const pointer = ref<number>(-1);
+    const componentId = suggestionsInstanceId++;
+    const listboxId = `suggestions-listbox-${componentId}`;
 
     const getInputElement = (): HTMLInputElement | null => {
       const _input: InstanceType<typeof SfInput> | null = (input as any).value;
@@ -172,10 +183,26 @@ export default defineComponent({
       pointer.value = -1;
     });
 
+    const activeDescendant = computed(() => {
+      if (pointer.value < 0) {
+        return null;
+      }
+
+      return `suggestion-${componentId}-${pointer.value}`;
+    });
+
+    const isExpanded = computed(() => {
+      return String(isActive.value && props.suggestions.length > 0);
+    });
+
     return {
       input,
       isActive,
       pointer,
+      listboxId,
+      componentId,
+      activeDescendant,
+      isExpanded,
       activate,
       deactivate,
       updateSearch,
