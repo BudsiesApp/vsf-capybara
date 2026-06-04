@@ -5,7 +5,7 @@
     :disabled="isDisabled"
     :should-lock-scroll-on-open="isMobile"
     :valid="isValid"
-    :label-id="ariaLabelledby"
+    :labelled-by="ariaLabelledby"
     v-model="selectedOption"
     v-if="showSelect"
   >
@@ -152,13 +152,7 @@ export default defineComponent({
 
     const showSelect = ref<boolean>(true);
     const sortedValuesIdsString = computed<string>(() => {
-      var ids = '';
-
-      for (const value of sortedValues.value) {
-        ids += value.id
-      }
-
-      return ids;
+      return sortedValues.value.map(value => value.id).join(',');
     });
 
     watch([sortedValuesIdsString, selectedCurrency], async () => {
