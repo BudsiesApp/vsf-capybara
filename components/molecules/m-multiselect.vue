@@ -49,7 +49,7 @@
       </multiselect>
 
       <label
-        :for="inputId"
+        :for="`${inputId}-input`"
         :id="labelId"
         class="m-multiselect__label"
         :class="{
