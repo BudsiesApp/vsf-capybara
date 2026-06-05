@@ -20,8 +20,13 @@ export class DropdownFormFieldBase {
   }
 
   public async selectByOptionTitle (title: string): Promise<void> {
-    await this.selector.click();
+    await this.openOptionsList();
     await this.optionsList.locator('li').getByText(title).click();
+  }
+
+  protected async openOptionsList (): Promise<void> {
+    await this.selector.click();
+    await expect(this.optionsList).toBeVisible();
   }
 
   public async expectOptionToBeSelected (title: string): Promise<void> {
