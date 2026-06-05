@@ -141,6 +141,8 @@ export class AddressForm {
   ) {
     await this.countrySelectorFormField.selectByOptionTitle(country);
     await this.streetAddressFormField.fill(address);
+    await this.streetAddressFormField.input.press('Escape');
+    await expect(this.streetAddressFormField.formField.locator('.m-suggestions-list__dropdown')).toBeHidden();
 
     if (state) {
       await this.stateSelectorFormField.selectByOptionTitle(state);
