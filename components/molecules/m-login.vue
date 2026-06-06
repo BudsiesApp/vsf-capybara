@@ -1,12 +1,11 @@
 <template>
   <div class="m-login modal-content">
     <ValidationObserver
-      v-slot="{ handleSubmit: validateAndSubmit }"
       ref="validationObserver"
       slim
     >
       <form
-        @submit.prevent="validateAndSubmit(handleSubmit)"
+        @submit.prevent="onFormSubmit"
         class="_form"
       >
         <ValidationProvider
@@ -21,6 +20,7 @@
         >
           <SfInput
             v-model.trim="emailValue"
+            :ref="getFieldAnchorName('Email')"
             name="email-address"
             type="email"
             :label="$t('Email address')"
@@ -46,7 +46,7 @@
             v-model.trim="otpCode"
             name="otp"
             type="text"
-            ref="otpInput"
+            :ref="getFieldAnchorName('OTP')"
             :label="$t('Enter verification code')"
             :valid="!errors.length"
             :error-message="errors[0]"
@@ -115,6 +115,7 @@ import { SfInput, SfButton } from '@storefront-ui/vue';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { AuthenticateRequestResponse } from '@vue-storefront/core/modules/user';
 import Task from 'core/lib/sync/types/Task';
+import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 
 extend('required', {
   ...required,
@@ -212,7 +213,6 @@ export default defineComponent({
     const root = context.root;
     const emit = context.emit;
 
-    const otpInput = ref<SfInputInstance | null>(null);
     const validationObserver = ref<ValidationObserverInstance | null>(null);
 
     const emailValue = computed<string>({
@@ -252,15 +252,21 @@ export default defineComponent({
       startRateLimitTimer
     } = useRateLimit(context);
 
+    const {
+      validateAndGoToFirstError
+    } = useFormValidation(
+      validationObserver,
+      () => context.refs
+    );
+
     function focusOtpInput (): void {
-      // TODO: temporary - current TS version don't handle `value` type right in this case
-      const otpInputRootElement = (otpInput as Ref<SfInputInstance | null>).value?.$el;
+      const otpInputRootElement = context.refs[getFieldAnchorName('OTP')] as SfInputInstance | undefined;
 
       if (!otpInputRootElement) {
         return;
       }
 
-      const inputElement = otpInputRootElement.querySelector('input');
+      const inputElement = otpInputRootElement.$el.querySelector('input');
 
       if (!inputElement) {
         return;
@@ -378,16 +384,15 @@ export default defineComponent({
       }
     };
 
-    const validateForm = async (): Promise<boolean> => {
-      // TODO: temporary - current TS version don't handle `value` type right in this case
-      const _validationObserver = (validationObserver as Ref<ValidationObserverInstance | null>);
+    const onFormSubmit = async (): Promise<void> => {
+      const isFormValid = await validateAndGoToFirstError();
 
-      if (!_validationObserver.value) {
-        return false;
+      if (!isFormValid) {
+        return;
       }
 
-      return _validationObserver.value.validate();
-    }
+      await handleSubmit();
+    };
 
     const showCancelButton = computed<boolean>(() => {
       return props.allowCancel && isCodeSent.value;
@@ -408,18 +413,19 @@ export default defineComponent({
     return {
       cancelLogin,
       emailValue,
+      getFieldAnchorName,
       handleSubmit,
       isCodeSent,
       isSubmitting,
+      onFormSubmit,
       otpCode,
       rateLimitCountdown,
       resendOtp,
       resendOtpButtonText,
       showCancelButton,
       submitButtonText,
-      otpInput,
       validationObserver,
-      validateForm
+      validateAndGoToFirstError
     };
   }
 });

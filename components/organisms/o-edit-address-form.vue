@@ -14,6 +14,7 @@
         </SfButton>
 
         <SfButton
+          ref="submitStepButton"
           @click="onFormSubmit"
           :disabled="isSubmitButtonDisabled"
         >
@@ -30,7 +31,7 @@
 
 <script lang="ts">
 import { ValidationObserver } from 'vee-validate';
-import { defineComponent, computed, ref } from '@vue/composition-api';
+import { defineComponent, computed, ref, Ref } from '@vue/composition-api';
 import { SfButton } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
 
@@ -55,6 +56,7 @@ export default defineComponent({
   setup (props, context) {
     const validationObserver = ref(null);
     const baseAddressForm = ref(null);
+    const submitStepButton: Ref<null | InstanceType<typeof SfButton>> = ref(null);
     const isSubmitting = ref(false);
 
     const emit = context.emit;
@@ -89,6 +91,20 @@ export default defineComponent({
     const isSubmitButtonDisabled = computed<boolean>(() => {
       return isSubmitting.value || isValidatingAddress.value
     });
+
+    function focusSubmitStepButton (): void {
+      if (!submitStepButton.value) {
+        return;
+      }
+
+      const submitStepButtonElement = submitStepButton.value.$el;
+
+      if (!(submitStepButtonElement instanceof HTMLElement)) {
+        return;
+      }
+
+      submitStepButtonElement.focus();
+    }
 
     function onFailure (message: string): void {
       root.$store.dispatch('notification/spawnNotification', {
@@ -133,6 +149,7 @@ export default defineComponent({
       const shouldProceed = await validateAddress(existingAddress);
 
       if (!shouldProceed) {
+        focusSubmitStepButton();
         return;
       }
 
@@ -158,6 +175,7 @@ export default defineComponent({
     return {
       validationObserver,
       baseAddressForm,
+      submitStepButton,
       existingAddress,
       isSubmitting,
       isSubmitButtonDisabled,

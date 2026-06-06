@@ -14,7 +14,7 @@
         accepted-file-types="image/gif, image/jpeg, image/png, image/heic, image/heif, application/pdf"
         image-transform-output-mime-type="image/jpeg"
         max-file-size="20MB"
-        label-idle="Drag + Drop or <span class='filepond--label-action'> Select File </span>"
+        label-idle="Drag + Drop or <span class='filepond--label-action' tabindex='0' role='button'> Select File </span>"
         :max-files="maxFiles"
         :files="files"
         :allow-multiple="allowMultiple"
@@ -147,6 +147,14 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       type: Number as PropType<number | null>,
       default: null
     },
+    ariaDescribedby: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
+    ariaInvalid: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
     ariaLabelledby: {
       type: String as PropType<string | undefined>,
       default: undefined
@@ -267,13 +275,48 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   },
   methods: {
     onFilePondInit (): void {
+      this.syncAccessibilityAttributes();
+    },
+    getFilepondInput (): HTMLElement | undefined {
+      const fileInput = this.getFileInput();
+
+      if (!fileInput || !fileInput.$el) {
+        return;
+      }
+
+      return fileInput.$el.querySelector('.filepond--label-action') as HTMLElement | undefined;
+    },
+    focusFilepondInput (): void {
+      const input = this.getFilepondInput();
+
+      if (!input) {
+        return;
+      }
+
+      input.focus();
+    },
+    syncAccessibilityAttributes (): void {
       const fileInput = this.getFileInput();
 
       if (fileInput && fileInput.$el) {
-        if (this.ariaLabelledby) {
-          const input = fileInput.$el.querySelector('.filepond--label-action');
+        const input = this.getFilepondInput();
+        const label = fileInput.$el.querySelector('.filepond--drop-label > label');
 
+        if (this.ariaLabelledby) {
           input?.setAttribute('aria-labelledby', this.ariaLabelledby);
+          label?.removeAttribute('aria-hidden');
+        }
+
+        if (this.ariaDescribedby) {
+          input?.setAttribute('aria-describedby', this.ariaDescribedby);
+        } else {
+          input?.removeAttribute('aria-describedby');
+        }
+
+        if (typeof this.ariaInvalid !== 'undefined') {
+          input?.setAttribute('aria-invalid', this.ariaInvalid);
+        } else {
+          input?.removeAttribute('aria-invalid');
         }
       }
     },
@@ -288,6 +331,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     },
     onFileRemove (error: FilePondErrorDescription, event: any) {
       this.updateFilesCount();
+
+      if (!error && this.filesCount === 0) {
+        setTimeout(() => {
+          this.focusFilepondInput();
+        }, 50);
+      }
+
       if (error || event.origin !== FileOrigin.LOCAL) {
         return;
       }
@@ -662,6 +712,21 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
           }
         }
       );
+    },
+    ariaDescribedby () {
+      this.$nextTick(() => {
+        this.syncAccessibilityAttributes();
+      });
+    },
+    ariaInvalid () {
+      this.$nextTick(() => {
+        this.syncAccessibilityAttributes();
+      });
+    },
+    ariaLabelledby () {
+      this.$nextTick(() => {
+        this.syncAccessibilityAttributes();
+      });
     }
   }
 })
@@ -803,6 +868,12 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
                     .filepond--item-panel {
                         background-color: var(--c-danger-variant);
                     }
+                }
+
+                .filepond--file-wrapper {
+                  legend {
+                    display: none;
+                  }
                 }
             }
         }

@@ -17,6 +17,8 @@
             '-expandable': expandConfig && expandConfig[optionValue.id] && expandConfig[optionValue.id].isExpandable,
             '-expanded': expandConfig && expandConfig[optionValue.id] && expandConfig[optionValue.id].isExpanded
           }"
+          :aria-describedby="ariaDescribedby"
+          :aria-invalid="ariaInvalid"
           :disabled="isDisabled"
           :valid="isValid"
           :value="optionValue.id"
@@ -105,7 +107,11 @@
       </li>
     </ul>
 
-    <div class="_error-message" aria-live="polite">
+    <div
+      :id="errorMessageId"
+      class="_error-message"
+      aria-live="polite"
+    >
       {{ error }}
     </div>
   </div>
@@ -129,6 +135,7 @@ import {
   useOptionValuesPrice,
   useValuesSort
 } from 'src/modules/customization-system';
+import { useErrorAccessibility } from 'theme/helpers/use-error-accessibility';
 
 import AAddedToCart from 'theme/components/atoms/a-added-to-cart.vue';
 import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
@@ -186,6 +193,7 @@ export default defineComponent({
   },
   setup (props, context) {
     const { maxValuesCount, value, values } = toRefs(props);
+    const hasError = computed<boolean>(() => !!props.error);
 
     function getItemImage (optionValue: OptionValue): string | undefined {
       if (!optionValue.thumbnailUrl) {
@@ -206,7 +214,15 @@ export default defineComponent({
         : 'group';
     });
 
+    const { ariaDescribedby, ariaInvalid, errorMessageId } = useErrorAccessibility(
+      'cards-list-widget',
+      hasError
+    );
+
     return {
+      ariaDescribedby,
+      ariaInvalid,
+      errorMessageId,
       groupRole,
       getItemImage,
       isValid,
