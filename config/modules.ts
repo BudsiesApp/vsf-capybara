@@ -12,6 +12,7 @@ import { TrueVaultModule } from 'src/modules/true-vault';
 import { OrdersHistoryModule } from 'src/modules/orders-history';
 import { CurrencyModule } from 'src/modules/currency';
 import { FeraModule } from 'src/modules/fera';
+import { TrafficAttributionModule } from 'src/modules/traffic-attribution';
 
 import registerStoryblokComponents from 'theme/components/storyblok'
 
@@ -30,6 +31,7 @@ export function registerClientModules () {
   registerModule(OrdersHistoryModule)
   registerModule(CurrencyModule)
   registerModule(FeraModule)
+  registerModule(TrafficAttributionModule)
 }
 
 // Deprecated API, will be removed in 2.0
