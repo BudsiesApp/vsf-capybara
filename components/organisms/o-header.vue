@@ -20,15 +20,22 @@
 
       <template #navigation>
         <SfHeaderNavigationItem
+          ref="aboutNavItem"
           @mouseover="onAboutMenuMouseOver"
           @mouseleave="isAboutMenuHovered = false"
+          @focusin="onAboutMenuFocusIn"
+          @focusout="onAboutMenuFocusOut"
+          @keydown.esc="onAboutMenuEscapeKey"
         >
-          <div class="o-header__submenu">
+          <div
+            class="o-header__submenu"
+            :aria-expanded="String(isAboutMenuHovered || isAboutMenuFocused)"
+          >
             {{ $t('About') }}
           </div>
 
           <MAboutMenu
-            :visible="isAboutMenuHovered && !isSearchPanelVisible"
+            :visible="(isAboutMenuHovered || isAboutMenuFocused) && !isSearchPanelVisible"
             @transitionend.native="onAboutMenuTransitionEnd"
             @close="onAboutMenuClose"
           />
@@ -42,14 +49,12 @@
           @focusout="onMainMenuFocusOut"
           @keydown.esc="onMainMenuEscapeKey"
         >
-          <button
-            type="button"
-            class="o-header__submenu o-header__submenu-trigger"
+          <div
+            class="o-header__submenu"
             :aria-expanded="String(isHoveredMenu || isFocusedMenu)"
-            aria-haspopup="true"
           >
             {{ $t('Products') }}
-          </button>
+          </div>
 
           <MMenu
             :visible="(isHoveredMenu || isFocusedMenu) && !isSearchPanelVisible"
@@ -123,6 +128,7 @@ export default Vue.extend({
   data () {
     return {
       isAboutMenuHovered: false,
+      isAboutMenuFocused: false,
       isAboutMouseOverLocked: false,
       isHoveredMenu: false,
       isFocusedMenu: false,
@@ -141,6 +147,7 @@ export default Vue.extend({
   methods: {
     onAboutMenuClose () {
       this.isAboutMenuHovered = false;
+      this.isAboutMenuFocused = false;
       this.isAboutMouseOverLocked = true;
     },
     onAboutMenuMouseOver () {
@@ -153,6 +160,24 @@ export default Vue.extend({
     async onAboutMenuTransitionEnd () {
       await this.$nextTick();
       this.isAboutMouseOverLocked = false;
+    },
+    onAboutMenuFocusIn () {
+      this.isAboutMenuFocused = true;
+    },
+    onAboutMenuFocusOut (event) {
+      if (
+        event.relatedTarget !== null &&
+        this.$refs.aboutNavItem.$el.contains(event.relatedTarget)
+      ) {
+        return;
+      }
+
+      this.isAboutMenuFocused = false;
+    },
+    onAboutMenuEscapeKey () {
+      this.isAboutMenuFocused = false;
+      this.isAboutMenuHovered = false;
+      this.$refs.aboutNavItem.$el.querySelector('a').focus();
     },
     onMainMenuClose () {
       this.isHoveredMenu = false;
@@ -174,12 +199,9 @@ export default Vue.extend({
       this.isFocusedMenu = true;
     },
     onMainMenuFocusOut (event) {
-      const productsNavItem = this.$refs.productsNavItem && this.$refs.productsNavItem.$el;
-
       if (
         event.relatedTarget !== null &&
-        productsNavItem &&
-        productsNavItem.contains(event.relatedTarget)
+        this.$refs.productsNavItem.$el.contains(event.relatedTarget)
       ) {
         return;
       }
@@ -189,12 +211,7 @@ export default Vue.extend({
     onMainMenuEscapeKey () {
       this.isFocusedMenu = false;
       this.isHoveredMenu = false;
-
-      const menuTrigger = this.$refs.productsNavItem && this.$refs.productsNavItem.$el.querySelector('button');
-
-      if (menuTrigger) {
-        menuTrigger.focus();
-      }
+      this.$refs.productsNavItem.$el.querySelector('a').focus();
     }
   }
 });
@@ -230,14 +247,6 @@ export default Vue.extend({
     cursor: pointer;
   }
 
-  &__submenu-trigger {
-    background: none;
-    border: 0;
-    color: inherit;
-    font: inherit;
-    padding: 0;
-  }
-
   a {
     &.active {
       font-weight: bold;
@@ -260,19 +269,14 @@ export default Vue.extend({
       width: 0;
     }
 
-    &:hover > *:not(.sf-mega-menu) {
+    &:hover > *:not(.sf-mega-menu),
+    &:focus-within > *:not(.sf-mega-menu) {
       --header-navigation-item-color: var(--c-white);
-    }
-
-    &:hover {
-      .m-about-menu {
-        opacity: 1;
-        visibility: visible;
-      }
     }
 
     &:hover,
     &:focus-within {
+      .m-about-menu,
       .m-menu {
         opacity: 1;
         visibility: visible;
