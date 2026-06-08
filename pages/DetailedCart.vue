@@ -51,9 +51,16 @@
 
                   <template #configuration>
                     <m-expandable-section
-                      :title="$t('Customizations').toString()"
+                      v-show="(selectionsCountByKey[getCartItemKey(product)] || 0) > 0"
                       :expanded="false"
                     >
+                      <template #title>
+                        <div class="_title-container">
+                          <span class="_title">{{ $t('Customizations') }}</span>
+                          <span class="_selections-count">{{ selectionsCountByKey[getCartItemKey(product)] }} {{ $t('selections') }}</span>
+                        </div>
+                      </template>
+
                       <cart-item-configuration
                         :customizations="product.customizations"
                         :customization-state="(product.extension_attributes || {}).customization_state"
@@ -62,6 +69,7 @@
                         :cart-item-price="cartItemPriceDictionary[getCartItemKey(product)]"
                         :cart-item-qty="product.qty"
                         :show-prices="true"
+                        @selections-count-change="handleSelectionsCountChange(getCartItemKey(product), $event)"
                       />
                     </m-expandable-section>
                   </template>
@@ -416,7 +424,8 @@ export default {
         }
       ],
       isMounted: false,
-      syncQuantityDebounced: undefined
+      syncQuantityDebounced: undefined,
+      selectionsCountByKey: {}
     };
   },
   props: {
@@ -480,6 +489,9 @@ export default {
   },
   methods: {
     getCartItemOptions,
+    handleSelectionsCountChange (key, count) {
+      this.$set(this.selectionsCountByKey, key, count);
+    },
     editHandler (product) {
       const productFlow = normalizeProductPurchaseFlow(product.extension_attributes?.flow);
 
@@ -706,6 +718,20 @@ export default {
 
   .m-expandable-section {
     margin-top: var(--spacer-xs);
+
+    ._title-container {
+      display: flex;
+      flex: 1;
+      justify-content: space-between;
+      align-items: center;
+      padding-right: var(--spacer-sm);
+    }
+
+    ._selections-count {
+      font-size: var(--font-xs);
+      color: var(--c-text-muted);
+      margin-left: var(--spacer-xs);
+    }
   }
 
   .sf-collected-product {
