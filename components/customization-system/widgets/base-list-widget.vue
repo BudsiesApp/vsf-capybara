@@ -1,8 +1,8 @@
 <template>
-  <div class="base-list-widget" :class="{ '-disabled': isDisabled }">
+  <div class="base-list-widget" :class="{ '-disabled': isDisabled }" :aria-labelledby="ariaLabelledby"
+       :role="groupRole"
+  >
     <ul
-      :aria-labelledby="ariaLabelledby"
-      :role="groupRole"
       class="_options-list"
       :class="{ [`-alignment-${alignment}`]: true, '-round': isRound }"
     >
