@@ -57,7 +57,7 @@
                       <template #title>
                         <div class="_title-container">
                           <span class="_title">{{ $t('Customizations') }}</span>
-                          <span class="_selections-count">{{ selectionsCountByKey[getCartItemKey(product)] }} {{ $t('selections') }}</span>
+                          <span class="_selections-count">{{ getSelectionsCountLabel(selectionsCountByKey[getCartItemKey(product)]) }}</span>
                         </div>
                       </template>
 
@@ -491,6 +491,9 @@ export default {
     getCartItemOptions,
     handleSelectionsCountChange (key, count) {
       this.$set(this.selectionsCountByKey, key, count);
+    },
+    getSelectionsCountLabel (count) {
+      return count === 1 ? `1 ${this.$t('selection')}` : `${count} ${this.$t('selections')}`;
     },
     editHandler (product) {
       const productFlow = normalizeProductPurchaseFlow(product.extension_attributes?.flow);
