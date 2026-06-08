@@ -48,7 +48,7 @@
     "vue-filepond": "^6.0.2",
     "vue-lazy-hydration": "https://github.com/BudsiesApp/vue-lazy-hydration.git#b33ee6ae174989a46191b05a0f706d8997172fb4",
     "vue-lazyload": "^1.3.3",
-    "vue-multiselect": "https://github.com/BudsiesApp/vue-multiselect.git#e6538c9dbebc10073e934e0708dc972aa9c32a2d",
+    "vue-multiselect": "https://github.com/BudsiesApp/vue-multiselect.git#5c9365c483a77534ac458ab86064f6d57ef6770f",
     "vue-no-ssr": "^0.2.2",
     "vue-observe-visibility": "^0.4.1",
     "vue-offline": "^1.0.8",

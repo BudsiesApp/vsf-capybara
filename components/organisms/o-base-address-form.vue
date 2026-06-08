@@ -62,6 +62,7 @@
         :options="countries"
         :valid="!errors.length"
         :error-message="errors[0]"
+        :error-message-id="getFieldErrorMessageId('Country')"
         :disabled="isFormFieldsDisabled || isCountryFieldDisabled"
         @change="onChangeCountry"
       />
@@ -85,6 +86,7 @@
         :disabled="isFormFieldsDisabled"
         :valid="!errors.length"
         :error-message="errors[0]"
+        :error-message-id="getFieldErrorMessageId('Address')"
         name="street-address"
         autocomplete="street-address"
         @input="onStreetAddressInput"
@@ -151,6 +153,7 @@
             :options="statesForSelectedCountry"
             :valid="!errors.length"
             :error-message="errors[0]"
+            :error-message-id="getFieldErrorMessageId('State')"
             :disabled="isFormFieldsDisabled || isStateFieldDisabled"
           />
         </validation-provider>
@@ -327,6 +330,9 @@ export default defineComponent({
     const formattedPhoneNumber = ref('');
     const stateValidator = ref<InstanceType<typeof ValidationProvider> | undefined>(undefined);
     const phoneValidator = ref<InstanceType<typeof ValidationProvider> | undefined>(undefined);
+    const getFieldErrorMessageId = (field: string): string => {
+      return `${props.getFieldAnchorName(field)}-error-message`;
+    };
 
     const updateValueField = (field: Record<string, string | number | null>): void => {
       emit('input', { ...props.value, ...field });
@@ -627,6 +633,7 @@ export default defineComponent({
       fZipCodeChanged,
       countries,
       formattedPhoneNumber,
+      getFieldErrorMessageId,
       stateValidator,
       phoneValidator,
       autocompleteSuggestions,

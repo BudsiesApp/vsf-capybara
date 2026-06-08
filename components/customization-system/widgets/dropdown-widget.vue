@@ -5,6 +5,7 @@
     :disabled="isDisabled"
     :should-lock-scroll-on-open="isMobile"
     :valid="isValid"
+    :label-id="ariaLabelledby"
     v-model="selectedOption"
     v-if="showSelect"
   >
@@ -76,6 +77,10 @@ export default defineComponent({
     values: {
       type: Array as PropType<OptionValue[]>,
       default: () => []
+    },
+    ariaLabelledby: {
+      type: String as PropType<string | undefined>,
+      default: undefined
     }
   },
   setup (props, context) {
@@ -146,7 +151,17 @@ export default defineComponent({
     });
 
     const showSelect = ref<boolean>(true);
-    watch([values, selectedCurrency], async () => {
+    const sortedValuesIdsString = computed<string>(() => {
+      var ids = '';
+
+      for (const value of sortedValues.value) {
+        ids += value.id
+      }
+
+      return ids;
+    });
+
+    watch([sortedValuesIdsString, selectedCurrency], async () => {
       showSelect.value = false;
       await nextTick();
       showSelect.value = true;

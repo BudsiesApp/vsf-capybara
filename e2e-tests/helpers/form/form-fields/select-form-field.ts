@@ -10,12 +10,12 @@ const SELECT = '.sf-select';
 export class SelectFormField extends DropdownFormFieldBase {
   public constructor (
     public readonly formFieldLocator: Locator,
-    public readonly selectSelector: string,
+    public readonly fieldSelector: string,
     public page: Page
   ) {
     super(
       formFieldLocator,
-      selectSelector,
+      fieldSelector,
       page,
       SELECT,
       SF_SELECT_ERROR_MESSAGE,

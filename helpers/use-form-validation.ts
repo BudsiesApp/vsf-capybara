@@ -27,11 +27,47 @@ export function useFormValidation (
   function getNameOfFirstFieldWithError (
     errors: Record<string, string[]>
   ): string | undefined {
-    for (const key in errors) {
-      if (errors[key] && !!errors[key].length) {
-        return key;
-      }
+    const fieldsWithErrors = Object.keys(errors).filter(
+      key => errors[key] && !!errors[key].length
+    );
+
+    if (!fieldsWithErrors.length) {
+      return undefined;
     }
+
+    const refs = getFormFieldsRefs();
+
+    return fieldsWithErrors.sort((a, b) => {
+      let refA = refs[getFieldAnchorName(a, prefix)];
+      let refB = refs[getFieldAnchorName(b, prefix)];
+
+      if (!refA || !refB) {
+        return 0;
+      }
+
+      if (Array.isArray(refA)) {
+        refA = refA[0];
+      }
+
+      if (Array.isArray(refB)) {
+        refB = refB[0];
+      }
+
+      const elA = (isVue(refA) ? (refA as Vue).$el : refA) as HTMLElement;
+      const elB = (isVue(refB) ? (refB as Vue).$el : refB) as HTMLElement;
+
+      const position = elA.compareDocumentPosition(elB);
+
+      if (position & Node.DOCUMENT_POSITION_FOLLOWING) {
+        return -1;
+      }
+
+      if (position & Node.DOCUMENT_POSITION_PRECEDING) {
+        return 1;
+      }
+
+      return 0;
+    })[0];
   }
 
   function goToFieldByName (
@@ -96,9 +132,6 @@ export function useFormValidation (
     if (!validationObserver.value) {
       throw new Error('Validation observer is not defined');
     }
-
-    validationObserver.value.reset();
-    await new Promise((resolve) => setTimeout(resolve, 0));
 
     if (await validate()) {
       return true;

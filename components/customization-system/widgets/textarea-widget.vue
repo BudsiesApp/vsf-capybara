@@ -1,6 +1,8 @@
 <template>
   <div class="textarea-widget">
     <textarea
+      :aria-describedby="ariaDescribedby"
+      :aria-invalid="ariaInvalid"
       class="_textarea"
       :disabled="isDisabled"
       :placeholder="placeholder"
@@ -8,7 +10,11 @@
       v-model.trim="valueModel"
     />
 
-    <div class="_error-message" aria-live="polite">
+    <div
+      :id="errorMessageId"
+      class="_error-message"
+      aria-live="polite"
+    >
       {{ error }}
     </div>
   </div>
@@ -17,6 +23,7 @@
 <script lang="ts">
 import { SfInput } from '@storefront-ui/vue';
 import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { useErrorAccessibility } from 'theme/helpers/use-error-accessibility';
 
 export default defineComponent({
   name: 'TextareaWidget',
@@ -42,6 +49,7 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
+    const hasError = computed<boolean>(() => !!props.error);
     const valueModel = computed<string | undefined>({
       get: () => {
         return props.value;
@@ -54,7 +62,15 @@ export default defineComponent({
       return !props.error;
     });
 
+    const { ariaDescribedby, ariaInvalid, errorMessageId } = useErrorAccessibility(
+      'textarea-widget',
+      hasError
+    );
+
     return {
+      ariaDescribedby,
+      ariaInvalid,
+      errorMessageId,
       isValid,
       valueModel
     };
@@ -83,10 +99,17 @@ export default defineComponent({
     );
     color: var(--input-color, var(--c-text));
     resize: vertical;
-    outline: none;
 
     &:focus {
       border-color: var(--c-primary);
+      outline: none;
+    }
+
+    &:focus-visible {
+      outline: var(--c-black) auto 1px;
+      outline: -webkit-focus-ring-color auto 1px;
+      outline: AccentColor auto 1px;
+      outline-offset: 2px;
     }
   }
 
