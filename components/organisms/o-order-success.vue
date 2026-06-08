@@ -7,7 +7,6 @@
         :level="1"
         tabindex="-1"
         ref="mainTitle"
-        role="heading"
       />
 
       <SfHeading
