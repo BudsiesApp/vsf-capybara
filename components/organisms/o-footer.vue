@@ -3,7 +3,7 @@
     <SfFooter :column="5" :multiple="true" class="_footer">
       <SfFooterColumn :title="$t('Industry Awards')" class="desktop-only">
         <div class="_awards-container">
-          <BaseImage src="/assets/industry_awards.png" :width="262" />
+          <BaseImage src="/assets/industry_awards.png" :width="262" alt="Four award badges: National Parenting Product Awards Winner 2016, Scholastic Parent & Child Gold Star Toy Award 2016, Toy Insider Top Summer Toy 2016, and Fun Stuff Parents' Choice Award." />
 
           <div class="_award-text">
             {{ $t('2017 Oppenheimer Best Toy Award') }}
@@ -34,7 +34,7 @@
 
       <SfFooterColumn :title="$t('Industry Awards')" class="mobile-only">
         <div class="_awards-container">
-          <BaseImage src="/assets/industry_awards.png" :width="262" />
+          <BaseImage src="/assets/industry_awards.png" :width="262" alt="Four award badges: National Parenting Product Awards Winner 2016, Scholastic Parent & Child Gold Star Toy Award 2016, Toy Insider Top Summer Toy 2016, and Fun Stuff Parents' Choice Award." />
 
           <div class="_award-text">
             {{ $t('2017 Oppenheimer Best Toy Award') }}
@@ -81,11 +81,14 @@
           </span>
         </div>
 
-        <SfButton class="color-secondary _contact-button">
-          <a href="https://support.budsies.com/support/home" target="_blank" rel="noopener noreferrer">
-            {{ $t('Contact Us') }}
-          </a>
-        </SfButton>
+        <a
+          class="sf-button color-secondary _contact-button"
+          href="https://support.budsies.com/support/home"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {{ $t('Contact Us') }}
+        </a>
       </div>
     </SfFooter>
 
@@ -110,7 +113,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import { SfButton, SfFooter, SfList, SfMenuItem, SfHeading } from '@storefront-ui/vue';
+import { SfFooter, SfList, SfMenuItem, SfHeading } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
 import config from 'config';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
@@ -128,7 +131,6 @@ export default {
   components: {
     PrivacyPolicyLink,
     MBudsiesBrands,
-    SfButton,
     SfFooter,
     SfList,
     SfMenuItem,
@@ -390,10 +392,11 @@ export default {
     width: 100%;
 
     ._contact-button {
+      display: inline-block;
       margin-top: var(--spacer-sm);
 
-      a {
-        color: inherit;
+      &:hover {
+        --c-link-hover: var(--button-color, var(--c-light-variant));
       }
     }
   }
