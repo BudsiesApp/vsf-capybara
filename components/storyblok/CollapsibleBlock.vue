@@ -42,9 +42,12 @@ export default Blok.extend({
 </script>
 
 <style lang="scss" scoped>
+@import "~@storefront-ui/shared/styles/helpers/breakpoints";
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 .collapsible-block {
+  @include display-property-handling;
+
   ._content {
     @include storyblok-sub-elements-layout;
   }
