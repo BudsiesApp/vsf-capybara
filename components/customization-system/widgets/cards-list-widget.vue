@@ -1,6 +1,6 @@
 <template>
-  <div class="cards-list-widget">
-    <ul class="_list" :role="groupRole" :aria-labelledby="ariaLabelledby">
+  <div class="cards-list-widget" :role="groupRole" :aria-labelledby="ariaLabelledby">
+    <ul class="_list">
       <li
         class="_item"
         :class="{
