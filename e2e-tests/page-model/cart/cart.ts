@@ -32,6 +32,14 @@ export class CartPage {
   }
 
   public async expectCartItemToHaveProperties (cartItem: Locator, properties: string[]) {
+    const expandableHeader = cartItem.locator('.m-expandable-section ._header');
+    if (await expandableHeader.isVisible()) {
+      const isExpanded = await cartItem.locator('.m-expandable-section.-expanded').isVisible();
+      if (!isExpanded) {
+        await expandableHeader.click();
+      }
+    }
+
     for (const property of properties) {
       const propertyLocator = cartItem.locator(`.collected-product__properties:has-text("${property}")`);
       await expect(propertyLocator).toBeVisible();
@@ -40,6 +48,14 @@ export class CartPage {
 
   public async getCartItemProperties (cartItem: Locator): Promise<string[]> {
     const properties: string[] = [];
+
+    const expandableHeader = cartItem.locator('.m-expandable-section ._header');
+    if (await expandableHeader.isVisible()) {
+      const isExpanded = await cartItem.locator('.m-expandable-section.-expanded').isVisible();
+      if (!isExpanded) {
+        await expandableHeader.click();
+      }
+    }
 
     const propertyLocators = await cartItem.locator('.collected-product__properties').all();
 
