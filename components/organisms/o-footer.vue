@@ -3,7 +3,7 @@
     <SfFooter :column="5" :multiple="true" class="_footer">
       <SfFooterColumn :title="$t('Industry Awards')" class="desktop-only">
         <div class="_awards-container">
-          <BaseImage src="/assets/industry_awards.png" :width="262" />
+          <BaseImage src="/assets/industry_awards.png" :width="262" alt="Four award badges: National Parenting Product Awards Winner 2016, Scholastic Parent & Child Gold Star Toy Award 2016, Toy Insider Top Summer Toy 2016, and Fun Stuff Parents' Choice Award." />
 
           <div class="_award-text">
             {{ $t('2017 Oppenheimer Best Toy Award') }}
@@ -34,7 +34,7 @@
 
       <SfFooterColumn :title="$t('Industry Awards')" class="mobile-only">
         <div class="_awards-container">
-          <BaseImage src="/assets/industry_awards.png" :width="262" />
+          <BaseImage src="/assets/industry_awards.png" :width="262" alt="Four award badges: National Parenting Product Awards Winner 2016, Scholastic Parent & Child Gold Star Toy Award 2016, Toy Insider Top Summer Toy 2016, and Fun Stuff Parents' Choice Award." />
 
           <div class="_award-text">
             {{ $t('2017 Oppenheimer Best Toy Award') }}
