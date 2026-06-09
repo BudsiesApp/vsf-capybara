@@ -5,7 +5,6 @@
       :title="`${$t('Contact')}`"
       :level="3"
       class="sf-heading--left sf-heading--no-underline title"
-      role="heading"
       tabindex="-1"
     />
 
