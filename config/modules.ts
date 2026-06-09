@@ -35,6 +35,7 @@ import { TrafficAttributionModule } from 'src/modules/traffic-attribution';
 import registerStoryblokComponents from 'theme/components/storyblok'
 import { KlaviyoModule, ModuleConfig } from 'src/modules/klaviyo'
 import { AmazonPay } from 'src/modules/vsf-amazon-pay'
+import { MaestraModule } from 'src/modules/maestra'
 
 const extendUrlVuex = {
   actions: {
@@ -96,6 +97,12 @@ export function registerClientModules () {
     updatePhoneNumberMutation: SET_PERSISTED_CUSTOMER_PHONE_NUMBER
   };
   registerModule(KlaviyoModule, klaviyoModuleConfig);
+
+  const maestraModuleConfig: ModuleConfig = {
+    updateEmailMutation: SET_PERSISTED_CUSTOMER_EMAIL,
+    updatePhoneNumberMutation: SET_PERSISTED_CUSTOMER_PHONE_NUMBER
+  };
+  registerModule(MaestraModule, maestraModuleConfig);
 }
 
 // Deprecated API, will be removed in 2.0
