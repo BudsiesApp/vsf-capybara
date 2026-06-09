@@ -62,6 +62,10 @@ export default Blok.extend({
 
   &.-editor-preview-mode {
     ::v-deep .m-expandable-section {
+      ._header {
+        pointer-events: none;
+      }
+
       ._body {
         grid-template-rows: 1fr !important;
         visibility: visible !important;
