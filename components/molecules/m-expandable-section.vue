@@ -4,7 +4,7 @@
       class="_header"
       role="button"
       :tabindex="0"
-      :aria-expanded="isExpanded"
+      :aria-expanded="isExpanded ? 'true' : 'false'"
       :aria-controls="bodyId"
       @click.stop="toggle"
       @keydown.enter.prevent="toggle"
