@@ -30,11 +30,14 @@
           <div
             class="o-header__submenu"
             :aria-expanded="String(isAboutMenuHovered || isAboutMenuFocused)"
+            tabindex="0"
+            role="menuitem"
           >
             {{ $t('About') }}
           </div>
 
           <MAboutMenu
+            id="products-about-menu"
             :visible="(isAboutMenuHovered || isAboutMenuFocused) && !isSearchPanelVisible"
             @transitionend.native="onAboutMenuTransitionEnd"
             @close="onAboutMenuClose"
@@ -52,11 +55,14 @@
           <div
             class="o-header__submenu"
             :aria-expanded="String(isHoveredMenu || isFocusedMenu)"
+            tabindex="0"
+            role="menuitem"
           >
             {{ $t('Products') }}
           </div>
 
           <MMenu
+            id="products-dropdown-menu"
             :visible="(isHoveredMenu || isFocusedMenu) && !isSearchPanelVisible"
             @transitionend.native="onMainMenuTransitionEnd"
             @close="onMainMenuClose"
