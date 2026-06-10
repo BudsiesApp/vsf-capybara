@@ -37,7 +37,6 @@
           </div>
 
           <MAboutMenu
-            id="products-about-menu"
             :visible="(isAboutMenuHovered || isAboutMenuFocused) && !isSearchPanelVisible"
             @transitionend.native="onAboutMenuTransitionEnd"
             @close="onAboutMenuClose"
@@ -62,7 +61,6 @@
           </div>
 
           <MMenu
-            id="products-dropdown-menu"
             :visible="(isHoveredMenu || isFocusedMenu) && !isSearchPanelVisible"
             @transitionend.native="onMainMenuTransitionEnd"
             @close="onMainMenuClose"
