@@ -7,12 +7,13 @@
   >
     <div class="_form-block -amount">
       <div class="_form-field" v-if="selectedTemplateId">
-        <label> Select style: </label>
+        <label id="gift-card-template-select-label"> Select style: </label>
 
         <SfSelect
           v-model="selectedTemplateId"
           name="giftcard_template_id"
           class="_giftcard-template sf-select--underlined"
+          label-id="gift-card-template-select-label"
           :disabled="isDisabled"
           :should-lock-scroll-on-open="isMobile"
         >
@@ -33,12 +34,13 @@
         name="Price Amount"
       >
         <div class="_form-field _price-amount-field" :class="classes">
-          <label> Select value: </label>
+          <label id="gift-card-price-amount-select-label"> Select value: </label>
 
           <SfSelect
             v-model="selectedPriceAmount"
             name="price_amount"
             class="_price-amount sf-select--underlined"
+            label-id="gift-card-price-amount-select-label"
             :class="{ '-slim': isSelectedPriceAmountSlim }"
             :disabled="isDisabled"
             :valid="!errors.length"
@@ -88,7 +90,7 @@
             rules="required"
             name="'Sender Name'"
           >
-            <label> Sender name </label>
+            <label for="customer_name"> Sender name </label>
 
             <SfInput
               name="customer_name"
@@ -108,7 +110,7 @@
           slim
         >
           <div class="_form-field" :class="classes">
-            <label>Recipient name:</label>
+            <label for="recipient_name">Recipient name:</label>
 
             <SfInput
               name="recipient_name"
@@ -129,7 +131,7 @@
           v-if="showRecipientFields"
         >
           <div class="_form-field" :class="classes">
-            <label>Recipient email address:</label>
+            <label for="recipient_email">Recipient email address:</label>
 
             <SfInput
               name="recipient_email"
@@ -161,9 +163,10 @@
         </div>
 
         <div class="_custom-message-container">
-          <label class="_label"> Custom message </label>
+          <label class="_label" for="custom_message"> Custom message </label>
 
           <textarea
+            id="custom_message"
             class="_custom-message"
             name="custom_message"
             rows="4"
