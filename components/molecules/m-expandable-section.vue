@@ -4,9 +4,9 @@
       class="_header"
       role="button"
       :tabindex="0"
-      :aria-expanded="isExpanded"
+      :aria-expanded="isExpanded ? 'true' : 'false'"
       :aria-controls="bodyId"
-      @click="toggle"
+      @click.stop="toggle"
       @keydown.enter.prevent="toggle"
       @keydown.space.prevent="toggle"
     >
@@ -66,6 +66,9 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .m-expandable-section {
+  border-bottom: var(--expandable-section-border, none);
+  padding: var(--expandable-section-padding, 0);
+
   ._header {
     display: flex;
     align-items: center;
@@ -76,6 +79,7 @@ export default defineComponent({
 
   ._title {
     font-weight: var(--font-semibold);
+    font-size: var(--expandable-section-title-font-size);
   }
 
   ._chevron {
@@ -86,9 +90,10 @@ export default defineComponent({
   ._body {
     display: grid;
     grid-template-rows: 0fr;
-    transition: grid-template-rows 300ms ease-in-out;
+    transition: grid-template-rows 300ms ease-in-out, visibility 0s linear 300ms, margin-top 0s linear 300ms;
     will-change: grid-template-rows;
     visibility: hidden;
+    padding: var(--expandable-section-body-padding, 0);
   }
 
   ._body-inner {
@@ -97,14 +102,17 @@ export default defineComponent({
   }
 
   &.-expanded {
-    ._chevron {
-      rotate: 180deg;
+    >._header {
+      ._chevron {
+        rotate: 180deg;
+      }
     }
 
-    ._body {
+    >._body {
       grid-template-rows: 1fr;
       visibility: visible;
       margin-top: var(--spacer-sm);
+      transition: grid-template-rows 300ms ease-in-out, visibility 0s linear 0s;
     }
   }
 }

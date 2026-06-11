@@ -131,7 +131,7 @@ export default defineComponent({
   align-items: stretch;
   width: 100%;
   margin-top: var(--spacer-sm);
-  border-radius: 0.5rem;
+  border-radius: var(--coupon-border-radius, 0.5rem);
   overflow: hidden;
   position: relative;
   background: var(--coupon-idle-background);
