@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent, watch } from '@vue/composition-api';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 
 import {
@@ -97,6 +97,18 @@ export default defineComponent({
 
       await applyCoupon();
     };
+
+    watch(
+      shouldRender,
+      (newValue, oldValue) => {
+        if (newValue === oldValue) {
+          return;
+        }
+
+        context.emit('should-render-changed', newValue);
+      },
+      { immediate: true }
+    );
 
     return {
       applyCouponOffer,

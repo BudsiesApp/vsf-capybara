@@ -12,25 +12,23 @@
       </div>
 
       <div class="_main">
-        <div class="_header">
-          <div class="_details">
-            <label class="_title">{{ title }}</label>
+        <div class="_details">
+          <label class="_title">{{ title }}</label>
 
-            <label
-              v-if="plushieName"
-              class="_name"
-            >
-              {{ plushieName }}
-            </label>
-          </div>
-
-          <SfPrice
-            v-if="cartItemPrice"
-            :regular="formattedPrice.regular"
-            :special="formattedPrice.special"
-            class="_price"
-          />
+          <label
+            v-if="plushieName"
+            class="_name"
+          >
+            {{ plushieName }}
+          </label>
         </div>
+
+        <SfPrice
+          v-if="cartItemPrice"
+          :regular="formattedPrice.regular"
+          :special="formattedPrice.special"
+          class="_price"
+        />
       </div>
 
       <div class="_configuration">
@@ -38,69 +36,68 @@
           :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
         />
 
-        <m-expandable-section
-          v-show="selectionsCount > 0"
-          :expanded="false"
-          class="_section"
-        >
-          <template #title>
-            <div class="_title-container">
-              <span class="_customizations-label">{{ $t('Customizations') }}</span>
-              <span class="_selections-count">{{ selectionsCountLabel }}</span>
+        <div class="_sections">
+          <m-expandable-section
+            v-show="selectionsCount > 0"
+            :expanded="false"
+            class="_section"
+          >
+            <template #title>
+              <div class="_title-container">
+                <span class="_customizations-label">{{ $t('Customizations') }}</span>
+                <span class="_selections-count">{{ selectionsCountLabel }}</span>
+              </div>
+            </template>
+
+            <cart-item-configuration-extended
+              :customization-groups="customizationGroups"
+              :has-customizable-properties="hasCustomizableProperties"
+              :product-options="productOptions"
+            />
+          </m-expandable-section>
+
+          <div class="_item-actions _section">
+            <a-custom-product-quantity
+              v-if="showQuantitySelector"
+              :value="product.qty"
+              :disabled="isCartSyncing"
+              @input="changeProductQuantity"
+            />
+
+            <div v-else class="_quantity">
+              {{ product.qty }}
             </div>
-          </template>
 
-          <cart-item-configuration
-            :customizations="product.customizations"
-            :customization-state="(product.extension_attributes || {}).customization_state"
-            :product-options="productOptions"
-            :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
-            :cart-item-price="cartItemPrice"
-            :cart-item-qty="product.qty"
-            :show-prices="true"
-            @selections-count-change="handleSelectionsCountChange"
-          />
-        </m-expandable-section>
-      </div>
+            <SfButton
+              v-if="showEditButton"
+              class="-small _action-button"
+              :disabled="isCartSyncing"
+              @click="editHandler"
+            >
+              Edit
+            </SfButton>
 
-      <div class="_actions">
-        <div class="_item-actions _section">
-          <a-custom-product-quantity
-            v-if="showQuantitySelector"
-            :value="product.qty"
-            :disabled="isCartSyncing"
-            @input="changeProductQuantity"
-          />
-
-          <div v-else class="_quantity">
-            {{ product.qty }}
+            <SfButton
+              class="-small color-secondary _action-button"
+              :disabled="isCartSyncing"
+              @click="removeHandler"
+            >
+              Remove
+            </SfButton>
           </div>
 
-          <SfButton
-            v-if="showEditButton"
-            class="-small _action-button"
-            :disabled="isCartSyncing"
-            @click="editHandler"
+          <div
+            class="_section _coupon-section"
+            v-show="showCouponOfferSection"
           >
-            Edit
-          </SfButton>
-
-          <SfButton
-            class="-small color-secondary _action-button"
-            :disabled="isCartSyncing"
-            @click="removeHandler"
-          >
-            Remove
-          </SfButton>
+            <MCartLineCouponOffer
+              :product="product"
+              class="_coupon-offer"
+              @should-render-changed="(value) => showCouponOfferSection = value"
+            />
+          </div>
         </div>
       </div>
-    </div>
-
-    <div class="_section _coupon-section">
-      <MCartLineCouponOffer
-        :product="product"
-        class="_coupon-offer"
-      />
     </div>
   </div>
 </template>
@@ -120,10 +117,11 @@ import { CART_UPD_ITEM } from '@vue-storefront/core/modules/cart/store/mutation-
 import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-item-key.function';
 import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import {
-  CartItemConfiguration,
   CartItemShipmentPromise,
-  getCustomizationSystemThumbnail
+  getCustomizationSystemThumbnail,
+  useCartItemConfiguration
 } from 'src/modules/customization-system';
+import CartItemConfigurationExtended from './cart-item-configuration-extended.vue';
 import { ImageHandlerService } from 'src/modules/file-storage';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 
@@ -196,7 +194,7 @@ export default defineComponent({
   name: 'CartLineItem',
   components: {
     ACustomProductQuantity,
-    CartItemConfiguration,
+    CartItemConfigurationExtended,
     CartItemShipmentPromise,
     MCartLineCouponOffer,
     MExpandableSection,
@@ -215,7 +213,6 @@ export default defineComponent({
     const plushieName = ref('Daisy');
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
 
-    const selectionsCount = ref(0);
     let syncQuantityDebounced: ReturnType<typeof debounce> | undefined;
 
     const isCartSyncing = computed<boolean>(() => context.root.$store.getters[IS_CART_SYNCING]);
@@ -226,6 +223,25 @@ export default defineComponent({
 
     const cartItemPrice = computed(() =>
       context.root.$store.getters[CART_ITEM_LOCALIZED_PRICE_DICTIONARY][cartItemKey.value]
+    );
+
+    const productCustomizations = computed(() => props.product.customizations || []);
+    const productCustomizationState = computed(() => props.product.extension_attributes?.customization_state || []);
+    const productQty = computed(() => props.product.qty);
+    const showPrices = ref(true);
+    const showCouponOfferSection = ref(false);
+
+    const {
+      customizationGroups,
+      hasCustomizableProperties,
+      selectionsCount: customizationGroupsCount
+    } = useCartItemConfiguration(
+      productCustomizations,
+      productCustomizationState,
+      cartItemPrice,
+      productQty,
+      showPrices,
+      context
     );
 
     const formattedPrice = computed(() =>
@@ -267,15 +283,15 @@ export default defineComponent({
 
     const productOptions = computed(() => getCartItemOptions(props.product));
 
+    const selectionsCount = computed<number>(() =>
+      hasCustomizableProperties.value ? customizationGroupsCount.value : productOptions.value.length
+    );
+
     const selectionsCountLabel = computed<string>(() => {
       return selectionsCount.value === 1
         ? `1 ${context.root.$t('selection')}`
         : `${selectionsCount.value} ${context.root.$t('selections')}`;
     });
-
-    function handleSelectionsCountChange (count: number): void {
-      selectionsCount.value = count;
-    }
 
     function syncQuantity (): Promise<any> | void {
       if (isCartSyncing.value) {
@@ -384,19 +400,21 @@ export default defineComponent({
 
     return {
       cartItemPrice,
+      customizationGroups,
       formattedPrice,
+      hasCustomizableProperties,
       isCartSyncing,
       plushieName,
       productOptions,
       selectionsCount,
       selectionsCountLabel,
+      showCouponOfferSection,
       showEditButton,
       showQuantitySelector,
       thumbnail,
       title,
       changeProductQuantity,
       editHandler,
-      handleSelectionsCountChange,
       removeHandler
     };
   }
@@ -411,6 +429,7 @@ export default defineComponent({
   flex-direction: column;
 
   padding: var(--spacer-sm);
+  padding-bottom: 0;
   border: 1px solid var(--c-divider);
 
   ._product-grid {
@@ -419,7 +438,7 @@ export default defineComponent({
     grid-template-areas:
       "aside main"
       "configuration configuration"
-      "actions actions";
+      "configuration configuration";
   }
 
   ._section {
@@ -428,7 +447,6 @@ export default defineComponent({
     border-top: 1px solid var(--c-divider);
   }
 
-  .m-expandable-section,
   .cart-item-shipment-promise {
     margin-top: var(--spacer-sm);
   }
@@ -446,10 +464,17 @@ export default defineComponent({
     background: none;
   }
 
+  ._sections {
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--spacer-sm);
+  }
+
   ._main {
     grid-area: main;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     margin: 0 0 0 var(--spacer-sm);
   }
 
@@ -502,27 +527,12 @@ export default defineComponent({
     }
   }
 
-  ._actions {
-    grid-area: actions;
-    display: flex;
-    flex-direction: column;
+  ._coupon-offer {
+    margin: 0;
   }
 
   ._coupon-section {
     padding: 0;
-    margin-bottom: calc(-1 * var(--spacer-sm));
-  }
-
-  ._coupon-offer {
-    --coupon-border-radius: 0;
-
-    width: 100%;
-    margin: 0;
-
-    &::before,
-    &::after {
-      display: none;
-    }
   }
 
   ._item-actions {
@@ -536,6 +546,16 @@ export default defineComponent({
     flex: 1;
   }
 
+  .a-custom-product-quantity {
+    ::v-deep {
+      ._handle,
+      ._value {
+        height: 32px;
+        box-sizing: border-box;
+      }
+    }
+  }
+
   ._quantity {
     line-height: initial;
     text-align: center;
@@ -543,10 +563,15 @@ export default defineComponent({
     font-size: var(--font-lg);
   }
 
-  .sf-quantity-selector {
-    ::v-deep {
-      .sf-quantity-selector__button {
-        --button-background: transparent;
+  @media (max-width: $tablet-min) {
+    ._coupon-offer {
+      --coupon-border-radius: 0;
+
+      width: 100%;
+
+      &::before,
+      &::after {
+        display: none;
       }
     }
   }
@@ -559,7 +584,7 @@ export default defineComponent({
         "aside actions";
     }
 
-    ._header {
+    ._main {
       flex-direction: row;
     }
 
@@ -588,20 +613,21 @@ export default defineComponent({
       margin: 0 0 0 var(--spacer-sm);
     }
 
-    ._actions {
-      margin: 0 0 0 var(--spacer-sm);
-      justify-content: flex-end;
+    ._section {
+      padding: var(--spacer-sm);
+      padding-left: 0;
     }
 
     ._coupon-offer {
-      width: calc(100% - 140px - var(--spacer-sm));
       max-width: 26rem;
-      margin-left: calc(8.75rem + var(--spacer-sm));
-      margin-right: var(--spacer-sm);
     }
 
     ._action-button {
       flex: 0;
+    }
+
+    ._item-actions {
+      background-color: transparent;
     }
   }
 }

@@ -87,6 +87,8 @@
                 v-model="product.qty"
                 :image="getThumbnailForProduct(product)"
                 :title="productTitle[getCartItemKey(product)] | htmlDecode"
+                :regular-price="formatPrice(cartItemPriceDictionary[getCartItemKey(product)].regular)"
+                :special-price="formatPrice(cartItemPriceDictionary[getCartItemKey(product)].special)"
                 class="collected-product"
               >
                 <template #image="{image}">
@@ -99,50 +101,21 @@
                   />
                 </template>
 
-                <template #title="{ title }">
-                  <div class="sf-collected-product__title-wraper">
-                    <label class="sf-collected-product__title">{{ title }}</label>
-
-                    <cart-item-shipment-promise
-                      :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
-                    />
-                  </div>
-                </template>
-
                 <template #configuration>
-                  <m-expandable-section
-                    v-show="(selectionsCountByKey[getCartItemKey(product)] || 0) > 0"
-                    :expanded="false"
-                  >
-                    <template #title>
-                      <div class="_title-container">
-                        <span class="_title">{{ $t('Customizations') }}</span>
-                        <span class="_selections-count">{{ getSelectionsCountLabel(selectionsCountByKey[getCartItemKey(product)]) }}</span>
-                      </div>
-                    </template>
-
-                    <cart-item-configuration
-                      :customizations="product.customizations"
-                      :customization-state="(product.extension_attributes || {}).customization_state"
-                      :product-options="getCartItemOptions(product)"
-                      :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
-                      @selections-count-change="handleSelectionsCountChange(getCartItemKey(product), $event)"
-                    />
-                  </m-expandable-section>
-                </template>
-                <template #price>
-                  <div class="_price-with-qty">
-                    <SfPrice
-                      :regular="formatPrice(cartItemPriceDictionary[getCartItemKey(product)].regular)"
-                      :special="formatPrice(cartItemPriceDictionary[getCartItemKey(product)].special)"
-                    />
-                    <div class="collected-product__action">
-                      {{ $t('Quantity') }}: <span class="product__qty">{{ product.qty }}</span>
-                    </div>
-                  </div>
+                  <cart-item-configuration
+                    :customizations="product.customizations"
+                    :customization-state="(product.extension_attributes || {}).customization_state"
+                    :product-options="getCartItemOptions(product)"
+                    :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
+                  />
                 </template>
                 <template #actions>
-                  <div />
+                  <div>
+                    <div class="collected-product__action">
+                      {{ $t('Quantity') }}:
+                      <span class="product__qty">{{ product.qty }}</span>
+                    </div>
+                  </div>
                 </template>
                 <template #input>
                   <span />
@@ -297,8 +270,7 @@ import { OrderModule, ORDER_CONFLICT_EVENT } from '@vue-storefront/core/modules/
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { OrderReview } from '@vue-storefront/core/modules/checkout/components/OrderReview';
 import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
-import { CartItemConfiguration, CartItemShipmentPromise, getCustomizationSystemThumbnail } from 'src/modules/customization-system';
-import MExpandableSection from 'theme/components/molecules/m-expandable-section.vue';
+import { CartItemConfiguration, getCustomizationSystemThumbnail } from 'src/modules/customization-system';
 import { IS_COUPON_PROCESSING, IS_TOTALS_SYNCING, IS_PAYMENT_METHODS_SYNCING, CART_ITEM_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/cart';
 import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-item-key.function';
 
@@ -322,8 +294,6 @@ export default {
   components: {
     APromoCode,
     CartItemConfiguration,
-    CartItemShipmentPromise,
-    MExpandableSection,
     MPriceSummary,
     OCartItemsTable,
     OGiftCardPayment,
@@ -345,8 +315,7 @@ export default {
   data () {
     return {
       isCheckoutInProgress: false,
-      braintreeClient: undefined,
-      selectionsCountByKey: {}
+      braintreeClient: undefined
     };
   },
   watch: {
@@ -485,12 +454,6 @@ export default {
       return PriceHelper.formatPrice(price, this.selectedCurrency.symbol);
     },
     getCartItemOptions,
-    handleSelectionsCountChange (key, count) {
-      this.$set(this.selectionsCountByKey, key, count);
-    },
-    getSelectionsCountLabel (count) {
-      return count === 1 ? `1 ${this.$t('selection')}` : `${count} ${this.$t('selections')}`;
-    },
     getThumbnailForProduct (product) {
       const customizationSystemThumbnail =
         getCustomizationSystemThumbnail(
@@ -653,7 +616,6 @@ export default {
   --accordion-item-content-padding: 0;
   --collected-product-padding: 0;
   --collected-product-image-background: var(--c-white);
-  --collected-product-configuration-margin: 0;
   --heading-padding: 0;
   --accordion-item-content-font-size: var(--font-sm);
   &__item {
@@ -689,10 +651,6 @@ export default {
     margin-top: var(--spacer-sm);
   }
 
-  ._price-with-qty &__action {
-    margin-top: 0;
-  }
-
   &__option {
     font-size: var(--font-xs);
 
@@ -700,40 +658,11 @@ export default {
       display: inline-block;
     }
   }
-
-  .cart-item-shipment-promise {
-    margin-top: var(--spacer-2xs);
-  }
-
-  .m-expandable-section {
-    margin-top: var(--spacer-xs);
-
-    ._title-container {
-      display: flex;
-      flex: 1;
-      justify-content: space-between;
-      align-items: center;
-      padding-right: var(--spacer-sm);
-    }
-
-    ._selections-count {
-      font-size: var(--font-xs);
-      color: var(--c-text-muted);
-      margin-left: var(--spacer-xs);
-    }
-  }
-
-  ._price-with-qty {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacer-xs);
-  }
 }
 ::v-deep .sf-collected-product {
   &__title {
     --collected-product-title-font-size: var(--font-sm);
     --collected-product-title-font-weight: var(--font-semibold);
-    margin-bottom: 0;
   }
 }
 .content {

@@ -90,8 +90,8 @@ export default defineComponent({
   ._body {
     display: grid;
     grid-template-rows: 0fr;
-    transition: grid-template-rows 300ms ease-in-out, visibility 0s linear 300ms, margin-top 0s linear 300ms;
-    will-change: grid-template-rows;
+    transition: grid-template-rows 300ms ease-in-out, visibility 0s linear 300ms, margin-top 300ms linear;
+    will-change: grid-template-rows, margin-top;
     visibility: hidden;
     padding: var(--expandable-section-body-padding, 0);
   }

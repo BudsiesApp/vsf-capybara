@@ -31,10 +31,6 @@
           {{ item.name | htmlDecode }}
         </div>
 
-        <cart-item-shipment-promise
-          :estimated-shipment="item.estimatedShipment"
-        />
-
         <cart-item-configuration
           :customizations="item.customizations"
           :customization-state="item.customizationState"
@@ -65,13 +61,12 @@ import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-obser
 
 import { OrderContentItem } from '../interfaces/order-content-item.interface';
 
-import { CartItemConfiguration, CartItemShipmentPromise } from 'src/modules/customization-system';
+import { CartItemConfiguration } from 'src/modules/customization-system';
 
 export default {
   name: 'OOrderContent',
   components: {
     CartItemConfiguration,
-    CartItemShipmentPromise,
     SfImage,
     SfPrice,
     SfTable
