@@ -108,8 +108,7 @@ import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType
 import {
   SfImage,
   SfPrice,
-  SfButton,
-  SfQuantitySelector
+  SfButton
 } from '@storefront-ui/vue';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
 import { CART_ITEM_LOCALIZED_PRICE_DICTIONARY, IS_CART_SYNCING } from '@vue-storefront/core/modules/cart';
@@ -200,8 +199,7 @@ export default defineComponent({
     MExpandableSection,
     SfImage,
     SfPrice,
-    SfButton,
-    SfQuantitySelector
+    SfButton
   },
   props: {
     product: {
@@ -253,6 +251,10 @@ export default defineComponent({
     );
 
     const thumbnail = computed<string>(() => {
+      if (!imageHandlerService) {
+        throw new Error('Image Handler Service is not defined');
+      }
+
       const customizationSystemThumbnail = getCustomizationSystemThumbnail(
         props.product.customizations,
         props.product.extension_attributes?.customization_state,
