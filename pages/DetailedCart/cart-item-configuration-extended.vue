@@ -3,7 +3,7 @@
     <template v-if="hasCustomizableProperties">
       <div
         v-for="group in customizationGroups"
-        :key="group.customizationId"
+        :key="group.groupKey"
         :class="[
           'collected-product__properties',
           { '-list': group.isList }

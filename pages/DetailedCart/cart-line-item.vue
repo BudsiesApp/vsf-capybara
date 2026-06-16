@@ -210,7 +210,6 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const plushieName = ref('Daisy');
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
 
     let syncQuantityDebounced: ReturnType<typeof debounce> | undefined;
@@ -234,6 +233,7 @@ export default defineComponent({
     const {
       customizationGroups,
       hasCustomizableProperties,
+      plushieName,
       selectionsCount: customizationGroupsCount
     } = useCartItemConfiguration(
       productCustomizations,
@@ -241,7 +241,8 @@ export default defineComponent({
       cartItemPrice,
       productQty,
       showPrices,
-      context
+      context,
+      ref(true)
     );
 
     const formattedPrice = computed(() =>
