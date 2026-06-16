@@ -118,9 +118,9 @@ import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-i
 import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import {
   CartItemShipmentPromise,
-  getCustomizationSystemThumbnail,
-  useCartItemConfiguration
+  getCustomizationSystemThumbnail
 } from 'src/modules/customization-system';
+import { useCartItemConfiguration } from 'theme/helpers/use-cart-item-configuration';
 import CartItemConfigurationExtended from './cart-item-configuration-extended.vue';
 import { ImageHandlerService } from 'src/modules/file-storage';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
