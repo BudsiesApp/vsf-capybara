@@ -433,7 +433,7 @@ export default defineComponent({
   flex-direction: column;
 
   padding: var(--spacer-sm);
-  border: 2px solid var(--c-divider);
+  border: 1.5px solid #D2D2D2;
 
   ._product-grid {
     display: grid;
