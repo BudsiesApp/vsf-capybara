@@ -19,10 +19,11 @@
       type="button"
       class="_action"
       :disabled="isActionDisabled"
+      :aria-label="actionText"
       @click="applyCouponOffer"
     >
       <span v-if="state === 'applying'" class="_spinner" />
-      <span>{{ actionText }}</span>
+      <span v-else>{{ actionText }}</span>
     </button>
   </div>
 </template>
@@ -207,7 +208,6 @@ export default defineComponent({
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.375rem;
     flex: 0 0 6rem;
     padding: var(--spacer-sm);
     border: 0;
@@ -263,7 +263,7 @@ export default defineComponent({
     }
 
     ._action {
-      flex-basis: 6.875rem;
+      flex-basis: 6.5rem;
       font-size: var(--font-sm);
     }
   }

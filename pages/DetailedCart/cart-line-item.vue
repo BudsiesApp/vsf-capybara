@@ -13,14 +13,19 @@
 
       <div class="_main">
         <div class="_details">
-          <label class="_title">{{ title }}</label>
-
           <label
             v-if="plushieName"
             class="_name"
           >
             {{ plushieName }}
           </label>
+
+          <label class="_title">{{ title }}</label>
+
+          <cart-item-shipment-promise
+            class="_shipment-promise"
+            :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
+          />
         </div>
 
         <SfPrice
@@ -32,15 +37,11 @@
       </div>
 
       <div class="_configuration">
-        <cart-item-shipment-promise
-          :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
-        />
-
         <div class="_sections">
           <m-expandable-section
             v-show="selectionsCount > 0"
             :expanded="false"
-            class="_section"
+            class="_customizations-section"
           >
             <template #title>
               <div class="_title-container">
@@ -56,7 +57,18 @@
             />
           </m-expandable-section>
 
-          <div class="_item-actions _section">
+          <div
+            class="_coupon-section"
+            v-show="showCouponOfferSection"
+          >
+            <MCartLineCouponOffer
+              :product="product"
+              class="_coupon-offer"
+              @should-render-changed="(value) => showCouponOfferSection = value"
+            />
+          </div>
+
+          <div class="_item-actions">
             <a-custom-product-quantity
               v-if="showQuantitySelector"
               :value="product.qty"
@@ -84,17 +96,6 @@
             >
               Remove
             </SfButton>
-          </div>
-
-          <div
-            class="_section _coupon-section"
-            v-show="showCouponOfferSection"
-          >
-            <MCartLineCouponOffer
-              :product="product"
-              class="_coupon-offer"
-              @should-render-changed="(value) => showCouponOfferSection = value"
-            />
           </div>
         </div>
       </div>
@@ -432,30 +433,22 @@ export default defineComponent({
   flex-direction: column;
 
   padding: var(--spacer-sm);
-  padding-bottom: 0;
-  border: 1px solid var(--c-divider);
+  border: 2px solid var(--c-divider);
 
   ._product-grid {
     display: grid;
-    grid-template-columns: 8.75rem 1fr;
+    grid-template-columns: 9rem minmax(0, 1fr);
     grid-template-areas:
       "aside main"
       "configuration configuration"
       "configuration configuration";
-  }
-
-  ._section {
-    padding: var(--spacer-sm);
-    margin: 0 calc(-1 * var(--spacer-sm)) 0;
-    border-top: 1px solid var(--c-divider);
-  }
-
-  .cart-item-shipment-promise {
-    margin-top: var(--spacer-sm);
+    column-gap: var(--spacer-sm);
   }
 
   ._name {
-    margin-top: var(--spacer-xs);
+    display: inline-block;
+    font-size: var(--font-sm);
+    font-weight: var(--font-semibold);
   }
 
   ._aside {
@@ -470,15 +463,14 @@ export default defineComponent({
   ._sections {
     display: flex;
     flex-direction: column;
-    margin-top: var(--spacer-sm);
+    margin-top: var(--spacer-lg);
+    gap: var(--spacer-lg);
   }
 
   ._main {
     grid-area: main;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    margin: 0 0 0 var(--spacer-sm);
   }
 
   ._header {
@@ -495,13 +487,12 @@ export default defineComponent({
 
   ._title {
     display: inline-block;
-    font-size: var(--font-sm);
     font-weight: var(--font-semibold);
+    margin-top: var(--spacer-xs);
   }
 
-  .cart-item-shipment-promise {
-    box-sizing: border-box;
-    width: 100%;
+  ._shipment-promise {
+    margin-top: var(--spacer-xs);
   }
 
   ._price {
@@ -523,10 +514,22 @@ export default defineComponent({
       padding-right: var(--spacer-sm);
     }
 
+    ._customizations-label {
+      font-weight: var(--font-semibold);
+    }
+
     ._selections-count {
-      font-size: var(--font-xs);
+      font-size: var(--font-sm);
       color: var(--c-text-muted);
       margin-left: var(--spacer-xs);
+    }
+  }
+
+  ._customizations-section {
+    ::v-deep {
+      ._body-inner {
+        padding: 0 var(--spacer-sm);
+      }
     }
   }
 
@@ -542,7 +545,6 @@ export default defineComponent({
     display: flex;
     align-items: center;
     gap: var(--spacer-xs);
-    background-color: #fcfeff;
   }
 
   ._action-button {
@@ -572,6 +574,21 @@ export default defineComponent({
 
       width: 100%;
 
+      ::v-deep {
+        ._content {
+          padding: var(--spacer-xs);
+          padding-left: var(--spacer-sm);
+        }
+
+        ._icon {
+          padding: var(--spacer-xs) 0 var(--spacer-xs) var(--spacer-xs);
+        }
+
+        ._action {
+          padding: var(--spacer-xs);
+        }
+      }
+
       &::before,
       &::after {
         display: none;
@@ -595,30 +612,13 @@ export default defineComponent({
       flex-grow: 3;
     }
 
-    ._section {
-      margin: 0;
-    }
-
-    .cart-item-shipment-promise {
+    ._shipment-promise {
       width: auto;
-    }
-
-    ._title {
-      font-size: var(--font-base);
     }
 
     ._price {
       flex-direction: row;
       margin-top: 0;
-    }
-
-    ._configuration {
-      margin: 0 0 0 var(--spacer-sm);
-    }
-
-    ._section {
-      padding: var(--spacer-sm);
-      padding-left: 0;
     }
 
     ._coupon-offer {

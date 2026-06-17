@@ -398,7 +398,7 @@ export default {
   text-align: left;
   display: flex;
   flex-direction: column;
-  row-gap: var(--spacer-sm);
+  row-gap: var(--spacer-xl);
   margin-top: var(--spacer-sm);
 }
 
