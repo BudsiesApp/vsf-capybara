@@ -5,7 +5,7 @@
         v-for="group in customizationGroups"
         :key="group.groupKey"
         :class="[
-          'collected-product__properties',
+          '_property',
           { '-list': group.isList }
         ]"
       >
@@ -18,12 +18,12 @@
           <li
             v-for="property in group.properties"
             :key="property.id"
-            class="collected-product__properties"
+            class="_property-row"
           >
             <SfIcon
               icon="check"
               size="xxs"
-              class="collected-product__properties__icon"
+              class="_property-icon"
             />
 
             {{ property.value }}
@@ -67,7 +67,7 @@
       <div
         v-for="option in productOptions"
         :key="option.label"
-        class="collected-product__properties"
+        class="_property"
       >
         <SfProperty
           v-if="option.isCustom"
@@ -134,7 +134,7 @@ export default defineComponent({
   --property-name-font-size: var(--font-xs);
   --property-value-font-size: var(--font-xs);
 
-  .collected-product__properties {
+  ._property {
     padding: var(--configuration-item-padding, 0);
     border-top: var(--configuration-item-border-top, none);
 
@@ -162,22 +162,26 @@ export default defineComponent({
   }
 
   ._customization-values-list {
+    list-style: none;
+    margin: 0;
     padding: 0;
     width: 100%;
+  }
 
-    li {
-      display: flex;
-      align-items: center;
-      width: 100%;
+  ._property-row {
+    font-size: var(--cart-item-configuration-font-size, var(--font-xs));
+    margin-bottom: var(--spacer-xs);
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-xs);
+    width: 100%;
+
+    &:last-child {
+      margin-bottom: 0;
     }
   }
 
-  ._customization-value {
-    list-style: none;
-    margin-bottom: var(--spacer-xs);
-  }
-
-  .collected-product__properties__icon {
+  ._property-icon {
     display: inline-block;
 
     --icon-color: var(--cart-item-configuration-checkmark-color, var(--c-primary));

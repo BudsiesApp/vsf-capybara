@@ -4,15 +4,14 @@ import { useMobileObserver, PriceHelper } from 'src/modules/shared';
 import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import {
+  CartItemConfigurationGroup,
+  CartItemConfigurationProperty,
   Customization,
   CustomizationStateItem,
   getCustomizationValueIdFieldKey,
+  getOptionValuePrice,
   isFileUploadValue
 } from 'src/modules/customization-system';
-import { getOptionValuePrice } from 'src/modules/customization-system/helpers/get-option-value-price';
-import { CartItemConfigurationProperty, CartItemConfigurationGroup } from 'src/modules/customization-system/types/cart-item-configuration.types';
-
-export { CartItemConfigurationProperty, CartItemConfigurationGroup };
 
 const PLUSHIE_NAME_CUSTOMIZATION_NAME = 'name';
 

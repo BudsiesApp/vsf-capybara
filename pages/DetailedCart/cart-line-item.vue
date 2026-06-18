@@ -86,7 +86,7 @@
               :disabled="isCartSyncing"
               @click="editHandler"
             >
-              Edit
+              {{ $t('Edit') }}
             </SfButton>
 
             <SfButton
@@ -94,7 +94,7 @@
               :disabled="isCartSyncing"
               @click="removeHandler"
             >
-              Remove
+              {{ $t('Remove') }}
             </SfButton>
           </div>
         </div>
@@ -512,6 +512,7 @@ export default defineComponent({
       justify-content: space-between;
       align-items: center;
       padding-right: var(--spacer-sm);
+      column-gap: var(--spacer-sm);
     }
 
     ._customizations-label {
@@ -522,6 +523,7 @@ export default defineComponent({
       font-size: var(--font-sm);
       color: var(--c-text-muted);
       margin-left: var(--spacer-xs);
+      white-space: nowrap;
     }
   }
 
@@ -621,6 +623,7 @@ export default defineComponent({
       margin-top: 0;
     }
 
+    ._configuration,
     ._coupon-offer {
       max-width: 26rem;
     }
@@ -631,6 +634,15 @@ export default defineComponent({
 
     ._item-actions {
       background-color: transparent;
+    }
+
+    ._configuration {
+      --expandable-section-header-hor-align: flex-start;
+
+      ._title-container {
+        justify-content: flex-start;
+        flex-grow: 0;
+      }
     }
   }
 }
