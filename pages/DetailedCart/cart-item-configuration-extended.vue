@@ -139,7 +139,7 @@ export default defineComponent({
     border-top: var(--configuration-item-border-top, none);
 
     font-size: var(--cart-item-configuration-font-size, var(--font-xs));
-    margin-bottom: var(--spacer-xs);
+    margin-top: var(--spacer-xs);
     display: flex;
     align-items: center;
     gap: var(--spacer-xs);
@@ -153,11 +153,8 @@ export default defineComponent({
 
     &:first-child {
       padding-top: 0;
+      margin-top: 0;
       border-top: none;
-    }
-
-    &:last-child {
-      margin-bottom: 0;
     }
   }
 
@@ -169,15 +166,19 @@ export default defineComponent({
   }
 
   ._property-row {
+    border-top: var(--configuration-item-border-top, none);
+    padding: var(--configuration-item-padding, 0);
     font-size: var(--cart-item-configuration-font-size, var(--font-xs));
-    margin-bottom: var(--spacer-xs);
+    margin-top: var(--spacer-xs);
     display: flex;
     align-items: center;
     gap: var(--spacer-xs);
     width: 100%;
 
-    &:last-child {
-      margin-bottom: 0;
+    &:first-child {
+      padding-top: 0;
+      margin-top: 0;
+      border-top: none;
     }
   }
 
