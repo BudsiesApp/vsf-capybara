@@ -40,7 +40,7 @@
         <div class="_sections">
           <m-expandable-section
             v-show="selectionsCount > 0"
-            :expanded="false"
+            :initially-expanded="false"
             class="_customizations-section"
           >
             <template #title>

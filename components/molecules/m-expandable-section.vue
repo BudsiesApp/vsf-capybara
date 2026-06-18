@@ -41,13 +41,13 @@ export default defineComponent({
       type: String,
       default: ''
     },
-    expanded: {
+    initiallyExpanded: {
       type: Boolean,
       default: false
     }
   },
   setup (props) {
-    const isExpanded = ref(props.expanded);
+    const isExpanded = ref(props.initiallyExpanded);
     const id = `expandable-section-${instanceId++}`;
     const bodyId = `${id}-body`;
 
