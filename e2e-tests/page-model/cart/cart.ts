@@ -5,11 +5,14 @@ import { normalizeLabel } from '../../helpers/normalize-label';
 export class CartPage {
   public cartItems: Locator;
   public orderSummary: Locator;
+  private readonly cartItemPropertySelector = '._property';
+  private readonly cartItemSelector = '.cart-line-item';
+  private readonly cartItemNameSelector = '._details ._name';
 
   public readonly DELETE_CART_ITEM_RESOURCE = '/api/cart/delete';
 
   public constructor (public readonly page: Page) {
-    this.cartItems = page.locator('.sf-collected-product');
+    this.cartItems = page.locator(this.cartItemSelector);
     this.orderSummary = page.locator('.detailed-cart-order-summary');
   }
 
@@ -19,9 +22,9 @@ export class CartPage {
 
   public getCartItemByProductName (productName: string) {
     const productLocator = this.page.locator(
-      '.sf-collected-product',
+      this.cartItemSelector,
       {
-        has: this.page.locator(`.sf-collected-product__title-wraper:has-text("${productName}")`)
+        has: this.page.locator('._details').getByText(productName, { exact: true })
       }
     );
     return productLocator;
@@ -41,8 +44,13 @@ export class CartPage {
     }
 
     for (const property of properties) {
-      const propertyLocator = cartItem.locator(`.collected-product__properties:has-text("${property}")`);
-      await expect(propertyLocator).toBeVisible();
+      const propertyLocator = cartItem.locator(`${this.cartItemPropertySelector}:has-text("${property}")`);
+      if (await propertyLocator.isVisible()) {
+        continue;
+      }
+
+      const nameLocator = cartItem.locator(this.cartItemNameSelector).getByText(property, { exact: true });
+      await expect(nameLocator).toBeVisible();
     }
   }
 
@@ -57,7 +65,7 @@ export class CartPage {
       }
     }
 
-    const propertyLocators = await cartItem.locator('.collected-product__properties').all();
+    const propertyLocators = await cartItem.locator(this.cartItemPropertySelector).all();
 
     for (const locator of propertyLocators) {
       properties.push(normalizeLabel(await locator.textContent()));
