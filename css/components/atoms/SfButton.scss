@@ -1,6 +1,11 @@
 .sf-button {
     --button-border-radius: var(--button-border-radius-size);
 
+    &.-small {
+      --button-font-size: var(--font-xs);
+      padding: var(--button-padding, var(--spacer-xs) var(--spacer-sm));
+    }
+
     &.color-secondary {
         --button-color: var(--c-white);
         --c-secondary: var(--c-blue);
@@ -8,6 +13,10 @@
 
         &:active {
             --button-background: var(--c-dark);
+        }
+
+        &.-small {
+          padding: var(--button-padding, calc(var(--spacer-xs) - var(--button-border-width, 0)) calc(var(--spacer-sm)));
         }
 
         &.sf-button--text {
