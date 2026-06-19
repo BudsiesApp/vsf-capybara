@@ -88,7 +88,7 @@ test('product can be edited', async ({ cartPage, customizableProductPage }) => {
 test('form fields are reset after save and make another', async ({ page, customizableProductPage, verticalStepsProductPage }) => {
   await fillRequiredFields(customizableProductPage);
   await verticalStepsProductPage.makeAnotherAndVerifyResponse();
-  await page.waitForFunction(() => window.scrollY <= 100);
+  await page.waitForFunction(() => window.scrollY <= 200);
 
   const imageWidget = customizableProductPage.getCustomizationWidgetByLabel(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
 

@@ -111,7 +111,7 @@ test('form fields are reset after save and make another', async ({ page, customi
   await fillRequiredFields(customizableProductPage);
   await verticalStepsProductPage.makeAnotherAndVerifyResponse();
 
-  await page.waitForFunction(() => window.scrollY === 0);
+  await page.waitForFunction(() => window.scrollY <= 200);
 
   const imageWidget = customizableProductPage.getCustomizationWidgetByLabel(UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
 

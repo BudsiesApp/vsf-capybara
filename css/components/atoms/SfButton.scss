@@ -16,7 +16,7 @@
         }
 
         &.-small {
-          padding: var(--button-padding, calc(var(--spacer-xs) - var(--button-border-width, 0)) calc(var(--spacer-sm)));
+          padding: var(--button-padding, calc(var(--spacer-xs) - var(--button-border-width, 0px)) calc(var(--spacer-sm)));
         }
 
         &.sf-button--text {
