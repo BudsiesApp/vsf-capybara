@@ -6,7 +6,6 @@
         class="_button"
         :is="btn.is"
         :key="btn.key"
-        v-bind="btn.props"
         :braintree-client="braintreeClient"
         :show-content="true"
         :on-express-checkout-authorized="onExpressCheckoutAuthorized"
@@ -51,7 +50,6 @@ import {
   PaymentApplePay,
   PaymentGooglePay,
   PaymentPayPal,
-  PaymentMethodCodePayPal,
   SET_PAYMENT_METHOD_NONCE_MUTATION
 } from 'src/modules/payment-braintree';
 import {
@@ -68,8 +66,7 @@ type AllSupportedMethodsCodes = BraintreeSupportedMethodCodes | AmazonPaySupport
 
 interface ExpressCheckoutMethod {
   is: string,
-  key: AllSupportedMethodsCodes,
-  props?: { [key: string]: any }
+  key: AllSupportedMethodsCodes
 };
 
 const phoneHelpers = createPhoneHelpers(parsePhoneNumberWithError);
@@ -97,7 +94,6 @@ export default defineComponent({
     const availableExpressCheckoutMethods = computed<Record<string, ExpressCheckoutMethod>>(() => {
       const availablePaymentMethods = root.$store.getters['checkout/getPaymentMethods'];
       const availableExpressCheckoutMethods: Record<string, ExpressCheckoutMethod> = {};
-      const payPalPaymentMethods: PaymentMethodCodePayPal[] = [];
 
       for (const method of availablePaymentMethods) {
         switch (method.code) {
@@ -114,8 +110,10 @@ export default defineComponent({
             };
             break;
           case BraintreeSupportedMethodCodes.PAY_PAL:
-          case BraintreeSupportedMethodCodes.VENMO:
-            payPalPaymentMethods.push(method.code);
+            availableExpressCheckoutMethods['paypal'] = {
+              is: 'PaymentPayPal',
+              key: BraintreeSupportedMethodCodes.PAY_PAL
+            };
             break;
           case AmazonPaySupportedMethodCodes.AMAZON_PAY:
             availableExpressCheckoutMethods['amazon'] = {
@@ -126,16 +124,6 @@ export default defineComponent({
           default:
             continue;
         }
-      }
-
-      if (payPalPaymentMethods.length > 0) {
-        availableExpressCheckoutMethods['paypal'] = {
-          is: 'PaymentPayPal',
-          key: BraintreeSupportedMethodCodes.PAY_PAL,
-          props: {
-            paymentMethods: payPalPaymentMethods
-          }
-        };
       }
 
       return availableExpressCheckoutMethods;

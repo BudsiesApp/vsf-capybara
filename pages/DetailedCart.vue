@@ -96,7 +96,6 @@ import {
 import { OrderSummary } from './DetailedCart/index.js';
 import CartLineItem from './DetailedCart/cart-line-item.vue';
 import { mapGetters, mapState } from 'vuex';
-import { PriceHelper } from 'src/modules/shared';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-item-key.function';
 import CartEvents from 'src/modules/shared/types/cart-events';
@@ -105,15 +104,14 @@ import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-obser
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
+import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 import { ModalList } from 'theme/store/ui/modals';
-import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MDropdown from 'theme/components/molecules/m-dropdown.vue';
 
 export default {
   name: 'DetailedCart',
   components: {
     CartLineItem,
-    MBlockStory,
     MDropdown,
     SfList,
     SfButton,
@@ -166,6 +164,9 @@ export default {
     },
     canShowProductionSpotCountdown () {
       return this.products.some((product) => Boolean(product.is_custom_product));
+    },
+    skinClass () {
+      return getCurrentThemeClass();
     }
   },
   async mounted () {
