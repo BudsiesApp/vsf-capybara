@@ -170,6 +170,8 @@ test('shipping address and shipping method are correct while placing order', asy
 
   await checkoutPage.shippingStep.continueToPaymentButton.click();
 
+  await checkoutPage.waitStepToBeActive('Billing address');
+
   await checkoutPage.billingStep.fillAddress(
     false,
     billingAddress.address,
