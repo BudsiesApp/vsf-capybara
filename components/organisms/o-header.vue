@@ -30,6 +30,8 @@
           <div
             class="o-header__submenu"
             :aria-expanded="String(isAboutMenuHovered || isAboutMenuFocused)"
+            tabindex="0"
+            role="menuitem"
           >
             {{ $t('About') }}
           </div>
@@ -52,6 +54,8 @@
           <div
             class="o-header__submenu"
             :aria-expanded="String(isHoveredMenu || isFocusedMenu)"
+            tabindex="0"
+            role="menuitem"
           >
             {{ $t('Products') }}
           </div>
