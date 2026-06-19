@@ -19,16 +19,17 @@
       type="button"
       class="_action"
       :disabled="isActionDisabled"
+      :aria-label="actionText"
       @click="applyCouponOffer"
     >
       <span v-if="state === 'applying'" class="_spinner" />
-      <span>{{ actionText }}</span>
+      <span v-else>{{ actionText }}</span>
     </button>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent, watch } from '@vue/composition-api';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 
 import {
@@ -98,6 +99,18 @@ export default defineComponent({
       await applyCoupon();
     };
 
+    watch(
+      shouldRender,
+      (newValue, oldValue) => {
+        if (newValue === oldValue) {
+          return;
+        }
+
+        context.emit('should-render-changed', newValue);
+      },
+      { immediate: true }
+    );
+
     return {
       applyCouponOffer,
       actionText,
@@ -131,7 +144,7 @@ export default defineComponent({
   align-items: stretch;
   width: 100%;
   margin-top: var(--spacer-sm);
-  border-radius: 0.5rem;
+  border-radius: var(--coupon-border-radius, 0);
   overflow: hidden;
   position: relative;
   background: var(--coupon-idle-background);
@@ -195,7 +208,6 @@ export default defineComponent({
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.375rem;
     flex: 0 0 6rem;
     padding: var(--spacer-sm);
     border: 0;
@@ -251,7 +263,7 @@ export default defineComponent({
     }
 
     ._action {
-      flex-basis: 6.875rem;
+      flex-basis: 6.5rem;
       font-size: var(--font-sm);
     }
   }

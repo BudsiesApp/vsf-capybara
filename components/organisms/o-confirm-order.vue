@@ -177,7 +177,7 @@
 
       <div class="form__radio-group" role="group" aria-labelledby="payment-method-heading">
         <component
-          v-for="method in sortedPaymentMethods"
+          v-for="method in filteredPaymentMethods"
           :key="method.code"
           :ref="method.code"
           :braintree-client="braintreeClient"
@@ -282,8 +282,6 @@ import { SupportedMethodCodes as AmazonSupportedMethodCodes } from 'src/modules/
 
 import { createSmoothscroll } from 'theme/helpers';
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
-
-import PaymentPayPal from 'src/modules/payment-braintree/components/payment-pay-pal.vue';
 import { getCartItemTitle } from 'theme/helpers/get-cart-item-title.function';
 
 import APromoCode from 'theme/components/atoms/a-promo-code';
@@ -365,11 +363,6 @@ export default {
       return paymentMethod ? paymentMethod.title : '';
     },
     showPlaceOrderButton () {
-      const autoPlacedMethods = [
-        braintreeSupportedMethodsCodes.PAY_PAL,
-        braintreeSupportedMethodsCodes.VENMO
-      ];
-
       return !this.isBraintreeMethodSelected ||
        (this.isBraintreeMethodSelected && !this.showPaymentPayPal);
     },
@@ -401,32 +394,8 @@ export default {
     selectedCurrency () {
       return this.$store.getters[GET_ACTIVE_CURRENCY];
     },
-    paymentPayPalPaymentMethods () {
-      if (this.payment.paymentMethod === braintreeSupportedMethodsCodes.PAY_PAL) {
-        return [braintreeSupportedMethodsCodes.PAY_PAL];
-      }
-
-      if (this.payment.paymentMethod === braintreeSupportedMethodsCodes.VENMO) {
-        return [braintreeSupportedMethodsCodes.VENMO];
-      }
-
-      return [];
-    },
-    sortedPaymentMethods () {
-      const sorted = this.paymentMethods
-        .filter((method) => method.code !== AmazonSupportedMethodCodes.AMAZON_PAY);
-
-      const payPalIndex = sorted.findIndex((item) => item.code === braintreeSupportedMethodsCodes.PAY_PAL);
-      const venmoIndex = sorted.findIndex((item) => item.code === braintreeSupportedMethodsCodes.VENMO);
-
-      if (payPalIndex >= 0 && venmoIndex >= 0 && payPalIndex > venmoIndex) {
-        const payPal = sorted[payPalIndex];
-
-        sorted[payPalIndex] = sorted[venmoIndex];
-        sorted[venmoIndex] = payPal;
-      }
-
-      return sorted;
+    filteredPaymentMethods () {
+      return this.paymentMethods.filter((method) => method.code !== AmazonSupportedMethodCodes.AMAZON_PAY);
     },
     productTitle () {
       const result = {};
@@ -441,8 +410,7 @@ export default {
     showPaymentPayPal () {
       return [
         braintreeSupportedMethodsCodes.PAY_PAL,
-        braintreeSupportedMethodsCodes.PAY_PAL_PAY_LATER,
-        braintreeSupportedMethodsCodes.VENMO
+        braintreeSupportedMethodsCodes.PAY_PAL_PAY_LATER
       ].includes(this.paymentDetails.paymentMethod);
     },
     paymentPayPalFundingSources () {
