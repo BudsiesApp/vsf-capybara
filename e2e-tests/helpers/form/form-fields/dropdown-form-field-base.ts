@@ -25,8 +25,22 @@ export class DropdownFormFieldBase {
   }
 
   protected async openOptionsList (): Promise<void> {
-    await this.selector.click();
+    await this.scrollFormFieldIntoView();
+    await this.triggerOptionsListOpening();
     await expect(this.optionsList).toBeVisible();
+  }
+
+  protected async triggerOptionsListOpening (): Promise<void> {
+    await this.selector.click();
+  }
+
+  protected async scrollFormFieldIntoView (): Promise<void> {
+    await this.formField.evaluate((element: HTMLElement) => {
+      element.scrollIntoView({
+        block: 'center',
+        inline: 'nearest'
+      });
+    });
   }
 
   public async expectOptionToBeSelected (title: string): Promise<void> {
