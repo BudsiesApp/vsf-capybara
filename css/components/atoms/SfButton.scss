@@ -9,6 +9,11 @@
 .sf-button {
     @include primary-button;
 
+    &.-small {
+      --button-font-size: var(--font-xs);
+      padding: var(--button-padding, var(--spacer-xs) var(--spacer-sm));
+    }
+
     &:active {
         --button-background: var(--c-button-background);
         --button-border-color: var(--c-button-border-active);
@@ -56,6 +61,10 @@
         &:active {
             --button-background: var(--c-white);
             --button-border-color: var(--c-button-border-active);
+        }
+
+        &.-small {
+          padding: var(--button-padding, calc(var(--spacer-xs) - var(--button-border-width, 0)) calc(var(--spacer-sm)));
         }
 
         &.sf-button--text {
