@@ -1,9 +1,11 @@
 <template>
   <div class="o-confirm-order">
     <SfHeading
+      ref="heading"
       :title="`${$t('Review')}`"
       :level="3"
       class="sf-heading--left sf-heading--no-underline title"
+      tabindex="-1"
     />
 
     <SfAccordion :open="$t('Totals')" class="accordion mobile-only">
@@ -84,7 +86,7 @@
                 :key="getCartItemKey(product)"
                 v-model="product.qty"
                 :image="getThumbnailForProduct(product)"
-                :title="product.name | htmlDecode"
+                :title="productTitle[getCartItemKey(product)] | htmlDecode"
                 :regular-price="formatPrice(cartItemPriceDictionary[getCartItemKey(product)].regular)"
                 :special-price="formatPrice(cartItemPriceDictionary[getCartItemKey(product)].special)"
                 class="collected-product"
@@ -162,12 +164,13 @@
       <MPriceSummary class="totals__element" />
     </div>
     <SfHeading
+      id="payment-method-heading"
       :title="$t('Payment method')"
       :level="3"
       class="sf-heading--left sf-heading--no-underline title"
     />
     <div class="form">
-      <div class="form__radio-group">
+      <div class="form__radio-group" role="group" aria-labelledby="payment-method-heading">
         <component
           v-for="method in filteredPaymentMethods"
           :key="method.code"
@@ -177,6 +180,7 @@
           :show-content="payment.paymentMethod === method.code"
           :is-order-placement-disabled="isPlaceOrderButtonDisabled"
           @success="placeOrder"
+          @cancelled="isCheckoutInProgress = false"
         >
           <template>
             <SfRadio
@@ -212,6 +216,7 @@
 
     <div class="actions">
       <SfButton
+        ref="placeOrderButton"
         v-show="showPlaceOrderButton"
         class="sf-button--full-width actions__button place-order-btn"
         :disabled="isPlaceOrderButtonDisabled"
@@ -219,6 +224,15 @@
       >
         {{ $t('Place the order') }}
       </SfButton>
+
+      <PaymentPayPal
+        v-if="showPaymentPayPal"
+        :braintree-client="braintreeClient"
+        :show-content="true"
+        :is-order-placement-disabled="isPlaceOrderButtonDisabled"
+        :funding-sources="paymentPayPalFundingSources"
+        @success="placeOrder"
+      />
     </div>
 
     <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
@@ -257,12 +271,13 @@ import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-i
 
 import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { AFFIRM_MODAL_CLOSED } from 'src/modules/payment-affirm/types/AffirmCheckoutEvents';
-import { getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
+import { PaymentPayPal, getComponentByMethodCode, supportedMethodsCodes as braintreeSupportedMethodsCodes } from 'src/modules/payment-braintree';
 import { PAYMENT_ERROR_EVENT, PriceHelper } from 'src/modules/shared';
 import { SupportedMethodCodes as AmazonSupportedMethodCodes } from 'src/modules/vsf-amazon-pay';
 
 import { createSmoothscroll } from 'theme/helpers';
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
+import { getCartItemTitle } from 'theme/helpers/get-cart-item-title.function';
 
 import APromoCode from 'theme/components/atoms/a-promo-code';
 import MPriceSummary from 'theme/components/molecules/m-price-summary';
@@ -283,7 +298,8 @@ export default {
     SfButton,
     SfHeading,
     SfAccordion,
-    SfCollectedProduct
+    SfCollectedProduct,
+    PaymentPayPal
   },
   mixins: [OrderReview, Payment],
   inject: {
@@ -341,8 +357,7 @@ export default {
     },
     showPlaceOrderButton () {
       return !this.isBraintreeMethodSelected ||
-       (this.isBraintreeMethodSelected &&
-        this.paymentDetails.paymentMethod !== braintreeSupportedMethodsCodes.PAY_PAL);
+       (this.isBraintreeMethodSelected && !this.showPaymentPayPal);
     },
     componentsByMethodCode () {
       const componentsByMethodCode = {};
@@ -374,6 +389,37 @@ export default {
     },
     filteredPaymentMethods () {
       return this.paymentMethods.filter((method) => method.code !== AmazonSupportedMethodCodes.AMAZON_PAY);
+    },
+    productTitle () {
+      const result = {};
+
+      for (const cartItem of this.productsInCart) {
+        const key = getCartItemKey(cartItem);
+        result[key] = getCartItemTitle(cartItem);
+      }
+
+      return result;
+    },
+    showPaymentPayPal () {
+      return [
+        braintreeSupportedMethodsCodes.PAY_PAL,
+        braintreeSupportedMethodsCodes.PAY_PAL_PAY_LATER
+      ].includes(this.paymentDetails.paymentMethod);
+    },
+    paymentPayPalFundingSources () {
+      if (!window.paypal) {
+        return [];
+      }
+
+      if (this.paymentDetails.paymentMethod === braintreeSupportedMethodsCodes.PAY_PAL) {
+        return [window.paypal.FUNDING.PAYPAL];
+      }
+
+      if (this.paymentDetails.paymentMethod === braintreeSupportedMethodsCodes.PAY_PAL_PAY_LATER) {
+        return [window.paypal.FUNDING.PAYLATER];
+      }
+
+      return [];
     }
   },
   beforeCreate () {
@@ -435,8 +481,12 @@ export default {
     onOrderConflictEventHandler () {
       this.isCheckoutInProgress = false;
     },
-    onPaymentErrorEventHandler () {
+    onPaymentErrorEventHandler (hideNotification) {
       this.isCheckoutInProgress = false;
+
+      if (hideNotification) {
+        return;
+      }
 
       this.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
@@ -451,11 +501,21 @@ export default {
       this.$bus.$emit('checkout-after-paymentMethodChanged', this.payment);
       this.changePaymentMethod();
     },
+    scrollToPlaceOrderButton () {
+      const placeOrderButton = this.$refs.placeOrderButton?.$el;
+
+      if (!placeOrderButton) {
+        return;
+      }
+
+      placeOrderButton.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    },
     onPlaceOrder () {
       if (this.isCheckoutInProgress) {
         return;
       }
 
+      this.scrollToPlaceOrderButton();
       this.isCheckoutInProgress = true;
 
       if (!this.isBraintreeMethodSelected) {
@@ -471,6 +531,7 @@ export default {
   },
   mounted () {
     createSmoothscroll(document.documentElement.scrollTop || document.body.scrollTop, 0);
+    this.$refs.heading.$el.focus();
   }
 };
 </script>

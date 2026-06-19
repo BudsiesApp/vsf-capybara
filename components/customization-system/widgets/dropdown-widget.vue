@@ -5,6 +5,7 @@
     :disabled="isDisabled"
     :should-lock-scroll-on-open="isMobile"
     :valid="isValid"
+    :label-id="ariaLabelledby"
     v-model="selectedOption"
     v-if="showSelect"
   >
@@ -37,6 +38,7 @@ import {
 
 import {
   OptionValue,
+  PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID,
   useOptionValuesPrice,
   useValuesSort
 } from 'src/modules/customization-system';
@@ -75,6 +77,10 @@ export default defineComponent({
     values: {
       type: Array as PropType<OptionValue[]>,
       default: () => []
+    },
+    ariaLabelledby: {
+      type: String as PropType<string | undefined>,
+      default: undefined
     }
   },
   setup (props, context) {
@@ -93,7 +99,7 @@ export default defineComponent({
 
     const { sortedValues } = useValuesSort(values);
 
-    const { isOptionValuesSamePrice, optionValuePriceDictionary } = useOptionValuesPrice(
+    const { defaultOptionValue, isOptionValuesSamePrice, optionValuePriceDictionary } = useOptionValuesPrice(
       sortedValues,
       context
     );
@@ -102,9 +108,18 @@ export default defineComponent({
       return context.root.$store.getters[GET_ACTIVE_CURRENCY];
     });
 
+    const isProductionTimeDefaultOption = computed<boolean>(() => {
+      if (!defaultOptionValue.value) {
+        return false;
+      }
+
+      return defaultOptionValue.value.id === PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID;
+    });
+
     const dropdownOptions = computed<DropdownOption[]>(() => {
       const _optionValuePriceDictionary = optionValuePriceDictionary.value;
       const _isOptionValuesSamePrice = isOptionValuesSamePrice.value;
+      const _isProductionTimeDefaultOption = isProductionTimeDefaultOption.value;
 
       const options: DropdownOption[] = [
         {
@@ -119,7 +134,10 @@ export default defineComponent({
         const canShowPrice = !_isOptionValuesSamePrice || sortedValues.value.length === 1;
         let label = optionValue.name || '';
 
-        if (canShowPrice && finalPrice) {
+        // TODO: quick fix to avoid breaking dropdown prices formatting and add support for production time customization relative prices
+        if (_isProductionTimeDefaultOption) {
+          label += `: +${PriceHelper.formatPrice(finalPrice, selectedCurrency.value.symbol)}`;
+        } else if (canShowPrice && finalPrice) {
           label += ` ${PriceHelper.formatPrice(finalPrice, selectedCurrency.value.symbol)}`;
         }
 
@@ -133,7 +151,17 @@ export default defineComponent({
     });
 
     const showSelect = ref<boolean>(true);
-    watch([values, selectedCurrency], async () => {
+    const sortedValuesIdsString = computed<string>(() => {
+      var ids = '';
+
+      for (const value of sortedValues.value) {
+        ids += value.id
+      }
+
+      return ids;
+    });
+
+    watch([sortedValuesIdsString, selectedCurrency], async () => {
       showSelect.value = false;
       await nextTick();
       showSelect.value = true;

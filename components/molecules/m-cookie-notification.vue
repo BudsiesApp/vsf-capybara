@@ -88,7 +88,7 @@ export default {
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .m-cookie-notification {
-  z-index: 100;
+  z-index: 99999999999;
   position: fixed;
   bottom: 0;
   width: 100%;

@@ -21,6 +21,15 @@
         />
       </template>
 
+      <template #reviews v-if="productCollectionRatingComponent">
+        <component
+          v-if="shouldShowProductRating"
+          :is="productCollectionRatingComponent"
+          :product-id="product.id"
+          class="_product-rating"
+        />
+      </template>
+
       <template #title="{title}" v-if="turnaroundTime">
         <h3 class="sf-product-card__title">
           {{ title }}
@@ -30,18 +39,27 @@
           </span>
         </h3>
       </template>
+
+      <template #price v-if="isAddedToCart">
+        <a-added-to-cart class="_added-to-cart" />
+      </template>
     </SfProductCard>
   </div>
 </template>
 
 <script lang="ts">
+import { defineComponent, computed, inject } from '@vue/composition-api';
+import config from 'config';
 import { SfProductCard } from '@storefront-ui/vue';
 
 import BaseImage from 'src/modules/budsies/components/BaseImage.vue';
 
-export default {
+import AAddedToCart from 'theme/components/atoms/a-added-to-cart.vue';
+
+export default defineComponent({
   name: 'OProductCard',
   components: {
+    AAddedToCart,
     BaseImage,
     SfProductCard
   },
@@ -73,20 +91,29 @@ export default {
     turnaroundTime: {
       type: Number,
       default: undefined
+    },
+    isAddedToCart: {
+      type: Boolean,
+      default: false
     }
   },
-  computed: {
-    productLink (): string {
-      return this.link ? this.link : this.product.link;
-    },
-    imageAspectRatio (): number {
-      return this.imageWidth / this.imageHeight;
-    },
-    turnaroundWeeks (): number {
-      return Math.ceil(this.turnaroundTime / 7);
-    }
+  setup (props) {
+    const productCollectionRatingComponent = inject('ProductCollectionRatingComponent', null);
+
+    const productLink = computed(() => props.link ? props.link : props.product.link);
+    const imageAspectRatio = computed(() => props.imageWidth / props.imageHeight);
+    const turnaroundWeeks = computed(() => Math.ceil(props.turnaroundTime / 7));
+    const shouldShowProductRating = computed(() => config.products.showRating && !!productCollectionRatingComponent && !!props.product.id);
+
+    return {
+      productLink,
+      imageAspectRatio,
+      turnaroundWeeks,
+      productCollectionRatingComponent,
+      shouldShowProductRating
+    };
   }
-}
+});
 </script>
 
 <style lang="scss" scoped>
@@ -107,6 +134,7 @@ $border-width: 2px;
   --badge-font-weight: 800;
   --badge-background: var(--c-white);
   --badge-font-size: var(--font-sm);
+  --product-card-margin: var(--spacer-xs) 0 0;
 
   ._turnaround-time {
     font-size: var(--font-xs);
@@ -119,6 +147,10 @@ $border-width: 2px;
     color: var(--c-accent);
     line-height: calc(var(--o-product-card-badge-size) - #{$border-width} * 2);
     pointer-events: none;
+  }
+
+  ._added-to-cart {
+    margin-top: var(--spacer-xs);
   }
 
   @include for-tablet-up {

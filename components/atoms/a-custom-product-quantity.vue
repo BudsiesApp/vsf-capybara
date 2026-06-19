@@ -8,12 +8,28 @@
       skinClass,
     ]"
   >
-    <a href="javascript:void(0)" class="_handle -down" @click="decreaseQty">-</a>
+    <button
+      type="button"
+      class="_handle -down"
+      :aria-label="$t('Decrease quantity, currently: {value}', { value: valueText })"
+      @click="decreaseQty"
+    >
+      -
+    </button>
+
     <div class="_value">
       {{ valueText }}
     </div>
 
-    <a href="javascript:void(0)" class="_handle -up" @click="increaseQty">+</a>
+    <button
+      type="button"
+      class="_handle -up"
+      :aria-label="$t('Increase quantity, currently: {value}', { value: valueText })"
+      @click="increaseQty"
+    >
+      +
+    </button>
+
     <input type="hidden" name="qty" :value="value">
   </div>
 </template>
@@ -74,10 +90,12 @@ export default Vue.extend({
     ._handle {
         flex-grow: 0;
         flex-shrink: 0;
-        height: 28px;
         line-height: 28px;
         text-align: center;
         transition: background-color 0.2s;
+        cursor: pointer;
+        background-color: var(--c-white);
+        padding: 0;
 
         &.-up {
             border-left-width: 0;

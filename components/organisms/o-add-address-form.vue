@@ -1,9 +1,11 @@
 <template>
   <div class="o-add-address-form">
-    <validation-observer slim v-slot="{passes}">
+    <validation-observer ref="validationObserver" slim>
       <o-base-address-form
+        ref="baseAddressForm"
         v-model="address"
         :is-form-fields-disabled="isSubmitting"
+        :get-field-anchor-name="getFieldAnchorName"
       />
 
       <div class="_buttons-row">
@@ -12,7 +14,8 @@
         </SfButton>
 
         <SfButton
-          @click="() => passes(() => onFormSubmit())"
+          ref="submitStepButton"
+          @click="onFormSubmit"
           :disabled="isSubmitButtonDisabled"
         >
           {{ $t('Add Address') }}
@@ -28,21 +31,22 @@
 
 <script lang="ts">
 import { ValidationObserver } from 'vee-validate';
-import { TranslateResult } from 'vue-i18n';
-import { defineComponent, ref } from '@vue/composition-api';
+import { defineComponent, ref, computed, Ref } from '@vue/composition-api';
 import { SfButton } from '@storefront-ui/vue';
 
 import i18n from '@vue-storefront/i18n';
+import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 
-import { usePersistedFirstName, usePersistedLastName, usePersistedPhoneNumber } from 'src/modules/persisted-customer-data';
+import { usePersistedFirstName, usePersistedLastName, usePersistedPhoneNumber, usePersistedVatId } from 'src/modules/persisted-customer-data';
+import { useAddressValidation } from 'src/modules/address';
 
-import { BaseAddressFormValue } from 'theme/components/interfaces/base-address-form-value.interface';
+import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 
 import OBaseAddressForm from './o-base-address-form.vue';
 
 type AddressData = Pick<
-BaseAddressFormValue,
-'city' | 'country' | 'state' | 'streetAddress' | 'zipCode' | 'regionId' | 'vatId'
+BaseAddressDetails,
+'city' | 'country' | 'state' | 'streetAddress' | 'apartmentNumber' | 'zipCode' | 'region_id'
 >
 
 export default defineComponent({
@@ -52,115 +56,191 @@ export default defineComponent({
     OBaseAddressForm,
     ValidationObserver
   },
-  setup () {
+  setup (props, { emit, root }) {
+    const validationObserver = ref(null);
+    const baseAddressForm = ref(null);
+    const submitStepButton: Ref<null | InstanceType<typeof SfButton>> = ref(null);
+
     const firstName = ref('');
     const lastName = ref('');
     const phoneNumber = ref('');
+    const vatId = ref('');
+    const isSubmitting = ref(false);
 
     const addressData = ref<AddressData>({
       city: '',
       country: '',
-      state: null,
+      state: '',
       streetAddress: '',
+      apartmentNumber: '',
       zipCode: '',
-      regionId: null,
-      vatId: ''
+      region_id: null
     });
 
-    return {
-      firstName,
-      lastName,
-      addressData,
-      phoneNumber,
+    const {
+      persistLastUsedCustomerFirstName,
+      persistLastUsedCustomerLastName,
+      persistLastUsedCustomerPhoneNumber,
+      persistLastUsedCustomerVatId
+    } = {
       ...usePersistedFirstName(firstName),
       ...usePersistedLastName(lastName),
-      ...usePersistedPhoneNumber(phoneNumber)
-    }
-  },
-  data () {
-    return {
-      isSubmitting: false
-    }
-  },
-  computed: {
-    isSubmitButtonDisabled (): boolean {
-      return this.isSubmitting;
-    },
-    address: {
-      get (): BaseAddressFormValue {
+      ...usePersistedPhoneNumber(phoneNumber),
+      ...usePersistedVatId(vatId)
+    };
+
+    const {
+      validateAddress,
+      isValidating: isValidatingAddress,
+      completeValidation: completeAddressValidation
+    } = useAddressValidation({ root, emit, attrs: {}, slots: {} } as any);
+
+    const { validateAndGoToFirstError } = useFormValidation(
+      validationObserver,
+      () => {
+        const baseAddressFormComponent = baseAddressForm.value as any;
+
         return {
-          city: this.addressData.city,
-          country: this.addressData.country,
-          state: this.addressData.state,
-          streetAddress: this.addressData.streetAddress,
-          zipCode: this.addressData.zipCode,
-          firstName: this.firstName,
-          lastName: this.lastName,
-          phoneNumber: this.phoneNumber,
-          regionId: this.addressData.regionId,
-          vatId: this.addressData.vatId
-        }
-      },
-      set (address: BaseAddressFormValue) {
-        this.addressData = {
-          city: address.city,
-          country: address.country,
-          state: address.state,
-          streetAddress: address.streetAddress,
-          zipCode: address.zipCode,
-          regionId: address.regionId,
-          vatId: address.vatId
-        }
-        this.firstName = address.firstName;
-        this.lastName = address.lastName;
-        this.phoneNumber = address.phoneNumber;
+          ...root.$refs,
+          ...(baseAddressFormComponent?.$refs || {})
+        };
       }
-    }
-  },
-  methods: {
-    async onFormSubmit (): Promise<void> {
-      if (this.isSubmitting) {
+    );
+
+    const isSubmitButtonDisabled = computed(() => isSubmitting.value || isValidatingAddress.value);
+
+    function focusSubmitStepButton (): void {
+      if (!submitStepButton.value) {
         return;
       }
 
-      this.isSubmitting = true;
+      const submitStepButtonElement = submitStepButton.value.$el;
 
-      const addressToCreate = {
-        firstname: this.address.firstName,
-        lastname: this.address.lastName,
-        street: [this.address.streetAddress],
-        city: this.address.city,
-        region: { region: this.address.state, region_id: this.address.regionId },
-        postcode: this.address.zipCode,
-        country_id: this.address.country,
-        telephone: this.address.phoneNumber,
-        default_shipping: false,
-        vat_id: this.address.vatId
+      if (!(submitStepButtonElement instanceof HTMLElement)) {
+        return;
       }
 
-      try {
-        await this.$store.dispatch('budsies/createNewAddress', { address: addressToCreate });
+      submitStepButtonElement.focus();
+    }
 
-        this.persistLastUsedCustomerFirstName(this.firstName);
-        this.persistLastUsedCustomerLastName(this.lastName);
-        this.persistLastUsedCustomerPhoneNumber(this.phoneNumber);
+    const address = computed<BaseAddressDetails>({
+      get () {
+        const _addressData = (addressData as any).value as BaseAddressDetails;
 
-        this.$emit('address-added');
-      } catch (error) {
-        this.onFailure(this.$t('Unable to add new address'));
-      } finally {
-        this.isSubmitting = false;
+        return {
+          city: _addressData.city,
+          country: _addressData.country,
+          state: _addressData.state,
+          streetAddress: _addressData.streetAddress,
+          apartmentNumber: _addressData.apartmentNumber,
+          zipCode: _addressData.zipCode,
+          firstName: firstName.value,
+          lastName: lastName.value,
+          phoneNumber: phoneNumber.value,
+          region_id: _addressData.region_id,
+          vat_id: vatId.value
+        }
+      },
+      set (newAddress: BaseAddressDetails) {
+        const _addressData = (addressData as any).value as BaseAddressDetails;
+
+        _addressData.city = newAddress.city;
+        _addressData.country = newAddress.country;
+        _addressData.state = newAddress.state;
+        _addressData.streetAddress = newAddress.streetAddress;
+        _addressData.apartmentNumber = newAddress.apartmentNumber;
+        _addressData.zipCode = newAddress.zipCode;
+        _addressData.region_id = newAddress.region_id;
+
+        firstName.value = newAddress.firstName;
+        lastName.value = newAddress.lastName;
+        phoneNumber.value = newAddress.phoneNumber;
+        vatId.value = newAddress.vat_id;
       }
-    },
-    onFailure (message: TranslateResult): void {
-      this.$store.dispatch('notification/spawnNotification', {
+    });
+
+    function onFailure (message: string): void {
+      root.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
         message,
         action1: { label: i18n.t('OK') }
       });
-    },
-    onCancelButtonClick (): void {
-      this.$emit('cancel');
+    }
+
+    async function onFormSubmit (): Promise<void> {
+      if (isSubmitting.value) {
+        return;
+      }
+
+      const isFormValid = await validateAndGoToFirstError();
+
+      if (!isFormValid) {
+        return;
+      }
+
+      const shouldProceed = await validateAddress(address);
+
+      if (!shouldProceed) {
+        focusSubmitStepButton();
+        return;
+      }
+
+      completeAddressValidation();
+
+      isSubmitting.value = true;
+
+      const addressToCreate = {
+        firstname: address.value.firstName,
+        lastname: address.value.lastName,
+        street: [address.value.streetAddress, address.value.apartmentNumber],
+        city: address.value.city,
+        region: { region: address.value.state, region_id: address.value.region_id },
+        postcode: address.value.zipCode,
+        country_id: address.value.country,
+        telephone: address.value.phoneNumber,
+        default_shipping: false,
+        vat_id: address.value.vat_id,
+        extension_attributes: address.value.extension_attributes
+      };
+
+      try {
+        await root.$store.dispatch('budsies/createNewAddress', { address: addressToCreate });
+
+        persistLastUsedCustomerFirstName(firstName.value);
+        persistLastUsedCustomerLastName(lastName.value);
+        persistLastUsedCustomerPhoneNumber(phoneNumber.value);
+        persistLastUsedCustomerVatId(vatId.value);
+
+        emit('address-added');
+      } catch (error) {
+        onFailure(root.$t('Unable to add new address') as string);
+      } finally {
+        isSubmitting.value = false;
+      }
+    }
+
+    function onCancelButtonClick (): void {
+      emit('cancel');
+    }
+
+    return {
+      validationObserver,
+      baseAddressForm,
+      submitStepButton,
+      firstName,
+      lastName,
+      phoneNumber,
+      addressData,
+      isSubmitting,
+      isSubmitButtonDisabled,
+      address,
+      validateAddress,
+      isValidatingAddress,
+      completeAddressValidation,
+      validateAndGoToFirstError,
+      getFieldAnchorName,
+      onFormSubmit,
+      onCancelButtonClick
     }
   }
 })

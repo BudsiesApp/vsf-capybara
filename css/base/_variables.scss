@@ -23,11 +23,11 @@ $font-family-secondary: "Gotham-Rounded-Medium";
     --font-extra-bold: 800;
     --font-black: 800;
     // font-size
-    --font-2xs: 0.703rem;
-    --font-xs: 0.844rem;
-    --font-sm: 0.984rem;
-    --font-base: 1.125rem;
-    --font-lg: 1.266rem;
+    --font-2xs: 0.703rem; 
+    --font-xs: 0.844rem; 
+    --font-sm: 0.984rem; 
+    --font-base: 1.125rem; 
+    --font-lg: 1.266rem; 
     --font-xl: 1.5rem;
     --font-2xl: 1.875rem;
     // headings font-size
@@ -81,6 +81,8 @@ $font-family-secondary: "Gotham-Rounded-Medium";
 
     --ios-select-dropdown-background: #4e4e4e;
     --ios-select-option-active-background: #636465;
+    --input-error-message-color: var(--c-danger-variant);
+    --input-error-message-font-weight: var(--font-light);
     --ios-select-option-border-color: #606060;
 
     --cart-item-configuration-checkmark-color: var(--_c-blue-primary);
@@ -115,4 +117,4 @@ $font-family-secondary: "Gotham-Rounded-Medium";
         --h5-font-size: 0.875rem;
         --h6-font-size: 0.625rem;
     }
-}
+  }

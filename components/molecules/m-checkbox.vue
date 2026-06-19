@@ -10,7 +10,8 @@
     <label class="sf-checkbox__container" :for="inputId">
       <input
         v-focus
-        type="checkbox"
+        v-bind="inputAttributes"
+        :type="inputType"
         :id="inputId"
         :name="name"
         :value="value"
@@ -18,6 +19,7 @@
         :disabled="disabled"
         class="sf-checkbox__input"
         @change="inputHandler"
+        @click="onClick"
       >
       <!-- @slot Custom check mark markup -->
       <slot name="checkmark" v-bind="{ isChecked, disabled }">
@@ -43,6 +45,7 @@ import { focus } from '@storefront-ui/vue/src/utilities/directives';
 let instanceId = 0;
 export default {
   name: 'MCheckbox',
+  inheritAttrs: false,
   directives: {
     focus
   },
@@ -79,8 +82,12 @@ export default {
       default: true
     },
     selected: {
-      type: [Array, Boolean],
+      type: [Array, Boolean, String],
       default: () => []
+    },
+    inputType: {
+      type: String,
+      default: 'checkbox'
     }
   },
   data () {
@@ -90,20 +97,40 @@ export default {
   },
   computed: {
     inputId () {
-      return `m-checkbox-${this.instanceId}`;
+      return this.$attrs.id || `m-checkbox-${this.instanceId}`;
+    },
+    inputAttributes () {
+      const attributes = { ...this.$attrs };
+
+      delete attributes.id;
+
+      return attributes;
     },
     isChecked () {
       if (typeof this.selected === 'boolean') {
         return this.selected;
+      } else if (typeof this.selected === 'string') {
+        return this.selected === this.value;
       } else {
         return this.selected.includes(this.value);
       }
     }
   },
   methods: {
+    onClick () {
+      if (this.inputType !== 'radio') {
+        return;
+      }
+
+      if (this.selected === this.value) {
+        this.$emit('change', undefined);
+      }
+    },
     inputHandler () {
       if (typeof this.selected === 'boolean') {
         this.$emit('change', !this.selected);
+      } else if (typeof this.selected === 'string') {
+        this.$emit('change', this.value);
       } else {
         let selected = [...this.selected];
         if (selected.includes(this.value)) {
@@ -135,6 +162,13 @@ export default {
 
   .sf-checkbox__container {
     align-items: var(--m-checkbox-align-items, center);
+  }
+
+  &:has(.sf-checkbox__input:focus-visible) {
+      outline: var(--c-black) auto 1px;
+      outline: -webkit-focus-ring-color auto 1px;
+      outline: AccentColor auto 1px;
+      outline-offset: 2px;
   }
 }
 </style>

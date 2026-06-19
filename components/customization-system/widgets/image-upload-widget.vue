@@ -2,6 +2,9 @@
   <div class="image-upload-widget">
     <m-artwork-upload
       ref="artworkUpload"
+      :aria-describedby="ariaDescribedby"
+      :aria-invalid="ariaInvalid"
+      :aria-labelledby="ariaLabelledby"
       :disabled="isDisabled"
       :product-id="backendProductId"
       :upload-url="artworkUploadUrl"
@@ -14,7 +17,11 @@
       @is-busy-changed="$emit('widget-busy-changed', $event)"
     />
 
-    <div class="_error-message">
+    <div
+      :id="errorMessageId"
+      aria-live="polite"
+      class="_error-message"
+    >
       {{ error }}
     </div>
   </div>
@@ -36,6 +43,7 @@ import {
   FileUploadValue,
   useFilesUpload
 } from 'src/modules/customization-system';
+import { useErrorAccessibility } from 'theme/helpers/use-error-accessibility';
 
 import { useBackendProductId } from 'theme/helpers/use-backend-product-id';
 
@@ -47,6 +55,10 @@ export default defineComponent({
     MArtworkUpload
   },
   props: {
+    ariaLabelledby: {
+      type: String,
+      default: undefined
+    },
     error: {
       type: String,
       default: undefined
@@ -72,12 +84,18 @@ export default defineComponent({
   },
   setup (props, context) {
     const { maxValuesCount, productId, value } = toRefs(props);
+    const hasError = computed<boolean>(() => !!props.error);
 
     const artworkUpload = ref<InstanceType<typeof MArtworkUpload> | null>(null);
     const filesUploadFields = useFilesUpload(
       value,
       maxValuesCount,
       context
+    );
+
+    const { ariaDescribedby, ariaInvalid, errorMessageId } = useErrorAccessibility(
+      'image-upload-widget',
+      hasError
     );
 
     const canReplaceInitialItems = computed<boolean>(() => {
@@ -95,6 +113,21 @@ export default defineComponent({
       });
     });
 
+    async function uploadImage (imageUrl: string): Promise<void> {
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      if (!(artworkUpload as any).value) {
+        return;
+      }
+
+      const image = await fetch(imageUrl);
+      const imageBlob = await image.blob();
+
+      // TODO: temporary - current TS version don't handle `value` type right in this case
+      await ((artworkUpload as any).value as InstanceType<typeof MArtworkUpload>).uploadFiles(
+        [imageBlob]
+      );
+    }
+
     watch(filesUploadFields.initialItems, async () => {
       if (!canReplaceInitialItems.value) {
         return;
@@ -108,8 +141,12 @@ export default defineComponent({
     return {
       ...filesUploadFields,
       ...useBackendProductId(productId),
+      ariaDescribedby,
+      ariaInvalid,
       artworkUpload,
-      artworkUploadUrl: config.images.fileuploaderUploadUrl as string
+      artworkUploadUrl: config.images.fileuploaderUploadUrl as string,
+      errorMessageId,
+      uploadImage
     };
   }
 });

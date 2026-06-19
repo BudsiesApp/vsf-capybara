@@ -1,5 +1,5 @@
 <template>
-  <footer class="o-footer">
+  <div class="o-footer">
     <div class="o-footer__logo" />
 
     <SfFooter :column="6" :multiple="true">
@@ -13,6 +13,7 @@
             <router-link
               :to="localizedRoute(link.link)"
               :target="link.target"
+              :rel="link.target === '_blank' ? 'noopener noreferrer' : null"
               :event="link.event ? link.event : 'click'"
               @click.native="onLinkClick(link)"
               exact
@@ -48,6 +49,23 @@
               />
             </router-link>
           </SfListItem>
+
+          <SfListItem class="social-column">
+            <div
+              class="social-icon"
+              v-for="item in social"
+              :key="item.name + ';' + item.url"
+            >
+              <a
+                :href="item.url"
+                :aria-label="item.label"
+                class="social-icon__link"
+                :class="'-' + item.name"
+                target="_blank"
+                rel="noopener noreferrer"
+              />
+            </div>
+          </SfListItem>
         </SfList>
       </SfFooterColumn>
 
@@ -70,7 +88,7 @@
         </div>
       </template>
     </SfFooter>
-  </footer>
+  </div>
 </template>
 
 <script>
@@ -82,6 +100,8 @@ import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import get from 'lodash-es/get';
 
 import { PrivacyPolicyLink } from 'src/modules/shared';
+
+import { socialServices } from 'theme/interfaces/social-services';
 
 import MBudsiesBrands from '../molecules/m-budsies-brands.vue';
 
@@ -102,6 +122,17 @@ export default {
   },
   computed: {
     ...mapGetters('user', ['isLoggedIn']),
+    social () {
+      const { name } = currentStoreView();
+
+      return socialServices.map((service) => {
+        return {
+          name: service.name,
+          url: service.url,
+          label: this.$t('{brand} {service} page', { brand: name, service: service.serviceLabel }) + ' ' + this.$t('opens in new tab')
+        };
+      });
+    },
     multistoreEnabled () {
       return get(config, 'storeViews.multistore', false);
     },
@@ -145,7 +176,9 @@ export default {
             { name: this.$t('Plush Guide 101'), link: '/plush-guide/' },
             { name: this.$t('NDA'), link: '/nda/' },
             { name: this.$t('Production Times'), link: '/production-times/' },
-            { name: this.$t('Shipping/Freight'), link: '/shipping/' }
+            { name: this.$t('Shipping/Freight'), link: '/shipping/' },
+            { name: this.$t('Fulfillment'), link: '/fulfillment/' },
+            { name: this.$t('Manufacturer Checklist'), link: '/checklist/' }
           ]
         }
       };
@@ -173,6 +206,8 @@ export default {
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .o-footer {
+  $brand-icons-path: '../../assets/brands';
+
   background-color: var(--c-footer);
   padding-bottom: var(--spacer-lg);
   margin-top: calc(var(--spacer-2xl) + var(--spacer-xl));
@@ -222,6 +257,33 @@ export default {
     &__bar {
       &:after {
         --chevron-color: var(--c-light-variant);
+      }
+    }
+  }
+
+  .social-column {
+    display: flex;
+    gap: var(--spacer-sm);
+  }
+
+  .social-icon {
+    display: flex;
+    justify-content: flex-start;
+
+    &__link {
+      display: block;
+      height: 32px;
+      width: 32px;
+      background-size: 32px 32px;
+      background-repeat: no-repeat;
+      background-position: center;
+
+      &.-facebook {
+        background-image: url('#{$brand-icons-path}/facebook.svg');
+      }
+
+      &.-linkedin {
+        background-image: url('#{$brand-icons-path}/linkedin.svg');
       }
     }
   }

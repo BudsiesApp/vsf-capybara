@@ -371,6 +371,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
+$filepond-min-height: 7rem;
+
 .order-items-bulk-customization-form {
   text-align: center;
 
@@ -395,6 +397,27 @@ export default defineComponent({
 
   ._customization {
     text-align: center;
+
+    ::v-deep {
+      .filepond--root {
+        min-height: $filepond-min-height;
+      }
+
+      .filepond--drop-label {
+        min-height: $filepond-min-height;
+
+        label {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: var(--spacer-sm);
+        }
+      }
+
+      .filepond--root .filepond--drop-label .filepond--label-action {
+        margin-left: 0;
+      }
+    }
   }
 
   ._step-divider {

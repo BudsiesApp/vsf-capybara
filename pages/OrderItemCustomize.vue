@@ -14,7 +14,7 @@
       :product="currentProduct"
       :plushie-type="plushieType"
       :can-use-persisted-customization-state="true"
-      :flow="CustomizableProductFlowType.CUSTOMIZE"
+      :customization-mode="ProductCustomizationMode.CUSTOMIZE"
       :draft-order-item="draftOrderItem"
       @hook:mounted="onFormMounted"
     />
@@ -39,10 +39,12 @@ import {
 import { SfHeading } from '@storefront-ui/vue';
 
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
-import { CustomizableProductFlowType } from 'src/modules/customization-system';
+import { ProductCustomizationMode } from 'src/modules/customization-system';
+import { OrderItem, useOrderDetails } from 'src/modules/orders-history';
 
 import { PlushieType } from 'theme/interfaces/plushie.type';
 import { useDraftOrderItem } from 'theme/helpers/use-draft-order-item';
+import { useOrderItemAlterationProductLoader } from 'theme/helpers/use-order-item-alteration-product-loader';
 import { useProductPage } from 'theme/helpers/use-product-page';
 import {
   LayoutType,
@@ -90,6 +92,10 @@ export default defineComponent({
       type: String,
       required: true
     },
+    orderId: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
     layout: {
       type: String as PropType<LayoutType>,
       default: () => LayoutType.WITH_IMAGES_GALLERY
@@ -100,7 +106,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const { sku, orderItemId, layout, plushieType } = toRefs(props);
+    const { sku, orderItemId, orderId, layout, plushieType } = toRefs(props);
 
     const { currentProduct, isDataLoaded: isProductLoaded } = useProductPage(
       sku,
@@ -111,10 +117,49 @@ export default defineComponent({
       context
     );
 
+    const orderDetails = useOrderDetails(context, orderId.value || '')
+
+    const order = computed(() => {
+      return orderDetails.order.value || undefined;
+    });
+
+    const orderItem = computed<OrderItem | undefined>(() => {
+      if (!order.value) {
+        return;
+      }
+
+      const targetOrderItemId = Number(orderItemId.value);
+
+      return order.value.items.find((item) => item.item_id === targetOrderItemId);
+    });
+
+    const shouldWaitForAlterationProduct = computed<boolean>(() => {
+      if (!orderId.value) {
+        return false;
+      }
+
+      if (orderDetails.isLoading.value) {
+        return true;
+      }
+
+      return !!orderItem.value?.extension_attributes?.alteration_product;
+    });
+
+    const {
+      alterationProduct
+    } = useOrderItemAlterationProductLoader(
+      orderItem,
+      order,
+      context
+    );
+
     const showForm = computed<boolean>(() => {
+      const isAlterationProductReady = !shouldWaitForAlterationProduct.value || !!alterationProduct.value;
+
       return (
         isProductLoaded.value &&
         isDraftOrderItemLoaded.value &&
+        isAlterationProductReady &&
         !!currentProduct.value &&
         !!draftOrderItem.value
       );
@@ -155,7 +200,8 @@ export default defineComponent({
     });
 
     return {
-      CustomizableProductFlowType,
+      LayoutType,
+      ProductCustomizationMode,
       currentProduct,
       draftOrderItem,
       formComponent,

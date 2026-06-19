@@ -6,7 +6,7 @@
   >
     <router-link
       class="_bulk-quote-button sf-button"
-      :to="{name: 'bulk-quote'}"
+      to="/quote/"
       v-show="showDefaultButton"
     >
       {{ $t('Instant Quote') }}

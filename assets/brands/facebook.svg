@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 512 512"
+   fill="#ffffff"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="facebook.svg"
+   width="512"
+   height="512"
+   inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:zoom="0.60007402"
+     inkscape:cx="-104.15382"
+     inkscape:cy="239.9704"
+     inkscape:window-width="1886"
+     inkscape:window-height="1019"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <path
+     d="m 341.7808,279.04 10.2384,-66.7152 H 288.004 v -43.2936 c 0,-18.252 8.9424,-36.0432 37.6128,-36.0432 h 29.1024 V 76.1872 c 0,0 -26.4096,-4.5072 -51.66,-4.5072 -52.7184,0 -87.1776,31.9536 -87.1776,89.7984 v 50.8464 H 157.2808 V 279.04 h 58.6008 V 440.32 H 288.004 V 279.04 Z"
+     id="path1"
+     style="stroke-width:0.72" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer1"
+     inkscape:label="frame" />
+  <circle
+     style="fill:none;fill-opacity:0.526255;stroke:#ffffff;stroke-width:15.8874;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+     id="path2"
+     cx="256"
+     cy="256"
+     r="248.05627" />
+</svg>

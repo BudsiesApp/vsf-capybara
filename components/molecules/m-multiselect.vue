@@ -26,17 +26,20 @@
         :max-height="190"
         :autocomplete="autocomplete"
         :autocomplete-value-search="autocompleteValueSearch"
+        :labelled-by="resolvedLabelledBy"
         open-direction="below"
         :disabled="disabled"
         ref="multiselect"
-        @open="isOpen = !isOpen"
+        @open="onOpen"
         @close="onClose"
+        @search-change="onSearchChange"
         @autocomplete-option-not-found="onAutocompleteOptionNotFound"
       >
-        <template #caret>
+        <template #caret="{ toggle }">
           <SfChevron
             class="_chevron"
             :class="{'-hidden': hideDropdownArrow}"
+            @click.native.stop="toggle"
           />
         </template>
 
@@ -46,7 +49,8 @@
       </multiselect>
 
       <label
-        :for="inputId"
+        :for="`${inputId}-input`"
+        :id="labelId"
         class="m-multiselect__label"
         :class="{
           '--required': required,
@@ -58,7 +62,10 @@
       </label>
     </div>
 
-    <div class="m-multiselect__error-message">
+    <div
+      :id="errorMessageId || undefined"
+      class="m-multiselect__error-message"
+    >
       <transition name="fade">
         <div v-if="!valid">
           {{ errorMessage }}
@@ -69,7 +76,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue';
+import { defineComponent, ref, PropType } from '@vue/composition-api';
 import Multiselect from 'vue-multiselect';
 import { SfChevron } from '@storefront-ui/vue';
 import {
@@ -82,19 +89,43 @@ import {
   clearAllBodyScrollLocks
 } from 'body-scroll-lock';
 import { logAutocompleteOptionNotFound } from 'src/modules/error-logging';
+import { use1PasswordDisable } from 'src/themes/petsies-capybara/helpers/use-1password-disable';
 
 type Option = Record<string, any> | string;
 
 let instanceId = 0;
 
-const onePasswordInputIgnoreAttribute = 'data-1p-ignore';
-
-export default Vue.extend({
+export default defineComponent({
   name: 'MMultiselect',
   inheritAttrs: false,
   components: {
     Multiselect,
     SfChevron
+  },
+  setup () {
+    const multiselect = ref<Multiselect | null>(null);
+
+    const getMultiselect = (): Multiselect | undefined => {
+      return (multiselect as any).value as Multiselect | undefined;
+    };
+
+    const getMultiselectInput = (): Element | undefined => {
+      const multiselectInstance = getMultiselect();
+
+      if (!multiselectInstance) {
+        return;
+      }
+
+      return multiselectInstance.$refs.search as Element | undefined;
+    };
+
+    use1PasswordDisable(getMultiselectInput);
+
+    return {
+      multiselect,
+      getMultiselect,
+      getMultiselectInput
+    };
   },
   created: function (): void {
     this.instanceId = instanceId.toString();
@@ -110,9 +141,6 @@ export default Vue.extend({
 
     const option = this.getCustomOptionForValue(this.value);
     this.customOptions.push(option);
-  },
-  mounted (): void {
-    this.disableOnePasswordForMultiselect();
   },
   props: {
     placeholder: {
@@ -159,6 +187,10 @@ export default Vue.extend({
       type: String,
       default: 'This field value is not correct.'
     },
+    errorMessageId: {
+      type: String,
+      default: ''
+    },
     autocomplete: {
       type: String,
       default: undefined
@@ -169,6 +201,10 @@ export default Vue.extend({
     },
     autocompleteValueSearch: {
       type: Function as PropType<((option: any, value: string) => boolean) | undefined>,
+      default: undefined
+    },
+    labelledBy: {
+      type: String,
       default: undefined
     }
   },
@@ -217,6 +253,20 @@ export default Vue.extend({
     inputId (): string {
       return 'm-multiselect-' + this.instanceId;
     },
+    labelId (): string {
+      return `${this.inputId}-label`;
+    },
+    resolvedLabelledBy (): string | undefined {
+      if (this.labelledBy) {
+        return this.labelledBy;
+      }
+
+      if (this.label) {
+        return this.labelId;
+      }
+
+      return undefined;
+    },
     allOptions (): any[] {
       const result = [...this.customOptions, ...this.options];
 
@@ -238,18 +288,81 @@ export default Vue.extend({
     unMapMobileObserver();
     this.enableBodyScroll();
   },
+  mounted (): void {
+    this.syncInputAccessibilityAttributes();
+  },
   methods: {
-    onAutocompleteOptionNotFound (value: string): void {
-      logAutocompleteOptionNotFound(this.autocomplete, value);
-    },
-    disableOnePasswordForMultiselect (): void {
-      const input = this.getMultiselectInput();
+    syncInputAccessibilityAttributes (): void {
+      const searchInput = this.getMultiselectInput() as HTMLElement | undefined;
 
-      if (!input) {
+      if (!searchInput) {
         return;
       }
 
-      input.setAttribute(onePasswordInputIgnoreAttribute, '');
+      if (this.required) {
+        searchInput.setAttribute('aria-required', 'true');
+      } else {
+        searchInput.removeAttribute('aria-required');
+      }
+
+      if (!this.valid) {
+        searchInput.setAttribute('aria-invalid', 'true');
+
+        if (this.errorMessageId) {
+          searchInput.setAttribute('aria-describedby', this.errorMessageId);
+        }
+
+        return;
+      }
+
+      searchInput.removeAttribute('aria-invalid');
+      searchInput.removeAttribute('aria-describedby');
+    },
+    onAutocompleteOptionNotFound (value: string): void {
+      logAutocompleteOptionNotFound(this.autocomplete, value);
+    },
+    getSelectedOptionLabel (): string {
+      const option = this.selectedOption;
+
+      if (!option) {
+        return '';
+      }
+
+      if (typeof option === 'object' && this.labelField) {
+        return (option as Record<string, any>)[this.labelField] || '';
+      }
+
+      return String(option);
+    },
+    onOpen (): void {
+      this.isOpen = true;
+
+      const searchInput = this.getMultiselectInput();
+
+      if (!searchInput) {
+        return;
+      }
+
+      const label = this.getSelectedOptionLabel();
+
+      if (label) {
+        searchInput.setAttribute('aria-label', label);
+      }
+
+      this.syncInputAccessibilityAttributes();
+    },
+    onSearchChange (value: string): void {
+      if (!value) {
+        return;
+      }
+
+      const searchInput = this.getMultiselectInput();
+
+      if (!searchInput) {
+        return;
+      }
+
+      searchInput.removeAttribute('aria-label');
     },
     enableBodyScroll (): void {
       const scrollableContainer = this.getMultiselectScrollableContainer();
@@ -270,18 +383,6 @@ export default Vue.extend({
         [this.idField]: value,
         [this.labelField]: value
       };
-    },
-    getMultiselect (): Multiselect | undefined {
-      return this.$refs['multiselect'] as Multiselect | undefined;
-    },
-    getMultiselectInput (): Element | undefined {
-      const multiselect = this.getMultiselect();
-
-      if (!multiselect) {
-        return;
-      }
-
-      return multiselect.$refs.search as Element | undefined;
     },
     getMultiselectScrollableContainer (): Element | null {
       const multiselect = this.getMultiselect();
@@ -312,7 +413,15 @@ export default Vue.extend({
       return option;
     },
     onClose (): void {
-      this.isOpen = !this.isOpen;
+      this.isOpen = false;
+
+      const searchInput = this.getMultiselectInput();
+
+      if (searchInput) {
+        searchInput.removeAttribute('aria-label');
+      }
+
+      this.syncInputAccessibilityAttributes();
 
       if (!this.allowFreeText) {
         return;
@@ -356,6 +465,30 @@ export default Vue.extend({
     isMobile: {
       handler (): void {
         this.toggleBodyScrollLock();
+      },
+      immediate: true
+    },
+    valid: {
+      handler (): void {
+        this.$nextTick(() => {
+          this.syncInputAccessibilityAttributes();
+        });
+      },
+      immediate: true
+    },
+    errorMessageId: {
+      handler (): void {
+        this.$nextTick(() => {
+          this.syncInputAccessibilityAttributes();
+        });
+      },
+      immediate: true
+    },
+    required: {
+      handler (): void {
+        this.$nextTick(() => {
+          this.syncInputAccessibilityAttributes();
+        });
       },
       immediate: true
     }
@@ -468,6 +601,13 @@ export default Vue.extend({
       .multiselect__tags {
         border-color: var(--input-border-color);
       }
+    }
+
+    &:focus-visible {
+      outline: var(--c-black) auto 1px;
+      outline: -webkit-focus-ring-color auto 1px;
+      outline: AccentColor auto 1px;
+      outline-offset: 2px;
     }
   }
 

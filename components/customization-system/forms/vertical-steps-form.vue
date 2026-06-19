@@ -141,6 +141,7 @@ import { useABTestingCustomizationsFilter } from 'src/modules/a-b-testing';
 import {
   Customization,
   CustomizationOptionValue,
+  ProductCustomizationMode,
   requiredCustomizationsFilter,
   useAvailableCustomizations,
   useCustomizationsBundleOptions,
@@ -148,12 +149,14 @@ import {
   useCustomizationsFilter,
   useCustomizationsGroups,
   useCustomizationsOptionsDefaultValue,
+  usePurchaseFlowCustomizations,
   useCustomizationState,
   useCustomizationStatePreservation,
   useEmailCustomization,
   useOptionValueActions,
   useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
+import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow } from 'src/modules/shared';
 import i18n from '@vue-storefront/core/i18n';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
@@ -204,6 +207,14 @@ export default defineComponent({
       type: Object as PropType<CartItem | undefined>,
       default: undefined
     },
+    customizationMode: {
+      type: String as PropType<ProductCustomizationMode>,
+      default: ProductCustomizationMode.ADD_TO_CART
+    },
+    productPurchaseFlow: {
+      type: String as PropType<ProductPurchaseFlow>,
+      default: DEFAULT_PRODUCT_PURCHASE_FLOW
+    },
     product: {
       type: Object as PropType<Product>,
       required: true
@@ -226,7 +237,13 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
-    const { canUsePersistedCustomizationState, existingCartItem, product } = toRefs(props);
+    const {
+      canUsePersistedCustomizationState,
+      customizationMode,
+      existingCartItem,
+      product,
+      productPurchaseFlow
+    } = toRefs(props);
 
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
@@ -238,15 +255,6 @@ export default defineComponent({
 
     const productCustomizations = computed<Customization[]>(() => {
       return product.value.customizations || [];
-    });
-    const productCustomization = computed<Record<string, Customization>>(() => {
-      const dictionary: Record<string, Customization> = {};
-
-      for (const customization of productCustomizations.value) {
-        dictionary[customization.id] = customization;
-      }
-
-      return dictionary;
     });
 
     const {
@@ -261,13 +269,33 @@ export default defineComponent({
     } = useCustomizationState(existingCartItem);
 
     const {
+      flowAvailableCustomizations
+    } = usePurchaseFlowCustomizations(
+      productCustomizations,
+      productPurchaseFlow,
+      updateCustomizationOptionValue,
+      customizationOptionValue,
+      customizationMode
+    );
+
+    const flowAvailableProductCustomization = computed<Record<string, Customization>>(() => {
+      const dictionary: Record<string, Customization> = {};
+
+      for (const customization of flowAvailableCustomizations.value) {
+        dictionary[customization.id] = customization;
+      }
+
+      return dictionary;
+    });
+
+    const {
       availableCustomizations,
       availableOptionCustomizations,
       availableOptionValues,
       customizationAvailableOptionValues,
       removeUnavailableOptionValues
     } = useAvailableCustomizations(
-      productCustomizations,
+      flowAvailableCustomizations,
       selectedOptionValuesIds,
       customizationOptionValue,
       updateCustomizationOptionValue
@@ -275,8 +303,8 @@ export default defineComponent({
 
     const { executeActionsByCustomizationIdAndCustomizationOptionValue } =
       useOptionValueActions(
-        productCustomizations,
-        productCustomization,
+        flowAvailableCustomizations,
+        flowAvailableProductCustomization,
         customizationAvailableOptionValues,
         updateCustomizationOptionValue,
         removeCustomizationOptionValue,
@@ -295,7 +323,7 @@ export default defineComponent({
     }
 
     const { unhandledCustomizationsFilter } = useSelectedOptionValueUrlQuery(
-      productCustomizations,
+      flowAvailableCustomizations,
       availableOptionValues,
       customizationOptionValue,
       product,
@@ -322,11 +350,10 @@ export default defineComponent({
         updateCustomizationOptionValue
       );
 
-    useCustomizationsBundleOptions(
-      productCustomizations,
+    const { bundleOptions } = useCustomizationsBundleOptions(
+      flowAvailableCustomizations,
       customizationOptionValue,
-      availableOptionValues,
-      context
+      availableOptionValues
     );
 
     const { setDefaultValues } = useCustomizationsOptionsDefaultValue(
@@ -345,8 +372,11 @@ export default defineComponent({
       product,
       quantity,
       customizationState,
+      bundleOptions,
       existingCartItem,
-      context
+      context,
+      undefined,
+      productPurchaseFlow.value
     );
     const agreement = ref<boolean>(false);
 
@@ -446,7 +476,7 @@ export default defineComponent({
     );
 
     return {
-      ...useCustomizationsGroups(filteredCustomizations, productCustomization),
+      ...useCustomizationsGroups(filteredCustomizations, flowAvailableProductCustomization),
       ...useQuantityAndShippingDiscounts(),
       ...formValidation,
       ...useBulkImagesUpload(context),

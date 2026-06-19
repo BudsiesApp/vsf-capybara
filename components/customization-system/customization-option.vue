@@ -15,6 +15,7 @@
         <label
           class="_option-label"
           :class="{ '-required': isFieldRequired }"
+          :id="customization.id"
         >
           {{ optionLabel }}
         </label>
@@ -35,6 +36,7 @@
       ref="validationProvider"
     >
       <component
+        ref="widgetComponent"
         class="_widget"
         :error="errors[0]"
         :is-disabled="isDisabled"
@@ -42,6 +44,7 @@
         v-bind="widget.props"
         v-model="selectedOption"
         @widget-busy-changed="onWidgetBusyChanged"
+        @expand-clicked="(optionValueId) => $emit('expand-clicked', optionValueId)"
       />
     </validation-provider>
 
@@ -57,6 +60,7 @@
 import {
   computed,
   defineComponent,
+  ref,
   PropType,
   toRefs
 } from '@vue/composition-api';
@@ -77,11 +81,20 @@ import CheckboxWidget from './widgets/checkbox-widget.vue';
 import ColorsListWidget from './widgets/colors-list-widget.vue';
 import DropdownWidget from './widgets/dropdown-widget.vue';
 import ImageUploadWidget from './widgets/image-upload-widget.vue';
-import ProductionTimeSelector from './production-time-selector.vue';
 import SearchFieldWidget from './widgets/search-field-widget.vue';
 import TextAreaWidget from './widgets/textarea-widget.vue';
 import TextInputWidget from './widgets/text-input-widget.vue';
 import ThumbnailsListWidget from './widgets/thumbnails-list-widget.vue';
+
+type WidgetComponent = InstanceType<typeof CardsListWidget> |
+InstanceType<typeof CheckboxWidget> |
+InstanceType<typeof ColorsListWidget> |
+InstanceType<typeof DropdownWidget> |
+InstanceType<typeof ImageUploadWidget> |
+InstanceType<typeof SearchFieldWidget> |
+InstanceType<typeof TextAreaWidget> |
+InstanceType<typeof TextInputWidget> |
+InstanceType<typeof ThumbnailsListWidget>;
 
 const customizationWidgetBusyStateChangedEventName =
   'customization-option-busy-state-changed';
@@ -94,7 +107,6 @@ export default defineComponent({
     ColorsListWidget,
     DropdownWidget,
     ImageUploadWidget,
-    ProductionTimeSelector,
     SearchFieldWidget,
     TextAreaWidget,
     TextInputWidget,
@@ -129,10 +141,25 @@ export default defineComponent({
     fieldNamePrefix: {
       type: String as PropType<string | undefined>,
       default: undefined
+    },
+    addedToCartOptionValueId: {
+      type: Object as PropType<Record<string, boolean> | undefined>,
+      default: undefined
+    },
+    expandConfig: {
+      type: Object as PropType<Record<string, {
+        isExpandable: boolean,
+        isExpanded: boolean
+      }> | undefined>,
+      default: undefined
+    },
+    hiddenOptionValues: {
+      type: Object as PropType<Record<string, boolean> | undefined>,
+      default: undefined
     }
   },
   setup (props, context) {
-    const { customization, disableValidation, fieldNamePrefix, optionValues, productId, value } = toRefs(props);
+    const { customization, disableValidation, fieldNamePrefix, optionValues, productId, value, addedToCartOptionValueId, expandConfig, hiddenOptionValues } = toRefs(props);
 
     const optionLabel = computed<string>(() => {
       return customization.value.title || customization.value.name;
@@ -153,6 +180,8 @@ export default defineComponent({
       );
     });
 
+    const widgetComponent = ref<null | WidgetComponent>(null);
+
     return {
       ...useCustomizationOptionValidation(
         customization,
@@ -164,7 +193,10 @@ export default defineComponent({
         customization,
         optionValues,
         productId,
-        context
+        context,
+        addedToCartOptionValueId,
+        expandConfig,
+        hiddenOptionValues
       ),
       ...useWidgetBusyState(
         customization,
@@ -174,7 +206,8 @@ export default defineComponent({
       optionDescription,
       optionHint,
       optionLabel,
-      showLabel
+      showLabel,
+      widgetComponent
     };
   }
 });

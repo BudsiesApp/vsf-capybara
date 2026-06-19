@@ -1,5 +1,5 @@
 <template>
-  <div class="o-modal">
+  <div class="o-modal" :style="modalStyle">
     <transition-group name="fade">
       <component
         class="modal"
@@ -17,6 +17,8 @@
 import { modalComponents } from 'theme/store/ui/modals'
 import { mapGetters } from 'vuex'
 
+const defaultIndex = 201;
+
 export default {
   name: 'OModal',
   computed: {
@@ -29,6 +31,21 @@ export default {
     },
     modalsNames () {
       return this.activeModals.map(modal => modal.name)
+    },
+    modalStyle () {
+      let zIndex = defaultIndex;
+
+      for (const activeModalName of this.modalsNames) {
+        const data = this.getModalData(activeModalName);
+
+        if (!data?.payload?.zIndex) {
+          continue;
+        }
+
+        zIndex = data.payload.zIndex;
+      }
+
+      return { zIndex };
     }
   },
   methods: {
@@ -45,7 +62,6 @@ export default {
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 .o-modal {
   position: relative;
-  z-index: 201;
 }
 .modal {
   box-sizing: border-box;

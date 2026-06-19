@@ -47,6 +47,16 @@ const CustomizableProduct = () =>
   import(/* webpackChunkName: "vsf-customizable-product" */ 'theme/pages/CustomizableProduct');
 const OrderItemsBulkCustomize = () =>
   import(/* webpackChunkName: "vsf-order-items-bulk-customize" */ 'theme/pages/OrderItemsBulkCustomize');
+const OrderItemDeliverablesDownload = () =>
+  import(/* webpackChunkName: "vsf-order-item-deliverables" */ 'theme/pages/OrderItemDeliverablesDownload');
+const OrderPrintoutsDownload = () =>
+  import(/* webpackChunkName: "vsf-order-printouts-download" */ 'theme/pages/OrderPrintoutsDownload');
+const TaxIdRequest = () =>
+  import(/* webpackChunkName: "vsf-tax-id-request" */ 'theme/pages/TaxIdRequest');
+const OrderUpdateAddress = () =>
+  import(/* webpackChunkName: "vsf-order-update-address" */ 'theme/pages/OrderUpdateAddress');
+const ExtraChargePurchase = () =>
+  import(/* webpackChunkName: "vsf-extra-charge-purchase" */ 'theme/pages/ExtraChargePurchase');
 
 function makeRoutesStrict (routes) {
   return routes.map((route) => {
@@ -381,6 +391,72 @@ let routes = [
     component: OrderItemsBulkCustomize,
     props: (route) => ({
       orderItemIds: route.query.orderItemIds
+    }),
+    meta: {
+      auth: true
+    }
+  },
+  {
+    path: '/extra-charge/purchase/',
+    name: 'extra-charge-purchase',
+    component: ExtraChargePurchase,
+    props: (route) => ({
+      sku: route.query.sku,
+      plushieId: route.query.plushieId,
+      qty: route.query.qty,
+      customizationValues: route.query.customizationValues
+    }),
+    meta: {
+      auth: true
+    }
+  },
+  {
+    path: '/order-items/deliverables/download/',
+    name: 'order-item-deliverables-download',
+    component: OrderItemDeliverablesDownload,
+    props: (route) => {
+      let orderItemId = Number(route.query['order_item_id']);
+
+      if (Number.isNaN(orderItemId)) {
+        orderItemId = undefined;
+      }
+
+      return {
+        orderItemId
+      }
+    },
+    meta: {
+      auth: true
+    }
+  },
+  {
+    path: '/orders/printouts-download/',
+    name: 'orders-printouts-download',
+    component: OrderPrintoutsDownload,
+    props: (route) => ({
+      orderId: route.query.orderId || ''
+    }),
+    meta: {
+      auth: true
+    }
+  },
+  {
+    path: '/order/tax-id-request/',
+    name: 'tax-id-request',
+    component: TaxIdRequest,
+    props: (route) => ({
+      orderId: route.query.orderId
+    }),
+    meta: {
+      auth: true
+    }
+  },
+  {
+    path: '/order/update-address/',
+    name: 'order-update-address',
+    component: OrderUpdateAddress,
+    props: (route) => ({
+      orderId: route.query.orderId
     }),
     meta: {
       auth: true

@@ -2,7 +2,7 @@
   <div class="o-header">
     <SfOverlay
       class="overlay"
-      :visible="isHoveredMenu || isSearchPanelVisible"
+      :visible="isAboutMenuHovered || isHoveredMenu || isFocusedMenu || isSearchPanelVisible"
       @click="$store.commit('ui/setSearchpanel', false)"
     />
     <SfHeader
@@ -19,22 +19,49 @@
       </template>
 
       <template #navigation>
-        <SfHeaderNavigationItem>
-          <router-link class="o-header__submenu" to="/about/">
+        <SfHeaderNavigationItem
+          ref="aboutNavItem"
+          @mouseover="onAboutMenuMouseOver"
+          @mouseleave="isAboutMenuHovered = false"
+          @focusin="onAboutMenuFocusIn"
+          @focusout="onAboutMenuFocusOut"
+          @keydown.esc="onAboutMenuEscapeKey"
+        >
+          <div
+            class="o-header__submenu"
+            :aria-expanded="String(isAboutMenuHovered || isAboutMenuFocused)"
+            tabindex="0"
+            role="menuitem"
+          >
             {{ $t('About') }}
-          </router-link>
+          </div>
+
+          <MAboutMenu
+            :visible="(isAboutMenuHovered || isAboutMenuFocused) && !isSearchPanelVisible"
+            @transitionend.native="onAboutMenuTransitionEnd"
+            @close="onAboutMenuClose"
+          />
         </SfHeaderNavigationItem>
 
         <SfHeaderNavigationItem
+          ref="productsNavItem"
           @mouseover="onMainMenuMouseOver"
           @mouseleave="isHoveredMenu = false"
+          @focusin="onMainMenuFocusIn"
+          @focusout="onMainMenuFocusOut"
+          @keydown.esc="onMainMenuEscapeKey"
         >
-          <div class="o-header__submenu">
+          <div
+            class="o-header__submenu"
+            :aria-expanded="String(isHoveredMenu || isFocusedMenu)"
+            tabindex="0"
+            role="menuitem"
+          >
             {{ $t('Products') }}
           </div>
 
           <MMenu
-            :visible="isHoveredMenu && !isSearchPanelVisible"
+            :visible="(isHoveredMenu || isFocusedMenu) && !isSearchPanelVisible"
             @transitionend.native="onMainMenuTransitionEnd"
             @close="onMainMenuClose"
           />
@@ -76,7 +103,8 @@
 </template>
 
 <script>
-import { SfButton, SfHeader, SfOverlay } from '@storefront-ui/vue';
+import Vue from 'vue';
+import { SfHeader, SfOverlay } from '@storefront-ui/vue';
 import { mapState, mapGetters } from 'vuex';
 
 import { CurrencySelector } from 'src/modules/currency';
@@ -84,10 +112,11 @@ import { CurrencySelector } from 'src/modules/currency';
 import ALogo from 'theme/components/atoms/a-logo';
 import AAccountIcon from 'theme/components/atoms/a-account-icon';
 import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
+import MAboutMenu from 'theme/components/molecules/m-about-menu';
 import MMenu from 'theme/components/molecules/m-menu';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
-export default {
+export default Vue.extend({
   name: 'OHeader',
   components: {
     SfHeader,
@@ -95,16 +124,20 @@ export default {
     AAccountIcon,
     ADetailedCartIcon,
     SfOverlay,
-    SfButton,
+    MAboutMenu,
     MMenu,
     MCtaButton,
     CurrencySelector
   },
   data () {
     return {
+      isAboutMenuHovered: false,
+      isAboutMenuFocused: false,
+      isAboutMouseOverLocked: false,
       isHoveredMenu: false,
+      isFocusedMenu: false,
       isMouseOverLocked: false
-    }
+    };
   },
   computed: {
     ...mapState({
@@ -116,8 +149,43 @@ export default {
     }
   },
   methods: {
+    onAboutMenuClose () {
+      this.isAboutMenuHovered = false;
+      this.isAboutMenuFocused = false;
+      this.isAboutMouseOverLocked = true;
+    },
+    onAboutMenuMouseOver () {
+      if (this.isAboutMouseOverLocked) {
+        return;
+      }
+
+      this.isAboutMenuHovered = true;
+    },
+    async onAboutMenuTransitionEnd () {
+      await this.$nextTick();
+      this.isAboutMouseOverLocked = false;
+    },
+    onAboutMenuFocusIn () {
+      this.isAboutMenuFocused = true;
+    },
+    onAboutMenuFocusOut (event) {
+      if (
+        event.relatedTarget !== null &&
+        this.$refs.aboutNavItem.$el.contains(event.relatedTarget)
+      ) {
+        return;
+      }
+
+      this.isAboutMenuFocused = false;
+    },
+    onAboutMenuEscapeKey () {
+      this.isAboutMenuFocused = false;
+      this.isAboutMenuHovered = false;
+      this.$refs.aboutNavItem.$el.querySelector('a').focus();
+    },
     onMainMenuClose () {
       this.isHoveredMenu = false;
+      this.isFocusedMenu = false;
       this.isMouseOverLocked = true;
     },
     onMainMenuMouseOver () {
@@ -130,9 +198,27 @@ export default {
     async onMainMenuTransitionEnd () {
       await this.$nextTick();
       this.isMouseOverLocked = false;
+    },
+    onMainMenuFocusIn () {
+      this.isFocusedMenu = true;
+    },
+    onMainMenuFocusOut (event) {
+      if (
+        event.relatedTarget !== null &&
+        this.$refs.productsNavItem.$el.contains(event.relatedTarget)
+      ) {
+        return;
+      }
+
+      this.isFocusedMenu = false;
+    },
+    onMainMenuEscapeKey () {
+      this.isFocusedMenu = false;
+      this.isHoveredMenu = false;
+      this.$refs.productsNavItem.$el.querySelector('a').focus();
     }
   }
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -187,11 +273,14 @@ export default {
       width: 0;
     }
 
-    &:hover > *:not(.sf-mega-menu) {
+    &:hover > *:not(.sf-mega-menu),
+    &:focus-within > *:not(.sf-mega-menu) {
       --header-navigation-item-color: var(--c-white);
     }
 
-    &:hover {
+    &:hover,
+    &:focus-within {
+      .m-about-menu,
       .m-menu {
         opacity: 1;
         visibility: visible;

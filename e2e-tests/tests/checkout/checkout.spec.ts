@@ -28,31 +28,31 @@ const fedexAvailableAddress: AddressData = {
 
 const USPS_SHIPPING_COUNTRY_CODE = 'US';
 const USPS_SHIPPING_COUNTRY_LABEL = 'United States';
-const USPS_SHIPPING_STATE_LABEL = 'California';
-const USPS_LABEL = 'USPS Priority';
+const USPS_SHIPPING_STATE_LABEL = 'Georgia';
+const USPS_LABEL = 'USPS or local equivalent';
 const uspsAvailableAddress: AddressData = {
   firstName: FIRST_NAME,
   lastName: LAST_NAME,
-  address: 'Street name, 128, 2',
+  address: '15 Bridge Creek Rd',
   country: USPS_SHIPPING_COUNTRY_LABEL,
   countryId: USPS_SHIPPING_COUNTRY_CODE,
   state: USPS_SHIPPING_STATE_LABEL,
-  regionId: 12,
-  city: 'Test city',
-  zipCode: '12345',
+  regionId: 19,
+  city: 'Tiger',
+  zipCode: '30576',
   phoneNumber: '+17472920712'
 };
 
 const billingAddress: AddressData = {
   firstName: `Billing ${FIRST_NAME}`,
   lastName: `Billing ${LAST_NAME}`,
-  address: 'Street name, 128, 2',
+  address: '201 Wall St',
   country: COUNTRY_WITH_STATES_LIST,
   countryId: COUNTRY_WITH_STATES_LIST_CODE,
   state: COUNTRY_WITH_STATES_DEFAULT_STATE,
-  regionId: 12,
-  city: 'Test city',
-  zipCode: '12345',
+  regionId: 19,
+  city: 'Rincon',
+  zipCode: '31326-9752',
   phoneNumber: '+17472920712'
 }
 
@@ -86,6 +86,7 @@ test('shipping address form has correct validation', async ({ cartPage, checkout
 
   await expect(shippingStepAddressForm.stateSelectorFormField.formField).toBeVisible();
   await expect(shippingStepAddressForm.stateInputFormField.formField).toBeHidden();
+  await checkoutPage.shippingStep.continueToPaymentButton.click();
 
   await shippingStepAddressForm.expectCorrectValidation();
 });
@@ -102,6 +103,7 @@ test('billing address form has correct validation', async ({ cartPage, checkoutP
   await checkoutPage.fillShippingAddress();
 
   await checkoutPage.billingStep.useShippingAddressCheckbox.click();
+  await checkoutPage.billingStep.goToReviewButton.click();
   await checkoutPage.billingStep.addressForm.expectCorrectValidation();
 });
 
@@ -150,20 +152,20 @@ test('shipping address and shipping method are correct while placing order', asy
   await cartPage.goto();
   await checkoutPage.goto();
   await checkoutPage.personalDetailsStep.fillPersonalDetails(
-    fedexAvailableAddress.firstName,
-    fedexAvailableAddress.lastName
+    uspsAvailableAddress.firstName,
+    uspsAvailableAddress.lastName
   );
 
   await checkoutPage.shippingStep.addressForm.fillAddress(
-    fedexAvailableAddress.address,
-    fedexAvailableAddress.country,
-    '',
-    fedexAvailableAddress.city,
-    fedexAvailableAddress.zipCode,
-    fedexAvailableAddress.phoneNumber
+    uspsAvailableAddress.address,
+    uspsAvailableAddress.country,
+    uspsAvailableAddress.state,
+    uspsAvailableAddress.city,
+    uspsAvailableAddress.zipCode,
+    uspsAvailableAddress.phoneNumber
   );
   await expect(checkoutPage.shippingStep.continueToPaymentButton).toBeDisabled();
-  await checkoutPage.shippingStep.expectShippingMethodToBeSelected(FEDEX_LABEL);
+  await checkoutPage.shippingStep.expectShippingMethodToBeSelected(USPS_LABEL);
   await expect(checkoutPage.shippingStep.continueToPaymentButton).not.toBeDisabled();
 
   await checkoutPage.shippingStep.continueToPaymentButton.click();
@@ -188,11 +190,11 @@ test('shipping address and shipping method are correct while placing order', asy
   const postData = JSON.parse(placeOrderRequest.postData());
   const addressInformation = postData.addressInformation;
 
-  expect(addressInformation.shipping_carrier_code).toEqual('fedex');
+  expect(addressInformation.shipping_carrier_code).toEqual('tablerate');
   const shippingAddress = addressInformation.shippingAddress;
   const payloadBillingAddress = addressInformation.billingAddress;
 
-  checkoutPage.expectAddressInPlaceOrderPayloadToBeEqual(shippingAddress, fedexAvailableAddress);
+  checkoutPage.expectAddressInPlaceOrderPayloadToBeEqual(shippingAddress, uspsAvailableAddress);
   checkoutPage.expectAddressInPlaceOrderPayloadToBeEqual(payloadBillingAddress, billingAddress);
 });
 
@@ -268,20 +270,20 @@ test('billing address is correct after "use shipping address" option is selected
   await cartPage.goto();
   await checkoutPage.goto();
   await checkoutPage.personalDetailsStep.fillPersonalDetails(
-    fedexAvailableAddress.firstName,
-    fedexAvailableAddress.lastName
+    uspsAvailableAddress.firstName,
+    uspsAvailableAddress.lastName
   );
 
   await checkoutPage.shippingStep.addressForm.fillAddress(
-    fedexAvailableAddress.address,
-    fedexAvailableAddress.country,
-    '',
-    fedexAvailableAddress.city,
-    fedexAvailableAddress.zipCode,
-    fedexAvailableAddress.phoneNumber
+    uspsAvailableAddress.address,
+    uspsAvailableAddress.country,
+    uspsAvailableAddress.state,
+    uspsAvailableAddress.city,
+    uspsAvailableAddress.zipCode,
+    uspsAvailableAddress.phoneNumber
   );
   await expect(checkoutPage.shippingStep.continueToPaymentButton).toBeDisabled();
-  await checkoutPage.shippingStep.expectShippingMethodToBeSelected(FEDEX_LABEL);
+  await checkoutPage.shippingStep.expectShippingMethodToBeSelected(USPS_LABEL);
   await expect(checkoutPage.shippingStep.continueToPaymentButton).not.toBeDisabled();
 
   await checkoutPage.shippingStep.continueToPaymentButton.click();
@@ -315,8 +317,8 @@ test('billing address is correct after "use shipping address" option is selected
   const shippingAddress = addressInformation.shippingAddress;
   const payloadBillingAddress = addressInformation.billingAddress;
 
-  expect(addressInformation.shipping_carrier_code).toEqual('fedex');
+  expect(addressInformation.shipping_carrier_code).toEqual('tablerate');
 
-  checkoutPage.expectAddressInPlaceOrderPayloadToBeEqual(shippingAddress, fedexAvailableAddress);
-  checkoutPage.expectAddressInPlaceOrderPayloadToBeEqual(payloadBillingAddress, fedexAvailableAddress);
+  checkoutPage.expectAddressInPlaceOrderPayloadToBeEqual(shippingAddress, uspsAvailableAddress);
+  checkoutPage.expectAddressInPlaceOrderPayloadToBeEqual(payloadBillingAddress, uspsAvailableAddress);
 });

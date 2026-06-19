@@ -58,6 +58,8 @@
               class="_item-link"
               :to="item.link"
               :target="item.target"
+              :rel="item.target === '_blank' ? 'noopener noreferrer' : null"
+              :aria-label="item.target === '_blank' ? (item.label + ' ' + $t('opens in new tab')) : null"
               @click.native="$emit('close')"
             >
               <SfMenuItem :label="item.label" icon="" />
@@ -139,6 +141,14 @@ export default Vue.extend({
         {
           label: this.$t('About'),
           link: '/about/'
+        },
+        {
+          label: this.$t('Fulfillment'),
+          link: '/fulfillment/'
+        },
+        {
+          label: this.$t('Manufacturer Checklist'),
+          link: '/checklist/'
         },
         {
           label: this.$t('How To Order'),

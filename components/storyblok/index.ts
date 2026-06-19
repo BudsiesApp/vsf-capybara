@@ -8,7 +8,7 @@ export default function registerComponents () {
   add('image', () => import(/* webpackChunkName: "vsf-storyblok" */ './Image.vue'))
   add('driver', () => import(/* webpackChunkName: "vsf-storyblok" */ './Driver.vue'))
   add('homepage_intro_section', () => import(/* webpackChunkName: "vsf-storyblok" */ './HomepageIntroSection.vue'))
-  add('slider', () => import('./Slider.vue'))
+  add('slider', () => import(/* webpackChunkName: "vsf-storyblok" */'./Slider.vue'))
   add('video', () => import(/* webpackChunkName: "vsf-storyblok" */ './Video.vue'))
   add('promotion_image_banner', () => import(/* webpackChunkName: "vsf-storyblok" */ './PromoCampaignBanner.vue'))
   add('textarea', () => import(/* webpackChunkName: "vsf-storyblok" */ './Textarea.vue'))
@@ -25,9 +25,14 @@ export default function registerComponents () {
   add('lightbox_gallery', () => import(/* webpackChunkName: "vsf-storyblok" */ './LightboxGallery.vue'))
   add('product_reviews', () => import(/* webpackChunkName: "vsf-storyblok" */ './ProductReviews.vue'))
   add('reviews', () => import(/* webpackChunkName: "vsf-storyblok" */ './Reviews.vue'))
+  add('product_structured_data', () => import(/* webpackChunkName: "vsf-storyblok" */ './ProductStructuredData.vue'))
 
-  // add('product', () => import('./Product.vue'))
-  // add('category', () => import('./Category.vue'))
+  add('product', () => import(/* webpackChunkName: "vsf-storyblok" */ './Product.vue'))
+  add('category', () => import(/* webpackChunkName: "vsf-storyblok" */ './Category.vue'))
+  add('product_list', () => import(/* webpackChunkName: "vsf-storyblok" */ './ProductList.vue'))
+
+  add('paypal_pay_later_message', () => import(/* webpackChunkName: "vsf-storyblok" */ './PayPalPayLaterMessage.vue'))
+
   // add('ciLink', () => import('./Link.vue'))
   // Overwrite an existing component
   // add('tile', () => import('./Tile.vue'), { force: true })

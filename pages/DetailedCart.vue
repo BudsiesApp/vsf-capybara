@@ -12,83 +12,94 @@
             class="collected-product-list"
           >
             <transition-group name="fade" tag="div">
-              <SfCollectedProduct
+              <div
                 v-for="product in products"
                 :key="getCartItemKey(product)"
-                :image="getThumbnailForProductExtend(product)"
-                image-width="140"
-                image-height="140"
-                :title="product.name"
-                class="sf-collected-product--detailed collected-product"
+                class="collected-product__item"
               >
-                <template #image="{image}">
-                  <SfImage
-                    :src="image"
-                    alt=""
-                    width="140"
-                    height="140"
-                    class="sf-collected-product__image"
-                  />
-                </template>
+                <SfCollectedProduct
+                  :image="getThumbnailForProductExtend(product)"
+                  image-width="140"
+                  image-height="140"
+                  :title="productTitle[getCartItemKey(product)]"
+                  class="sf-collected-product--detailed collected-product"
+                >
+                  <template #image="{image}">
+                    <SfImage
+                      :src="image"
+                      alt=""
+                      width="140"
+                      height="140"
+                      class="sf-collected-product__image"
+                    />
+                  </template>
 
-                <template #configuration>
-                  <cart-item-configuration
-                    :customizations="product.customizations"
-                    :customization-state="(product.extension_attributes || {}).customization_state"
-                    :product-options="getCartItemOptions(product)"
-                    :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
-                  />
-                </template>
+                  <template #configuration>
+                    <cart-item-configuration
+                      :customizations="product.customizations"
+                      :customization-state="(product.extension_attributes || {}).customization_state"
+                      :product-options="getCartItemOptions(product)"
+                      :estimated-shipment="(product.extension_attributes || {}).estimated_shipment"
+                    />
+                  </template>
 
-                <template #input>
-                  <SfQuantitySelector
-                    :qty="product.qty"
-                    :disabled="isCartItemProcessing"
-                    :title="$t('Quantity')"
-                    @input="changeProductQuantity(product, $event)"
-                    v-if="showQuantitySelectorForProduct(product)"
-                  />
+                  <template #input>
+                    <SfQuantitySelector
+                      :qty="product.qty"
+                      :disabled="isCartSyncing"
+                      :title="$t('Quantity')"
+                      @input="changeProductQuantity(product, $event)"
+                      v-if="showQuantitySelectorForProduct(product)"
+                    />
 
-                  <div class="_quantity" v-else>
-                    {{ product.qty }}
-                  </div>
-                </template>
+                    <div class="_quantity" v-else>
+                      {{ product.qty }}
+                    </div>
+                  </template>
 
-                <template #price>
-                  <div />
-                </template>
+                  <template #price>
+                    <div />
+                  </template>
 
-                <template #actions>
-                  <SfButton
-                    v-if="showEditButton(product.sku)"
-                    class="sf-button--text actions__button"
-                    :disabled="isCartItemProcessing"
-                    @click="editHandler(product)"
-                  >
-                    Edit
-                  </SfButton>
+                  <template #actions>
+                    <SfButton
+                      v-if="showEditButton(product.sku)"
+                      class="sf-button--text actions__button"
+                      :disabled="isCartSyncing"
+                      @click="editHandler(product)"
+                    >
+                      Edit
+                    </SfButton>
 
-                  <SfButton
-                    class="sf-button--text sf-collected-product__remove sf-collected-product__remove--text actions__button"
-                    :disabled="isCartItemProcessing"
-                    @click="removeHandler(product)"
-                  >
-                    Remove
-                  </SfButton>
-                </template>
+                    <SfButton
+                      class="sf-button--text sf-collected-product__remove sf-collected-product__remove--text actions__button"
+                      :disabled="isCartSyncing"
+                      @click="removeHandler(product)"
+                    >
+                      Remove
+                    </SfButton>
+                  </template>
 
-                <template #remove>
-                  <SfPrice
-                    v-if="cartItemPriceDictionary[getCartItemKey(product)]"
-                    :regular="formatPrice(cartItemPriceDictionary[getCartItemKey(product)]).regular"
-                    :special="formatPrice(cartItemPriceDictionary[getCartItemKey(product)]).special"
-                  />
-                </template>
+                  <template #remove>
+                    <div class="collected-product__remove-column">
+                      <SfPrice
+                        v-if="cartItemPriceDictionary[getCartItemKey(product)]"
+                        :regular="formatPrice(cartItemPriceDictionary[getCartItemKey(product)]).regular"
+                        :special="formatPrice(cartItemPriceDictionary[getCartItemKey(product)]).special"
+                      />
+                    </div>
+                  </template>
 
-                <template #more-actions>
-                  <div />
-                </template>
-              </SfCollectedProduct>
+                  <template #more-actions>
+                    <div />
+                  </template>
+                </SfCollectedProduct>
+
+                <MCartLineCouponOffer
+                  :product="product"
+                  class="collected-product__coupon-offer"
+                />
+              </div>
             </transition-group>
 
             <div class="_buttons-container">
@@ -133,9 +144,7 @@
       </div>
 
       <div v-if="totalItems" class="detailed-cart__aside">
-        <OrderSummary
-          :is-updating-quantity="isCartItemProcessing"
-        />
+        <OrderSummary />
       </div>
     </div>
   </div>
@@ -152,23 +161,28 @@ import {
 } from '@storefront-ui/vue';
 import { OrderSummary } from './DetailedCart/index.js';
 import { mapGetters, mapState } from 'vuex';
-import { PriceHelper } from 'src/modules/shared';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helpers';
-import { CART_ITEM_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/cart';
+import { CART_ITEM_LOCALIZED_PRICE_DICTIONARY, IS_CART_SYNCING } from '@vue-storefront/core/modules/cart';
 import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-item-key.function';
 import CartEvents from 'src/modules/shared/types/cart-events';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 import { CART_UPD_ITEM } from '@vue-storefront/core/modules/cart/store/mutation-types';
 import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
-import { CartItemConfiguration, getCustomizationSystemThumbnail } from 'src/modules/customization-system';
+import {
+  CartItemConfiguration,
+  getCustomizationSystemThumbnail
+} from 'src/modules/customization-system';
+import { normalizeProductPurchaseFlow, ProductPurchaseFlow, PriceHelper } from 'src/modules/shared';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
 import { ModalList } from 'theme/store/ui/modals';
+import MCartLineCouponOffer from 'theme/components/molecules/m-cart-line-coupon-offer.vue';
 
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
+import { getCartItemTitle } from 'theme/helpers/get-cart-item-title.function';
 
 const CHANGE_QUANTITY_DEBOUNCE_TIME = 1000;
 
@@ -197,6 +211,7 @@ export default {
   },
   components: {
     CartItemConfiguration,
+    MCartLineCouponOffer,
     SfImage,
     SfPrice,
     SfCollectedProduct,
@@ -207,7 +222,6 @@ export default {
   },
   data () {
     return {
-      isCartItemProcessing: false,
       isDropdownOpen: false,
       isMounted: false,
       syncQuantityDebounced: undefined
@@ -224,7 +238,8 @@ export default {
       cartIsLoaded: (state) => state.cart.cartIsLoaded
     }),
     ...mapGetters({
-      products: 'cart/getCartItems'
+      products: 'cart/getCartItems',
+      isCartSyncing: IS_CART_SYNCING
     }),
     ...mapMobileObserver(),
     cartItemPriceDictionary () {
@@ -241,6 +256,16 @@ export default {
     },
     selectedCurrency () {
       return this.$store.getters[GET_ACTIVE_CURRENCY];
+    },
+    productTitle () {
+      const result = {};
+
+      for (const cartItem of this.products) {
+        const key = getCartItemKey(cartItem);
+        result[key] = getCartItemTitle(cartItem);
+      }
+
+      return result;
     }
   },
   async mounted () {
@@ -261,6 +286,8 @@ export default {
   methods: {
     getCartItemOptions,
     editHandler (product) {
+      const productFlow = normalizeProductPurchaseFlow(product.extension_attributes?.flow);
+
       if (bulkSampleProductSkus.includes(product.sku)) {
         let routeName;
 
@@ -283,17 +310,11 @@ export default {
       return PriceHelper.formatProductPrice(price, this.selectedCurrency.symbol);
     },
     async removeHandler (product) {
-      if (this.isCartItemProcessing) {
+      if (this.isCartSyncing) {
         return;
       }
 
-      this.isCartItemProcessing = true;
-
-      try {
-        await this.$store.dispatch('cart/removeItem', { product: product });
-      } finally {
-        this.isCartItemProcessing = false;
-      }
+      await this.$store.dispatch('cart/removeItem', { product: product });
     },
     getThumbnailForProductExtend (product) {
       const customizationSystemThumbnail =
@@ -325,22 +346,20 @@ export default {
       }
     },
     showQuantitySelectorForProduct (product) {
+      if (product?.is_alteration_product) {
+        return false;
+      }
+
       return getProductMaxSaleQuantity(product) > 1;
     },
     syncQuantity () {
-      if (this.isCartItemProcessing) {
+      if (this.isCartSyncing) {
         return;
       }
 
-      this.isCartItemProcessing = true;
-
-      return this.$store
-        .dispatch('cart/sync', {
-          forceClientState: true
-        })
-        .finally(() => {
-          this.isCartItemProcessing = false;
-        });
+      return this.$store.dispatch('cart/sync', {
+        forceClientState: true
+      });
     },
     onDropdownActionClick (action) {
       EventBus.$emit(CartEvents.MAKE_ANOTHER_FROM_CART, action.label);
@@ -512,11 +531,29 @@ export default {
 }
 
 .collected-product {
-  --collected-product-padding: var(--spacer-sm) 0;
+  --collected-product-padding: 0;
+  --collected-product-item-padding: var(--spacer-sm) 0;
   --collected-product-title-font-size: var(--font-sm);
   --collected-product-title-font-weight: var(--font-semibold);
-  border: 1px solid var(--c-light);
-  border-width: 1px 0 0 0;
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacer-sm) 0;
+    border: 1px solid var(--c-light);
+    border-width: 1px 0 0 0;
+  }
+
+  &__coupon-offer {
+    width: 100%;
+    margin: var(--spacer-base) 0 0;
+
+    @media (min-width: 768px) {
+      width: calc(100% - 140px);
+      max-width: 26rem;
+      margin-left: calc(8.75rem + var(--spacer-sm));
+    }
+  }
 
   ::v-deep {
     .sf-link {
@@ -527,13 +564,14 @@ export default {
 
   @include for-mobile {
     --collected-product-remove-bottom: var(--spacer-sm);
-    &:first-of-type {
+
+    &__item:first-of-type {
       border: none;
     }
   }
 
   @include for-desktop {
-    --collected-product-padding: var(--spacer-lg) 0;
+    --collected-product-item-padding: var(--spacer-lg) 0;
     --collected-product-title-font-size: var(--font-base);
   }
 }

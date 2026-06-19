@@ -18,6 +18,7 @@ import { getCustomizationSystemThumbnail } from 'src/modules/customization-syste
 import { PriceHelper } from 'src/modules/shared';
 
 import { getCartItemOptions } from 'theme/helpers/get-cart-item-options.function';
+import { getCartItemTitle } from 'theme/helpers/get-cart-item-title.function';
 import { OrderContentItem } from '../interfaces/order-content-item.interface';
 
 import OOrderContent from './o-order-content.vue';
@@ -62,7 +63,7 @@ export default {
         return {
           key: cartItemKey,
           thumbnail: this.getThumbnailForProduct(cartItem),
-          name: cartItem.name,
+          name: getCartItemTitle(cartItem),
           qty: cartItem.qty,
           customizations: cartItem.customizations,
           customizationState: cartItem.extension_attributes?.customization_state,
