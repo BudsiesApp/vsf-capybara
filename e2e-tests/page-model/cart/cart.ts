@@ -44,7 +44,7 @@ export class CartPage {
     }
 
     for (const property of properties) {
-      const propertyLocator = cartItem.locator(`${this.cartItemPropertySelector}:has-text("${property}")`);
+      const propertyLocator = cartItem.locator(`${this.cartItemPropertySelector}:has-text("${property.replace('"', '\\"')}")`);
       if (await propertyLocator.isVisible()) {
         continue;
       }
