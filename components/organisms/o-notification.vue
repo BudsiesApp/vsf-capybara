@@ -4,6 +4,7 @@
       v-for="notification in notifications"
       :key="notification.id"
       class="notification"
+      role="alert"
       :visible="true"
       :type="getType(notification)"
       :message="notification.message | htmlDecode"

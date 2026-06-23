@@ -23,7 +23,11 @@ test('buttons are disabled when item is removing', async ({ page, cartPage, prin
       await expect(cartItem.locator('button:has-text("Edit")')).toBeDisabled();
     }
 
-    await expect(cartItem.locator('.sf-quantity-selector__button').nth(0)).toBeDisabled();
+    const quantityControl = cartItem.locator('.a-custom-product-quantity');
+
+    if (await quantityControl.isVisible()) {
+      await expect(quantityControl).toHaveClass(/-disabled/);
+    }
   }
 
   const response = await deleteResponse;

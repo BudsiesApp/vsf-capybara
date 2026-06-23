@@ -16,6 +16,7 @@
             <router-link
               :to="localizedRoute(link.link)"
               :target="link.target"
+              :rel="link.target === '_blank' ? 'noopener noreferrer' : null"
               :event="link.event ? link.event : 'click'"
               @click.native="onLinkClick(link)"
               exact
@@ -45,6 +46,7 @@
             class="social-icon__link"
             :class="'-' + item.name"
             target="_blank"
+            rel="noopener noreferrer"
           />
         </div>
       </SfFooterColumn>
@@ -58,13 +60,14 @@
           class="social-icon__link"
           :class="'-' + item.name"
           target="_blank"
+          rel="noopener noreferrer"
         />
       </div>
 
       <MBudsiesBrands />
 
       <div class="_additional-information">
-        <a href="https://support.mypetsies.com/support/home" target="_blank">
+        <a href="https://support.mypetsies.com/support/home" target="_blank" rel="noopener noreferrer">
           <SfMenuItem
             class="sf-footer__menu-item"
             :label="$t('Contact Us')"
@@ -132,7 +135,7 @@ export default {
         return {
           name: service.name,
           url: service.url,
-          label: this.$t('{brand} {service} page', { brand: name, service: service.serviceLabel })
+          label: this.$t('{brand} {service} page', { brand: name, service: service.serviceLabel }) + ' ' + this.$t('opens in new tab')
         };
       });
     },

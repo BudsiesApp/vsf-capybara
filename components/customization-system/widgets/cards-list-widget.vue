@@ -1,5 +1,5 @@
 <template>
-  <div class="cards-list-widget">
+  <div class="cards-list-widget" :role="groupRole" :aria-labelledby="ariaLabelledby">
     <ul class="_list">
       <li
         class="_item"
@@ -17,6 +17,8 @@
             '-expandable': expandConfig && expandConfig[optionValue.id] && expandConfig[optionValue.id].isExpandable,
             '-expanded': expandConfig && expandConfig[optionValue.id] && expandConfig[optionValue.id].isExpanded
           }"
+          :aria-describedby="ariaDescribedby"
+          :aria-invalid="ariaInvalid"
           :disabled="isDisabled"
           :valid="isValid"
           :value="optionValue.id"
@@ -105,7 +107,11 @@
       </li>
     </ul>
 
-    <div class="_error-message">
+    <div
+      :id="errorMessageId"
+      class="_error-message"
+      aria-live="polite"
+    >
       {{ error }}
     </div>
   </div>
@@ -123,11 +129,13 @@ import { getThumbnailPath } from '@vue-storefront/core/helpers';
 
 import { BaseImage } from 'src/modules/budsies';
 import {
+  ListWidgetInputType,
   OptionValue,
   useListWidget,
   useOptionValuesPrice,
   useValuesSort
 } from 'src/modules/customization-system';
+import { useErrorAccessibility } from 'theme/helpers/use-error-accessibility';
 
 import AAddedToCart from 'theme/components/atoms/a-added-to-cart.vue';
 import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
@@ -177,10 +185,15 @@ export default defineComponent({
     hiddenOptionValues: {
       type: Object as PropType<Record<string, boolean> | undefined>,
       default: undefined
+    },
+    ariaLabelledby: {
+      type: String as PropType<string | undefined>,
+      default: undefined
     }
   },
   setup (props, context) {
     const { maxValuesCount, value, values } = toRefs(props);
+    const hasError = computed<boolean>(() => !!props.error);
 
     function getItemImage (optionValue: OptionValue): string | undefined {
       if (!optionValue.thumbnailUrl) {
@@ -195,7 +208,22 @@ export default defineComponent({
 
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
 
+    const groupRole = computed<string>(() => {
+      return listWidgetFields.inputType.value === ListWidgetInputType.RADIO
+        ? 'radiogroup'
+        : 'group';
+    });
+
+    const { ariaDescribedby, ariaInvalid, errorMessageId } = useErrorAccessibility(
+      'cards-list-widget',
+      hasError
+    );
+
     return {
+      ariaDescribedby,
+      ariaInvalid,
+      errorMessageId,
+      groupRole,
       getItemImage,
       isValid,
       ...listWidgetFields,

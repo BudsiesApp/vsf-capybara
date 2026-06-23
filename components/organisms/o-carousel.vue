@@ -24,6 +24,7 @@
           ref="prev-button"
           class="_arrow swiper-button-prev -left sf-button--pure"
           :class="{ '-vertical-layout': !horizontalSlides }"
+          :aria-label="$t('Previous slide').toString()"
         />
 
         <div class="_counter" v-if="showCounter">
@@ -34,6 +35,7 @@
           ref="next-button"
           class="_arrow -right swiper-button-next sf-button--pure"
           :class="{ '-vertical-layout': !horizontalSlides }"
+          :aria-label="$t('Next slide').toString()"
         />
       </div>
     </div>

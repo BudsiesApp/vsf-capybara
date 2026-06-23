@@ -11,6 +11,7 @@
       :class="cssClasses"
       :link="linkField"
       :is-new-window="shouldOpenInNewWindow"
+      :aria-label="itemData.link_text"
     >
       {{ itemData.link_text }}
     </sb-router-link>

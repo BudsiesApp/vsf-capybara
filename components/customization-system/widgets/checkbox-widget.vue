@@ -1,6 +1,8 @@
 <template>
   <div class="checkbox-widget">
     <m-checkbox
+      :aria-describedby="ariaDescribedby"
+      :aria-invalid="ariaInvalid"
       class="_checkbox"
       :disabled="isDisabled"
       :label="label"
@@ -8,7 +10,11 @@
       v-model="isSelected"
     />
 
-    <div class="_error-message">
+    <div
+      :id="errorMessageId"
+      class="_error-message"
+      aria-live="polite"
+    >
       {{ error }}
     </div>
   </div>
@@ -20,6 +26,7 @@ import { computed, defineComponent, PropType, toRef } from '@vue/composition-api
 import { OptionValue } from 'src/modules/customization-system';
 
 import MCheckbox from 'theme/components/molecules/m-checkbox.vue';
+import { useErrorAccessibility } from 'theme/helpers/use-error-accessibility';
 
 export default defineComponent({
   name: 'CheckboxWidget',
@@ -49,6 +56,7 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
+    const hasError = computed<boolean>(() => !!props.error);
     const sortedValues = computed<OptionValue[]>(() => {
       return props.values.sort((a, b) => a.sn - b.sn);
     });
@@ -94,7 +102,15 @@ export default defineComponent({
       return !props.error;
     });
 
+    const { ariaDescribedby, ariaInvalid, errorMessageId } = useErrorAccessibility(
+      'checkbox-widget',
+      hasError
+    );
+
     return {
+      ariaDescribedby,
+      ariaInvalid,
+      errorMessageId,
       isSelected,
       isValid
     };

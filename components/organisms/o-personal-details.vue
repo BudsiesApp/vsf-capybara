@@ -1,9 +1,11 @@
 <template>
   <div class="o-personal-details">
     <SfHeading
+      ref="heading"
       :title="`${$t('Contact')}`"
       :level="3"
       class="sf-heading--left sf-heading--no-underline title"
+      tabindex="-1"
     />
 
     <div class="form">
@@ -196,6 +198,7 @@ export default defineComponent({
       0
     );
 
+    this.$refs.heading.$el.focus();
     this.fillLastUsedCustomerData();
   },
   methods: {
@@ -225,11 +228,11 @@ export default defineComponent({
 
       const loginForm = this.$refs['login-form'];
 
-      if (loginForm?.validateForm) {
-        const isLoginFormValid = await loginForm.validateForm();
+      if (loginForm?.validateAndGoToFirstError) {
+        const isLoginFormValid = await loginForm.validateAndGoToFirstError();
 
         if (!isLoginFormValid) {
-          isInvalid = true;
+          return;
         }
       }
 

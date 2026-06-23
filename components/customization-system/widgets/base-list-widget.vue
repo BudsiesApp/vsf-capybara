@@ -1,5 +1,7 @@
 <template>
-  <div class="base-list-widget" :class="{ '-disabled': isDisabled }">
+  <div class="base-list-widget" :class="{ '-disabled': isDisabled }" :aria-labelledby="ariaLabelledby"
+       :role="groupRole"
+  >
     <ul
       class="_options-list"
       :class="{ [`-alignment-${alignment}`]: true, '-round': isRound }"
@@ -48,14 +50,21 @@
           class="_input"
           :disabled="isDisabled"
           :type="inputType"
+          :name="radioInputName"
           :value="option.id"
           :id="getOptionId(option.id)"
+          :aria-describedby="ariaDescribedby"
+          :aria-invalid="ariaInvalid"
           v-model="selectedOption"
         >
       </li>
     </ul>
 
-    <div class="_error-message">
+    <div
+      :id="errorMessageId"
+      aria-live="polite"
+      class="_error-message"
+    >
       {{ error }}
     </div>
   </div>
@@ -72,6 +81,7 @@ import { SfPrice } from '@storefront-ui/vue';
 
 import { BaseImage } from 'src/modules/budsies';
 import {
+  ListWidgetInputType,
   OptionValue,
   useListWidget,
   useOptionValuesPrice,
@@ -79,6 +89,7 @@ import {
   WidgetOptionAlignment,
   WidgetOptionShape
 } from 'src/modules/customization-system';
+import { useErrorAccessibility } from 'theme/helpers/use-error-accessibility';
 
 export default defineComponent({
   name: 'BaseListWidget',
@@ -99,6 +110,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    ariaLabelledby: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
     maxValuesCount: {
       type: Number as PropType<number | undefined>,
       default: undefined
@@ -111,13 +126,18 @@ export default defineComponent({
       type: Array as PropType<OptionValue[]>,
       default: () => []
     },
+    radioGroupName: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
     shape: {
       type: String as PropType<WidgetOptionShape>,
       default: 'square'
     }
   },
   setup (props, context) {
-    const { maxValuesCount, shape, value, values } = toRefs(props);
+    const { maxValuesCount, radioGroupName, shape, value, values } = toRefs(props);
+    const hasError = computed<boolean>(() => !!props.error);
 
     const isRound = computed<boolean>(() => {
       return shape.value === 'round';
@@ -125,12 +145,34 @@ export default defineComponent({
 
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
 
+    const groupRole = computed<string>(() => {
+      return listWidgetFields.inputType.value === ListWidgetInputType.RADIO
+        ? 'radiogroup'
+        : 'group';
+    });
+
+    const radioInputName = computed<string | undefined>(() => {
+      return listWidgetFields.inputType.value === ListWidgetInputType.RADIO
+        ? radioGroupName.value
+        : undefined;
+    });
+
+    const { ariaDescribedby, ariaInvalid, errorMessageId } = useErrorAccessibility(
+      'base-list-widget',
+      hasError
+    );
+
     function getOptionId (optionId: string): string {
       return `base-list-widget-option-${optionId}`;
     }
 
     return {
+      ariaDescribedby,
+      ariaInvalid,
+      errorMessageId,
+      groupRole,
       isRound,
+      radioInputName,
       getOptionId,
       ...listWidgetFields,
       ...useOptionValuesPrice(values, context, true),
@@ -195,6 +237,13 @@ export default defineComponent({
 
     &.-round {
       padding: 0 var(--spacer-sm);
+    }
+
+    &:has(._input:focus-visible) {
+      outline: var(--c-black) auto 1px;
+      outline: -webkit-focus-ring-color auto 1px;
+      outline: AccentColor auto 1px;
+      outline-offset: 1px;
     }
   }
 

@@ -54,8 +54,16 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    ariaLabelledby: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
     maxValuesCount: {
       type: Number as PropType<number | undefined>,
+      default: undefined
+    },
+    radioGroupName: {
+      type: String as PropType<string | undefined>,
       default: undefined
     },
     value: {
@@ -118,7 +126,7 @@ export default defineComponent({
   width: 100%;
 
   &.-round {
-    --base-list-widget-item-min-width: var(--thumbnails-list-widget-round-item-min-width, --thumbnails-list-widget-item-min-width);
+    --base-list-widget-item-min-width: var(--thumbnails-list-widget-round-item-min-width, var(--thumbnails-list-widget-item-min-width));
     --base-list-widget-name-display: block;
   }
 

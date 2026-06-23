@@ -10,6 +10,7 @@
       class="_link"
       :link="itemData.link_url"
       :is-new-window="itemData.target_blank"
+      :aria-label="itemData.link_text || itemData.alt_tag || undefined"
     >
       <BaseImage
         class="_image"
