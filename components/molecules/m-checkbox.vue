@@ -10,6 +10,7 @@
     <label class="sf-checkbox__container" :for="inputId">
       <input
         v-focus
+        v-bind="inputAttributes"
         :type="inputType"
         :id="inputId"
         :name="name"
@@ -44,6 +45,7 @@ import { focus } from '@storefront-ui/vue/src/utilities/directives';
 let instanceId = 0;
 export default {
   name: 'MCheckbox',
+  inheritAttrs: false,
   directives: {
     focus
   },
@@ -95,7 +97,14 @@ export default {
   },
   computed: {
     inputId () {
-      return `m-checkbox-${this.instanceId}`;
+      return this.$attrs.id || `m-checkbox-${this.instanceId}`;
+    },
+    inputAttributes () {
+      const attributes = { ...this.$attrs };
+
+      delete attributes.id;
+
+      return attributes;
     },
     isChecked () {
       if (typeof this.selected === 'boolean') {
@@ -153,6 +162,13 @@ export default {
 
   .sf-checkbox__container {
     align-items: var(--m-checkbox-align-items, center);
+  }
+
+  &:has(.sf-checkbox__input:focus-visible) {
+      outline: var(--c-black) auto 1px;
+      outline: -webkit-focus-ring-color auto 1px;
+      outline: AccentColor auto 1px;
+      outline-offset: 2px;
   }
 }
 </style>

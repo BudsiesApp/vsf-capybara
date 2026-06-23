@@ -71,6 +71,7 @@
       v-if="isCouponCode"
       class="promo-code__button"
       button-class="color-secondary"
+      :disabled="isCouponRemovalDisabled"
       :show-spinner="isCouponRemoving"
       @click="removeCoupon"
     >
@@ -102,6 +103,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { SfProperty, SfDivider } from '@storefront-ui/vue';
+import { IS_COUPON_INTERACTION_BLOCKED } from '@vue-storefront/core/modules/cart';
 
 import { PriceHelper } from '@vue-storefront/core/helpers';
 import { DEFAULT_CURRENCY, GET_CURRENCY_EXCHANGE_RATE, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
@@ -160,8 +162,14 @@ export default {
     selectedCurrency () {
       return this.$store.getters[GET_ACTIVE_CURRENCY];
     },
+    isCouponInteractionBlocked () {
+      return Boolean(this.$store.getters[IS_COUPON_INTERACTION_BLOCKED]);
+    },
     showDefaultCurrencyGrandTotal () {
       return this.selectedCurrency.code !== DEFAULT_CURRENCY.code;
+    },
+    isCouponRemovalDisabled () {
+      return this.isCouponRemoving || this.isCouponInteractionBlocked;
     },
     exchangeRate () {
       return this.$store.getters[GET_CURRENCY_EXCHANGE_RATE];
@@ -169,7 +177,7 @@ export default {
   },
   methods: {
     async removeCoupon () {
-      if (this.isCouponRemoving) {
+      if (this.isCouponRemovalDisabled) {
         return;
       }
 
