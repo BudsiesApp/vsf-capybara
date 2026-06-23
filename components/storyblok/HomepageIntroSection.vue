@@ -231,11 +231,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
       display: block;
       object-fit: cover;
     }
-
-    ::v-deep .streaming-video {
-      padding-top: 0;
-      height: 100%;
-    }
   }
 
   &.-editor-preview-mode {
