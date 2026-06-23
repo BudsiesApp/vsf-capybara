@@ -8,5 +8,6 @@ export default interface HomepageIntroSectionData extends ItemData {
   text_color: ColorPickerField,
   button_link: LinkField,
   button_text: string,
-  background_color: ColorPickerField
+  background_color: ColorPickerField,
+  video?: AssetField
 }

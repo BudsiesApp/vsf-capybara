@@ -17,6 +17,24 @@
         fetchpriority="high"
         v-if="itemData.image.filename"
       />
+      <div
+        class="_video-layer"
+        :class="videoLayerClasses"
+        v-if="showVideoLayer"
+      >
+        <video
+          ref="videoElement"
+          :src="videoUrl"
+          autoplay
+          muted
+          loop
+          playsinline
+          @canplay="onVideoCanPlay"
+          @playing="onVideoPlaying"
+          @error="onVideoError"
+          @pause="onVideoPause"
+        />
+      </div>
     </div>
 
     <div class="_intro-column _content">
@@ -59,6 +77,7 @@
 
 <script lang="ts">
 import { VueConstructor } from 'vue';
+import { isServer } from '@vue-storefront/core/helpers';
 import { nl2br, BaseImage, ImageSourceItem } from 'src/modules/budsies';
 
 import { InjectType } from 'src/modules/shared';
@@ -77,8 +96,7 @@ import generateBreakpointsSpecs from './generate-breakpoints-specs';
 import generateImageSourcesList from './generate-image-sources-list';
 
 interface InjectedServices {
-  componentWidthCalculator: ComponentWidthCalculator,
-  window: Window
+  componentWidthCalculator: ComponentWidthCalculator
 }
 
 export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServices>).extend({
@@ -88,12 +106,53 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     SfHeading
   },
   inject: {
-    componentWidthCalculator: { },
-    window: { from: 'WindowObject' }
+    componentWidthCalculator: { }
   } as unknown as InjectType<InjectedServices>,
+  data () {
+    return {
+      isVideoReady: false,
+      isVideoPlaying: false,
+      hasVideoLoadError: false
+    };
+  },
+  watch: {
+    videoUrl () {
+      this.resetVideoState();
+
+      if (isServer) {
+        return;
+      }
+
+      this.$nextTick(() => {
+        this.tryStartVideoPlayback();
+      });
+    }
+  },
   computed: {
     itemData (): HomepageIntroSectionData {
       return this.item as HomepageIntroSectionData;
+    },
+    hasVideo (): boolean {
+      const video = this.itemData.video;
+      return !!(video && video.filename);
+    },
+    showVideoLayer (): boolean {
+      return this.hasVideo;
+    },
+    videoUrl (): string {
+      return this.itemData.video ? this.itemData.video.filename : '';
+    },
+    shouldDisplayVideo (): boolean {
+      if (!this.hasVideo || this.hasVideoLoadError || !this.isVideoReady) {
+        return false;
+      }
+
+      return this.isVideoPlaying;
+    },
+    videoLayerClasses (): Record<string, boolean> {
+      return {
+        '-is-visible': this.shouldDisplayVideo
+      };
     },
     extraStyles (): Record<string, string> {
       const styles: Record<string, string> = {};
@@ -135,9 +194,58 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
       )
     }
   },
+  mounted () {
+    this.tryStartVideoPlayback();
+  },
   methods: {
     nl2br (text: string): string {
       return nl2br(text);
+    },
+    resetVideoState () {
+      this.isVideoReady = false;
+      this.isVideoPlaying = false;
+      this.hasVideoLoadError = false;
+    },
+    async tryStartVideoPlayback () {
+      if (isServer || !this.hasVideo || this.hasVideoLoadError) {
+        return;
+      }
+
+      const videoElement = this.$refs.videoElement as HTMLVideoElement | undefined;
+
+      if (!videoElement || videoElement.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+        return;
+      }
+
+      videoElement.muted = true;
+
+      try {
+        const playResult = videoElement.play();
+
+        if (playResult && typeof playResult.then === 'function') {
+          await playResult;
+        }
+
+        this.isVideoPlaying = true;
+      } catch (error) {
+        this.isVideoPlaying = false;
+      }
+    },
+    onVideoCanPlay () {
+      this.isVideoReady = true;
+      this.tryStartVideoPlayback();
+    },
+    onVideoPlaying () {
+      this.isVideoReady = true;
+      this.isVideoPlaying = true;
+    },
+    onVideoPause () {
+      this.isVideoPlaying = false;
+    },
+    onVideoError () {
+      this.hasVideoLoadError = true;
+      this.isVideoReady = false;
+      this.isVideoPlaying = false;
     }
   }
 })
@@ -195,9 +303,45 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     position: relative;
   }
 
+  ._video-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .2s ease;
+
+    video {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    &.-with-controls {
+      pointer-events: auto;
+    }
+
+    &.-is-visible {
+      opacity: 1;
+    }
+
+    ::v-deep .streaming-video {
+      padding-top: 0;
+      height: 100%;
+    }
+  }
+
   &.-editor-preview-mode {
     ._button {
       pointer-events: none
+    }
+
+    ._video-layer {
+      pointer-events: none;
     }
   }
 

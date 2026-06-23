@@ -1,9 +1,13 @@
 import { AspectRatio } from 'src/modules/shared';
-import { ItemData, VideoUrlField } from 'src/modules/vsf-storyblok-module';
+import { AssetField, ItemData, VideoUrlField } from 'src/modules/vsf-storyblok-module';
 
 export default interface VideoData extends ItemData {
-  url: VideoUrlField,
+  url?: VideoUrlField,
   aspect_ratio: AspectRatio,
+  video?: AssetField,
+  autoplay?: boolean,
+  muted?: boolean,
+  loop?: boolean,
   display_controls?: boolean
 }
 
