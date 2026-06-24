@@ -129,7 +129,8 @@ export default Vue.extend({
         }
     }
 
-    &.-skin-petsies {
+    &.-skin-petsies,
+    &.-skin-bulkorders {
       ._handle {
         border: 1px solid var(--c-text);
         width: 30px;

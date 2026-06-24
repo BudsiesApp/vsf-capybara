@@ -27,8 +27,8 @@ export class DeliveryDeadlineField {
   }
 }
 export class QuoteOrderPage {
-  public readonly DEFAULT_PROJECT_NAME = 'Test project';
-  public readonly DEFAULT_PROJECT_DESCRIPTION = 'Test description';
+  public readonly DEFAULT_PROJECT_NAME = 'Test Project';
+  public readonly DEFAULT_PROJECT_DESCRIPTION = 'Test Description';
   public readonly DEFAULT_QUANTITY = '100';
   public readonly DEFAULT_CUSTOMER_FIRST_NAME = 'Test first name';
   public readonly DEFAULT_CUSTOMER_LAST_NAME = 'Test last name';
