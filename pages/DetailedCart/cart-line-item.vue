@@ -77,7 +77,7 @@
             />
 
             <div v-else class="_quantity">
-              {{ product.qty }}
+              {{ $t('Quantity') }}: {{ product.qty }}
             </div>
 
             <SfButton
@@ -566,8 +566,7 @@ export default defineComponent({
   ._quantity {
     line-height: initial;
     text-align: center;
-    margin-top: var(--spacer-sm);
-    font-size: var(--font-lg);
+    font-size: var(--font-sm);
   }
 
   @media (max-width: $tablet-min) {
