@@ -479,7 +479,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         this.getProductBySkuDictionary[AMASTY_GIFT_CARD_SKU] ||
         this.getProductBySkuDictionary[giftCardSku];
       await this.$store.dispatch('product/setCurrent', product);
-      this.hasPageRenderedEventBeenEmitted = false;
     },
     updateCustomerName (): void {
       this.giftCardOrderFormData.customerName = this.loggedUserFullName;
