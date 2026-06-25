@@ -7,6 +7,16 @@ import {
   watch
 } from '@vue/composition-api';
 
+function createReadyStoryDependenciesDictionary (
+  storyDependencies: string[]
+): Record<string, boolean> {
+  return storyDependencies.reduce<Record<string, boolean>>((result, dependencyName) => {
+    result[dependencyName] = false;
+
+    return result;
+  }, {});
+}
+
 export function useFormReady (
   formKey: Ref<string | undefined>,
   storyDependencies: Ref<string[]>,
@@ -14,7 +24,9 @@ export function useFormReady (
   onFormReady: undefined | (() => void)
 ) {
   const mountedKey: Ref<string | undefined> = ref(undefined);
-  const readyStoryDependencies: Ref<Record<string, boolean>> = ref({});
+  const readyStoryDependencies: Ref<Record<string, boolean>> = ref(
+    createReadyStoryDependenciesDictionary(storyDependencies.value)
+  );
   const emittedFormReadyKey: Ref<string | undefined> = ref(undefined);
 
   function markMountedReady (): void {
@@ -41,16 +53,20 @@ export function useFormReady (
       return true;
     }
 
-    return Object.values(readyStoryDependencies.value).every((item) => item);
+    return storyDependencies.value.every((dependencyName) => readyStoryDependencies.value[dependencyName]);
   });
 
   onMounted(() => {
     markMountedReady();
   });
 
-  watch(formKey, () => {
+  watch(formKey, (newValue, oldValue) => {
+    if (newValue === oldValue) {
+      return;
+    }
+
     mountedKey.value = undefined;
-    readyStoryDependencies.value = {};
+    readyStoryDependencies.value = createReadyStoryDependenciesDictionary(storyDependencies.value);
     emittedFormReadyKey.value = undefined;
     markMountedReady();
   });
