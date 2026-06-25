@@ -32,19 +32,36 @@ export default Vue.extend({
   },
   async mounted () {
     if (this.story) {
+      this.$emit('story-ready', (this as any).getStoryReadyPayload());
       return;
     }
 
     await this.loadStory();
   },
   methods: {
+    getStoryReadyPayload (): string[] {
+      return this.storyFullSlug ? [this.storyFullSlug] : [];
+    },
+    async executeStoryLoad (
+      loadStoryHandler: () => Promise<void>
+    ): Promise<void> {
+      try {
+        await loadStoryHandler();
+      } finally {
+        this.$emit('story-ready', this.getStoryReadyPayload());
+      }
+    },
     async loadStory (): Promise<void> {
       if (!this.storyFullSlug) {
         throw new Error('\'storyFullSlug\' property is not defined');
       }
 
-      await this.$store.dispatch(`storyblok/loadStory`, {
-        fullSlug: this.storyFullSlug
+      const storyFullSlug = this.storyFullSlug;
+
+      await this.executeStoryLoad(async () => {
+        await this.$store.dispatch(`storyblok/loadStory`, {
+          fullSlug: storyFullSlug
+        });
       });
     }
   }
