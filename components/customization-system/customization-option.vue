@@ -1,7 +1,7 @@
 <template>
   <div
     class="customization-option"
-    :class="'-widget-' + widget.component"
+    :class="customizationOptionClasses"
     :ref="validationRef"
   >
     <template
@@ -181,6 +181,20 @@ export default defineComponent({
     });
 
     const widgetComponent = ref<null | WidgetComponent>(null);
+    const widgetState = useCustomizationOptionWidget(
+      value,
+      customization,
+      optionValues,
+      productId,
+      context,
+      addedToCartOptionValueId,
+      expandConfig,
+      hiddenOptionValues
+    );
+    const customizationOptionClasses = computed(() => ({
+      ['-widget-' + widgetState.widget.component]: true,
+      '-compact-spacing': widgetState.useCompactSpacing.value
+    }));
 
     return {
       ...useCustomizationOptionValidation(
@@ -188,16 +202,7 @@ export default defineComponent({
         disableValidation,
         fieldNamePrefix
       ),
-      ...useCustomizationOptionWidget(
-        value,
-        customization,
-        optionValues,
-        productId,
-        context,
-        addedToCartOptionValueId,
-        expandConfig,
-        hiddenOptionValues
-      ),
+      ...widgetState,
       ...useWidgetBusyState(
         customization,
         customizationWidgetBusyStateChangedEventName,
@@ -206,6 +211,7 @@ export default defineComponent({
       optionDescription,
       optionHint,
       optionLabel,
+      customizationOptionClasses,
       showLabel,
       widgetComponent
     };
