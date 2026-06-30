@@ -1,5 +1,8 @@
 <template>
-  <div class="cart-item-configuration-extended">
+  <div
+    class="cart-item-configuration-extended"
+    :class="{'-disabled': isOptionsManageDisabled}"
+  >
     <template v-if="hasCustomizableProperties">
       <div
         v-for="group in customizationGroups"
@@ -275,7 +278,7 @@ export default defineComponent({
         return;
       }
 
-      context.emit('restore-option', { customizationId, optionValueId });
+      context.emit('restore-option', { customizationId, optionValue: optionValueId });
     }
 
     return {
@@ -410,12 +413,17 @@ export default defineComponent({
   }
 
   ._action-icon {
-display: block;
+    display: block;
     width: 1.5rem;
     height: 1.5rem;
     position: absolute;
-    /* top: 50%; */
     transform: translateY(-50%);
+  }
+
+  &.-disabled {
+    ._action-button {
+      opacity: 0.5;
+    }
   }
 }
 </style>

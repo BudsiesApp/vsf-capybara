@@ -1,5 +1,6 @@
 import { computed, ComputedRef, nextTick, ref, Ref, set, SetupContext } from '@vue/composition-api';
 
+import i18n from '@vue-storefront/core/i18n';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { Customization, CustomizationOptionValue, CustomizationStateItem, FileUploadValue, isFileUploadValue, OptionValue, useAvailableCustomizations, useCustomizationsBundleOptions, useCustomizationState } from 'src/modules/customization-system';
@@ -9,15 +10,38 @@ import { useAddToCart } from './use-add-to-cart';
 
 interface RemovedOptionReference {
   customizationId: string,
+  key: string,
   optionValue: CustomizationOptionValue
 }
 
+function getRemovedOptionValueIds (optionValue: CustomizationOptionValue): string[] {
+  if (!optionValue) {
+    return [];
+  }
+
+  if (Array.isArray(optionValue)) {
+    const optionValueIds: string[] = [];
+
+    for (const value of optionValue as (string | FileUploadValue)[]) {
+      optionValueIds.push(isFileUploadValue(value) ? value.id : value);
+    }
+
+    return optionValueIds;
+  }
+
+  const singleOptionValue = optionValue as string | FileUploadValue;
+
+  return [isFileUploadValue(singleOptionValue) ? singleOptionValue.id : singleOptionValue];
+}
+
 function getRemovedOptionKey (customizationId: string, optionValue: CustomizationOptionValue): string | undefined {
-  if (!optionValue || Array.isArray(optionValue) || isFileUploadValue(optionValue)) {
+  const optionValueIds = getRemovedOptionValueIds(optionValue);
+
+  if (optionValueIds.length === 0) {
     return;
   }
 
-  return `${customizationId}-${optionValue}`;
+  return `${customizationId}-${optionValueIds.slice().sort().join('__')}`;
 }
 
 function isSameOptionValue (
@@ -68,7 +92,7 @@ export function useCartItemRemovableOptions (
 
   const { quantity } = useProductQuantity(existingCartItem);
   const product: ComputedRef<Product | undefined> = computed(() => {
-    return context.root.$store.getters['product/getProductBySkuDictionary'];
+    return context.root.$store.getters['product/getProductBySkuDictionary'][existingCartItem.value.sku];
   });
 
   const { addToCartHandler } = useAddToCart(
@@ -208,7 +232,7 @@ export function useCartItemRemovableOptions (
 
     const relatedRemovedOptions = relatedRemovedOptionsByOptionKey.value[parentRemovedOptionKey] || [];
 
-    if (relatedRemovedOptions.find((item) => item.customizationId === removedOption.customizationId && item.optionValue === removedOption.optionValue)) {
+    if (relatedRemovedOptions.find((item) => item.key === removedOption.key)) {
       return;
     }
 
@@ -227,9 +251,14 @@ export function useCartItemRemovableOptions (
 
     for (const customizationId of Object.keys(relatedRemovedOptionValues)) {
       const optionValue = relatedRemovedOptionValues[customizationId];
+      const removedOptionKey = getRemovedOptionKey(customizationId, optionValue);
 
-      addRelatedRemovedOption(parentRemovedOptionKey, { customizationId, optionValue });
-      collectRelatedRemovedOptions(getRemovedOptionKey(customizationId, optionValue));
+      if (!removedOptionKey) {
+        continue;
+      }
+
+      addRelatedRemovedOption(parentRemovedOptionKey, { customizationId, key: removedOptionKey, optionValue });
+      collectRelatedRemovedOptions(removedOptionKey);
     }
   }
 
@@ -247,7 +276,13 @@ export function useCartItemRemovableOptions (
       return;
     }
 
-    addRelatedRemovedOption(parentRemovedOptionKey, { customizationId, optionValue });
+    const removedOptionKey = getRemovedOptionKey(customizationId, optionValue);
+
+    addRelatedRemovedOption(parentRemovedOptionKey, {
+      customizationId,
+      key: removedOptionKey || `${customizationId}`,
+      optionValue
+    });
 
     const existingCustomizationOptionValue = customizationOptionValue.value[customizationId];
 
@@ -266,7 +301,6 @@ export function useCartItemRemovableOptions (
       updateCustomizationOptionValue({ customizationId, value: undefined });
     }
 
-    const removedOptionKey = getRemovedOptionKey(customizationId, optionValue);
     collectRelatedRemovedOptions(removedOptionKey);
   }
 
@@ -277,7 +311,6 @@ export function useCartItemRemovableOptions (
     const initialValue = initialCustomizationStateData.customizationOptionValue.value[customizationId];
 
     if (Array.isArray(initialValue) && !Array.isArray(optionValue)) {
-      debugger;
       return [optionValue] as CustomizationOptionValue;
     }
 
@@ -305,6 +338,22 @@ export function useCartItemRemovableOptions (
     set(relatedRemovedOptionsByOptionKey.value, removedOptionKey, []);
   }
 
+  async function restoreOption ({ customizationId, optionValue }: {customizationId: string, optionValue: CustomizationOptionValue}): Promise<void> {
+    restoreRelatedOptions(customizationId, optionValue);
+
+    await nextTick();
+    try {
+      await addToCartHandler();
+    } catch (error) {
+      remove({ customizationId, optionValue });
+      context.root.$store.dispatch('notification/spawnNotification', {
+        type: 'danger',
+        message: 'Error: ' + error,
+        action1: { label: i18n.t('OK') }
+      });
+    }
+  }
+
   async function removeOption (
     payload: {
       customizationId: string,
@@ -314,14 +363,17 @@ export function useCartItemRemovableOptions (
     remove(payload);
 
     await nextTick();
-    await addToCartHandler();
-  }
 
-  async function restoreOption ({ customizationId, optionValueId }: {customizationId: string, optionValueId: string}): Promise<void> {
-    restoreRelatedOptions(customizationId, optionValueId);
-
-    await nextTick();
-    await addToCartHandler();
+    try {
+      await addToCartHandler();
+    } catch (error) {
+      restoreRelatedOptions(payload.customizationId, payload.optionValue);
+      context.root.$store.dispatch('notification/spawnNotification', {
+        type: 'danger',
+        message: 'Error: ' + error,
+        action1: { label: i18n.t('OK') }
+      });
+    }
   }
 
   return {
