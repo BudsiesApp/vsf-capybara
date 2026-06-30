@@ -205,7 +205,7 @@ export function useCartItemRemovableOptions (
 
         const optionValue = optionValueDictionary[optionValueId];
 
-        if (!optionValue || !optionValue.price) {
+        if (!optionValue || !optionValue.price || !optionValue.allowRemovingFromCart) {
           continue;
         }
 
