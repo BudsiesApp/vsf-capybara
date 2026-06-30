@@ -54,6 +54,11 @@
               :customization-groups="customizationGroups"
               :has-customizable-properties="hasCustomizableProperties"
               :product-options="productOptions"
+              :removable-options="removableOptions"
+              :removed-options="removedOptions"
+              :is-options-manage-disabled="isCartSyncing"
+              @remove-option="removeOption"
+              @restore-option="restoreOption"
             />
           </m-expandable-section>
 
@@ -105,7 +110,7 @@
 
 <script lang="ts">
 import debounce from 'lodash-es/debounce';
-import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, ref } from '@vue/composition-api';
+import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, ref, toRef } from '@vue/composition-api';
 import {
   SfImage,
   SfPrice,
@@ -127,6 +132,7 @@ import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 
 import { normalizeProductPurchaseFlow, ProductPurchaseFlow, PriceHelper } from 'src/modules/shared';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
+import { useCartItemRemovableOptions } from 'theme/helpers/use-cart-item-removable-options';
 
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
 import MCartLineCouponOffer from 'theme/components/molecules/m-cart-line-coupon-offer.vue';
@@ -224,10 +230,14 @@ export default defineComponent({
     );
 
     const productCustomizations = computed(() => props.product.customizations || []);
-    const productCustomizationState = computed(() => props.product.extension_attributes?.customization_state || []);
     const productQty = computed(() => props.product.qty);
     const showPrices = ref(true);
     const showCouponOfferSection = ref(false);
+
+    const cartItemRemovableOptions = useCartItemRemovableOptions(
+      toRef(props, 'product'),
+      context
+    );
 
     const {
       customizationGroups,
@@ -236,7 +246,7 @@ export default defineComponent({
       selectionsCount: customizationGroupsCount
     } = useCartItemConfiguration(
       productCustomizations,
-      productCustomizationState,
+      cartItemRemovableOptions.initialCustomizationState,
       cartItemPrice,
       productQty,
       showPrices,
@@ -403,6 +413,7 @@ export default defineComponent({
     });
 
     return {
+      ...cartItemRemovableOptions,
       cartItemPrice,
       customizationGroups,
       formattedPrice,

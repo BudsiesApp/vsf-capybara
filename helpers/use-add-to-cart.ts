@@ -98,6 +98,8 @@ export function useAddToCart (
       }
     );
 
+    console.log(customizationStateItems.value);
+
     const cartItemForUpdate: Partial<CartItem> = {
       qty: quantity.value,
       product_option: productOption,
