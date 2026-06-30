@@ -59,6 +59,8 @@
               <SfButton
                 v-if="!removableOptions[property.optionValueId]"
                 class="sf-button--text _action-button"
+                :aria-label="$t('Remove') + ` ${property.value}`"
+                :title="$t('Remove')"
                 @click="remove(group.customizationId, property.optionValueId)"
               >
                 <img
@@ -71,6 +73,8 @@
               <SfButton
                 v-else
                 class="sf-button--text _action-button"
+                :aria-label="$t('Restore') + ` ${property.value}`"
+                :title="$t('Restore')"
                 @click="restore(group.customizationId, property.optionValueId)"
               >
                 <img
@@ -108,6 +112,8 @@
             <SfButton
               v-if="!removableOptions[group.properties[0].optionValueId]"
               class="sf-button--text _action-button"
+              :aria-label="$t('Remove') + ` ${group.properties[0].value}`"
+              :title="$t('Remove')"
               @click="remove(group.customizationId, group.properties[0].optionValueId)"
             >
               <img
@@ -120,6 +126,8 @@
             <SfButton
               v-else
               class="sf-button--text _action-button"
+              :title="$t('Restore')"
+              :aria-label="$t('Restore') + ` ${group.properties[0].value}`"
               @click="restore(group.customizationId, group.properties[0].optionValueId)"
             >
               <img
@@ -155,7 +163,7 @@
 
 <script lang="ts">
 import { SfButton, SfIcon, SfPrice, SfProperty } from '@storefront-ui/vue';
-import { computed, ComputedRef, defineComponent, PropType, ref, set } from '@vue/composition-api';
+import { computed, ComputedRef, defineComponent, PropType } from '@vue/composition-api';
 
 import { CartItemConfigurationGroup, CustomizationOptionValue, isFileUploadValue } from 'src/modules/customization-system';
 import { useMobileObserver } from 'src/modules/shared';

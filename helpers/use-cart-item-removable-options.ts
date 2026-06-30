@@ -55,6 +55,10 @@ function isSameOptionValue (
   return value === valueToCompare;
 }
 
+function getErrorNotificationMessage (error: unknown): string {
+  return (error as Error)?.message || i18n.t('Something went wrong').toString();
+}
+
 export function useCartItemRemovableOptions (
   existingCartItem: Ref<CartItem>,
   context: SetupContext
@@ -348,7 +352,7 @@ export function useCartItemRemovableOptions (
       remove({ customizationId, optionValue });
       context.root.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
-        message: 'Error: ' + error,
+        message: getErrorNotificationMessage(error),
         action1: { label: i18n.t('OK') }
       });
     }
@@ -370,7 +374,7 @@ export function useCartItemRemovableOptions (
       restoreRelatedOptions(payload.customizationId, payload.optionValue);
       context.root.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
-        message: 'Error: ' + error,
+        message: getErrorNotificationMessage(error),
         action1: { label: i18n.t('OK') }
       });
     }
