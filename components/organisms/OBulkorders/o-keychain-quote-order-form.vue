@@ -16,7 +16,33 @@
         :show-calculation-animation="showCalculationAnimation"
         :get-field-anchor-name="getFieldAnchorName"
         @calculation-animation-finished="onCalculationAnimationFinished"
-      />
+      >
+        <template #last-question-after-customer-type v-if="leadSourceCustomization">
+          <div class="_last-question-follow-up">
+            <customization-option
+              class="_customization-option"
+              ref="customizationOption"
+              :customization="leadSourceCustomization"
+              :is-disabled="isDisabled"
+              :option-values="leadSourceCustomizationOptionValues"
+              :product-id="Number(product.id)"
+              :value="customizationOptionValue[leadSourceCustomization.id]"
+              @input="onCustomizationOptionInput"
+            />
+
+            <customization-option
+              v-if="leadSourceOtherDetailsCustomization"
+              class="_customization-option _lead-source-other-details"
+              ref="customizationOption"
+              :customization="leadSourceOtherDetailsCustomization"
+              :is-disabled="isDisabled"
+              :product-id="Number(product.id)"
+              :value="customizationOptionValue[leadSourceOtherDetailsCustomization.id]"
+              @input="onCustomizationOptionInput"
+            />
+          </div>
+        </template>
+      </m-base-form>
 
       <m-form-errors
         class="_form-errors"
@@ -46,14 +72,25 @@
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
-import { defineComponent, PropType, Ref, ref } from '@vue/composition-api';
+import { computed, defineComponent, PropType, Ref, ref, toRefs } from '@vue/composition-api';
 
 import Product from 'core/modules/catalog/types/Product';
 import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo } from 'src/modules/budsies';
+import {
+  Customization,
+  CustomizationOptionValue,
+  OptionValue,
+  useAvailableCustomizations,
+  useCustomizationState
+} from 'src/modules/customization-system';
 
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
+import {
+  useBulkRequestLeadSource
+} from 'theme/helpers/use-bulk-request-lead-source';
 
+import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 
 import MBaseForm from './m-base-form.vue';
@@ -67,15 +104,75 @@ function getBaseFormRefs (
     throw new Error('Base Form is not defined');
   }
 
-  return baseForm.$refs;
+  const customizationOptionRefs = Array.isArray(refs.customizationOption)
+    ? refs.customizationOption
+    : refs.customizationOption ? [refs.customizationOption] : [];
+
+  const customizationRefs: Record<string, Vue | Element | Vue[] | Element[]> = customizationOptionRefs.reduce((result, customizationOption) => {
+    return {
+      ...result,
+      ...((customizationOption as any).$refs || {})
+    };
+  }, {});
+
+  return {
+    ...baseForm.$refs,
+    ...customizationRefs
+  };
 }
 
 export default defineComponent({
   name: 'OKeychainQuoteOrderForm',
-  setup (_, setupContext) {
+  setup (props, setupContext) {
+    const { product } = toRefs(props);
+    const productCustomizations = computed<Customization[]>(() => {
+      return product.value.customizations || [];
+    });
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
 
+    const {
+      customizationOptionValue,
+      customizationState,
+      selectedOptionValuesIds,
+      updateCustomizationOptionValue
+    } = useCustomizationState();
+
+    const {
+      availableCustomizations,
+      customizationAvailableOptionValues
+    } = useAvailableCustomizations(
+      productCustomizations,
+      selectedOptionValuesIds,
+      customizationOptionValue,
+      updateCustomizationOptionValue
+    );
+
+    const {
+      leadSourceCustomization,
+      leadSourceOtherDetailsCustomization,
+      leadSourcePayload,
+      leadSourceCustomizationOptionValues
+    } = useBulkRequestLeadSource(
+      availableCustomizations,
+      customizationOptionValue,
+      customizationAvailableOptionValues
+    );
+
+    function onCustomizationOptionInput (payload: {
+      customizationId: string,
+      value: CustomizationOptionValue
+    }) {
+      updateCustomizationOptionValue(payload);
+    }
+
     return {
+      customizationOptionValue,
+      customizationState,
+      leadSourceCustomization,
+      leadSourceCustomizationOptionValues,
+      leadSourceOtherDetailsCustomization,
+      leadSourcePayload,
+      onCustomizationOptionInput,
       validationObserver,
       ...useBulkOrdersBaseForm(),
       ...useFormValidation(
@@ -100,6 +197,7 @@ export default defineComponent({
   },
   components: {
     MBaseForm,
+    CustomizationOption,
     MFormErrors,
     SfButton,
     SfHeading,
@@ -185,7 +283,8 @@ export default defineComponent({
             deadline_date: this.bulkordersBaseFormData.deadlineDate,
             client_type_id: this.bulkordersBaseFormData.customerType || '',
             agreement: this.bulkordersBaseFormData.agreement,
-            customization_state: this.customizationState
+            customization_state: this.customizationState,
+            ...this.leadSourcePayload
           }
         );
 
@@ -250,6 +349,20 @@ export default defineComponent({
     display: flex;
     justify-content: center;
     margin-top: var(--spacer-lg);
+  }
+
+  ._customization-option {
+    --dropdown-widget-max-width: 100%;
+  }
+
+  ._last-question-follow-up {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-lg);
+  }
+
+  ._lead-source-other-details {
+    --customization-option-widget-margin: 0;
   }
 
   ._notice-link-container {

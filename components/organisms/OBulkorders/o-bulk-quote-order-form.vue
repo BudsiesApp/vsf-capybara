@@ -31,7 +31,7 @@
               :customization="colorPaletteCustomization"
               :is-disabled="isDisabled"
               :option-values="colorPaletteCustomizationOptionValues"
-              :product-id="product.id"
+              :product-id="Number(product.id)"
               :value="customizationOptionValue[colorPaletteCustomization.id]
               "
               @input="onCustomizationOptionInput"
@@ -57,7 +57,7 @@
               :customization="sizeCustomization"
               :is-disabled="isDisabled"
               :option-values="sizeCustomizationOptionValues"
-              :product-id="product.id"
+              :product-id="Number(product.id)"
               :value="customizationOptionValue[sizeCustomization.id]
               "
               @input="onCustomizationOptionInput"
@@ -72,6 +72,32 @@
                 />
               </template>
             </customization-option>
+          </div>
+        </template>
+
+        <template #last-question-after-customer-type v-if="leadSourceCustomization">
+          <div class="_last-question-follow-up">
+            <customization-option
+              class="_customization-option"
+              ref="customizationOption"
+              :customization="leadSourceCustomization"
+              :is-disabled="isDisabled"
+              :option-values="leadSourceCustomizationOptionValues"
+              :product-id="Number(product.id)"
+              :value="customizationOptionValue[leadSourceCustomization.id]"
+              @input="onCustomizationOptionInput"
+            />
+
+            <customization-option
+              v-if="leadSourceOtherDetailsCustomization"
+              class="_customization-option _lead-source-other-details"
+              ref="customizationOption"
+              :customization="leadSourceOtherDetailsCustomization"
+              :is-disabled="isDisabled"
+              :product-id="Number(product.id)"
+              :value="customizationOptionValue[leadSourceOtherDetailsCustomization.id]"
+              @input="onCustomizationOptionInput"
+            />
           </div>
         </template>
 
@@ -145,6 +171,9 @@ import {
 } from 'src/modules/customization-system';
 
 import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
+import {
+  useBulkRequestLeadSource
+} from 'theme/helpers/use-bulk-request-lead-source';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 
 import MBaseForm from './m-base-form.vue';
@@ -179,8 +208,18 @@ function getFormAllRefs (
   refs: Record<string, Vue | Element | Vue[] | Element[]>
 ): Record<string, Vue | Element | Vue[] | Element[]> {
   const baseForm = getBaseForm(refs);
+  const customizationOptionRefs = Array.isArray(refs.customizationOption)
+    ? refs.customizationOption
+    : refs.customizationOption ? [refs.customizationOption] : [];
 
-  return { ...refs, ...baseForm.$refs, ...(refs.customizationOption as any).$refs };
+  const customizationRefs: Record<string, Vue | Element | Vue[] | Element[]> = customizationOptionRefs.reduce((result, customizationOption) => {
+    return {
+      ...result,
+      ...((customizationOption as any).$refs || {})
+    };
+  }, {});
+
+  return { ...refs, ...baseForm.$refs, ...customizationRefs };
 }
 
 const COLOR_PALETTE_CUSTOMIZATION_SKU = 'bulk_sample_color_palette';
@@ -250,6 +289,17 @@ export default defineComponent({
       }
     );
 
+    const {
+      leadSourceCustomization,
+      leadSourceOtherDetailsCustomization,
+      leadSourcePayload,
+      leadSourceCustomizationOptionValues
+    } = useBulkRequestLeadSource(
+      availableCustomizations,
+      customizationOptionValue,
+      customizationAvailableOptionValues
+    );
+
     function onCustomizationOptionInput (payload: {
       customizationId: string,
       value: CustomizationOptionValue
@@ -284,6 +334,10 @@ export default defineComponent({
       customizationOptionValue,
       customizationState,
       getSizeNumber,
+      leadSourceCustomization,
+      leadSourceCustomizationOptionValues,
+      leadSourceOtherDetailsCustomization,
+      leadSourcePayload,
       onCustomizationOptionInput,
       sizeCustomization,
       sizeCustomizationOptionValues,
@@ -408,7 +462,8 @@ export default defineComponent({
             deadline_date: this.bulkordersBaseFormData.deadlineDate,
             client_type_id: this.bulkordersBaseFormData.customerType || '',
             customization_state: this.customizationState,
-            agreement: this.bulkordersBaseFormData.agreement
+            agreement: this.bulkordersBaseFormData.agreement,
+            ...this.leadSourcePayload
           }
         );
 
@@ -471,6 +526,16 @@ export default defineComponent({
       width: 100%;
       text-align: center;
     }
+  }
+
+  ._last-question-follow-up {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-lg);
+  }
+
+  ._lead-source-other-details {
+    --customization-option-widget-margin: 0;
   }
 
   ._title {
