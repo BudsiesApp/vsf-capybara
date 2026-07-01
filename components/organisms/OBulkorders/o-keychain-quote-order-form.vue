@@ -20,7 +20,7 @@
         <template #last-question-after-customer-type v-if="leadSourceCustomization">
           <div class="_last-question-follow-up">
             <customization-option
-              class="_customization-option"
+              class="_customization-option _lead-source-customization"
               ref="customizationOption"
               :customization="leadSourceCustomization"
               :is-disabled="isDisabled"
@@ -361,8 +361,20 @@ export default defineComponent({
     gap: var(--spacer-lg);
   }
 
+  ._lead-source-customization,
   ._lead-source-other-details {
-    --customization-option-widget-margin: 0;
+    --customization-option-label-size: 1rem;
+    --customization-option-label-weight: var(--font-normal);
+  }
+
+  ._lead-source-other-details {
+    ::v-deep ._widget {
+      width: 100%;
+    }
+
+    ::v-deep .text-input-widget {
+      max-width: 100%;
+    }
   }
 
   ._notice-link-container {
