@@ -1,10 +1,10 @@
-import { computed, ComputedRef, nextTick, ref, Ref, set, SetupContext } from '@vue/composition-api';
+import { computed, ComputedRef, nextTick, onMounted, ref, Ref, set, SetupContext } from '@vue/composition-api';
 
 import i18n from '@vue-storefront/core/i18n';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
-import { Customization, CustomizationOptionValue, CustomizationStateItem, FileUploadValue, isFileUploadValue, OptionValue, useAvailableCustomizations, useCustomizationsBundleOptions, useCustomizationState } from 'src/modules/customization-system';
+import { Customization, CustomizationOptionValue, CustomizationStateItem, getOptionValueId, isFileUploadValue, OptionValue, toOptionValueArray, useAvailableCustomizations, useCustomizationsBundleOptions, useCustomizationState } from 'src/modules/customization-system';
 import { CartEvents } from 'src/modules/shared';
 
 import { useProductQuantity } from './use-product-quantity';
@@ -16,45 +16,18 @@ interface RemovedOptionReference {
   optionValue: CustomizationOptionValue
 }
 
-function getRemovedOptionValueIds (optionValue: CustomizationOptionValue): string[] {
-  if (!optionValue) {
-    return [];
-  }
-
-  if (Array.isArray(optionValue)) {
-    const optionValueIds: string[] = [];
-
-    for (const value of optionValue as (string | FileUploadValue)[]) {
-      optionValueIds.push(isFileUploadValue(value) ? value.id : value);
-    }
-
-    return optionValueIds;
-  }
-
-  const singleOptionValue = optionValue as string | FileUploadValue;
-
-  return [isFileUploadValue(singleOptionValue) ? singleOptionValue.id : singleOptionValue];
+function getOptionValueIds (optionValue: CustomizationOptionValue): string[] {
+  return toOptionValueArray(optionValue).map(getOptionValueId);
 }
 
 function getRemovedOptionKey (customizationId: string, optionValue: CustomizationOptionValue): string | undefined {
-  const optionValueIds = getRemovedOptionValueIds(optionValue);
+  const optionValueIds = getOptionValueIds(optionValue);
 
   if (optionValueIds.length === 0) {
     return;
   }
 
-  return `${customizationId}-${optionValueIds.slice().sort().join('__')}`;
-}
-
-function isSameOptionValue (
-  value: string | FileUploadValue,
-  valueToCompare: string | FileUploadValue
-): boolean {
-  if (isFileUploadValue(value) && isFileUploadValue(valueToCompare)) {
-    return value.id === valueToCompare.id;
-  }
-
-  return value === valueToCompare;
+  return `${customizationId}-${optionValueIds.sort().join('__')}`;
 }
 
 function getErrorNotificationMessage (error: unknown): string {
@@ -69,19 +42,41 @@ export function useCartItemRemovableOptions (
     return existingCartItem.value.customizations || [];
   });
 
-  const optionValueIdentifierDictionary: ComputedRef<Record<string, string>> = computed(() => {
-    const dictionary: Record<string, string> = {};
+  const optionValueDictionary: ComputedRef<Record<string, OptionValue>> = computed(() => {
+    const dictionary: Record<string, OptionValue> = {};
 
     for (const customization of productCustomizations.value) {
       for (const optionValue of customization.optionData?.values || []) {
-        dictionary[optionValue.id] = optionValue.sku || optionValue.id;
+        dictionary[optionValue.id] = optionValue;
       }
     }
 
     return dictionary;
   });
 
-  const initialCustomizationStateData = useCustomizationState(existingCartItem);
+  const initialCustomizationState: Ref<CustomizationStateItem[]> = ref([]);
+
+  onMounted(() => {
+    const stateItems = existingCartItem.value.extension_attributes?.customization_state || [];
+
+    initialCustomizationState.value = stateItems
+      .filter((item) => !!item.value)
+      .map((item) => ({
+        customization_id: item.customization_id,
+        quantity: item.quantity || 1,
+        value: item.value
+      }));
+  });
+
+  const initialCustomizationOptionValue: ComputedRef<Record<string, CustomizationOptionValue>> = computed(() => {
+    const dictionary: Record<string, CustomizationOptionValue> = {};
+
+    for (const item of initialCustomizationState.value) {
+      dictionary[item.customization_id] = item.value;
+    }
+
+    return dictionary;
+  });
 
   const {
     addCustomizationOptionValue,
@@ -128,57 +123,25 @@ export function useCartItemRemovableOptions (
   const relatedRemovedOptionsByOptionKey: Ref<Record<string, RemovedOptionReference[]>> = ref({});
 
   const removedOptions: ComputedRef<Record<string, CustomizationOptionValue>> = computed(() => {
-    const initialCustomizationOptionValues = initialCustomizationStateData.customizationOptionValue.value;
     const result: Record<string, CustomizationOptionValue> = {};
 
-    for (const customizationId of Object.keys(initialCustomizationOptionValues)) {
-      const initialValue = initialCustomizationOptionValues[customizationId];
-      const currentValue = customizationOptionValue.value[customizationId];
+    for (const customizationId of Object.keys(initialCustomizationOptionValue.value)) {
+      const initialValue = initialCustomizationOptionValue.value[customizationId];
 
       if (!initialValue) {
         continue;
       }
 
-      if (!currentValue) {
-        result[customizationId] = initialValue;
-        continue;
-      }
+      const currentValueIds = getOptionValueIds(customizationOptionValue.value[customizationId]);
+      const removedValues = toOptionValueArray(initialValue)
+        .filter((value) => !currentValueIds.includes(getOptionValueId(value)));
 
       if (Array.isArray(initialValue)) {
-        if (!Array.isArray(currentValue)) {
-          throw new Error('Option value type mismatch');
-        }
-
-        const removedValues: string[] | FileUploadValue[] = [];
-
-        for (const value of initialValue) {
-          const initialId = isFileUploadValue(value) ? (value as FileUploadValue).id : value;
-
-          if (!currentValue.find((item) => (isFileUploadValue(item) ? (item as FileUploadValue).id : item) === initialId)) {
-            removedValues.push(value as any);
-          }
-        }
-
-        result[customizationId] = removedValues;
+        result[customizationId] = removedValues as CustomizationOptionValue;
         continue;
       }
 
-      if (Array.isArray(currentValue)) {
-        throw new Error('Option value type mismatch');
-      }
-
-      if (!isFileUploadValue(initialValue)) {
-        if (currentValue !== initialValue) {
-          result[customizationId] = initialValue;
-        }
-        continue;
-      }
-
-      if (!isFileUploadValue(currentValue)) {
-        throw new Error('Option value type mismatch');
-      }
-
-      if ((initialValue as FileUploadValue).id !== (currentValue as FileUploadValue).id) {
+      if (removedValues.length > 0) {
         result[customizationId] = initialValue;
       }
     }
@@ -186,57 +149,30 @@ export function useCartItemRemovableOptions (
     return result;
   });
 
-  const initialCustomizationState: ComputedRef<CustomizationStateItem[]> = computed(() => {
-    return initialCustomizationStateData.customizationState.value;
-  });
-
   const removableOptions: ComputedRef<Record<string, boolean>> = computed(() => {
     const dictionary: Record<string, boolean> = {};
-    const optionValueDictionary: Record<string, OptionValue> = {};
 
-    for (const customization of productCustomizations.value) {
-      if (!customization.optionData?.values) {
-        continue;
-      }
-
-      for (const optionValue of customization.optionData.values) {
-        optionValueDictionary[optionValue.id] = optionValue;
-      }
-    }
-
-    for (const item of initialCustomizationStateData.customizationState.value) {
+    for (const item of initialCustomizationState.value) {
       const customization = availableCustomizationsDictionary.value[item.customization_id];
 
       if (!customization || !customization.optionData || customization.optionData.isRequired) {
         continue;
       }
 
-      const selectedOptionValueIds = Array.isArray(item.value)
-        ? item.value
-        : [item.value];
+      const removedOptionValueIds = getOptionValueIds(removedOptions.value[item.customization_id]);
 
-      for (const optionValueId of selectedOptionValueIds) {
-        if (isFileUploadValue(optionValueId)) {
+      for (const selectedValue of toOptionValueArray(item.value)) {
+        if (isFileUploadValue(selectedValue)) {
           continue;
         }
 
-        const optionValue = optionValueDictionary[optionValueId];
+        const optionValue = optionValueDictionary.value[selectedValue];
 
         if (!optionValue || !optionValue.price || !optionValue.allowRemovingFromCart) {
           continue;
         }
 
-        const removedOptionValues = removedOptions.value[item.customization_id];
-
-        if (isFileUploadValue(removedOptionValues)) {
-          throw new Error('Option value type mismatch');
-        }
-
-        if (Array.isArray(removedOptionValues)) {
-          dictionary[optionValueId] = !!removedOptionValues.find((item) => item === optionValueId);
-        } else {
-          dictionary[optionValueId] = removedOptionValues === optionValueId;
-        }
+        dictionary[selectedValue] = removedOptionValueIds.includes(selectedValue);
       }
     }
 
@@ -301,23 +237,18 @@ export function useCartItemRemovableOptions (
 
     addRelatedRemovedOption(parentRemovedOptionKey, {
       customizationId,
-      key: removedOptionKey || `${customizationId}`,
+      key: removedOptionKey || customizationId,
       optionValue
     });
 
     const existingCustomizationOptionValue = customizationOptionValue.value[customizationId];
 
     if (Array.isArray(existingCustomizationOptionValue)) {
-      const optionValueToUpdate: CustomizationOptionValue = [];
-      const optionValueToRemove: string[] | FileUploadValue[] = Array.isArray(optionValue) ? optionValue : [optionValue] as string[] | FileUploadValue[];
+      const optionValueIdsToRemove = getOptionValueIds(optionValue);
+      const optionValueToUpdate = toOptionValueArray(existingCustomizationOptionValue)
+        .filter((item) => !optionValueIdsToRemove.includes(getOptionValueId(item)));
 
-      for (const item of existingCustomizationOptionValue) {
-        if (!optionValueToRemove.some((itemToRemove) => isSameOptionValue(item as string | FileUploadValue, itemToRemove))) {
-          optionValueToUpdate.push(item as any);
-        }
-      }
-
-      updateCustomizationOptionValue({ customizationId, value: optionValueToUpdate });
+      updateCustomizationOptionValue({ customizationId, value: optionValueToUpdate as CustomizationOptionValue });
     } else if (existingCustomizationOptionValue) {
       updateCustomizationOptionValue({ customizationId, value: undefined });
     }
@@ -329,7 +260,7 @@ export function useCartItemRemovableOptions (
     customizationId: string,
     optionValue: CustomizationOptionValue
   ): CustomizationOptionValue {
-    const initialValue = initialCustomizationStateData.customizationOptionValue.value[customizationId];
+    const initialValue = initialCustomizationOptionValue.value[customizationId];
 
     if (Array.isArray(initialValue) && !Array.isArray(optionValue)) {
       return [optionValue] as CustomizationOptionValue;
@@ -359,27 +290,33 @@ export function useCartItemRemovableOptions (
     set(relatedRemovedOptionsByOptionKey.value, removedOptionKey, []);
   }
 
-  async function restoreOption (
-    {
-      customizationId,
-      optionValue
-    }: {
-      customizationId: string,
-      optionValue: string
-    }
-  ): Promise<void> {
-    restoreRelatedOptions(customizationId, optionValue);
+  function getOptionValueIdentifier (optionValueId: string): string | undefined {
+    const optionValue = optionValueDictionary.value[optionValueId];
 
+    if (!optionValue) {
+      return;
+    }
+
+    return optionValue.sku || optionValue.id;
+  }
+
+  async function syncCartItem (
+    optionValueId: string,
+    successEvent: CartEvents,
+    rollback: () => void
+  ): Promise<void> {
     await nextTick();
+
     try {
       await addToCartHandler();
 
-      const optionIdentifier = optionValueIdentifierDictionary.value[optionValue];
+      const optionIdentifier = getOptionValueIdentifier(optionValueId);
+
       if (optionIdentifier) {
-        EventBus.$emit(CartEvents.UPGRADE_RESTORE_FROM_CART, optionIdentifier);
+        EventBus.$emit(successEvent, optionIdentifier);
       }
     } catch (error) {
-      remove({ customizationId, optionValue });
+      rollback();
       context.root.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
         message: getErrorNotificationMessage(error),
@@ -396,23 +333,26 @@ export function useCartItemRemovableOptions (
   ): Promise<void> {
     remove({ customizationId, optionValue });
 
-    await nextTick();
+    await syncCartItem(
+      optionValue,
+      CartEvents.UPGRADE_REMOVE_FROM_CART,
+      () => restoreRelatedOptions(customizationId, optionValue)
+    );
+  }
 
-    try {
-      await addToCartHandler();
-
-      const optionIdentifier = optionValueIdentifierDictionary.value[optionValue];
-      if (optionIdentifier) {
-        EventBus.$emit(CartEvents.UPGRADE_REMOVE_FROM_CART, optionIdentifier);
-      }
-    } catch (error) {
-      restoreRelatedOptions(customizationId, optionValue);
-      context.root.$store.dispatch('notification/spawnNotification', {
-        type: 'danger',
-        message: getErrorNotificationMessage(error),
-        action1: { label: i18n.t('OK') }
-      });
+  async function restoreOption (
+    { customizationId, optionValue }: {
+      customizationId: string,
+      optionValue: string
     }
+  ): Promise<void> {
+    restoreRelatedOptions(customizationId, optionValue);
+
+    await syncCartItem(
+      optionValue,
+      CartEvents.UPGRADE_RESTORE_FROM_CART,
+      () => remove({ customizationId, optionValue })
+    );
   }
 
   return {
