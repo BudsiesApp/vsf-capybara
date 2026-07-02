@@ -16,14 +16,16 @@ export function useAddToCart (
   existingCartItem: Ref<CartItem | undefined>,
   { root }: SetupContext,
   existingPlushieId?: string,
-  productPurchaseFlow?: ProductPurchaseFlow
+  productPurchaseFlow?: ProductPurchaseFlow,
+  waitForTotalsUpdate?: boolean
 ) {
   const isSubmitting = ref<boolean>(false);
 
   async function updateClientAndServerItem (payload: {
     product: CartItem,
     forceUpdateServerItem?: boolean,
-    forceClientState?: boolean
+    forceClientState?: boolean,
+    waitForTotalsUpdate?: boolean
   }): Promise<void> {
     await root.$store.dispatch('cart/updateClientAndServerItem', payload);
   }
@@ -119,7 +121,8 @@ export function useAddToCart (
     try {
       await updateClientAndServerItem({
         product: Object.assign({}, existingCartItem.value, cartItemForUpdate),
-        forceUpdateServerItem: true
+        forceUpdateServerItem: true,
+        waitForTotalsUpdate
       });
     } catch (err) {
       if (err instanceof ServerError) {

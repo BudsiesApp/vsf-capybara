@@ -1,9 +1,11 @@
 import { computed, ComputedRef, nextTick, ref, Ref, set, SetupContext } from '@vue/composition-api';
 
 import i18n from '@vue-storefront/core/i18n';
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { Customization, CustomizationOptionValue, CustomizationStateItem, FileUploadValue, isFileUploadValue, OptionValue, useAvailableCustomizations, useCustomizationsBundleOptions, useCustomizationState } from 'src/modules/customization-system';
+import { CartEvents } from 'src/modules/shared';
 
 import { useProductQuantity } from './use-product-quantity';
 import { useAddToCart } from './use-add-to-cart';
@@ -67,6 +69,18 @@ export function useCartItemRemovableOptions (
     return existingCartItem.value.customizations || [];
   });
 
+  const optionValueIdentifierDictionary: ComputedRef<Record<string, string>> = computed(() => {
+    const dictionary: Record<string, string> = {};
+
+    for (const customization of productCustomizations.value) {
+      for (const optionValue of customization.optionData?.values || []) {
+        dictionary[optionValue.id] = optionValue.sku || optionValue.id;
+      }
+    }
+
+    return dictionary;
+  });
+
   const initialCustomizationStateData = useCustomizationState(existingCartItem);
 
   const {
@@ -105,7 +119,10 @@ export function useCartItemRemovableOptions (
     customizationState,
     bundleOptions,
     existingCartItem,
-    context
+    context,
+    undefined,
+    undefined,
+    true
   );
 
   const relatedRemovedOptionsByOptionKey: Ref<Record<string, RemovedOptionReference[]>> = ref({});
@@ -342,12 +359,25 @@ export function useCartItemRemovableOptions (
     set(relatedRemovedOptionsByOptionKey.value, removedOptionKey, []);
   }
 
-  async function restoreOption ({ customizationId, optionValue }: {customizationId: string, optionValue: CustomizationOptionValue}): Promise<void> {
+  async function restoreOption (
+    {
+      customizationId,
+      optionValue
+    }: {
+      customizationId: string,
+      optionValue: string
+    }
+  ): Promise<void> {
     restoreRelatedOptions(customizationId, optionValue);
 
     await nextTick();
     try {
       await addToCartHandler();
+
+      const optionIdentifier = optionValueIdentifierDictionary.value[optionValue];
+      if (optionIdentifier) {
+        EventBus.$emit(CartEvents.UPGRADE_RESTORE_FROM_CART, optionIdentifier);
+      }
     } catch (error) {
       remove({ customizationId, optionValue });
       context.root.$store.dispatch('notification/spawnNotification', {
@@ -359,19 +389,24 @@ export function useCartItemRemovableOptions (
   }
 
   async function removeOption (
-    payload: {
+    { customizationId, optionValue }: {
       customizationId: string,
-      optionValue: CustomizationOptionValue
+      optionValue: string
     }
   ): Promise<void> {
-    remove(payload);
+    remove({ customizationId, optionValue });
 
     await nextTick();
 
     try {
       await addToCartHandler();
+
+      const optionIdentifier = optionValueIdentifierDictionary.value[optionValue];
+      if (optionIdentifier) {
+        EventBus.$emit(CartEvents.UPGRADE_REMOVE_FROM_CART, optionIdentifier);
+      }
     } catch (error) {
-      restoreRelatedOptions(payload.customizationId, payload.optionValue);
+      restoreRelatedOptions(customizationId, optionValue);
       context.root.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
         message: getErrorNotificationMessage(error),

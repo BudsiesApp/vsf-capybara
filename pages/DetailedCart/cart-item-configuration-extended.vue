@@ -354,7 +354,6 @@ export default defineComponent({
   }
 
   ._property-value {
-
     &.-inactive {
       color: var(--c-text-muted);
       text-decoration: line-through;
@@ -366,6 +365,10 @@ export default defineComponent({
     ._property-value,
     ._quantity {
       color: var(--c-text-muted);
+    }
+
+    ._property-value {
+      text-decoration: line-through;
     }
 
     ._option-price {
