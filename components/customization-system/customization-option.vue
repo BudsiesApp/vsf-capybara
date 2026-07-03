@@ -192,7 +192,7 @@ export default defineComponent({
       hiddenOptionValues
     );
     const customizationOptionClasses = computed(() => ({
-      ['-widget-' + widgetState.widget.component]: true,
+      ['-widget-' + widgetState.widget.value.component]: true,
       '-compact-spacing': widgetState.useCompactSpacing.value
     }));
 
