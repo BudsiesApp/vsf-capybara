@@ -401,6 +401,13 @@
           {{ item.title }}
         </SfSelectOption>
       </SfSelect>
+
+      <div
+        v-if="$slots['last-question-after-customer-type']"
+        class="_last-question-after-customer-type"
+      >
+        <slot name="last-question-after-customer-type" />
+      </div>
     </div>
 
     <validation-provider
@@ -947,6 +954,10 @@ export default defineComponent({
 
   ._helper {
     margin-bottom: var(--spacer-sm);
+  }
+
+  ._last-question-after-customer-type {
+    margin-top: var(--spacer-lg);
   }
 
   ._additional-quantity {
