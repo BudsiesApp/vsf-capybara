@@ -272,5 +272,9 @@ export default defineComponent({
   ._widget {
     margin: var(--customization-option-widget-margin, var(--spacer-sm) 0 0);
   }
+
+  > :first-child {
+    margin-top: 0;
+  }
 }
 </style>
