@@ -103,7 +103,8 @@ export function useCartItemRemovableOptions (
     availableOptionValues
   );
 
-  const { quantity } = useProductQuantity(existingCartItem);
+  const quantity = computed(() => existingCartItem.value.qty);
+
   const product: ComputedRef<Product | undefined> = computed(() => {
     return context.root.$store.getters['product/getProductBySkuDictionary'][existingCartItem.value.sku];
   });
@@ -116,7 +117,7 @@ export function useCartItemRemovableOptions (
     existingCartItem,
     context,
     undefined,
-    undefined,
+    existingCartItem.value.extension_attributes?.flow,
     true
   );
 
@@ -168,7 +169,7 @@ export function useCartItemRemovableOptions (
 
         const optionValue = optionValueDictionary.value[selectedValue];
 
-        if (!optionValue || !optionValue.price || !optionValue.allowRemovingFromCart) {
+        if (!optionValue || !optionValue.allowRemovingFromCart) {
           continue;
         }
 

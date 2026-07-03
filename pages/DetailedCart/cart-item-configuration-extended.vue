@@ -61,6 +61,7 @@
                 class="sf-button--text _action-button"
                 :aria-label="$t('Remove') + ` ${property.value}`"
                 :title="$t('Remove')"
+                :disabled="isOptionsManageDisabled"
                 @click="remove(group.customizationId, property.optionValueId)"
               >
                 <img
@@ -75,6 +76,7 @@
                 class="sf-button--text _action-button"
                 :aria-label="$t('Restore') + ` ${property.value}`"
                 :title="$t('Restore')"
+                :disabled="isOptionsManageDisabled"
                 @click="restore(group.customizationId, property.optionValueId)"
               >
                 <img
@@ -114,6 +116,7 @@
               class="sf-button--text _action-button"
               :aria-label="$t('Remove') + ` ${group.properties[0].value}`"
               :title="$t('Remove')"
+              :disabled="isOptionsManageDisabled"
               @click="remove(group.customizationId, group.properties[0].optionValueId)"
             >
               <img
@@ -128,6 +131,7 @@
               class="sf-button--text _action-button"
               :title="$t('Restore')"
               :aria-label="$t('Restore') + ` ${group.properties[0].value}`"
+              :disabled="isOptionsManageDisabled"
               @click="restore(group.customizationId, group.properties[0].optionValueId)"
             >
               <img
@@ -427,8 +431,7 @@ export default defineComponent({
     display: block;
     width: 1.5rem;
     height: 1.5rem;
-    position: absolute;
-    transform: translateY(-50%);
+    margin-top: -0.25rem;
   }
 
   &.-disabled {
