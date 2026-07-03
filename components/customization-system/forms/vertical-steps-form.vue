@@ -5,7 +5,7 @@
     <MBlockStory
       :story-slug="topStorySlug"
       class="_top-block"
-      @story-ready="onStoryReady('topStory', $event)"
+      @story-ready="onStoryReady"
       v-if="topStorySlug"
     />
 
@@ -118,7 +118,7 @@
 
         <MBlockStory
           :story-slug="bottomStorySlug"
-          @story-ready="onStoryReady('bottomStory', $event)"
+          @story-ready="onStoryReady"
           v-if="bottomStorySlug"
         />
       </form>
@@ -179,7 +179,7 @@ import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
-import { useFormReady } from 'theme/helpers/use-form-ready';
+import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
 
@@ -476,7 +476,11 @@ export default defineComponent({
     const storyDependencies = computed<string[]>(() => {
       return [`blocks/${topStorySlug.value}`, `blocks/${bottomStorySlug.value}`];
     });
-    const { onStoryReady } = useFormReady(productSku, storyDependencies, context);
+    const { onStoryReady } = useStoryblokReadinessTracker(
+      productSku,
+      storyDependencies,
+      () => context.emit('form-ready')
+    );
 
     const { customizationFilter } = useABTestingCustomizationsFilter(
       context.ssrContext

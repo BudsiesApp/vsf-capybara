@@ -40,7 +40,7 @@ import ProductTypeButton from 'theme/components/interfaces/product-type-button.i
 import PlushieProductType from 'theme/interfaces/plushie-product-type';
 import { PlushieType } from 'theme/interfaces/plushie.type';
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
-import { useFormReady } from 'theme/helpers/use-form-ready';
+import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
 
 import CreationWizardForm from 'theme/components/customization-system/forms/creation-wizard-form.vue';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
@@ -139,7 +139,11 @@ export default defineComponent({
       return [`blocks/${topStorySlug.value}`];
     });
 
-    const { onStoryReady } = useFormReady(plushieType, storyDependencies, context, () => emitPageRenderedEvent());
+    const { onStoryReady } = useStoryblokReadinessTracker(
+      plushieType,
+      storyDependencies,
+      () => emitPageRenderedEvent()
+    );
 
     const canUsePersistedCustomizationState = ref<boolean>(false);
 

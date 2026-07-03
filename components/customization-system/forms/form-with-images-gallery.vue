@@ -133,7 +133,7 @@
       :product-sku="descriptionProductSku"
       :backup-product-sku="product.parentSku"
       :title="$t('Product Details').toString()"
-      @story-ready="onStoryReady('descriptionStory', $event)"
+      @story-ready="onStoryReady"
     />
   </div>
 </template>
@@ -189,7 +189,7 @@ import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmoun
 import { useCustomizeAction } from 'theme/helpers/use-customize-action';
 import { useImageUpload } from 'theme/helpers/use-image-upload';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
-import { useFormReady } from 'theme/helpers/use-form-ready';
+import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
 import { useProductGallery } from 'theme/helpers/use-product-gallery';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 
@@ -572,7 +572,11 @@ export default defineComponent({
     const descriptionStoryDependencies = computed<string[]>(() => {
       return [getProductDescriptionStoryFullSlug(descriptionProductSku.value)];
     });
-    const { onStoryReady } = useFormReady(productSku, descriptionStoryDependencies, context);
+    const { onStoryReady } = useStoryblokReadinessTracker(
+      productSku,
+      descriptionStoryDependencies,
+      () => context.emit('form-ready')
+    );
 
     return {
       ...useProductGallery(

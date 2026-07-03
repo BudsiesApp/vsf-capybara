@@ -6,7 +6,7 @@
       <div class="_notes">
         <MBlockStory
           :story-slug="topStorySlug"
-          @story-ready="onStoryReady('topStory', $event)"
+          @story-ready="onStoryReady"
           v-if="topStorySlug"
         />
       </div>
@@ -115,7 +115,7 @@
     <div class="_notes">
       <MBlockStory
         :story-slug="bottomStorySlug"
-        @story-ready="onStoryReady('bottomStory', $event)"
+        @story-ready="onStoryReady"
         v-if="bottomStorySlug"
       />
     </div>
@@ -160,7 +160,7 @@ import {
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
-import { useFormReady } from 'theme/helpers/use-form-ready';
+import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
 import { usePhrasePillowFormSteps } from 'theme/helpers/use-phrase-pillow-form-steps';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 
@@ -411,7 +411,11 @@ export default defineComponent({
     const storyDependencies = computed<string[]>(() => {
       return [`blocks/${topStorySlug.value}`, `blocks/${bottomStorySlug.value}`];
     });
-    const { onStoryReady } = useFormReady(productSku, storyDependencies, context);
+    const { onStoryReady } = useStoryblokReadinessTracker(
+      productSku,
+      storyDependencies,
+      () => context.emit('form-ready')
+    );
 
     watch(formSteps.currentStep, (val, oldVal) => {
       if (val === oldVal) {
