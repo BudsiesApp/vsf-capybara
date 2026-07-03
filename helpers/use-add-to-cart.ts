@@ -17,7 +17,8 @@ export function useAddToCart (
   { root }: SetupContext,
   existingPlushieId?: string,
   productPurchaseFlow?: ProductPurchaseFlow,
-  waitForTotalsUpdate?: boolean
+  waitForTotalsUpdate?: boolean,
+  propagateAllErrors?: boolean
 ) {
   const isSubmitting = ref<boolean>(false);
 
@@ -71,6 +72,10 @@ export function useAddToCart (
         productToAdd: Object.assign({}, product.value, productToAddData)
       });
     } catch (err) {
+      if (propagateAllErrors) {
+        throw err;
+      }
+
       if (err instanceof ServerError) {
         throw err;
       }
@@ -125,6 +130,10 @@ export function useAddToCart (
         waitForTotalsUpdate
       });
     } catch (err) {
+      if (propagateAllErrors) {
+        throw err;
+      }
+
       if (err instanceof ServerError) {
         throw err;
       }

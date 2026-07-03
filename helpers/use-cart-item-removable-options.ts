@@ -7,7 +7,6 @@ import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { Customization, CustomizationOptionValue, CustomizationStateItem, getOptionValueId, isFileUploadValue, OptionValue, toOptionValueArray, useAvailableCustomizations, useCustomizationsBundleOptions, useCustomizationState } from 'src/modules/customization-system';
 import { CartEvents } from 'src/modules/shared';
 
-import { useProductQuantity } from './use-product-quantity';
 import { useAddToCart } from './use-add-to-cart';
 
 interface RemovedOptionReference {
@@ -118,6 +117,7 @@ export function useCartItemRemovableOptions (
     context,
     undefined,
     existingCartItem.value.extension_attributes?.flow,
+    true,
     true
   );
 
