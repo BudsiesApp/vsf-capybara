@@ -32,20 +32,6 @@ export function useAlterationProductsLoader (
     return items;
   });
 
-  const orderItemIdToShippingCountryId = computed<Record<number, string | undefined>>(() => {
-    const mapping: Record<number, string | undefined> = {};
-
-    for (const order of orders.value) {
-      const shippingCountryId = order.shipping_address?.country_id;
-
-      for (const item of order.items) {
-        mapping[item.item_id] = shippingCountryId;
-      }
-    }
-
-    return mapping;
-  });
-
   const alterationProductSkus = computed<string[]>(() => {
     const skus = new Set<string>();
 
@@ -85,13 +71,10 @@ export function useAlterationProductsLoader (
         continue;
       }
 
-      const shippingCountryId = orderItemIdToShippingCountryId.value[orderItem.item_id];
-
       const updatedProduct = updateProductProductionTimeCustomizationData(
         product,
         root.$store,
         {
-          shippingCountryId,
           makeProductionTimeRequired: false
         }
       );

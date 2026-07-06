@@ -33,10 +33,6 @@ export function useOrderItemAlterationProductLoader (
     return orderItem.value.extension_attributes?.alteration_product?.sku;
   });
 
-  const shippingCountryId = computed<string | undefined>(() => {
-    return order.value?.shipping_address?.country_id;
-  });
-
   const productBySkuDictionary = computed<Record<string, Product>>(() => {
     return root.$store.getters['product/getProductBySkuDictionary'] || {};
   });
@@ -58,7 +54,6 @@ export function useOrderItemAlterationProductLoader (
       product,
       root.$store,
       {
-        shippingCountryId: shippingCountryId.value,
         makeProductionTimeRequired: false
       }
     );
