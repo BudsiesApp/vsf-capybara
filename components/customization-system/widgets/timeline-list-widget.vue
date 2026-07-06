@@ -34,6 +34,7 @@
             :aria-describedby="ariaDescribedby"
             :aria-invalid="ariaInvalid"
             :disabled="isOptionValueDisabled(optionValue)"
+            @click="onInputClick(optionValue)"
             v-model="selectedOption"
           >
 
@@ -249,6 +250,18 @@ export default defineComponent({
       return optionValue.id === fastestAvailableOptionValueId.value;
     }
 
+    function onInputClick (optionValue: OptionValue): void {
+      if (listWidgetFields.inputType.value !== ListWidgetInputType.RADIO) {
+        return;
+      }
+
+      if (!listWidgetFields.isSelected(optionValue)) {
+        return;
+      }
+
+      context.emit('input', undefined);
+    }
+
     const { ariaDescribedby, ariaInvalid, errorMessageId } = useErrorAccessibility(
       'timeline-list-widget',
       hasError
@@ -261,6 +274,7 @@ export default defineComponent({
       groupRole,
       isFastestAvailable,
       isOptionValueDisabled,
+      onInputClick,
       productionTimeOptionCardDataByOptionValueId,
       radioInputName,
       sortedValues,
