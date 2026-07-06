@@ -39,7 +39,6 @@
           >
 
           <production-time-option-card
-            v-if="productionTimeOptionCardDataByOptionValueId[optionValue.id]"
             class="_card"
             :is-disabled="isOptionValueDisabled(optionValue)"
             :is-fastest-available="isFastestAvailable(optionValue)"
@@ -72,10 +71,10 @@ import { RushAddon } from 'src/modules/budsies';
 import {
   ListWidgetInputType,
   OptionValue,
+  PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID,
   useListWidget,
   useOptionValuesPrice
 } from 'src/modules/customization-system';
-import { PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID } from 'src/modules/customization-system/types/production-time-selector-standard-option-value-id';
 import { useErrorAccessibility } from 'theme/helpers/use-error-accessibility';
 
 import ProductionTimeOptionCard from '../production-time-option-card.vue';
@@ -183,6 +182,7 @@ export default defineComponent({
 
         dictionary[optionValue.id] = {
           optionName: optionValue.name || addon.text,
+          optionValueSku: optionValue.sku || '',
           price,
           slotsLeft: typeof addon.slotsLeft === 'number' ? addon.slotsLeft : Infinity,
           turnaroundTime: addon.turnaroundTime

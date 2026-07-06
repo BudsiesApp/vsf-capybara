@@ -95,6 +95,10 @@ export default defineComponent({
       type: String,
       required: true
     },
+    optionValueSku: {
+      type: String,
+      required: true
+    },
     price: {
       type: Object as PropType<PriceHelper.ProductPrice>,
       required: true
@@ -146,17 +150,17 @@ export default defineComponent({
     });
 
     const iconSrc = computed<string>(() => {
-      const optionName = props.optionName.toLowerCase();
+      const optionValueSku = props.optionValueSku.toLowerCase();
 
-      if (optionName.includes('standard')) {
-        return standardIcon;
-      }
-
-      if (optionName.includes('super')) {
+      if (optionValueSku.includes('super_rush')) {
         return superRushIcon;
       }
 
-      return rushIcon;
+      if (optionValueSku.includes('rush')) {
+        return rushIcon;
+      }
+
+      return standardIcon;
     });
 
     const iconStyle = computed<Record<string, string>>(() => {
