@@ -716,6 +716,10 @@ export default defineComponent({
     --customization-option-hint-align: center;
 
     margin-top: var(--spacer-base);
+
+    &.-compact-spacing {
+      margin-top: 0;
+    }
   }
 
   ._form-errors {
