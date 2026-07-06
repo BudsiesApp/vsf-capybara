@@ -15,7 +15,7 @@
         }"
       >
         <span
-          class="_mobile-timeline"
+          class="_timeline"
           :class="{
             '-selected': isSelected(optionValue),
             '-disabled': isOptionValueDisabled(optionValue)
@@ -41,6 +41,7 @@
             v-if="productionTimeOptionCardDataByOptionValueId[optionValue.id]"
             class="_card"
             :is-disabled="isOptionValueDisabled(optionValue)"
+            :is-fastest-available="isFastestAvailable(optionValue)"
             :is-selected="isSelected(optionValue)"
             v-bind="productionTimeOptionCardDataByOptionValueId[optionValue.id]"
           />
@@ -219,6 +220,21 @@ export default defineComponent({
       });
     });
 
+    const fastestAvailableOptionValueId = computed<string | undefined>(() => {
+      if (props.isDisabled) {
+        return;
+      }
+
+      const cardDataByOptionValueId = productionTimeOptionCardDataByOptionValueId.value;
+      const optionValue = sortedValues.value.find((value) => {
+        const cardData = cardDataByOptionValueId[value.id];
+
+        return !!cardData && cardData.slotsLeft !== 0;
+      });
+
+      return optionValue && optionValue.id;
+    });
+
     function isOptionValueSoldOut (optionValue: OptionValue): boolean {
       const cardData = productionTimeOptionCardDataByOptionValueId.value[optionValue.id];
 
@@ -227,6 +243,10 @@ export default defineComponent({
 
     function isOptionValueDisabled (optionValue: OptionValue): boolean {
       return props.isDisabled || isOptionValueSoldOut(optionValue);
+    }
+
+    function isFastestAvailable (optionValue: OptionValue): boolean {
+      return optionValue.id === fastestAvailableOptionValueId.value;
     }
 
     const { ariaDescribedby, ariaInvalid, errorMessageId } = useErrorAccessibility(
@@ -239,6 +259,7 @@ export default defineComponent({
       ariaInvalid,
       errorMessageId,
       groupRole,
+      isFastestAvailable,
       isOptionValueDisabled,
       productionTimeOptionCardDataByOptionValueId,
       radioInputName,
@@ -292,7 +313,7 @@ export default defineComponent({
     }
   }
 
-  ._mobile-timeline {
+  ._timeline {
     position: relative;
     display: flex;
     align-items: center;
@@ -331,13 +352,13 @@ export default defineComponent({
   }
 
   ._option:first-child {
-    ._mobile-timeline::before {
+    ._timeline::before {
       display: none;
     }
   }
 
   ._option:last-child {
-    ._mobile-timeline::after {
+    ._timeline::after {
       display: none;
     }
   }
@@ -409,7 +430,7 @@ export default defineComponent({
       justify-content: center;
     }
 
-    ._mobile-timeline {
+    ._timeline {
       align-items: center;
       min-height: auto;
       margin-bottom: var(--spacer-sm);

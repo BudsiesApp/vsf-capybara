@@ -10,6 +10,10 @@
       <SfIcon icon="check" size="12px" color="white" />
     </span>
 
+    <span v-if="isFastestAvailable" class="_fastest-available-badge">
+      {{ fastestAvailableTitle }}
+    </span>
+
     <div class="_icon-wrapper" aria-hidden="true">
       <span
         class="_icon"
@@ -99,6 +103,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    isFastestAvailable: {
+      type: Boolean,
+      default: false
+    },
     isSelected: {
       type: Boolean,
       default: false
@@ -170,6 +178,10 @@ export default defineComponent({
       return `+ ${PriceHelper.formatPrice(finalPrice, selectedCurrency.value.symbol)}`;
     });
 
+    const fastestAvailableTitle = computed<string>(() => {
+      return root.$t('Fastest available').toString();
+    });
+
     const hasInfiniteSlots = computed<boolean>(() => {
       return !Number.isFinite(props.slotsLeft);
     });
@@ -202,6 +214,7 @@ export default defineComponent({
     });
 
     return {
+      fastestAvailableTitle,
       hasInfiniteSlots,
       iconStyle,
       isSoldOut,
@@ -256,6 +269,21 @@ export default defineComponent({
     width: 23px;
     height: 23px;
     background: var(--c-primary);
+  }
+
+  ._fastest-available-badge {
+    position: absolute;
+    top: 0;
+    right: var(--spacer-sm);
+    z-index: 1;
+    padding: 2px var(--spacer-xs);
+    background: var(--c-primary);
+    color: var(--c-white);
+    font-size: var(--font-sm);
+    font-weight: var(--font-bold);
+    line-height: 1.2;
+    transform: translateY(-50%);
+    white-space: nowrap;
   }
 
   ._icon-wrapper {
@@ -346,6 +374,12 @@ export default defineComponent({
       left: var(--spacer-xs);
       display: none;
       visibility: visible;
+    }
+
+    ._fastest-available-badge {
+      right: auto;
+      left: 50%;
+      transform: translate(-50%, -50%);
     }
 
     ._icon-wrapper {
