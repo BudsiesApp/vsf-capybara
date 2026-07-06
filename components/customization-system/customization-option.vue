@@ -85,7 +85,7 @@ import SearchFieldWidget from './widgets/search-field-widget.vue';
 import TextAreaWidget from './widgets/textarea-widget.vue';
 import TextInputWidget from './widgets/text-input-widget.vue';
 import ThumbnailsListWidget from './widgets/thumbnails-list-widget.vue';
-import TimelineListWidget from './widgets/timeline-list-widget.vue';
+import ProductionTimeTimelineWidget from './widgets/production-time-timeline-widget.vue';
 
 type WidgetComponent = InstanceType<typeof CardsListWidget> |
 InstanceType<typeof CheckboxWidget> |
@@ -96,7 +96,7 @@ InstanceType<typeof SearchFieldWidget> |
 InstanceType<typeof TextAreaWidget> |
 InstanceType<typeof TextInputWidget> |
 InstanceType<typeof ThumbnailsListWidget> |
-InstanceType<typeof TimelineListWidget>;
+InstanceType<typeof ProductionTimeTimelineWidget>;
 
 const customizationWidgetBusyStateChangedEventName =
   'customization-option-busy-state-changed';
@@ -113,7 +113,7 @@ export default defineComponent({
     TextAreaWidget,
     TextInputWidget,
     ThumbnailsListWidget,
-    TimelineListWidget,
+    ProductionTimeTimelineWidget,
     ValidationProvider
   },
   props: {

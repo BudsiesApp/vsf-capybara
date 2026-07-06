@@ -1,6 +1,6 @@
 <template>
   <div
-    class="timeline-list-widget"
+    class="production-time-timeline-widget"
     :role="groupRole"
     :aria-labelledby="ariaLabelledby"
   >
@@ -98,7 +98,7 @@ function getRushAddonForOptionValue (
 }
 
 export default defineComponent({
-  name: 'TimelineListWidget',
+  name: 'ProductionTimeTimelineWidget',
   components: {
     ProductionTimeOptionCard
   },
@@ -263,7 +263,7 @@ export default defineComponent({
     }
 
     const { ariaDescribedby, ariaInvalid, errorMessageId } = useErrorAccessibility(
-      'timeline-list-widget',
+      'production-time-timeline-widget',
       hasError
     );
 
@@ -287,7 +287,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-.timeline-list-widget {
+.production-time-timeline-widget {
   $timeline-mark-size: 14px;
   $timeline-mark-border-width: 3px;
   $timeline-line-width: 2px;
