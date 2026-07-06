@@ -274,6 +274,10 @@ export default defineComponent({
 
     margin-top: var(--spacer-lg);
 
+    &.-compact-spacing {
+      margin-top: 0;
+    }
+
     &.-widget-CardsListWidget {
       --customization-option-widget-margin: var(--spacer-sm) calc(var(--spacer-sm) * -1) 0;
     }
