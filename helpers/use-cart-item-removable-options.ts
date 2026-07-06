@@ -156,7 +156,7 @@ export function useCartItemRemovableOptions (
     for (const item of initialCustomizationState.value) {
       const customization = availableCustomizationsDictionary.value[item.customization_id];
 
-      if (!customization || !customization.optionData || customization.optionData.isRequired) {
+      if (!customization || !customization.allowRemovingFromCart) {
         continue;
       }
 
@@ -169,7 +169,7 @@ export function useCartItemRemovableOptions (
 
         const optionValue = optionValueDictionary.value[selectedValue];
 
-        if (!optionValue || !optionValue.allowRemovingFromCart) {
+        if (!optionValue) {
           continue;
         }
 
