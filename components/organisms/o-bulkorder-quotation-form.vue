@@ -143,6 +143,7 @@
         :addons="addons"
         :disabled="isDisabled"
         :get-field-anchor-name="getFieldAnchorName"
+        v-if="addons.length"
       />
 
       <m-form-errors
