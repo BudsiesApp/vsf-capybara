@@ -336,7 +336,7 @@ export function useCartItemRemovableOptions (
 
     await syncCartItem(
       optionValue,
-      CartEvents.UPGRADE_REMOVE_FROM_CART,
+      CartEvents.CART_UPGRADE_REMOVED,
       () => restoreRelatedOptions(customizationId, optionValue)
     );
   }
@@ -351,7 +351,7 @@ export function useCartItemRemovableOptions (
 
     await syncCartItem(
       optionValue,
-      CartEvents.UPGRADE_RESTORE_FROM_CART,
+      CartEvents.CART_UPGRADE_RESTORE,
       () => remove({ customizationId, optionValue })
     );
   }
