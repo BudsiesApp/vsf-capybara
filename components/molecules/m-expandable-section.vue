@@ -41,13 +41,13 @@ export default defineComponent({
       type: String,
       default: ''
     },
-    expanded: {
+    initiallyExpanded: {
       type: Boolean,
       default: false
     }
   },
   setup (props) {
-    const isExpanded = ref(props.expanded);
+    const isExpanded = ref(props.initiallyExpanded);
     const id = `expandable-section-${instanceId++}`;
     const bodyId = `${id}-body`;
 
@@ -72,7 +72,7 @@ export default defineComponent({
   ._header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: var(--expandable-section-header-hor-align, space-between);
     cursor: pointer;
     user-select: none;
   }
@@ -90,8 +90,8 @@ export default defineComponent({
   ._body {
     display: grid;
     grid-template-rows: 0fr;
-    transition: grid-template-rows 300ms ease-in-out, visibility 0s linear 300ms, margin-top 0s linear 300ms;
-    will-change: grid-template-rows;
+    transition: grid-template-rows 300ms ease-in-out, visibility 0s linear 300ms, margin-top 300ms linear;
+    will-change: grid-template-rows, margin-top;
     visibility: hidden;
     padding: var(--expandable-section-body-padding, 0);
   }
