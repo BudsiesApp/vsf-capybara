@@ -668,6 +668,12 @@ export default defineComponent({
     margin-top: var(--spacer-base);
   }
 
+  ._customization-option {
+    &.-compact-spacing {
+      margin-top: 0;
+    }
+  }
+
   &.-align-center {
   --price-justify-content: center;
   --customization-option-label-align: center;

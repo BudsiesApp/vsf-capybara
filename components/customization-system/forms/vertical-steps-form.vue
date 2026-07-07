@@ -547,6 +547,10 @@ export default defineComponent({
 
     margin-top: var(--spacer-base);
 
+    &.-compact-spacing {
+      margin-top: 0;
+    }
+
     ::v-deep {
       .cards-list-widget {
         width: 100%;
