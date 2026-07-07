@@ -5,6 +5,7 @@
     <MBlockStory
       :story-slug="topStorySlug"
       class="_top-block"
+      @story-ready="onStoryReady"
       v-if="topStorySlug"
     />
 
@@ -115,7 +116,11 @@
           </template>
         </div>
 
-        <MBlockStory :story-slug="bottomStorySlug" v-if="bottomStorySlug" />
+        <MBlockStory
+          :story-slug="bottomStorySlug"
+          @story-ready="onStoryReady"
+          v-if="bottomStorySlug"
+        />
       </form>
     </validation-observer>
 
@@ -174,6 +179,7 @@ import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
 
@@ -182,7 +188,6 @@ import CustomizationOption from 'theme/components/customization-system/customiza
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MOrderSubmitAgreement from 'theme/components/molecules/m-order-submit-agreement.vue';
-import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
 
 function getAllFormRefs (
   refs: Record<string, Vue | Element | Vue[] | Element[]>
@@ -231,7 +236,6 @@ export default defineComponent({
     MBlockStory,
     MFormErrors,
     MOrderSubmitAgreement,
-    MProductDescriptionStory,
     SfButton,
     SfDivider,
     SfHeading,
@@ -469,6 +473,15 @@ export default defineComponent({
       ).toString();
     });
 
+    const storyDependencies = computed<string[]>(() => {
+      return [`blocks/${topStorySlug.value}`, `blocks/${bottomStorySlug.value}`];
+    });
+    const { onStoryReady } = useStoryblokReadinessTracker(
+      productSku,
+      storyDependencies,
+      () => context.emit('form-ready')
+    );
+
     const { customizationFilter } = useABTestingCustomizationsFilter(
       context.ssrContext
     );
@@ -494,6 +507,7 @@ export default defineComponent({
       onEntityBusyChanged,
       onCustomizationOptionInput,
       onFormSubmit,
+      onStoryReady,
       pageTitle,
       shouldMakeAnother,
       submitButtonText,

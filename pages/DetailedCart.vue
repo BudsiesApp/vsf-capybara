@@ -108,6 +108,7 @@ import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { ModalList } from 'theme/store/ui/modals';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MDropdown from 'theme/components/molecules/m-dropdown.vue';
+import { emitPageRenderedEvent } from 'src/modules/shared';
 
 export default {
   name: 'DetailedCart',
@@ -291,6 +292,8 @@ export default {
         products: this.products,
         platformTotals: this.$store.state.cart.platformTotals
       });
+
+      emitPageRenderedEvent();
     }
   },
   metaInfo () {

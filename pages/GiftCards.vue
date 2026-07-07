@@ -45,6 +45,7 @@
           :price-amount-list="priceAmountList"
           :custom-amount-values="customAmountValues"
           :gift-card-type="baseGiftCardType"
+          @hook:mounted="onFormMounted"
           @submit-form="onFormSubmit"
           @show-preview="onShowPreviewModalHandler"
         />
@@ -53,8 +54,8 @@
       <MProductDescriptionStory
         v-if="showStory"
         class="_giftcard-detailed-information"
-        :product="product"
         :product-sku="product.sku"
+        @story-ready="onStoryReady"
       />
     </div>
   </div>
@@ -79,7 +80,7 @@ import MProductDescriptionStory from 'theme/components/molecules/m-product-descr
 
 import GiftCardTemplate from 'src/modules/gift-card/types/GiftCardTemplate.interface';
 import { ImageHandlerService } from 'src/modules/file-storage';
-import { InjectType, ProductEvent } from 'src/modules/shared';
+import { emitPageRenderedEvent, InjectType, ProductEvent } from 'src/modules/shared';
 import {
   AMASTY_GIFT_CARD_SKU,
   AmGiftCardType,
@@ -262,7 +263,9 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       giftCardOrderFormData:
         defaultGiftCardOrderFormData as GiftCardOrderFormData,
       showPreviewModal: false,
-      isSubmitting: false
+      isSubmitting: false,
+      isFormMounted: false,
+      isStoryReady: false
     };
   },
   async mounted (): Promise<void> {
@@ -308,6 +311,21 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
   },
   methods: {
+    onFormMounted (): void {
+      this.isFormMounted = true;
+      this.emitPageRendered();
+    },
+    onStoryReady (): void {
+      this.isStoryReady = true;
+      this.emitPageRendered();
+    },
+    emitPageRendered (): void {
+      if (!this.product || !this.isFormMounted || !this.isStoryReady) {
+        return;
+      }
+
+      emitPageRenderedEvent();
+    },
     async addCartItem (): Promise<void> {
       if (!this.product || !this.giftCardOrderFormData.selectedTemplateId) {
         return;

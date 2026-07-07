@@ -259,7 +259,7 @@ import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-headers.function';
 
-import { ProductEvent } from 'src/modules/shared';
+import { emitPageRenderedEvent, ProductEvent } from 'src/modules/shared';
 import { mappingFallbackForUrlRewrite } from 'src/modules/url-rewrite';
 
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
@@ -611,6 +611,7 @@ export default {
         categoryId: category.id || ''
       }
     );
+    this.emitPageRendered();
   },
   beforeDestroy () {
     unMapMobileObserver();
@@ -672,6 +673,7 @@ export default {
     async onCategoryChangedHandler (categoryRoute) {
       await composeInitialPageState(store, categoryRoute);
       await this.updatePage(categoryRoute);
+      this.emitPageRendered();
     },
     async updatePage (route) {
       if (route.query.page) {
@@ -692,6 +694,13 @@ export default {
           categoryId: category.id || ''
         }
       );
+    },
+    emitPageRendered () {
+      if (!this.getCurrentCategory) {
+        return;
+      }
+
+      emitPageRenderedEvent();
     },
     getCanonicalUrl () {
       const {

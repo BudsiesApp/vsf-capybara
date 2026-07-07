@@ -31,6 +31,7 @@ import { OrdersHistoryModule } from 'src/modules/orders-history';
 import { CurrencyModule } from 'src/modules/currency';
 import { FeraModule } from 'src/modules/fera';
 import { TrafficAttributionModule } from 'src/modules/traffic-attribution';
+import { MaestraModule } from 'src/modules/maestra';
 
 import registerStoryblokComponents from 'theme/components/storyblok'
 import { KlaviyoModule, ModuleConfig } from 'src/modules/klaviyo'
@@ -90,6 +91,7 @@ export function registerClientModules () {
   registerModule(FeraModule)
   registerModule(AmazonPay)
   registerModule(TrafficAttributionModule)
+  registerModule(MaestraModule)
 
   const klaviyoModuleConfig: ModuleConfig = {
     updateEmailMutation: SET_PERSISTED_CUSTOMER_EMAIL,
