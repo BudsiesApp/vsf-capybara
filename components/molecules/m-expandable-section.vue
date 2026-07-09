@@ -1,6 +1,7 @@
 <template>
   <div class="m-expandable-section" :class="{ '-expanded': isExpanded }">
-    <div
+    <component
+      :is="titleTag"
       class="_header"
       role="button"
       :tabindex="0"
@@ -14,8 +15,8 @@
         <span class="_title">{{ title }}</span>
       </slot>
 
-      <SfChevron class="_chevron" />
-    </div>
+      <SfChevron aria-hidden="true" class="_chevron" />
+    </component>
 
     <div :id="bodyId" class="_body">
       <div class="_body-inner">
@@ -40,6 +41,10 @@ export default defineComponent({
     title: {
       type: String,
       default: ''
+    },
+    titleTag: {
+      type: String,
+      default: 'div'
     },
     initiallyExpanded: {
       type: Boolean,
@@ -73,6 +78,7 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: var(--expandable-section-header-hor-align, space-between);
+    margin: 0;
     cursor: pointer;
     user-select: none;
   }
@@ -111,7 +117,7 @@ export default defineComponent({
     >._body {
       grid-template-rows: 1fr;
       visibility: visible;
-      margin-top: var(--spacer-sm);
+      margin-top: var(--expandable-section-body-margin-top, var(--spacer-sm));
       transition: grid-template-rows 300ms ease-in-out, visibility 0s linear 0s;
     }
   }

@@ -6,7 +6,10 @@
   >
     <editor-block-icons :item="itemData" />
 
-    <MExpandableSection :title="itemData.title">
+    <MExpandableSection
+      :title="itemData.title"
+      :title-tag="titleTag"
+    >
       <div class="_content">
         <sb-render
           v-for="bodyItem in itemData.body"
@@ -34,6 +37,15 @@ export default Blok.extend({
     itemData (): CollapsibleBlockData {
       return this.item as CollapsibleBlockData;
     },
+    titleTag (): string {
+      const titleLevel = Number(this.itemData.heading_type);
+
+      if (titleLevel >= 1 && titleLevel <= 6) {
+        return `h${titleLevel}`;
+      }
+
+      return 'h3';
+    },
     scopeId (): string {
       return (this.$options as any)._scopeId;
     }
@@ -53,11 +65,16 @@ export default Blok.extend({
   }
 
   .m-expandable-section {
-    --expandable-section-body-padding: 0 0 0 var(--spacer-base);
+    --expandable-section-body-padding: 0;
+    --expandable-section-body-margin-top: var(--spacer-base);
     --expandable-section-title-font-size: var(--h3-font-size);
 
     --expandable-section-border: var(--c-divider) solid 1px;
-    --expandable-section-padding: 0 0 var(--spacer-sm);
+    --expandable-section-padding: var(--spacer-sm) 0;
+  }
+
+  & + & {
+    margin-top: 0;
   }
 
   &.-editor-preview-mode {
@@ -69,7 +86,7 @@ export default Blok.extend({
       ._body {
         grid-template-rows: 1fr !important;
         visibility: visible !important;
-        margin-top: var(--spacer-sm);
+        margin-top: var(--expandable-section-body-margin-top, var(--spacer-base));
       }
     }
   }
