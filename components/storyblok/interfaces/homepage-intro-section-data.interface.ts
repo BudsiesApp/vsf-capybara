@@ -1,4 +1,4 @@
-import { AssetField, ItemData, ColorPickerField, LinkField } from 'src/modules/vsf-storyblok-module';
+import { AssetField, ItemData, ColorPickerField, LinkField, VideoSelectorField } from 'src/modules/vsf-storyblok-module';
 
 export default interface HomepageIntroSectionData extends ItemData {
   image: AssetField,
@@ -9,5 +9,6 @@ export default interface HomepageIntroSectionData extends ItemData {
   button_link: LinkField,
   button_text: string,
   background_color: ColorPickerField,
-  video?: AssetField
+  background_video?: VideoSelectorField,
+  mobile_background_video?: VideoSelectorField
 }

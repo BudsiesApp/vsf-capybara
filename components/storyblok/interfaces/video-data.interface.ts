@@ -1,26 +1,15 @@
 import { AspectRatio } from 'src/modules/shared';
-import { AssetField, ItemData, VideoUrlField } from 'src/modules/vsf-storyblok-module';
+import { ItemData, VideoSelectorField, VideoUrlField } from 'src/modules/vsf-storyblok-module';
+
+import { resolveVideoData } from '../../../helpers/resolve-video-data.function';
 
 export default interface VideoData extends ItemData {
+  video?: VideoSelectorField,
   url?: VideoUrlField,
-  aspect_ratio: AspectRatio,
-  video?: AssetField,
-  autoplay?: boolean,
-  muted?: boolean,
-  loop?: boolean,
+  aspect_ratio?: AspectRatio,
   display_controls?: boolean
 }
 
 export function isVideoData (item: any): item is VideoData {
-  if (!item.aspect_ratio) {
-    return false;
-  }
-
-  const url = item.url;
-
-  if (!url) {
-    return false;
-  }
-
-  return !!(url.video_id && url.video_url && url.provider);
+  return !!resolveVideoData(item as VideoData);
 }

@@ -7,23 +7,22 @@
     <editor-block-icons :item="itemData" />
 
     <video
-      v-if="hasAssetVideo"
       class="_asset-video"
-      :src="assetVideoUrl"
-      :autoplay="autoplay"
-      :muted="muted"
-      :loop="loop"
-      :controls="displayControls"
+      :src="resolvedVideoData.assetUrl"
+      :autoplay="resolvedVideoData.autoplay"
+      :muted="resolvedVideoData.muted"
+      :loop="resolvedVideoData.loop"
+      :controls="resolvedVideoData.displayControls"
       playsinline
+      v-if="hasAssetVideo"
     />
 
     <StreamingVideo
       class="_embedded-video"
-      :aspect-ratio="itemData.aspect_ratio"
-      :video-id="itemData.url.video_id"
-      :provider="itemData.url.provider"
-      :display-controls="displayControls"
-      :auto-play="autoplay"
+      :aspect-ratio="resolvedVideoData.aspectRatio"
+      :video-id="resolvedVideoData.videoId"
+      :provider="resolvedVideoData.provider"
+      :display-controls="resolvedVideoData.displayControls"
       v-else-if="hasEmbeddedVideo"
     />
   </div>
@@ -35,6 +34,11 @@ import { Blok } from 'src/modules/vsf-storyblok-module/components';
 import { StreamingVideo } from 'src/modules/shared';
 
 import VideoData from './interfaces/video-data.interface';
+import {
+  resolveVideoData,
+  ResolvedVideoData,
+  ResolvedVideoSourceType
+} from '../../helpers/resolve-video-data.function';
 
 export default Blok.extend({
   name: 'StoryblokVideo',
@@ -45,28 +49,14 @@ export default Blok.extend({
     itemData (): VideoData {
       return this.item as VideoData;
     },
+    resolvedVideoData (): ResolvedVideoData | undefined {
+      return resolveVideoData(this.itemData);
+    },
     hasAssetVideo (): boolean {
-      const video = this.itemData.video;
-      return !!(video && video.filename);
+      return !!this.resolvedVideoData && this.resolvedVideoData.sourceType === ResolvedVideoSourceType.ASSET;
     },
     hasEmbeddedVideo (): boolean {
-      const url = this.itemData.url;
-      return !!(url && url.video_id && url.provider);
-    },
-    assetVideoUrl (): string {
-      return this.itemData.video ? this.itemData.video.filename : '';
-    },
-    autoplay (): boolean {
-      return this.itemData.autoplay !== undefined ? this.itemData.autoplay : false;
-    },
-    muted (): boolean {
-      return this.itemData.muted !== undefined ? this.itemData.muted : false;
-    },
-    loop (): boolean {
-      return this.itemData.loop !== undefined ? this.itemData.loop : false;
-    },
-    displayControls (): boolean {
-      return this.itemData.display_controls !== undefined ? this.itemData.display_controls : true;
+      return !!this.resolvedVideoData && this.resolvedVideoData.sourceType === ResolvedVideoSourceType.EMBEDDED;
     }
   }
 });
@@ -84,8 +74,8 @@ export default Blok.extend({
   }
 
   &.-editor-preview-mode {
-    ._embedded-video,
-    ._asset-video {
+    ._asset-video,
+    ._embedded-video {
       pointer-events: none
     }
   }

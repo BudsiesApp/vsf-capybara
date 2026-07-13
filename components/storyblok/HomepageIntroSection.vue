@@ -6,7 +6,11 @@
   >
     <editor-block-icons :item="itemData" />
 
-    <div class="_intro-column _image-column">
+    <div
+      class="_intro-column _image-column"
+      :class="videoContainerClasses"
+      :style="videoContainerStyles"
+    >
       <BaseImage
         :srcsets="imageSources.sourceItems"
         :fallback-srcset="imageSources.fallbackSourceItem"
@@ -17,19 +21,28 @@
         fetchpriority="high"
         v-if="itemData.image.filename"
       />
-      <div
-        class="_video-layer"
-        v-if="showVideoLayer"
-      >
-        <video
-          ref="videoElement"
-          :src="videoUrl"
-          autoplay
-          muted
-          loop
-          playsinline
-        />
-      </div>
+
+      <video
+        class="_video-layer -mobile"
+        :src="mobileVideoUrl"
+        poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+        autoplay
+        muted
+        loop
+        playsinline
+        v-if="hasMobileVideo"
+      />
+
+      <video
+        class="_video-layer -desktop"
+        :src="desktopVideoUrl"
+        poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+        autoplay
+        muted
+        loop
+        playsinline
+        v-if="hasDesktopVideo"
+      />
     </div>
 
     <div class="_intro-column _content">
@@ -106,15 +119,54 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     itemData (): HomepageIntroSectionData {
       return this.item as HomepageIntroSectionData;
     },
-    hasVideo (): boolean {
-      const video = this.itemData.video;
-      return !!(video && video.filename);
+    hasDesktopVideo (): boolean {
+      return !!this.desktopVideoUrl;
     },
-    showVideoLayer (): boolean {
-      return this.hasVideo;
+    hasMobileVideo (): boolean {
+      return !!this.mobileVideoUrl;
     },
-    videoUrl (): string {
-      return this.itemData.video ? this.itemData.video.filename : '';
+    desktopVideoUrl (): string {
+      const selector = this.itemData.background_video;
+
+      return selector && selector.asset ? selector.asset.filename : '';
+    },
+    mobileVideoUrl (): string {
+      const selector = this.itemData.mobile_background_video;
+
+      return selector && selector.asset ? selector.asset.filename : '';
+    },
+    videoContainerClasses (): Record<string, boolean> {
+      return {
+        '-with-desktop-video': !!this.desktopVideoAspectRatio,
+        '-with-mobile-video': !!this.mobileVideoAspectRatio
+      };
+    },
+    desktopVideoAspectRatio (): number | undefined {
+      const selector = this.itemData.background_video;
+
+      return this.hasDesktopVideo && selector
+        ? selector.aspect_ratio as number
+        : undefined;
+    },
+    mobileVideoAspectRatio (): number | undefined {
+      const selector = this.itemData.mobile_background_video;
+
+      return this.hasMobileVideo && selector
+        ? selector.aspect_ratio as number
+        : undefined;
+    },
+    videoContainerStyles (): Record<string, string> {
+      const styles: Record<string, string> = {};
+
+      if (this.desktopVideoAspectRatio) {
+        styles['--desktop-video-aspect-ratio'] = this.desktopVideoAspectRatio.toString();
+      }
+
+      if (this.mobileVideoAspectRatio) {
+        styles['--mobile-video-aspect-ratio'] = this.mobileVideoAspectRatio.toString();
+      }
+
+      return styles;
     },
     extraStyles (): Record<string, string> {
       const styles: Record<string, string> = {};
@@ -214,6 +266,16 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 
   ._image-column {
     position: relative;
+
+    &.-with-mobile-video {
+      aspect-ratio: var(--mobile-video-aspect-ratio);
+
+      ._image {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+      }
+    }
   }
 
   ._video-layer {
@@ -223,13 +285,12 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     width: 100%;
     height: 100%;
     overflow: hidden;
+    object-fit: cover;
     pointer-events: none;
+    z-index: 1;
 
-    video {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: cover;
+    &.-desktop {
+      display: none;
     }
   }
 
@@ -244,11 +305,42 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
   }
 
   @media (min-width: $tablet-min) {
+    ._image-column {
+      &.-with-mobile-video {
+        aspect-ratio: auto;
+
+        ._image {
+          position: relative;
+        }
+      }
+
+      &.-with-desktop-video {
+        aspect-ratio: var(--desktop-video-aspect-ratio);
+
+        ._image {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+        }
+      }
+    }
+
+    ._video-layer {
+      &.-mobile {
+        display: none;
+      }
+
+      &.-desktop {
+        display: block;
+      }
+    }
+
     ._content {
       padding: 0 5% 0 55%;
       position: absolute;
       top: 0;
       left: 0;
+      z-index: 2;
 
       ._title-block {
         .sf-heading__title {
