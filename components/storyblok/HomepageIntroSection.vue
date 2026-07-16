@@ -265,6 +265,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
   }
 
   ._image-column {
+    overflow: hidden;
     position: relative;
 
     &.-with-mobile-video {
@@ -279,11 +280,12 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
   }
 
   ._video-layer {
+    display: block;
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: calc(100% + 1px);
     overflow: hidden;
     object-fit: cover;
     pointer-events: none;
