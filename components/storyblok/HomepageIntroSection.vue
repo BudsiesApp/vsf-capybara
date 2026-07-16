@@ -365,17 +365,24 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
       position: absolute;
       top: 0;
       left: 0;
+      text-align: left;
       z-index: 2;
 
-      ._title-block {
-        .sf-heading__title {
-          text-align: left;
-        }
-
-        ._button-row {
-          text-align: left;
-        }
+      .sf-heading {
+        text-align: inherit;
       }
+
+      ._button-row {
+        text-align: inherit;
+      }
+    }
+
+    &.-align-center ._content {
+      text-align: center;
+    }
+
+    &.-align-right ._content {
+      text-align: right;
     }
   }
 
