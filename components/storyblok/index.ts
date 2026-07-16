@@ -17,6 +17,7 @@ export default function registerComponents () {
   add('sharing', () => import(/* webpackChunkName: "vsf-storyblok" */ './Sharing.vue'))
   add('newsletter_subscribe_form', () => import(/* webpackChunkName: "vsf-storyblok" */ './NewsletterSubscribeForm.vue'))
   add('expandable_text_block', () => import(/* webpackChunkName: "vsf-storyblok" */ './ExpandableText.vue'))
+  add('collapsible_block', () => import(/* webpackChunkName: "vsf-storyblok" */ './CollapsibleBlock.vue'))
   add('hr', () => import(/* webpackChunkName: "vsf-storyblok" */ './HorizontalRule.vue'))
   add('parallax', () => import(/* webpackChunkName: "vsf-storyblok" */ './Parallax.vue'))
   add('mailing_list_subscribe_form', () => import(/* webpackChunkName: "vsf-storyblok" */ './MailingListSubscribeForm.vue'))

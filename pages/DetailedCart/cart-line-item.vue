@@ -44,10 +44,10 @@
             class="_customizations-section"
           >
             <template #title>
-              <div class="_title-container">
+              <span class="_title-container">
                 <span class="_customizations-label">{{ $t('Customizations') }}</span>
                 <span class="_selections-count">{{ selectionsCountLabel }}</span>
-              </div>
+              </span>
             </template>
 
             <cart-item-configuration-extended
