@@ -193,6 +193,7 @@ export function useCartItemConfiguration (
         ensureGroup().properties.push({
           id: getPropertyComposedId(selectedOptionValue.name, stateItem.customization_id),
           value: selectedOptionValue.name,
+          optionValueId: selectedOptionValue.id,
           sn: relatedCustomization.sn,
           qty: quantityText,
           finalPriceValue: finalPrice,

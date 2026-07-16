@@ -60,6 +60,32 @@
             </div>
           </validation-provider>
         </template>
+
+        <template #last-question-after-customer-type v-if="leadSourceCustomization">
+          <div class="_last-question-follow-up">
+            <customization-option
+              class="_customization-option _lead-source-customization"
+              ref="customizationOption"
+              :customization="leadSourceCustomization"
+              :is-disabled="isDisabled"
+              :option-values="leadSourceCustomizationOptionValues"
+              :product-id="Number(product.id)"
+              :value="customizationOptionValue[leadSourceCustomization.id]"
+              @input="onCustomizationOptionInput"
+            />
+
+            <customization-option
+              v-if="leadSourceOtherDetailsCustomization"
+              class="_customization-option _lead-source-other-details"
+              ref="customizationOption"
+              :customization="leadSourceOtherDetailsCustomization"
+              :is-disabled="isDisabled"
+              :product-id="Number(product.id)"
+              :value="customizationOptionValue[leadSourceOtherDetailsCustomization.id]"
+              @input="onCustomizationOptionInput"
+            />
+          </div>
+        </template>
       </m-base-form>
 
       <m-form-errors
@@ -88,7 +114,7 @@ import i18n from '@vue-storefront/i18n';
 import { ValidationObserver, ValidationProvider, extend } from 'vee-validate';
 import { required } from 'vee-validate/dist/rules';
 import { SfButton, SfSelect, SfHeading } from '@storefront-ui/vue';
-import { defineComponent, PropType, Ref, ref } from '@vue/composition-api';
+import { computed, defineComponent, PropType, Ref, ref, toRefs } from '@vue/composition-api';
 
 import Product from 'core/modules/catalog/types/Product';
 import {
@@ -96,13 +122,23 @@ import {
   BulkOrderStatus,
   BulkOrderInfo
 } from 'src/modules/budsies';
-import { Customization, OptionValue } from 'src/modules/customization-system';
+import {
+  Customization,
+  CustomizationOptionValue,
+  OptionValue,
+  useAvailableCustomizations,
+  useCustomizationState
+} from 'src/modules/customization-system';
 
 import { useFormValidation } from 'theme/helpers/use-form-validation';
 import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
+import {
+  useBulkRequestLeadSource
+} from 'theme/helpers/use-bulk-request-lead-source';
 
 import MBaseForm from './m-base-form.vue';
 import AOrderedHeading from '../../atoms/a-ordered-heading.vue';
+import CustomizationOption from '../../customization-system/customization-option.vue';
 import MFormErrors from '../../molecules/m-form-errors.vue';
 
 interface PillowSizeOption {
@@ -132,20 +168,76 @@ function getFormAllRefs (
   refs: Record<string, Vue | Element | Vue[] | Element[]>
 ): Record<string, Vue | Element | Vue[] | Element[]> {
   const baseForm = getBaseForm(refs);
+  const customizationOptionRefs = Array.isArray(refs.customizationOption)
+    ? refs.customizationOption
+    : refs.customizationOption ? [refs.customizationOption] : [];
 
-  return { ...refs, ...baseForm.$refs };
+  const customizationRefs: Record<string, Vue | Element | Vue[] | Element[]> = customizationOptionRefs.reduce((result, customizationOption) => {
+    return {
+      ...result,
+      ...((customizationOption as any).$refs || {})
+    };
+  }, {});
+
+  return { ...refs, ...baseForm.$refs, ...customizationRefs };
 }
 
 const SIZE_CUSTOMIZATION_NAME = 'size';
 
 export default defineComponent({
   name: 'OPillowQuoteOrderForm',
-  setup (_, setupContext) {
+  setup (props, setupContext) {
+    const { product } = toRefs(props);
+    const productCustomizations = computed<Customization[]>(() => {
+      return product.value.customizations || [];
+    });
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
     > | null> = ref(null);
 
+    const {
+      customizationOptionValue,
+      customizationState,
+      selectedOptionValuesIds,
+      updateCustomizationOptionValue
+    } = useCustomizationState();
+
+    const {
+      availableCustomizations,
+      customizationAvailableOptionValues
+    } = useAvailableCustomizations(
+      productCustomizations,
+      selectedOptionValuesIds,
+      customizationOptionValue,
+      updateCustomizationOptionValue
+    );
+
+    const {
+      leadSourceCustomization,
+      leadSourceOtherDetailsCustomization,
+      leadSourcePayload,
+      leadSourceCustomizationOptionValues
+    } = useBulkRequestLeadSource(
+      availableCustomizations,
+      customizationOptionValue,
+      customizationAvailableOptionValues
+    );
+
+    function onCustomizationOptionInput (payload: {
+      customizationId: string,
+      value: CustomizationOptionValue
+    }) {
+      updateCustomizationOptionValue(payload);
+    }
+
     return {
+      customizationOptionValue,
+      customizationState,
+      leadSourceCustomization,
+      leadSourceCustomizationOptionValues,
+      leadSourceOtherDetailsCustomization,
+      leadSourcePayload,
+      onCustomizationOptionInput,
       validationObserver,
       ...useBulkOrdersBaseForm(),
       ...useFormValidation(
@@ -169,6 +261,7 @@ export default defineComponent({
     MFormErrors,
     SfButton,
     AOrderedHeading,
+    CustomizationOption,
     SfSelect,
     SfHeading,
     ValidationObserver,
@@ -293,7 +386,8 @@ export default defineComponent({
             alternative_qty: this.bulkordersBaseFormData.additionalQuantity || '',
             deadline_date: this.bulkordersBaseFormData.deadlineDate,
             client_type_id: this.bulkordersBaseFormData.customerType || '',
-            agreement: this.bulkordersBaseFormData.agreement
+            agreement: this.bulkordersBaseFormData.agreement,
+            ...this.leadSourcePayload
           }
         );
 
@@ -356,6 +450,34 @@ export default defineComponent({
     display: flex;
     justify-content: center;
     margin-top: var(--spacer-lg);
+  }
+
+  ._customization-option {
+    --dropdown-widget-max-width: 100%;
+  }
+
+  ._last-question-follow-up {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-lg);
+  }
+
+  ._lead-source-customization,
+  ._lead-source-other-details {
+    --customization-option-label-size: 1rem;
+    --customization-option-label-weight: var(--font-normal);
+  }
+
+  ._lead-source-other-details {
+    width: 100%;
+
+    ::v-deep ._widget {
+      width: 100%;
+    }
+
+    ::v-deep .text-input-widget {
+      max-width: 100%;
+    }
   }
 
   ._section {
