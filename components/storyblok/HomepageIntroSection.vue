@@ -23,26 +23,26 @@
       />
 
       <video
-        class="_video-layer -mobile"
-        :src="mobileVideoUrl"
+        class="_video-layer"
+        :key="`${mobileVideoUrl}-${desktopVideoUrl}`"
         poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
         autoplay
         muted
         loop
         playsinline
-        v-if="hasMobileVideo"
-      />
-
-      <video
-        class="_video-layer -desktop"
-        :src="desktopVideoUrl"
-        poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-        autoplay
-        muted
-        loop
-        playsinline
-        v-if="hasDesktopVideo"
-      />
+        v-if="hasVideo"
+      >
+        <source
+          :src="mobileVideoUrl"
+          :media="mobileVideoMediaQuery"
+          v-if="hasMobileVideo"
+        >
+        <source
+          :src="desktopVideoUrl"
+          :media="desktopVideoMediaQuery"
+          v-if="hasDesktopVideo"
+        >
+      </video>
     </div>
 
     <div class="_intro-column _content">
@@ -87,7 +87,7 @@
 import { VueConstructor } from 'vue';
 import { nl2br, BaseImage, ImageSourceItem } from 'src/modules/budsies';
 
-import { InjectType } from 'src/modules/shared';
+import { BreakpointValue, InjectType } from 'src/modules/shared';
 
 import {
   Blok,
@@ -124,6 +124,15 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     },
     hasMobileVideo (): boolean {
       return !!this.mobileVideoUrl;
+    },
+    hasVideo (): boolean {
+      return this.hasDesktopVideo || this.hasMobileVideo;
+    },
+    desktopVideoMediaQuery (): string {
+      return `(min-width: ${BreakpointValue.SMALL + 1}px)`;
+    },
+    mobileVideoMediaQuery (): string {
+      return `(max-width: ${BreakpointValue.SMALL}px)`;
     },
     desktopVideoUrl (): string {
       const selector = this.itemData.background_video;
@@ -313,10 +322,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     object-fit: cover;
     pointer-events: none;
     z-index: 1;
-
-    &.-desktop {
-      display: none;
-    }
   }
 
   &.-editor-preview-mode {
@@ -347,16 +352,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
           width: 100%;
           height: 100%;
         }
-      }
-    }
-
-    ._video-layer {
-      &.-mobile {
-        display: none;
-      }
-
-      &.-desktop {
-        display: block;
       }
     }
 
