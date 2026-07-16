@@ -2,6 +2,7 @@ import { VideoProvider } from 'src/modules/shared';
 
 import ZoomGalleryAsset from 'theme/interfaces/zoom-gallery-asset.interface';
 import VideoData from 'theme/components/storyblok/interfaces/video-data.interface';
+import { resolveVideoData, ResolvedVideoSourceType } from './resolve-video-data.function';
 
 const supportedVideoProviders: readonly VideoProvider[] = [VideoProvider.youtubeShorts, VideoProvider.youtube];
 
@@ -17,11 +18,16 @@ function getYouTubeImageSrc (videoId: string, quality: YoutubeImageQuality): str
 }
 
 export function getZoomGalleryAssetForVideoData (videoData: VideoData): ZoomGalleryAsset | undefined {
-  if (!supportedVideoProviders.includes(videoData.url.provider)) {
+  const resolvedVideo = resolveVideoData(videoData);
+  if (!resolvedVideo || resolvedVideo.sourceType !== ResolvedVideoSourceType.EMBEDDED) {
     return;
   }
 
-  const videoId = videoData.url.video_id;
+  if (!supportedVideoProviders.includes(resolvedVideo.provider)) {
+    return;
+  }
+
+  const videoId = resolvedVideo.videoId;
 
   const asset: ZoomGalleryAsset = {
     stage: '',
@@ -31,14 +37,14 @@ export function getZoomGalleryAssetForVideoData (videoData: VideoData): ZoomGall
     title: '',
     video: {
       videoId: videoId,
-      provider: videoData.url.provider,
-      aspectRatio: videoData.aspect_ratio,
-      displayControls: videoData.display_controls || false,
+      provider: resolvedVideo.provider,
+      aspectRatio: resolvedVideo.aspectRatio,
+      displayControls: resolvedVideo.displayControls,
       autoplay: false
     }
   };
 
-  switch (videoData.url.provider) {
+  switch (resolvedVideo.provider) {
     case VideoProvider.youtube:
     case VideoProvider.youtubeShorts:
       asset.stage = getYouTubeImageSrc(videoId, YoutubeImageQuality.MAX);
