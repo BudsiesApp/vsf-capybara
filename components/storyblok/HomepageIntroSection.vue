@@ -170,9 +170,19 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     },
     extraStyles (): Record<string, string> {
       const styles: Record<string, string> = {};
+      const desktopContentStart = this.normalizePercentage(this.itemData.desktop_content_start);
+      const desktopContentEnd = this.normalizePercentage(this.itemData.desktop_content_end);
 
       if (this.itemData.background_color.color) {
         styles['--intro-section-background-color'] = this.itemData.background_color.color;
+      }
+
+      if (desktopContentStart) {
+        styles['--desktop-content-start'] = desktopContentStart;
+      }
+
+      if (desktopContentEnd) {
+        styles['--desktop-content-end'] = desktopContentEnd;
       }
 
       return styles;
@@ -209,6 +219,19 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     }
   },
   methods: {
+    normalizePercentage (value: number | string | undefined): string | undefined {
+      if (value === undefined || value === '') {
+        return;
+      }
+
+      const numericValue = Number(value);
+
+      if (isNaN(numericValue)) {
+        return;
+      }
+
+      return `${Math.min(Math.max(numericValue, 0), 100)}%`;
+    },
     nl2br (text: string): string {
       return nl2br(text);
     }
@@ -338,7 +361,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     }
 
     ._content {
-      padding: 0 5% 0 55%;
+      padding: 0 var(--desktop-content-end, 5%) 0 var(--desktop-content-start, 55%);
       position: absolute;
       top: 0;
       left: 0;
