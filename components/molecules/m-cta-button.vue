@@ -85,6 +85,7 @@ $small-button-padding: calc(var(--spacer-2xs) * 3);
   .sf-button {
     --button-font-size: var(--font-sm);
     --button-font-line-height: 1;
+    --button-padding: var(--spacer-sm) var(--spacer-sm);
   }
 
   ._bulk-quote-button {

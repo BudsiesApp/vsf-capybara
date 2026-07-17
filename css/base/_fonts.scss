@@ -66,23 +66,52 @@
 
 $path: "/assets/fonts/";
 
-$font-path: $path + "Gotham-Rounded-Bold";
-@include font-face("Gotham-Rounded-Bold", $font-path, 800, normal);
+$font-path: $path + "GothamRnd-Light";
+@include font-face("Gotham Rounded", $font-path, 300, normal, woff2);
 
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  @include font-face("Gotham-Rounded-Bold", $font-path, 800, normal, svg);
-}
+$font-path: $path + "GothamRnd-LightItalic";
+@include font-face("Gotham Rounded", $font-path, 300, italic, woff2);
 
-$font-path: $path + "Gotham-Rounded-Medium";
-@include font-face("Gotham-Rounded-Medium", $font-path, 400, normal);
+$font-path: $path + "GothamRnd-Book";
+@include font-face("Gotham Rounded", $font-path, 400, normal, woff2);
 
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  @include font-face("Gotham-Rounded-Medium", $font-path, 400, normal, svg);
-}
+$font-path: $path + "GothamRnd-BookItalic";
+@include font-face("Gotham Rounded", $font-path, 400, italic, woff2);
+
+$font-path: $path + "GothamRnd-Medium";
+@include font-face("Gotham Rounded", $font-path, 500, normal, woff2);
+
+$font-path: $path + "GothamRnd-MediumItalic";
+@include font-face("Gotham Rounded", $font-path, 500, italic, woff2);
+
+$font-path: $path + "GothamRnd-Medium";
+@include font-face("Gotham Rounded", $font-path, 600, normal, woff2);
+
+$font-path: $path + "GothamRnd-MediumItalic";
+@include font-face("Gotham Rounded", $font-path, 600, italic, woff2);
+
+$font-path: $path + "GothamRnd-Bold";
+@include font-face("Gotham Rounded", $font-path, 700, normal, woff2);
+
+$font-path: $path + "GothamRnd-BoldItalic";
+@include font-face("Gotham Rounded", $font-path, 700, italic, woff2);
+
 
 $font-path: $path + "Titillium-Web-Regular";
-@include font-face("Titillium Web", $font-path, 400, normal);
+@include font-face("Titillium Web", $font-path, 400, normal, woff2);
 
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  @include font-face("Titillium Web", $font-path, 400, normal, svg);
-}
+$font-path: $path + "Titillium-Web-Italic";
+@include font-face("Titillium Web", $font-path, 400, italic, woff2);
+
+$font-path: $path + "Titillium-Web-SemiBold";
+@include font-face("Titillium Web", $font-path, 600, normal, woff2);
+
+$font-path: $path + "Titillium-Web-SemiBoldItalic";
+@include font-face("Titillium Web", $font-path, 600, italic, woff2);
+
+$font-path: $path + "Titillium-Web-Bold";
+@include font-face("Titillium Web", $font-path, 700, normal, woff2);
+
+$font-path: $path + "Titillium-Web-BoldItalic";
+@include font-face("Titillium Web", $font-path, 700, italic, woff2);
+
