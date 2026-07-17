@@ -5,8 +5,9 @@ $line-height-base: 1.34;
 
 $font-size-base: 16px;
 
-$font-family-base: "Titillium Web", sans-serif;
-$font-family-secondary: "Gotham-Rounded-Medium";
+$font-family-base: "Titillium Web", "Segoe UI", sans-serif;
+
+$font-family-secondary: "Gotham Rounded", sans-serif;
 
 // override storefront-ui variables
 :root {
@@ -16,12 +17,12 @@ $font-family-secondary: "Gotham-Rounded-Medium";
     --font-family-secondary: #{$font-family-secondary};
     // font-weight
     --font-light: 300;
-    --font-normal: 300;
+    --font-normal: 400;
     --font-medium: 500;
-    --font-semibold: 500;
-    --font-bold: 800;
-    --font-extra-bold: 800;
-    --font-black: 800;
+    --font-semibold: 600;
+    --font-bold: 700;
+    --font-extra-bold: 900;
+    --font-black: 900;
     // font-size
     --font-2xs: 0.703rem; 
     --font-xs: 0.844rem; 
