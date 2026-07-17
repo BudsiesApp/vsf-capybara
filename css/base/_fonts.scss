@@ -66,34 +66,28 @@
 
 $path: "/assets/fonts/";
 
-$font-path: $path + "GothamRnd-Light";
+$font-path: $path + "GothamRnd-Light_300";
 @include font-face("Gotham Rounded", $font-path, 300, normal, woff2);
 
-$font-path: $path + "GothamRnd-LightItalic";
+$font-path: $path + "GothamRnd-Light_300_Italic";
 @include font-face("Gotham Rounded", $font-path, 300, italic, woff2);
 
-$font-path: $path + "GothamRnd-Book";
+$font-path: $path + "GothamRnd-Book_400";
 @include font-face("Gotham Rounded", $font-path, 400, normal, woff2);
 
-$font-path: $path + "GothamRnd-BookItalic";
+$font-path: $path + "GothamRnd-Book_400_Italic";
 @include font-face("Gotham Rounded", $font-path, 400, italic, woff2);
 
-$font-path: $path + "GothamRnd-Medium";
-@include font-face("Gotham Rounded", $font-path, 500, normal, woff2);
+$font-path: $path + "GothamRnd-Medium_500";
+@include font-face("Gotham Rounded", $font-path, 500 600, normal, woff2);
 
-$font-path: $path + "GothamRnd-MediumItalic";
-@include font-face("Gotham Rounded", $font-path, 500, italic, woff2);
+$font-path: $path + "GothamRnd-Medium_500_Italic";
+@include font-face("Gotham Rounded", $font-path, 500 600, italic, woff2);
 
-$font-path: $path + "GothamRnd-Medium";
-@include font-face("Gotham Rounded", $font-path, 600, normal, woff2);
-
-$font-path: $path + "GothamRnd-MediumItalic";
-@include font-face("Gotham Rounded", $font-path, 600, italic, woff2);
-
-$font-path: $path + "GothamRnd-Bold";
+$font-path: $path + "GothamRnd-Bold_700";
 @include font-face("Gotham Rounded", $font-path, 700, normal, woff2);
 
-$font-path: $path + "GothamRnd-BoldItalic";
+$font-path: $path + "GothamRnd-Bold_700_Italic";
 @include font-face("Gotham Rounded", $font-path, 700, italic, woff2);
 
 
