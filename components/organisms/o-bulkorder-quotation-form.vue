@@ -483,8 +483,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
-$table-header-color: #062e5f;
-$selection-color: #ffb31a;
+$table-header-color: var(--c-text);
+$selection-color: var(--c-primary);
 $border-color: #d8d8d8;
 $soft-background-color: #f7f7f2;
 
@@ -557,7 +557,6 @@ $soft-background-color: #f7f7f2;
     border: 1px solid $border-color;
     border-collapse: separate;
     border-spacing: 0;
-    border-radius: 8px;
     overflow: hidden;
 
     th {
@@ -582,7 +581,7 @@ $soft-background-color: #f7f7f2;
     cursor: pointer;
 
     &.-selected td {
-      background: #fff8e8;
+      background: #f0fbfc;
     }
 
     &.-disabled {
@@ -615,7 +614,6 @@ $soft-background-color: #f7f7f2;
     display: grid;
     row-gap: var(--spacer-lg);
     border: 3px solid $selection-color;
-    border-radius: 8px;
     background: $soft-background-color;
   }
 
