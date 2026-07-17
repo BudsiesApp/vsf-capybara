@@ -25,8 +25,9 @@
       </div>
       <div class="_quotes-selector">
         <SfHeading
+          class="_quotes-selector-title"
           v-if="!isQuoteSelectionDisabled"
-          :level="2"
+          :level="3"
           :title="$t('Estimated Bulk Production Pricing')"
         />
 
@@ -60,12 +61,23 @@
                 :class="{ '-selected': isQuoteSelected(quote), '-disabled': isQuoteRowSelectionDisabled }"
                 :tabindex="isQuoteRowSelectionDisabled ? -1 : 0"
                 :aria-disabled="isQuoteRowSelectionDisabled ? 'true' : 'false'"
+                :aria-selected="isQuoteSelected(quote) ? 'true' : 'false'"
                 @click="selectQuote(quote)"
                 @keydown.enter.prevent="selectQuote(quote)"
                 @keydown.space.prevent="selectQuote(quote)"
               >
                 <td :data-label="quantityColumnTitle">
-                  {{ getQuoteQuantityLabel(quote) }}
+                  <SfRadio
+                    v-model="quoteId"
+                    :value="quote.id.toString()"
+                    :disabled="isQuoteRowSelectionDisabled"
+                    name="bulkorder-quote"
+                    class="_quote-radio"
+                  >
+                    <template #label>
+                      {{ getQuoteQuantityLabel(quote) }}
+                    </template>
+                  </SfRadio>
                 </td>
                 <td :data-label="$t('Estimated Unit Price (USD)')">
                   {{ getEstimatedUnitPrice(quote) }}
@@ -79,7 +91,8 @@
         </div>
 
         <p class="_quote-currency-note" v-if="!isQuoteSelectionDisabled">
-          {{ $t('Please note: All quotes are in $USD') }}
+          <strong class="_note-label">{{ $t('Please note:') }}</strong>
+          {{ $t('All quotes are in USD') }}
         </p>
 
         <div class="_production-time" v-if="productionTimeStoryContent">
@@ -89,7 +102,8 @@
     </div>
 
     <p class="_not-order-note" v-if="!isQuoteSelectionDisabled">
-      <strong>{{ $t('This is not an order.') }}</strong>
+      <strong class="_note-header">{{ $t('This is not an Order.') }}</strong>
+      <br>
       {{ $t('All bulk projects require a prototype sample before bulk production can begin.') }}
     </p>
 
@@ -103,7 +117,7 @@
       <div class="_sample-prototype-copy">
         <SfHeading
           :title="$t('Next Step: Order Sample Prototype')"
-          :level="2"
+          :level="3"
         />
 
         <p>
@@ -168,7 +182,7 @@
 
 <script lang="ts">
 import { PropType, Ref, defineComponent, ref } from '@vue/composition-api';
-import { SfButton, SfHeading } from '@storefront-ui/vue'
+import { SfButton, SfHeading, SfRadio } from '@storefront-ui/vue'
 import { getProductGallery as getGalleryByProduct } from '@vue-storefront/core/modules/catalog/helpers';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { BundleOption } from '@vue-storefront/core/modules/catalog/types/BundleOption';
@@ -235,6 +249,7 @@ export default defineComponent({
     MAddonsSelector,
     SfButton,
     SfHeading,
+    SfRadio,
     Blok: components.block,
     ValidationObserver,
     MFormErrors
@@ -391,7 +406,10 @@ export default defineComponent({
   },
   methods: {
     getPrice (price: number): string {
-      return '$' + price.toFixed(2);
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+      }).format(price);
     },
     getQuoteQuantityLabel (quote: BulkorderQuote): string {
       return quote.qty + ' ' + String(this.$t('pieces'));
@@ -482,6 +500,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 $table-header-color: var(--c-text);
 $selection-color: var(--c-primary);
@@ -526,26 +545,31 @@ $soft-background-color: #f7f7f2;
     }
 
     ._artwork > img {
-      max-width: 100%;
+      max-width: 350px;
     }
   }
 
   ._quotes-selector {
     margin-top: var(--spacer-xl);
     width: 100%;
+
+    ._quotes-selector-title {
+      text-align: left;
+    }
   }
 
   ._quote-currency-note {
+    font-style: italic;
     margin: var(--spacer-xs) 0 0;
+
+    ._note-label {
+      font-weight: var(--font-semibold);
+    }
   }
 
   ._quote-note {
     margin-top: var(--spacer-base);
     margin-bottom: 0;
-  }
-
-  ._quote-currency-note {
-    font-style: italic;
   }
 
   ._quote-table-wrapper {
@@ -568,44 +592,68 @@ $soft-background-color: #f7f7f2;
     }
 
     td {
-      padding: var(--spacer-sm);
-      font-size: var(--font-lg);
+      padding: var(--spacer-xs);
+      font-size: var(--font-base);
       font-weight: var(--font-semibold);
       text-align: center;
       vertical-align: middle;
 
     }
+
+    ._quote-row {
+      cursor: pointer;
+      transition: background-color 150ms ease;
+
+      &:not(.-disabled) {
+        &:hover,
+        &:focus-visible {
+          background: #f0fbfc;
+        }
+
+        &:focus-visible {
+          outline: 2px solid $selection-color;
+          outline-offset: -2px;
+        }
+      }
+
+      &.-selected {
+        background: #f0fbfc;
+      }
+
+      ._quote-radio {
+        --radio-background: transparent;
+        --radio-container-align-items: center;
+        --radio-container-padding: 0;
+        --radio-checkmark-size: 1.25rem;
+        --radio-label-font-family: var(--font-family-primary);
+        --radio-label-font-size: var(--font-size-base);
+
+        display: inline-flex;
+        vertical-align: middle;
+        text-align: left;
+      }
+
+      &.-disabled {
+        cursor: default;
+        opacity: 0.7;
+      }
+
+    }
   }
-
-  ._quote-row {
-    cursor: pointer;
-
-    &.-selected td {
-      background: #f0fbfc;
-    }
-
-    &.-disabled {
-      cursor: default;
-      opacity: 0.7;
-    }
-
-    td {
-      background: var(--c-white);
-    }
-
-    & + ._quote-row td {
-      border-top: 1px solid $border-color;
-    }
-  }
-
   ._production-time {
+    @include storyblok-reset-margins-for-transparent-containers();
+
     margin-top: var(--spacer-base);
   }
 
   ._not-order-note {
-    margin: var(--spacer-xl) auto 0;
+    margin: var(--spacer-2xl) auto 0;
     max-width: 860px;
     font-size: var(--font-lg);
+
+    ._note-header {
+      font-weight: var(--font-semibold);
+    }
   }
 
   ._sample-prototype-card {
@@ -618,9 +666,15 @@ $soft-background-color: #f7f7f2;
   }
 
   ._sample-prototype-copy {
+    text-align: center;
+
     p {
       margin-top: var(--spacer-base);
       line-height: 1.55;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
     }
   }
 
@@ -675,6 +729,8 @@ $soft-background-color: #f7f7f2;
   }
 
   ._more-info {
+    @include storyblok-reset-margins-for-transparent-containers();
+
     margin-top: var(--spacer-xl);
   }
 
@@ -703,6 +759,7 @@ $soft-background-color: #f7f7f2;
 
       ._quote-row {
         border-top: 1px solid $border-color;
+        padding: var(--spacer-xs);
 
         &:first-child {
           border-top: none;
@@ -711,6 +768,7 @@ $soft-background-color: #f7f7f2;
 
       td {
         display: flex;
+        align-items: center;
         justify-content: space-between;
         gap: var(--spacer-sm);
         border-top: none;
@@ -719,7 +777,7 @@ $soft-background-color: #f7f7f2;
         &::before {
           content: attr(data-label);
           font-size: var(--font-base);
-          font-weight: var(--font-bold);
+          font-weight: var(--font-normal);
           text-align: left;
         }
       }
@@ -741,6 +799,19 @@ $soft-background-color: #f7f7f2;
       width: 50%;
     }
 
+    ._quote-table {
+      td {
+        padding: var(--spacer-sm);
+        font-size: var(--font-lg);
+      }
+
+      ._quote-row {
+        & + ._quote-row td {
+          border-top: 1px solid $border-color;
+        }
+      }
+    }
+
     ._bulkorder-description {
       width: 50%;
     }
@@ -748,7 +819,7 @@ $soft-background-color: #f7f7f2;
     ._sample-prototype-card {
       grid-template-columns: minmax(0, 1fr) minmax(280px, 0.75fr);
       column-gap: var(--spacer-lg);
-      align-items: stretch;
+      align-items: center;
     }
 
     ._sample-prototype-action {
@@ -763,7 +834,7 @@ $soft-background-color: #f7f7f2;
     }
 
     ._sample-prototype-card {
-      margin-top: var(--spacer-2xl);
+      margin-top: var(--spacer-base);
       padding: var(--spacer-xl);
     }
   }
