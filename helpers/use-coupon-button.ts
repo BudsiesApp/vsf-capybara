@@ -90,7 +90,7 @@ export function useCouponButton (
     isApplyingCoupon.value = true;
 
     try {
-      const result = await root.$store.dispatch('cart/applyCoupon', couponCode.value);
+      const result = await root.$store.dispatch('cart/applyCoupon', { couponCode: couponCode.value });
 
       if (!result?.code || result.code !== 200) {
         return false;

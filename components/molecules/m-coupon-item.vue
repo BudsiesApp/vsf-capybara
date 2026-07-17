@@ -169,7 +169,8 @@ export default defineComponent({
     animation: coupon-spin 0.8s linear infinite;
   }
 
-  &.-applied {
+  &.-applied,
+  &.-saved {
     background: var(--coupon-applied-background);
     color: var(--coupon-applied-text);
 

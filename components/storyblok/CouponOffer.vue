@@ -31,6 +31,9 @@ import { CouponButtonState, useCouponButton } from 'theme/helpers/use-coupon-but
 
 import CouponOfferData from './interfaces/coupon-offer-data.interface';
 
+const PENDING_COUPON_SAVING_TIMEOUT = 700;
+type CouponOfferButtonState = CouponButtonState | 'saved'
+
 export default defineComponent({
   name: 'StoryblokCouponOffer',
   extends: Blok,
@@ -50,6 +53,12 @@ export default defineComponent({
     const couponCode = computed<string | undefined>(() => itemData.value.coupon_code);
     const couponCodeLabel = computed<string>(() => couponCode.value || '');
     const isSavingPendingCoupon = ref<boolean>(false);
+    const pendingCouponCode = computed<string | null>(() => {
+      return context.root.$store.getters['cart/getPendingCouponCode'];
+    });
+    const isCouponSaved = computed<boolean>(() => {
+      return Boolean(couponCode.value) && pendingCouponCode.value === couponCode.value;
+    });
     const isEditorPreview = computed<boolean>(() => {
       return isStoryblokPreview();
     });
@@ -61,8 +70,16 @@ export default defineComponent({
       isCouponInteractionBlocked,
       state
     } = useCouponButton(couponCode, context);
-    const displayState = computed<CouponButtonState>(() => {
-      return isSavingPendingCoupon.value ? 'applying' : state.value;
+    const displayState = computed<CouponOfferButtonState>(() => {
+      if (isSavingPendingCoupon.value) {
+        return 'applying';
+      }
+
+      if (isCouponSaved.value) {
+        return 'saved';
+      }
+
+      return state.value;
     });
     const offerTitle = computed<string>(() => {
       if (displayState.value === 'locked') {
@@ -78,6 +95,10 @@ export default defineComponent({
 
       if (displayState.value === 'applied') {
         return context.root.$t('Applied').toString();
+      }
+
+      if (displayState.value === 'saved') {
+        return context.root.$t('Saved').toString();
       }
 
       if (displayState.value === 'locked') {
@@ -103,22 +124,22 @@ export default defineComponent({
         { root: true }
       );
     };
-    const savePendingCoupon = async (): Promise<void> => {
+    const savePendingCoupon = (): void => {
       if (!couponCode.value || isActionDisabled.value) {
         return;
       }
 
       isSavingPendingCoupon.value = true;
 
-      try {
-        context.root.$store.commit(
-          `cart/${CART_SET_PENDING_COUPON}`,
-          couponCode.value
-        );
-        notifyPendingCouponSaved();
-      } finally {
+      context.root.$store.commit(
+        `cart/${CART_SET_PENDING_COUPON}`,
+        couponCode.value
+      );
+
+      setTimeout(() => {
         isSavingPendingCoupon.value = false;
-      }
+        notifyPendingCouponSaved();
+      }, PENDING_COUPON_SAVING_TIMEOUT);
     };
     const applyCouponOffer = async (): Promise<void> => {
       if (isEditorPreview.value || !couponCode.value) {
@@ -126,7 +147,7 @@ export default defineComponent({
       }
 
       if (!hasServerCart.value) {
-        await savePendingCoupon();
+        savePendingCoupon();
         return;
       }
 
