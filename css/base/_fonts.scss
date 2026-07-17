@@ -104,18 +104,26 @@ $font-path: $path + "Roselina-Script";
 @include font-face("Roselina", $font-path, 400, normal, woff2);
 
 
+$font-path: $path + "GothamRnd-Light_300";
+@include font-face("Gotham Rounded", $font-path, 300, normal, woff2);
 
+$font-path: $path + "GothamRnd-Light_300_Italic";
+@include font-face("Gotham Rounded", $font-path, 300, italic, woff2);
 
+$font-path: $path + "GothamRnd-Book_400";
+@include font-face("Gotham Rounded", $font-path, 400, normal, woff2);
 
-$font-name: "GothamRounded";
-@each $font-weight in 300, 400, 500, 700 {
-  $font-path: $path + $font-name + "_" + $font-weight + "_normal";
-  @include font-face($font-name, $font-path, $font-weight, normal);
-}
+$font-path: $path + "GothamRnd-Book_400_Italic";
+@include font-face("Gotham Rounded", $font-path, 400, italic, woff2);
 
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  @each $font-weight in 300, 400, 500, 700 {
-    $font-path: $path + $font-name + "_" + $font-weight + "_normal";
-    @include font-face($font-name, $font-path, $font-weight, null, svg);
-  }
-}
+$font-path: $path + "GothamRnd-Medium_500";
+@include font-face("Gotham Rounded", $font-path, 500 600, normal, woff2);
+
+$font-path: $path + "GothamRnd-Medium_500_Italic";
+@include font-face("Gotham Rounded", $font-path, 500 600, italic, woff2);
+
+$font-path: $path + "GothamRnd-Bold_700";
+@include font-face("Gotham Rounded", $font-path, 700, normal, woff2);
+
+$font-path: $path + "GothamRnd-Bold_700_Italic";
+@include font-face("Gotham Rounded", $font-path, 700, italic, woff2);
