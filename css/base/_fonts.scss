@@ -65,32 +65,44 @@
 }
 
 $path: "/assets/fonts/";
-$font-name: "Avenir";
-$font-weights: (300, 500, 800);
 
-@each $font-weight in $font-weights {
-  $font-path: $path + $font-name + "_" + $font-weight;
-  @include font-face($font-name, $font-path, $font-weight, normal);
-}
+$font-path: $path + "Avenir-Light_300";
+@include font-face("Avenir", $font-path, 300, normal, woff2);
 
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  @each $font-weight in $font-weights {
-    $font-path: $path + $font-name + "_" + $font-weight;
-    @include font-face($font-name, $font-path, $font-weight, normal, svg);
-  }
-}
+$font-path: $path + "Avenir-LightOblique_300_Italic";
+@include font-face("Avenir", $font-path, 300, italic, woff2);
 
-$font-path: $path + $font-name + "_500_italic";
-@include font-face($font-name, $font-path, 500, italic);
+$font-path: $path + "Avenir-Oblique_400_Italic";
+@include font-face("Avenir", $font-path, 400, italic, woff2);
 
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  $font-path: $path + $font-name + "_500_italic";
-  @include font-face($font-name, $font-path, 500, italic, svg);
-}
+$font-path: $path + "Avenir-Roman";
+@include font-face("Avenir", $font-path, 400, normal, woff2);
+
+$font-path: $path + "Avenir-Roman_400";
+@include font-face("Avenir", $font-path, 400, normal, woff2);
+
+$font-path: $path + "Avenir-Medium_500";
+@include font-face("Avenir", $font-path, 500 600, normal, woff2);
+
+$font-path: $path + "Avenir-MediumOblique_500_Italic";
+@include font-face("Avenir", $font-path, 500 600, italic, woff2);
+
+$font-path: $path + "Avenir-Heavy_800";
+@include font-face("Avenir", $font-path, 700 800, normal, woff2);
+
+$font-path: $path + "Avenir-HeavyOblique_800_Italic";
+@include font-face("Avenir", $font-path, 700 800, italic, woff2);
+
+$font-path: $path + "Avenir-Black_900";
+@include font-face("Avenir", $font-path, 900, normal, woff2);
+
+$font-path: $path + "Avenir-BlackOblique_900_Italic";
+@include font-face("Avenir", $font-path, 900, italic, woff2);
+
 
 $font-path: $path + "Roselina-Script";
-@include font-face("Roselina", $font-path, 400, normal);
+@include font-face("Roselina", $font-path, 400, normal, woff2);
 
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  @include font-face("Roselina", $font-path, 400, normal, svg);
-}
+
+
+
