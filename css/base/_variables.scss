@@ -7,8 +7,7 @@ $font-size-base: 16px;
 
 $font-family-intro: "Whale-Song-Regular", sans-serif;
 
-$font-family-base: "Gotham-Medium", sans-serif;
-$font-family-bold: "Gotham-Bold", sans-serif;
+$font-family-base: "Gotham Rounded", sans-serif;
 $font-family-accent: "Whale-Song-Regular", sans-serif;
 
 $page-color: #fff;
@@ -60,7 +59,7 @@ $forms-color-placeholder: #a09999;
     --font-family-intro: #{$font-family-intro};
     // font-weight
     --font-light: 300;
-    --font-normal: 300;
+    --font-normal: 400;
     --font-medium: 500;
     --font-semibold: 600;
     --font-bold: 700;
