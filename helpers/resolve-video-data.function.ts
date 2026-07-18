@@ -32,7 +32,7 @@ export interface ResolvedEmbeddedVideoData extends ResolvedVideoDataBase {
 
 export type ResolvedVideoData = ResolvedAssetVideoData | ResolvedEmbeddedVideoData;
 
-export function resolveVideoSelectorField (selector: VideoSelectorField): ResolvedVideoData | undefined {
+export function resolveVideoSelectorField (selector?: VideoSelectorField | null): ResolvedVideoData | undefined {
   if (!selector) {
     return;
   }
@@ -69,23 +69,5 @@ export function resolveVideoSelectorField (selector: VideoSelectorField): Resolv
 }
 
 export function resolveVideoData (videoData: VideoData): ResolvedVideoData | undefined {
-  if (videoData.video !== undefined) {
-    return resolveVideoSelectorField(videoData.video);
-  }
-
-  const url = videoData.url;
-  if (!url || !url.video_id || !url.provider) {
-    return;
-  }
-
-  return {
-    sourceType: ResolvedVideoSourceType.EMBEDDED,
-    videoId: url.video_id,
-    provider: url.provider,
-    aspectRatio: videoData.aspect_ratio,
-    autoplay: false,
-    muted: false,
-    loop: false,
-    displayControls: videoData.display_controls === true
-  };
+  return resolveVideoSelectorField(videoData.video);
 }
