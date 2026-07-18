@@ -38,16 +38,17 @@ export function resolveVideoSelectorField (selector: VideoSelectorField): Resolv
   }
 
   const asset = selector.asset;
+  const options = selector.options || {};
 
   if (asset && asset.filename) {
     return {
       sourceType: ResolvedVideoSourceType.ASSET,
       assetUrl: asset.filename,
       aspectRatio: selector.aspect_ratio as number,
-      autoplay: selector.autoplay === true,
-      muted: selector.muted === true,
-      loop: selector.loop === true,
-      displayControls: selector.display_controls === true
+      autoplay: options.autoplay === true,
+      muted: options.muted === true,
+      loop: options.loop === true,
+      displayControls: options.display_controls === true
     };
   }
 
@@ -63,7 +64,7 @@ export function resolveVideoSelectorField (selector: VideoSelectorField): Resolv
     autoplay: false,
     muted: false,
     loop: false,
-    displayControls: selector.display_controls === true
+    displayControls: options.display_controls === true
   };
 }
 
