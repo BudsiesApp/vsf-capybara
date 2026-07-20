@@ -32,22 +32,23 @@ export interface ResolvedEmbeddedVideoData extends ResolvedVideoDataBase {
 
 export type ResolvedVideoData = ResolvedAssetVideoData | ResolvedEmbeddedVideoData;
 
-export function resolveVideoSelectorField (selector: VideoSelectorField): ResolvedVideoData | undefined {
+export function resolveVideoSelectorField (selector?: VideoSelectorField | null): ResolvedVideoData | undefined {
   if (!selector) {
     return;
   }
 
   const asset = selector.asset;
+  const options = selector.options || {};
 
   if (asset && asset.filename) {
     return {
       sourceType: ResolvedVideoSourceType.ASSET,
       assetUrl: asset.filename,
       aspectRatio: selector.aspect_ratio as number,
-      autoplay: selector.autoplay === true,
-      muted: selector.muted === true,
-      loop: selector.loop === true,
-      displayControls: selector.display_controls === true
+      autoplay: options.autoplay === true,
+      muted: options.muted === true,
+      loop: options.loop === true,
+      displayControls: options.display_controls === true
     };
   }
 
@@ -63,28 +64,10 @@ export function resolveVideoSelectorField (selector: VideoSelectorField): Resolv
     autoplay: false,
     muted: false,
     loop: false,
-    displayControls: selector.display_controls === true
+    displayControls: options.display_controls === true
   };
 }
 
 export function resolveVideoData (videoData: VideoData): ResolvedVideoData | undefined {
-  if (videoData.video !== undefined) {
-    return resolveVideoSelectorField(videoData.video);
-  }
-
-  const url = videoData.url;
-  if (!url || !url.video_id || !url.provider) {
-    return;
-  }
-
-  return {
-    sourceType: ResolvedVideoSourceType.EMBEDDED,
-    videoId: url.video_id,
-    provider: url.provider,
-    aspectRatio: videoData.aspect_ratio,
-    autoplay: false,
-    muted: false,
-    loop: false,
-    displayControls: videoData.display_controls === true
-  };
+  return resolveVideoSelectorField(videoData.video);
 }
