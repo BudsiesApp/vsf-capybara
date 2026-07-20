@@ -1,13 +1,9 @@
-import { AspectRatio } from 'src/modules/shared';
-import { ItemData, VideoSelectorField, VideoUrlField } from 'src/modules/vsf-storyblok-module';
+import { ItemData, VideoSelectorField } from 'src/modules/vsf-storyblok-module';
 
 import { resolveVideoData } from '../../../helpers/resolve-video-data.function';
 
 export default interface VideoData extends ItemData {
-  video?: VideoSelectorField,
-  url?: VideoUrlField,
-  aspect_ratio?: AspectRatio,
-  display_controls?: boolean
+  video?: VideoSelectorField
 }
 
 export function isVideoData (item: any): item is VideoData {
