@@ -6,7 +6,7 @@
       <m-login
         v-if="!showRegistrationForm"
         :email.sync="email"
-        :email-submit-button-text="$t('Sign Up')"
+        :email-submit-button-text="$t('Sign Up').toString()"
         @otp-submitted="resetPostAuthRedirectPath"
         @otp-requested="onOtpRequested"
         @registration-required="onRegistrationRequired"

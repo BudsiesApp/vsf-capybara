@@ -8,22 +8,22 @@
 
     <video
       class="_asset-video"
-      :src="resolvedVideoData.assetUrl"
-      :autoplay="resolvedVideoData.autoplay"
-      :muted="resolvedVideoData.muted"
-      :loop="resolvedVideoData.loop"
-      :controls="resolvedVideoData.displayControls"
+      :src="assetVideoData.assetUrl"
+      :autoplay="assetVideoData.autoplay"
+      :muted="assetVideoData.muted"
+      :loop="assetVideoData.loop"
+      :controls="assetVideoData.displayControls"
       playsinline
-      v-if="hasAssetVideo"
+      v-if="assetVideoData"
     />
 
     <StreamingVideo
       class="_embedded-video"
-      :aspect-ratio="resolvedVideoData.aspectRatio"
-      :video-id="resolvedVideoData.videoId"
-      :provider="resolvedVideoData.provider"
-      :display-controls="resolvedVideoData.displayControls"
-      v-else-if="hasEmbeddedVideo"
+      :aspect-ratio="embeddedVideoData.aspectRatio"
+      :video-id="embeddedVideoData.videoId"
+      :provider="embeddedVideoData.provider"
+      :display-controls="embeddedVideoData.displayControls"
+      v-else-if="embeddedVideoData"
     />
   </div>
 </template>
@@ -36,6 +36,8 @@ import { StreamingVideo } from 'src/modules/shared';
 import VideoData from './interfaces/video-data.interface';
 import {
   resolveVideoData,
+  ResolvedAssetVideoData,
+  ResolvedEmbeddedVideoData,
   ResolvedVideoData,
   ResolvedVideoSourceType
 } from '../../helpers/resolve-video-data.function';
@@ -52,11 +54,15 @@ export default Blok.extend({
     resolvedVideoData (): ResolvedVideoData | undefined {
       return resolveVideoData(this.itemData);
     },
-    hasAssetVideo (): boolean {
-      return !!this.resolvedVideoData && this.resolvedVideoData.sourceType === ResolvedVideoSourceType.ASSET;
+    assetVideoData (): ResolvedAssetVideoData | undefined {
+      return this.resolvedVideoData?.sourceType === ResolvedVideoSourceType.ASSET
+        ? this.resolvedVideoData
+        : undefined;
     },
-    hasEmbeddedVideo (): boolean {
-      return !!this.resolvedVideoData && this.resolvedVideoData.sourceType === ResolvedVideoSourceType.EMBEDDED;
+    embeddedVideoData (): ResolvedEmbeddedVideoData | undefined {
+      return this.resolvedVideoData?.sourceType === ResolvedVideoSourceType.EMBEDDED
+        ? this.resolvedVideoData
+        : undefined;
     }
   }
 });

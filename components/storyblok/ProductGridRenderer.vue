@@ -33,8 +33,11 @@ import { ProductEvent, PriceHelper } from 'src/modules/shared';
 import { ColumnsCountField, SizeValue } from 'src/modules/vsf-storyblok-module';
 
 import { prepareCategoryProduct } from 'theme/helpers'
+import { resolveProductCardLink } from 'theme/helpers/resolve-product-card-link';
 
 import OProductCard from 'theme/components/organisms/o-product-card.vue';
+
+type PreparedProduct = ReturnType<typeof prepareCategoryProduct> & { link: string };
 
 export default defineComponent({
   name: 'ProductGridRenderer',
@@ -67,8 +70,8 @@ export default defineComponent({
       return root.$store.getters[GET_ACTIVE_CURRENCY];
     });
 
-    const preparedProducts = computed<ReturnType<typeof prepareCategoryProduct>[]>(() => {
-      const products: ReturnType<typeof prepareCategoryProduct>[] = [];
+    const preparedProducts = computed<PreparedProduct[]>(() => {
+      const products: PreparedProduct[] = [];
 
       const _productPriceDictionary = productPriceDictionary.value;
       const _selectedCurrency = selectedCurrency.value;
@@ -87,13 +90,12 @@ export default defineComponent({
           _selectedCurrency
         );
 
-        if (product.landing_page_url) {
-          preparedProduct.link = product.landing_page_url;
-        } else if (typeof preparedProduct.link === 'object') {
-          preparedProduct.link = preparedProduct.link.fullPath || root.$router.resolve(preparedProduct.link).href;
-        }
+        const link = product.landing_page_url || resolveProductCardLink(
+          preparedProduct.link,
+          route => root.$router.resolve(route).href
+        );
 
-        products.push(preparedProduct);
+        products.push({ ...preparedProduct, link });
       }
 
       return products;
