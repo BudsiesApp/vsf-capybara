@@ -112,7 +112,7 @@ export default {
       this.isSubmitting = true;
 
       try {
-        const result = await this.$store.dispatch('cart/applyCoupon', this.promoCode);
+        const result = await this.$store.dispatch('cart/applyCoupon', { couponCode: this.promoCode });
 
         if (result.code !== 200) {
           throw new Error(result.result.errorMessage);
