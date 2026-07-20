@@ -241,7 +241,7 @@ export default defineComponent({
 
   position: relative;
   display: grid;
-  grid-template-columns: 23px minmax(0, 1fr) auto;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
   column-gap: var(--spacer-sm);
   align-items: center;
   padding: var(--spacer-sm);
@@ -266,7 +266,7 @@ export default defineComponent({
   }
 
   ._checkmark {
-    display: flex;
+    display: none;
     visibility: hidden;
     align-items: center;
     justify-content: center;
@@ -291,7 +291,7 @@ export default defineComponent({
   }
 
   ._icon-wrapper {
-    display: none;
+    display: flex;
     align-items: center;
     justify-content: center;
   }
