@@ -3,6 +3,7 @@ import { add } from 'src/modules/vsf-storyblok-module/components'
 export default function registerComponents () {
   add('heading', () => import(/* webpackChunkName: "vsf-storyblok" */'./Heading.vue'))
   add('button_item', () => import(/* webpackChunkName: "vsf-storyblok" */ './Button.vue'))
+  add('coupon_offer', () => import(/* webpackChunkName: "vsf-storyblok" */ './CouponOffer.vue'))
   add('buttons', () => import(/* webpackChunkName: "vsf-storyblok" */ './Buttons.vue'))
   add('html', () => import(/* webpackChunkName: "vsf-storyblok" */ './Html.vue'))
   add('image', () => import(/* webpackChunkName: "vsf-storyblok" */ './Image.vue'))
