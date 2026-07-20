@@ -213,7 +213,7 @@ export default defineComponent({
     const root = context.root;
     const emit = context.emit;
 
-    const validationObserver = ref<ValidationObserverInstance | null>(null);
+    const validationObserver: Ref<ValidationObserverInstance | null> = ref(null);
 
     const emailValue = computed<string>({
       get: () => {

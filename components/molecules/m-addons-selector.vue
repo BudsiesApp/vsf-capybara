@@ -118,10 +118,11 @@ export default Vue.extend({
     }
   },
   data () {
+    const showVideoFlags: Record<number, boolean | undefined> = {};
+
     return {
       instanceId: '',
-      // eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
-      showVideoFlags: {} as Record<number, boolean | undefined>
+      showVideoFlags
     };
   },
   computed: {

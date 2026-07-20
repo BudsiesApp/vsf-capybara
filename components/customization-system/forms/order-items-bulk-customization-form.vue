@@ -218,8 +218,8 @@ export default defineComponent({
     const orderItemCustomizationForm = ref<OrderItemCustomizationFormType[]>([]);
     const orderItemsErrors = ref<Record<string, string>>({});
 
-    const orderItemCustomizationByOrderItemId = computed<Record<string, OrderItemCustomizationFormType>>(() => {
-      const dictionary: Record<string, OrderItemCustomizationFormType> = {};
+    const orderItemCustomizationByOrderItemId = computed<Record<number, OrderItemCustomizationFormType>>(() => {
+      const dictionary: Record<number, OrderItemCustomizationFormType> = {};
       // TODO: temporary - current TS version don't handle `value` type right in this case
       for (const form of ((orderItemCustomizationForm as any).value as unknown as OrderItemCustomizationFormType[])) {
         dictionary[form.draftOrderItem.id] = form;
@@ -228,7 +228,13 @@ export default defineComponent({
     });
 
     function goToOrderItem (orderItemId: string): void {
-      const orderItemCustomizationForm = orderItemCustomizationByOrderItemId.value[orderItemId];
+      const numericOrderItemId = Number(orderItemId);
+
+      if (!Number.isFinite(numericOrderItemId)) {
+        return;
+      }
+
+      const orderItemCustomizationForm = orderItemCustomizationByOrderItemId.value[numericOrderItemId];
 
       if (!orderItemCustomizationForm) {
         return;
@@ -241,7 +247,7 @@ export default defineComponent({
       useEntityBusyState();
 
     function onOrderItemCustomizationFormErrorChanged (
-      { hasError, id }: {hasError: boolean, id: string}
+      { hasError, id }: {hasError: boolean, id: number}
     ): void {
       if (!hasError) {
         del(

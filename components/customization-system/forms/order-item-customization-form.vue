@@ -27,6 +27,7 @@ import {
   computed,
   defineComponent,
   PropType,
+  Ref,
   ref,
   toRefs,
   watch
@@ -49,26 +50,9 @@ import {
   useCustomizationStatePreservation
 } from 'src/modules/customization-system';
 
-import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
 
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
-
-function getAllFormRefs (
-  refs: Record<string, Vue | Element | Vue[] | Element[]>
-): Record<string, Vue | Element | Vue[] | Element[]> {
-  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = {};
-  const customizationOptions = refs['customizationOption'] as InstanceType<
-    typeof CustomizationOption
-  >[];
-
-  for (const customizationOption of customizationOptions) {
-    for (const key in customizationOption.$refs) {
-      refsDictionary[key] = customizationOption.$refs[key];
-    }
-  }
-
-  return refsDictionary;
-}
 
 export default defineComponent({
   name: 'OrderItemCustomizationForm',
@@ -97,7 +81,7 @@ export default defineComponent({
   setup (props, context) {
     const { draftOrderItem, product } = toRefs(props);
 
-    const validationObserver = ref<InstanceType<typeof ValidationObserver> | null>(null);
+    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
     const customizationOption = ref<InstanceType<typeof CustomizationOption>[] | null>(null);
 
     const productCustomizations = computed<Customization[]>(() => {
@@ -212,7 +196,7 @@ export default defineComponent({
 
     const formValidation = useFormValidation(
       validationObserver,
-      () => getAllFormRefs(context.refs),
+      () => getNestedFormRefs(context.refs, 'customizationOption'),
       props.draftOrderItem.id.toString()
     );
 

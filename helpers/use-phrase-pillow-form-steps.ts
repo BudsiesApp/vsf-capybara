@@ -1,14 +1,16 @@
 import { computed, ref, Ref } from '@vue/composition-api';
+import Vue from 'vue';
 
 import { Customization } from 'src/modules/customization-system';
-
-import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 
 import { useFormSteps } from './use-form-steps';
 
 const lastStepName = 'Add to Cart';
 
-type CustomizationOptionComponent = InstanceType<typeof CustomizationOption>;
+type CustomizationOptionComponent = Vue & {
+  customization: Customization;
+  validate: (silent: boolean) => Promise<{ valid: boolean }>;
+};
 
 export function usePhrasePillowFormSteps (
   customizationRootGroups: Ref<Customization[]>,
