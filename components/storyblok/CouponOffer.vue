@@ -19,9 +19,10 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref } from '@vue/composition-api';
+import { computed, ComputedRef, defineComponent, PropType, ref } from '@vue/composition-api';
 
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
+import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import { CART_SET_PENDING_COUPON } from '@vue-storefront/core/modules/cart/store/mutation-types';
 import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
@@ -65,11 +66,16 @@ export default defineComponent({
     const hasServerCart = computed<boolean>(() => {
       return Boolean(context.root.$store.getters['cart/getCartToken']);
     });
+    const cartItems: ComputedRef<CartItem[]> = computed(() => {
+      return context.root.$store.getters['cart/getCartItems'];
+    });
+
     const {
       applyCoupon,
       isCouponInteractionBlocked,
       state
     } = useCouponButton(couponCode, context);
+
     const displayState = computed<CouponOfferButtonState>(() => {
       if (isSavingPendingCoupon.value) {
         return 'applying';
@@ -81,6 +87,7 @@ export default defineComponent({
 
       return state.value;
     });
+
     const offerTitle = computed<string>(() => {
       if (displayState.value === 'locked') {
         return context.root.$t('Another coupon is already applied.').toString();
@@ -88,6 +95,7 @@ export default defineComponent({
 
       return itemData.value.title || '';
     });
+
     const actionText = computed<string>(() => {
       if (displayState.value === 'applying') {
         return context.root.$t('Applying').toString();
@@ -107,6 +115,7 @@ export default defineComponent({
 
       return context.root.$t('Apply').toString();
     });
+
     const isActionDisabled = computed<boolean>(() => {
       return isEditorPreview.value ||
         isCouponInteractionBlocked.value ||
@@ -124,6 +133,7 @@ export default defineComponent({
         { root: true }
       );
     };
+
     const savePendingCoupon = (): void => {
       if (!couponCode.value || isActionDisabled.value) {
         return;
@@ -141,12 +151,13 @@ export default defineComponent({
         notifyPendingCouponSaved();
       }, PENDING_COUPON_SAVING_TIMEOUT);
     };
+
     const applyCouponOffer = async (): Promise<void> => {
       if (isEditorPreview.value || !couponCode.value) {
         return;
       }
 
-      if (!hasServerCart.value) {
+      if (!hasServerCart.value || !cartItems.value.length) {
         savePendingCoupon();
         return;
       }
