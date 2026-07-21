@@ -23,7 +23,8 @@
           :valid="isValid"
           :value="optionValue.id"
           :input-type="inputType"
-          v-model="selectedOption"
+          :selected="selectedOption"
+          @change="onSelectedOptionChange"
         >
           <template #checkmark="{ isChecked }">
             <div class="_checkmark-wrapper">
@@ -208,6 +209,10 @@ export default defineComponent({
 
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
 
+    const onSelectedOptionChange = (selectedOption: string | string[] | undefined): void => {
+      listWidgetFields.selectedOption.value = selectedOption;
+    };
+
     const groupRole = computed<string>(() => {
       return listWidgetFields.inputType.value === ListWidgetInputType.RADIO
         ? 'radiogroup'
@@ -226,6 +231,7 @@ export default defineComponent({
       groupRole,
       getItemImage,
       isValid,
+      onSelectedOptionChange,
       ...listWidgetFields,
       ...useOptionValuesPrice(values, context),
       ...useValuesSort(values)

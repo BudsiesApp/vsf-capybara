@@ -123,7 +123,7 @@ import {
 } from 'src/modules/customization-system';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
-import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
 import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
 
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
@@ -131,23 +131,6 @@ import CustomizationOption from 'theme/components/customization-system/customiza
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MOrderSubmitAgreement from 'theme/components/molecules/m-order-submit-agreement.vue';
-
-function getAllFormRefs (
-  refs: Record<string, Vue | Element | Vue[] | Element[]>
-): Record<string, Vue | Element | Vue[] | Element[]> {
-  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = {};
-  const customizationOptions = refs['customizationOption'] as InstanceType<
-    typeof CustomizationOption
-  >[];
-
-  for (const customizationOption of customizationOptions) {
-    for (const key in customizationOption.$refs) {
-      refsDictionary[key] = customizationOption.$refs[key];
-    }
-  }
-
-  return refsDictionary;
-}
 
 export default defineComponent({
   name: 'CreationWizardFormLastStep',
@@ -216,7 +199,7 @@ export default defineComponent({
     > | null> = ref(null);
 
     const formValidation = useFormValidation(validationObserver, () =>
-      getAllFormRefs(context.refs)
+      getNestedFormRefs(context.refs, 'customizationOption')
     );
 
     const productType = computed<string>(() => {

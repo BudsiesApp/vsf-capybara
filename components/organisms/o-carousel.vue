@@ -46,13 +46,12 @@
 import Vue, { PropType } from 'vue';
 import { SfButton } from '@storefront-ui/vue';
 import Swiper from 'swiper';
-import Autoplay from 'swiper/modules/autoplay.mjs';
-import Navigation from 'swiper/modules/navigation.mjs';
+import { Autoplay, Navigation } from 'swiper/modules';
 import { SwiperOptions } from 'swiper/types/swiper-options';
 import { AutoplayOptions } from 'swiper/types/modules/autoplay';
 
-import 'swiper/swiper.scss';
-import 'swiper/modules/navigation.scss';
+import 'swiper/scss';
+import 'swiper/scss/navigation';
 
 import { BreakpointValue } from 'src/modules/shared';
 

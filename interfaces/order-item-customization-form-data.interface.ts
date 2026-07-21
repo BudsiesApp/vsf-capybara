@@ -1,7 +1,7 @@
 import { DraftOrderItem } from 'src/modules/customization-system';
 
 export interface OrderItemCustomizationFormData {
-  id: string,
+  id: number,
   title: string,
   draftOrderItem: DraftOrderItem,
   product: any,
