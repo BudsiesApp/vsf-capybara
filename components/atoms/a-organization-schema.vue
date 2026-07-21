@@ -1,9 +1,13 @@
 <template>
-  <script
+  <div
     v-if="showOrganizationSchema"
-    type="application/ld+json"
-    v-html="schemaDataString"
-  />
+    style="display: none;"
+  >
+    <script
+      type="application/ld+json"
+      v-html="schemaDataString"
+    />
+  </div>
 </template>
 
 <script lang="ts">
