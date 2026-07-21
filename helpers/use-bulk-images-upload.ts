@@ -7,7 +7,7 @@ import { FilesUploaderEvents } from 'theme/interfaces/files-uploader-events';
 
 export function useBulkImagesUpload (
   { root }: SetupContext,
-  allowMultipleImagesPerUploader: boolean = true
+  allowMultipleImagesPerUploader = true
 ) {
   function windowDragHoverHandler (event: DragEvent): void {
     event.preventDefault();

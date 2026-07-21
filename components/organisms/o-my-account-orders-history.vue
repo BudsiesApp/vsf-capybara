@@ -6,7 +6,7 @@
           <orders-history-list
             :orders="activeOrdersList"
             :alteration-products="alterationProductByOrderItemId"
-            :title="$t('Active Orders')"
+            :title="$t('Active Orders').toString()"
             v-if="activeOrdersList.length"
           />
 
@@ -15,7 +15,7 @@
           <orders-history-list
             :orders="completedOrdersList"
             :alteration-products="alterationProductByOrderItemId"
-            :title="$t('Completed Orders')"
+            :title="$t('Completed Orders').toString()"
             v-if="completedOrdersList.length"
           />
         </div>

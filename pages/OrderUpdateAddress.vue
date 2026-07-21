@@ -123,8 +123,8 @@ export default defineComponent({
   },
   setup (props, context) {
     const root = context.root;
-    const validationObserver = ref<InstanceType<typeof ValidationObserver> | null>(null);
-    const baseAddressForm = ref<InstanceType<typeof OBaseAddressForm> | null>(null);
+    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+    const baseAddressForm: Ref<InstanceType<typeof OBaseAddressForm> | null> = ref(null);
     const wasFormSubmitted = ref(false);
 
     const { order, isLoading, isError: showNotFound } = useOrderDetails(context, props.orderId);

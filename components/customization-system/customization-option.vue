@@ -130,7 +130,7 @@ export default defineComponent({
       default: () => []
     },
     productId: {
-      type: Number,
+      type: [Number, String] as PropType<number | string>,
       required: true
     },
     value: {
@@ -164,6 +164,16 @@ export default defineComponent({
   setup (props, context) {
     const { customization, disableValidation, fieldNamePrefix, optionValues, productId, value, addedToCartOptionValueId, expandConfig, hiddenOptionValues } = toRefs(props);
 
+    const normalizedProductId = computed<number>(() => {
+      const result = Number(productId.value);
+
+      if (!Number.isFinite(result)) {
+        throw new Error(`Invalid customization product ID: ${productId.value}`);
+      }
+
+      return result;
+    });
+
     const optionLabel = computed<string>(() => {
       return customization.value.title || customization.value.name;
     });
@@ -188,7 +198,7 @@ export default defineComponent({
       value,
       customization,
       optionValues,
-      productId,
+      normalizedProductId,
       context,
       addedToCartOptionValueId,
       expandConfig,

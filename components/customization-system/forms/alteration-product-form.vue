@@ -151,7 +151,7 @@ import { useOrderItemAndAlterationProductMapping } from 'theme/helpers/use-order
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useCollapsedCustomizationsView } from 'theme/helpers/use-collapsed-customizations-view';
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
-import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import OProductCard from 'theme/components/organisms/o-product-card.vue';
@@ -213,23 +213,6 @@ function useStandardProductionTimeSelectionEnforcement (
     },
     { deep: true }
   );
-}
-
-function getAllFormRefs (
-  refs: Record<string, Vue | Element | Vue[] | Element[]>
-): Record<string, Vue | Element | Vue[] | Element[]> {
-  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = {};
-  const customizationOptions = refs['customizationOption'] as InstanceType<
-    typeof CustomizationOption
-  >[];
-
-  for (const customizationOption of customizationOptions) {
-    for (const key in customizationOption.$refs) {
-      refsDictionary[key] = customizationOption.$refs[key];
-    }
-  }
-
-  return refsDictionary;
 }
 
 export default defineComponent({
@@ -356,7 +339,7 @@ export default defineComponent({
     const { isSomeEntityBusy, onEntityBusyChanged } = useEntityBusyState();
 
     const formValidation = useFormValidation(validationObserver, () =>
-      getAllFormRefs(context.refs)
+      getNestedFormRefs(context.refs, 'customizationOption')
     );
 
     function onCustomizationOptionInput (payload: {

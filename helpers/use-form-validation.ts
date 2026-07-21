@@ -4,6 +4,28 @@ import { Ref } from '@vue/composition-api';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { isVue } from 'src/modules/shared';
 
+export type FormRef = Vue | Element | (Vue | Element)[];
+export type FormRefs = Record<string, FormRef>;
+
+export function getNestedFormRefs (
+  refs: FormRefs,
+  nestedRefName: string
+): FormRefs {
+  const nestedRef = refs[nestedRefName];
+  const nestedComponents = Array.isArray(nestedRef) ? nestedRef : [nestedRef];
+  const result: FormRefs = {};
+
+  for (const component of nestedComponents) {
+    if (!component || !isVue(component)) {
+      continue;
+    }
+
+    Object.assign(result, component.$refs);
+  }
+
+  return result;
+}
+
 export function getFieldAnchorName (field: string, prefix?: string): string {
   // Strip quotes
   let fieldName = field.replace(/^['"]+|['"]+$/g, '');
@@ -21,7 +43,7 @@ export function getFieldAnchorName (field: string, prefix?: string): string {
 
 export function useFormValidation (
   validationObserver: Ref<InstanceType<typeof ValidationObserver> | null>,
-  getFormFieldsRefs: () => Record<string, Vue | Element | Vue[] | Element[]>,
+  getFormFieldsRefs: () => FormRefs,
   prefix?: string
 ) {
   function getNameOfFirstFieldWithError (
