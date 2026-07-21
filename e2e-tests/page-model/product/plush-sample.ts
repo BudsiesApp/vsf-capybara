@@ -23,9 +23,9 @@ export class PlushSamplePage extends VerticalStepsProductPage {
   }
 
   public async fillRequiredFields (
-    name: string = 'Test name',
-    email: string = 'test@test.test',
-    description: string = 'Test description'
+    name = 'Test name',
+    email = 'test@test.test',
+    description = 'Test description'
   ): Promise<void> {
     await this.customizableProductPage.fillCustomizationImageValue(this.UPLOAD_PHOTO_CUSTOMIZATION_OPTION_LABEL);
 

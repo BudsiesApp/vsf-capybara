@@ -104,7 +104,7 @@ export class QuoteOrderPage {
     projectName: string = this.DEFAULT_PROJECT_NAME,
     projectDescription: string = this.DEFAULT_PROJECT_DESCRIPTION,
     quantity: string = this.DEFAULT_QUANTITY,
-    deadlineOptionIndex: number = 0,
+    deadlineOptionIndex = 0,
     countryName: string = this.DEFAULT_COUNTRY_NAME,
     customerFirstName: string = this.DEFAULT_CUSTOMER_FIRST_NAME,
     customerLastName: string = this.DEFAULT_CUSTOMER_LAST_NAME,

@@ -293,8 +293,6 @@ export default defineComponent({
         if (!this.bulkOrderInfo || this.bulkOrderInfo.id !== bulkOrderId) {
           throw new Error('Unable to resolve status for created BulkOrder');
         }
-      } catch (e) {
-        throw e;
       } finally {
         this.isSubmitting = false;
       }
