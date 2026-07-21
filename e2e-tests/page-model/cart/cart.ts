@@ -95,7 +95,7 @@ export class CartPage {
     await expect(priceLocator).toHaveText(price);
   }
 
-  public async removeCartItemWithDelay (cartItem: Locator, delay: number = 1000) {
+  public async removeCartItemWithDelay (cartItem: Locator, delay = 1000) {
     await this.page.route(`*/**${this.DELETE_CART_ITEM_RESOURCE}?*`, async (route) => {
       await this.page.waitForTimeout(delay);
       await route.continue();

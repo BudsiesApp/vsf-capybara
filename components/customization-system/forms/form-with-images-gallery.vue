@@ -166,7 +166,7 @@ import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import { useCustomizeAction } from 'theme/helpers/use-customize-action';
 import { useImageUpload } from 'theme/helpers/use-image-upload';
-import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
 import { useProductGallery } from 'theme/helpers/use-product-gallery';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 
@@ -178,23 +178,6 @@ import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MOrderSubmitAgreement from 'theme/components/molecules/m-order-submit-agreement.vue';
 import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
 import MZoomGallery from 'theme/components/molecules/m-zoom-gallery.vue';
-
-function getAllFormRefs (
-  refs: Record<string, Vue | Element | Vue[] | Element[]>
-): Record<string, Vue | Element | Vue[] | Element[]> {
-  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = {};
-  const customizationOptions = refs['customizationOption'] as InstanceType<
-    typeof CustomizationOption
-  >[];
-
-  for (const customizationOption of customizationOptions) {
-    for (const key in customizationOption.$refs) {
-      refsDictionary[key] = customizationOption.$refs[key];
-    }
-  }
-
-  return refsDictionary;
-}
 
 export default defineComponent({
   name: 'FormWithImagesGallery',
@@ -418,7 +401,7 @@ export default defineComponent({
     );
 
     const formValidation = useFormValidation(validationObserver, () =>
-      getAllFormRefs(context.refs)
+      getNestedFormRefs(context.refs, 'customizationOption')
     );
 
     const { quantity } = useProductQuantity(existingCartItem);

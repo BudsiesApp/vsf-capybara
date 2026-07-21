@@ -156,18 +156,18 @@ import {
   useOptionValueActions,
   useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
-import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow } from 'src/modules/shared';
+import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow , PrivacyPolicyLink } from 'src/modules/shared';
 import i18n from '@vue-storefront/core/i18n';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
-import { PrivacyPolicyLink } from 'src/modules/shared';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import {
   getFieldAnchorName,
+  getNestedFormRefs, 
   useFormValidation
 } from 'theme/helpers/use-form-validation';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
@@ -178,23 +178,6 @@ import CustomizationOption from 'theme/components/customization-system/customiza
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
-
-function getAllFormRefs (
-  refs: Record<string, Vue | Element | Vue[] | Element[]>
-): Record<string, Vue | Element | Vue[] | Element[]> {
-  const refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = {};
-  const customizationOptions = refs['customizationOption'] as InstanceType<
-    typeof CustomizationOption
-  >[];
-
-  for (const customizationOption of customizationOptions) {
-    for (const key in customizationOption.$refs) {
-      refsDictionary[key] = customizationOption.$refs[key];
-    }
-  }
-
-  return { ...refsDictionary, ...refs };
-}
 
 export default defineComponent({
   name: 'VerticalStepsForm',
@@ -364,7 +347,7 @@ export default defineComponent({
     );
 
     const formValidation = useFormValidation(validationObserver, () =>
-      getAllFormRefs(context.refs)
+      getNestedFormRefs(context.refs, 'customizationOption')
     );
 
     const { quantity } = useProductQuantity(existingCartItem);
