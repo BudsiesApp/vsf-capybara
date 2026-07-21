@@ -486,9 +486,7 @@ export default defineComponent({
       customizations
     } = toRefs(props);
 
-    const backgroundEditor = ref<InstanceType<typeof MBackgroundEditor> | null>(
-      null
-    );
+    const backgroundEditor: Ref<InstanceType<typeof MBackgroundEditor> | null> = ref(null);
 
     const isCustomizerPreviewBackSideFocused = ref<boolean>(false);
 

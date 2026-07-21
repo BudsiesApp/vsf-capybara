@@ -28,7 +28,7 @@
 
       <SfTableData class="table__description">
         <div class="product-title">
-          {{ item.name | htmlDecode }}
+          {{ decodeHtml(item.name) }}
         </div>
 
         <cart-item-configuration
@@ -58,6 +58,7 @@
 import { PropType } from 'vue';
 import { SfImage, SfPrice, SfTable } from '@storefront-ui/vue';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
+import { htmlDecode } from '@vue-storefront/core/filters';
 
 import { OrderContentItem } from '../interfaces/order-content-item.interface';
 
@@ -94,6 +95,9 @@ export default {
     ...mapMobileObserver()
   },
   methods: {
+    decodeHtml (value: string): string {
+      return htmlDecode(value);
+    },
     getItemQuantity (product: OrderContentItem): number | string {
       return this.shouldShowHeader ? product.qty : `x ${product.qty}`;
     },

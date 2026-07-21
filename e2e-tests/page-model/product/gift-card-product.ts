@@ -148,7 +148,7 @@ export class GiftCardProductPage {
     senderName: string = DEFAULT_SENDER_NAME,
     recipientName: string = DEFAULT_RECIPIENT_NAME,
     recipientEmail: string = DEFAULT_RECIPIENT_EMAIL,
-    sendPhysicalGiftCard: boolean = false,
+    sendPhysicalGiftCard = false,
     message: string = DEFAULT_MESSAGE
   ): Promise<void> {
     await this.senderNameInputFormField.fill(senderName);

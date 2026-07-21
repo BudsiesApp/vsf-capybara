@@ -110,7 +110,6 @@
             <router-link
               class="_item-link"
               :to="item.url"
-              :class="{'-active': item.isActive && item.isActive()}"
               @click.native="$emit('close')"
             >
               <SfMenuItem :label="item.label" icon="" />

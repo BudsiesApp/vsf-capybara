@@ -57,7 +57,7 @@
           </SfSelect>
 
           <validation-provider
-            v-slot="{ errors }"
+            v-slot="{ errors: customPriceErrors }"
             slim
             :rules="customPriceAmountRules"
             name="'Price Amount'"
@@ -73,8 +73,8 @@
               v-model.number="customPriceAmount"
               :disabled="isDisabled"
               :required="true"
-              :valid="!errors.length"
-              :error-message="errors[0]"
+              :valid="!customPriceErrors.length"
+              :error-message="customPriceErrors[0]"
             />
           </validation-provider>
         </div>

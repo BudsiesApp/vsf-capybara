@@ -111,7 +111,7 @@ export default {
       const distinctCategories = this.products
         .filter(product => product.category)
         .map(product => product.category)
-        .flat()
+        .reduce((categories, category) => categories.concat(category), [])
         .reduce((result, category) => {
           result[category.category_id] = category;
           return result;

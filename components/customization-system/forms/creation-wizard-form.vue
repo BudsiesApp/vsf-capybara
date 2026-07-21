@@ -170,7 +170,7 @@ import { useCreationWizardGtmEvents } from 'theme/helpers/use-creation-wizard-gt
 import { useCreationWizardPreselectedSize } from 'theme/helpers/use-creation-wizard-preselected-size';
 import { useCreationWizardProductTypeStep } from 'theme/helpers/use-creation-wizard-product-type-step';
 import { useFloatingPhoto } from 'theme/helpers/use-floating-photo';
-import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 import { PlushieType } from 'theme/interfaces/plushie.type';
 import { useCustomizeAction } from 'theme/helpers/use-customize-action';
@@ -181,23 +181,6 @@ import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MFloatingPhoto from 'theme/components/organisms/OPlushieCreationWizard/m-floating-photo.vue';
 import MProductTypeChooseStep from 'theme/components/organisms/OPlushieCreationWizard/m-product-type-choose-step.vue';
-
-function getAllFormRefs (
-  refs: Record<string, Vue | Element | Vue[] | Element[]>
-): Record<string, Vue | Element | Vue[] | Element[]> {
-  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = {};
-  const customizationOptions = refs['customizationOption'] as InstanceType<
-    typeof CustomizationOption
-  >[];
-
-  for (const customizationOption of customizationOptions) {
-    for (const key in customizationOption.$refs) {
-      refsDictionary[key] = customizationOption.$refs[key];
-    }
-  }
-
-  return refsDictionary;
-}
 
 export interface CreationWizardFormAdditionalStep {
   name: string,
@@ -509,7 +492,7 @@ export default defineComponent({
 
     const preservationStorageKey = computed<string>(() => {
       return isCustomizeMode.value && draftOrderItem.value
-        ? draftOrderItem.value.id
+        ? draftOrderItem.value.id.toString()
         : plushieType.value;
     });
 
@@ -639,7 +622,7 @@ export default defineComponent({
       ...productTypeStep,
       ...useFloatingPhoto(customizationState, availableCustomizations),
       ...useFormValidation(validationObserver, () =>
-        getAllFormRefs(context.refs)
+        getNestedFormRefs(context.refs, 'customizationOption')
       ),
       ...useBulkImagesUpload(context),
       currentProduct,
