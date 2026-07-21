@@ -35,14 +35,14 @@
         :title="$t('Educators')"
         class="_educators mobile-only"
       >
-        <template #title="{title}">
+        <template #title="{ title: columnTitle }">
           <h3 class="sf-mega-menu-column__title">
             <router-link
               to="/teachers/"
               class="_link"
               @click.native="$emit('close')"
             >
-              {{ title }}
+              {{ columnTitle }}
             </router-link>
           </h3>
         </template>
