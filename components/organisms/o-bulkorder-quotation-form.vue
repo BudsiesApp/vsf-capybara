@@ -68,11 +68,12 @@
               >
                 <td :data-label="quantityColumnTitle">
                   <SfRadio
-                    v-model="quoteId"
                     :value="quote.id.toString()"
+                    :selected="quoteId"
                     :disabled="isQuoteRowSelectionDisabled"
                     name="bulkorder-quote"
                     class="_quote-radio"
+                    @input="quoteId = $event"
                   >
                     <template #label>
                       {{ getQuoteQuantityLabel(quote) }}
@@ -194,7 +195,11 @@ import { PriceHelper } from 'src/modules/shared';
 import { components } from 'src/modules/vsf-storyblok-module/components';
 import { ItemData } from 'src/modules/vsf-storyblok-module';
 import { BulkorderQuote, BulkOrderInfo, BulkOrderStatus, BulkorderQuoteProductId } from 'src/modules/budsies';
-import { useFormValidation } from 'theme/helpers/use-form-validation';
+import {
+  FormRefs,
+  getNestedFormRefs,
+  useFormValidation
+} from 'theme/helpers/use-form-validation';
 import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 
@@ -202,17 +207,12 @@ import AddonOption from '../interfaces/addon-option.interface';
 import SelectedAddon from '../interfaces/selected-addon.interface';
 
 function getAllFormRefs (
-  refs: Record<string, Vue | Element | Vue[] | Element[]>
-): Record<string, Vue | Element | Vue[] | Element[]> {
-  const addonsSelector = refs['addons-selector'] as InstanceType<typeof MAddonsSelector> | undefined;
-
-  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = { ...refs };
-
-  if (addonsSelector) {
-    refsDictionary = { ...refsDictionary, ...addonsSelector.$refs };
-  }
-
-  return refsDictionary;
+  refs: FormRefs
+): FormRefs {
+  return {
+    ...refs,
+    ...getNestedFormRefs(refs, 'addons-selector')
+  };
 }
 
 export default defineComponent({

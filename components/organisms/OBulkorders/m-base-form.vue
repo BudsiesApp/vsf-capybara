@@ -215,14 +215,16 @@
           value="0"
           name="deadline-radio"
           :label="$t('No firm deadline - the sooner the better!')"
-          v-model="deadline"
+          :selected="deadline"
+          @input="deadline = $event"
         />
 
         <SfRadio
           value="1"
           name="deadline-radio"
           :label="$t('I need them for a specific date')"
-          v-model="deadline"
+          :selected="deadline"
+          @input="deadline = $event"
         />
 
         <div
@@ -287,7 +289,7 @@
         class="_coutry-select"
         v-model="country"
         name="countries"
-        :label="$t('Country')"
+        :label="$t('Country').toString()"
         :required="true"
         id-field="code"
         label-field="name"

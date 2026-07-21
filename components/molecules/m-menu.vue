@@ -140,7 +140,8 @@ export default Vue.extend({
       usefulLinksItems: [
         {
           label: this.$t('About'),
-          link: '/about/'
+          link: '/about/',
+          target: '_self'
         },
         {
           label: this.$t('Fulfillment'),

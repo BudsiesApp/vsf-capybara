@@ -129,11 +129,11 @@
       </div>
 
       <div class="_notice-link-container">
-        <template v-if="$additionalContent.formLinks">
+        <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
           <component
             :is="linkComponent.component"
             :key="linkComponent.key"
-            v-for="linkComponent in $additionalContent.formLinks"
+            v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks"
           />
         </template>
       </div>
@@ -174,7 +174,11 @@ import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
 import {
   useBulkRequestLeadSource
 } from 'theme/helpers/use-bulk-request-lead-source';
-import { useFormValidation } from 'theme/helpers/use-form-validation';
+import {
+  FormRefs,
+  getNestedFormRefs,
+  useFormValidation
+} from 'theme/helpers/use-form-validation';
 
 import MBaseForm from './m-base-form.vue';
 import AOrderedHeading from '../../atoms/a-ordered-heading.vue';
@@ -193,7 +197,7 @@ extend('between', {
 });
 
 function getBaseForm (
-  refs: Record<string, Vue | Element | Vue[] | Element[]>
+  refs: FormRefs
 ): InstanceType<typeof MBaseForm> {
   const baseForm = refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
 
@@ -205,21 +209,13 @@ function getBaseForm (
 }
 
 function getFormAllRefs (
-  refs: Record<string, Vue | Element | Vue[] | Element[]>
-): Record<string, Vue | Element | Vue[] | Element[]> {
-  const baseForm = getBaseForm(refs);
-  const customizationOptionRefs = Array.isArray(refs.customizationOption)
-    ? refs.customizationOption
-    : refs.customizationOption ? [refs.customizationOption] : [];
-
-  const customizationRefs: Record<string, Vue | Element | Vue[] | Element[]> = customizationOptionRefs.reduce((result, customizationOption) => {
-    return {
-      ...result,
-      ...((customizationOption as any).$refs || {})
-    };
-  }, {});
-
-  return { ...refs, ...baseForm.$refs, ...customizationRefs };
+  refs: FormRefs
+): FormRefs {
+  return {
+    ...refs,
+    ...getNestedFormRefs(refs, 'baseForm'),
+    ...getNestedFormRefs(refs, 'customizationOption')
+  };
 }
 
 const COLOR_PALETTE_CUSTOMIZATION_SKU = 'bulk_sample_color_palette';

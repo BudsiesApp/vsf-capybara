@@ -60,8 +60,8 @@
       </div>
 
       <div class="_notice-link-container">
-        <template v-if="$additionalContent.formLinks">
-          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.formLinks" />
+        <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
         </template>
       </div>
     </validation-observer>
@@ -84,7 +84,11 @@ import {
   useCustomizationState
 } from 'src/modules/customization-system';
 
-import { useFormValidation } from 'theme/helpers/use-form-validation';
+import {
+  FormRefs,
+  getNestedFormRefs,
+  useFormValidation
+} from 'theme/helpers/use-form-validation';
 import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
 import {
   useBulkRequestLeadSource
@@ -96,28 +100,11 @@ import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MBaseForm from './m-base-form.vue';
 
 function getBaseFormRefs (
-  refs: Record<string, Vue | Element | Vue[] | Element[]>
-): Record<string, Vue | Element | Vue[] | Element[]> {
-  const baseForm = refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
-
-  if (!baseForm) {
-    throw new Error('Base Form is not defined');
-  }
-
-  const customizationOptionRefs = Array.isArray(refs.customizationOption)
-    ? refs.customizationOption
-    : refs.customizationOption ? [refs.customizationOption] : [];
-
-  const customizationRefs: Record<string, Vue | Element | Vue[] | Element[]> = customizationOptionRefs.reduce((result, customizationOption) => {
-    return {
-      ...result,
-      ...((customizationOption as any).$refs || {})
-    };
-  }, {});
-
+  refs: FormRefs
+): FormRefs {
   return {
-    ...baseForm.$refs,
-    ...customizationRefs
+    ...getNestedFormRefs(refs, 'baseForm'),
+    ...getNestedFormRefs(refs, 'customizationOption')
   };
 }
 
