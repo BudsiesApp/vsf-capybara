@@ -326,6 +326,12 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
         height: calc(100% + 2px);
         top: -1px;
         left: 0;
+
+        ::v-deep {
+          img {
+            object-fit: cover;
+          }
+        }
       }
     }
   }
@@ -372,6 +378,12 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
           height: calc(100% + 2px);
           top: -1px;
           left: 0;
+
+          ::v-deep {
+            img {
+              object-fit: cover;
+            }
+          }
         }
       }
     }
