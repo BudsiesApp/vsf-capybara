@@ -48,9 +48,9 @@
                     :class="{'-wide-image': wideImage}"
                     @click="switchToVideo($event, addon)"
                   >
-                    <img v-if="getItemImage(addon)" :src="getItemImage(addon)" class="_image">
+                    <img v-if="getItemImage(addon)" :src="getItemImage(addon)" alt="" class="_image">
 
-                    <img v-if="getItemHoverImage(addon)" :src="getItemHoverImage(addon)" class="_image-hover">
+                    <img v-if="getItemHoverImage(addon)" :src="getItemHoverImage(addon)" alt="" class="_image-hover">
                   </div>
 
                   <StreamingVideo
