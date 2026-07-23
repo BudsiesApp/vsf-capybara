@@ -32,7 +32,7 @@
       <MCtaButton size="small" class="_item" />
 
       <div class="_action-icons">
-        <CurrencySelector />
+        <CurrencySelector label-id="mobile-currency-selector-label" />
 
         <AAccountIcon class="sf-header__action _item" />
         <ADetailedCartIcon class="sf-header__action _item" />

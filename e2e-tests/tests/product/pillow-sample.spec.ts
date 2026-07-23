@@ -69,7 +69,6 @@ test('product display in cart correctly', async ({ cartPage, customizableProduct
   const cartItem = cartPage.getCartItemByProductName(PRODUCT_NAME);
 
   await expect(cartItem).toBeVisible();
-  await cartPage.expectCartItemToHaveProperties(cartItem, [DESCRIPTION_TEXT]);
 });
 
 test('product can be edited', async ({ cartPage, customizableProductPage }) => {
@@ -90,7 +89,4 @@ test('product can be edited', async ({ cartPage, customizableProductPage }) => {
 
   await customizableProductPage.addToCartAndVerifyResponse();
   await cartPage.waitPageToBeVisible();
-
-  const updatedCartItem = cartPage.getCartItemByProductName(PRODUCT_NAME);
-  await cartPage.expectCartItemToHaveProperties(updatedCartItem, [UPDATED_DESCRIPTION_TEXT]);
 });

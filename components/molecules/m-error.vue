@@ -2,6 +2,7 @@
   <div class="m-error error">
     <SfImage
       src="/assets/error.svg"
+      alt=""
       class="error__image"
     />
     <SfHeading :level="level" :title="title" :subtitle="subtitle" class="error__message" />

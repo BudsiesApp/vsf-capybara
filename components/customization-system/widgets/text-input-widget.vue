@@ -2,6 +2,7 @@
   <div class="text-input-widget">
     <sf-input
       class="_input"
+      :aria-labelledby="ariaLabelledby"
       :name="inputName"
       :disabled="isDisabled"
       :error-message="error"
@@ -23,6 +24,10 @@ export default defineComponent({
     SfInput
   },
   props: {
+    ariaLabelledby: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
     error: {
       type: String,
       default: undefined

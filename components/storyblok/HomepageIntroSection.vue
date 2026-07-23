@@ -327,7 +327,15 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
       ._image {
         position: absolute;
         width: 100%;
-        height: 100%;
+        height: calc(100% + 2px);
+        top: -1px;
+        left: 0;
+
+        ::v-deep {
+          img {
+            object-fit: cover;
+          }
+        }
       }
     }
   }
@@ -335,10 +343,10 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
   ._video-layer {
     display: block;
     position: absolute;
-    top: 0;
+    top: -1px;
     left: 0;
     width: 100%;
-    height: calc(100% + 1px);
+    height: calc(100% + 2px);
     overflow: hidden;
     object-fit: cover;
     pointer-events: none;
@@ -376,7 +384,15 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
         ._image {
           position: absolute;
           width: 100%;
-          height: 100%;
+          height: calc(100% + 2px);
+          top: -1px;
+          left: 0;
+
+          ::v-deep {
+            img {
+              object-fit: cover;
+            }
+          }
         }
       }
     }
