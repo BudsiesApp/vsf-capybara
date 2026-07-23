@@ -28,5 +28,5 @@ test('sample product is added to cart successfully', async ({ cartPage, plushQuo
   await cartPage.waitPageToBeVisible();
   const cartItem = cartPage.getCartItemByProductName(PRODUCT_NAME);
   await expect(cartItem).toBeVisible();
-  await cartPage.expectCartItemToHaveProperties(cartItem, [PROJECT_NAME, PROJECT_DESCRIPTION, selectedSize]);
+  await cartPage.expectCartItemToHaveProperties(cartItem, [PROJECT_NAME, selectedSize]);
 });

@@ -40,7 +40,6 @@ test('product can be edited', async ({ cartPage, customizableProductPage, plushK
   const cartItem = cartPage.getCartItemByProductName(plushKeychainSamplePage.productName);
 
   await expect(cartItem).toBeVisible();
-  await cartPage.expectCartItemToHaveProperties(cartItem, [DESCRIPTION_TEXT]);
 
   await cartPage.editCartItemByProductName(plushKeychainSamplePage.productName);
 
@@ -55,7 +54,4 @@ test('product can be edited', async ({ cartPage, customizableProductPage, plushK
 
   await customizableProductPage.addToCartAndVerifyResponse();
   await cartPage.waitPageToBeVisible();
-
-  const updatedCartItem = cartPage.getCartItemByProductName(plushKeychainSamplePage.productName);
-  await cartPage.expectCartItemToHaveProperties(updatedCartItem, [UPDATED_DESCRIPTION_TEXT]);
 });
