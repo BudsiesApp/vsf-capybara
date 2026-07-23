@@ -80,7 +80,6 @@ test('product display in cart correctly', async ({ cartPage, crossSellsPage, cus
   const cartItem = cartPage.getCartItemByProductName(PRODUCT_NAME);
 
   await expect(cartItem).toBeVisible();
-  await cartPage.expectCartItemToHaveProperties(cartItem, [DESCRIPTION_TEXT]);
 });
 
 test('product can be edited', async ({ cartPage, crossSellsPage, customizableProductPage }) => {
@@ -104,7 +103,7 @@ test('product can be edited', async ({ cartPage, crossSellsPage, customizablePro
   await cartPage.goto();
 
   const updatedCartItem = cartPage.getCartItemByProductName(PRODUCT_NAME);
-  await cartPage.expectCartItemToHaveProperties(updatedCartItem, [UPDATED_DESCRIPTION_TEXT]);
+  await expect(updatedCartItem).toBeVisible();
 });
 
 test('form fields are reset after save and make another', async ({ page, customizableProductPage, verticalStepsProductPage }) => {

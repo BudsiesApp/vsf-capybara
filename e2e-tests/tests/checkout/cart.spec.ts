@@ -1,6 +1,6 @@
 import { expect, test } from '../../fixtures/cart-page';
 
-const simpleProductUrl = '/p/hat_birthday/';
+const simpleProductUrl = '/p/voice-recorder/';
 
 test('buttons are disabled when item is removing', async ({ page, cartPage, printedSocksPage, simpleProductPage }) => {
   await page.goto(simpleProductUrl);
