@@ -81,7 +81,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
       this.$store.dispatch('ui/openModal', {
         name: ModalList.ImagesGallery,
         payload: {
-          images: this.itemData.images_list.map((item) => item.filename)
+          images: this.itemData.images_list
         }
       });
     }
