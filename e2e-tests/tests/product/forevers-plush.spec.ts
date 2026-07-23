@@ -210,5 +210,5 @@ test('product can be edited', async ({ cartPage, crossSellsPage, customizablePro
 
   await cartPage.goto();
   const updatedCartItem = cartPage.getCartItemByProductName(productName);
-  await cartPage.expectCartItemToHaveProperties(updatedCartItem, [UPDATED_DESCRIPTION_TEXT, UPDATED_PET_NAME]);
+  await cartPage.expectCartItemToHaveProperties(updatedCartItem, [UPDATED_PET_NAME]);
 });

@@ -3,6 +3,7 @@
     <textarea
       :aria-describedby="ariaDescribedby"
       :aria-invalid="ariaInvalid"
+      :aria-labelledby="ariaLabelledby"
       class="_textarea"
       :disabled="isDisabled"
       :placeholder="placeholder"
@@ -21,16 +22,16 @@
 </template>
 
 <script lang="ts">
-import { SfInput } from '@storefront-ui/vue';
 import { computed, defineComponent, PropType } from '@vue/composition-api';
 import { useErrorAccessibility } from 'theme/helpers/use-error-accessibility';
 
 export default defineComponent({
   name: 'TextareaWidget',
-  components: {
-    SfInput
-  },
   props: {
+    ariaLabelledby: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
     error: {
       type: String,
       default: undefined

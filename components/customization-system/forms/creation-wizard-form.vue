@@ -24,7 +24,7 @@
               :name="customizationGroup.name"
             >
               <validation-observer
-                v-slot="{ errors: formErrors, passes }"
+                v-slot="{ errors: formErrors }"
                 ref="validationObserver"
               >
                 <SfHeading
@@ -63,7 +63,7 @@
                   <SfButton
                     class="_button"
                     :disabled="isSubmitButtonDisabled"
-                    @click="(event) => passes(() => nextStep())"
+                    @click="onContinueClick"
                   >
                     {{ $t("Continue") }}
                   </SfButton>
@@ -271,7 +271,19 @@ export default defineComponent({
 
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
-    > | null> = ref(null);
+    > | InstanceType<typeof ValidationObserver>[] | null> = ref(null);
+    const activeValidationObserver = computed<InstanceType<
+      typeof ValidationObserver
+    > | null>(() => {
+      if (Array.isArray(validationObserver.value)) {
+        return validationObserver.value[0] || null;
+      }
+
+      return validationObserver.value;
+    });
+    const formValidation = useFormValidation(activeValidationObserver, () =>
+      getNestedFormRefs(context.refs, 'customizationOption')
+    );
 
     const productCustomizations = computed<Customization[]>(() => {
       return currentProduct.value?.customizations || [];
@@ -607,6 +619,16 @@ export default defineComponent({
       return isDisabled.value || isSomeEntityBusy.value;
     });
 
+    async function onContinueClick (): Promise<void> {
+      const isValid = await formValidation.validateAndGoToFirstError();
+
+      if (!isValid) {
+        return;
+      }
+
+      await formSteps.nextStep();
+    }
+
     const {
       filteredOptionValues: filteredCustomizationAvailableOptionValues
     } = useAvailableOptionsValuesFilter(
@@ -621,9 +643,7 @@ export default defineComponent({
       ...formSteps,
       ...productTypeStep,
       ...useFloatingPhoto(customizationState, availableCustomizations),
-      ...useFormValidation(validationObserver, () =>
-        getNestedFormRefs(context.refs, 'customizationOption')
-      ),
+      ...formValidation,
       ...useBulkImagesUpload(context),
       currentProduct,
       filteredCustomizationAvailableOptionValues,
@@ -632,6 +652,7 @@ export default defineComponent({
       isSubmitButtonDisabled,
       onEntityBusyChanged,
       onCustomizationOptionInput,
+      onContinueClick,
       onFormSubmit,
       submitButtonText,
       quantity,

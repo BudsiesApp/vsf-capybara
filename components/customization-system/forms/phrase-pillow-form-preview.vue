@@ -15,6 +15,7 @@
               class="_background"
               :style="smallBackgroundImageStyle"
               :src="croppedBackground"
+              alt=""
               v-if="croppedBackground"
             >
 
