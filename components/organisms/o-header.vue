@@ -86,7 +86,7 @@
       </template>
       <template #header-icons>
         <div class="sf-header__icons">
-          <CurrencySelector />
+          <CurrencySelector label-id="desktop-currency-selector-label" />
 
           <AAccountIcon class="sf-header__action" />
           <ADetailedCartIcon class="sf-header__action" />

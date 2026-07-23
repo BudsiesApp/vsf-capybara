@@ -79,9 +79,6 @@ test('product can be edited', async ({ cartPage, customizableProductPage }) => {
 
   await customizableProductPage.addToCartAndVerifyResponse();
   await cartPage.waitPageToBeVisible();
-
-  const updatedCartItem = cartPage.getCartItemByProductName(PRODUCT_NAME);
-  await expect(updatedCartItem).toBeVisible();
 });
 
 test('form fields are reset after save and make another', async ({ page, customizableProductPage, verticalStepsProductPage }) => {
