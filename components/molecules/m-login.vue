@@ -24,6 +24,7 @@
             name="email-address"
             type="email"
             :label="$t('Email address')"
+            autocomplete="email"
             :valid="!errors.length"
             :error-message="errors[0]"
             :disabled="isSubmitting"

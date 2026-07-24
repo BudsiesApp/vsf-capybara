@@ -1,72 +1,22 @@
 <template>
   <div class="m-price-summary" :class="skinClass">
-    <SfProperty
-      :name="$t('Products')"
-      :value="totalItems"
-      class="sf-property--full-width property"
-      :class="{'sf-property--large': isLarge}"
-    />
-    <SfProperty
-      v-if="regularSubtotalPrice"
-      :name="$t('Subtotal')"
-      :value="formatPrice(regularSubtotalPrice)"
-      class="sf-property--full-width property"
-      :class="{'sf-property--large': isLarge}"
-    />
-    <SfProperty
-      v-if="prices.subtotal_incl_tax"
-      :name="$t('Subtotal Incl Tax')"
-      :value="formatPrice(prices.subtotal_incl_tax)"
-      class="sf-property--full-width property"
-      :class="{'sf-property--large': isLarge}"
-    />
-    <SfProperty
-      v-if="prices.tax"
-      :name="$t('Tax')"
-      :value="formatPrice(prices.tax)"
-      class="sf-property--full-width property"
-      :class="{'sf-property--large': isLarge}"
-    />
-    <SfProperty
-      v-if="prices.shipping || prices.shipping === 0"
-      :name="$t('Shipping')"
-      :value="formatPrice(prices.shipping)"
-      class="sf-property--full-width property"
-      :class="{'sf-property--large': isLarge}"
-    />
-    <template v-if="discount">
-      <SfProperty
-        :name="discount.title"
-        :value="formatPrice(discount.value)"
-        class="sf-property--full-width property --marked"
-        :class="{'sf-property--large': isLarge}"
-      />
-    </template>
+    <dl class="m-price-summary__list">
+      <div
+        v-for="row in summaryRows"
+        :key="row.code"
+        class="property"
+        :class="{
+          'property--large': isLarge,
+          'property--marked': row.isMarked
+        }"
+      >
+        <dt class="property__name" v-text="row.name" />
+        <dd class="property__value">
+          {{ row.value }}
+        </dd>
+      </div>
+    </dl>
 
-    <SfProperty
-      v-if="prices.amgiftcard"
-      :name="$t('Gift Cards Applied')"
-      :value="formatPrice(prices.amgiftcard)"
-      class="sf-property--full-width property --marked"
-      :class="{'sf-property--large': isLarge}"
-    />
-
-    <template v-if="savingsTotal">
-      <SfProperty
-        :name="$t('Price Savings')"
-        :value="formatPrice(savingsTotal)"
-        class="sf-property--full-width property --marked"
-        :class="{'sf-property--large': isLarge}"
-      />
-    </template>
-    <template v-if="discountsTotal">
-      <SfProperty
-        :name="$t('Total Discounts')"
-        :value="formatPrice(discountsTotal)"
-        class="sf-property--full-width property --marked"
-        :class="{'sf-property--large': isLarge}"
-      />
-    </template>
     <MSpinnerButton
       v-if="isCouponCode"
       class="promo-code__button"
@@ -78,31 +28,39 @@
       {{ $t('Delete discount code') }}
     </MSpinnerButton>
     <SfDivider class="divider" />
-    <SfProperty
-      :name="$t('Grand Total')"
-      :value="formatPrice(prices.grand_total)"
-      class="sf-property--full-width property"
-      :class="{'sf-property--large': isLarge}"
-    />
 
-    <template v-if="showDefaultCurrencyGrandTotal">
-      <SfProperty
-        :name="$t('Grand Total(USD)')"
-        :value="prices.grand_total | price"
-        class="sf-property--full-width property"
-        :class="{'sf-property--large': isLarge}"
-      />
-
-      <div class="_note">
-        {{ $t(`Note: You will be charged in USD. The amount shown in your selected currency is an estimate based on the current exchange rate and may vary slightly depending on your payment provider.`) }}
+    <dl class="m-price-summary__list">
+      <div
+        class="property"
+        :class="{'property--large': isLarge}"
+      >
+        <dt class="property__name" v-text="$t('Grand Total')" />
+        <dd class="property__value" aria-live="polite">
+          {{ formatPrice(prices.grand_total) }}
+        </dd>
       </div>
-    </template>
+
+      <div
+        v-if="showDefaultCurrencyGrandTotal"
+        class="property"
+        :class="{'property--large': isLarge}"
+      >
+        <dt class="property__name" v-text="$t('Grand Total(USD)')" />
+        <dd class="property__value">
+          {{ prices.grand_total | price }}
+        </dd>
+      </div>
+    </dl>
+
+    <div v-if="showDefaultCurrencyGrandTotal" class="_note">
+      {{ $t(`Note: You will be charged in USD. The amount shown in your selected currency is an estimate based on the current exchange rate and may vary slightly depending on your payment provider.`) }}
+    </div>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
-import { SfProperty, SfDivider } from '@storefront-ui/vue';
+import { SfDivider } from '@storefront-ui/vue';
 import { IS_COUPON_INTERACTION_BLOCKED } from '@vue-storefront/core/modules/cart';
 
 import { PriceHelper } from '@vue-storefront/core/helpers';
@@ -116,7 +74,6 @@ export default {
   name: 'MPriceSummary',
   components: {
     MSpinnerButton,
-    SfProperty,
     SfDivider
   },
   props: {
@@ -146,6 +103,85 @@ export default {
     },
     regularSubtotalPrice () {
       return this.prices.regular_subtotal || this.prices.subtotal;
+    },
+    summaryRows () {
+      const rows = [];
+
+      rows.push({
+        code: 'products',
+        name: this.$t('Products'),
+        value: this.totalItems
+      });
+
+      if (this.regularSubtotalPrice) {
+        rows.push({
+          code: 'subtotal',
+          name: this.$t('Subtotal'),
+          value: this.formatPrice(this.regularSubtotalPrice)
+        });
+      }
+
+      if (this.prices.subtotal_incl_tax) {
+        rows.push({
+          code: 'subtotal-incl-tax',
+          name: this.$t('Subtotal Incl Tax'),
+          value: this.formatPrice(this.prices.subtotal_incl_tax)
+        });
+      }
+
+      if (this.prices.tax) {
+        rows.push({
+          code: 'tax',
+          name: this.$t('Tax'),
+          value: this.formatPrice(this.prices.tax)
+        });
+      }
+
+      if (this.prices.shipping || this.prices.shipping === 0) {
+        rows.push({
+          code: 'shipping',
+          name: this.$t('Shipping'),
+          value: this.formatPrice(this.prices.shipping)
+        });
+      }
+
+      if (this.discount) {
+        rows.push({
+          code: 'discount',
+          name: this.discount.title,
+          value: this.formatPrice(this.discount.value),
+          isMarked: true
+        });
+      }
+
+      if (this.prices.amgiftcard) {
+        rows.push({
+          code: 'gift-cards-applied',
+          name: this.$t('Gift Cards Applied'),
+          value: this.formatPrice(this.prices.amgiftcard),
+          isMarked: true
+        });
+      }
+
+      if (this.savingsTotal) {
+        rows.push({
+          code: 'price-savings',
+          name: this.$t('Price Savings'),
+          value: this.formatPrice(this.savingsTotal),
+          isMarked: true
+        });
+      }
+
+      if (this.discountsTotal) {
+        rows.push({
+          code: 'total-discounts',
+          name: this.$t('Total Discounts'),
+          value: this.formatPrice(this.discountsTotal),
+          isMarked: true
+        });
+      }
+
+      return rows;
     },
     totalItems () {
       return this.productsInCart.reduce((result, product) => {
@@ -205,11 +241,12 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
+@import "~@storefront-ui/shared/styles/helpers/typography";
 
 .m-price-summary {
-  .sf-property.--marked {
-    --property-name-color: var(--_c-light-primary);
-    --property-value-color: var(--_c-light-primary);
+  &__list {
+    margin: 0;
+    padding: 0;
   }
 
   .divider {
@@ -231,11 +268,50 @@ export default {
 }
 
 .property {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  color: var(--property-color, var(--c-text));
   margin: 0 0 var(--spacer-base) 0;
 
-  &.sf-property--large {
+  &__name {
+    margin: var(--property-name-margin, 0 var(--spacer-xs) 0 0);
+    color: var(--property-name-color, var(--c-secondary-variant));
+    text-transform: var(--property-name-text-transform);
+    @include font(
+      --property-name-font,
+      var(--font-normal),
+      var(--font-sm),
+      1.2,
+      var(--font-family-secondary)
+    );
+
+    &::after {
+      content: var(--property-name-content, ":");
+    }
+  }
+
+  &__value {
+    margin: 0;
+    color: var(--property-value-color);
+    @include font(
+      --property-value-font,
+      var(--font-medium),
+      var(--font-sm),
+      1.2,
+      var(--font-family-secondary)
+    );
+  }
+
+  &--large {
     --property-name-font-size: var(--font-lg);
     --property-value-font-size: var(--font-lg);
+    --property-value-font-weight: var(--font-semibold);
+  }
+
+  &--marked {
+    --property-name-color: var(--_c-light-primary);
+    --property-value-color: var(--_c-light-primary);
   }
 
   @include for-desktop {

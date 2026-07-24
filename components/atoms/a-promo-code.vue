@@ -10,6 +10,7 @@
         name="promoCode"
         :placeholder="$t('Add a discount code')"
         :disabled="isInteractionDisabled"
+        :aria-label="$t('Add a discount code')"
         class="sf-input--filled a-promo-code__input"
         @keyup.enter="applyCoupon"
       />
@@ -18,6 +19,7 @@
         :show-spinner="isSubmitting"
         :disabled="isInteractionDisabled"
         :title="$t('Apply coupon')"
+        :aria-label="$t('Apply coupon')"
         class="_circle-button"
         button-class="sf-button -icon-button"
         @click="applyCoupon"
@@ -41,7 +43,7 @@
       {{ $t('Delete discount code') }}
     </MSpinnerButton>
 
-    <div class="a-promo-code__message" v-if="message">
+    <div class="a-promo-code__message" v-if="message" aria-live="polite">
       {{ message }}
     </div>
 
@@ -53,7 +55,7 @@
 </template>
 
 <script>
-import { SfIcon, SfInput, SfCircleIcon } from '@storefront-ui/vue';
+import { SfIcon, SfInput } from '@storefront-ui/vue';
 import { IS_COUPON_INTERACTION_BLOCKED } from '@vue-storefront/core/modules/cart';
 
 import MSpinnerButton from 'theme/components/molecules/m-spinner-button.vue';
