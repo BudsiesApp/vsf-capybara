@@ -30,7 +30,11 @@
           />
         </validation-provider>
 
-        <MSpinnerButton class="_submit-button" :show-spinner="isSubmitting">
+        <MSpinnerButton
+          class="_submit-button"
+          :show-spinner="isSubmitting"
+          button-type="submit"
+        >
           {{ buttonText }}
         </MSpinnerButton>
       </form>

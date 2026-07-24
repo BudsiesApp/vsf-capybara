@@ -3,6 +3,7 @@
     <sf-input
       class="_input"
       :aria-labelledby="ariaLabelledby"
+      :autocomplete="type === 'email' ? 'email' : undefined"
       :name="inputName"
       :disabled="isDisabled"
       :error-message="error"
