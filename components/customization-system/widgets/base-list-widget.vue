@@ -1,6 +1,7 @@
 <template>
-  <div class="base-list-widget" :class="{ '-disabled': isDisabled }" :aria-labelledby="ariaLabelledby"
-       :role="groupRole"
+  <div
+    class="base-list-widget" :class="{ '-disabled': isDisabled }" :aria-labelledby="ariaLabelledby"
+    :role="groupRole"
   >
     <ul
       class="_options-list"
@@ -227,11 +228,14 @@ export default defineComponent({
     &.-selected {
       background: var(
         --base-list-widget-selected-option-background,
-        var(--c-primary)
+        var(--c-secondary)
       );
+
+      outline: var(--base-list-widget-selected-option-outline, var(--c-primary)) solid 2px;
 
       &.-round {
         background: transparent;
+        outline: none;
       }
     }
 

@@ -92,8 +92,13 @@ export default {
   position: fixed;
   bottom: 0;
   width: 100%;
-  background-color: var(--c-dark-lighten);
-  color: var(--c-light-darken);
+  background-color: #232631;
+  color: #939393;
+
+  a:not(:hover) {
+    color: #FFFFFF;
+  }
+
   .cookie {
     box-sizing: border-box;
     padding: var(--spacer-xs) calc(var(--spacer-2xl) + var(--spacer-2xs)) var(--spacer-xs) var(--spacer-sm);
@@ -105,7 +110,7 @@ export default {
 
     &__icon {
       cursor: pointer;
-      --icon-color: var(--c-link);
+      --icon-color: #FFFFFF;
       &:hover {
         --icon-color: var(--c-link-hover);
       }
