@@ -182,7 +182,7 @@
 </template>
 
 <script lang="ts">
-import { PropType, Ref, defineComponent, ref } from '@vue/composition-api';
+import Vue, { PropType, Ref, ref } from 'vue';
 import { SfButton, SfHeading, SfRadio } from '@storefront-ui/vue'
 import { getProductGallery as getGalleryByProduct } from '@vue-storefront/core/modules/catalog/helpers';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -191,7 +191,7 @@ import { ValidationObserver } from 'vee-validate';
 import { TranslateResult } from 'vue-i18n';
 
 import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
-import { PriceHelper } from 'src/modules/shared';
+import { PriceHelper, useCurrentInstance } from 'src/modules/shared';
 import { components } from 'src/modules/vsf-storyblok-module/components';
 import { ItemData } from 'src/modules/vsf-storyblok-module';
 import { BulkorderQuote, BulkOrderInfo, BulkOrderStatus, BulkorderQuoteProductId } from 'src/modules/budsies';
@@ -215,7 +215,7 @@ function getAllFormRefs (
   };
 }
 
-export default defineComponent({
+export default Vue.extend({
   props: {
     bulkorderInfo: {
       type: Object as PropType<BulkOrderInfo>,
@@ -226,14 +226,15 @@ export default defineComponent({
       required: true
     }
   },
-  setup (_, setupContext) {
+  setup () {
+    const refs = useCurrentInstance().$refs;
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
 
     return {
       validationObserver,
       ...useFormValidation(
         validationObserver,
-        () => getAllFormRefs(setupContext.refs)
+        () => getAllFormRefs(refs)
       )
     }
   },
@@ -361,6 +362,10 @@ export default defineComponent({
 
         const images: string[] = getGalleryByProduct(productLink.product).map((i: any) => i.src);
         const price = this.productPriceDictionary[productLink.product.id];
+
+        if (!price) {
+          continue;
+        }
 
         result.push({
           id: Number(productLink.product.id),

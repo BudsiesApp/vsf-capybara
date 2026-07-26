@@ -114,7 +114,7 @@ import i18n from '@vue-storefront/i18n';
 import { ValidationObserver, ValidationProvider, extend } from 'vee-validate';
 import { required } from 'vee-validate/dist/rules';
 import { SfButton, SfSelect, SfHeading } from '@storefront-ui/vue';
-import { computed, defineComponent, PropType, Ref, ref, toRefs } from '@vue/composition-api';
+import Vue, { computed, PropType, Ref, ref, toRefs } from 'vue';
 
 import Product from 'core/modules/catalog/types/Product';
 import {
@@ -129,6 +129,7 @@ import {
   useAvailableCustomizations,
   useCustomizationState
 } from 'src/modules/customization-system';
+import { useCurrentInstance } from 'src/modules/shared';
 
 import {
   FormRefs,
@@ -180,9 +181,10 @@ function getFormAllRefs (
 
 const SIZE_CUSTOMIZATION_NAME = 'size';
 
-export default defineComponent({
+export default Vue.extend({
   name: 'OPillowQuoteOrderForm',
-  setup (props, setupContext) {
+  setup (props) {
+    const refs = useCurrentInstance().$refs;
     const { product } = toRefs(props);
     const productCustomizations = computed<Customization[]>(() => {
       return product.value.customizations || [];
@@ -229,16 +231,22 @@ export default defineComponent({
     return {
       customizationOptionValue,
       customizationState,
-      leadSourceCustomization,
-      leadSourceCustomizationOptionValues,
-      leadSourceOtherDetailsCustomization,
+      get leadSourceCustomization () {
+        return leadSourceCustomization.value;
+      },
+      get leadSourceCustomizationOptionValues () {
+        return leadSourceCustomizationOptionValues.value;
+      },
+      get leadSourceOtherDetailsCustomization () {
+        return leadSourceOtherDetailsCustomization.value;
+      },
       leadSourcePayload,
       onCustomizationOptionInput,
       validationObserver,
       ...useBulkOrdersBaseForm(),
       ...useFormValidation(
         validationObserver,
-        () => getFormAllRefs(setupContext.refs)
+        () => getFormAllRefs(refs)
       )
     };
   },

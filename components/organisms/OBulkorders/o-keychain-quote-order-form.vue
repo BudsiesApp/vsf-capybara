@@ -72,7 +72,7 @@
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
-import { computed, defineComponent, PropType, Ref, ref, toRefs } from '@vue/composition-api';
+import Vue, { computed, PropType, Ref, ref, toRefs } from 'vue';
 
 import Product from 'core/modules/catalog/types/Product';
 import { BulkorderQuoteProductId, BulkOrderStatus, BulkOrderInfo } from 'src/modules/budsies';
@@ -83,6 +83,7 @@ import {
   useAvailableCustomizations,
   useCustomizationState
 } from 'src/modules/customization-system';
+import { useCurrentInstance } from 'src/modules/shared';
 
 import {
   FormRefs,
@@ -108,9 +109,10 @@ function getBaseFormRefs (
   };
 }
 
-export default defineComponent({
+export default Vue.extend({
   name: 'OKeychainQuoteOrderForm',
-  setup (props, setupContext) {
+  setup (props) {
+    const refs = useCurrentInstance().$refs;
     const { product } = toRefs(props);
     const productCustomizations = computed<Customization[]>(() => {
       return product.value.customizations || [];
@@ -155,16 +157,22 @@ export default defineComponent({
     return {
       customizationOptionValue,
       customizationState,
-      leadSourceCustomization,
-      leadSourceCustomizationOptionValues,
-      leadSourceOtherDetailsCustomization,
+      get leadSourceCustomization () {
+        return leadSourceCustomization.value;
+      },
+      get leadSourceCustomizationOptionValues () {
+        return leadSourceCustomizationOptionValues.value;
+      },
+      get leadSourceOtherDetailsCustomization () {
+        return leadSourceOtherDetailsCustomization.value;
+      },
       leadSourcePayload,
       onCustomizationOptionInput,
       validationObserver,
       ...useBulkOrdersBaseForm(),
       ...useFormValidation(
         validationObserver,
-        () => getBaseFormRefs(setupContext.refs)
+        () => getBaseFormRefs(refs)
       )
     };
   },

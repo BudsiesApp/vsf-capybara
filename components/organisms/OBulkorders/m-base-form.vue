@@ -84,7 +84,7 @@
         name="description"
         rows="5"
         v-model="description"
-        :placeholder="$t('Give us any additional direction as we create your plush prototype')"
+        :placeholder="$t('Give us any additional direction as we create your plush prototype').toString()"
         :disabled="isDisabled"
       />
 
@@ -452,7 +452,7 @@
 
 <script lang="ts">
 import { parsePhoneNumberWithError } from 'libphonenumber-js';
-import { PropType, computed, defineComponent, inject } from '@vue/composition-api';
+import Vue, { PropType, computed, inject } from 'vue';
 import config from 'config';
 import { ValidationProvider, extend } from 'vee-validate';
 import { email, required, max, min, min_value, max_value, regex } from 'vee-validate/dist/rules';
@@ -536,7 +536,7 @@ extend('min_date', {
   message: 'The date must be on or after {min}'
 });
 
-export default defineComponent({
+export default Vue.extend({
   name: 'MBaseForm',
   components: {
     AOrderedHeading,

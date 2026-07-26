@@ -147,14 +147,13 @@ import { ValidationObserver, ValidationProvider, extend } from 'vee-validate';
 import { between, required } from 'vee-validate/dist/rules';
 import { SfButton, SfHeading, SfInput } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
-import {
+import Vue, {
   computed,
-  defineComponent,
   PropType,
   Ref,
   ref,
   toRefs
-} from '@vue/composition-api';
+} from 'vue';
 
 import Product from 'core/modules/catalog/types/Product';
 import {
@@ -169,6 +168,7 @@ import {
   useAvailableCustomizations,
   useCustomizationState
 } from 'src/modules/customization-system';
+import { useCurrentInstance } from 'src/modules/shared';
 
 import { useBulkOrdersBaseForm } from 'theme/helpers/use-bulkorders-base-form';
 import {
@@ -221,9 +221,10 @@ function getFormAllRefs (
 const COLOR_PALETTE_CUSTOMIZATION_SKU = 'bulk_sample_color_palette';
 const SIZE_CUSTOMIZATION_NAME = 'size';
 
-export default defineComponent({
+export default Vue.extend({
   name: 'OBulkQuoteOrderForm',
-  setup (props, setupContext) {
+  setup (props) {
+    const refs = useCurrentInstance().$refs;
     const { product } = toRefs(props);
 
     const productCustomizations = computed<Customization[]>(() => {
@@ -324,23 +325,37 @@ export default defineComponent({
     }
 
     return {
-      colorPaletteCustomization,
-      colorPaletteCustomizationOptionValues,
+      get colorPaletteCustomization () {
+        return colorPaletteCustomization.value;
+      },
+      get colorPaletteCustomizationOptionValues () {
+        return colorPaletteCustomizationOptionValues.value;
+      },
       customizationAvailableOptionValues,
       customizationOptionValue,
       customizationState,
       getSizeNumber,
-      leadSourceCustomization,
-      leadSourceCustomizationOptionValues,
-      leadSourceOtherDetailsCustomization,
+      get leadSourceCustomization () {
+        return leadSourceCustomization.value;
+      },
+      get leadSourceCustomizationOptionValues () {
+        return leadSourceCustomizationOptionValues.value;
+      },
+      get leadSourceOtherDetailsCustomization () {
+        return leadSourceOtherDetailsCustomization.value;
+      },
       leadSourcePayload,
       onCustomizationOptionInput,
-      sizeCustomization,
-      sizeCustomizationOptionValues,
+      get sizeCustomization () {
+        return sizeCustomization.value;
+      },
+      get sizeCustomizationOptionValues () {
+        return sizeCustomizationOptionValues.value;
+      },
       validationObserver,
       ...useBulkOrdersBaseForm(),
       ...useFormValidation(validationObserver, () =>
-        getFormAllRefs(setupContext.refs)
+        getFormAllRefs(refs)
       )
     };
   },

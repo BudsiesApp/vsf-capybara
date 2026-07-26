@@ -1,4 +1,4 @@
-import { Ref, onBeforeMount, watch } from '@vue/composition-api';
+import { Ref, onBeforeMount, watch } from 'vue';
 
 import { StorageManager } from '@vue-storefront/core/lib/storage-manager';
 import { SN_BUDSIES } from 'src/modules/budsies/store/mutation-types';
