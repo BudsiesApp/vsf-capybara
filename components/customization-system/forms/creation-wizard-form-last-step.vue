@@ -112,7 +112,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, Ref } from '@vue/composition-api';
+import { computed, defineComponent, PropType, ref, Ref } from 'vue';
 import { SfButton, SfHeading, SfInput, SfModal } from '@storefront-ui/vue';
 import { ValidationObserver, ValidationProvider } from 'vee-validate';
 
@@ -121,6 +121,7 @@ import {
   CustomizationOptionValue,
   OptionValue
 } from 'src/modules/customization-system';
+import { useCurrentInstance } from 'src/modules/shared';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
 import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
@@ -194,12 +195,13 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
+    const instance = useCurrentInstance();
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
     > | null> = ref(null);
 
     const formValidation = useFormValidation(validationObserver, () =>
-      getNestedFormRefs(context.refs, 'customizationOption')
+      getNestedFormRefs(instance.$refs, 'customizationOption')
     );
 
     const productType = computed<string>(() => {

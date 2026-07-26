@@ -45,6 +45,7 @@
         name="email-address"
         :disabled="true"
         :label="$t('Email address')"
+        autocomplete="email"
         :required="true"
         :valid="!$v.personalDetails.emailAddress.$error"
         :error-message="
@@ -61,6 +62,7 @@
         :class="{[vuelidateErrorClassName]: $v.personalDetails.firstName.$error}"
         name="first-name"
         :label="$t('First name')"
+        autocomplete="given-name"
         :required="true"
         :valid="!$v.personalDetails.firstName.$error"
         :error-message="$t('Field is required')"
@@ -73,6 +75,7 @@
         :class="{[vuelidateErrorClassName]: $v.personalDetails.lastName.$error}"
         name="last-name"
         :label="$t('Last name')"
+        autocomplete="family-name"
         :required="true"
         :valid="!$v.personalDetails.lastName.$error"
         :error-message="$t('Field is required')"
@@ -109,7 +112,7 @@
 </template>
 
 <script>
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 import { required, minLength, email, sameAs } from 'vuelidate/lib/validators';
 import { PersonalDetails } from '@vue-storefront/core/modules/checkout/components/PersonalDetails';
 import { SfInput, SfButton, SfHeading, SfCheckbox } from '@storefront-ui/vue';
@@ -118,7 +121,7 @@ import { mapActions } from 'vuex';
 
 import i18n from '@vue-storefront/i18n';
 import { PERSISTED_CUSTOMER_EMAIL, PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_EMAIL, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME } from 'src/modules/persisted-customer-data';
-import { PrivacyPolicyLink } from 'src/modules/shared';
+import { PrivacyPolicyLink, useRootInstance } from 'src/modules/shared';
 
 import { createSmoothscroll } from 'theme/helpers';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
@@ -139,10 +142,11 @@ export default defineComponent({
     MLogin
   },
   setup (_, context) {
-    const { persistPostAuthRedirectPath, resetPostAuthRedirectPath } = useAuthorizationRouteRestoration(context);
+    const root = useRootInstance();
+    const { persistPostAuthRedirectPath, resetPostAuthRedirectPath } = useAuthorizationRouteRestoration();
 
     function onOtpRequested () {
-      persistPostAuthRedirectPath(context.root.$route.fullPath);
+      persistPostAuthRedirectPath(root.$route.fullPath);
     }
 
     return {

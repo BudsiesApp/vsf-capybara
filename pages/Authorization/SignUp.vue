@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onBeforeMount, ref } from '@vue/composition-api';
+import { defineComponent, onBeforeMount, ref } from 'vue';
 import { SfHeading } from '@storefront-ui/vue';
 
 import { useAuthorizationPage } from 'theme/helpers/use-authorization-page';
@@ -45,8 +45,8 @@ export default defineComponent({
     const {
       prefilledEmail,
       redirectTarget
-    } = useAuthorizationPage(context);
-    const { persistPostAuthRedirectPath, resetPostAuthRedirectPath } = useAuthorizationRouteRestoration(context);
+    } = useAuthorizationPage();
+    const { persistPostAuthRedirectPath, resetPostAuthRedirectPath } = useAuthorizationRouteRestoration();
 
     function onOtpRequested () {
       persistPostAuthRedirectPath(redirectTarget.value);

@@ -4,6 +4,8 @@
       :class="buttonClass"
       :disabled="isDisabled"
       :title="title"
+      :type="buttonType"
+      :aria-label="ariaLabel"
       @click="$emit('click')"
     >
       <ALoadingSpinner v-show="showSpinner" />
@@ -37,6 +39,14 @@ export default Vue.extend({
     title: {
       type: String,
       default: ''
+    },
+    ariaLabel: {
+      type: String,
+      default: ''
+    },
+    buttonType: {
+      type: String,
+      default: 'button'
     }
   },
   components: {

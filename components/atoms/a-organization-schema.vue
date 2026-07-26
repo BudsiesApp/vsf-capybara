@@ -15,9 +15,10 @@ import config from 'config';
 import {
   computed,
   defineComponent
-} from '@vue/composition-api';
+} from 'vue';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-headers.function';
+import { useCurrentInstance, useRootInstance } from 'src/modules/shared';
 
 import { socialServices } from 'theme/interfaces/social-services';
 
@@ -50,13 +51,15 @@ interface SchemaData {
 export default defineComponent({
   name: 'AOrganizationSchema',
   setup (_, context) {
+    const instance = useCurrentInstance();
+    const root = useRootInstance();
     const isHomepage = computed<boolean>(() => {
-      return ['', '/'].includes(context.root.$route.path);
+      return ['', '/'].includes(root.$route.path);
     });
 
     const storeUrl = computed<string>(() => {
-      const host = context.ssrContext
-        ? getHostFromHeaders((context.ssrContext.server.request as any).headers)
+      const host = instance.$ssrContext
+        ? getHostFromHeaders((instance.$ssrContext.server.request as any).headers)
         : window.location.host;
 
       return `https://${host}`;

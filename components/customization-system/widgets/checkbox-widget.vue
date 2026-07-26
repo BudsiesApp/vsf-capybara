@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, toRef } from '@vue/composition-api';
+import { computed, defineComponent, PropType, toRef } from 'vue';
 
 import { OptionValue } from 'src/modules/customization-system';
 

@@ -1,4 +1,4 @@
-import { computed, ComputedRef, Ref } from '@vue/composition-api';
+import { computed, ComputedRef, Ref } from 'vue';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 

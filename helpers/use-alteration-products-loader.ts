@@ -1,10 +1,11 @@
-import { computed, Ref, ref, SetupContext, watch } from '@vue/composition-api';
+import { computed, Ref, ref, watch } from 'vue';
 import { SearchQuery } from 'storefront-query-builder';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
 import { updateProductProductionTimeCustomizationData } from 'src/modules/customization-system';
 import { Order, OrderItem } from 'src/modules/orders-history';
+import { useRootInstance } from 'src/modules/shared';
 
 function getSearchQuery (skus: string[]): SearchQuery {
   let productsQuery = new SearchQuery();
@@ -17,9 +18,9 @@ function getSearchQuery (skus: string[]): SearchQuery {
 }
 
 export function useAlterationProductsLoader (
-  orders: Ref<Order[]>,
-  { root }: SetupContext
+  orders: Ref<Order[]>
 ) {
+  const root = useRootInstance();
   const isLoading = ref<boolean>(false);
 
   const allOrderItems = computed<OrderItem[]>(() => {
