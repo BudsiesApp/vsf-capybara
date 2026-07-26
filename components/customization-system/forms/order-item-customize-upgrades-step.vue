@@ -23,12 +23,13 @@ import {
   defineComponent,
   PropType,
   ref
-} from '@vue/composition-api';
+} from 'vue';
 import { SfButton } from '@storefront-ui/vue';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
 import { OrderItem } from 'src/modules/orders-history';
+import { useRootInstance } from 'src/modules/shared';
 
 import AlterationProductForm from 'theme/components/customization-system/forms/alteration-product-form.vue';
 
@@ -49,10 +50,11 @@ export default defineComponent({
     }
   },
   setup (_, context) {
+    const root = useRootInstance();
     const isNavigating = ref<boolean>(false);
 
     function onAddedToCart (): void {
-      context.root.$router.replace({ name: 'detailed-cart' });
+      root.$router.replace({ name: 'detailed-cart' });
     }
 
     function onContinueWithoutUpgradesClick (): void {
@@ -61,7 +63,7 @@ export default defineComponent({
       }
 
       isNavigating.value = true;
-      context.root.$router.replace({ name: 'orders-history' });
+      root.$router.replace({ name: 'orders-history' });
     }
 
     return {

@@ -17,7 +17,7 @@
 
 <script lang="ts">
 import { SfInput } from '@storefront-ui/vue';
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { computed, defineComponent, PropType } from 'vue';
 
 export default defineComponent({
   name: 'TextInputWidget',

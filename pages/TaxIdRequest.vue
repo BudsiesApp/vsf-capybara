@@ -107,7 +107,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from '@vue/composition-api';
+import { defineComponent, ref, computed } from 'vue';
 import { extend, ValidationProvider, ValidationObserver } from 'vee-validate';
 import { required, max } from 'vee-validate/dist/rules';
 import { SfButton, SfCheckbox, SfHeading, SfInput } from '@storefront-ui/vue';
@@ -123,6 +123,7 @@ import {
   useOrderDetails,
   mapOrderAddressToBaseAddressDetails
 } from 'src/modules/orders-history';
+import { useRootInstance } from 'src/modules/shared';
 
 extend('required', {
   ...required,
@@ -163,12 +164,12 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const { root } = context;
+    const root = useRootInstance();
     const taxIdValue = ref('');
     const shouldSaveToDefaultAddress = ref(false);
     const isSubmitting = ref(false);
 
-    const { order, isLoading, isError: error } = useOrderDetails(context, props.orderId);
+    const { order, isLoading, isError: error } = useOrderDetails(props.orderId);
 
     const orderNumber = computed(() => {
       return ((order as any).value as (Order | null))?.increment_id || '';

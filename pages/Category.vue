@@ -225,7 +225,7 @@
 <script>
 import LazyHydrate from 'vue-lazy-hydration';
 import { mapGetters } from 'vuex';
-import { ref } from '@vue/composition-api';
+import { ref } from 'vue';
 import castArray from 'lodash-es/castArray';
 import config from 'config';
 import { isServer } from '@vue-storefront/core/helpers';

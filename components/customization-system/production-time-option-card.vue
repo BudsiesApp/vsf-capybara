@@ -59,11 +59,12 @@ import {
   ComputedRef,
   defineComponent,
   PropType
-} from '@vue/composition-api';
+} from 'vue';
 import { SfIcon } from '@storefront-ui/vue';
 import { PriceHelper } from '@vue-storefront/core/helpers';
 
 import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
+import { useRootInstance } from 'src/modules/shared';
 
 import rushIcon from '../../assets/rush-upgrades/rush.svg';
 import standardIcon from '../../assets/rush-upgrades/standard.svg';
@@ -124,7 +125,8 @@ export default defineComponent({
       required: true
     }
   },
-  setup (props, { root }) {
+  setup (props) {
+    const root = useRootInstance();
     const selectedCurrency = computed<Currency>(() => {
       return root.$store.getters[GET_ACTIVE_CURRENCY];
     });

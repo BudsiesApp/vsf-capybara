@@ -26,7 +26,7 @@ import {
   ref,
   onBeforeMount,
   onBeforeUnmount
-} from '@vue/composition-api';
+} from 'vue';
 import { Client } from 'braintree-web';
 import Bowser from 'bowser';
 import { parsePhoneNumberWithError } from 'libphonenumber-js';
@@ -58,7 +58,8 @@ import {
   PAYMENT_ERROR_EVENT,
   PaymentType,
   ExpressCheckoutData,
-  useExpressCheckoutTotals
+  useExpressCheckoutTotals,
+  useRootInstance
 } from 'src/modules/shared';
 import { useAddressValidation } from 'src/modules/address';
 
@@ -84,7 +85,7 @@ export default defineComponent({
     PaymentAmazonPay
   },
   setup (_, context) {
-    const root = context.root;
+    const root = useRootInstance();
     const windowObj = inject<Window & typeof window>('WindowObject');
     const isPlacing = ref(false);
 
@@ -189,9 +190,9 @@ export default defineComponent({
       EventBus.$off('order-after-placed', onOrderAfterPlaced);
     });
 
-    const { expressCheckoutTotals } = useExpressCheckoutTotals(context);
+    const { expressCheckoutTotals } = useExpressCheckoutTotals();
 
-    const { validateAddress, completeValidation } = useAddressValidation(context, {
+    const { validateAddress, completeValidation } = useAddressValidation({
       interactiveVerdicts: ['CONFIRM', 'CONFIRM_ADD_SUBPREMISES']
     });
 
@@ -270,7 +271,7 @@ export default defineComponent({
       return activeShippingDetailsChangedPromise;
     }
 
-    const { prepareOrderData } = useOrderCreation(context);
+    const { prepareOrderData } = useOrderCreation();
 
     const onExpressCheckoutAuthorized = async (data: ExpressCheckoutAuthorizedCallbackData): Promise<void> => {
       EventBus.$emit('notification-progress-start', root.$t('Processing order...'))

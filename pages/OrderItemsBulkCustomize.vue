@@ -49,10 +49,9 @@ import {
   defineComponent,
   Ref,
   ref,
-  SetupContext,
   computed,
   PropType
-} from '@vue/composition-api';
+} from 'vue';
 import { SfHeading } from '@storefront-ui/vue';
 import { SearchQuery } from 'storefront-query-builder';
 
@@ -64,12 +63,12 @@ import { OrderItemCustomizationFormData } from 'theme/interfaces/order-item-cust
 
 import OrderItemsBulkCustomizationForm from 'theme/components/customization-system/forms/order-items-bulk-customization-form.vue';
 import VerticalStepsFormPlaceholder from 'theme/components/customization-system/forms/placeholders/vertical-steps-form-placeholder.vue';
-import { BudsieStatus } from 'src/modules/shared';
+import { BudsieStatus, useRootInstance } from 'src/modules/shared';
 
 function useOrderItemsBulkCustomizations (
-  orderItemIds: Ref<string[]>,
-  { root }: SetupContext
+  orderItemIds: Ref<string[]>
 ) {
+  const root = useRootInstance();
   const isLoading = ref(true);
 
   const draftOrderItemsByProductSku = ref<Record<string, DraftOrderItem[]>>({});
@@ -182,13 +181,13 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const root = useRootInstance();
     const orderItemIds = computed<string[]>(() => {
       return Array.isArray(props.orderItemIds) ? props.orderItemIds : [props.orderItemIds];
     });
 
     const { isLoading, loadData, orderItemsCustomizationData } = useOrderItemsBulkCustomizations(
-      orderItemIds,
-      context
+      orderItemIds
     );
 
     const showForm = computed<boolean>(() => {
@@ -201,7 +200,7 @@ export default defineComponent({
       const allItemsCustomized = orderItemsCustomizationData.value.every((item) => item.isCustomized);
 
       if (allItemsCustomized) {
-        context.root.$router.replace({ name: 'orders-history' });
+        root.$router.replace({ name: 'orders-history' });
       }
     }
 

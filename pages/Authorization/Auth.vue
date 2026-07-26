@@ -41,12 +41,13 @@ import {
   onBeforeUnmount,
   watch,
   computed
-} from '@vue/composition-api';
+} from 'vue';
 import { SfLoader, SfHeading, SfButton } from '@storefront-ui/vue';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { AuthenticateRequestResponse } from '@vue-storefront/core/modules/user';
+import { useRootInstance } from 'src/modules/shared';
 
 import { REDIRECT_TARGET_QUERY_KEY } from 'theme/interfaces/redirect-target-query-key';
 import { useRegistrationForm } from 'theme/helpers/use-registration-form';
@@ -74,7 +75,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const root = context.root;
+    const root = useRootInstance();
 
     const isLoading = ref<boolean>(true);
     const isSuccess = ref<boolean>(false);
@@ -88,7 +89,7 @@ export default defineComponent({
       navigateToPostAuthRedirectPath,
       persistPostAuthRedirectPath,
       getPersistedPostAuthRedirectPath
-    } = useAuthorizationRouteRestoration(context);
+    } = useAuthorizationRouteRestoration();
 
     const isUserLoggedIn = computed<boolean>(() => {
       return root.$store.getters['user/isLoggedIn'];

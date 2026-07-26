@@ -63,11 +63,10 @@
 </template>
 
 <script lang="ts">
-import Vue, { VueConstructor } from 'vue';
+import Vue, { ref, VueConstructor } from 'vue';
 import DatePicker from 'vue2-datepicker';
 import { ValidationObserver, ValidationProvider, extend } from 'vee-validate';
 import { required, email } from 'vee-validate/dist/rules';
-import { defineComponent, ref } from '@vue/composition-api';
 
 import { SfButton, SfInput, SfHeading } from '@storefront-ui/vue';
 
@@ -85,7 +84,7 @@ extend('email', {
   message: 'Please, provide the correct email address'
 });
 
-export default defineComponent({
+export default Vue.extend({
   name: 'MRemindMeAboutBudsiesForm',
   props: {
     buttonText: {

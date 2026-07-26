@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import Vue from 'vue';
 import { SfInput, SfButton } from '@storefront-ui/vue';
 import { required } from 'vuelidate/lib/validators';
 
@@ -54,7 +54,7 @@ import i18n from '@vue-storefront/i18n';
 
 import MPassword from 'theme/components/molecules/m-password.vue';
 
-export default defineComponent({
+export default Vue.extend({
   name: 'MRegister',
   components: {
     SfInput,

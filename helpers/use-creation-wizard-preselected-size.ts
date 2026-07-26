@@ -1,4 +1,4 @@
-import { nextTick, Ref } from '@vue/composition-api';
+import { nextTick, Ref } from 'vue';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { isServer } from '@vue-storefront/core/helpers';

@@ -94,7 +94,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from '@vue/composition-api';
+import { defineComponent, PropType, ref } from 'vue';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 import { ValidationProvider } from 'vee-validate';
 
