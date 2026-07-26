@@ -105,7 +105,6 @@
           <SfListItem
             v-for="item in otherProductsItems"
             :key="item.label"
-            :class="item.class ? item.class : ''"
           >
             <router-link
               class="_item-link"
