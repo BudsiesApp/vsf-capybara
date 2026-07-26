@@ -36,7 +36,7 @@
 
     <div class="_body">
       <div class="_price">
-        {{ option.price | price() }}
+        {{ formattedPrice }}
       </div>
 
       <div class="_info">
@@ -53,6 +53,7 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 import { SfButton } from '@storefront-ui/vue';
+import { price } from '@vue-storefront/core/filters';
 
 export interface CreativityKitFormOption {
   image: string,
@@ -88,6 +89,9 @@ export default Vue.extend({
     SfButton
   },
   computed: {
+    formattedPrice (): string {
+      return price(this.option.price, undefined, undefined);
+    },
     selectedValue: {
       get (): CreativityKitFormOption | undefined {
         return this.value;
