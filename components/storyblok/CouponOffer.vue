@@ -19,6 +19,7 @@
 </template>
 
 <script lang="ts">
+import { useI18n, useStore } from '@vue-storefront/core/application-services';
 import { computed, ComputedRef, defineComponent, PropType, ref } from 'vue';
 
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
@@ -26,7 +27,6 @@ import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import { CART_SET_PENDING_COUPON } from '@vue-storefront/core/modules/cart/store/mutation-types';
 import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
-import { useRootInstance } from 'src/modules/shared';
 
 import MCouponItem from 'theme/components/molecules/m-coupon-item.vue';
 import { CouponButtonState, useCouponButton } from 'theme/helpers/use-coupon-button';
@@ -49,7 +49,8 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const root = useRootInstance();
+    const applicationStore = useStore();
+    const applicationI18n = useI18n();
     const itemData = computed<CouponOfferData>(() => {
       return props.item;
     });
@@ -57,7 +58,7 @@ export default defineComponent({
     const couponCodeLabel = computed<string>(() => couponCode.value || '');
     const isSavingPendingCoupon = ref<boolean>(false);
     const pendingCouponCode = computed<string | null>(() => {
-      return root.$store.getters['cart/getPendingCouponCode'];
+      return applicationStore.getters['cart/getPendingCouponCode'];
     });
     const isCouponSaved = computed<boolean>(() => {
       return Boolean(couponCode.value) && pendingCouponCode.value === couponCode.value;
@@ -66,10 +67,10 @@ export default defineComponent({
       return isStoryblokPreview();
     });
     const hasServerCart = computed<boolean>(() => {
-      return Boolean(root.$store.getters['cart/getCartToken']);
+      return Boolean(applicationStore.getters['cart/getCartToken']);
     });
     const cartItems: ComputedRef<CartItem[]> = computed(() => {
-      return root.$store.getters['cart/getCartItems'];
+      return applicationStore.getters['cart/getCartItems'];
     });
 
     const {
@@ -92,7 +93,7 @@ export default defineComponent({
 
     const offerTitle = computed<string>(() => {
       if (displayState.value === 'locked') {
-        return root.$t('Another coupon is already applied.').toString();
+        return applicationI18n.t('Another coupon is already applied.').toString();
       }
 
       return itemData.value.title || '';
@@ -100,22 +101,22 @@ export default defineComponent({
 
     const actionText = computed<string>(() => {
       if (displayState.value === 'applying') {
-        return root.$t('Applying').toString();
+        return applicationI18n.t('Applying').toString();
       }
 
       if (displayState.value === 'applied') {
-        return root.$t('Applied').toString();
+        return applicationI18n.t('Applied').toString();
       }
 
       if (displayState.value === 'saved') {
-        return root.$t('Saved').toString();
+        return applicationI18n.t('Saved').toString();
       }
 
       if (displayState.value === 'locked') {
-        return root.$t('Locked').toString();
+        return applicationI18n.t('Locked').toString();
       }
 
-      return root.$t('Apply').toString();
+      return applicationI18n.t('Apply').toString();
     });
 
     const isActionDisabled = computed<boolean>(() => {
@@ -125,11 +126,11 @@ export default defineComponent({
     });
 
     const notifyPendingCouponSaved = (): void => {
-      root.$store.dispatch(
+      applicationStore.dispatch(
         'notification/spawnNotification',
         notifications.createNotification({
           type: 'success',
-          message: root.$t('Coupon saved. It will be applied automatically when you add items to your cart.').toString(),
+          message: applicationI18n.t('Coupon saved. It will be applied automatically when you add items to your cart.').toString(),
           timeToLive: 5 * 1000
         }),
         { root: true }
@@ -143,7 +144,7 @@ export default defineComponent({
 
       isSavingPendingCoupon.value = true;
 
-      root.$store.commit(
+      applicationStore.commit(
         `cart/${CART_SET_PENDING_COUPON}`,
         couponCode.value
       );

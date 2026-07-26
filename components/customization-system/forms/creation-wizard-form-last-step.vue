@@ -98,8 +98,8 @@
 
       <m-order-submit-agreement />
 
-      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      <template v-if="privacyPolicyLinks.length">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
       </template>
     </div>
 
@@ -121,8 +121,12 @@ import {
   CustomizationOptionValue,
   OptionValue
 } from 'src/modules/customization-system';
-import { useCurrentInstance } from 'src/modules/shared';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
 import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
@@ -195,13 +199,20 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
-    const instance = useCurrentInstance();
+    const privacyPolicyLinks = useAdditionalContent(
+      AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+    );
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
     > | null> = ref(null);
+    const customizationOption: Ref<
+      InstanceType<typeof CustomizationOption> |
+      InstanceType<typeof CustomizationOption>[] |
+      null
+    > = ref(null);
 
     const formValidation = useFormValidation(validationObserver, () =>
-      getNestedFormRefs(instance.$refs, 'customizationOption')
+      getNestedFormRefs(customizationOption.value)
     );
 
     const productType = computed<string>(() => {
@@ -231,7 +242,10 @@ export default defineComponent({
     return {
       ...useQuantityAndShippingDiscounts(),
       ...formValidation,
+      customizationOption,
       onSubmitClick,
+      privacyPolicyLinks: privacyPolicyLinks as unknown as
+        readonly AdditionalContentEntry[],
       productType,
       validationObserver
     };

@@ -45,6 +45,7 @@
 </template>
 
 <script lang="ts">
+import { useRoute, useRouter, useStore } from '@vue-storefront/core/application-services';
 import {
   defineComponent,
   Ref,
@@ -63,17 +64,19 @@ import { OrderItemCustomizationFormData } from 'theme/interfaces/order-item-cust
 
 import OrderItemsBulkCustomizationForm from 'theme/components/customization-system/forms/order-items-bulk-customization-form.vue';
 import VerticalStepsFormPlaceholder from 'theme/components/customization-system/forms/placeholders/vertical-steps-form-placeholder.vue';
-import { BudsieStatus, useRootInstance } from 'src/modules/shared';
+import { BudsieStatus } from 'src/modules/shared';
 
 function useOrderItemsBulkCustomizations (
   orderItemIds: Ref<string[]>
 ) {
-  const root = useRootInstance();
+  const applicationStore = useStore();
+  const applicationRouter = useRouter();
+  const currentRoute = useRoute();
   const isLoading = ref(true);
 
   const draftOrderItemsByProductSku = ref<Record<string, DraftOrderItem[]>>({});
   const productBySkuDictionary = computed<Record<string, Product>>(() => {
-    return root.$store.getters['product/getProductBySkuDictionary'];
+    return applicationStore.getters['product/getProductBySkuDictionary'];
   });
 
   const orderItemsCustomizationData = computed<OrderItemCustomizationFormData[]>(() => {
@@ -139,7 +142,7 @@ function useOrderItemsBulkCustomizations (
       productsQuery = productsQuery
         .applyFilter({ key: 'sku', value: { 'in': notExistingProductsSkus } });
 
-      await root.$store.dispatch('product/findProducts', {
+      await applicationStore.dispatch('product/findProducts', {
         query: productsQuery,
         options: {
           prefetchGroupProducts: false
@@ -181,7 +184,9 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const root = useRootInstance();
+    const applicationStore = useStore();
+    const applicationRouter = useRouter();
+    const currentRoute = useRoute();
     const orderItemIds = computed<string[]>(() => {
       return Array.isArray(props.orderItemIds) ? props.orderItemIds : [props.orderItemIds];
     });
@@ -200,7 +205,7 @@ export default defineComponent({
       const allItemsCustomized = orderItemsCustomizationData.value.every((item) => item.isCustomized);
 
       if (allItemsCustomized) {
-        root.$router.replace({ name: 'orders-history' });
+        applicationRouter.replace({ name: 'orders-history' });
       }
     }
 

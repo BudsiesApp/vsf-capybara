@@ -120,6 +120,7 @@
 </template>
 
 <script lang="ts">
+import { useRouter, useStore } from '@vue-storefront/core/application-services';
 import {
   Component,
   computed,
@@ -159,7 +160,7 @@ import {
   useAvailableOptionsValuesFilter,
   usePurchaseFlowCustomizations
 } from 'src/modules/customization-system';
-import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow, useCurrentInstance, useRootInstance } from 'src/modules/shared';
+import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow } from 'src/modules/shared';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
@@ -249,8 +250,8 @@ export default defineComponent({
     ValidationObserver
   },
   setup (props, context) {
-    const instance = useCurrentInstance();
-    const root = useRootInstance();
+    const applicationStore = useStore();
+    const applicationRouter = useRouter();
     const {
       canUsePersistedCustomizationState,
       draftOrderItem,
@@ -268,12 +269,17 @@ export default defineComponent({
     });
 
     const currentProduct = computed<Product | undefined>(() => {
-      return root.$store.getters['product/getCurrentProduct'];
+      return applicationStore.getters['product/getCurrentProduct'];
     });
 
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
     > | InstanceType<typeof ValidationObserver>[] | null> = ref(null);
+    const customizationOption: Ref<
+      InstanceType<typeof CustomizationOption> |
+      InstanceType<typeof CustomizationOption>[] |
+      null
+    > = ref(null);
     const activeValidationObserver = computed<InstanceType<
       typeof ValidationObserver
     > | null>(() => {
@@ -284,7 +290,7 @@ export default defineComponent({
       return validationObserver.value;
     });
     const formValidation = useFormValidation(activeValidationObserver, () =>
-      getNestedFormRefs(instance.$refs, 'customizationOption')
+      getNestedFormRefs(customizationOption.value)
     );
 
     const productCustomizations = computed<Customization[]>(() => {
@@ -395,9 +401,9 @@ export default defineComponent({
         updateCustomizationOptionValue
       );
 
-    const { customizationFilter: abTestingCustomizationFilter } = useABTestingCustomizationsFilter(
-      instance.$ssrContext
-    );
+    const {
+      customizationFilter: abTestingCustomizationFilter
+    } = useABTestingCustomizationsFilter();
 
     const { filteredCustomizations } = useCustomizationsFilter(
       availableCustomizations,
@@ -576,17 +582,17 @@ export default defineComponent({
         }
 
         if (isCustomizeMode.value) {
-          root.$router.push({
+          applicationRouter.push({
             name: 'orders-history'
           });
         } else {
-          root.$router.push({
+          applicationRouter.push({
             name: 'cross-sells',
             params: { parentSku: currentProduct.value.sku }
           });
         }
       } catch (error) {
-        root.$store.dispatch('notification/spawnNotification', {
+        applicationStore.dispatch('notification/spawnNotification', {
           type: 'danger',
           message: 'Error: ' + error.message,
           action1: { label: i18n.t('OK') }
@@ -644,6 +650,7 @@ export default defineComponent({
       ...useBulkImagesUpload(),
       currentProduct,
       filteredCustomizationAvailableOptionValues,
+      customizationOption,
       customizationOptionValue,
       isDisabled,
       isSubmitButtonDisabled,

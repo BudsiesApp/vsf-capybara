@@ -35,7 +35,7 @@ import {
 import { ValidationObserver } from 'vee-validate';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
-import { BudsieStatus, useCurrentInstance } from 'src/modules/shared';
+import { BudsieStatus } from 'src/modules/shared';
 import {
   Customization,
   CustomizationOptionValue,
@@ -79,7 +79,6 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const instance = useCurrentInstance();
     const { draftOrderItem, product } = toRefs(props);
 
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
@@ -197,7 +196,7 @@ export default defineComponent({
 
     const formValidation = useFormValidation(
       validationObserver,
-      () => getNestedFormRefs(instance.$refs, 'customizationOption'),
+      () => getNestedFormRefs(customizationOption.value),
       props.draftOrderItem.id.toString()
     );
 
