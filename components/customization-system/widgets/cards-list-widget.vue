@@ -124,7 +124,7 @@ import {
   defineComponent,
   PropType,
   toRefs
-} from '@vue/composition-api';
+} from 'vue';
 import { SfChevron, SfIcon, SfPrice } from '@storefront-ui/vue';
 import { getThumbnailPath } from '@vue-storefront/core/helpers';
 
@@ -233,7 +233,7 @@ export default defineComponent({
       isValid,
       onSelectedOptionChange,
       ...listWidgetFields,
-      ...useOptionValuesPrice(values, context),
+      ...useOptionValuesPrice(values),
       ...useValuesSort(values)
     };
   }

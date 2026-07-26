@@ -1,4 +1,4 @@
-import { computed, Ref } from '@vue/composition-api';
+import { computed, Ref } from 'vue';
 
 let instanceId = 0;
 
@@ -15,7 +15,7 @@ export function useErrorAccessibility (componentName: string, hasError: Ref<bool
       : undefined;
   });
 
-  const ariaInvalid = computed<string>(() => {
+  const ariaInvalid = computed<'true' | 'false'>(() => {
     return hasError.value ? 'true' : 'false';
   });
 

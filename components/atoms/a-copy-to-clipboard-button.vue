@@ -15,7 +15,7 @@ import {
   onBeforeUnmount,
   ref,
   watch
-} from '@vue/composition-api';
+} from 'vue';
 import { SfButton } from '@storefront-ui/vue';
 
 type CopyFeedbackState = 'idle' | 'copied' | 'error'

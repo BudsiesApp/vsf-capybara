@@ -12,7 +12,7 @@
       <validation-provider
         rules="required"
         class="_field"
-        :name="$t('Story')"
+        :name="$t('Story').toString()"
         tag="div"
         v-slot="{ errors, classes }"
       >
@@ -20,7 +20,7 @@
           class="_story-textarea"
           :class="classes"
           v-model="story"
-          :title="$t('Story')"
+          :title="$t('Story').toString()"
           :disabled="isDisabled"
           :required="true"
           :valid="!errors.length"

@@ -21,16 +21,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import Vue from 'vue';
 import { SfModal, StorefrontUiInstanceType } from '@storefront-ui/vue';
 import { mapActions } from 'vuex';
+import { useRootInstance } from 'src/modules/shared';
 
 import { useAuthorizationRouteRestoration } from 'theme/helpers/use-authorization-route-restoration';
 
 import MLogin from 'theme/components/molecules/m-login.vue'
 import MRegister from 'theme/components/molecules/m-register.vue'
 
-export default defineComponent({
+export default Vue.extend({
   name: 'MModalAuthentication',
   components: {
     MLogin,
@@ -49,10 +50,11 @@ export default defineComponent({
     }
   },
   setup (_, context) {
-    const { persistPostAuthRedirectPath, resetPostAuthRedirectPath } = useAuthorizationRouteRestoration(context);
+    const root = useRootInstance();
+    const { persistPostAuthRedirectPath, resetPostAuthRedirectPath } = useAuthorizationRouteRestoration();
 
     const onOtpRequested = () => {
-      persistPostAuthRedirectPath(context.root.$route.fullPath);
+      persistPostAuthRedirectPath(root.$route.fullPath);
     };
 
     return {

@@ -1,4 +1,4 @@
-import { computed, onBeforeMount, onServerPrefetch, ref, Ref, SetupContext } from '@vue/composition-api';
+import { computed, onBeforeMount, onServerPrefetch, ref, Ref } from 'vue';
 import config from 'config';
 import { SearchQuery } from 'storefront-query-builder';
 
@@ -6,14 +6,14 @@ import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { PRODUCT_SET_PRODUCT_BY_SKU, PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import Product from 'core/modules/catalog/types/Product';
-import { ProductEvent } from 'src/modules/shared';
+import { ProductEvent, useRootInstance } from 'src/modules/shared';
 import { updateProductProductionTimeCustomizationData } from 'src/modules/customization-system';
 
 export function useMultiProductsPage (
   skus: Ref<string[]>,
-  { root }: SetupContext,
   initialSku?: Ref<string | undefined>
 ) {
+  const root = useRootInstance();
   const isDataLoaded = ref<boolean>(false);
 
   function getSearchQuery (productSkus: string[]) {

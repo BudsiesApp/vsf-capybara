@@ -1,12 +1,13 @@
-import { ref, Ref, SetupContext } from '@vue/composition-api';
+import { ref, Ref } from 'vue';
 
 import { CustomizationStateItem, DraftOrderItem, filterCustomizationState, saveOrderItemCustomizationsState, submitOrderItemCustomizationsState } from 'src/modules/customization-system';
+import { useRootInstance } from 'src/modules/shared';
 
 export function useCustomizeAction (
   customizationStateItems: Ref<CustomizationStateItem[]>,
-  draftOrderItem: Ref<DraftOrderItem | undefined>,
-  { root }: SetupContext
+  draftOrderItem: Ref<DraftOrderItem | undefined>
 ) {
+  const root = useRootInstance();
   const isSubmitting = ref(false);
 
   async function confirmCustomization () {
