@@ -251,11 +251,11 @@
 <script lang="ts">
 import { extend, ValidationProvider } from 'vee-validate';
 import { min, required } from 'vee-validate/dist/rules';
-import { defineComponent, PropType, ref, computed, watch, nextTick } from '@vue/composition-api';
+import { defineComponent, PropType, ref, computed, watch, nextTick } from 'vue';
 import { SfInput } from '@storefront-ui/vue';
 import { parsePhoneNumberWithError } from 'libphonenumber-js';
 
-import { stateCodeAutocompleteOptionSearch, createPhoneHelpers } from 'src/modules/shared';
+import { stateCodeAutocompleteOptionSearch, createPhoneHelpers, useCurrentInstance } from 'src/modules/shared';
 import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 import { useAddressAutocomplete } from 'src/modules/address/composables/use-address-autocomplete';
 import { googleMapsAttributionLogo } from 'src/modules/address';
@@ -323,7 +323,8 @@ export default defineComponent({
     MSuggestionsList,
     ValidationProvider
   },
-  setup (props, { emit, refs }) {
+  setup (props, { emit }) {
+    const refs = useCurrentInstance().$refs;
     const states = States;
     const fZipCodeChanged = ref(false);
     const countries = Countries;

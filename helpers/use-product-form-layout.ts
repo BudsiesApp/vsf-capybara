@@ -1,4 +1,4 @@
-import { computed, ref, Ref } from '@vue/composition-api';
+import { computed, ref, Ref } from 'vue';
 import { isServer } from '@vue-storefront/core/helpers';
 
 export enum LayoutType {

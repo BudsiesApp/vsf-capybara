@@ -1,4 +1,7 @@
 import { ADDRESS_VALIDATION_MODAL_NAME } from 'src/modules/address';
+import { Component } from 'vue';
+
+type ModalComponentLoader = () => Promise<{ default: Component }>;
 
 /**
  * List of modal names
@@ -20,7 +23,7 @@ export enum ModalList {
 /**
  * List of modal components files
  */
-export const modalComponents = new Map([
+export const modalComponents = new Map<string, ModalComponentLoader>([
   [ModalList.Review, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-review.vue')],
   [ModalList.Auth, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-authentication.vue')],
   [ModalList.SizeGuide, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-size-guide.vue')],

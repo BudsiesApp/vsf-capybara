@@ -30,7 +30,7 @@
     "quicklink": "^2.0.0-alpha",
     "supports-webp": "^2.0.1",
     "swiper": "^11.1.14",
-    "vue": "2.6.14",
+    "vue": "2.7.16",
     "vue-cool-lightbox": "^2.7.4",
     "vue-croppie": "https://github.com/BudsiesApp/vue-croppie.git#optimuspro",
     "vue-filepond": "^6.0.2",

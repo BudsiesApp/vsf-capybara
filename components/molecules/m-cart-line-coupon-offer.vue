@@ -12,8 +12,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, watch } from '@vue/composition-api';
+import { computed, defineComponent, watch } from 'vue';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
+import { useRootInstance } from 'src/modules/shared';
 
 import MCouponItem from 'theme/components/molecules/m-coupon-item.vue';
 
@@ -34,6 +35,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const root = useRootInstance();
     const product = computed(() => props.product as CartItem);
     const offer = computed<CartLineCouponOffer | undefined>(() => {
       return resolveCartLineCouponOffer(product.value);
@@ -52,10 +54,10 @@ export default defineComponent({
       isCouponInteractionBlocked,
       state,
       shouldRender
-    } = useCouponButton(couponCode, context);
+    } = useCouponButton(couponCode);
     const offerTitle = computed<string>(() => {
       if (state.value === 'locked') {
-        return context.root.$t('Another coupon is already applied.').toString();
+        return root.$t('Another coupon is already applied.').toString();
       }
 
       return offerButtonText.value;
@@ -63,18 +65,18 @@ export default defineComponent({
 
     const actionText = computed<string>(() => {
       if (state.value === 'applying') {
-        return context.root.$t('Applying').toString();
+        return root.$t('Applying').toString();
       }
 
       if (state.value === 'applied') {
-        return context.root.$t('Applied').toString();
+        return root.$t('Applied').toString();
       }
 
       if (state.value === 'locked') {
-        return context.root.$t('Locked').toString();
+        return root.$t('Locked').toString();
       }
 
-      return context.root.$t('Apply').toString();
+      return root.$t('Apply').toString();
     });
     const isActionDisabled = computed<boolean>(() => {
       return isCouponInteractionBlocked.value || state.value !== 'idle';

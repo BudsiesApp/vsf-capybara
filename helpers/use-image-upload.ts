@@ -1,4 +1,4 @@
-import { Ref } from '@vue/composition-api';
+import { Ref } from 'vue';
 
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 

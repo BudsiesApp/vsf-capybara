@@ -57,7 +57,7 @@
 <script lang="ts">
 import { extend, ValidationProvider, ValidationObserver } from 'vee-validate';
 import { email, required } from 'vee-validate/dist/rules';
-import { PropType, defineComponent, ref } from '@vue/composition-api';
+import Vue, { PropType, ref } from 'vue';
 
 import { SfInput } from '@storefront-ui/vue';
 import Task from '@vue-storefront/core/lib/sync/types/Task';
@@ -74,7 +74,7 @@ extend('required', {
 
 extend('email', email);
 
-export default defineComponent({
+export default Vue.extend({
   name: 'MSubscriptionForm',
   components: {
     MSpinnerButton,

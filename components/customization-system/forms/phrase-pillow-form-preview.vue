@@ -112,12 +112,13 @@ import {
   inject,
   nextTick,
   PropType,
+  CSSProperties,
   Ref,
   ref,
   toRef,
   toRefs,
   watch
-} from '@vue/composition-api';
+} from 'vue';
 import { SfHeading } from '@storefront-ui/vue';
 
 import config from 'config';
@@ -146,7 +147,7 @@ import MDesignImages from 'theme/components/molecules/m-design-images.vue';
 import MLivePreview from 'theme/components/molecules/m-live-preview.vue';
 import { useBackendProductId } from 'theme/helpers/use-backend-product-id';
 
-interface SmallBackgroundImageStyle {
+interface SmallBackgroundImageStyle extends CSSProperties {
   width: string,
   height: string,
   top: string,

@@ -1,4 +1,4 @@
-import { onUnmounted, ref } from '@vue/composition-api';
+import { onUnmounted, ref } from 'vue';
 
 export function useComponentUnmountedChecker () {
   const isUnmounted = ref<boolean>(false);

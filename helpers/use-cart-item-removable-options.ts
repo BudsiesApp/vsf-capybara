@@ -1,11 +1,11 @@
-import { computed, ComputedRef, nextTick, onMounted, ref, Ref, set, SetupContext } from '@vue/composition-api';
+import { computed, ComputedRef, nextTick, onMounted, ref, Ref, set } from 'vue';
 
 import i18n from '@vue-storefront/core/i18n';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { Customization, CustomizationOptionValue, CustomizationStateItem, getOptionValueId, isFileUploadValue, OptionValue, toOptionValueArray, useAvailableCustomizations, useCustomizationsBundleOptions, useCustomizationState } from 'src/modules/customization-system';
-import { CartEvents } from 'src/modules/shared';
+import { CartEvents, useRootInstance } from 'src/modules/shared';
 
 import { useAddToCart } from './use-add-to-cart';
 
@@ -34,9 +34,9 @@ function getErrorNotificationMessage (error: unknown): string {
 }
 
 export function useCartItemRemovableOptions (
-  existingCartItem: Ref<CartItem>,
-  context: SetupContext
+  existingCartItem: Ref<CartItem>
 ) {
+  const root = useRootInstance();
   const productCustomizations = computed<Customization[]>(() => {
     return existingCartItem.value.customizations || [];
   });
@@ -105,7 +105,7 @@ export function useCartItemRemovableOptions (
   const quantity = computed(() => existingCartItem.value.qty);
 
   const product: ComputedRef<Product | undefined> = computed(() => {
-    return context.root.$store.getters['product/getProductBySkuDictionary'][existingCartItem.value.sku];
+    return root.$store.getters['product/getProductBySkuDictionary'][existingCartItem.value.sku];
   });
 
   const { addToCartHandler } = useAddToCart(
@@ -114,7 +114,6 @@ export function useCartItemRemovableOptions (
     customizationState,
     bundleOptions,
     existingCartItem,
-    context,
     undefined,
     existingCartItem.value.extension_attributes?.flow,
     true,
@@ -318,7 +317,7 @@ export function useCartItemRemovableOptions (
       }
     } catch (error) {
       rollback();
-      context.root.$store.dispatch('notification/spawnNotification', {
+      root.$store.dispatch('notification/spawnNotification', {
         type: 'danger',
         message: getErrorNotificationMessage(error),
         action1: { label: i18n.t('OK') }

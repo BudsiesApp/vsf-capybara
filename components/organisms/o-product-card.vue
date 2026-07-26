@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, inject } from '@vue/composition-api';
+import { defineComponent, computed, inject } from 'vue';
 import config from 'config';
 import { SfProductCard } from '@storefront-ui/vue';
 
