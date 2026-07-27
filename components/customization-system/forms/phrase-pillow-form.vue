@@ -129,7 +129,7 @@ import {
   ref,
   toRefs,
   watch
-} from '@vue/composition-api';
+} from 'vue';
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfHeading, SfSteps } from '@storefront-ui/vue';
 
@@ -138,6 +138,7 @@ import CartItem from 'core/modules/cart/types/CartItem';
 import Product from 'core/modules/catalog/types/Product';
 import i18n from '@vue-storefront/core/i18n';
 import { useABTestingCustomizationsFilter } from 'src/modules/a-b-testing';
+import { useCurrentInstance, useRootInstance } from 'src/modules/shared';
 import {
   Customization,
   useCustomizationState,
@@ -198,6 +199,8 @@ export default defineComponent({
     ValidationObserver
   },
   setup (props, context) {
+    const instance = useCurrentInstance();
+    const root = useRootInstance();
     const { canUsePersistedCustomizationState, existingCartItem, product } = toRefs(props);
 
     const validationObserver: Ref<InstanceType<
@@ -288,8 +291,7 @@ export default defineComponent({
       customizationOptionValue,
       product,
       mergeCustomizationState,
-      removeUnavailableOptionValues,
-      context
+      removeUnavailableOptionValues
     );
 
     const { removePreservedState } =
@@ -311,7 +313,7 @@ export default defineComponent({
       );
 
     const { customizationFilter } = useABTestingCustomizationsFilter(
-      context.ssrContext
+      instance.$ssrContext
     );
 
     const { filteredCustomizations } = useCustomizationsFilter(
@@ -336,8 +338,7 @@ export default defineComponent({
       quantity,
       customizationState,
       bundleOptions,
-      existingCartItem,
-      context
+      existingCartItem
     );
 
     const { isUnmounted } = useComponentUnmountedChecker();
@@ -378,12 +379,12 @@ export default defineComponent({
           return;
         }
 
-        context.root.$router.push({
+        root.$router.push({
           name: 'cross-sells',
           params: { parentSku: product.value.sku }
         });
       } catch (error) {
-        context.root.$store.dispatch('notification/spawnNotification', {
+        root.$store.dispatch('notification/spawnNotification', {
           type: 'danger',
           message: 'Error: ' + error,
           action1: { label: i18n.t('OK') }
@@ -430,7 +431,7 @@ export default defineComponent({
     return {
       ...customizationGroups,
       ...formSteps,
-      ...useBulkImagesUpload(context),
+      ...useBulkImagesUpload(),
       availableCustomizations,
       availableOptionValues,
       bottomStorySlug,

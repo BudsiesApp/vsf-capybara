@@ -1,4 +1,4 @@
-import { onMounted, ref, Ref, SetupContext } from '@vue/composition-api';
+import { onMounted, ref, Ref } from 'vue';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
@@ -6,7 +6,7 @@ import CartItem from 'core/modules/cart/types/CartItem';
 import Product from 'core/modules/catalog/types/Product';
 import { PlushieWizardEvents } from 'src/modules/budsies';
 import { updateProductProductionTimeCustomizationData } from 'src/modules/customization-system';
-import { ProductEvent } from 'src/modules/shared';
+import { ProductEvent, useRootInstance } from 'src/modules/shared';
 
 import { PlushieType } from 'theme/interfaces/plushie.type';
 import getPlushieSkuByTypes from './get-plushie-sku-by-types.function';
@@ -18,9 +18,9 @@ export function useCreationWizardProductTypeStep (
   preselectedProductType: Ref<string | undefined>,
   resetCustomizationState: () => void,
   nextStep: () => Promise<void>,
-  afterProductTypeSet: () => void,
-  { root }: SetupContext
+  afterProductTypeSet: () => void
 ) {
+  const root = useRootInstance();
   const isProductLoading = ref<boolean>(false);
 
   async function loadProduct (sku: string): Promise<void> {

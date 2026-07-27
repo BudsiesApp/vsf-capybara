@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from '@vue/composition-api';
+import { defineComponent, computed } from 'vue';
 import { SfLoader, SfTabs } from '@storefront-ui/vue';
 
 import {
@@ -68,11 +68,11 @@ export default defineComponent({
       isError,
       isLoading,
       ordersList
-    } = useOrderHistoryList(context);
+    } = useOrderHistoryList();
 
     const {
       alterationProductByOrderItemId
-    } = useAlterationProductsLoader(ordersList, context);
+    } = useAlterationProductsLoader(ordersList);
 
     const showLoadingIndicator = computed<boolean>(() => {
       return isLoading.value && !isError.value;

@@ -1,6 +1,6 @@
-import { computed, ref, Ref, SetupContext } from '@vue/composition-api';
+import { computed, ref, Ref } from 'vue';
 
-import { useMobileObserver, PriceHelper } from 'src/modules/shared';
+import { useMobileObserver, PriceHelper, useRootInstance } from 'src/modules/shared';
 import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import {
@@ -47,9 +47,9 @@ export function useCartItemConfiguration (
   cartItemPrice: Ref<PriceHelper.ProductPrice | undefined>,
   cartItemQty: Ref<number>,
   showPrices: Ref<boolean>,
-  { root }: SetupContext,
   filterOutNameCustomization: Ref<boolean> = ref(false)
 ) {
+  const root = useRootInstance();
   const { isMobile } = useMobileObserver();
 
   function truncate (text: string, desktopLength = 75, mobileLength = 50): string {

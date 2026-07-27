@@ -81,7 +81,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, computed, Ref, ComputedRef } from '@vue/composition-api';
+import { defineComponent, ref, watch, computed, Ref, ComputedRef } from 'vue';
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfCheckbox, SfHeading } from '@storefront-ui/vue';
 
@@ -100,6 +100,7 @@ import {
   REQUEST_ORDER_SHIPPING_ADDRESS_UPDATE_ACTION,
   REQUEST_ORDER_SHIPPING_ADDRESS_CONFIRMATION_ACTION
 } from 'src/modules/orders-history';
+import { useRootInstance } from 'src/modules/shared';
 
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 import OBaseAddressForm from 'theme/components/organisms/o-base-address-form.vue';
@@ -122,12 +123,12 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const root = context.root;
+    const root = useRootInstance();
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
     const baseAddressForm: Ref<InstanceType<typeof OBaseAddressForm> | null> = ref(null);
     const wasFormSubmitted = ref(false);
 
-    const { order, isLoading, isError: showNotFound } = useOrderDetails(context, props.orderId);
+    const { order, isLoading, isError: showNotFound } = useOrderDetails(props.orderId);
     const isSubmitting = ref(false);
     const addressFormModel: Ref<BaseAddressDetails> = ref({
       firstName: '',
@@ -149,7 +150,7 @@ export default defineComponent({
       handleValidationResult,
       isValidating: isValidatingAddress,
       completeValidation: completeAddressValidation
-    } = useAddressValidation(context);
+    } = useAddressValidation();
 
     const existingExtensionAttributes: ComputedRef<AddressExtensionAttributes | undefined> = computed(() => {
       return currentShippingAddress.value?.extension_attributes;

@@ -23,13 +23,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, PropType } from '@vue/composition-api';
+import { defineComponent, computed, PropType } from 'vue';
 
 import Product from 'core/modules/catalog/types/Product';
 import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog'
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency'
-import { ProductEvent, PriceHelper } from 'src/modules/shared';
+import { ProductEvent, PriceHelper, useRootInstance } from 'src/modules/shared';
 import { ColumnsCountField, SizeValue } from 'src/modules/vsf-storyblok-module';
 
 import { prepareCategoryProduct } from 'theme/helpers'
@@ -58,7 +58,8 @@ export default defineComponent({
       default: ''
     }
   },
-  setup (props, { root }) {
+  setup (props) {
+    const root = useRootInstance();
     const productBySkuDictionary = computed<Record<string, Product>>(() => {
       return root.$store.getters['product/getProductBySkuDictionary'];
     });

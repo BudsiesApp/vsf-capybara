@@ -24,7 +24,7 @@ import {
   defineComponent,
   PropType,
   toRefs
-} from '@vue/composition-api';
+} from 'vue';
 
 import {
   OptionValue,

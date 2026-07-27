@@ -117,7 +117,7 @@ import {
   watch,
   toRefs,
   set
-} from '@vue/composition-api';
+} from 'vue';
 import { SfButton, SfChevron, SfHeading } from '@storefront-ui/vue';
 import { ValidationObserver } from 'vee-validate';
 
@@ -144,6 +144,7 @@ import {
   canOrderItemHaveUpgrades,
   OrderItem
 } from 'src/modules/orders-history';
+import { useCurrentInstance, useRootInstance } from 'src/modules/shared';
 
 import { useAlterationProductCustomizations } from 'theme/helpers/use-alteration-product-customizations';
 import { useOrderItemAndAlterationProductMapping } from 'theme/helpers/use-order-item-and-alteration-product-mapping';
@@ -241,12 +242,14 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const instance = useCurrentInstance();
+    const root = useRootInstance();
     const { orderItem, alterationProduct, isExpandable } = toRefs(props);
     const isExpanded = ref(false);
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
 
     const productBySkuDictionary = computed<Record<string, Product>>(() => {
-      return context.root.$store.getters['product/getProductBySkuDictionary'] || {};
+      return root.$store.getters['product/getProductBySkuDictionary'] || {};
     });
 
     const plushieId = computed<string | undefined>(() => {
@@ -263,7 +266,7 @@ export default defineComponent({
       return productBySkuDictionary.value[sku];
     });
 
-    const { existingCartItem } = useExistingCartItem(plushieId, context);
+    const { existingCartItem } = useExistingCartItem(plushieId);
 
     const mapping = useOrderItemAndAlterationProductMapping(alterationProduct, extraChargesProduct);
 
@@ -339,7 +342,7 @@ export default defineComponent({
     const { isSomeEntityBusy, onEntityBusyChanged } = useEntityBusyState();
 
     const formValidation = useFormValidation(validationObserver, () =>
-      getNestedFormRefs(context.refs, 'customizationOption')
+      getNestedFormRefs(instance.$refs, 'customizationOption')
     );
 
     function onCustomizationOptionInput (payload: {
@@ -396,7 +399,6 @@ export default defineComponent({
       customizationState,
       bundleOptions,
       existingCartItem,
-      context,
       plushieId.value
     );
 
@@ -431,10 +433,10 @@ export default defineComponent({
 
     const addToCartButtonText = computed<string>(() => {
       if (existingCartItem.value) {
-        return context.root.$t('Update Cart').toString();
+        return root.$t('Update Cart').toString();
       }
 
-      return context.root.$t('Add to Cart').toString();
+      return root.$t('Add to Cart').toString();
     });
 
     function onShowDetailsClick () {
@@ -475,24 +477,24 @@ export default defineComponent({
 
         const notification = {
           type: 'info',
-          message: context.root.$t('Upgrades were added to the cart').toString(),
+          message: root.$t('Upgrades were added to the cart').toString(),
           timeToLive: 10 * 1000,
-          action1: { label: context.root.$t('OK') },
+          action1: { label: root.$t('OK') },
           action2: {
-            label: context.root.$t('Proceed to checkout'),
-            action: () => context.root.$router.push({ name: 'checkout' })
+            label: root.$t('Proceed to checkout'),
+            action: () => root.$router.push({ name: 'checkout' })
           }
         };
 
-        context.root.$store.dispatch(
+        root.$store.dispatch(
           'notification/spawnNotification',
           notification
         );
       } catch (error) {
-        context.root.$store.dispatch('notification/spawnNotification', {
+        root.$store.dispatch('notification/spawnNotification', {
           type: 'danger',
           message: (error as Error).message,
-          action1: { label: context.root.$t('OK') }
+          action1: { label: root.$t('OK') }
         });
       }
     }
