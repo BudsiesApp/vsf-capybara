@@ -404,7 +404,7 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     processUpload (
       fieldName: string,
       file: File,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       metadata: Record<string, any>,
       load: (id: string) => void,
       error: (errorText: string) => void,

@@ -29,7 +29,7 @@
         >
           <div
             class="o-header__submenu"
-            :aria-expanded="String(isAboutMenuHovered || isAboutMenuFocused)"
+            :aria-expanded="isAboutMenuHovered || isAboutMenuFocused"
             tabindex="0"
             role="menuitem"
           >
@@ -52,7 +52,7 @@
         >
           <div
             class="o-header__submenu"
-            :aria-expanded="String(isHoveredMenu || isFocusedMenu)"
+            :aria-expanded="isHoveredMenu || isFocusedMenu"
             tabindex="0"
             role="menuitem"
           >

@@ -60,8 +60,8 @@
       </div>
 
       <div class="_notice-link-container">
-        <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+        <template v-if="privacyPolicyLinks.length">
+          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
         </template>
       </div>
     </validation-observer>
@@ -83,7 +83,11 @@ import {
   useAvailableCustomizations,
   useCustomizationState
 } from 'src/modules/customization-system';
-import { useCurrentInstance } from 'src/modules/shared';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import {
   FormRefs,
@@ -101,19 +105,24 @@ import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MBaseForm from './m-base-form.vue';
 
 function getBaseFormRefs (
-  refs: FormRefs
+  baseForm: InstanceType<typeof MBaseForm> | null,
+  customizationOptions: InstanceType<typeof CustomizationOption> | InstanceType<typeof CustomizationOption>[] | null
 ): FormRefs {
   return {
-    ...getNestedFormRefs(refs, 'baseForm'),
-    ...getNestedFormRefs(refs, 'customizationOption')
+    ...getNestedFormRefs(baseForm),
+    ...getNestedFormRefs(customizationOptions)
   };
 }
 
 export default Vue.extend({
   name: 'OKeychainQuoteOrderForm',
   setup (props) {
-    const refs = useCurrentInstance().$refs;
     const { product } = toRefs(props);
+    const privacyPolicyLinks = useAdditionalContent(
+      AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+    );
+    const baseForm: Ref<InstanceType<typeof MBaseForm> | null> = ref(null);
+    const customizationOption: Ref<InstanceType<typeof CustomizationOption> | InstanceType<typeof CustomizationOption>[] | null> = ref(null);
     const productCustomizations = computed<Customization[]>(() => {
       return product.value.customizations || [];
     });
@@ -154,7 +163,17 @@ export default Vue.extend({
       updateCustomizationOptionValue(payload);
     }
 
+    function persistBaseFormData (): void {
+      if (!baseForm.value) {
+        throw new Error('Base Form is not defined');
+      }
+
+      baseForm.value.persistCustomerData();
+    }
+
     return {
+      baseForm,
+      customizationOption,
       customizationOptionValue,
       customizationState,
       get leadSourceCustomization () {
@@ -168,11 +187,14 @@ export default Vue.extend({
       },
       leadSourcePayload,
       onCustomizationOptionInput,
+      persistBaseFormData,
+      privacyPolicyLinks: privacyPolicyLinks as unknown as
+        readonly AdditionalContentEntry[],
       validationObserver,
       ...useBulkOrdersBaseForm(),
       ...useFormValidation(
         validationObserver,
-        () => getBaseFormRefs(refs)
+        () => getBaseFormRefs(baseForm.value, customizationOption.value)
       )
     };
   },
@@ -313,13 +335,7 @@ export default Vue.extend({
       });
     },
     persistCustomerData (): void {
-      const baseForm = this.$refs.baseForm as InstanceType<typeof MBaseForm> | undefined;
-
-      if (!baseForm) {
-        throw new Error('Base Form is not defined');
-      }
-
-      baseForm.persistCustomerData();
+      this.persistBaseFormData();
     }
   }
 })

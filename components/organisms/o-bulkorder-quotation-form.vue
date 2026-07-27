@@ -153,7 +153,6 @@
       <m-addons-selector
         class="_sample-prototype-addons"
         v-model="selectedAddons"
-        ref="addons-selector"
         :wide-image="true"
         :addons="addons"
         :disabled="isDisabled"
@@ -191,28 +190,19 @@ import { ValidationObserver } from 'vee-validate';
 import { TranslateResult } from 'vue-i18n';
 
 import { PRODUCT_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
-import { PriceHelper, useCurrentInstance } from 'src/modules/shared';
+import { PriceHelper } from 'src/modules/shared';
 import { components } from 'src/modules/vsf-storyblok-module/components';
 import { ItemData } from 'src/modules/vsf-storyblok-module';
 import { BulkorderQuote, BulkOrderInfo, BulkOrderStatus, BulkorderQuoteProductId } from 'src/modules/budsies';
-import {
-  FormRefs,
-  getNestedFormRefs,
-  useFormValidation
-} from 'theme/helpers/use-form-validation';
+import { FormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
 import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 
 import AddonOption from '../interfaces/addon-option.interface';
 import SelectedAddon from '../interfaces/selected-addon.interface';
 
-function getAllFormRefs (
-  refs: FormRefs
-): FormRefs {
-  return {
-    ...refs,
-    ...getNestedFormRefs(refs, 'addons-selector')
-  };
+function getAllFormRefs (): FormRefs {
+  return {};
 }
 
 export default Vue.extend({
@@ -227,14 +217,13 @@ export default Vue.extend({
     }
   },
   setup () {
-    const refs = useCurrentInstance().$refs;
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
 
     return {
       validationObserver,
       ...useFormValidation(
         validationObserver,
-        () => getAllFormRefs(refs)
+        getAllFormRefs
       )
     }
   },
