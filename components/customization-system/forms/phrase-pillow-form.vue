@@ -66,6 +66,7 @@
                   customizationGroup.id
                 ]"
                 class="_customization-option"
+                ref="customizationOptionsRefs"
                 :key="customization.id"
                 :customization="customization"
                 :is-disabled="isDisabled"
