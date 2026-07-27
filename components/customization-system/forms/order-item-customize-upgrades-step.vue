@@ -19,6 +19,7 @@
 </template>
 
 <script lang="ts">
+import { useRouter } from '@vue-storefront/core/application-services';
 import {
   defineComponent,
   PropType,
@@ -29,7 +30,6 @@ import { SfButton } from '@storefront-ui/vue';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 
 import { OrderItem } from 'src/modules/orders-history';
-import { useRootInstance } from 'src/modules/shared';
 
 import AlterationProductForm from 'theme/components/customization-system/forms/alteration-product-form.vue';
 
@@ -50,11 +50,11 @@ export default defineComponent({
     }
   },
   setup (_, context) {
-    const root = useRootInstance();
+    const applicationRouter = useRouter();
     const isNavigating = ref<boolean>(false);
 
     function onAddedToCart (): void {
-      root.$router.replace({ name: 'detailed-cart' });
+      applicationRouter.replace({ name: 'detailed-cart' });
     }
 
     function onContinueWithoutUpgradesClick (): void {
@@ -63,7 +63,7 @@ export default defineComponent({
       }
 
       isNavigating.value = true;
-      root.$router.replace({ name: 'orders-history' });
+      applicationRouter.replace({ name: 'orders-history' });
     }
 
     return {

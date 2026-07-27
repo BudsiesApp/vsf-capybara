@@ -75,17 +75,17 @@
         <SfButton
           type="submit"
           class="sf-button--full-width sf-button--text form__action-button form__action-button--secondary"
-          @click="$bus.$emit('checkout-before-edit', 'personalDetails')"
+          @click="emitCheckoutEdit('personalDetails')"
         >
           {{ $t('Edit contact') }}
         </SfButton>
       </div>
 
-      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+      <template v-if="privacyPolicyLinks.length">
         <component
           :is="linkComponent.component"
           :key="linkComponent.key"
-          v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks"
+          v-for="linkComponent in privacyPolicyLinks"
         />
       </template>
     </div>
@@ -105,6 +105,10 @@ import { ValidationObserver } from 'vee-validate';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { IS_SHIPPING_METHODS_SYNCING } from '@vue-storefront/core/modules/cart';
 import { Shipping } from '@vue-storefront/core/modules/checkout/components/Shipping';
+import {
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import { createSmoothscroll } from 'theme/helpers';
 import MMultiselect from 'theme/components/molecules/m-multiselect';
@@ -137,16 +141,13 @@ export default defineComponent({
 
     const { validateAndGoToFirstError } = useFormValidation(
       validationObserver,
-      () => {
-        const baseAddressFormComponent = baseAddressForm.value;
-
-        return {
-          ...(baseAddressFormComponent?.$refs || {})
-        };
-      }
+      () => baseAddressForm.value?.getFormValidationRefs() || {}
     );
 
     return {
+      privacyPolicyLinks: useAdditionalContent(
+        AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+      ),
       validateAddress,
       isValidatingAddress,
       completeAddressValidation,
@@ -180,6 +181,9 @@ export default defineComponent({
     }
   },
   methods: {
+    emitCheckoutEdit (section) {
+      EventBus.$emit('checkout-before-edit', section);
+    },
     focusSubmitStepButton () {
       const submitStepButton = this.$refs.submitStepButton;
 
@@ -210,7 +214,7 @@ export default defineComponent({
       this.changeCountry();
     },
     onZipCodeBlur () {
-      this.$bus.$emit('checkout-before-shippingMethods', this.shipping.country)
+      EventBus.$emit('checkout-before-shippingMethods', this.shipping.country)
     },
     async saveDataToCheckout () {
       const isFormValid = await this.validateAndGoToFirstError();

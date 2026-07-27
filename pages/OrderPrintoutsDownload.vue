@@ -81,6 +81,7 @@
 </template>
 
 <script lang="ts">
+import { useStore } from '@vue-storefront/core/application-services';
 import { computed, defineComponent, inject, PropType } from 'vue';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 
@@ -89,7 +90,7 @@ import i18n from '@vue-storefront/i18n';
 import { BaseImage } from 'src/modules/budsies';
 import { isFileUploadValue } from 'src/modules/customization-system/types/is-file-upload-value.typeguard';
 import { ImageHandlerService } from 'src/modules/file-storage';
-import { BudsieStatus, useRootInstance } from 'src/modules/shared';
+import { BudsieStatus } from 'src/modules/shared';
 import { useOrderDetails } from 'src/modules/orders-history';
 
 import { useBatchImageDownload } from 'theme/helpers/use-batch-image-download';
@@ -127,7 +128,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const root = useRootInstance();
+    const applicationStore = useStore();
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
 
     if (!imageHandlerService) {
@@ -187,7 +188,7 @@ export default defineComponent({
     function onError (error: unknown): void {
       const message = (error as Error)?.message || String(i18n.t('Something went wrong'));
 
-      root.$store.dispatch('notification/spawnNotification', {
+      applicationStore.dispatch('notification/spawnNotification', {
         type: 'danger',
         message,
         action1: { label: i18n.t('OK') }

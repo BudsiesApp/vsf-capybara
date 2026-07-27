@@ -35,7 +35,7 @@ import {
 import { ValidationObserver } from 'vee-validate';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
-import { BudsieStatus, useCurrentInstance } from 'src/modules/shared';
+import { BudsieStatus } from 'src/modules/shared';
 import {
   Customization,
   CustomizationOptionValue,
@@ -51,6 +51,7 @@ import {
 } from 'src/modules/customization-system';
 
 import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
+import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
 
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 
@@ -79,11 +80,13 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const instance = useCurrentInstance();
     const { draftOrderItem, product } = toRefs(props);
 
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
-    const customizationOption = ref<InstanceType<typeof CustomizationOption>[] | null>(null);
+    const {
+      templateRef: customizationOption,
+      getRefsInRenderedOrder: getCustomizationOptionsInRenderedOrder
+    } = useRenderedOrderTemplateRefs<InstanceType<typeof CustomizationOption>>();
 
     const productCustomizations = computed<Customization[]>(() => {
       return product.value.customizations || [];
@@ -197,7 +200,7 @@ export default defineComponent({
 
     const formValidation = useFormValidation(
       validationObserver,
-      () => getNestedFormRefs(instance.$refs, 'customizationOption'),
+      () => getNestedFormRefs(getCustomizationOptionsInRenderedOrder()),
       props.draftOrderItem.id.toString()
     );
 
