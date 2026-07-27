@@ -37,8 +37,10 @@ import {
   nextTick,
   onMounted,
   ref
-} from '@vue/composition-api';
+} from 'vue';
 import { SfIcon, SfMegaMenu, SfList, SfMenuItem } from '@storefront-ui/vue';
+
+import { useCurrentInstance, useRootInstance } from 'src/modules/shared';
 
 interface AboutItem {
   label: string,
@@ -59,7 +61,9 @@ export default defineComponent({
       default: true
     }
   },
-  setup (_, { emit, refs, root }) {
+  setup (_, { emit }) {
+    const instance = useCurrentInstance();
+    const root = useRootInstance();
     const menu = ref<any>(null);
     const aboutItems: AboutItem[] = [
       {
@@ -83,7 +87,7 @@ export default defineComponent({
     onMounted(async () => {
       await nextTick();
 
-      menu.value = refs.menu;
+      menu.value = instance.$refs.menu;
       menu.value.active = menu.value.items;
       menu.value._computedWatchers.isMobile = undefined;
     });

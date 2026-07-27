@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, onBeforeUnmount, ref, Ref } from '@vue/composition-api';
+import { computed, defineComponent, onMounted, onBeforeUnmount, ref, Ref } from 'vue';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { Logger } from '@vue-storefront/core/lib/logger';
@@ -30,6 +30,7 @@ import {
   useCustomizationsBundleOptions
 } from 'src/modules/customization-system';
 import { getCustomizationIdByOptionValueId } from 'src/modules/customization-system/helpers/get-customization-id-by-option-value-id';
+import { useRootInstance } from 'src/modules/shared';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 
@@ -94,7 +95,8 @@ export default defineComponent({
       required: true
     }
   },
-  setup (props, { root }) {
+  setup (props) {
+    const root = useRootInstance();
     const PREPARING_ITEM_MESSAGE = root.$t('Preparing your item...').toString();
 
     const isLoading = ref<boolean>(true);
@@ -154,7 +156,6 @@ export default defineComponent({
       customizationState,
       bundleOptions,
       existingCartItem,
-      { root } as any,
       props.plushieId
     );
 

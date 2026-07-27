@@ -126,7 +126,7 @@ import {
   ref,
   Ref,
   toRefs
-} from '@vue/composition-api';
+} from 'vue';
 import {
   SfButton,
   SfCheckbox,
@@ -156,7 +156,7 @@ import {
   useOptionValueActions,
   useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
-import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow , PrivacyPolicyLink } from 'src/modules/shared';
+import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow, useCurrentInstance, useRootInstance , PrivacyPolicyLink } from 'src/modules/shared';
 import i18n from '@vue-storefront/core/i18n';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
@@ -220,6 +220,8 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
+    const instance = useCurrentInstance();
+    const root = useRootInstance();
     const {
       canUsePersistedCustomizationState,
       customizationMode,
@@ -311,8 +313,7 @@ export default defineComponent({
       customizationOptionValue,
       product,
       mergeCustomizationState,
-      removeUnavailableOptionValues,
-      context
+      removeUnavailableOptionValues
     );
 
     const { removePreservedState } =
@@ -347,7 +348,7 @@ export default defineComponent({
     );
 
     const formValidation = useFormValidation(validationObserver, () =>
-      getNestedFormRefs(context.refs, 'customizationOption')
+      getNestedFormRefs(instance.$refs, 'customizationOption')
     );
 
     const { quantity } = useProductQuantity(existingCartItem);
@@ -357,7 +358,6 @@ export default defineComponent({
       customizationState,
       bundleOptions,
       existingCartItem,
-      context,
       undefined,
       productPurchaseFlow.value
     );
@@ -382,7 +382,7 @@ export default defineComponent({
         timeToLive: 5 * 1000
       });
 
-      context.root.$store.dispatch(
+      root.$store.dispatch(
         'notification/spawnNotification',
         notification,
         { root: true }
@@ -409,7 +409,7 @@ export default defineComponent({
         }
 
         if (!shouldMakeAnother.value) {
-          context.root.$router.push({
+          root.$router.push({
             name: 'detailed-cart'
           });
 
@@ -418,7 +418,7 @@ export default defineComponent({
 
         onSuccessAndMakeAnother();
       } catch (error) {
-        context.root.$store.dispatch('notification/spawnNotification', {
+        root.$store.dispatch('notification/spawnNotification', {
           type: 'danger',
           message: 'Error: ' + error,
           action1: { label: i18n.t('OK') }
@@ -449,7 +449,7 @@ export default defineComponent({
     });
 
     const { customizationFilter } = useABTestingCustomizationsFilter(
-      context.ssrContext
+      instance.$ssrContext
     );
 
     const { filteredCustomizations } = useCustomizationsFilter(
@@ -462,7 +462,7 @@ export default defineComponent({
       ...useCustomizationsGroups(filteredCustomizations, flowAvailableProductCustomization),
       ...useQuantityAndShippingDiscounts(),
       ...formValidation,
-      ...useBulkImagesUpload(context),
+      ...useBulkImagesUpload(),
       agreement,
       availableCustomizations,
       availableOptionCustomizations,

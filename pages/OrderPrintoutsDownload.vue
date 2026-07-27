@@ -81,7 +81,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, PropType } from '@vue/composition-api';
+import { computed, defineComponent, inject, PropType } from 'vue';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 
 import i18n from '@vue-storefront/i18n';
@@ -89,7 +89,7 @@ import i18n from '@vue-storefront/i18n';
 import { BaseImage } from 'src/modules/budsies';
 import { isFileUploadValue } from 'src/modules/customization-system/types/is-file-upload-value.typeguard';
 import { ImageHandlerService } from 'src/modules/file-storage';
-import { BudsieStatus } from 'src/modules/shared';
+import { BudsieStatus, useRootInstance } from 'src/modules/shared';
 import { useOrderDetails } from 'src/modules/orders-history';
 
 import { useBatchImageDownload } from 'theme/helpers/use-batch-image-download';
@@ -127,7 +127,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const root = context.root;
+    const root = useRootInstance();
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
 
     if (!imageHandlerService) {
@@ -136,7 +136,7 @@ export default defineComponent({
 
     const imageService = imageHandlerService;
 
-    const { order, isLoading, isError } = useOrderDetails(context, props.orderId);
+    const { order, isLoading, isError } = useOrderDetails(props.orderId);
     const showNotFound = computed<boolean>(() => {
       return isError.value;
     });

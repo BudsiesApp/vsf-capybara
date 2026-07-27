@@ -1,14 +1,15 @@
-import { watch, Ref, ref, SetupContext } from '@vue/composition-api';
+import { watch, Ref, ref } from 'vue';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
 import i18n from '@vue-storefront/core/i18n'
 
 import { DraftOrderItem, fetchOrderItemCustomizationsState } from 'src/modules/customization-system';
+import { useRootInstance } from 'src/modules/shared';
 
 export function useDraftOrderItem (
-  orderItemId: Ref<string>,
-  { root }: SetupContext
+  orderItemId: Ref<string>
 ) {
+  const root = useRootInstance();
   const isDataLoaded = ref<boolean>(false);
   const draftOrderItem = ref<DraftOrderItem | undefined>();
 

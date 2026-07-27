@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, onBeforeMount } from '@vue/composition-api';
+import { defineComponent, computed, ref, onBeforeMount } from 'vue';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 import { SearchQuery } from 'storefront-query-builder';
 
@@ -45,7 +45,7 @@ import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { FETCH_SUGGESTED_PRODUCTS_ACTION, SUGGESTED_PRODUCTS_IDS_GETTER } from 'src/modules/orders-history';
-import { ProductEvent, useMobileObserver } from 'src/modules/shared';
+import { ProductEvent, useMobileObserver, useRootInstance } from 'src/modules/shared';
 
 import { prepareCategoryProduct } from 'theme/helpers';
 
@@ -78,7 +78,8 @@ export default defineComponent({
     SfButton,
     SfHeading
   },
-  setup (_, { root }) {
+  setup () {
+    const root = useRootInstance();
     const isDataLoading = ref<boolean>(false);
     const productBySkuDictionary = computed<Record<string, Product>>(() => {
       return root.$store.getters['product/getProductBySkuDictionary'];

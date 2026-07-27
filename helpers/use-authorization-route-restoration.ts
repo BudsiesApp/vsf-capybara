@@ -1,10 +1,8 @@
-import { SetupContext } from '@vue/composition-api';
-
 import { StorageManager } from '@vue-storefront/core/lib/storage-manager'
+import { useRootInstance } from 'src/modules/shared';
 
-export function useAuthorizationRouteRestoration (
-  { root }: SetupContext
-) {
+export function useAuthorizationRouteRestoration () {
+  const root = useRootInstance();
   const urlStorage = StorageManager.get('url');
   const postAuthRedirectPathLocalStorageKey = 'postAuthRedirectPath';
 

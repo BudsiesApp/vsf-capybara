@@ -1,4 +1,4 @@
-import { ref } from '@vue/composition-api';
+import { ref } from 'vue';
 
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 

@@ -50,7 +50,7 @@ import {
   PropType,
   ref,
   toRefs
-} from '@vue/composition-api';
+} from 'vue';
 
 import i18n from '@vue-storefront/core/i18n';
 import { htmlDecode } from '@vue-storefront/core/filters';
@@ -71,7 +71,8 @@ import {
   FOREVERS_DOG_BUNDLE_SKU,
   FOREVERS_OTHER_BUNDLE_SKU,
   getCanonicalUrl,
-  ProductPurchaseFlow
+  ProductPurchaseFlow,
+  useCurrentInstance
 } from 'src/modules/shared';
 
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
@@ -98,6 +99,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const instance = useCurrentInstance();
     const { existingPlushieId } = toRefs(props);
     const canUsePersistedCustomizationState = ref<boolean>(false);
     const productPurchaseFlow = ref<ProductPurchaseFlow>(
@@ -111,14 +113,14 @@ export default defineComponent({
       FOREVERS_OTHER_BUNDLE_SKU
     ]);
 
-    const { existingCartItem } = useExistingCartItem(existingPlushieId, context);
+    const { existingCartItem } = useExistingCartItem(existingPlushieId);
     const isSelectorDisabled = computed<boolean>(() => {
       return !!existingCartItem.value;
     });
 
     const storeUrl = computed<string>(() => {
-      const host = context.ssrContext
-        ? getHostFromHeaders((context.ssrContext.server.request as any).headers)
+      const host = instance.$ssrContext
+        ? getHostFromHeaders((instance.$ssrContext.server.request as any).headers)
         : window.location.host;
 
       return `https://${host}`;
@@ -195,7 +197,7 @@ export default defineComponent({
       currentProduct,
       isDataLoaded,
       selectProduct
-    } = useMultiProductsPage(productSkus, context);
+    } = useMultiProductsPage(productSkus);
 
     const showForm = computed<boolean>(() => {
       return isDataLoaded.value && !!currentProduct.value;

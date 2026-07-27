@@ -24,6 +24,7 @@
             name="email-address"
             type="email"
             :label="$t('Email address')"
+            autocomplete="email"
             :valid="!errors.length"
             :error-message="errors[0]"
             :disabled="isSubmitting"
@@ -103,11 +104,10 @@ import {
   defineComponent,
   onBeforeUnmount,
   ref,
-  SetupContext,
   nextTick,
   PropType,
   Ref
-} from '@vue/composition-api';
+} from 'vue';
 import { extend, ValidationProvider, ValidationObserver } from 'vee-validate';
 import { required, email } from 'vee-validate/dist/rules';
 import { SfInput, SfButton } from '@storefront-ui/vue';
@@ -115,6 +115,7 @@ import { SfInput, SfButton } from '@storefront-ui/vue';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { AuthenticateRequestResponse } from '@vue-storefront/core/modules/user';
 import Task from 'core/lib/sync/types/Task';
+import { useCurrentInstance, useRootInstance } from 'src/modules/shared';
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 
 extend('required', {
@@ -126,7 +127,8 @@ extend('email', {
   message: 'Please, provide the correct email address'
 });
 
-function useRateLimit ({ root }: SetupContext) {
+function useRateLimit () {
+  const root = useRootInstance();
   const RATE_LIMIT_TIMEOUT = 60;
   const RATE_LIMIT_ERROR_CODE = 429;
 
@@ -210,7 +212,8 @@ export default defineComponent({
     ValidationObserver
   },
   setup (props, context) {
-    const root = context.root;
+    const instance = useCurrentInstance();
+    const root = useRootInstance();
     const emit = context.emit;
 
     const validationObserver: Ref<ValidationObserverInstance | null> = ref(null);
@@ -250,17 +253,17 @@ export default defineComponent({
       isRateLimitError,
       rateLimitCountdown,
       startRateLimitTimer
-    } = useRateLimit(context);
+    } = useRateLimit();
 
     const {
       validateAndGoToFirstError
     } = useFormValidation(
       validationObserver,
-      () => context.refs
+      () => instance.$refs
     );
 
     function focusOtpInput (): void {
-      const otpInputRootElement = context.refs[getFieldAnchorName('OTP')] as SfInputInstance | undefined;
+      const otpInputRootElement = instance.$refs[getFieldAnchorName('OTP')] as SfInputInstance | undefined;
 
       if (!otpInputRootElement) {
         return;

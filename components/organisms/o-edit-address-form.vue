@@ -31,11 +31,12 @@
 
 <script lang="ts">
 import { ValidationObserver } from 'vee-validate';
-import { defineComponent, computed, ref, Ref } from '@vue/composition-api';
+import { defineComponent, computed, ref, Ref } from 'vue';
 import { SfButton } from '@storefront-ui/vue';
 import i18n from '@vue-storefront/i18n';
 
 import { useAddressValidation } from 'src/modules/address';
+import { useRootInstance } from 'src/modules/shared';
 
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 import OBaseAddressForm from './o-base-address-form.vue';
@@ -60,13 +61,13 @@ export default defineComponent({
     const isSubmitting = ref(false);
 
     const emit = context.emit;
-    const root = context.root;
+    const root = useRootInstance();
 
     const {
       validateAddress,
       isValidating: isValidatingAddress,
       completeValidation: completeAddressValidation
-    } = useAddressValidation(context);
+    } = useAddressValidation();
 
     const { validateAndGoToFirstError } = useFormValidation(
       validationObserver,
