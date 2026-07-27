@@ -109,6 +109,7 @@
 </template>
 
 <script lang="ts">
+import { useI18n, useRouter, useStore } from '@vue-storefront/core/application-services';
 import debounce from 'lodash-es/debounce';
 import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, ref, toRef } from 'vue';
 import {
@@ -130,7 +131,7 @@ import CartItemConfigurationExtended from './cart-item-configuration-extended.vu
 import { ImageHandlerService } from 'src/modules/file-storage';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 
-import { normalizeProductPurchaseFlow, ProductPurchaseFlow, PriceHelper, useRootInstance } from 'src/modules/shared';
+import { normalizeProductPurchaseFlow, ProductPurchaseFlow, PriceHelper } from 'src/modules/shared';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
 import { useCartItemRemovableOptions } from 'theme/helpers/use-cart-item-removable-options';
 
@@ -179,19 +180,21 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const root = useRootInstance();
+    const applicationStore = useStore();
+    const applicationRouter = useRouter();
+    const applicationI18n = useI18n();
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
 
     let syncQuantityDebounced: ReturnType<typeof debounce> | undefined;
 
-    const isCartSyncing = computed<boolean>(() => root.$store.getters[IS_CART_SYNCING]);
+    const isCartSyncing = computed<boolean>(() => applicationStore.getters[IS_CART_SYNCING]);
 
     const cartItemKey = computed<string>(() => getCartItemKey(props.product));
 
     const title = computed<string>(() => getCartItemTitle(props.product));
 
     const cartItemPrice = computed(() =>
-      root.$store.getters[CART_ITEM_LOCALIZED_PRICE_DICTIONARY][cartItemKey.value]
+      applicationStore.getters[CART_ITEM_LOCALIZED_PRICE_DICTIONARY][cartItemKey.value]
     );
 
     const productCustomizations = computed(() => props.product.customizations || []);
@@ -220,7 +223,7 @@ export default defineComponent({
     const formattedPrice = computed(() =>
       PriceHelper.formatProductPrice(
         cartItemPrice.value,
-        root.$store.getters[GET_ACTIVE_CURRENCY].symbol
+        applicationStore.getters[GET_ACTIVE_CURRENCY].symbol
       )
     );
 
@@ -266,8 +269,8 @@ export default defineComponent({
 
     const selectionsCountLabel = computed<string>(() => {
       return selectionsCount.value === 1
-        ? `1 ${root.$t('selection')}`
-        : `${selectionsCount.value} ${root.$t('selections')}`;
+        ? `1 ${applicationI18n.t('selection')}`
+        : `${selectionsCount.value} ${applicationI18n.t('selections')}`;
     });
 
     function syncQuantity (): Promise<any> | void {
@@ -275,7 +278,7 @@ export default defineComponent({
         return;
       }
 
-      return root.$store.dispatch('cart/sync', { forceClientState: true });
+      return applicationStore.dispatch('cart/sync', { forceClientState: true });
     }
 
     async function changeProductQuantity (qty: number): Promise<void> {
@@ -283,9 +286,9 @@ export default defineComponent({
         return;
       }
 
-      root.$store.commit(`cart/${CART_UPD_ITEM}`, { product: props.product, qty });
+      applicationStore.commit(`cart/${CART_UPD_ITEM}`, { product: props.product, qty });
 
-      if (root.$store.getters['cart/isCartSyncEnabled']) {
+      if (applicationStore.getters['cart/isCartSyncEnabled']) {
         syncQuantityDebounced?.();
       }
     }
@@ -295,7 +298,7 @@ export default defineComponent({
         return;
       }
 
-      await root.$store.dispatch('cart/removeItem', { product: props.product });
+      await applicationStore.dispatch('cart/removeItem', { product: props.product });
     }
 
     function editHandler (): void {
@@ -316,7 +319,7 @@ export default defineComponent({
           routeName = 'plush-sample';
         }
 
-        root.$router.push({ name: routeName, query: { existingPlushieId: product.extension_attributes?.plushie_id } })
+        applicationRouter.push({ name: routeName, query: { existingPlushieId: product.extension_attributes?.plushie_id } })
       }
     }
 

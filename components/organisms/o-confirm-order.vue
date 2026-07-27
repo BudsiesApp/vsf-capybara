@@ -21,7 +21,7 @@
           </div>
           <SfButton
             class="sf-button--text color-secondary accordion__edit"
-            @click="$bus.$emit('checkout-before-edit', 'personalDetails')"
+            @click="emitCheckoutEdit('personalDetails')"
           >
             {{ $t('Edit') }}
           </SfButton>
@@ -47,7 +47,7 @@
           </div>
           <SfButton
             class="sf-button--text color-secondary accordion__edit"
-            @click="$bus.$emit('checkout-before-edit', 'shipping')"
+            @click="emitCheckoutEdit('shipping')"
           >
             {{ $t('Edit') }}
           </SfButton>
@@ -70,7 +70,7 @@
           </div>
           <SfButton
             class="sf-button--text color-secondary accordion__edit"
-            @click="$bus.$emit('checkout-before-edit', 'payment')"
+            @click="emitCheckoutEdit('payment')"
           >
             {{ $t('Edit') }}
           </SfButton>
@@ -235,16 +235,17 @@
       />
     </div>
 
-    <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+    <template v-if="privacyPolicyLinks.length">
       <component
         :is="linkComponent.component"
         :key="linkComponent.key"
-        v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks"
+        v-for="linkComponent in privacyPolicyLinks"
       />
     </template>
   </div>
 </template>
 <script>
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { mapGetters, mapActions } from 'vuex';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 import {
@@ -265,6 +266,10 @@ import { OrderModule, ORDER_CONFLICT_EVENT } from '@vue-storefront/core/modules/
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { OrderReview } from '@vue-storefront/core/modules/checkout/components/OrderReview';
 import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
+import {
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 import { CartItemConfiguration, getCustomizationSystemThumbnail } from 'src/modules/customization-system';
 import { IS_COUPON_PROCESSING, IS_TOTALS_SYNCING, IS_PAYMENT_METHODS_SYNCING, CART_ITEM_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/cart';
 import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-item-key.function';
@@ -304,6 +309,13 @@ export default {
   mixins: [OrderReview, Payment],
   inject: {
     imageHandlerService: { from: 'ImageHandlerService' }
+  },
+  setup () {
+    return {
+      privacyPolicyLinks: useAdditionalContent(
+        AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+      )
+    };
   },
   data () {
     return {
@@ -426,20 +438,23 @@ export default {
     registerModule(OrderModule);
   },
   async beforeMount () {
-    this.$bus.$on(AFFIRM_MODAL_CLOSED, this.onAffirmModalClosedHandler);
-    this.$bus.$on(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
-    this.$bus.$on(PAYMENT_ERROR_EVENT, this.onPaymentErrorEventHandler);
-    this.$bus.$on(ORDER_CONFLICT_EVENT, this.onOrderConflictEventHandler);
+    EventBus.$on(AFFIRM_MODAL_CLOSED, this.onAffirmModalClosedHandler);
+    EventBus.$on(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
+    EventBus.$on(PAYMENT_ERROR_EVENT, this.onPaymentErrorEventHandler);
+    EventBus.$on(ORDER_CONFLICT_EVENT, this.onOrderConflictEventHandler);
 
     this.braintreeClient = await this.$store.dispatch('braintree/createBraintreeClient');
   },
   beforeDestroy () {
-    this.$bus.$off(AFFIRM_MODAL_CLOSED, this.onAffirmModalClosedHandler);
-    this.$bus.$off(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler)
-    this.$bus.$off(PAYMENT_ERROR_EVENT, this.onPaymentErrorEventHandler);
-    this.$bus.$off(ORDER_CONFLICT_EVENT, this.onOrderConflictEventHandler);
+    EventBus.$off(AFFIRM_MODAL_CLOSED, this.onAffirmModalClosedHandler);
+    EventBus.$off(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler)
+    EventBus.$off(PAYMENT_ERROR_EVENT, this.onPaymentErrorEventHandler);
+    EventBus.$off(ORDER_CONFLICT_EVENT, this.onOrderConflictEventHandler);
   },
   methods: {
+    emitCheckoutEdit (section) {
+      EventBus.$emit('checkout-before-edit', section);
+    },
     ...mapActions('ui', {
       openModal: 'openModal'
     }),
@@ -498,7 +513,7 @@ export default {
       return getCartItemKey(cartItem);
     },
     onPaymentMethodChange () {
-      this.$bus.$emit('checkout-after-paymentMethodChanged', this.payment);
+      EventBus.$emit('checkout-after-paymentMethodChanged', this.payment);
       this.changePaymentMethod();
     },
     scrollToPlaceOrderButton () {

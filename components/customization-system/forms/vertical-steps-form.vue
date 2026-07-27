@@ -107,8 +107,8 @@
             {{ submitButtonText }}
           </SfButton>
 
-          <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-            <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+          <template v-if="privacyPolicyLinks.length">
+            <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
           </template>
         </div>
 
@@ -119,6 +119,7 @@
 </template>
 
 <script lang="ts">
+import { useRouter, useStore } from '@vue-storefront/core/application-services';
 import {
   computed,
   defineComponent,
@@ -156,20 +157,26 @@ import {
   useOptionValueActions,
   useSelectedOptionValueUrlQuery
 } from 'src/modules/customization-system';
-import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow, useCurrentInstance, useRootInstance , PrivacyPolicyLink } from 'src/modules/shared';
+import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow, PrivacyPolicyLink } from 'src/modules/shared';
 import i18n from '@vue-storefront/core/i18n';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import {
   getFieldAnchorName,
-  getNestedFormRefs, 
+  getNestedFormRefs,
   useFormValidation
 } from 'theme/helpers/use-form-validation';
+import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
 
@@ -220,8 +227,11 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
-    const instance = useCurrentInstance();
-    const root = useRootInstance();
+    const privacyPolicyLinks = useAdditionalContent(
+      AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+    );
+    const applicationStore = useStore();
+    const applicationRouter = useRouter();
     const {
       canUsePersistedCustomizationState,
       customizationMode,
@@ -233,6 +243,10 @@ export default defineComponent({
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
     > | null> = ref(null);
+    const {
+      templateRef: customizationOption,
+      getRefsInRenderedOrder: getCustomizationOptionsInRenderedOrder
+    } = useRenderedOrderTemplateRefs<InstanceType<typeof CustomizationOption>>();
 
     const productSku = computed<string>(() => {
       return product.value.sku;
@@ -348,7 +362,7 @@ export default defineComponent({
     );
 
     const formValidation = useFormValidation(validationObserver, () =>
-      getNestedFormRefs(instance.$refs, 'customizationOption')
+      getNestedFormRefs(getCustomizationOptionsInRenderedOrder())
     );
 
     const { quantity } = useProductQuantity(existingCartItem);
@@ -382,7 +396,7 @@ export default defineComponent({
         timeToLive: 5 * 1000
       });
 
-      root.$store.dispatch(
+      applicationStore.dispatch(
         'notification/spawnNotification',
         notification,
         { root: true }
@@ -409,7 +423,7 @@ export default defineComponent({
         }
 
         if (!shouldMakeAnother.value) {
-          root.$router.push({
+          applicationRouter.push({
             name: 'detailed-cart'
           });
 
@@ -418,7 +432,7 @@ export default defineComponent({
 
         onSuccessAndMakeAnother();
       } catch (error) {
-        root.$store.dispatch('notification/spawnNotification', {
+        applicationStore.dispatch('notification/spawnNotification', {
           type: 'danger',
           message: 'Error: ' + error,
           action1: { label: i18n.t('OK') }
@@ -448,9 +462,7 @@ export default defineComponent({
       ).toString();
     });
 
-    const { customizationFilter } = useABTestingCustomizationsFilter(
-      instance.$ssrContext
-    );
+    const { customizationFilter } = useABTestingCustomizationsFilter();
 
     const { filteredCustomizations } = useCustomizationsFilter(
       availableCustomizations,
@@ -469,6 +481,7 @@ export default defineComponent({
       bottomStorySlug,
       customizationAvailableOptionValues,
       customizationOptionValue,
+      customizationOption,
       getFieldAnchorName,
       isDisabled,
       isSubmitButtonDisabled,
@@ -476,6 +489,8 @@ export default defineComponent({
       onCustomizationOptionInput,
       onFormSubmit,
       pageTitle,
+      privacyPolicyLinks: privacyPolicyLinks as unknown as
+        readonly AdditionalContentEntry[],
       shouldMakeAnother,
       submitButtonText,
       quantity,

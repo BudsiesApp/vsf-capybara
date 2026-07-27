@@ -14,6 +14,7 @@
 </template>
 
 <script lang="ts">
+import { useI18n, useRouter, useStore } from '@vue-storefront/core/application-services';
 import { computed, defineComponent, onMounted, onBeforeUnmount, ref, Ref } from 'vue';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
@@ -30,7 +31,6 @@ import {
   useCustomizationsBundleOptions
 } from 'src/modules/customization-system';
 import { getCustomizationIdByOptionValueId } from 'src/modules/customization-system/helpers/get-customization-id-by-option-value-id';
-import { useRootInstance } from 'src/modules/shared';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 
@@ -96,8 +96,10 @@ export default defineComponent({
     }
   },
   setup (props) {
-    const root = useRootInstance();
-    const PREPARING_ITEM_MESSAGE = root.$t('Preparing your item...').toString();
+    const applicationStore = useStore();
+    const applicationRouter = useRouter();
+    const applicationI18n = useI18n();
+    const PREPARING_ITEM_MESSAGE = applicationI18n.t('Preparing your item...').toString();
 
     const isLoading = ref<boolean>(true);
     const errorMessage = ref<string | null>(null);
@@ -105,11 +107,11 @@ export default defineComponent({
     const product: Ref<Product | undefined> = ref(undefined);
     const existingCartItem: Ref<CartItem | undefined> = ref(undefined);
 
-    const INCORRECT_PURCHASE_LINK_MESSAGE = root.$t('Purchase link is incorrect.').toString();
-    const ADDING_TO_CART_MESSAGE = root.$t('Adding to cart...').toString();
+    const INCORRECT_PURCHASE_LINK_MESSAGE = applicationI18n.t('Purchase link is incorrect.').toString();
+    const ADDING_TO_CART_MESSAGE = applicationI18n.t('Adding to cart...').toString();
 
     const cartItems = computed<CartItem[]>(() => {
-      return root.$store.getters['cart/getCartItems'] || [];
+      return applicationStore.getters['cart/getCartItems'] || [];
     });
 
     const {
@@ -188,11 +190,11 @@ export default defineComponent({
       try {
         let [loadedProduct] = await Promise.all(
           [
-            root.$store.dispatch('product/loadProduct', {
+            applicationStore.dispatch('product/loadProduct', {
               parentSku: props.sku,
               setCurrent: false
             }),
-            root.$store.dispatch('budsies/loadProductsRushAddons', {
+            applicationStore.dispatch('budsies/loadProductsRushAddons', {
               productSku: props.sku
             })
           ]
@@ -209,7 +211,7 @@ export default defineComponent({
 
         loadedProduct = updateProductProductionTimeCustomizationData(
           loadedProduct,
-          root.$store
+          applicationStore
         );
 
         product.value = loadedProduct;
@@ -247,7 +249,7 @@ export default defineComponent({
         return;
       }
 
-      await root.$store.dispatch('cart/removeItem', {
+      await applicationStore.dispatch('cart/removeItem', {
         product: existingCartItem,
         removeByParentSku: false
       });
@@ -267,9 +269,9 @@ export default defineComponent({
 
         await removeMatchingAlterationCartItem();
         await addToCartHandler();
-        await root.$router.replace({ name: 'detailed-cart' });
+        await applicationRouter.replace({ name: 'detailed-cart' });
       } catch (error) {
-        errorMessage.value = root.$t('Sorry, we were unable to update your cart').toString();
+        errorMessage.value = applicationI18n.t('Sorry, we were unable to update your cart').toString();
         pageStatus.value = '';
         Logger.error((error as Error).message, 'extra-charge-purchase')();
       } finally {
@@ -278,7 +280,7 @@ export default defineComponent({
     }
 
     const isUserSessionStarted = computed<boolean>(() => {
-      return root.$store.getters['user/getIsSessionStarted'];
+      return applicationStore.getters['user/getIsSessionStarted'];
     });
 
     onMounted(() => {

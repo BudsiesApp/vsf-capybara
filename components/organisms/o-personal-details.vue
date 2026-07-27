@@ -104,14 +104,16 @@
         </SfButton>
       </div>
 
-      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      <template v-if="privacyPolicyLinks.length">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
       </template>
     </div>
   </div>
 </template>
 
 <script>
+import { useRoute } from '@vue-storefront/core/application-services';
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { defineComponent } from 'vue';
 import { required, minLength, email, sameAs } from 'vuelidate/lib/validators';
 import { PersonalDetails } from '@vue-storefront/core/modules/checkout/components/PersonalDetails';
@@ -120,8 +122,12 @@ import { ModalList } from 'theme/store/ui/modals'
 import { mapActions } from 'vuex';
 
 import i18n from '@vue-storefront/i18n';
+import {
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 import { PERSISTED_CUSTOMER_EMAIL, PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_EMAIL, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME } from 'src/modules/persisted-customer-data';
-import { PrivacyPolicyLink, useRootInstance } from 'src/modules/shared';
+import { PrivacyPolicyLink } from 'src/modules/shared';
 
 import { createSmoothscroll } from 'theme/helpers';
 import { vuelidateErrorClassName, vuelidateScrollToFirstError } from 'theme/helpers/vuelidate-scroll-to-first-error.function';
@@ -142,15 +148,18 @@ export default defineComponent({
     MLogin
   },
   setup (_, context) {
-    const root = useRootInstance();
+    const currentRoute = useRoute();
     const { persistPostAuthRedirectPath, resetPostAuthRedirectPath } = useAuthorizationRouteRestoration();
 
     function onOtpRequested () {
-      persistPostAuthRedirectPath(root.$route.fullPath);
+      persistPostAuthRedirectPath(currentRoute.fullPath);
     }
 
     return {
       onOtpRequested,
+      privacyPolicyLinks: useAdditionalContent(
+        AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+      ),
       resetPostAuthRedirectPath
     }
   },
@@ -191,10 +200,10 @@ export default defineComponent({
     }
   },
   beforeMount () {
-    this.$bus.$on('checkout-after-load', this.fillLastUsedCustomerData)
+    EventBus.$on('checkout-after-load', this.fillLastUsedCustomerData)
   },
   beforeDestroy () {
-    this.$bus.$off('checkout-after-load', this.fillLastUsedCustomerData)
+    EventBus.$off('checkout-after-load', this.fillLastUsedCustomerData)
   },
   mounted () {
     createSmoothscroll(

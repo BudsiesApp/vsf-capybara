@@ -78,12 +78,12 @@
         <privacy-policy-link />
       </div>
 
-      <template v-if="$additionalContent.footerLinks">
+      <template v-if="footerLinks.length">
         <div class="_additional-links">
           <component
             :is="linkComponent.component"
             :key="linkComponent.key"
-            v-for="linkComponent in $additionalContent.footerLinks"
+            v-for="linkComponent in footerLinks"
           />
         </div>
       </template>
@@ -97,6 +97,10 @@ import { SfFooter, SfList, SfMenuItem } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals';
 import config from 'config';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
+import {
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 import get from 'lodash-es/get';
 
 import { PrivacyPolicyLink } from 'src/modules/shared';
@@ -119,6 +123,13 @@ export default {
       type: String,
       default: ''
     }
+  },
+  setup () {
+    return {
+      footerLinks: useAdditionalContent(
+        AdditionalContentOutlet.FOOTER_LINKS
+      )
+    };
   },
   computed: {
     ...mapGetters('user', ['isLoggedIn']),

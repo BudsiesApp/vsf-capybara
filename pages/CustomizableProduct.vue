@@ -23,6 +23,8 @@
 </template>
 
 <script lang="ts">
+import { useRoute } from '@vue-storefront/core/application-services';
+import { useRequestServices } from '@vue-storefront/core/request-services';
 import {
   computed,
   defineComponent,
@@ -37,7 +39,7 @@ import { htmlDecode } from '@vue-storefront/core/filters';
 import { isServer } from '@vue-storefront/core/helpers';
 
 import { ProductStructuredData } from 'src/modules/budsies';
-import { getCanonicalUrl, useRootInstance } from 'src/modules/shared';
+import { getCanonicalUrl } from 'src/modules/shared';
 
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 import { useProductPage } from 'theme/helpers/use-product-page';
@@ -81,7 +83,8 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const root = useRootInstance();
+    const currentRoute = useRoute();
+    const requestServices = useRequestServices();
     const { existingPlushieId, sku } = toRefs(props);
 
     const { currentProduct, isDataLoaded } = useProductPage(sku);
@@ -133,7 +136,7 @@ export default defineComponent({
     );
 
     const imageUrl = computed<string | undefined>(() => {
-      let url = root.$route.query['image-url'];
+      let url = currentRoute.query['image-url'];
 
       if (Array.isArray(url)) {
         url = url[0] || '';
@@ -155,6 +158,7 @@ export default defineComponent({
       formPlaceholderComponent,
       isLeavePage,
       onFormMounted,
+      requestServices,
       showForm,
       showPlaceholder
     };
@@ -194,7 +198,7 @@ export default defineComponent({
       link: [
         {
           rel: 'canonical',
-          href: getCanonicalUrl(this.$ssrContext, this.$router)
+          href: getCanonicalUrl(this.requestServices.host, this.$router)
         }
       ]
     };

@@ -1,6 +1,7 @@
+import { useStore } from '@vue-storefront/core/application-services';
 import { computed, ref, Ref } from 'vue';
 
-import { useMobileObserver, PriceHelper, useRootInstance } from 'src/modules/shared';
+import { useMobileObserver, PriceHelper } from 'src/modules/shared';
 import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import {
@@ -49,7 +50,7 @@ export function useCartItemConfiguration (
   showPrices: Ref<boolean>,
   filterOutNameCustomization: Ref<boolean> = ref(false)
 ) {
-  const root = useRootInstance();
+  const applicationStore = useStore();
   const { isMobile } = useMobileObserver();
 
   function truncate (text: string, desktopLength = 75, mobileLength = 50): string {
@@ -94,13 +95,13 @@ export function useCartItemConfiguration (
 
   const customizationGroups = computed<CartItemConfigurationGroup[]>(() => {
     const productBySkuDictionary = showPrices.value
-      ? root.$store.getters['product/getProductBySkuDictionary']
+      ? applicationStore.getters['product/getProductBySkuDictionary']
       : {};
     const productPriceDictionary = showPrices.value
-      ? root.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY]
+      ? applicationStore.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY]
       : {};
     const currency = showPrices.value
-      ? root.$store.getters[GET_ACTIVE_CURRENCY]
+      ? applicationStore.getters[GET_ACTIVE_CURRENCY]
       : null;
 
     const groupMap: Record<string, CartItemConfigurationGroup> = {};

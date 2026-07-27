@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { mapState } from 'vuex';
 import { SfLoader } from '@storefront-ui/vue';
 import { disableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
@@ -26,14 +27,14 @@ export default {
     isVisible: state => state.ui.loader
   }),
   beforeMount () {
-    this.$bus.$on('notification-progress-start', this.show);
-    this.$bus.$on('notification-progress-stop', this.hide);
+    EventBus.$on('notification-progress-start', this.show);
+    EventBus.$on('notification-progress-stop', this.hide);
   },
   beforeDestroy () {
     this.unlockScroll();
 
-    this.$bus.$off('notification-progress-start', this.show);
-    this.$bus.$off('notification-progress-stop', this.hide);
+    EventBus.$off('notification-progress-start', this.show);
+    EventBus.$off('notification-progress-stop', this.hide);
   },
   methods: {
     lockScroll () {

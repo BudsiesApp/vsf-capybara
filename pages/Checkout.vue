@@ -135,12 +135,12 @@ export default {
   },
   beforeMount () {
     registerModule(Braintree)
-    this.$bus.$on('order-after-placed', this.onOrderAfterPlacedHandler);
+    EventBus.$on('order-after-placed', this.onOrderAfterPlacedHandler);
     EventBus.$on(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
     EventBus.$emit(CartEvents.BEGIN_CHECKOUT);
   },
   beforeDestroy () {
-    this.$bus.$off('order-after-placed', this.onOrderAfterPlacedHandler);
+    EventBus.$off('order-after-placed', this.onOrderAfterPlacedHandler);
     EventBus.$off(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
   },
   methods: {
@@ -151,7 +151,7 @@ export default {
     },
     changeStep (newStepIndex) {
       if (newStepIndex < this.currentStep) {
-        this.$bus.$emit('checkout-before-edit', this.availableSteps[newStepIndex].key);
+        EventBus.$emit('checkout-before-edit', this.availableSteps[newStepIndex].key);
       }
     },
     async onOrderAfterPlacedHandler () {
