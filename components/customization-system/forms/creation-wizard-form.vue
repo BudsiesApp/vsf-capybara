@@ -172,6 +172,7 @@ import { useCreationWizardPreselectedSize } from 'theme/helpers/use-creation-wiz
 import { useCreationWizardProductTypeStep } from 'theme/helpers/use-creation-wizard-product-type-step';
 import { useFloatingPhoto } from 'theme/helpers/use-floating-photo';
 import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
+import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 import { PlushieType } from 'theme/interfaces/plushie.type';
 import { useCustomizeAction } from 'theme/helpers/use-customize-action';
@@ -275,11 +276,10 @@ export default defineComponent({
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
     > | InstanceType<typeof ValidationObserver>[] | null> = ref(null);
-    const customizationOption: Ref<
-      InstanceType<typeof CustomizationOption> |
-      InstanceType<typeof CustomizationOption>[] |
-      null
-    > = ref(null);
+    const {
+      templateRef: customizationOption,
+      getRefsInRenderedOrder: getCustomizationOptionsInRenderedOrder
+    } = useRenderedOrderTemplateRefs<InstanceType<typeof CustomizationOption>>();
     const activeValidationObserver = computed<InstanceType<
       typeof ValidationObserver
     > | null>(() => {
@@ -290,7 +290,7 @@ export default defineComponent({
       return validationObserver.value;
     });
     const formValidation = useFormValidation(activeValidationObserver, () =>
-      getNestedFormRefs(customizationOption.value)
+      getNestedFormRefs(getCustomizationOptionsInRenderedOrder())
     );
 
     const productCustomizations = computed<Customization[]>(() => {

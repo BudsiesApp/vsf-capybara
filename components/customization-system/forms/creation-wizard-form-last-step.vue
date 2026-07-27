@@ -129,6 +129,7 @@ import {
 } from '@vue-storefront/core/additional-content';
 
 import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
+import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
 import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
 
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
@@ -205,14 +206,13 @@ export default defineComponent({
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
     > | null> = ref(null);
-    const customizationOption: Ref<
-      InstanceType<typeof CustomizationOption> |
-      InstanceType<typeof CustomizationOption>[] |
-      null
-    > = ref(null);
+    const {
+      templateRef: customizationOption,
+      getRefsInRenderedOrder: getCustomizationOptionsInRenderedOrder
+    } = useRenderedOrderTemplateRefs<InstanceType<typeof CustomizationOption>>();
 
     const formValidation = useFormValidation(validationObserver, () =>
-      getNestedFormRefs(customizationOption.value)
+      getNestedFormRefs(getCustomizationOptionsInRenderedOrder())
     );
 
     const productType = computed<string>(() => {

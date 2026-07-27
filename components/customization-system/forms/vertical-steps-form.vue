@@ -180,6 +180,7 @@ import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
+import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
 
@@ -246,11 +247,10 @@ export default defineComponent({
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
     > | null> = ref(null);
-    const customizationOption: Ref<
-      InstanceType<typeof CustomizationOption> |
-      InstanceType<typeof CustomizationOption>[] |
-      null
-    > = ref(null);
+    const {
+      templateRef: customizationOption,
+      getRefsInRenderedOrder: getCustomizationOptionsInRenderedOrder
+    } = useRenderedOrderTemplateRefs<InstanceType<typeof CustomizationOption>>();
 
     const productSku = computed<string>(() => {
       return product.value.sku;
@@ -366,7 +366,7 @@ export default defineComponent({
     );
 
     const formValidation = useFormValidation(validationObserver, () =>
-      getNestedFormRefs(customizationOption.value)
+      getNestedFormRefs(getCustomizationOptionsInRenderedOrder())
     );
 
     const { quantity } = useProductQuantity(existingCartItem);

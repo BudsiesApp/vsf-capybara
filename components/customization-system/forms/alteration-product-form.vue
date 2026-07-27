@@ -153,6 +153,7 @@ import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useCollapsedCustomizationsView } from 'theme/helpers/use-collapsed-customizations-view';
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
+import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import OProductCard from 'theme/components/organisms/o-product-card.vue';
@@ -248,11 +249,10 @@ export default defineComponent({
     const { orderItem, alterationProduct, isExpandable } = toRefs(props);
     const isExpanded = ref(false);
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
-    const customizationOption: Ref<
-      InstanceType<typeof CustomizationOption> |
-      InstanceType<typeof CustomizationOption>[] |
-      null
-    > = ref(null);
+    const {
+      templateRef: customizationOption,
+      getRefsInRenderedOrder: getCustomizationOptionsInRenderedOrder
+    } = useRenderedOrderTemplateRefs<InstanceType<typeof CustomizationOption>>();
 
     const productBySkuDictionary = computed<Record<string, Product>>(() => {
       return applicationStore.getters['product/getProductBySkuDictionary'] || {};
@@ -348,7 +348,7 @@ export default defineComponent({
     const { isSomeEntityBusy, onEntityBusyChanged } = useEntityBusyState();
 
     const formValidation = useFormValidation(validationObserver, () =>
-      getNestedFormRefs(customizationOption.value)
+      getNestedFormRefs(getCustomizationOptionsInRenderedOrder())
     );
 
     function onCustomizationOptionInput (payload: {

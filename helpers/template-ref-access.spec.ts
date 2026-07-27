@@ -1,6 +1,8 @@
 import Vue, { defineComponent, ref } from 'vue';
 import { mount, Wrapper } from '@vue/test-utils';
 
+import { useRenderedOrderTemplateRefs } from './use-rendered-order-template-refs';
+
 describe('Vue 2.7 template ref behavior', () => {
   let wrapper: Wrapper<Vue> | undefined;
 
@@ -44,8 +46,11 @@ describe('Vue 2.7 template ref behavior', () => {
     expect(conditionalTarget.value).toBeInstanceOf(HTMLInputElement);
   });
 
-  it('records repeated setup-ref behavior through reorder and removal', async () => {
-    const optionRefs = ref<HTMLElement[]>([]);
+  it('keeps repeated setup refs in rendered order through reorder and removal', async () => {
+    const {
+      templateRef: optionRefs,
+      getRefsInRenderedOrder
+    } = useRenderedOrderTemplateRefs<HTMLElement>();
     const options = ref([
       { id: 'first', label: 'First' },
       { id: 'second', label: 'Second' }
@@ -73,7 +78,7 @@ describe('Vue 2.7 template ref behavior', () => {
     });
 
     wrapper = mount(Fixture as any);
-    const getOptionIds = () => optionRefs.value.map(
+    const getOptionIds = () => getRefsInRenderedOrder().map(
       element => element.dataset.optionId
     );
     expect(getOptionIds()).toEqual(['first', 'second']);
@@ -83,7 +88,7 @@ describe('Vue 2.7 template ref behavior', () => {
     expect(wrapper.findAll('button').wrappers.map(
       button => button.attributes('data-option-id')
     )).toEqual(['second', 'first']);
-    expect(getOptionIds()).toEqual(['first', 'second']);
+    expect(getOptionIds()).toEqual(['second', 'first']);
 
     options.value = [options.value[0]];
     await Vue.nextTick();

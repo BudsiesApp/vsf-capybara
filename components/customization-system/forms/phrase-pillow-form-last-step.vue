@@ -4,7 +4,6 @@
       v-show="!isSubmitting"
       v-for="customization in availableCustomizations"
       class="_customization-option"
-      ref="customizationOption"
       :key="customization.id"
       :customization="customization"
       :is-disabled="isDisabled"

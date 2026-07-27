@@ -194,6 +194,7 @@ import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmoun
 import { useCustomizeAction } from 'theme/helpers/use-customize-action';
 import { useImageUpload } from 'theme/helpers/use-image-upload';
 import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
+import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
 import { useProductGallery } from 'theme/helpers/use-product-gallery';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 
@@ -280,7 +281,10 @@ export default defineComponent({
       return customizationMode.value === ProductCustomizationMode.CUSTOMIZE;
     });
 
-    const customizationOption = ref<InstanceType<typeof CustomizationOption>[] | null>(null);
+    const {
+      templateRef: customizationOption,
+      getRefsInRenderedOrder: getCustomizationOptionsInRenderedOrder
+    } = useRenderedOrderTemplateRefs<InstanceType<typeof CustomizationOption>>();
 
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
@@ -376,7 +380,7 @@ export default defineComponent({
       existingCartItem,
       availableCustomizations,
       customizationOptionValue,
-      customizationOption
+      getCustomizationOptionsInRenderedOrder
     );
 
     async function onCustomizationStateRestored (): Promise<void> {
@@ -432,7 +436,7 @@ export default defineComponent({
     );
 
     const formValidation = useFormValidation(validationObserver, () =>
-      getNestedFormRefs(customizationOption.value)
+      getNestedFormRefs(getCustomizationOptionsInRenderedOrder())
     );
 
     const { quantity } = useProductQuantity(existingCartItem);

@@ -64,7 +64,7 @@ export default defineComponent({
       AdditionalContentOutlet.PRIVACY_POLICY_LINKS
     );
     const validationObserver = ref(null);
-    const baseAddressForm = ref(null);
+    const baseAddressForm: Ref<InstanceType<typeof OBaseAddressForm> | null> = ref(null);
     const submitStepButton: Ref<null | InstanceType<typeof SfButton>> = ref(null);
     const isSubmitting = ref(false);
 
@@ -80,13 +80,7 @@ export default defineComponent({
 
     const { validateAndGoToFirstError } = useFormValidation(
       validationObserver,
-      () => {
-        const baseAddressFormComponent = baseAddressForm.value as any;
-
-        return {
-          ...(baseAddressFormComponent?.$refs || {})
-        };
-      }
+      () => baseAddressForm.value?.getFormValidationRefs() || {}
     );
 
     const existingAddress = computed({
