@@ -8,8 +8,8 @@
 </template>
 
 <script lang="ts">
+import { useRouter } from '@vue-storefront/core/application-services';
 import { defineComponent } from 'vue';
-import { useRootInstance } from 'src/modules/shared';
 
 import OAddAddressForm from 'theme/components/organisms/o-add-address-form.vue';
 
@@ -19,15 +19,15 @@ export default defineComponent({
     OAddAddressForm
   },
   setup () {
-    const root = useRootInstance();
+    const applicationRouter = useRouter();
     const onAddressAdded = () => {
-      root.$router.push({
+      applicationRouter.push({
         name: 'address-book-list'
       });
     };
 
     const onCancel = () => {
-      root.$router.push({
+      applicationRouter.push({
         name: 'address-book-list'
       });
     };

@@ -52,11 +52,11 @@ import {
   toRefs
 } from 'vue';
 
+import { useRequestServices } from '@vue-storefront/core/request-services';
 import i18n from '@vue-storefront/core/i18n';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { isServer } from '@vue-storefront/core/helpers';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
-import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-headers.function';
 import { ProductStructuredData } from 'src/modules/budsies';
 import {
   Customization,
@@ -71,8 +71,7 @@ import {
   FOREVERS_DOG_BUNDLE_SKU,
   FOREVERS_OTHER_BUNDLE_SKU,
   getCanonicalUrl,
-  ProductPurchaseFlow,
-  useCurrentInstance
+  ProductPurchaseFlow
 } from 'src/modules/shared';
 
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
@@ -99,7 +98,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const instance = useCurrentInstance();
+    const request = useRequestServices();
     const { existingPlushieId } = toRefs(props);
     const canUsePersistedCustomizationState = ref<boolean>(false);
     const productPurchaseFlow = ref<ProductPurchaseFlow>(
@@ -119,11 +118,7 @@ export default defineComponent({
     });
 
     const storeUrl = computed<string>(() => {
-      const host = instance.$ssrContext
-        ? getHostFromHeaders((instance.$ssrContext.server.request as any).headers)
-        : window.location.host;
-
-      return `https://${host}`;
+      return `https://${request.host}`;
     });
 
     const productTypeSelectorOptions = computed<OptionValue[]>(() => {
@@ -255,6 +250,7 @@ export default defineComponent({
       onFormMounted,
       onProductTypeChange,
       productPurchaseFlow,
+      requestServices: request,
       productTypeCustomization,
       productTypeSelectorOptions,
       selectedProductTypeOptionValueId,
@@ -292,7 +288,7 @@ export default defineComponent({
       link: [
         {
           rel: 'canonical',
-          href: getCanonicalUrl(this.$ssrContext, this.$router)
+          href: getCanonicalUrl(this.requestServices.host, this.$router)
         }
       ]
     };

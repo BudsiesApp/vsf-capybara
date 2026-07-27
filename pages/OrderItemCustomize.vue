@@ -32,6 +32,7 @@
 </template>
 
 <script lang="ts">
+import { useI18n } from '@vue-storefront/core/application-services';
 import {
   computed,
   defineComponent,
@@ -43,7 +44,6 @@ import { SfHeading } from '@storefront-ui/vue';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { ProductCustomizationMode } from 'src/modules/customization-system';
 import { OrderItem, useOrderDetails } from 'src/modules/orders-history';
-import { useRootInstance } from 'src/modules/shared';
 
 import { PlushieType } from 'theme/interfaces/plushie.type';
 import { useDraftOrderItem } from 'theme/helpers/use-draft-order-item';
@@ -111,7 +111,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const root = useRootInstance();
+    const applicationI18n = useI18n();
     const { sku, orderItemId, orderId, layout, plushieType } = toRefs(props);
 
     const { currentProduct, isDataLoaded: isProductLoaded } = useProductPage(sku);
@@ -203,8 +203,8 @@ export default defineComponent({
 
       const title =
         plushieType.value === PlushieType.FOREVERS
-          ? root.$t('Customize Your Forevers Plush')
-          : root.$t('Customize Your Golf Head Covers');
+          ? applicationI18n.t('Customize Your Forevers Plush')
+          : applicationI18n.t('Customize Your Golf Head Covers');
 
       return title.toString();
     });

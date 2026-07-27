@@ -1,3 +1,4 @@
+import { useStore } from '@vue-storefront/core/application-services';
 import { Ref, ref } from 'vue';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
@@ -6,7 +7,7 @@ import { SelectedBundleOption } from '@vue-storefront/core/modules/catalog/types
 import { setBundleProductOptionsAsync } from '@vue-storefront/core/modules/catalog/helpers';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { CustomizationStateItem, filterCustomizationState } from 'src/modules/customization-system';
-import { normalizeProductPurchaseFlow, ProductPurchaseFlow, ServerError, useRootInstance } from 'src/modules/shared';
+import { normalizeProductPurchaseFlow, ProductPurchaseFlow, ServerError } from 'src/modules/shared';
 
 export function useAddToCart (
   product: Ref<Product | undefined>,
@@ -19,7 +20,7 @@ export function useAddToCart (
   waitForTotalsUpdate?: boolean,
   propagateAllErrors?: boolean
 ) {
-  const root = useRootInstance();
+  const applicationStore = useStore();
   const isSubmitting = ref<boolean>(false);
 
   async function updateClientAndServerItem (payload: {
@@ -28,7 +29,7 @@ export function useAddToCart (
     forceClientState?: boolean,
     waitForTotalsUpdate?: boolean
   }): Promise<void> {
-    await root.$store.dispatch('cart/updateClientAndServerItem', payload);
+    await applicationStore.dispatch('cart/updateClientAndServerItem', payload);
   }
 
   async function addToCart (): Promise<void> {
@@ -68,7 +69,7 @@ export function useAddToCart (
     }
 
     try {
-      await root.$store.dispatch('cart/addItem', {
+      await applicationStore.dispatch('cart/addItem', {
         productToAdd: Object.assign({}, product.value, productToAddData)
       });
     } catch (err) {

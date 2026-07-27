@@ -60,6 +60,7 @@
 </template>
 
 <script lang="ts">
+import { useI18n, useStore } from '@vue-storefront/core/application-services';
 import {
   del,
   set,
@@ -76,17 +77,18 @@ import { OrderItemCustomizationFormData } from 'theme/interfaces/order-item-cust
 
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import OrderItemCustomizationForm from 'theme/components/customization-system/forms/order-item-customization-form.vue';
-import { BudsieStatus, useRootInstance } from 'src/modules/shared';
+import { BudsieStatus } from 'src/modules/shared';
 
 function useOrderItemsBulkCustomizationActions () {
-  const root = useRootInstance();
+  const applicationStore = useStore();
+  const applicationI18n = useI18n();
   const isSubmitting = ref(false);
 
   function spawnError (errorMessage: string): void {
-    root.$store.dispatch('notification/spawnNotification', {
+    applicationStore.dispatch('notification/spawnNotification', {
       type: 'danger',
       message: errorMessage,
-      action1: { label: root.$t('OK') }
+      action1: { label: applicationI18n.t('OK') }
     });
     Logger.error(errorMessage, 'bulk-customize')();
   }
@@ -97,7 +99,7 @@ function useOrderItemsBulkCustomizationActions () {
     }
 
     isSubmitting.value = true;
-    const userToken = root.$store.getters['user/getUserToken'];
+    const userToken = applicationStore.getters['user/getUserToken'];
     let submittedIds: number[] = [];
 
     try {
@@ -114,13 +116,13 @@ function useOrderItemsBulkCustomizationActions () {
 
       submittedIds = savedOrderItemsIds;
 
-      root.$store.dispatch('notification/spawnNotification', {
+      applicationStore.dispatch('notification/spawnNotification', {
         type: 'success',
-        message: root.$t(
+        message: applicationI18n.t(
           '{count} Order item(s) have been saved successfully',
           { count: savedOrderItemsIds.length }
         ),
-        action1: { label: root.$t('OK') }
+        action1: { label: applicationI18n.t('OK') }
       });
 
       return savedOrderItemsIds;
@@ -139,7 +141,7 @@ function useOrderItemsBulkCustomizationActions () {
     }
 
     isSubmitting.value = true;
-    const userToken = root.$store.getters['user/getUserToken'];
+    const userToken = applicationStore.getters['user/getUserToken'];
     let submittedIds: number[] = [];
 
     try {
@@ -166,13 +168,13 @@ function useOrderItemsBulkCustomizationActions () {
       submittedIds = submitResult.success.map(s => s.orderItemId);
 
       if (submittedIds.length > 0) {
-        root.$store.dispatch('notification/spawnNotification', {
+        applicationStore.dispatch('notification/spawnNotification', {
           type: 'success',
-          message: root.$t(
+          message: applicationI18n.t(
             '{count} Order item(s) have been updated successfully',
             { count: submittedIds.length }
           ),
-          action1: { label: root.$t('OK') }
+          action1: { label: applicationI18n.t('OK') }
         });
       }
     } catch (error) {
@@ -213,7 +215,8 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const root = useRootInstance();
+    const applicationStore = useStore();
+    const applicationI18n = useI18n();
     const orderItemCustomizationForm = ref<OrderItemCustomizationFormType[]>([]);
     const orderItemsErrors = ref<Record<string, string>>({});
 

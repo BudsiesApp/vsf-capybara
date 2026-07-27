@@ -56,15 +56,15 @@
             sf-button--full-width sf-button--text
             form__action-button form__action-button--secondary
           "
-          @click="$bus.$emit('checkout-before-edit', isVirtualCart ? 'personalDetails' :'shipping')"
+          @click="emitCheckoutEdit(isVirtualCart ? 'personalDetails' : 'shipping')"
         >
           {{ isVirtualCart ? $t('Edit contact') : $t('Edit shipping') }}
         </SfButton>
       </div>
     </div>
 
-    <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+    <template v-if="privacyPolicyLinks.length">
+      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
     </template>
     <!-- This dummy container below is needed because src\modules\payment-cash-on-delivery\index.ts
          tries to inject here a component with payment description -->
@@ -78,6 +78,10 @@ import { ValidationObserver } from 'vee-validate';
 
 import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
 import {
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
+import {
   SfInput,
   SfButton,
   SfHeading,
@@ -90,7 +94,6 @@ import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 import { useAddressValidation } from 'src/modules/address';
-import { useCurrentInstance } from 'src/modules/shared';
 import OBaseAddressForm from './o-base-address-form.vue';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
@@ -108,7 +111,6 @@ export default defineComponent({
   },
   mixins: [Payment],
   setup (_, context) {
-    const instance = useCurrentInstance();
     const validationObserver = ref(null);
     const baseAddressForm = ref(null);
 
@@ -116,16 +118,13 @@ export default defineComponent({
 
     const { validateAndGoToFirstError } = useFormValidation(
       validationObserver,
-      () => {
-        const baseAddressFormComponent = baseAddressForm.value;
-        return {
-          ...instance.$refs,
-          ...(baseAddressFormComponent?.$refs || {})
-        };
-      }
+      () => baseAddressForm.value?.getFormValidationRefs() || {}
     );
 
     return {
+      privacyPolicyLinks: useAdditionalContent(
+        AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+      ),
       validationObserver,
       baseAddressForm,
       validateAddress,
@@ -186,6 +185,9 @@ export default defineComponent({
     EventBus.$off('user-after-loggedin', this.fillLastUsedCustomerData);
   },
   methods: {
+    emitCheckoutEdit (section) {
+      EventBus.$emit('checkout-before-edit', section);
+    },
     focusSubmitStepButton () {
       const submitStepButton = this.$refs.submitStepButton;
 

@@ -19,6 +19,7 @@
 </template>
 
 <script lang="ts">
+import { useI18n, useRouter, useStore } from '@vue-storefront/core/application-services';
 import {
   computed,
   defineComponent,
@@ -58,8 +59,7 @@ import {
   PAYMENT_ERROR_EVENT,
   PaymentType,
   ExpressCheckoutData,
-  useExpressCheckoutTotals,
-  useRootInstance
+  useExpressCheckoutTotals
 } from 'src/modules/shared';
 import { useAddressValidation } from 'src/modules/address';
 
@@ -85,7 +85,9 @@ export default defineComponent({
     PaymentAmazonPay
   },
   setup (_, context) {
-    const root = useRootInstance();
+    const applicationStore = useStore();
+    const applicationRouter = useRouter();
+    const applicationI18n = useI18n();
     const windowObj = inject<Window & typeof window>('WindowObject');
     const isPlacing = ref(false);
 
@@ -93,7 +95,7 @@ export default defineComponent({
     let nextShippingDetailsChangedData: undefined | ShippingDetailsChangedCallbackData;
 
     const availableExpressCheckoutMethods = computed<Record<string, ExpressCheckoutMethod>>(() => {
-      const availablePaymentMethods = root.$store.getters['checkout/getPaymentMethods'];
+      const availablePaymentMethods = applicationStore.getters['checkout/getPaymentMethods'];
       const availableExpressCheckoutMethods: Record<string, ExpressCheckoutMethod> = {};
 
       for (const method of availablePaymentMethods) {
@@ -164,25 +166,25 @@ export default defineComponent({
       return sortedPaymentMethods;
     });
 
-    const braintreeClient = computed<Client>(() => root.$store.getters['braintree/braintreeClient']);
+    const braintreeClient = computed<Client>(() => applicationStore.getters['braintree/braintreeClient']);
 
     function onOrderAfterPlaced (payload: any) {
-      root.$store.commit(CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION, payload);
-      root.$router.push({ name: 'checkout', params: { success: 'success' } });
+      applicationStore.commit(CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION, payload);
+      applicationRouter.push({ name: 'checkout', params: { success: 'success' } });
     }
 
     function onPaymentErrorEventHandler () {
-      root.$store.dispatch('notification/spawnNotification', {
+      applicationStore.dispatch('notification/spawnNotification', {
         type: 'danger',
-        message: root.$t('Something went wrong. Please try another payment method'),
-        action1: { label: root.$t('OK') }
+        message: applicationI18n.t('Something went wrong. Please try another payment method'),
+        action1: { label: applicationI18n.t('OK') }
       });
     }
 
     onBeforeMount(async () => {
       EventBus.$on(PAYMENT_ERROR_EVENT, onPaymentErrorEventHandler);
       EventBus.$on('order-after-placed', onOrderAfterPlaced);
-      await root.$store.dispatch('braintree/createBraintreeClient');
+      await applicationStore.dispatch('braintree/createBraintreeClient');
     });
 
     onBeforeUnmount(() => {
@@ -197,7 +199,7 @@ export default defineComponent({
     });
 
     const shippingMethods = computed<ExpressCheckoutUpdateData['availableShippingMethods']>(() => {
-      return root.$store.getters['checkout/getShippingMethods'];
+      return applicationStore.getters['checkout/getShippingMethods'];
     });
 
     async function updateCustomerData (data: ExpressCheckoutAuthorizedCallbackData['customer']): Promise<void> {
@@ -205,28 +207,28 @@ export default defineComponent({
         return;
       }
 
-      await root.$store.dispatch('checkout/savePersonalDetails', data);
+      await applicationStore.dispatch('checkout/savePersonalDetails', data);
 
       if (data.firstName && data.lastName && data.emailAddress) {
-        await root.$store.dispatch('budsies/updatePersonalDetails', data);
+        await applicationStore.dispatch('budsies/updatePersonalDetails', data);
       }
     }
 
     async function updateShippingDetails (data: ShippingDetailsChangedCallbackData): Promise<ExpressCheckoutUpdateData> {
       if (data.shippingAddress) {
-        root.$store.commit(CHECKOUT_UPDATE_SHIPPING_DETAILS_MUTATION, data.shippingAddress);
+        applicationStore.commit(CHECKOUT_UPDATE_SHIPPING_DETAILS_MUTATION, data.shippingAddress);
       }
 
       if (data.paymentAddress) {
-        root.$store.commit(CHECKOUT_UPDATE_PAYMENT_DETAILS_MUTATION, data.paymentAddress);
+        applicationStore.commit(CHECKOUT_UPDATE_PAYMENT_DETAILS_MUTATION, data.paymentAddress);
       }
 
-      await root.$store.dispatch('cart/syncShippingMethods', { forceServerSync: true });
+      await applicationStore.dispatch('cart/syncShippingMethods', { forceServerSync: true });
 
       let selectedShippingMethod = shippingMethods.value.find((method) => method.method_code === data.shippingMethod) || shippingMethods.value[0];
 
       if (selectedShippingMethod) {
-        root.$store.commit(
+        applicationStore.commit(
           CHECKOUT_UPDATE_SHIPPING_DETAILS_MUTATION,
           {
             shippingCarrier: selectedShippingMethod.carrier_code,
@@ -234,7 +236,7 @@ export default defineComponent({
           }
         );
 
-        await root.$store.dispatch('cart/fetchTotals');
+        await applicationStore.dispatch('cart/fetchTotals');
       }
 
       if (nextShippingDetailsChangedData) {
@@ -274,14 +276,14 @@ export default defineComponent({
     const { prepareOrderData } = useOrderCreation();
 
     const onExpressCheckoutAuthorized = async (data: ExpressCheckoutAuthorizedCallbackData): Promise<void> => {
-      EventBus.$emit('notification-progress-start', root.$t('Processing order...'))
+      EventBus.$emit('notification-progress-start', applicationI18n.t('Processing order...'))
       await updateCustomerData(data.customer);
 
       const { i18n } = currentStoreView();
       const defaultCountry = i18n.defaultCountry;
 
       if (data.shippingDetails.phoneNumber) {
-        const checkoutShippingDetails = root.$store.getters['checkout/getShippingDetails'];
+        const checkoutShippingDetails = applicationStore.getters['checkout/getShippingDetails'];
         const country = checkoutShippingDetails.country || defaultCountry;
 
         data.shippingDetails.phoneNumber = phoneHelpers.formatPhoneNumberToE164(
@@ -291,7 +293,7 @@ export default defineComponent({
       }
 
       if (data.paymentDetails.phoneNumber) {
-        const checkoutPaymentDetails = root.$store.getters['checkout/getPaymentDetails'];
+        const checkoutPaymentDetails = applicationStore.getters['checkout/getPaymentDetails'];
         const country = checkoutPaymentDetails.country || defaultCountry;
 
         data.paymentDetails.phoneNumber = phoneHelpers.formatPhoneNumberToE164(
@@ -300,21 +302,21 @@ export default defineComponent({
         ) || undefined;
       }
 
-      root.$store.commit(CHECKOUT_UPDATE_SHIPPING_DETAILS_MUTATION, data.shippingDetails);
-      root.$store.commit(CHECKOUT_UPDATE_PAYMENT_DETAILS_MUTATION, data.paymentDetails);
-      root.$store.commit(
+      applicationStore.commit(CHECKOUT_UPDATE_SHIPPING_DETAILS_MUTATION, data.shippingDetails);
+      applicationStore.commit(CHECKOUT_UPDATE_PAYMENT_DETAILS_MUTATION, data.paymentDetails);
+      applicationStore.commit(
         CHECKOUT_UPDATE_PAYMENT_DETAILS_MUTATION,
         { paymentMethod: data.paymentMethod }
       );
 
       try {
-        const shippingAddress = root.$store.getters['checkout/getShippingDetails'];
-        const paymentAddress = root.$store.getters['checkout/getPaymentDetails'];
+        const shippingAddress = applicationStore.getters['checkout/getShippingDetails'];
+        const paymentAddress = applicationStore.getters['checkout/getPaymentDetails'];
         const addressesAreEqual = isAddressesEquals(shippingAddress, paymentAddress);
 
         const shippingComputed = computed({
-          get: () => root.$store.getters['checkout/getShippingDetails'],
-          set: (value) => root.$store.commit(CHECKOUT_UPDATE_SHIPPING_DETAILS_MUTATION, value)
+          get: () => applicationStore.getters['checkout/getShippingDetails'],
+          set: (value) => applicationStore.commit(CHECKOUT_UPDATE_SHIPPING_DETAILS_MUTATION, value)
         });
 
         const shouldProceedShipping = await validateAddress(shippingComputed);
@@ -324,11 +326,11 @@ export default defineComponent({
         }
 
         if (addressesAreEqual) {
-          root.$store.commit(CHECKOUT_UPDATE_PAYMENT_DETAILS_MUTATION, shippingComputed.value);
+          applicationStore.commit(CHECKOUT_UPDATE_PAYMENT_DETAILS_MUTATION, shippingComputed.value);
         } else {
           const paymentComputed = computed({
-            get: () => root.$store.getters['checkout/getPaymentDetails'],
-            set: (value) => root.$store.commit(CHECKOUT_UPDATE_PAYMENT_DETAILS_MUTATION, value)
+            get: () => applicationStore.getters['checkout/getPaymentDetails'],
+            set: (value) => applicationStore.commit(CHECKOUT_UPDATE_PAYMENT_DETAILS_MUTATION, value)
           });
 
           const shouldProceedPayment = await validateAddress(paymentComputed);
@@ -356,22 +358,22 @@ export default defineComponent({
       try {
         registerModule(OrderModule);
 
-        const paymentMethod = root.$store.getters['checkout/getPaymentDetails'].paymentMethod;
+        const paymentMethod = applicationStore.getters['checkout/getPaymentDetails'].paymentMethod;
         const isAmazonPay = paymentMethod === AmazonPaySupportedMethodCodes.AMAZON_PAY;
 
         const additionalData: Record<string, any> = {};
 
         if (isAmazonPay) {
-          const amazonSessionId = root.$store.getters[AMAZON_SESSION_ID_GETTER];
-          root.$store.commit(CLEAR_AMAZON_SESSION_ID_MUTATION);
+          const amazonSessionId = applicationStore.getters[AMAZON_SESSION_ID_GETTER];
+          applicationStore.commit(CLEAR_AMAZON_SESSION_ID_MUTATION);
           additionalData.amazon_session_id = amazonSessionId;
         } else {
-          const paymentMethodNonce = root.$store.getters['braintree/paymentMethodNonce'];
-          root.$store.commit(SET_PAYMENT_METHOD_NONCE_MUTATION, undefined);
+          const paymentMethodNonce = applicationStore.getters['braintree/paymentMethodNonce'];
+          applicationStore.commit(SET_PAYMENT_METHOD_NONCE_MUTATION, undefined);
           additionalData.payment_method_nonce = paymentMethodNonce;
         }
 
-        await root.$store.dispatch(
+        await applicationStore.dispatch(
           'checkout/placeOrder',
           { order: prepareOrderData(additionalData) }
         );

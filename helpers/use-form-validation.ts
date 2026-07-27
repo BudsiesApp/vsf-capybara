@@ -1,27 +1,30 @@
 import { ValidationObserver } from 'vee-validate';
-import { ComponentPublicInstance, Ref } from 'vue';
+import { Ref } from 'vue';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
-import { isVue } from 'src/modules/shared';
 
-type FormComponentRef = Vue | ComponentPublicInstance;
+interface FormComponentRef {
+  $el: Element
+}
 export type FormRef = FormComponentRef | Element | (FormComponentRef | Element)[];
 export type FormRefs = Record<string, FormRef>;
 
+export interface NestedFormValidationHandle {
+  getFormValidationRefs: () => FormRefs
+}
+
 export function getNestedFormRefs (
-  refs: FormRefs,
-  nestedRefName: string
+  nestedRef: NestedFormValidationHandle | NestedFormValidationHandle[] | null
 ): FormRefs {
-  const nestedRef = refs[nestedRefName];
   const nestedComponents = Array.isArray(nestedRef) ? nestedRef : [nestedRef];
   const result: FormRefs = {};
 
   for (const component of nestedComponents) {
-    if (!component || !isVue(component)) {
+    if (!component) {
       continue;
     }
 
-    Object.assign(result, component.$refs);
+    Object.assign(result, component.getFormValidationRefs());
   }
 
   return result;
@@ -76,8 +79,8 @@ export function useFormValidation (
         refB = refB[0];
       }
 
-      const elA = (isVue(refA) ? (refA as Vue).$el : refA) as HTMLElement;
-      const elB = (isVue(refB) ? (refB as Vue).$el : refB) as HTMLElement;
+      const elA = (refA instanceof Element ? refA : refA.$el) as HTMLElement;
+      const elB = (refB instanceof Element ? refB : refB.$el) as HTMLElement;
 
       const position = elA.compareDocumentPosition(elB);
 
@@ -110,7 +113,7 @@ export function useFormValidation (
       ref = ref[0];
     }
 
-    if (isVue(ref)) {
+    if (!(ref instanceof Element)) {
       ref = ref.$el as HTMLElement;
     }
 
