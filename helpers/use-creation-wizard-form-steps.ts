@@ -1,9 +1,9 @@
+import { useRoute, useRouter } from '@vue-storefront/core/application-services';
 import debounce from 'lodash.debounce';
 import { computed, nextTick, Ref, watch } from 'vue';
 
 import CartItem from 'core/modules/cart/types/CartItem';
 import { ProductCustomizationMode, Customization } from 'src/modules/customization-system';
-import { useRootInstance } from 'src/modules/shared';
 
 import { useFormSteps } from './use-form-steps';
 
@@ -22,7 +22,8 @@ export function useCreationWizardFormSteps (
   afterStepChanged: (previousStepCustomization?: Customization) => void,
   customizationMode: Ref<ProductCustomizationMode>
 ) {
-  const root = useRootInstance();
+  const applicationRouter = useRouter();
+  const currentRoute = useRoute();
   const {
     currentStep,
     lastStepCustomization
@@ -103,13 +104,13 @@ export function useCreationWizardFormSteps (
     (step: number) => {
       const stepQueryValue = getStepQueryValue(step, stepsList.value);
 
-      if (stepQueryValue === root.$route.query.step) {
+      if (stepQueryValue === currentRoute.query.step) {
         return;
       }
 
-      root.$router.replace({
+      applicationRouter.replace({
         query: {
-          ...root.$route.query,
+          ...currentRoute.query,
           step: stepQueryValue
         }
       });

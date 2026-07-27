@@ -3,7 +3,7 @@ import { CatalogNextModule } from '@vue-storefront/core/modules/catalog-next'
 import { NotificationModule } from '@vue-storefront/core/modules/notification'
 import { UrlModule } from '@vue-storefront/core/modules/url'
 import { StoryblokModule } from 'src/modules/vsf-storyblok-module'
-import { registerModule } from '@vue-storefront/core/lib/modules'
+import { registerApplicationModule, registerModule } from '@vue-storefront/core/lib/modules'
 import { ABTesting } from 'src/modules/a-b-testing'
 import { BackendSettings } from 'src/modules/backend-settings';
 import { ErrorLoggingModule } from 'src/modules/error-logging';
@@ -19,18 +19,18 @@ import registerStoryblokComponents from 'theme/components/storyblok'
 // TODO:distributed across proper pages BEFORE 1.11
 export function registerClientModules () {
   registerStoryblokComponents()
-  registerModule(TrueVaultModule)
+  registerApplicationModule(TrueVaultModule)
   registerModule(PageLoadingIndicatorModule)
   registerModule(UrlModule)
   registerModule(NotificationModule)
   registerModule(CatalogNextModule)
   registerModule(StoryblokModule)
-  registerModule(ABTesting)
+  registerApplicationModule(ABTesting)
   registerModule(BackendSettings)
   registerModule(ErrorLoggingModule)
   registerModule(OrdersHistoryModule)
   registerModule(CurrencyModule)
-  registerModule(FeraModule)
+  registerApplicationModule(FeraModule)
   registerModule(TrafficAttributionModule)
 }
 

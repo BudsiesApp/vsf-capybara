@@ -84,9 +84,9 @@
         <privacy-policy-link />
       </p>
 
-      <template v-if="$additionalContent.footerLinks">
+      <template v-if="footerLinks.length">
         <div class="_additional-links">
-          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.footerLinks" />
+          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in footerLinks" />
         </div>
       </template>
     </div>
@@ -97,6 +97,10 @@
 import { mapGetters } from 'vuex';
 import { SfFooter, SfList, SfMenuItem, SfHeading } from '@storefront-ui/vue';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
+import {
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import { BaseImage } from 'src/modules/budsies';
 import { PrivacyPolicyLink } from 'src/modules/shared';
@@ -120,6 +124,13 @@ export default {
       type: String,
       default: ''
     }
+  },
+  setup () {
+    return {
+      footerLinks: useAdditionalContent(
+        AdditionalContentOutlet.FOOTER_LINKS
+      )
+    };
   },
   computed: {
 

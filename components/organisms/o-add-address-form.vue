@@ -22,24 +22,29 @@
         </SfButton>
       </div>
 
-      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      <template v-if="privacyPolicyLinks.length">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
       </template>
     </validation-observer>
   </div>
 </template>
 
 <script lang="ts">
+import { useI18n, useStore } from '@vue-storefront/core/application-services';
 import { ValidationObserver } from 'vee-validate';
 import { defineComponent, ref, computed, Ref } from 'vue';
 import { SfButton } from '@storefront-ui/vue';
 
 import i18n from '@vue-storefront/i18n';
 import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import { usePersistedFirstName, usePersistedLastName, usePersistedPhoneNumber, usePersistedVatId } from 'src/modules/persisted-customer-data';
 import { useAddressValidation } from 'src/modules/address';
-import { useRootInstance } from 'src/modules/shared';
 
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 
@@ -58,9 +63,13 @@ export default defineComponent({
     ValidationObserver
   },
   setup (props, { emit }) {
-    const root = useRootInstance();
+    const privacyPolicyLinks = useAdditionalContent(
+      AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+    );
+    const applicationStore = useStore();
+    const applicationI18n = useI18n();
     const validationObserver = ref(null);
-    const baseAddressForm = ref(null);
+    const baseAddressForm: Ref<InstanceType<typeof OBaseAddressForm> | null> = ref(null);
     const submitStepButton: Ref<null | InstanceType<typeof SfButton>> = ref(null);
 
     const firstName = ref('');
@@ -99,14 +108,7 @@ export default defineComponent({
 
     const { validateAndGoToFirstError } = useFormValidation(
       validationObserver,
-      () => {
-        const baseAddressFormComponent = baseAddressForm.value as any;
-
-        return {
-          ...root.$refs,
-          ...(baseAddressFormComponent?.$refs || {})
-        };
-      }
+      () => baseAddressForm.value?.getFormValidationRefs() || {}
     );
 
     const isSubmitButtonDisabled = computed(() => isSubmitting.value || isValidatingAddress.value);
@@ -162,7 +164,7 @@ export default defineComponent({
     });
 
     function onFailure (message: string): void {
-      root.$store.dispatch('notification/spawnNotification', {
+      applicationStore.dispatch('notification/spawnNotification', {
         type: 'danger',
         message,
         action1: { label: i18n.t('OK') }
@@ -206,7 +208,7 @@ export default defineComponent({
       };
 
       try {
-        await root.$store.dispatch('budsies/createNewAddress', { address: addressToCreate });
+        await applicationStore.dispatch('budsies/createNewAddress', { address: addressToCreate });
 
         persistLastUsedCustomerFirstName(firstName.value);
         persistLastUsedCustomerLastName(lastName.value);
@@ -215,7 +217,7 @@ export default defineComponent({
 
         emit('address-added');
       } catch (error) {
-        onFailure(root.$t('Unable to add new address') as string);
+        onFailure(applicationI18n.t('Unable to add new address') as string);
       } finally {
         isSubmitting.value = false;
       }
@@ -226,6 +228,8 @@ export default defineComponent({
     }
 
     return {
+      privacyPolicyLinks: privacyPolicyLinks as unknown as
+        readonly AdditionalContentEntry[],
       validationObserver,
       baseAddressForm,
       submitStepButton,

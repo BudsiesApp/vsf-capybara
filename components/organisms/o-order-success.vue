@@ -136,8 +136,8 @@
               {{ $t('Rewards dollars may be applied onto existing orders within 7 days of checkout.') }}
             </p>
 
-            <template v-if="$additionalContent.financialIncentivesLinks">
-              <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.financialIncentivesLinks" />
+            <template v-if="financialIncentiveLinks.length">
+              <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in financialIncentiveLinks" />
             </template>
           </div>
         </div>
@@ -147,10 +147,15 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType, VueConstructor } from 'vue'
+import Vue, { PropType, ref, VueConstructor } from 'vue'
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 
 import { CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION } from '@vue-storefront/core/modules/checkout';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 import { Order } from 'core/modules/order/types/Order';
 import { BaseImage } from 'src/modules/budsies';
 import { InjectType } from 'src/modules/shared';
@@ -199,6 +204,18 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
     SfButton,
     SfHeading
   },
+  setup () {
+    const financialIncentiveLinks = useAdditionalContent(
+      AdditionalContentOutlet.FINANCIAL_INCENTIVE_LINKS
+    );
+    const mainTitle = ref<Vue | null>(null);
+
+    return {
+      financialIncentiveLinks: financialIncentiveLinks as unknown as
+        readonly AdditionalContentEntry[],
+      mainTitle
+    };
+  },
   computed: {
     email (): string {
       return this.order.personalDetails.emailAddress;
@@ -224,7 +241,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
     };
   },
   mounted () {
-    ((this.$refs.mainTitle as Vue).$el as HTMLElement).focus();
+    (this.mainTitle?.$el as HTMLElement | undefined)?.focus();
   },
   destroyed () {
     this.$store.commit(CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION, undefined);

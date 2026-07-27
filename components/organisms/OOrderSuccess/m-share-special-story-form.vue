@@ -42,8 +42,8 @@
         </SfButton>
       </div>
 
-      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      <template v-if="privacyPolicyLinks.length">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
       </template>
     </validation-observer>
   </div>
@@ -57,6 +57,11 @@ import Vue from 'vue'
 import { mapState } from 'vuex';
 import { SfButton } from '@storefront-ui/vue';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 extend('required', {
   ...required,
@@ -75,6 +80,16 @@ export default Vue.extend({
       type: String,
       required: true
     }
+  },
+  setup () {
+    const privacyPolicyLinks = useAdditionalContent(
+      AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+    );
+
+    return {
+      privacyPolicyLinks: privacyPolicyLinks as unknown as
+        readonly AdditionalContentEntry[]
+    };
   },
   data () {
     return {

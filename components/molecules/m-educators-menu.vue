@@ -35,8 +35,16 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import Vue, { ref } from 'vue';
 import { SfIcon, SfMegaMenu, SfList, SfMenuItem } from '@storefront-ui/vue';
+
+interface MegaMenuHandle {
+  active: unknown,
+  items: unknown,
+  _computedWatchers: {
+    isMobile: unknown
+  }
+}
 
 export default Vue.extend({
   name: 'MEducatorsMenu',
@@ -55,6 +63,11 @@ export default Vue.extend({
       type: String,
       default: ''
     }
+  },
+  setup () {
+    return {
+      menu: ref<MegaMenuHandle | null>(null)
+    };
   },
   data () {
     return {
@@ -83,7 +96,11 @@ export default Vue.extend({
   async mounted () {
     await this.$nextTick();
 
-    const menu: any = this.$refs.menu;
+    const menu = this.menu;
+    if (!menu) {
+      return;
+    }
+
     menu.active = menu.items;
     menu._computedWatchers.isMobile = undefined;
   }
