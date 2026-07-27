@@ -55,7 +55,7 @@
 </template>
 
 <script lang="ts">
-import { PropType } from 'vue';
+import Vue, { PropType } from 'vue';
 import { SfImage, SfPrice, SfTable } from '@storefront-ui/vue';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 import { htmlDecode } from '@vue-storefront/core/filters';
@@ -64,7 +64,7 @@ import { OrderContentItem } from '../interfaces/order-content-item.interface';
 
 import { CartItemConfiguration } from 'src/modules/customization-system';
 
-export default {
+export default Vue.extend({
   name: 'OOrderContent',
   components: {
     CartItemConfiguration,
@@ -111,7 +111,7 @@ export default {
       return text.substring(0, maxLength) + '...';
     }
   }
-};
+});
 </script>
 
   <style lang="scss" scoped>

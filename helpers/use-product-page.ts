@@ -1,16 +1,16 @@
-import { computed, onBeforeMount, onServerPrefetch, ref, Ref, SetupContext, watch } from '@vue/composition-api';
+import { computed, onBeforeMount, onServerPrefetch, ref, Ref, watch } from 'vue';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import Product from 'core/modules/catalog/types/Product';
-import { ProductEvent } from 'src/modules/shared';
+import { ProductEvent, useRootInstance } from 'src/modules/shared';
 import { updateProductProductionTimeCustomizationData } from 'src/modules/customization-system';
 
 export function useProductPage (
-  sku: Ref<string>,
-  { root }: SetupContext
+  sku: Ref<string>
 ) {
+  const root = useRootInstance();
   const isDataLoaded = ref<boolean>(false);
 
   const currentProduct = computed<Product | undefined>(() => {

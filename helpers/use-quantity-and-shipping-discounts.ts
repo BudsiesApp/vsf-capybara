@@ -1,4 +1,4 @@
-import { ref } from '@vue/composition-api';
+import { ref } from 'vue';
 
 export function useQuantityAndShippingDiscounts () {
   const showQuantityNotes = ref<boolean>(false);

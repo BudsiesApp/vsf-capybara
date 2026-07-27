@@ -1,8 +1,9 @@
 import debounce from 'lodash.debounce';
-import { computed, nextTick, Ref, SetupContext, watch } from '@vue/composition-api';
+import { computed, nextTick, Ref, watch } from 'vue';
 
 import CartItem from 'core/modules/cart/types/CartItem';
 import { ProductCustomizationMode, Customization } from 'src/modules/customization-system';
+import { useRootInstance } from 'src/modules/shared';
 
 import { useFormSteps } from './use-form-steps';
 
@@ -19,9 +20,9 @@ export function useCreationWizardFormSteps (
   additionalStepNames: Ref<string[]>,
   existingCartItem: Ref<CartItem | undefined>,
   afterStepChanged: (previousStepCustomization?: Customization) => void,
-  customizationMode: Ref<ProductCustomizationMode>,
-  { root }: SetupContext
+  customizationMode: Ref<ProductCustomizationMode>
 ) {
+  const root = useRootInstance();
   const {
     currentStep,
     lastStepCustomization

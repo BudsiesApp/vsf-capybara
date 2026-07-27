@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { computed, defineComponent, PropType } from 'vue';
 import { useErrorAccessibility } from 'theme/helpers/use-error-accessibility';
 
 export default defineComponent({

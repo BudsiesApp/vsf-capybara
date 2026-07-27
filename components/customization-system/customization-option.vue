@@ -63,7 +63,7 @@ import {
   ref,
   PropType,
   toRefs
-} from '@vue/composition-api';
+} from 'vue';
 import { ValidationProvider } from 'vee-validate';
 
 import {

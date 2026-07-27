@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { computed, defineComponent, PropType } from 'vue';
 import { getThumbnailPath } from '@vue-storefront/core/helpers';
 
 import { BaseImage } from 'src/modules/budsies';

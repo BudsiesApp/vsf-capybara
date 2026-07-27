@@ -1,14 +1,15 @@
-import { onBeforeMount, onBeforeUnmount, SetupContext } from '@vue/composition-api';
+import { onBeforeMount, onBeforeUnmount } from 'vue';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
+import { useRootInstance } from 'src/modules/shared';
 
 import { UploaderData } from 'theme/store/ui/artwork-upload';
 import { FilesUploaderEvents } from 'theme/interfaces/files-uploader-events';
 
 export function useBulkImagesUpload (
-  { root }: SetupContext,
   allowMultipleImagesPerUploader = true
 ) {
+  const root = useRootInstance();
   function windowDragHoverHandler (event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();

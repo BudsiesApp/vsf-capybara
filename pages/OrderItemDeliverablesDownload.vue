@@ -70,7 +70,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, PropType, Ref, ref } from '@vue/composition-api';
+import { computed, defineComponent, inject, onMounted, PropType, Ref, ref } from 'vue';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 import { SearchQuery } from 'storefront-query-builder';
 import config from 'config';
@@ -82,7 +82,7 @@ import { BaseImage } from 'src/modules/budsies';
 import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { fetchOrderItemDeliverables, Deliverable } from 'src/modules/customization-system';
 import { ImageHandlerService } from 'src/modules/file-storage';
-import { PriceHelper, ProductEvent } from 'src/modules/shared';
+import { PriceHelper, ProductEvent, useRootInstance } from 'src/modules/shared';
 
 import { useImageDownload } from 'theme/helpers/use-image-download';
 
@@ -122,6 +122,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const root = useRootInstance();
     const qaPhotosHandlerService = inject<ImageHandlerService>('QaPhotosHandlerService');
 
     if (!qaPhotosHandlerService) {
@@ -160,7 +161,7 @@ export default defineComponent({
         query.applyFilter({ key: 'stock.is_in_stock', value: { 'eq': true } });
       }
 
-      await context.root.$store.dispatch('product/findProducts', {
+      await root.$store.dispatch('product/findProducts', {
         query,
         options: {
           prefetchGroupProducts: false
@@ -169,14 +170,14 @@ export default defineComponent({
     }
 
     const productBySkuDictionary = computed<Record<string, Product>>(() => {
-      return context.root.$store.getters['product/getProductBySkuDictionary'];
+      return root.$store.getters['product/getProductBySkuDictionary'];
     });
 
     const productPriceDictionary = computed<Record<string, PriceHelper.ProductPrice>>(() => {
-      return context.root.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY]
+      return root.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY]
     });
     const selectedCurrency = computed<Currency>(() => {
-      return context.root.$store.getters[GET_ACTIVE_CURRENCY];
+      return root.$store.getters[GET_ACTIVE_CURRENCY];
     });
 
     const relatedProducts = computed<ReturnType<typeof prepareCategoryProduct>[]>(() => {
@@ -232,7 +233,7 @@ export default defineComponent({
 
       const routeName = PRODUCT_SKU_ROUTE_MAPPING[product.sku];
 
-      return context.root.$router.resolve({
+      return root.$router.resolve({
         name: routeName,
         query: {
           'image-url': getAbsoluteImageUrl(imageUrl)

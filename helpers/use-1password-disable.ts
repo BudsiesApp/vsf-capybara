@@ -1,4 +1,4 @@
-import { onMounted } from '@vue/composition-api';
+import { onMounted } from 'vue';
 
 const ONE_PASSWORD_INPUT_IGNORE_ATTRIBUTE = 'data-1p-ignore';
 

@@ -8,7 +8,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
+import { useRootInstance } from 'src/modules/shared';
 
 import OAddAddressForm from 'theme/components/organisms/o-add-address-form.vue';
 
@@ -17,7 +18,8 @@ export default defineComponent({
   components: {
     OAddAddressForm
   },
-  setup (_, { root }) {
+  setup () {
+    const root = useRootInstance();
     const onAddressAdded = () => {
       root.$router.push({
         name: 'address-book-list'
