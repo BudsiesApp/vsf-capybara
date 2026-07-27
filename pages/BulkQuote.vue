@@ -75,7 +75,9 @@ export default {
     void this.loadData();
   },
   serverPrefetch (): Promise<void> {
-    if (this.$ssrContext) this.$ssrContext.output.cacheTags.add('product')
+    const ssrContext = this.$ssrContext;
+
+    if (ssrContext) ssrContext.output.cacheTags.add('product')
 
     return (this as any).loadData();
   },

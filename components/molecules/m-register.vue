@@ -37,8 +37,8 @@
       </SfButton>
     </form>
 
-    <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+    <template v-if="privacyPolicyLinks.length">
+      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
     </template>
   </div>
 </template>
@@ -51,6 +51,11 @@ import { required } from 'vuelidate/lib/validators';
 import Task from '@vue-storefront/core/lib/sync/types/Task';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import i18n from '@vue-storefront/i18n';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import MPassword from 'theme/components/molecules/m-password.vue';
 
@@ -70,6 +75,16 @@ export default Vue.extend({
       type: String,
       required: true
     }
+  },
+  setup () {
+    const privacyPolicyLinks = useAdditionalContent(
+      AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+    );
+
+    return {
+      privacyPolicyLinks: privacyPolicyLinks as unknown as
+        readonly AdditionalContentEntry[]
+    };
   },
   data () {
     return {

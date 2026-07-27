@@ -29,7 +29,7 @@
         >
           <div
             class="o-header__submenu"
-            :aria-expanded="String(isAboutMenuHovered || isAboutMenuFocused)"
+            :aria-expanded="isAboutMenuHovered || isAboutMenuFocused"
             tabindex="0"
             role="menuitem"
           >
@@ -44,7 +44,6 @@
         </SfHeaderNavigationItem>
 
         <SfHeaderNavigationItem
-          ref="productsNavItem"
           @mouseover="onMainMenuMouseOver"
           @mouseleave="isHoveredMenu = false"
           @focusin="onMainMenuFocusIn"
@@ -53,7 +52,7 @@
         >
           <div
             class="o-header__submenu"
-            :aria-expanded="String(isHoveredMenu || isFocusedMenu)"
+            :aria-expanded="isHoveredMenu || isFocusedMenu"
             tabindex="0"
             role="menuitem"
           >
@@ -102,18 +101,18 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import Vue from 'vue';
 import { SfHeader, SfOverlay } from '@storefront-ui/vue';
 import { mapState, mapGetters } from 'vuex';
 
 import { CurrencySelector } from 'src/modules/currency';
 
-import ALogo from 'theme/components/atoms/a-logo';
-import AAccountIcon from 'theme/components/atoms/a-account-icon';
-import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
-import MAboutMenu from 'theme/components/molecules/m-about-menu';
-import MMenu from 'theme/components/molecules/m-menu';
+import ALogo from 'theme/components/atoms/a-logo.vue';
+import AAccountIcon from 'theme/components/atoms/a-account-icon.vue';
+import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
+import MAboutMenu from 'theme/components/molecules/m-about-menu.vue';
+import MMenu from 'theme/components/molecules/m-menu.vue';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
 export default Vue.extend({
@@ -202,20 +201,26 @@ export default Vue.extend({
     onMainMenuFocusIn () {
       this.isFocusedMenu = true;
     },
-    onMainMenuFocusOut (event) {
+    onMainMenuFocusOut (event: FocusEvent) {
+      const productsNavElement = event.currentTarget as HTMLElement | null;
+
       if (
         event.relatedTarget !== null &&
-        this.$refs.productsNavItem.$el.contains(event.relatedTarget)
+        productsNavElement?.contains(event.relatedTarget as Node)
       ) {
         return;
       }
 
       this.isFocusedMenu = false;
     },
-    onMainMenuEscapeKey () {
+    onMainMenuEscapeKey (event: KeyboardEvent) {
       this.isFocusedMenu = false;
       this.isHoveredMenu = false;
-      this.$refs.productsNavItem.$el.querySelector('a').focus();
+
+      const productsNavElement = event.currentTarget as HTMLElement | null;
+      const menuTrigger = productsNavElement?.querySelector('a') as HTMLAnchorElement | null;
+
+      menuTrigger?.focus();
     }
   }
 });

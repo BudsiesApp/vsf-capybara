@@ -12,7 +12,7 @@
         :level="3"
         :title="$t('Please upload your awesome design')"
         class="_title -required"
-        :ref="getFieldAnchorName('Artwork')"
+        ref="artworkAnchor"
       />
 
       <input type="hidden" :value="value.customerImages">
@@ -47,7 +47,7 @@
         :level="3"
         :title="$t('Project Name')"
         class="_title"
-        :ref="getFieldAnchorName('Project Name')"
+        ref="projectNameAnchor"
       />
 
       <SfInput
@@ -77,7 +77,7 @@
         :level="3"
         :title="$t('Describe your design')"
         class="_title -required"
-        :ref="getFieldAnchorName('Design')"
+        ref="designAnchor"
       />
 
       <textarea
@@ -104,7 +104,7 @@
         :level="3"
         :title="$t('What quantity are you interested in?')"
         class="_title"
-        :ref="getFieldAnchorName('Quantity')"
+        ref="quantityAnchor"
       />
 
       <span class="_helper">
@@ -166,7 +166,7 @@
           :disabled="isDisabled"
           name="additional-quantity"
           class="-quantity"
-          :ref="getFieldAnchorName('Additional Quantity')"
+          ref="additionalQuantityAnchor"
           v-model="additionalQuantity"
         />
 
@@ -201,7 +201,7 @@
         :order="deadlineStepOrder"
         :level="3"
         :title="$t('Do you have a deadline for delivery?')"
-        :ref="getFieldAnchorName('Deadline')"
+        ref="deadlineAnchor"
         class="_title -required"
       />
 
@@ -239,7 +239,7 @@
         tag="div"
         v-slot="{ errors }"
         name="Deadline Date"
-        :ref="getFieldAnchorName('Deadline Date')"
+        ref="deadlineDateAnchor"
         :rules="deadline === '1' ? `required|min_date:${minDeadlineDate}` : 'min_date:${minDeadlineDate}'"
       >
         <div
@@ -278,7 +278,7 @@
         :level="3"
         :title="$t('Which country is the plush being delivered to?')"
         class="_title"
-        :ref="getFieldAnchorName('Country')"
+        ref="countryAnchor"
       />
 
       <div class="_helper">
@@ -317,7 +317,7 @@
         >
           <SfInput
             :label="$t('First Name')"
-            :ref="getFieldAnchorName('First Name')"
+            ref="firstNameAnchor"
             name="first-name"
             v-model="customerFirstName"
             class="sf-input--required"
@@ -349,7 +349,7 @@
         >
           <SfInput
             :label="$t('Your e-mail address')"
-            :ref="getFieldAnchorName('Email')"
+            ref="emailAnchor"
             name="email"
             v-model="customerEmail"
             class="sf-input--required"
@@ -366,7 +366,7 @@
         >
           <SfInput
             :label="$t('Phone Number')"
-            :ref="getFieldAnchorName('Phone Number')"
+            ref="phoneNumberAnchor"
             name="phone-number"
             v-model="formattedPhoneNumber"
             class="sf-input--required"
@@ -422,7 +422,7 @@
         v-model="agreement"
         class="_agreement-checkbox"
         :disabled="isDisabled"
-        :ref="getFieldAnchorName('Agreement')"
+        ref="agreementAnchor"
       >
         <template #label>
           <div class="sf-checkbox__label">
@@ -452,7 +452,7 @@
 
 <script lang="ts">
 import { parsePhoneNumberWithError } from 'libphonenumber-js';
-import Vue, { PropType, computed, inject } from 'vue';
+import Vue, { PropType, computed, inject, ref } from 'vue';
 import config from 'config';
 import { ValidationProvider, extend } from 'vee-validate';
 import { email, required, max, min, min_value, max_value, regex } from 'vee-validate/dist/rules';
@@ -467,6 +467,8 @@ import Product from 'core/modules/catalog/types/Product';
 import { Dictionary, ProductId, ProductValue } from 'src/modules/budsies';
 import { ImageHandlerService, Item } from 'src/modules/file-storage';
 import { createPhoneHelpers } from 'src/modules/shared';
+
+import { FormRef, FormRefs } from 'theme/helpers/use-form-validation';
 
 import BulkordersBaseFormData from 'theme/components/interfaces/bulkorders-base-form-data.interface';
 import CustomerType from 'theme/components/interfaces/customer-type.interface';
@@ -636,8 +638,55 @@ export default Vue.extend({
     currentDate.setDate(currentDate.getDate() + 1);
 
     const minDeadlineDate = currentDate.toISOString().split('T')[0];
+    const artworkAnchor = ref<FormRef | null>(null);
+    const projectNameAnchor = ref<FormRef | null>(null);
+    const designAnchor = ref<FormRef | null>(null);
+    const quantityAnchor = ref<FormRef | null>(null);
+    const additionalQuantityAnchor = ref<FormRef | null>(null);
+    const deadlineAnchor = ref<FormRef | null>(null);
+    const deadlineDateAnchor = ref<FormRef | null>(null);
+    const countryAnchor = ref<FormRef | null>(null);
+    const firstNameAnchor = ref<FormRef | null>(null);
+    const emailAnchor = ref<FormRef | null>(null);
+    const phoneNumberAnchor = ref<FormRef | null>(null);
+    const agreementAnchor = ref<FormRef | null>(null);
+
+    const getFormValidationRefs = (): FormRefs => {
+      const fieldRefs: [string, FormRef | null][] = [
+        ['Artwork', artworkAnchor.value],
+        ['Project Name', projectNameAnchor.value],
+        ['Design', designAnchor.value],
+        ['Quantity', quantityAnchor.value],
+        ['Additional Quantity', additionalQuantityAnchor.value],
+        ['Deadline', deadlineAnchor.value],
+        ['Deadline Date', deadlineDateAnchor.value],
+        ['Country', countryAnchor.value],
+        ['First Name', firstNameAnchor.value],
+        ['Email', emailAnchor.value],
+        ['Phone Number', phoneNumberAnchor.value],
+        ['Agreement', agreementAnchor.value]
+      ];
+
+      return fieldRefs.reduce<FormRefs>((refs, [field, anchor]) => {
+        if (anchor) {
+          refs[props.getFieldAnchorName(field)] = anchor;
+        }
+
+        return refs;
+      }, {});
+    };
 
     return {
+      additionalQuantityAnchor,
+      agreementAnchor,
+      artworkAnchor,
+      countryAnchor,
+      deadlineAnchor,
+      deadlineDateAnchor,
+      designAnchor,
+      emailAnchor,
+      firstNameAnchor,
+      getFormValidationRefs,
       imageHandlerService,
       customerLastName,
       customerFirstName,
@@ -645,6 +694,9 @@ export default Vue.extend({
       customerPhone,
       country,
       minDeadlineDate,
+      phoneNumberAnchor,
+      projectNameAnchor,
+      quantityAnchor,
       ...usePersistedEmail(customerEmail),
       ...usePersistedLastName(customerLastName),
       ...usePersistedFirstName(customerFirstName),

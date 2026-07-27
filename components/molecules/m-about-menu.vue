@@ -40,11 +40,19 @@ import {
 } from 'vue';
 import { SfIcon, SfMegaMenu, SfList, SfMenuItem } from '@storefront-ui/vue';
 
-import { useCurrentInstance, useRootInstance } from 'src/modules/shared';
+import { useI18n } from '@vue-storefront/core/application-services';
 
 interface AboutItem {
   label: string,
   link: string
+}
+
+interface MegaMenuHandle {
+  active: unknown,
+  items: unknown,
+  _computedWatchers: {
+    isMobile?: unknown
+  }
 }
 
 export default defineComponent({
@@ -62,20 +70,19 @@ export default defineComponent({
     }
   },
   setup (_, { emit }) {
-    const instance = useCurrentInstance();
-    const root = useRootInstance();
-    const menu = ref<any>(null);
+    const applicationI18n = useI18n();
+    const menu = ref<MegaMenuHandle | null>(null);
     const aboutItems: AboutItem[] = [
       {
-        label: root.$t('Who We Are').toString(),
+        label: applicationI18n.t('Who We Are').toString(),
         link: '/about/'
       },
       {
-        label: root.$t('Fulfillment').toString(),
+        label: applicationI18n.t('Fulfillment').toString(),
         link: '/fulfillment/'
       },
       {
-        label: root.$t('Manufacturer Checklist').toString(),
+        label: applicationI18n.t('Manufacturer Checklist').toString(),
         link: '/checklist/'
       }
     ];
@@ -87,7 +94,10 @@ export default defineComponent({
     onMounted(async () => {
       await nextTick();
 
-      menu.value = instance.$refs.menu;
+      if (!menu.value) {
+        return;
+      }
+
       menu.value.active = menu.value.items;
       menu.value._computedWatchers.isMobile = undefined;
     });

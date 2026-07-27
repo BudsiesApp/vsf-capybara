@@ -1,20 +1,21 @@
+import { useStore } from '@vue-storefront/core/application-services';
 import { computed, onBeforeMount, onServerPrefetch, ref, Ref, watch } from 'vue';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import Product from 'core/modules/catalog/types/Product';
-import { ProductEvent, useRootInstance } from 'src/modules/shared';
+import { ProductEvent } from 'src/modules/shared';
 import { updateProductProductionTimeCustomizationData } from 'src/modules/customization-system';
 
 export function useProductPage (
   sku: Ref<string>
 ) {
-  const root = useRootInstance();
+  const applicationStore = useStore();
   const isDataLoaded = ref<boolean>(false);
 
   const currentProduct = computed<Product | undefined>(() => {
-    const product = root.$store.getters['product/getCurrentProduct'];
+    const product = applicationStore.getters['product/getCurrentProduct'];
 
     if (!product?.sku || product.sku !== sku.value) {
       return null;
@@ -25,15 +26,15 @@ export function useProductPage (
 
   async function loadData (): Promise<void> {
     isDataLoaded.value = false;
-    root.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
+    applicationStore.commit(`product/${PRODUCT_UNSET_CURRENT}`);
 
     let [product] = await Promise.all(
       [
-        root.$store.dispatch('product/loadProduct', {
+        applicationStore.dispatch('product/loadProduct', {
           parentSku: sku.value,
           setCurrent: false
         }),
-        root.$store.dispatch(
+        applicationStore.dispatch(
           'budsies/loadProductsRushAddons',
           { productSku: sku.value }
         )
@@ -47,10 +48,10 @@ export function useProductPage (
 
     product = updateProductProductionTimeCustomizationData(
       product,
-      root.$store
+      applicationStore
     );
 
-    await root.$store.dispatch('product/setCurrent', product);
+    await applicationStore.dispatch('product/setCurrent', product);
 
     catalogHooksExecutors.productPageVisited(product);
 

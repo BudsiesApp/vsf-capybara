@@ -60,6 +60,7 @@
 </template>
 
 <script lang="ts">
+import { useStore } from '@vue-storefront/core/application-services';
 import {
   computed,
   defineComponent,
@@ -68,7 +69,6 @@ import {
 } from 'vue';
 
 import { RushAddon } from 'src/modules/budsies';
-import { useRootInstance } from 'src/modules/shared';
 import {
   ListWidgetInputType,
   OptionValue,
@@ -137,7 +137,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const root = useRootInstance();
+    const applicationStore = useStore();
     const { maxValuesCount, radioGroupName, value, values } = toRefs(props);
     const hasError = computed<boolean>(() => !!props.error);
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
@@ -156,7 +156,7 @@ export default defineComponent({
     });
 
     const productRushAddons = computed<RushAddon[]>(() => {
-      return root.$store.getters['budsies/getProductRushAddons'](props.productId);
+      return applicationStore.getters['budsies/getProductRushAddons'](props.productId);
     });
 
     const productionTimeOptionCardDataByOptionValueId = computed<Record<string, ProductionTimeOptionCardData>>(() => {

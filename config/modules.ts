@@ -13,7 +13,11 @@ import { NewsletterModule } from '@vue-storefront/core/modules/newsletter'
 import { StoryblokModule } from 'src/modules/vsf-storyblok-module'
 import { forStoryblok } from 'src/modules/vsf-storyblok-module/mappingFallback'
 import { extendStore } from '@vue-storefront/core/helpers'
-import { StorefrontModule, registerModule } from '@vue-storefront/core/lib/modules'
+import {
+  StorefrontModule,
+  registerApplicationModule,
+  registerModule
+} from '@vue-storefront/core/lib/modules'
 import { ABTesting } from 'src/modules/a-b-testing'
 import { BudsiesModule } from 'src/modules/budsies'
 import { PromotionPlatformModule } from 'src/modules/promotion-platform'
@@ -59,7 +63,7 @@ const extendUrlModule: StorefrontModule = function ({ store }) {
 // TODO:distributed across proper pages BEFORE 1.11
 export function registerClientModules () {
   registerStoryblokComponents()
-  registerModule(TrueVaultModule)
+  registerApplicationModule(TrueVaultModule)
   registerModule(PageLoadingIndicatorModule)
   registerModule(UrlModule)
   registerModule(CatalogModule)
@@ -74,7 +78,7 @@ export function registerClientModules () {
   registerModule(extendUrlModule)
   registerModule(BudsiesModule)
   registerModule(GoogleTagManagerModule)
-  registerModule(ABTesting)
+  registerApplicationModule(ABTesting)
   registerModule(PromotionPlatformModule)
   registerModule(PaymentBackendMethodsModule)
   registerModule(PaymentAffirm)
@@ -85,7 +89,7 @@ export function registerClientModules () {
   registerModule(PersistedCustomerDataModule)
   registerModule(OrdersHistoryModule)
   registerModule(CurrencyModule)
-  registerModule(FeraModule)
+  registerApplicationModule(FeraModule)
   registerModule(AmazonPay)
   registerModule(TrafficAttributionModule)
 

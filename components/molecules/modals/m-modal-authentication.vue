@@ -21,10 +21,10 @@
 </template>
 
 <script lang="ts">
+import { useRoute } from '@vue-storefront/core/application-services';
 import Vue from 'vue';
 import { SfModal, StorefrontUiInstanceType } from '@storefront-ui/vue';
 import { mapActions } from 'vuex';
-import { useRootInstance } from 'src/modules/shared';
 
 import { useAuthorizationRouteRestoration } from 'theme/helpers/use-authorization-route-restoration';
 
@@ -50,11 +50,11 @@ export default Vue.extend({
     }
   },
   setup (_, context) {
-    const root = useRootInstance();
+    const currentRoute = useRoute();
     const { persistPostAuthRedirectPath, resetPostAuthRedirectPath } = useAuthorizationRouteRestoration();
 
     const onOtpRequested = () => {
-      persistPostAuthRedirectPath(root.$route.fullPath);
+      persistPostAuthRedirectPath(currentRoute.fullPath);
     };
 
     return {
