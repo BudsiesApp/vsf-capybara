@@ -1,8 +1,9 @@
-import { ComputedRef, SetupContext, computed, ref, watch } from '@vue/composition-api';
+import { ComputedRef, computed, ref, watch } from 'vue';
 
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import { IS_CART_SYNCING, IS_COUPON_INTERACTION_BLOCKED, IS_COUPON_PROCESSING } from '@vue-storefront/core/modules/cart';
 import AppliedCoupon from '@vue-storefront/core/modules/cart/types/AppliedCoupon';
+import { useRootInstance } from 'src/modules/shared';
 
 export type CouponButtonState = 'applied' | 'applying' | 'hidden' | 'idle' | 'locked'
 
@@ -17,9 +18,9 @@ export interface CouponButtonResult {
 }
 
 export function useCouponButton (
-  couponCode: ComputedRef<string | undefined>,
-  { root }: SetupContext
+  couponCode: ComputedRef<string | undefined>
 ): CouponButtonResult {
+  const root = useRootInstance();
   const isApplyingCoupon = ref<boolean>(false);
   const appliedCoupon = computed<AppliedCoupon | false>(() => {
     return root.$store.getters['cart/getCoupon'];

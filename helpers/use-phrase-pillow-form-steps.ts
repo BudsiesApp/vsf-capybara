@@ -1,5 +1,4 @@
-import { computed, ref, Ref } from '@vue/composition-api';
-import Vue from 'vue';
+import Vue, { computed, ref, Ref } from 'vue';
 
 import { Customization } from 'src/modules/customization-system';
 

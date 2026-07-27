@@ -1,4 +1,4 @@
-import { computed, inject, Ref } from '@vue/composition-api';
+import { computed, inject, Ref } from 'vue';
 
 import { Customization, CustomizationStateItem, isFileUploadValue } from 'src/modules/customization-system';
 import { ImageHandlerService } from 'src/modules/file-storage';

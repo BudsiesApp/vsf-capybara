@@ -1,10 +1,11 @@
 import { ValidationObserver } from 'vee-validate';
-import { Ref } from '@vue/composition-api';
+import { ComponentPublicInstance, Ref } from 'vue';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { isVue } from 'src/modules/shared';
 
-export type FormRef = Vue | Element | (Vue | Element)[];
+type FormComponentRef = Vue | ComponentPublicInstance;
+export type FormRef = FormComponentRef | Element | (FormComponentRef | Element)[];
 export type FormRefs = Record<string, FormRef>;
 
 export function getNestedFormRefs (

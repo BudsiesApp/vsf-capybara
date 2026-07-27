@@ -26,14 +26,14 @@ import {
   PropType,
   ref,
   toRefs
-} from '@vue/composition-api';
+} from 'vue';
 import { SfHeading } from '@storefront-ui/vue';
 
 import { htmlDecode } from '@vue-storefront/core/filters';
 import i18n from '@vue-storefront/core/i18n';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import Product from 'core/modules/catalog/types/Product';
-import { getCanonicalUrl } from 'src/modules/shared';
+import { getCanonicalUrl, useRootInstance } from 'src/modules/shared';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
 import PlushieProductType from 'theme/interfaces/plushie-product-type';
@@ -69,10 +69,11 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const root = useRootInstance();
     const { existingPlushieId, plushieType } = toRefs(props);
 
     const currentProduct = computed<Product | undefined>(
-      () => context.root.$store.getters[`product/getCurrentProduct`]
+      () => root.$store.getters[`product/getCurrentProduct`]
     );
 
     const foreversProductTypeButtons = computed<ProductTypeButton[]>(() => {
@@ -136,7 +137,7 @@ export default defineComponent({
     const canUsePersistedCustomizationState = ref<boolean>(false);
 
     return {
-      ...useExistingCartItem(existingPlushieId, context),
+      ...useExistingCartItem(existingPlushieId),
       canUsePersistedCustomizationState,
       currentProduct,
       mainTitleText,
