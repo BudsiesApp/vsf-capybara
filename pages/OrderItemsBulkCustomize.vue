@@ -45,7 +45,7 @@
 </template>
 
 <script lang="ts">
-import { useRoute, useRouter, useStore } from '@vue-storefront/core/application-services';
+import { useRouter, useStore } from '@vue-storefront/core/application-services';
 import {
   defineComponent,
   Ref,
@@ -70,8 +70,6 @@ function useOrderItemsBulkCustomizations (
   orderItemIds: Ref<string[]>
 ) {
   const applicationStore = useStore();
-  const applicationRouter = useRouter();
-  const currentRoute = useRoute();
   const isLoading = ref(true);
 
   const draftOrderItemsByProductSku = ref<Record<string, DraftOrderItem[]>>({});
@@ -183,10 +181,8 @@ export default defineComponent({
       required: true
     }
   },
-  setup (props, context) {
-    const applicationStore = useStore();
+  setup (props) {
     const applicationRouter = useRouter();
-    const currentRoute = useRoute();
     const orderItemIds = computed<string[]>(() => {
       return Array.isArray(props.orderItemIds) ? props.orderItemIds : [props.orderItemIds];
     });
