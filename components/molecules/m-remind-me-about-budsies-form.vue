@@ -51,8 +51,8 @@
         </SfButton>
       </div>
 
-      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      <template v-if="privacyPolicyLinks.length">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
       </template>
     </validation-observer>
 
@@ -69,6 +69,11 @@ import { ValidationObserver, ValidationProvider, extend } from 'vee-validate';
 import { required, email } from 'vee-validate/dist/rules';
 
 import { SfButton, SfInput, SfHeading } from '@storefront-ui/vue';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 
@@ -114,9 +119,14 @@ export default Vue.extend({
   },
   setup () {
     const email = ref<string | undefined>(undefined);
+    const privacyPolicyLinks = useAdditionalContent(
+      AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+    );
 
     return {
       email,
+      privacyPolicyLinks: privacyPolicyLinks as unknown as
+        readonly AdditionalContentEntry[],
       ...usePersistedEmail(email)
     }
   },

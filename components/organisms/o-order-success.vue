@@ -147,7 +147,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType, VueConstructor } from 'vue'
+import Vue, { PropType, ref, VueConstructor } from 'vue'
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 
 import { CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION } from '@vue-storefront/core/modules/checkout';
@@ -208,10 +208,12 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
     const financialIncentiveLinks = useAdditionalContent(
       AdditionalContentOutlet.FINANCIAL_INCENTIVE_LINKS
     );
+    const mainTitle = ref<Vue | null>(null);
 
     return {
       financialIncentiveLinks: financialIncentiveLinks as unknown as
-        readonly AdditionalContentEntry[]
+        readonly AdditionalContentEntry[],
+      mainTitle
     };
   },
   computed: {
@@ -239,7 +241,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
     };
   },
   mounted () {
-    ((this.$refs.mainTitle as Vue).$el as HTMLElement).focus();
+    (this.mainTitle?.$el as HTMLElement | undefined)?.focus();
   },
   destroyed () {
     this.$store.commit(CHECKOUT_UPDATE_SUCCESS_ORDER_DATA_MUTATION, undefined);

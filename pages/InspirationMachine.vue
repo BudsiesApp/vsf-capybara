@@ -113,9 +113,10 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import Vue, { ref } from 'vue';
 
 import { SfHeading, SfSteps } from '@storefront-ui/vue';
+import { useRequestServices } from '@vue-storefront/core/request-services';
 
 import { InspirationMachineCharacterStep, InspirationMachineDownloadGuideStep, InspirationMachineDownloadKit, InspirationMachineExtrasStep, InspirationMachineThemeStep, SN_INSPIRATION_MACHINE, SelectableItem, Theme, actions, getters } from 'src/modules/inspiration-machine';
 import { getCanonicalUrl } from 'src/modules/shared';
@@ -130,6 +131,12 @@ export default Vue.extend({
     InspirationMachineDownloadKit,
     SfHeading,
     SfSteps
+  },
+  setup () {
+    return {
+      requestServices: useRequestServices(),
+      scrollTarget: ref<HTMLElement | null>(null)
+    };
   },
   data () {
     return {
@@ -212,7 +219,7 @@ export default Vue.extend({
       this.scrollToTop();
     },
     scrollToTop (): void {
-      (this.$refs['scroll-target'] as HTMLElement).scrollIntoView({ behavior: 'smooth', inline: 'start' })
+      this.scrollTarget?.scrollIntoView({ behavior: 'smooth', inline: 'start' })
     }
   },
   watch: {
@@ -238,7 +245,7 @@ export default Vue.extend({
     }
   },
   metaInfo () {
-    const canonicalUrl = getCanonicalUrl(this.$ssrContext, this.$router);
+    const canonicalUrl = getCanonicalUrl(this.requestServices.host, this.$router);
 
     return {
       title: this.$t('Inspiration Machine').toString(),

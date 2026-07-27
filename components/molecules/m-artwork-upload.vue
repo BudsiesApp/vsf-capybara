@@ -1,12 +1,12 @@
 <template>
   <div ref="dropzone" class="m-artwork-upload _drop-zone" :class="classes">
-    <div ref="dropzone-overlay" class="_dropzone-overlay" />
+    <div ref="dropzoneOverlay" class="_dropzone-overlay" />
 
     <slot />
 
     <div class="_upload-block">
       <file-pond
-        ref="file-input"
+        ref="fileInput"
         class="_uploader"
         :class="{ '-disabled': disabled }"
         :disabled="disabled"
@@ -51,7 +51,7 @@
 import 'filepond/dist/filepond.min.css';
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
 
-import Vue, { PropType, VueConstructor } from 'vue';
+import Vue, { PropType, ref, VueConstructor } from 'vue';
 // Import Vue FilePond
 import vueFilePond, { VueFilePondComponent } from 'vue-filepond';
 import { File as FilePond, FileOrigin, FilePondFile, FileStatus } from 'filepond';
@@ -159,6 +159,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       type: String as PropType<string | undefined>,
       default: undefined
     }
+  },
+  setup () {
+    return {
+      dropzone: ref<HTMLElement | null>(null),
+      dropzoneOverlay: ref<HTMLElement | null>(null),
+      fileInput: ref<VueFilePondComponent | null>(null)
+    };
   },
   data () {
     return {
@@ -504,13 +511,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.updateUploaderDataInStore();
     },
     getDropzone (): HTMLElement | undefined {
-      return this.$refs['dropzone'] as HTMLElement;
+      return this.dropzone || undefined;
     },
     getDropzoneOverlay (): HTMLElement | undefined {
-      return this.$refs['dropzone-overlay'] as HTMLElement;
+      return this.dropzoneOverlay || undefined;
     },
     getFileInput (): VueFilePondComponent | undefined {
-      return (this.$refs['file-input'] as unknown) as VueFilePondComponent;
+      return this.fileInput || undefined;
     },
     updateStatus (): void {
       const fileInput = this.getFileInput();

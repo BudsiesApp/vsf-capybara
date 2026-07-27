@@ -141,8 +141,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
   },
   async serverPrefetch () {
-    if (this.$ssrContext) this.$ssrContext.output.cacheTags.add('product')
-
     await (this as any).loadData();
   },
   async beforeMount () {
