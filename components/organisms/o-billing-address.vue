@@ -72,7 +72,7 @@
   </validation-observer>
 </template>
 <script>
-import { defineComponent, ref, toRef } from '@vue/composition-api';
+import { defineComponent, ref, toRef } from 'vue';
 import { mapGetters } from 'vuex';
 import { ValidationObserver } from 'vee-validate';
 
@@ -90,6 +90,7 @@ import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 import { useAddressValidation } from 'src/modules/address';
+import { useCurrentInstance } from 'src/modules/shared';
 import OBaseAddressForm from './o-base-address-form.vue';
 
 const States = require('@vue-storefront/i18n/resource/states.json');
@@ -107,17 +108,18 @@ export default defineComponent({
   },
   mixins: [Payment],
   setup (_, context) {
+    const instance = useCurrentInstance();
     const validationObserver = ref(null);
     const baseAddressForm = ref(null);
 
-    const { validateAddress, isValidating: isValidatingAddress, completeValidation: completeAddressValidation } = useAddressValidation(context);
+    const { validateAddress, isValidating: isValidatingAddress, completeValidation: completeAddressValidation } = useAddressValidation();
 
     const { validateAndGoToFirstError } = useFormValidation(
       validationObserver,
       () => {
         const baseAddressFormComponent = baseAddressForm.value;
         return {
-          ...context.refs,
+          ...instance.$refs,
           ...(baseAddressFormComponent?.$refs || {})
         };
       }

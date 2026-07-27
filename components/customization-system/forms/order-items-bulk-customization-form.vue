@@ -65,9 +65,8 @@ import {
   set,
   defineComponent,
   ref,
-  computed,
-  SetupContext
-} from '@vue/composition-api';
+  computed
+} from 'vue';
 import { SfButton, SfDivider, SfHeading } from '@storefront-ui/vue';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { DraftOrderItem, submitOrderItemCustomizationsState, saveOrderItemCustomizationsState, useEntityBusyState } from 'src/modules/customization-system';
@@ -77,11 +76,10 @@ import { OrderItemCustomizationFormData } from 'theme/interfaces/order-item-cust
 
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import OrderItemCustomizationForm from 'theme/components/customization-system/forms/order-item-customization-form.vue';
-import { BudsieStatus } from 'src/modules/shared';
+import { BudsieStatus, useRootInstance } from 'src/modules/shared';
 
-function useOrderItemsBulkCustomizationActions (
-  { root }: SetupContext
-) {
+function useOrderItemsBulkCustomizationActions () {
+  const root = useRootInstance();
   const isSubmitting = ref(false);
 
   function spawnError (errorMessage: string): void {
@@ -215,6 +213,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const root = useRootInstance();
     const orderItemCustomizationForm = ref<OrderItemCustomizationFormType[]>([]);
     const orderItemsErrors = ref<Record<string, string>>({});
 
@@ -257,7 +256,7 @@ export default defineComponent({
       }
     }
 
-    const { confirmCustomization, isSubmitting, saveCustomizationsState } = useOrderItemsBulkCustomizationActions(context);
+    const { confirmCustomization, isSubmitting, saveCustomizationsState } = useOrderItemsBulkCustomizationActions();
 
     const isFormDisabled = computed(() => {
       return isSubmitting.value || props.isDisabled;
@@ -359,7 +358,7 @@ export default defineComponent({
     }
 
     return {
-      ...useBulkImagesUpload(context, false),
+      ...useBulkImagesUpload(false),
       isFormDisabled,
       isSubmitButtonDisabled,
       goToOrderItem,

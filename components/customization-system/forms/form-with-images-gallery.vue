@@ -147,7 +147,7 @@ import {
   Ref,
   toRefs,
   watch
-} from '@vue/composition-api';
+} from 'vue';
 import { SfButton } from '@storefront-ui/vue';
 import { ValidationObserver, ValidationProvider } from 'vee-validate';
 
@@ -177,7 +177,7 @@ import {
   useLockedCustomizations,
   useAvailableOptionsValuesFilter
 } from 'src/modules/customization-system';
-import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow } from 'src/modules/shared';
+import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow, useCurrentInstance, useRootInstance } from 'src/modules/shared';
 import i18n from '@vue-storefront/core/i18n';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -250,6 +250,8 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
+    const instance = useCurrentInstance();
+    const root = useRootInstance();
     const {
       canUsePersistedCustomizationState,
       existingCartItem,
@@ -351,8 +353,7 @@ export default defineComponent({
       customizationOptionValue,
       product,
       mergeCustomizationState,
-      removeUnavailableOptionValues,
-      context
+      removeUnavailableOptionValues
     );
 
     const preservationStorageKey = computed<string>(() => {
@@ -422,7 +423,7 @@ export default defineComponent({
     );
 
     const formValidation = useFormValidation(validationObserver, () =>
-      getNestedFormRefs(context.refs, 'customizationOption')
+      getNestedFormRefs(instance.$refs, 'customizationOption')
     );
 
     const { quantity } = useProductQuantity(existingCartItem);
@@ -445,7 +446,6 @@ export default defineComponent({
       customizationState,
       bundleOptions,
       existingCartItem,
-      context,
       undefined,
       productPurchaseFlow.value
     );
@@ -471,13 +471,12 @@ export default defineComponent({
     );
 
     const { customizationFilter } = useABTestingCustomizationsFilter(
-      context.ssrContext
+      instance.$ssrContext
     );
 
     const { confirmCustomization, isSubmitting: isSubmittingCustomize } = useCustomizeAction(
       customizationState,
-      draftOrderItem,
-      context
+      draftOrderItem
     );
 
     async function onFormSubmit (): Promise<void> {
@@ -500,16 +499,16 @@ export default defineComponent({
         };
 
         if (isCustomizeMode.value) {
-          context.root.$router.push({ name: 'orders-history' });
+          root.$router.push({ name: 'orders-history' });
           return;
         }
 
-        context.root.$router.push({
+        root.$router.push({
           name: 'cross-sells',
           params: { parentSku: product.value.sku }
         });
       } catch (error) {
-        context.root.$store.dispatch('notification/spawnNotification', {
+        root.$store.dispatch('notification/spawnNotification', {
           type: 'danger',
           message: 'Error: ' + error,
           action1: { label: i18n.t('OK') }
@@ -560,11 +559,10 @@ export default defineComponent({
       ),
       ...useCustomizationsPrice(
         flowAvailableCustomizations,
-        customizationOptionValue,
-        context
+        customizationOptionValue
       ),
       ...formValidation,
-      ...useBulkImagesUpload(context),
+      ...useBulkImagesUpload(),
       availableCustomizations,
       availableOptionCustomizations,
       customizationAvailableOptionValues,

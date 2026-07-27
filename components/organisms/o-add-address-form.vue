@@ -31,7 +31,7 @@
 
 <script lang="ts">
 import { ValidationObserver } from 'vee-validate';
-import { defineComponent, ref, computed, Ref } from '@vue/composition-api';
+import { defineComponent, ref, computed, Ref } from 'vue';
 import { SfButton } from '@storefront-ui/vue';
 
 import i18n from '@vue-storefront/i18n';
@@ -39,6 +39,7 @@ import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/Base
 
 import { usePersistedFirstName, usePersistedLastName, usePersistedPhoneNumber, usePersistedVatId } from 'src/modules/persisted-customer-data';
 import { useAddressValidation } from 'src/modules/address';
+import { useRootInstance } from 'src/modules/shared';
 
 import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 
@@ -56,7 +57,8 @@ export default defineComponent({
     OBaseAddressForm,
     ValidationObserver
   },
-  setup (props, { emit, root }) {
+  setup (props, { emit }) {
+    const root = useRootInstance();
     const validationObserver = ref(null);
     const baseAddressForm = ref(null);
     const submitStepButton: Ref<null | InstanceType<typeof SfButton>> = ref(null);
@@ -93,7 +95,7 @@ export default defineComponent({
       validateAddress,
       isValidating: isValidatingAddress,
       completeValidation: completeAddressValidation
-    } = useAddressValidation({ root, emit, attrs: {}, slots: {} } as any);
+    } = useAddressValidation();
 
     const { validateAndGoToFirstError } = useFormValidation(
       validationObserver,

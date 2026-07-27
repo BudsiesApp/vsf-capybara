@@ -120,15 +120,15 @@
 </template>
 
 <script lang="ts">
-import { Component } from 'vue';
 import {
+  Component,
   computed,
   defineComponent,
   PropType,
   Ref,
   ref,
   toRefs
-} from '@vue/composition-api';
+} from 'vue';
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfHeading, SfSteps } from '@storefront-ui/vue';
 
@@ -159,7 +159,7 @@ import {
   useAvailableOptionsValuesFilter,
   usePurchaseFlowCustomizations
 } from 'src/modules/customization-system';
-import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow } from 'src/modules/shared';
+import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow, useCurrentInstance, useRootInstance } from 'src/modules/shared';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
@@ -249,6 +249,8 @@ export default defineComponent({
     ValidationObserver
   },
   setup (props, context) {
+    const instance = useCurrentInstance();
+    const root = useRootInstance();
     const {
       canUsePersistedCustomizationState,
       draftOrderItem,
@@ -266,7 +268,7 @@ export default defineComponent({
     });
 
     const currentProduct = computed<Product | undefined>(() => {
-      return context.root.$store.getters['product/getCurrentProduct'];
+      return root.$store.getters['product/getCurrentProduct'];
     });
 
     const validationObserver: Ref<InstanceType<
@@ -282,7 +284,7 @@ export default defineComponent({
       return validationObserver.value;
     });
     const formValidation = useFormValidation(activeValidationObserver, () =>
-      getNestedFormRefs(context.refs, 'customizationOption')
+      getNestedFormRefs(instance.$refs, 'customizationOption')
     );
 
     const productCustomizations = computed<Customization[]>(() => {
@@ -394,7 +396,7 @@ export default defineComponent({
       );
 
     const { customizationFilter: abTestingCustomizationFilter } = useABTestingCustomizationsFilter(
-      context.ssrContext
+      instance.$ssrContext
     );
 
     const { filteredCustomizations } = useCustomizationsFilter(
@@ -430,8 +432,7 @@ export default defineComponent({
       additionalStepNames,
       existingCartItem,
       onStepSubmit,
-      customizationMode,
-      context
+      customizationMode
     );
 
     const { handlePreselectedSize } = useCreationWizardPreselectedSize(
@@ -454,8 +455,7 @@ export default defineComponent({
       preselectedProductType,
       resetCustomizationState,
       formSteps.nextStep,
-      afterProductTypeSet,
-      context
+      afterProductTypeSet
     );
 
     const additionalPreservedData = computed<Record<string, any>>(() => {
@@ -471,8 +471,7 @@ export default defineComponent({
       customizationOptionValue,
       currentProduct,
       mergeCustomizationState,
-      removeUnavailableOptionValues,
-      context
+      removeUnavailableOptionValues
     );
 
     const showProductTypeChooseStep = computed<boolean>(() => {
@@ -529,15 +528,13 @@ export default defineComponent({
       customizationState,
       bundleOptions,
       existingCartItem,
-      context,
       undefined,
       productPurchaseFlow.value
     );
 
     const { confirmCustomization, isSubmitting: isSubmittingCustomize } = useCustomizeAction(
       customizationState,
-      draftOrderItem,
-      context
+      draftOrderItem
     );
 
     const { isUnmounted } = useComponentUnmountedChecker();
@@ -579,17 +576,17 @@ export default defineComponent({
         }
 
         if (isCustomizeMode.value) {
-          context.root.$router.push({
+          root.$router.push({
             name: 'orders-history'
           });
         } else {
-          context.root.$router.push({
+          root.$router.push({
             name: 'cross-sells',
             params: { parentSku: currentProduct.value.sku }
           });
         }
       } catch (error) {
-        context.root.$store.dispatch('notification/spawnNotification', {
+        root.$store.dispatch('notification/spawnNotification', {
           type: 'danger',
           message: 'Error: ' + error.message,
           action1: { label: i18n.t('OK') }
@@ -644,7 +641,7 @@ export default defineComponent({
       ...productTypeStep,
       ...useFloatingPhoto(customizationState, availableCustomizations),
       ...formValidation,
-      ...useBulkImagesUpload(context),
+      ...useBulkImagesUpload(),
       currentProduct,
       filteredCustomizationAvailableOptionValues,
       customizationOptionValue,

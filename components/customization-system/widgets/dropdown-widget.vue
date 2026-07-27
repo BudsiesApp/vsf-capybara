@@ -29,7 +29,7 @@ import {
   ref,
   toRefs,
   watch
-} from '@vue/composition-api';
+} from 'vue';
 
 import {
   mapMobileObserver,
@@ -42,7 +42,7 @@ import {
   useOptionValuesPrice,
   useValuesSort
 } from 'src/modules/customization-system';
-import { PriceHelper } from 'src/modules/shared';
+import { PriceHelper, useRootInstance } from 'src/modules/shared';
 import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 
 const defaultPlaceholder = 'Select Option';
@@ -84,6 +84,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const root = useRootInstance();
     const { placeholder, values } = toRefs(props);
     const selectedOption = computed<string | undefined>({
       get: () => {
@@ -100,12 +101,11 @@ export default defineComponent({
     const { sortedValues } = useValuesSort(values);
 
     const { defaultOptionValue, isOptionValuesSamePrice, optionValuePriceDictionary } = useOptionValuesPrice(
-      sortedValues,
-      context
+      sortedValues
     );
 
     const selectedCurrency = computed<Currency>(() => {
-      return context.root.$store.getters[GET_ACTIVE_CURRENCY];
+      return root.$store.getters[GET_ACTIVE_CURRENCY];
     });
 
     const isProductionTimeDefaultOption = computed<boolean>(() => {

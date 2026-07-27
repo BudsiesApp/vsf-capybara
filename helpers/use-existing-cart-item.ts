@@ -1,12 +1,13 @@
-import { computed, Ref, SetupContext } from '@vue/composition-api';
+import { computed, Ref } from 'vue';
 
 import CartItem from 'core/modules/cart/types/CartItem';
 import { updateCartItemProductionTimeCustomizationState } from 'src/modules/customization-system';
+import { useRootInstance } from 'src/modules/shared';
 
 export function useExistingCartItem (
-  existingPlushieId: Ref<string | undefined>,
-  { root }: SetupContext
+  existingPlushieId: Ref<string | undefined>
 ) {
+  const root = useRootInstance();
   const cartItems = computed<CartItem[]>(() => {
     return root.$store.getters['cart/getCartItems'];
   });

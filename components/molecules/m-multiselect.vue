@@ -74,7 +74,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, PropType } from '@vue/composition-api';
+import Vue, { ref, PropType } from 'vue';
 import Multiselect from 'vue-multiselect';
 import { SfChevron } from '@storefront-ui/vue';
 import {
@@ -93,7 +93,7 @@ type Option = Record<string, any> | string;
 
 let instanceId = 0;
 
-export default defineComponent({
+export default Vue.extend({
   name: 'MMultiselect',
   inheritAttrs: false,
   components: {

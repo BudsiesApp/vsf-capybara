@@ -10,7 +10,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from '@vue/composition-api';
+import { computed, defineComponent, ref, watch } from 'vue';
+import { useRootInstance } from 'src/modules/shared';
 
 import OEditAddressForm from 'theme/components/organisms/o-edit-address-form.vue';
 
@@ -25,7 +26,8 @@ export default defineComponent({
   components: {
     OEditAddressForm
   },
-  setup (props, { root }) {
+  setup (props) {
+    const root = useRootInstance();
     const address = computed<any>(() => {
       const user = root.$store.state.user.current;
       const addresses = user?.addresses || [];

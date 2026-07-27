@@ -76,7 +76,7 @@ import {
   defineComponent,
   PropType,
   toRefs
-} from '@vue/composition-api';
+} from 'vue';
 import { SfPrice } from '@storefront-ui/vue';
 
 import { BaseImage } from 'src/modules/budsies';
@@ -175,7 +175,7 @@ export default defineComponent({
       radioInputName,
       getOptionId,
       ...listWidgetFields,
-      ...useOptionValuesPrice(values, context, true),
+      ...useOptionValuesPrice(values, true),
       ...useValuesSort(values)
     };
   }

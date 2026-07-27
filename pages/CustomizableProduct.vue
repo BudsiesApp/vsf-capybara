@@ -30,14 +30,14 @@ import {
   ref,
   toRefs,
   watch
-} from '@vue/composition-api';
+} from 'vue';
 
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { isServer } from '@vue-storefront/core/helpers';
 
 import { ProductStructuredData } from 'src/modules/budsies';
-import { getCanonicalUrl } from 'src/modules/shared';
+import { getCanonicalUrl, useRootInstance } from 'src/modules/shared';
 
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 import { useProductPage } from 'theme/helpers/use-product-page';
@@ -87,9 +87,10 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const root = useRootInstance();
     const { existingPlushieId, sku } = toRefs(props);
 
-    const { currentProduct, isDataLoaded } = useProductPage(sku, context);
+    const { currentProduct, isDataLoaded } = useProductPage(sku);
     const canUsePersistedCustomizationState = ref<boolean>(false);
 
     const showForm = computed<boolean>(() => {
@@ -142,7 +143,7 @@ export default defineComponent({
     );
 
     const imageUrl = computed<string | undefined>(() => {
-      let url = context.root.$route.query['image-url'];
+      let url = root.$route.query['image-url'];
 
       if (Array.isArray(url)) {
         url = url[0] || '';
@@ -156,7 +157,7 @@ export default defineComponent({
     });
 
     return {
-      ...useExistingCartItem(existingPlushieId, context),
+      ...useExistingCartItem(existingPlushieId),
       canUsePersistedCustomizationState,
       currentProduct,
       imageUrl,

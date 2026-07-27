@@ -92,7 +92,7 @@
   </validation-observer>
 </template>
 <script>
-import { toRef, defineComponent, ref } from '@vue/composition-api';
+import { toRef, defineComponent, ref } from 'vue';
 import {
   SfInput,
   SfRadio,
@@ -133,7 +133,7 @@ export default defineComponent({
     const validationObserver = ref(null);
     const baseAddressForm = ref(null);
 
-    const { validateAddress, isValidating: isValidatingAddress, completeValidation: completeAddressValidation } = useAddressValidation(context);
+    const { validateAddress, isValidating: isValidatingAddress, completeValidation: completeAddressValidation } = useAddressValidation();
 
     const { validateAndGoToFirstError } = useFormValidation(
       validationObserver,
