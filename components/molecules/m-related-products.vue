@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import config from 'config';
 import { mapGetters } from 'vuex';
 import { SfSection } from '@storefront-ui/vue';
@@ -47,16 +48,16 @@ export default {
   },
   beforeMount () {
     if (config.usePriceTiers) {
-      this.$bus.$on('user-after-loggedin', this.refreshList);
-      this.$bus.$on('user-after-logout', this.refreshList);
+      EventBus.$on('user-after-loggedin', this.refreshList);
+      EventBus.$on('user-after-logout', this.refreshList);
     }
 
     this.refreshList();
   },
   beforeDestroy () {
     if (config.usePriceTiers) {
-      this.$bus.$off('user-after-loggedin', this.refreshList);
-      this.$bus.$off('user-after-logout', this.refreshList);
+      EventBus.$off('user-after-loggedin', this.refreshList);
+      EventBus.$off('user-after-logout', this.refreshList);
     }
   },
   methods: {

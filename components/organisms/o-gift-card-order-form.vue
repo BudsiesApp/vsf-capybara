@@ -217,8 +217,8 @@
         {{ $t('Add to Cart') }}
       </SfButton>
 
-      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      <template v-if="privacyPolicyLinks.length">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
       </template>
     </div>
   </validation-observer>
@@ -234,6 +234,11 @@ import {
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
 import { SfCheckbox, SfButton, SfInput, SfSelect } from '@storefront-ui/vue';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 import { AmGiftCardType } from 'src/modules/gift-card';
 
 import GiftCardOrderFormData from 'theme/components/interfaces/gift-card-order-form-data.interface';
@@ -304,6 +309,16 @@ export default Vue.extend({
       type: Number as PropType<AmGiftCardType>,
       default: () => AmGiftCardType.VIRTUAL
     }
+  },
+  setup () {
+    const privacyPolicyLinks = useAdditionalContent(
+      AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+    );
+
+    return {
+      privacyPolicyLinks: privacyPolicyLinks as unknown as
+        readonly AdditionalContentEntry[]
+    };
   },
   computed: {
     ...mapMobileObserver(),

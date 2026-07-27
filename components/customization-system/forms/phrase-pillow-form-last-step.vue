@@ -4,7 +4,6 @@
       v-show="!isSubmitting"
       v-for="customization in availableCustomizations"
       class="_customization-option"
-      ref="customizationOption"
       :key="customization.id"
       :customization="customization"
       :is-disabled="isDisabled"
@@ -68,8 +67,8 @@
 
       <m-order-submit-agreement />
 
-      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      <template v-if="privacyPolicyLinks.length">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
       </template>
     </div>
 
@@ -89,6 +88,11 @@
 import { defineComponent, PropType, ref } from 'vue';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 import { ValidationProvider } from 'vee-validate';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import Product from 'core/modules/catalog/types/Product';
 import {
@@ -157,6 +161,9 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props) {
+    const privacyPolicyLinks = useAdditionalContent(
+      AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+    );
     const isSubmitting = ref<boolean>(false);
     const submitAnimator = ref<InstanceType<typeof MSubmitAnimator> | null>(
       null
@@ -185,6 +192,8 @@ export default defineComponent({
     return {
       isSubmitting,
       onAddToCartClick,
+      privacyPolicyLinks: privacyPolicyLinks as unknown as
+        readonly AdditionalContentEntry[],
       submitAnimationSteps,
       submitAnimator
     };

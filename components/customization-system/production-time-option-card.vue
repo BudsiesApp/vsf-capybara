@@ -54,6 +54,7 @@
 </template>
 
 <script lang="ts">
+import { useI18n, useStore } from '@vue-storefront/core/application-services';
 import {
   computed,
   ComputedRef,
@@ -64,7 +65,6 @@ import { SfIcon } from '@storefront-ui/vue';
 import { PriceHelper } from '@vue-storefront/core/helpers';
 
 import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
-import { useRootInstance } from 'src/modules/shared';
 
 import rushIcon from '../../assets/rush-upgrades/rush.svg';
 import standardIcon from '../../assets/rush-upgrades/standard.svg';
@@ -126,9 +126,10 @@ export default defineComponent({
     }
   },
   setup (props) {
-    const root = useRootInstance();
+    const applicationStore = useStore();
+    const applicationI18n = useI18n();
     const selectedCurrency = computed<Currency>(() => {
-      return root.$store.getters[GET_ACTIVE_CURRENCY];
+      return applicationStore.getters[GET_ACTIVE_CURRENCY];
     });
 
     const weeks = computed<number>(() => {
@@ -140,13 +141,13 @@ export default defineComponent({
     });
 
     const shipTitle = computed<string>(() => {
-      return root.$t('Ships {date}', { date: formatShortDate(shipDate.value) }).toString();
+      return applicationI18n.t('Ships {date}', { date: formatShortDate(shipDate.value) }).toString();
     });
 
     const optionWeeksTitle = computed<string>(() => {
       const title = weeks.value === 1
-        ? root.$t('{optionName} - 1 week', { optionName: props.optionName })
-        : root.$t('{optionName} - {weeks} weeks', { optionName: props.optionName, weeks: weeks.value });
+        ? applicationI18n.t('{optionName} - 1 week', { optionName: props.optionName })
+        : applicationI18n.t('{optionName} - {weeks} weeks', { optionName: props.optionName, weeks: weeks.value });
 
       return title.toString();
     });
@@ -178,14 +179,14 @@ export default defineComponent({
       const finalPrice = PriceHelper.getFinalPrice(props.price);
 
       if (finalPrice === 0) {
-        return root.$t('Free').toString();
+        return applicationI18n.t('Free').toString();
       }
 
       return `+ ${PriceHelper.formatPrice(finalPrice, selectedCurrency.value.symbol)}`;
     });
 
     const fastestAvailableTitle = computed<string>(() => {
-      return root.$t('Fastest available').toString();
+      return applicationI18n.t('Fastest available').toString();
     });
 
     const hasInfiniteSlots = computed<boolean>(() => {
@@ -198,18 +199,18 @@ export default defineComponent({
 
     const slotsLeftTitle = computed<string>(() => {
       if (hasInfiniteSlots.value) {
-        return root.$t('Always Available').toString();
+        return applicationI18n.t('Always Available').toString();
       }
 
       if (props.slotsLeft === 0) {
-        return root.$t('Sold out').toString();
+        return applicationI18n.t('Sold out').toString();
       }
 
       if (props.slotsLeft === 1) {
-        return root.$t('Only 1 slot left').toString();
+        return applicationI18n.t('Only 1 slot left').toString();
       }
 
-      return root.$t('Only {slotsLeft} slots left', { slotsLeft: props.slotsLeft }).toString();
+      return applicationI18n.t('Only {slotsLeft} slots left', { slotsLeft: props.slotsLeft }).toString();
     });
 
     const slotsLeftClasses = computed<Record<string, boolean>>(() => {

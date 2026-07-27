@@ -19,7 +19,6 @@
       </template>
       <template #navigation>
         <SfHeaderNavigationItem
-          ref="productsNavItem"
           @mouseover="onMainMenuMouseOver"
           @mouseleave="isHoveredMenu = false"
           @focusin="onMainMenuFocusIn"
@@ -78,19 +77,20 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue';
 import { SfHeader, SfOverlay } from '@storefront-ui/vue';
 
 import { CurrencySelector } from 'src/modules/currency';
 
-import ALogo from 'theme/components/atoms/a-logo';
-import AAccountIcon from 'theme/components/atoms/a-account-icon';
-import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
+import ALogo from 'theme/components/atoms/a-logo.vue';
+import AAccountIcon from 'theme/components/atoms/a-account-icon.vue';
+import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
 import { mapState, mapGetters } from 'vuex';
-import MMenu from 'theme/components/molecules/m-menu';
+import MMenu from 'theme/components/molecules/m-menu.vue';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
-export default {
+export default Vue.extend({
   name: 'OHeader',
   components: {
     SfHeader,
@@ -138,23 +138,29 @@ export default {
     onMainMenuFocusIn () {
       this.isFocusedMenu = true;
     },
-    onMainMenuFocusOut (event) {
+    onMainMenuFocusOut (event: FocusEvent) {
+      const productsNavElement = event.currentTarget as HTMLElement | null;
+
       if (
         event.relatedTarget !== null &&
-        this.$refs.productsNavItem.$el.contains(event.relatedTarget)
+        productsNavElement?.contains(event.relatedTarget as Node)
       ) {
         return;
       }
 
       this.isFocusedMenu = false;
     },
-    onMainMenuEscapeKey () {
+    onMainMenuEscapeKey (event: KeyboardEvent) {
       this.isFocusedMenu = false;
       this.isHoveredMenu = false;
-      this.$refs.productsNavItem.$el.querySelector('a').focus();
+
+      const productsNavElement = event.currentTarget as HTMLElement | null;
+      const menuTrigger = productsNavElement?.querySelector('a') as HTMLAnchorElement | null;
+
+      menuTrigger?.focus();
     }
   }
-};
+});
 </script>
 
 <style lang="scss" scoped>

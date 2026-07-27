@@ -43,6 +43,7 @@
 import { mapGetters, mapState } from 'vuex';
 import LazyHydrate from 'vue-lazy-hydration';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
+import { useRequestServices } from '@vue-storefront/core/request-services';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { ProductVisibility } from '@vue-storefront/core/modules/catalog/types/product-visibility.value';
 import { onlineHelper, isServer } from '@vue-storefront/core/helpers';
@@ -52,7 +53,6 @@ import OProductDetails from 'theme/components/organisms/o-product-details';
 import { filterChangedProduct } from '@vue-storefront/core/modules/catalog/events';
 import { getMediaGallery } from '@vue-storefront/core/modules/catalog/helpers';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
-import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-headers.function';
 
 import { ProductStructuredData } from 'src/modules/budsies';
 import { ProductEvent } from 'src/modules/shared';
@@ -72,6 +72,11 @@ const getSkusFromRoute = (route) => {
 
 export default {
   name: 'Product',
+  setup () {
+    return {
+      requestServices: useRequestServices()
+    };
+  },
   components: {
     LazyHydrate,
     MRelatedProducts,
@@ -269,10 +274,6 @@ export default {
         return;
       }
 
-      const host = this.$ssrContext
-        ? getHostFromHeaders(this.$ssrContext.server.request.headers)
-        : window.location.host;
-
       const params = {
         parentSku: product.parentSku
       };
@@ -288,7 +289,7 @@ export default {
         params
       });
 
-      return `https://${host}${resolvedRoute.href}`;
+      return `https://${this.requestServices.host}${resolvedRoute.href}`;
     }
   },
   metaInfo () {
