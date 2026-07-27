@@ -20,6 +20,8 @@
 </template>
 
 <script lang="ts">
+import { useStore } from '@vue-storefront/core/application-services';
+import { useRequestServices } from '@vue-storefront/core/request-services';
 import {
   computed,
   defineComponent,
@@ -33,7 +35,7 @@ import { htmlDecode } from '@vue-storefront/core/filters';
 import i18n from '@vue-storefront/core/i18n';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import Product from 'core/modules/catalog/types/Product';
-import { getCanonicalUrl, useRootInstance } from 'src/modules/shared';
+import { getCanonicalUrl } from 'src/modules/shared';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
 import PlushieProductType from 'theme/interfaces/plushie-product-type';
@@ -69,11 +71,12 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const root = useRootInstance();
+    const applicationStore = useStore();
+    const requestServices = useRequestServices();
     const { existingPlushieId, plushieType } = toRefs(props);
 
     const currentProduct = computed<Product | undefined>(
-      () => root.$store.getters[`product/getCurrentProduct`]
+      () => applicationStore.getters[`product/getCurrentProduct`]
     );
 
     const foreversProductTypeButtons = computed<ProductTypeButton[]>(() => {
@@ -142,6 +145,7 @@ export default defineComponent({
       currentProduct,
       mainTitleText,
       productTypeButtonsList,
+      requestServices,
       topStorySlug
     };
   },
@@ -184,7 +188,7 @@ export default defineComponent({
       link: [
         {
           rel: 'canonical',
-          href: getCanonicalUrl(this.$ssrContext, this.$router)
+          href: getCanonicalUrl(this.requestServices.host, this.$router)
         }
       ]
     };

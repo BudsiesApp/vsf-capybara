@@ -70,7 +70,6 @@
                   customizationGroup.id
                 ]"
                 class="_customization-option"
-                ref="customizationOptionsRefs"
                 :key="customization.id"
                 :customization="customization"
                 :is-disabled="isDisabled"
@@ -125,6 +124,7 @@
 </template>
 
 <script lang="ts">
+import { useRouter, useStore } from '@vue-storefront/core/application-services';
 import {
   computed,
   defineComponent,
@@ -142,7 +142,6 @@ import CartItem from 'core/modules/cart/types/CartItem';
 import Product from 'core/modules/catalog/types/Product';
 import i18n from '@vue-storefront/core/i18n';
 import { useABTestingCustomizationsFilter } from 'src/modules/a-b-testing';
-import { useCurrentInstance, useRootInstance } from 'src/modules/shared';
 import {
   Customization,
   useCustomizationState,
@@ -203,8 +202,8 @@ export default defineComponent({
     ValidationObserver
   },
   setup (props, context) {
-    const instance = useCurrentInstance();
-    const root = useRootInstance();
+    const applicationStore = useStore();
+    const applicationRouter = useRouter();
     const { canUsePersistedCustomizationState, existingCartItem, product } = toRefs(props);
 
     const validationObserver: Ref<InstanceType<
@@ -316,9 +315,7 @@ export default defineComponent({
         updateCustomizationOptionValue
       );
 
-    const { customizationFilter } = useABTestingCustomizationsFilter(
-      instance.$ssrContext
-    );
+    const { customizationFilter } = useABTestingCustomizationsFilter();
 
     const { filteredCustomizations } = useCustomizationsFilter(
       availableCustomizations,
@@ -383,12 +380,12 @@ export default defineComponent({
           return;
         }
 
-        root.$router.push({
+        applicationRouter.push({
           name: 'cross-sells',
           params: { parentSku: product.value.sku }
         });
       } catch (error) {
-        root.$store.dispatch('notification/spawnNotification', {
+        applicationStore.dispatch('notification/spawnNotification', {
           type: 'danger',
           message: 'Error: ' + error,
           action1: { label: i18n.t('OK') }

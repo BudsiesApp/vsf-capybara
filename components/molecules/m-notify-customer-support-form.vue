@@ -8,8 +8,8 @@
       {{ $t('Notify Customer Support') }}
     </SfButton>
 
-    <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+    <template v-if="privacyPolicyLinks.length">
+      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
     </template>
   </form>
 </template>
@@ -17,6 +17,11 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue'
 import { SfInput, SfButton } from '@storefront-ui/vue';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 export default Vue.extend({
   name: 'MNotifyCustomerSupportForm',
@@ -37,6 +42,16 @@ export default Vue.extend({
       type: Function as PropType<(name: string, email: string, phone?: string) => Promise<void>>,
       required: true
     }
+  },
+  setup () {
+    const privacyPolicyLinks = useAdditionalContent(
+      AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+    );
+
+    return {
+      privacyPolicyLinks: privacyPolicyLinks as unknown as
+        readonly AdditionalContentEntry[]
+    };
   },
   data () {
     return {

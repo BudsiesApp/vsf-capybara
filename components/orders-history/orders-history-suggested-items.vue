@@ -34,6 +34,7 @@
 </template>
 
 <script lang="ts">
+import { useI18n, useStore } from '@vue-storefront/core/application-services';
 import { defineComponent, computed, ref, onBeforeMount } from 'vue';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 import { SearchQuery } from 'storefront-query-builder';
@@ -45,7 +46,7 @@ import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { FETCH_SUGGESTED_PRODUCTS_ACTION, SUGGESTED_PRODUCTS_IDS_GETTER } from 'src/modules/orders-history';
-import { ProductEvent, useMobileObserver, useRootInstance } from 'src/modules/shared';
+import { ProductEvent, useMobileObserver } from 'src/modules/shared';
 
 import { prepareCategoryProduct } from 'theme/helpers';
 
@@ -79,19 +80,20 @@ export default defineComponent({
     SfHeading
   },
   setup () {
-    const root = useRootInstance();
+    const applicationStore = useStore();
+    const applicationI18n = useI18n();
     const isDataLoading = ref<boolean>(false);
     const productBySkuDictionary = computed<Record<string, Product>>(() => {
-      return root.$store.getters['product/getProductBySkuDictionary'];
+      return applicationStore.getters['product/getProductBySkuDictionary'];
     });
     const suggestedProductsIds = computed<number[]>(() => {
-      return root.$store.getters[SUGGESTED_PRODUCTS_IDS_GETTER];
+      return applicationStore.getters[SUGGESTED_PRODUCTS_IDS_GETTER];
     });
     const productPriceDictionary = computed<Record<string, PriceHelper.ProductPrice>>(() => {
-      return root.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY]
+      return applicationStore.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY]
     });
     const selectedCurrency = computed<Currency>(() => {
-      return root.$store.getters[GET_ACTIVE_CURRENCY];
+      return applicationStore.getters[GET_ACTIVE_CURRENCY];
     });
 
     const products = computed<any[]>(() => {
@@ -127,7 +129,7 @@ export default defineComponent({
     async function loadData (): Promise<void> {
       isDataLoading.value = true;
 
-      const productsIds: number[] = await root.$store.dispatch(
+      const productsIds: number[] = await applicationStore.dispatch(
         FETCH_SUGGESTED_PRODUCTS_ACTION,
         { pageSize: SUGGESTED_PRODUCTS_TO_FETCH_COUNT }
       );
@@ -145,7 +147,7 @@ export default defineComponent({
       }
 
       if (notExistingProductsIds.length > 0) {
-        await root.$store.dispatch('product/findProducts', {
+        await applicationStore.dispatch('product/findProducts', {
           query: getSearchQuery(notExistingProductsIds),
           options: {
             prefetchGroupProducts: false
@@ -175,8 +177,8 @@ export default defineComponent({
 
     const toggleMoreButtonText = computed<string>(() => {
       return isListExpanded.value
-        ? root.$t('Show less').toString()
-        : root.$t('Show more').toString();
+        ? applicationI18n.t('Show less').toString()
+        : applicationI18n.t('Show more').toString();
     });
 
     function onToggleMoreButtonClicked () {

@@ -50,8 +50,8 @@
         {{ $t('We\'ll send you a digital copy of the coloring book via email for you to download when ready!') }}
       </div>
 
-      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      <template v-if="privacyPolicyLinks.length">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
       </template>
     </form>
 
@@ -75,6 +75,11 @@ import { Blok } from 'src/modules/vsf-storyblok-module/components'
 import { required, email } from 'vuelidate/lib/validators';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import { DonglerBookService } from 'src/modules/dongler-book';
 import { PERSISTED_CUSTOMER_EMAIL, SET_PERSISTED_CUSTOMER_EMAIL } from 'src/modules/persisted-customer-data';
@@ -87,6 +92,16 @@ export default Blok.extend({
     SfHeading,
     SfInput,
     SfButton
+  },
+  setup () {
+    const privacyPolicyLinks = useAdditionalContent(
+      AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+    );
+
+    return {
+      privacyPolicyLinks: privacyPolicyLinks as unknown as
+        readonly AdditionalContentEntry[]
+    };
   },
   data () {
     return {

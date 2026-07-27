@@ -1,8 +1,8 @@
+import { useRouter } from '@vue-storefront/core/application-services';
 import { StorageManager } from '@vue-storefront/core/lib/storage-manager'
-import { useRootInstance } from 'src/modules/shared';
 
 export function useAuthorizationRouteRestoration () {
-  const root = useRootInstance();
+  const applicationRouter = useRouter();
   const urlStorage = StorageManager.get('url');
   const postAuthRedirectPathLocalStorageKey = 'postAuthRedirectPath';
 
@@ -18,11 +18,11 @@ export function useAuthorizationRouteRestoration () {
     const route = await urlStorage.getItem(postAuthRedirectPathLocalStorageKey);
 
     if (!route) {
-      await root.$router.replace({ name: 'orders-history' });
+      await applicationRouter.replace({ name: 'orders-history' });
       return;
     }
 
-    await root.$router.replace(route);
+    await applicationRouter.replace(route);
     reset();
   }
 

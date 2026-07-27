@@ -107,6 +107,7 @@
 </template>
 
 <script lang="ts">
+import { useI18n, useRouter, useStore } from '@vue-storefront/core/application-services';
 import { defineComponent, ref, computed } from 'vue';
 import { extend, ValidationProvider, ValidationObserver } from 'vee-validate';
 import { required, max } from 'vee-validate/dist/rules';
@@ -123,7 +124,6 @@ import {
   useOrderDetails,
   mapOrderAddressToBaseAddressDetails
 } from 'src/modules/orders-history';
-import { useRootInstance } from 'src/modules/shared';
 
 extend('required', {
   ...required,
@@ -164,7 +164,9 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const root = useRootInstance();
+    const applicationStore = useStore();
+    const applicationRouter = useRouter();
+    const applicationI18n = useI18n();
     const taxIdValue = ref('');
     const shouldSaveToDefaultAddress = ref(false);
     const isSubmitting = ref(false);
@@ -187,14 +189,14 @@ export default defineComponent({
 
     const destinationCountry = computed(() => {
       if (!orderAddress.value?.country) {
-        return root.$t('your country').toString();
+        return applicationI18n.t('your country').toString();
       }
 
       return getCountryNameByCode(orderAddress.value.country);
     });
 
     const defaultShippingAddress = computed(() => {
-      return root.$store.getters['user/defaultShippingAddress'];
+      return applicationStore.getters['user/defaultShippingAddress'];
     });
 
     const hasDefaultShippingAddress = computed(() => {
@@ -213,14 +215,14 @@ export default defineComponent({
         vat_id: taxIdValue.value
       };
 
-      await root.$store.dispatch('budsies/updateAddress', { address: addressToUpdate });
+      await applicationStore.dispatch('budsies/updateAddress', { address: addressToUpdate });
     }
 
     async function onSubmit () {
       isSubmitting.value = true;
 
       try {
-        await root.$store.dispatch(
+        await applicationStore.dispatch(
           SUBMIT_TAX_ID_UPDATE_REQUEST_ACTION,
           { orderId: props.orderId, taxId: taxIdValue.value }
         );
@@ -231,17 +233,17 @@ export default defineComponent({
 
         persistLastUsedCustomerVatId(taxIdValue.value);
 
-        root.$store.dispatch('notification/spawnNotification', {
+        applicationStore.dispatch('notification/spawnNotification', {
           type: 'success',
           message: i18n.t('Tax ID saved successfully'),
           action1: { label: i18n.t('OK') }
         });
 
-        root.$router.push({ name: 'orders-history' });
+        applicationRouter.push({ name: 'orders-history' });
       } catch (e) {
         const errorMessage = (e as Error).message || String(i18n.t('Failed to submit Tax ID'));
 
-        root.$store.dispatch('notification/spawnNotification', {
+        applicationStore.dispatch('notification/spawnNotification', {
           type: 'danger',
           message: errorMessage,
           action1: { label: i18n.t('OK') }
