@@ -20,6 +20,7 @@
 </template>
 
 <script lang="ts">
+import { useStore } from '@vue-storefront/core/application-services';
 import { SfSelect } from '@storefront-ui/vue';
 import {
   computed,
@@ -42,7 +43,7 @@ import {
   useOptionValuesPrice,
   useValuesSort
 } from 'src/modules/customization-system';
-import { PriceHelper, useRootInstance } from 'src/modules/shared';
+import { PriceHelper } from 'src/modules/shared';
 import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 
 const defaultPlaceholder = 'Select Option';
@@ -84,7 +85,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const root = useRootInstance();
+    const applicationStore = useStore();
     const { placeholder, values } = toRefs(props);
     const selectedOption = computed<string | undefined>({
       get: () => {
@@ -105,7 +106,7 @@ export default defineComponent({
     );
 
     const selectedCurrency = computed<Currency>(() => {
-      return root.$store.getters[GET_ACTIVE_CURRENCY];
+      return applicationStore.getters[GET_ACTIVE_CURRENCY];
     });
 
     const isProductionTimeDefaultOption = computed<boolean>(() => {

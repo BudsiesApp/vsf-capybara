@@ -1,3 +1,4 @@
+import { useStore } from '@vue-storefront/core/application-services';
 import { onMounted, ref, Ref } from 'vue';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
@@ -6,7 +7,7 @@ import CartItem from 'core/modules/cart/types/CartItem';
 import Product from 'core/modules/catalog/types/Product';
 import { PlushieWizardEvents } from 'src/modules/budsies';
 import { updateProductProductionTimeCustomizationData } from 'src/modules/customization-system';
-import { ProductEvent, useRootInstance } from 'src/modules/shared';
+import { ProductEvent } from 'src/modules/shared';
 
 import { PlushieType } from 'theme/interfaces/plushie.type';
 import getPlushieSkuByTypes from './get-plushie-sku-by-types.function';
@@ -20,22 +21,22 @@ export function useCreationWizardProductTypeStep (
   nextStep: () => Promise<void>,
   afterProductTypeSet: () => void
 ) {
-  const root = useRootInstance();
+  const applicationStore = useStore();
   const isProductLoading = ref<boolean>(false);
 
   async function loadProduct (sku: string): Promise<void> {
     isProductLoading.value = true;
-    root.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
+    applicationStore.commit(`product/${PRODUCT_UNSET_CURRENT}`);
 
     try {
       let [product] = await Promise.all(
         [
-          root.$store.dispatch('product/loadProduct', {
+          applicationStore.dispatch('product/loadProduct', {
             parentSku: sku,
             childSku: null,
             setCurrent: false
           }),
-          root.$store.dispatch(
+          applicationStore.dispatch(
             'budsies/loadProductsRushAddons',
             { productSku: sku }
           )
@@ -44,10 +45,10 @@ export function useCreationWizardProductTypeStep (
 
       product = updateProductProductionTimeCustomizationData(
         product,
-        root.$store
+        applicationStore
       );
 
-      await root.$store.dispatch('product/setCurrent', product);
+      await applicationStore.dispatch('product/setCurrent', product);
 
       void nextStep();
     } finally {

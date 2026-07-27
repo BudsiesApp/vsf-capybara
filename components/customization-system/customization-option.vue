@@ -2,7 +2,7 @@
   <div
     class="customization-option"
     :class="customizationOptionClasses"
-    :ref="validationRef"
+    ref="validationAnchor"
   >
     <template
       v-if="showLabel"
@@ -194,6 +194,21 @@ export default defineComponent({
     });
 
     const widgetComponent = ref<null | WidgetComponent>(null);
+    const validationAnchor = ref<HTMLElement | null>(null);
+    const validationState = useCustomizationOptionValidation(
+      customization,
+      disableValidation,
+      fieldNamePrefix
+    );
+    function getFormValidationRefs () {
+      if (!validationAnchor.value) {
+        return {};
+      }
+
+      return {
+        [validationState.validationRef.value]: validationAnchor.value
+      };
+    }
     const widgetState = useCustomizationOptionWidget(
       value,
       customization,
@@ -210,11 +225,7 @@ export default defineComponent({
     }));
 
     return {
-      ...useCustomizationOptionValidation(
-        customization,
-        disableValidation,
-        fieldNamePrefix
-      ),
+      ...validationState,
       ...widgetState,
       ...useWidgetBusyState(
         customization,
@@ -225,7 +236,9 @@ export default defineComponent({
       optionHint,
       optionLabel,
       customizationOptionClasses,
+      getFormValidationRefs,
       showLabel,
+      validationAnchor,
       widgetComponent
     };
   }

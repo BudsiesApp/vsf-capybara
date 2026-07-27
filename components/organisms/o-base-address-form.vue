@@ -9,7 +9,7 @@
     >
       <SfInput
         v-model="firstName"
-        :ref="getFieldAnchorName('First name')"
+        ref="firstNameAnchor"
         class="form__element form__element--half"
         name="first-name"
         autocomplete="given-name"
@@ -30,7 +30,7 @@
     >
       <SfInput
         v-model="lastName"
-        :ref="getFieldAnchorName('Last name')"
+        ref="lastNameAnchor"
         class="form__element form__element--half"
         name="last-name"
         autocomplete="family-name"
@@ -51,7 +51,7 @@
     >
       <MMultiselect
         v-model="country"
-        :ref="getFieldAnchorName('Country')"
+        ref="countryAnchor"
         class="form__element form__select"
         name="country-name"
         autocomplete="country-name"
@@ -77,7 +77,7 @@
     >
       <MSuggestionsList
         v-model="streetAddress"
-        :ref="getFieldAnchorName('Address')"
+        ref="addressAnchor"
         class="form__element"
         :suggestions="autocompleteSuggestions"
         :loading="autocompleteLoading"
@@ -106,7 +106,7 @@
 
     <SfInput
       v-model="apartmentNumber"
-      :ref="getFieldAnchorName('Apartment')"
+      ref="apartmentAnchor"
       class="form__element"
       name="apartment"
       autocomplete="address-line2"
@@ -120,7 +120,7 @@
         v-if="!isSelectedCountryHasStates"
         key="state"
         v-model="state"
-        :ref="getFieldAnchorName('State')"
+        ref="stateAnchor"
         class="form__element form__element--half"
         name="address-level1"
         autocomplete="address-level1"
@@ -142,7 +142,7 @@
         >
           <MMultiselect
             v-model="region_id"
-            :ref="getFieldAnchorName('State')"
+            ref="stateAnchor"
             name="address-level1"
             autocomplete="address-level1"
             :autocomplete-value-search="stateCodeAutocompleteOptionSearch"
@@ -169,7 +169,7 @@
     >
       <SfInput
         v-model="city"
-        :ref="getFieldAnchorName('City')"
+        ref="cityAnchor"
         class="form__element form__element--half"
         name="city"
         autocomplete="address-level2"
@@ -190,7 +190,7 @@
     >
       <SfInput
         v-model="zipCode"
-        :ref="getFieldAnchorName('Zip Code')"
+        ref="zipCodeAnchor"
         class="form__element form__element--half"
         name="zipCode"
         autocomplete="postal-code"
@@ -213,7 +213,7 @@
     >
       <SfInput
         v-model="formattedPhoneNumber"
-        :ref="getFieldAnchorName('Phone number')"
+        ref="phoneNumberAnchor"
         :required="isPhoneNumberRequired"
         :valid="!errors.length"
         :error-message="errors[0]"
@@ -237,7 +237,7 @@
     >
       <SfInput
         v-model.trim="vat_id"
-        :ref="getFieldAnchorName('Tax ID')"
+        ref="taxIdAnchor"
         name="vat_id"
         :label="$t('Tax ID')"
         :disabled="isFormFieldsDisabled"
@@ -255,7 +255,7 @@ import { defineComponent, PropType, ref, computed, watch, nextTick } from 'vue';
 import { SfInput } from '@storefront-ui/vue';
 import { parsePhoneNumberWithError } from 'libphonenumber-js';
 
-import { stateCodeAutocompleteOptionSearch, createPhoneHelpers, useCurrentInstance } from 'src/modules/shared';
+import { stateCodeAutocompleteOptionSearch, createPhoneHelpers } from 'src/modules/shared';
 import BaseAddressDetails from '@vue-storefront/core/modules/checkout/types/BaseAddressDetails';
 import { useAddressAutocomplete } from 'src/modules/address/composables/use-address-autocomplete';
 import { googleMapsAttributionLogo } from 'src/modules/address';
@@ -263,6 +263,7 @@ import { isStateNonPostal } from 'src/modules/address/helpers/is-state-non-posta
 
 import MMultiselect from 'theme/components/molecules/m-multiselect.vue';
 import MSuggestionsList from 'theme/components/molecules/m-suggestions-list.vue';
+import { FormRef, FormRefs } from 'theme/helpers/use-form-validation';
 
 const Countries = require('@vue-storefront/i18n/resource/countries.json');
 const States = require('@vue-storefront/i18n/resource/states.json');
@@ -324,13 +325,22 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, { emit }) {
-    const refs = useCurrentInstance().$refs;
     const states = States;
     const fZipCodeChanged = ref(false);
     const countries = Countries;
     const formattedPhoneNumber = ref('');
     const stateValidator = ref<InstanceType<typeof ValidationProvider> | undefined>(undefined);
     const phoneValidator = ref<InstanceType<typeof ValidationProvider> | undefined>(undefined);
+    const firstNameAnchor = ref<FormRef | null>(null);
+    const lastNameAnchor = ref<FormRef | null>(null);
+    const countryAnchor = ref<FormRef | null>(null);
+    const addressAnchor = ref<FormRef | null>(null);
+    const apartmentAnchor = ref<FormRef | null>(null);
+    const stateAnchor = ref<FormRef | null>(null);
+    const cityAnchor = ref<FormRef | null>(null);
+    const zipCodeAnchor = ref<FormRef | null>(null);
+    const phoneNumberAnchor = ref<FormRef | null>(null);
+    const taxIdAnchor = ref<FormRef | null>(null);
     const getFieldErrorMessageId = (field: string): string => {
       return `${props.getFieldAnchorName(field)}-error-message`;
     };
@@ -525,18 +535,35 @@ export default defineComponent({
     };
 
     const validateCountryRelatedFields = (): void => {
-      type validatorType = InstanceType<typeof ValidationProvider> | undefined;
-
-      const stateValidatorInstance = refs.stateValidator as validatorType;
-      const phoneValidatorInstance = refs.phoneValidator as validatorType;
-
-      if (stateValidatorInstance) {
-        stateValidatorInstance.validate();
+      if (stateValidator.value) {
+        stateValidator.value.validate();
       }
 
-      if (phoneValidatorInstance) {
-        phoneValidatorInstance.validate();
+      if (phoneValidator.value) {
+        phoneValidator.value.validate();
       }
+    };
+
+    const getFormValidationRefs = (): FormRefs => {
+      const refs: FormRefs = {};
+      const addAnchor = (field: string, anchor: FormRef | null) => {
+        if (anchor) {
+          refs[props.getFieldAnchorName(field)] = anchor;
+        }
+      };
+
+      addAnchor('First name', firstNameAnchor.value);
+      addAnchor('Last name', lastNameAnchor.value);
+      addAnchor('Country', countryAnchor.value);
+      addAnchor('Address', addressAnchor.value);
+      addAnchor('Apartment', apartmentAnchor.value);
+      addAnchor('State', stateAnchor.value);
+      addAnchor('City', cityAnchor.value);
+      addAnchor('Zip Code', zipCodeAnchor.value);
+      addAnchor('Phone number', phoneNumberAnchor.value);
+      addAnchor('Tax ID', taxIdAnchor.value);
+
+      return refs;
     };
 
     const onChangeCountry = async (): Promise<void> => {
@@ -637,6 +664,17 @@ export default defineComponent({
       getFieldErrorMessageId,
       stateValidator,
       phoneValidator,
+      firstNameAnchor,
+      lastNameAnchor,
+      countryAnchor,
+      addressAnchor,
+      apartmentAnchor,
+      stateAnchor,
+      cityAnchor,
+      zipCodeAnchor,
+      phoneNumberAnchor,
+      taxIdAnchor,
+      getFormValidationRefs,
       autocompleteSuggestions,
       autocompleteLoading,
       selectAutocompleteSuggestion,

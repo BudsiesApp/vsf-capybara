@@ -23,8 +23,8 @@
           {{ $t('Reset password') }}
         </SfButton>
 
-        <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+        <template v-if="privacyPolicyLinks.length">
+          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
         </template>
       </form>
     </template>
@@ -40,10 +40,15 @@
 </template>
 
 <script>
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { SfInput, SfButton } from '@storefront-ui/vue';
 import { required, email } from 'vuelidate/lib/validators';
 
 import i18n from '@vue-storefront/i18n';
+import {
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 export default {
   name: 'MResetPassword',
@@ -56,6 +61,13 @@ export default {
       type: String,
       default: ''
     }
+  },
+  setup () {
+    return {
+      privacyPolicyLinks: useAdditionalContent(
+        AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+      )
+    };
   },
   data () {
     return {
@@ -78,14 +90,14 @@ export default {
         });
         return;
       }
-      this.$bus.$emit(
+      EventBus.$emit(
         'notification-progress-start',
         this.$t('Resetting the password ... ')
       );
       this.$store
         .dispatch('user/resetPassword', { email: this.email })
         .then(response => {
-          this.$bus.$emit('notification-progress-stop');
+          EventBus.$emit('notification-progress-stop');
           if (response.code === 200) {
             this.passwordSent = true;
             this.$emit('restore-success');
@@ -94,7 +106,7 @@ export default {
           }
         })
         .catch(() => {
-          this.$bus.$emit('notification-progress-stop');
+          EventBus.$emit('notification-progress-stop');
         });
     },
     onFailure (result) {

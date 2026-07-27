@@ -39,11 +39,11 @@
         </MSpinnerButton>
       </form>
 
-      <template v-if="$additionalContent.financialIncentivesLinks">
+      <template v-if="financialIncentiveLinks.length">
         <component
           :is="linkComponent.component"
           :key="linkComponent.key"
-          v-for="linkComponent in $additionalContent.financialIncentivesLinks"
+          v-for="linkComponent in financialIncentiveLinks"
         />
       </template>
 
@@ -62,6 +62,11 @@ import Vue, { PropType, ref } from 'vue';
 import { SfInput } from '@storefront-ui/vue';
 import Task from '@vue-storefront/core/lib/sync/types/Task';
 import i18n from '@vue-storefront/i18n';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 
@@ -105,6 +110,9 @@ export default Vue.extend({
     }
   },
   setup () {
+    const financialIncentiveLinks = useAdditionalContent(
+      AdditionalContentOutlet.FINANCIAL_INCENTIVE_LINKS
+    );
     const email = ref<string | undefined>(undefined);
     const submitError = ref<string | undefined>(undefined);
 
@@ -123,6 +131,8 @@ export default Vue.extend({
 
     return {
       email,
+      financialIncentiveLinks: financialIncentiveLinks as unknown as
+        readonly AdditionalContentEntry[],
       handleError,
       onEmailInput,
       submitError,
