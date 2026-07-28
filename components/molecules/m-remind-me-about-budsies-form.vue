@@ -14,6 +14,7 @@
           v-model="email"
           name="email"
           type="email"
+          autocomplete="email"
           :disabled="isFormDisabled"
           :placeholder="inputPlaceholder"
           :valid="!errors.length"

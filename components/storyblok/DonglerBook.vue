@@ -22,6 +22,7 @@
           name="email"
           type="email"
           :label="$t('Email:')"
+          autocomplete="email"
           :required="true"
           :disabled="isSubmitting"
           :valid="!$v.email.$error"
