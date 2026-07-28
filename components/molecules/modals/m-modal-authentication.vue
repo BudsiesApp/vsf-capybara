@@ -130,7 +130,6 @@ export default Vue.extend({
         return;
       }
 
-      debugger;
       heading.focus();
     }
   },
