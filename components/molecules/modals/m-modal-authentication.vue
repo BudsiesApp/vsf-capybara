@@ -141,9 +141,7 @@ export default Vue.extend({
       }
 
       await this.$nextTick();
-      setTimeout(() => {
-        this.focusHeading();
-      }, 200);
+      this.focusHeading();
     },
     isUserLoggedIn (newValue) {
       if (newValue) {
