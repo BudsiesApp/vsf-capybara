@@ -91,6 +91,8 @@
 "Capacity Per","Capacity Per"
 "Card number","Card number"
 "Cart","Cart"
+"Cart is synchronized","Cart is synchronized"
+"Cart is syncing","Cart is syncing"
 "Cash on delivery","Cash on delivery"
 "Cat Golf Head Covers","Cat Golf Head Covers"
 "Categories","Categories"
@@ -1080,3 +1082,18 @@
 "{optionName} - 1 week","{optionName} - 1 week"
 "{optionName} - {weeks} weeks","{optionName} - {weeks} weeks"
 "{slotsLeft} rush slots left","{slotsLeft} rush slots left"
+
+"Address removed","Address removed"
+"Address set as default billing","Address set as default billing"
+"Address set as default shipping","Address set as default shipping"
+"Gift card applied","Gift card applied"
+"Loading orders","Loading orders"
+"No shipping methods are available for this address.","No shipping methods are available for this address."
+"Reminder set for {date}","Reminder set for {date}"
+"{count} orders loaded","{count} orders loaded"
+
+
+"Adding Gift Card...","Adding Gift Card..."
+"Gift Cards cannot be used to purchase Gift Card products","Gift Cards cannot be used to purchase Gift Card products"
+"Something went wrong... Please, try again or contact the support.","Something went wrong... Please, try again or contact the support."
+"Your order’s grand total is now zero. You're all set!","Your order’s grand total is now zero. You're all set!"

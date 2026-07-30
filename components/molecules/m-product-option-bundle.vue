@@ -1,5 +1,8 @@
 <template>
   <div class="a-product-option-bundle">
+    <p class="sr-only" role="alert" aria-atomic="true">
+      {{ errorMessage || '' }}
+    </p>
     <SfAlert
       v-if="errorMessage"
       :message="errorMessage"

@@ -1,7 +1,7 @@
 <template>
   <form @submit.prevent="onFormSubmit" class="m-notify-customer-support-form">
     <SfInput v-model="name" name="name" :placeholder="$t('Your name')" />
-    <SfInput v-model="email" name="email" :placeholder="$t('Your email')" />
+    <SfInput v-model="email" name="email" autocomplete="email" :placeholder="$t('Your email')" />
     <SfInput v-model="phone" name="name" :placeholder="$t('Phone (optional)')" />
 
     <SfButton class="sf-button sf-button--outline _submit-button">

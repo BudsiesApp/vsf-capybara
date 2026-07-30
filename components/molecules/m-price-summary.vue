@@ -32,10 +32,12 @@
     <dl class="m-price-summary__list">
       <div
         class="property"
+        aria-live="polite"
+        aria-atomic="true"
         :class="{'property--large': isLarge}"
       >
         <dt class="property__name" v-text="$t('Grand Total')" />
-        <dd class="property__value" aria-live="polite">
+        <dd class="property__value">
           {{ formatPrice(prices.grand_total) }}
         </dd>
       </div>
