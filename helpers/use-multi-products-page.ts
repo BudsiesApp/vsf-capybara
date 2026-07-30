@@ -1,4 +1,5 @@
-import { computed, onBeforeMount, onServerPrefetch, ref, Ref, SetupContext } from '@vue/composition-api';
+import { useStore } from '@vue-storefront/core/application-services';
+import { computed, onBeforeMount, onServerPrefetch, ref, Ref } from 'vue';
 import config from 'config';
 import { SearchQuery } from 'storefront-query-builder';
 
@@ -11,9 +12,9 @@ import { updateProductProductionTimeCustomizationData } from 'src/modules/custom
 
 export function useMultiProductsPage (
   skus: Ref<string[]>,
-  { root }: SetupContext,
   initialSku?: Ref<string | undefined>
 ) {
+  const applicationStore = useStore();
   const isDataLoaded = ref<boolean>(false);
 
   function getSearchQuery (productSkus: string[]) {
@@ -31,7 +32,7 @@ export function useMultiProductsPage (
   }
 
   const currentProduct = computed<Product | undefined>(() => {
-    const product = root.$store.getters['product/getCurrentProduct'];
+    const product = applicationStore.getters['product/getCurrentProduct'];
 
     if (!product?.sku) {
       return;
@@ -41,7 +42,7 @@ export function useMultiProductsPage (
   });
 
   const productBySkuDictionary = computed<Record<string, Product>>(() => {
-    return root.$store.getters['product/getProductBySkuDictionary'] || {};
+    return applicationStore.getters['product/getProductBySkuDictionary'] || {};
   });
 
   async function selectProduct (sku: string): Promise<void> {
@@ -51,9 +52,9 @@ export function useMultiProductsPage (
       return;
     }
 
-    const productUpdated = updateProductProductionTimeCustomizationData(product, root.$store);
-    root.$store.commit(`product/${PRODUCT_SET_PRODUCT_BY_SKU}`, productUpdated);
-    await root.$store.dispatch('product/setCurrent', productUpdated);
+    const productUpdated = updateProductProductionTimeCustomizationData(product, applicationStore);
+    applicationStore.commit(`product/${PRODUCT_SET_PRODUCT_BY_SKU}`, productUpdated);
+    await applicationStore.dispatch('product/setCurrent', productUpdated);
 
     if (!currentProduct.value) {
       return;
@@ -64,16 +65,16 @@ export function useMultiProductsPage (
 
   async function loadData (): Promise<void> {
     isDataLoaded.value = false;
-    root.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
+    applicationStore.commit(`product/${PRODUCT_UNSET_CURRENT}`);
 
     await Promise.all([
-      root.$store.dispatch('product/findProducts', {
+      applicationStore.dispatch('product/findProducts', {
         query: getSearchQuery(skus.value),
         options: {
           prefetchGroupProducts: true
         }
       }),
-      root.$store.dispatch(
+      applicationStore.dispatch(
         'budsies/loadProductsRushAddons',
         { productSku: '' }
       )

@@ -7,6 +7,12 @@
       v-slot="{passes}"
       slim
     >
+      <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {{ isSuccessSubscribed ? successMessage : '' }}
+      </p>
+      <p class="sr-only" role="alert" aria-atomic="true">
+        {{ submitError || '' }}
+      </p>
       <form
         @submit.prevent="() => passes(() => onSubmitForm())"
         class="_form"
@@ -23,6 +29,7 @@
             class="_input"
             :name="emailInputName"
             :label="$t('E-mail address')"
+            autocomplete="email"
             :disabled="isSubmitting"
             :valid="!errors.length && !submitError"
             :error-message="errors[0] || submitError"
@@ -39,11 +46,11 @@
         </MSpinnerButton>
       </form>
 
-      <template v-if="$additionalContent.financialIncentivesLinks">
+      <template v-if="financialIncentiveLinks.length">
         <component
           :is="linkComponent.component"
           :key="linkComponent.key"
-          v-for="linkComponent in $additionalContent.financialIncentivesLinks"
+          v-for="linkComponent in financialIncentiveLinks"
         />
       </template>
 
@@ -57,11 +64,16 @@
 <script lang="ts">
 import { extend, ValidationProvider, ValidationObserver } from 'vee-validate';
 import { email, required } from 'vee-validate/dist/rules';
-import { PropType, defineComponent, ref } from '@vue/composition-api';
+import Vue, { PropType, ref } from 'vue';
 
 import { SfInput } from '@storefront-ui/vue';
 import Task from '@vue-storefront/core/lib/sync/types/Task';
 import i18n from '@vue-storefront/i18n';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 
@@ -74,7 +86,7 @@ extend('required', {
 
 extend('email', email);
 
-export default defineComponent({
+export default Vue.extend({
   name: 'MSubscriptionForm',
   components: {
     MSpinnerButton,
@@ -105,6 +117,9 @@ export default defineComponent({
     }
   },
   setup () {
+    const financialIncentiveLinks = useAdditionalContent(
+      AdditionalContentOutlet.FINANCIAL_INCENTIVE_LINKS
+    );
     const email = ref<string | undefined>(undefined);
     const submitError = ref<string | undefined>(undefined);
 
@@ -123,6 +138,8 @@ export default defineComponent({
 
     return {
       email,
+      financialIncentiveLinks: financialIncentiveLinks as unknown as
+        readonly AdditionalContentEntry[],
       handleError,
       onEmailInput,
       submitError,

@@ -118,8 +118,8 @@
 
                 <m-order-submit-agreement />
 
-                <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-                  <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+                <template v-if="privacyPolicyLinks.length">
+                  <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
                 </template>
               </div>
             </div>
@@ -138,6 +138,7 @@
 </template>
 
 <script lang="ts">
+import { useRouter, useStore } from '@vue-storefront/core/application-services';
 import {
   computed,
   defineComponent,
@@ -147,7 +148,7 @@ import {
   Ref,
   toRefs,
   watch
-} from '@vue/composition-api';
+} from 'vue';
 import { SfButton } from '@storefront-ui/vue';
 import { ValidationObserver, ValidationProvider } from 'vee-validate';
 
@@ -181,6 +182,11 @@ import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow } from 'src/modules/
 import i18n from '@vue-storefront/core/i18n';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
@@ -188,6 +194,7 @@ import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmoun
 import { useCustomizeAction } from 'theme/helpers/use-customize-action';
 import { useImageUpload } from 'theme/helpers/use-image-upload';
 import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
+import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
 import { useProductGallery } from 'theme/helpers/use-product-gallery';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 
@@ -250,6 +257,11 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
+    const privacyPolicyLinks = useAdditionalContent(
+      AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+    );
+    const applicationStore = useStore();
+    const applicationRouter = useRouter();
     const {
       canUsePersistedCustomizationState,
       existingCartItem,
@@ -269,7 +281,10 @@ export default defineComponent({
       return customizationMode.value === ProductCustomizationMode.CUSTOMIZE;
     });
 
-    const customizationOption = ref<InstanceType<typeof CustomizationOption>[] | null>(null);
+    const {
+      templateRef: customizationOption,
+      getRefsInRenderedOrder: getCustomizationOptionsInRenderedOrder
+    } = useRenderedOrderTemplateRefs<InstanceType<typeof CustomizationOption>>();
 
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
@@ -351,8 +366,7 @@ export default defineComponent({
       customizationOptionValue,
       product,
       mergeCustomizationState,
-      removeUnavailableOptionValues,
-      context
+      removeUnavailableOptionValues
     );
 
     const preservationStorageKey = computed<string>(() => {
@@ -366,7 +380,7 @@ export default defineComponent({
       existingCartItem,
       availableCustomizations,
       customizationOptionValue,
-      customizationOption
+      getCustomizationOptionsInRenderedOrder
     );
 
     async function onCustomizationStateRestored (): Promise<void> {
@@ -422,7 +436,7 @@ export default defineComponent({
     );
 
     const formValidation = useFormValidation(validationObserver, () =>
-      getNestedFormRefs(context.refs, 'customizationOption')
+      getNestedFormRefs(getCustomizationOptionsInRenderedOrder())
     );
 
     const { quantity } = useProductQuantity(existingCartItem);
@@ -445,7 +459,6 @@ export default defineComponent({
       customizationState,
       bundleOptions,
       existingCartItem,
-      context,
       undefined,
       productPurchaseFlow.value
     );
@@ -470,14 +483,11 @@ export default defineComponent({
       [lockedOptionValuesFilter]
     );
 
-    const { customizationFilter } = useABTestingCustomizationsFilter(
-      context.ssrContext
-    );
+    const { customizationFilter } = useABTestingCustomizationsFilter();
 
     const { confirmCustomization, isSubmitting: isSubmittingCustomize } = useCustomizeAction(
       customizationState,
-      draftOrderItem,
-      context
+      draftOrderItem
     );
 
     async function onFormSubmit (): Promise<void> {
@@ -500,16 +510,16 @@ export default defineComponent({
         };
 
         if (isCustomizeMode.value) {
-          context.root.$router.push({ name: 'orders-history' });
+          applicationRouter.push({ name: 'orders-history' });
           return;
         }
 
-        context.root.$router.push({
+        applicationRouter.push({
           name: 'cross-sells',
           params: { parentSku: product.value.sku }
         });
       } catch (error) {
-        context.root.$store.dispatch('notification/spawnNotification', {
+        applicationStore.dispatch('notification/spawnNotification', {
           type: 'danger',
           message: 'Error: ' + error,
           action1: { label: i18n.t('OK') }
@@ -560,11 +570,10 @@ export default defineComponent({
       ),
       ...useCustomizationsPrice(
         flowAvailableCustomizations,
-        customizationOptionValue,
-        context
+        customizationOptionValue
       ),
       ...formValidation,
-      ...useBulkImagesUpload(context),
+      ...useBulkImagesUpload(),
       availableCustomizations,
       availableOptionCustomizations,
       customizationAvailableOptionValues,
@@ -575,6 +584,8 @@ export default defineComponent({
       isDisabled,
       isCustomizeMode,
       isSubmitButtonDisabled,
+      privacyPolicyLinks: privacyPolicyLinks as unknown as
+        readonly AdditionalContentEntry[],
       lockedCustomizationDictionary,
       onEntityBusyChanged,
       onCustomizationOptionInput,

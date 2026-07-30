@@ -167,7 +167,7 @@
 
 <script lang="ts">
 import { SfButton, SfIcon, SfPrice, SfProperty } from '@storefront-ui/vue';
-import { computed, ComputedRef, defineComponent, PropType } from '@vue/composition-api';
+import { computed, ComputedRef, defineComponent, PropType } from 'vue';
 
 import { CartItemConfigurationGroup, CustomizationOptionValue, isFileUploadValue } from 'src/modules/customization-system';
 import { useMobileObserver } from 'src/modules/shared';

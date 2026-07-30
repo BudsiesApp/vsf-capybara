@@ -20,7 +20,7 @@
         >
           <SfInput
             v-model.trim="emailValue"
-            :ref="getFieldAnchorName('Email')"
+            ref="emailFieldAnchor"
             name="email-address"
             type="email"
             :label="$t('Email address')"
@@ -31,8 +31,13 @@
           />
         </ValidationProvider>
 
-        <div v-if="isCodeSent" class="_code-sent-message">
-          {{ $t('Verification code sent to your email') }}
+        <div
+          class="_code-sent-message"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {{ isCodeSent ? $t('Verification code sent to your email') : "" }}
         </div>
 
         <ValidationProvider
@@ -47,7 +52,7 @@
             v-model.trim="otpCode"
             name="otp"
             type="text"
-            :ref="getFieldAnchorName('OTP')"
+            ref="otpFieldAnchor"
             :label="$t('Enter verification code')"
             :valid="!errors.length"
             :error-message="errors[0]"
@@ -81,8 +86,8 @@
 
           <slot
             name="submit-button"
-            :isDisabled="isSubmitting"
-            :submitButtonText="submitButtonText"
+            :is-disabled="isSubmitting"
+            :submit-button-text="submitButtonText"
           >
             <SfButton
               class="sf-button _submit-button"
@@ -99,16 +104,16 @@
 </template>
 
 <script lang="ts">
+import { useI18n, useStore } from '@vue-storefront/core/application-services';
 import {
   computed,
   defineComponent,
   onBeforeUnmount,
   ref,
-  SetupContext,
   nextTick,
   PropType,
   Ref
-} from '@vue/composition-api';
+} from 'vue';
 import { extend, ValidationProvider, ValidationObserver } from 'vee-validate';
 import { required, email } from 'vee-validate/dist/rules';
 import { SfInput, SfButton } from '@storefront-ui/vue';
@@ -116,7 +121,7 @@ import { SfInput, SfButton } from '@storefront-ui/vue';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { AuthenticateRequestResponse } from '@vue-storefront/core/modules/user';
 import Task from 'core/lib/sync/types/Task';
-import { useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
+import { FormRefs, useFormValidation, getFieldAnchorName } from 'theme/helpers/use-form-validation';
 
 extend('required', {
   ...required,
@@ -127,7 +132,9 @@ extend('email', {
   message: 'Please, provide the correct email address'
 });
 
-function useRateLimit ({ root }: SetupContext) {
+function useRateLimit () {
+  const applicationStore = useStore();
+  const applicationI18n = useI18n();
   const RATE_LIMIT_TIMEOUT = 60;
   const RATE_LIMIT_ERROR_CODE = 429;
 
@@ -166,10 +173,10 @@ function useRateLimit ({ root }: SetupContext) {
   const handleRateLimitError = (): void => {
     startRateLimitTimer();
 
-    root.$store.dispatch('notification/spawnNotification', {
+    applicationStore.dispatch('notification/spawnNotification', {
       type: 'warning',
-      message: root.$t('Too many requests. Please wait before trying again.'),
-      action1: { label: root.$t('OK') }
+      message: applicationI18n.t('Too many requests. Please wait before trying again.'),
+      action1: { label: applicationI18n.t('OK') }
     });
   };
 
@@ -211,10 +218,13 @@ export default defineComponent({
     ValidationObserver
   },
   setup (props, context) {
-    const root = context.root;
+    const applicationStore = useStore();
+    const applicationI18n = useI18n();
     const emit = context.emit;
 
     const validationObserver: Ref<ValidationObserverInstance | null> = ref(null);
+    const emailFieldAnchor: Ref<SfInputInstance | null> = ref(null);
+    const otpFieldAnchor: Ref<SfInputInstance | null> = ref(null);
 
     const emailValue = computed<string>({
       get: () => {
@@ -240,10 +250,10 @@ export default defineComponent({
 
     const submitButtonText = computed<string>(() => {
       if (isCodeSent.value) {
-        return root.$t('Verify').toString();
+        return applicationI18n.t('Verify').toString();
       }
 
-      return props.emailSubmitButtonText || root.$t('Login').toString();
+      return props.emailSubmitButtonText || applicationI18n.t('Login').toString();
     });
 
     const {
@@ -251,17 +261,26 @@ export default defineComponent({
       isRateLimitError,
       rateLimitCountdown,
       startRateLimitTimer
-    } = useRateLimit(context);
+    } = useRateLimit();
 
     const {
       validateAndGoToFirstError
     } = useFormValidation(
       validationObserver,
-      () => context.refs
+      (): FormRefs => {
+        const refs: FormRefs = {};
+        if (emailFieldAnchor.value) {
+          refs[getFieldAnchorName('Email')] = emailFieldAnchor.value;
+        }
+        if (otpFieldAnchor.value) {
+          refs[getFieldAnchorName('OTP')] = otpFieldAnchor.value;
+        }
+        return refs;
+      }
     );
 
     function focusOtpInput (): void {
-      const otpInputRootElement = context.refs[getFieldAnchorName('OTP')] as SfInputInstance | undefined;
+      const otpInputRootElement = otpFieldAnchor.value;
 
       if (!otpInputRootElement) {
         return;
@@ -278,17 +297,17 @@ export default defineComponent({
 
     const resendOtpButtonText = computed<string>(() => {
       if (rateLimitCountdown.value > 0) {
-        return `${root.$t('Resend in')} ${rateLimitCountdown.value}`
+        return `${applicationI18n.t('Resend in')} ${rateLimitCountdown.value}`
       }
 
-      return root.$t('Resend code').toString();
+      return applicationI18n.t('Resend code').toString();
     });
 
     const requestOtp = async (): Promise<void> => {
       isSubmitting.value = true;
 
       try {
-        const task: Task = await root.$store.dispatch('user/login', { email: emailValue.value });
+        const task: Task = await applicationStore.dispatch('user/login', { email: emailValue.value });
 
         if (isRateLimitError(task)) {
           handleRateLimitError();
@@ -310,10 +329,10 @@ export default defineComponent({
       } catch (error) {
         Logger.error(error, 'user-login')();
 
-        root.$store.dispatch('notification/spawnNotification', {
+        applicationStore.dispatch('notification/spawnNotification', {
           type: 'danger',
-          message: root.$t('Unable to send verification code. Please try again.'),
-          action1: { label: root.$t('OK') }
+          message: applicationI18n.t('Unable to send verification code. Please try again.'),
+          action1: { label: applicationI18n.t('OK') }
         });
       } finally {
         isSubmitting.value = false;
@@ -324,19 +343,19 @@ export default defineComponent({
       isSubmitting.value = true;
 
       try {
-        const response: Task = await root.$store.dispatch('user/authenticate', {
+        const response: Task = await applicationStore.dispatch('user/authenticate', {
           token: otpCode.value,
           email: emailValue.value
         });
         const result: AuthenticateRequestResponse = response.result;
 
         if (response.code !== 200) {
-          const error = response.result.errorMessage || root.$t('Authentication failed').toString();
+          const error = response.result.errorMessage || applicationI18n.t('Authentication failed').toString();
 
-          root.$store.dispatch('notification/spawnNotification', {
+          applicationStore.dispatch('notification/spawnNotification', {
             type: 'danger',
             message: error,
-            action1: { label: root.$t('OK') }
+            action1: { label: applicationI18n.t('OK') }
           });
           return;
         }
@@ -344,10 +363,10 @@ export default defineComponent({
         emit('otp-submitted');
 
         if (!result.is_new_customer) {
-          root.$store.dispatch('notification/spawnNotification', {
+          applicationStore.dispatch('notification/spawnNotification', {
             type: 'success',
-            message: root.$t('Successfully logged in!'),
-            action1: { label: root.$t('OK') }
+            message: applicationI18n.t('Successfully logged in!'),
+            action1: { label: applicationI18n.t('OK') }
           });
           return;
         }
@@ -356,10 +375,10 @@ export default defineComponent({
       } catch (error) {
         Logger.error(error, 'user-authenticate')();
 
-        root.$store.dispatch('notification/spawnNotification', {
+        applicationStore.dispatch('notification/spawnNotification', {
           type: 'danger',
-          message: root.$t('Authentication failed. Please try again.'),
-          action1: { label: root.$t('OK') }
+          message: applicationI18n.t('Authentication failed. Please try again.'),
+          action1: { label: applicationI18n.t('OK') }
         });
       } finally {
         isSubmitting.value = false;
@@ -413,6 +432,7 @@ export default defineComponent({
 
     return {
       cancelLogin,
+      emailFieldAnchor,
       emailValue,
       getFieldAnchorName,
       handleSubmit,
@@ -420,6 +440,7 @@ export default defineComponent({
       isSubmitting,
       onFormSubmit,
       otpCode,
+      otpFieldAnchor,
       rateLimitCountdown,
       resendOtp,
       resendOtpButtonText,

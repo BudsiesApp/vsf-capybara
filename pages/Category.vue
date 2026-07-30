@@ -225,7 +225,7 @@
 <script>
 import LazyHydrate from 'vue-lazy-hydration';
 import { mapGetters } from 'vuex';
-import { ref } from '@vue/composition-api';
+import { ref } from 'vue';
 import castArray from 'lodash-es/castArray';
 import config from 'config';
 import { isServer } from '@vue-storefront/core/helpers';
@@ -257,7 +257,7 @@ import {
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
 import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
-import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-headers.function';
+import { useRequestServices } from '@vue-storefront/core/request-services';
 
 import { ProductEvent } from 'src/modules/shared';
 import { mappingFallbackForUrlRewrite } from 'src/modules/url-rewrite';
@@ -313,7 +313,7 @@ async function loadProducts (isProductsLoading) {
   }
 }
 
-const checkForRewriteRoute = async (to, ssrContext) => {
+const checkForRewriteRoute = async (to, redirect) => {
   const category = store.getters['category-next/getCategoryByParams'](to.params);
 
   if (!isObjectEmpty(category)) {
@@ -327,7 +327,7 @@ const checkForRewriteRoute = async (to, ssrContext) => {
     {
       url: to.path,
       params: to.query,
-      ssrContext
+      redirect
     }
   )
 }
@@ -353,6 +353,7 @@ export default {
     SfLoader
   },
   setup () {
+    const requestServices = useRequestServices();
     const nextPageLoadingThreshold = ref(null);
     const isProductsLoading = ref(false);
 
@@ -365,6 +366,7 @@ export default {
 
     return {
       nextPageLoadingThreshold,
+      requestServices,
       isInfinityScrollingEnabled,
       isProductsLoading
     }
@@ -536,7 +538,7 @@ export default {
   async serverPrefetch () {
     await this.onCategoryChangedHandler(this.$route);
 
-    return checkForRewriteRoute(this.$route, this.$ssrContext);
+    return checkForRewriteRoute(this.$route, this.requestServices.redirect);
   },
   async beforeRouteUpdate (to, from, next) {
     if (to.params.slug === from.params.slug) {
@@ -600,7 +602,7 @@ export default {
         this.aggregations = action.payload.aggregations;
       }
     });
-    this.$bus.$on('product-after-list', this.initPagination);
+    EventBus.$on('product-after-list', this.initPagination);
 
     const category = this.getCurrentCategory;
     EventBus.$emit(
@@ -616,7 +618,7 @@ export default {
     unMapMobileObserver();
     this.$store.dispatch('category-next/resetCurrentCategoryData');
     this.unsubscribeFromStoreAction();
-    this.$bus.$off('product-after-list', this.initPagination);
+    EventBus.$off('product-after-list', this.initPagination);
   },
   methods: {
     async changePage (page = this.currentPage) {
@@ -698,12 +700,9 @@ export default {
         slug
       } = this.getCurrentCategory;
 
-      const host = this.$ssrContext
-        ? getHostFromHeaders(this.$ssrContext.server.request.headers)
-        : window.location.host;
       const resolvedRoute = this.$router.resolve({ name: 'category', params: { slug } });
 
-      return `https://${host}${resolvedRoute.href}`;
+      return `https://${this.requestServices.host}${resolvedRoute.href}`;
     }
   },
   metaInfo () {

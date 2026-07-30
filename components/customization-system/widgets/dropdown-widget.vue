@@ -20,6 +20,7 @@
 </template>
 
 <script lang="ts">
+import { useStore } from '@vue-storefront/core/application-services';
 import { SfSelect } from '@storefront-ui/vue';
 import {
   computed,
@@ -29,7 +30,7 @@ import {
   ref,
   toRefs,
   watch
-} from '@vue/composition-api';
+} from 'vue';
 
 import {
   mapMobileObserver,
@@ -84,6 +85,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const applicationStore = useStore();
     const { placeholder, values } = toRefs(props);
     const selectedOption = computed<string | undefined>({
       get: () => {
@@ -100,12 +102,11 @@ export default defineComponent({
     const { sortedValues } = useValuesSort(values);
 
     const { defaultOptionValue, isOptionValuesSamePrice, optionValuePriceDictionary } = useOptionValuesPrice(
-      sortedValues,
-      context
+      sortedValues
     );
 
     const selectedCurrency = computed<Currency>(() => {
-      return context.root.$store.getters[GET_ACTIVE_CURRENCY];
+      return applicationStore.getters[GET_ACTIVE_CURRENCY];
     });
 
     const isProductionTimeDefaultOption = computed<boolean>(() => {

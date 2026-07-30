@@ -60,12 +60,13 @@
 </template>
 
 <script lang="ts">
+import { useStore } from '@vue-storefront/core/application-services';
 import {
   computed,
   defineComponent,
   PropType,
   toRefs
-} from '@vue/composition-api';
+} from 'vue';
 
 import { RushAddon } from 'src/modules/budsies';
 import {
@@ -136,10 +137,11 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const applicationStore = useStore();
     const { maxValuesCount, radioGroupName, value, values } = toRefs(props);
     const hasError = computed<boolean>(() => !!props.error);
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
-    const { optionValuePriceDictionary } = useOptionValuesPrice(values, context);
+    const { optionValuePriceDictionary } = useOptionValuesPrice(values);
 
     const groupRole = computed<string>(() => {
       return listWidgetFields.inputType.value === ListWidgetInputType.RADIO
@@ -154,7 +156,7 @@ export default defineComponent({
     });
 
     const productRushAddons = computed<RushAddon[]>(() => {
-      return context.root.$store.getters['budsies/getProductRushAddons'](props.productId);
+      return applicationStore.getters['budsies/getProductRushAddons'](props.productId);
     });
 
     const productionTimeOptionCardDataByOptionValueId = computed<Record<string, ProductionTimeOptionCardData>>(() => {

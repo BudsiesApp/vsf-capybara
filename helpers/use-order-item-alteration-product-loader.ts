@@ -1,4 +1,5 @@
-import { computed, Ref, ref, SetupContext, watch } from '@vue/composition-api';
+import { useStore } from '@vue-storefront/core/application-services';
+import { computed, Ref, ref, watch } from 'vue';
 import { SearchQuery } from 'storefront-query-builder';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -20,9 +21,9 @@ function getSearchQuery (sku: string): SearchQuery {
 
 export function useOrderItemAlterationProductLoader (
   orderItem: Ref<OrderItem | undefined>,
-  order: Ref<Order | undefined>,
-  { root }: SetupContext
+  order: Ref<Order | undefined>
 ) {
+  const applicationStore = useStore();
   const isLoading = ref<boolean>(false);
 
   const alterationProductSku = computed<string | undefined>(() => {
@@ -34,7 +35,7 @@ export function useOrderItemAlterationProductLoader (
   });
 
   const productBySkuDictionary = computed<Record<string, Product>>(() => {
-    return root.$store.getters['product/getProductBySkuDictionary'] || {};
+    return applicationStore.getters['product/getProductBySkuDictionary'] || {};
   });
 
   const alterationProduct = computed<Product | undefined>(() => {
@@ -52,7 +53,7 @@ export function useOrderItemAlterationProductLoader (
 
     return updateProductProductionTimeCustomizationData(
       product,
-      root.$store,
+      applicationStore,
       {
         makeProductionTimeRequired: false
       }
@@ -70,7 +71,7 @@ export function useOrderItemAlterationProductLoader (
 
     try {
       if (!productBySkuDictionary.value[sku]) {
-        await root.$store.dispatch('product/findProducts', {
+        await applicationStore.dispatch('product/findProducts', {
           query: getSearchQuery(sku),
           options: {
             prefetchGroupProducts: false
@@ -78,7 +79,7 @@ export function useOrderItemAlterationProductLoader (
         });
       }
 
-      await root.$store.dispatch(
+      await applicationStore.dispatch(
         'budsies/loadProductsRushAddons',
         { productSku: '' }
       );

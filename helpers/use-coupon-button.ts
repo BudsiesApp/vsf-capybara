@@ -1,4 +1,5 @@
-import { ComputedRef, SetupContext, computed, ref, watch } from '@vue/composition-api';
+import { useI18n, useStore } from '@vue-storefront/core/application-services';
+import { ComputedRef, computed, ref, watch } from 'vue';
 
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import { IS_CART_SYNCING, IS_COUPON_INTERACTION_BLOCKED, IS_COUPON_PROCESSING } from '@vue-storefront/core/modules/cart';
@@ -17,21 +18,22 @@ export interface CouponButtonResult {
 }
 
 export function useCouponButton (
-  couponCode: ComputedRef<string | undefined>,
-  { root }: SetupContext
+  couponCode: ComputedRef<string | undefined>
 ): CouponButtonResult {
+  const applicationStore = useStore();
+  const applicationI18n = useI18n();
   const isApplyingCoupon = ref<boolean>(false);
   const appliedCoupon = computed<AppliedCoupon | false>(() => {
-    return root.$store.getters['cart/getCoupon'];
+    return applicationStore.getters['cart/getCoupon'];
   });
   const isCartSyncing = computed<boolean>(() => {
-    return root.$store.getters[IS_CART_SYNCING];
+    return applicationStore.getters[IS_CART_SYNCING];
   });
   const isCouponInteractionBlocked = computed<boolean>(() => {
-    return root.$store.getters[IS_COUPON_INTERACTION_BLOCKED];
+    return applicationStore.getters[IS_COUPON_INTERACTION_BLOCKED];
   });
   const isCouponProcessing = computed<boolean>(() => {
-    return root.$store.getters[IS_COUPON_PROCESSING];
+    return applicationStore.getters[IS_COUPON_PROCESSING];
   });
   const state = computed<CouponButtonState>(() => {
     if (!couponCode.value) {
@@ -63,7 +65,7 @@ export function useCouponButton (
   });
 
   const createNotification = (type: string, message: string): void => {
-    root.$store.dispatch(
+    applicationStore.dispatch(
       'notification/spawnNotification',
       notifications.createNotification({
         type,
@@ -90,13 +92,13 @@ export function useCouponButton (
     isApplyingCoupon.value = true;
 
     try {
-      const result = await root.$store.dispatch('cart/applyCoupon', { couponCode: couponCode.value });
+      const result = await applicationStore.dispatch('cart/applyCoupon', { couponCode: couponCode.value });
 
       if (!result?.code || result.code !== 200) {
         return false;
       }
 
-      createNotification('success', root.$t('Coupon applied.').toString());
+      createNotification('success', applicationI18n.t('Coupon applied.').toString());
       return true;
     } catch (error) {
       return false;

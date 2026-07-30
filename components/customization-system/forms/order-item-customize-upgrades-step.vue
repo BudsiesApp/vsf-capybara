@@ -19,11 +19,12 @@
 </template>
 
 <script lang="ts">
+import { useRouter } from '@vue-storefront/core/application-services';
 import {
   defineComponent,
   PropType,
   ref
-} from '@vue/composition-api';
+} from 'vue';
 import { SfButton } from '@storefront-ui/vue';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -49,10 +50,11 @@ export default defineComponent({
     }
   },
   setup (_, context) {
+    const applicationRouter = useRouter();
     const isNavigating = ref<boolean>(false);
 
     function onAddedToCart (): void {
-      context.root.$router.replace({ name: 'detailed-cart' });
+      applicationRouter.replace({ name: 'detailed-cart' });
     }
 
     function onContinueWithoutUpgradesClick (): void {
@@ -61,7 +63,7 @@ export default defineComponent({
       }
 
       isNavigating.value = true;
-      context.root.$router.replace({ name: 'orders-history' });
+      applicationRouter.replace({ name: 'orders-history' });
     }
 
     return {

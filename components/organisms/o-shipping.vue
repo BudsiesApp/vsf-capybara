@@ -63,6 +63,9 @@
           {{ $t('Our service is not responsible for local tariffs or duties on international shipments') }}
         </p>
       </div>
+      <p class="sr-only" role="alert" aria-atomic="true">
+        {{ shippingMethodsError }}
+      </p>
       <div class="form__action">
         <SfButton
           ref="submitStepButton"
@@ -75,24 +78,24 @@
         <SfButton
           type="submit"
           class="sf-button--full-width sf-button--text form__action-button form__action-button--secondary"
-          @click="$bus.$emit('checkout-before-edit', 'personalDetails')"
+          @click="emitCheckoutEdit('personalDetails')"
         >
           {{ $t('Edit contact') }}
         </SfButton>
       </div>
 
-      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
+      <template v-if="privacyPolicyLinks.length">
         <component
           :is="linkComponent.component"
           :key="linkComponent.key"
-          v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks"
+          v-for="linkComponent in privacyPolicyLinks"
         />
       </template>
     </div>
   </validation-observer>
 </template>
 <script>
-import { toRef, defineComponent, ref } from '@vue/composition-api';
+import { toRef, defineComponent, ref } from 'vue';
 import {
   SfInput,
   SfRadio,
@@ -105,6 +108,10 @@ import { ValidationObserver } from 'vee-validate';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { IS_SHIPPING_METHODS_SYNCING } from '@vue-storefront/core/modules/cart';
 import { Shipping } from '@vue-storefront/core/modules/checkout/components/Shipping';
+import {
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import { createSmoothscroll } from 'theme/helpers';
 import MMultiselect from 'theme/components/molecules/m-multiselect';
@@ -133,20 +140,17 @@ export default defineComponent({
     const validationObserver = ref(null);
     const baseAddressForm = ref(null);
 
-    const { validateAddress, isValidating: isValidatingAddress, completeValidation: completeAddressValidation } = useAddressValidation(context);
+    const { validateAddress, isValidating: isValidatingAddress, completeValidation: completeAddressValidation } = useAddressValidation();
 
     const { validateAndGoToFirstError } = useFormValidation(
       validationObserver,
-      () => {
-        const baseAddressFormComponent = baseAddressForm.value;
-
-        return {
-          ...(baseAddressFormComponent?.$refs || {})
-        };
-      }
+      () => baseAddressForm.value?.getFormValidationRefs() || {}
     );
 
     return {
+      privacyPolicyLinks: useAdditionalContent(
+        AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+      ),
       validateAddress,
       isValidatingAddress,
       completeAddressValidation,
@@ -159,6 +163,7 @@ export default defineComponent({
   mixins: [Shipping],
   data: () => {
     return {
+      shippingMethodsError: '',
       states: States
     };
   },
@@ -179,7 +184,24 @@ export default defineComponent({
       return this.$store.getters[GET_CURRENCY_EXCHANGE_RATE];
     }
   },
+  watch: {
+    isShippingMethodsSyncing (isSyncing, wasSyncing) {
+      if (isSyncing) {
+        this.shippingMethodsError = '';
+        return;
+      }
+
+      if (!wasSyncing || this.shippingMethods.length) {
+        return;
+      }
+
+      this.shippingMethodsError = this.$t('No shipping methods are available for this address.').toString();
+    }
+  },
   methods: {
+    emitCheckoutEdit (section) {
+      EventBus.$emit('checkout-before-edit', section);
+    },
     focusSubmitStepButton () {
       const submitStepButton = this.$refs.submitStepButton;
 
@@ -210,7 +232,7 @@ export default defineComponent({
       this.changeCountry();
     },
     onZipCodeBlur () {
-      this.$bus.$emit('checkout-before-shippingMethods', this.shipping.country)
+      EventBus.$emit('checkout-before-shippingMethods', this.shipping.country)
     },
     async saveDataToCheckout () {
       const isFormValid = await this.validateAndGoToFirstError();
@@ -387,6 +409,7 @@ export default defineComponent({
     font-size: var(--font-sm);
     color: var(--c-dark-variant);
   }
+
   &__label {
     display: flex;
     justify-content: flex-start;

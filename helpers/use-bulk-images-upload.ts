@@ -1,4 +1,5 @@
-import { onBeforeMount, onBeforeUnmount, SetupContext } from '@vue/composition-api';
+import { useI18n, useStore } from '@vue-storefront/core/application-services';
+import { onBeforeMount, onBeforeUnmount } from 'vue';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 
@@ -6,9 +7,10 @@ import { UploaderData } from 'theme/store/ui/artwork-upload';
 import { FilesUploaderEvents } from 'theme/interfaces/files-uploader-events';
 
 export function useBulkImagesUpload (
-  { root }: SetupContext,
   allowMultipleImagesPerUploader = true
 ) {
+  const applicationStore = useStore();
+  const applicationI18n = useI18n();
   function windowDragHoverHandler (event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
@@ -20,13 +22,13 @@ export function useBulkImagesUpload (
     }
 
     if (uploaders.length > 1) {
-      root.$store.dispatch('notification/spawnNotification', {
+      applicationStore.dispatch('notification/spawnNotification', {
         type: 'error',
-        message: root.$t(
+        message: applicationI18n.t(
           '{filesCount} images were not uploaded because the maximum number of images reached',
           { filesCount }
         ),
-        action1: { label: root.$t('OK') }
+        action1: { label: applicationI18n.t('OK') }
       });
       return;
     }
@@ -43,7 +45,7 @@ export function useBulkImagesUpload (
     event.preventDefault();
     event.stopPropagation();
 
-    const uploaders: UploaderData[] = root.$store.getters['ui/getUploaders'];
+    const uploaders: UploaderData[] = applicationStore.getters['ui/getUploaders'];
 
     if (!uploaders || uploaders.length === 0) {
       return;

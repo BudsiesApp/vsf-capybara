@@ -60,14 +60,14 @@
 </template>
 
 <script lang="ts">
+import { useI18n, useStore } from '@vue-storefront/core/application-services';
 import {
   del,
   set,
   defineComponent,
   ref,
-  computed,
-  SetupContext
-} from '@vue/composition-api';
+  computed
+} from 'vue';
 import { SfButton, SfDivider, SfHeading } from '@storefront-ui/vue';
 import { Logger } from '@vue-storefront/core/lib/logger';
 import { DraftOrderItem, submitOrderItemCustomizationsState, saveOrderItemCustomizationsState, useEntityBusyState } from 'src/modules/customization-system';
@@ -79,16 +79,16 @@ import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import OrderItemCustomizationForm from 'theme/components/customization-system/forms/order-item-customization-form.vue';
 import { BudsieStatus } from 'src/modules/shared';
 
-function useOrderItemsBulkCustomizationActions (
-  { root }: SetupContext
-) {
+function useOrderItemsBulkCustomizationActions () {
+  const applicationStore = useStore();
+  const applicationI18n = useI18n();
   const isSubmitting = ref(false);
 
   function spawnError (errorMessage: string): void {
-    root.$store.dispatch('notification/spawnNotification', {
+    applicationStore.dispatch('notification/spawnNotification', {
       type: 'danger',
       message: errorMessage,
-      action1: { label: root.$t('OK') }
+      action1: { label: applicationI18n.t('OK') }
     });
     Logger.error(errorMessage, 'bulk-customize')();
   }
@@ -99,7 +99,7 @@ function useOrderItemsBulkCustomizationActions (
     }
 
     isSubmitting.value = true;
-    const userToken = root.$store.getters['user/getUserToken'];
+    const userToken = applicationStore.getters['user/getUserToken'];
     let submittedIds: number[] = [];
 
     try {
@@ -116,13 +116,13 @@ function useOrderItemsBulkCustomizationActions (
 
       submittedIds = savedOrderItemsIds;
 
-      root.$store.dispatch('notification/spawnNotification', {
+      applicationStore.dispatch('notification/spawnNotification', {
         type: 'success',
-        message: root.$t(
+        message: applicationI18n.t(
           '{count} Order item(s) have been saved successfully',
           { count: savedOrderItemsIds.length }
         ),
-        action1: { label: root.$t('OK') }
+        action1: { label: applicationI18n.t('OK') }
       });
 
       return savedOrderItemsIds;
@@ -141,7 +141,7 @@ function useOrderItemsBulkCustomizationActions (
     }
 
     isSubmitting.value = true;
-    const userToken = root.$store.getters['user/getUserToken'];
+    const userToken = applicationStore.getters['user/getUserToken'];
     let submittedIds: number[] = [];
 
     try {
@@ -168,13 +168,13 @@ function useOrderItemsBulkCustomizationActions (
       submittedIds = submitResult.success.map(s => s.orderItemId);
 
       if (submittedIds.length > 0) {
-        root.$store.dispatch('notification/spawnNotification', {
+        applicationStore.dispatch('notification/spawnNotification', {
           type: 'success',
-          message: root.$t(
+          message: applicationI18n.t(
             '{count} Order item(s) have been updated successfully',
             { count: submittedIds.length }
           ),
-          action1: { label: root.$t('OK') }
+          action1: { label: applicationI18n.t('OK') }
         });
       }
     } catch (error) {
@@ -215,6 +215,8 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const applicationStore = useStore();
+    const applicationI18n = useI18n();
     const orderItemCustomizationForm = ref<OrderItemCustomizationFormType[]>([]);
     const orderItemsErrors = ref<Record<string, string>>({});
 
@@ -257,7 +259,7 @@ export default defineComponent({
       }
     }
 
-    const { confirmCustomization, isSubmitting, saveCustomizationsState } = useOrderItemsBulkCustomizationActions(context);
+    const { confirmCustomization, isSubmitting, saveCustomizationsState } = useOrderItemsBulkCustomizationActions();
 
     const isFormDisabled = computed(() => {
       return isSubmitting.value || props.isDisabled;
@@ -359,7 +361,7 @@ export default defineComponent({
     }
 
     return {
-      ...useBulkImagesUpload(context, false),
+      ...useBulkImagesUpload(false),
       isFormDisabled,
       isSubmitButtonDisabled,
       goToOrderItem,

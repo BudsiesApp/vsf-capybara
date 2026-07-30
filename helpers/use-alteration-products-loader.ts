@@ -1,4 +1,5 @@
-import { computed, Ref, ref, SetupContext, watch } from '@vue/composition-api';
+import { useStore } from '@vue-storefront/core/application-services';
+import { computed, Ref, ref, watch } from 'vue';
 import { SearchQuery } from 'storefront-query-builder';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -17,9 +18,9 @@ function getSearchQuery (skus: string[]): SearchQuery {
 }
 
 export function useAlterationProductsLoader (
-  orders: Ref<Order[]>,
-  { root }: SetupContext
+  orders: Ref<Order[]>
 ) {
+  const applicationStore = useStore();
   const isLoading = ref<boolean>(false);
 
   const allOrderItems = computed<OrderItem[]>(() => {
@@ -52,7 +53,7 @@ export function useAlterationProductsLoader (
   });
 
   const productBySkuDictionary = computed<Record<string, Product>>(() => {
-    return root.$store.getters['product/getProductBySkuDictionary'] || {};
+    return applicationStore.getters['product/getProductBySkuDictionary'] || {};
   });
 
   const alterationProductByOrderItemId = computed<Record<number, Product>>(() => {
@@ -73,7 +74,7 @@ export function useAlterationProductsLoader (
 
       const updatedProduct = updateProductProductionTimeCustomizationData(
         product,
-        root.$store,
+        applicationStore,
         {
           makeProductionTimeRequired: false
         }
@@ -104,7 +105,7 @@ export function useAlterationProductsLoader (
 
     if (notLoadedSkus.length === 0) {
       try {
-        await root.$store.dispatch(
+        await applicationStore.dispatch(
           'budsies/loadProductsRushAddons',
           { productSku: '' }
         );
@@ -117,13 +118,13 @@ export function useAlterationProductsLoader (
 
     try {
       await Promise.all([
-        root.$store.dispatch('product/findProducts', {
+        applicationStore.dispatch('product/findProducts', {
           query: getSearchQuery(notLoadedSkus),
           options: {
             prefetchGroupProducts: false
           }
         }),
-        root.$store.dispatch(
+        applicationStore.dispatch(
           'budsies/loadProductsRushAddons',
           { productSku: '' }
         )

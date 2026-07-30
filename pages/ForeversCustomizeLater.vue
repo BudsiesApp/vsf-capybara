@@ -50,13 +50,13 @@ import {
   PropType,
   ref,
   toRefs
-} from '@vue/composition-api';
+} from 'vue';
 
+import { useRequestServices } from '@vue-storefront/core/request-services';
 import i18n from '@vue-storefront/core/i18n';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { isServer } from '@vue-storefront/core/helpers';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
-import getHostFromHeaders from '@vue-storefront/core/helpers/get-host-from-headers.function';
 import { ProductStructuredData } from 'src/modules/budsies';
 import {
   Customization,
@@ -98,6 +98,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const request = useRequestServices();
     const { existingPlushieId } = toRefs(props);
     const canUsePersistedCustomizationState = ref<boolean>(false);
     const productPurchaseFlow = ref<ProductPurchaseFlow>(
@@ -111,17 +112,13 @@ export default defineComponent({
       FOREVERS_OTHER_BUNDLE_SKU
     ]);
 
-    const { existingCartItem } = useExistingCartItem(existingPlushieId, context);
+    const { existingCartItem } = useExistingCartItem(existingPlushieId);
     const isSelectorDisabled = computed<boolean>(() => {
       return !!existingCartItem.value;
     });
 
     const storeUrl = computed<string>(() => {
-      const host = context.ssrContext
-        ? getHostFromHeaders((context.ssrContext.server.request as any).headers)
-        : window.location.host;
-
-      return `https://${host}`;
+      return `https://${request.host}`;
     });
 
     const productTypeSelectorOptions = computed<OptionValue[]>(() => {
@@ -195,7 +192,7 @@ export default defineComponent({
       currentProduct,
       isDataLoaded,
       selectProduct
-    } = useMultiProductsPage(productSkus, context);
+    } = useMultiProductsPage(productSkus);
 
     const showForm = computed<boolean>(() => {
       return isDataLoaded.value && !!currentProduct.value;
@@ -253,6 +250,7 @@ export default defineComponent({
       onFormMounted,
       onProductTypeChange,
       productPurchaseFlow,
+      requestServices: request,
       productTypeCustomization,
       productTypeSelectorOptions,
       selectedProductTypeOptionValueId,
@@ -290,7 +288,7 @@ export default defineComponent({
       link: [
         {
           rel: 'canonical',
-          href: getCanonicalUrl(this.$ssrContext, this.$router)
+          href: getCanonicalUrl(this.requestServices.host, this.$router)
         }
       ]
     };

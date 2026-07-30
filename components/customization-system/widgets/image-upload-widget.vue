@@ -37,7 +37,7 @@ import {
   ref,
   toRefs,
   watch
-} from '@vue/composition-api';
+} from 'vue';
 
 import {
   FileUploadValue,

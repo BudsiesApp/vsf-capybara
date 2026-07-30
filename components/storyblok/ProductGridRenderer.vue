@@ -23,7 +23,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, PropType } from '@vue/composition-api';
+import { useRoute, useRouter, useStore } from '@vue-storefront/core/application-services';
+import { defineComponent, computed, PropType } from 'vue';
 
 import Product from 'core/modules/catalog/types/Product';
 import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog'
@@ -58,16 +59,19 @@ export default defineComponent({
       default: ''
     }
   },
-  setup (props, { root }) {
+  setup (props) {
+    const applicationStore = useStore();
+    const applicationRouter = useRouter();
+    const currentRoute = useRoute();
     const productBySkuDictionary = computed<Record<string, Product>>(() => {
-      return root.$store.getters['product/getProductBySkuDictionary'];
+      return applicationStore.getters['product/getProductBySkuDictionary'];
     });
 
     const productPriceDictionary = computed<Record<string, PriceHelper.ProductPrice>>(() => {
-      return root.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY];
+      return applicationStore.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY];
     });
     const selectedCurrency = computed<Currency>(() => {
-      return root.$store.getters[GET_ACTIVE_CURRENCY];
+      return applicationStore.getters[GET_ACTIVE_CURRENCY];
     });
 
     const preparedProducts = computed<PreparedProduct[]>(() => {
@@ -92,7 +96,7 @@ export default defineComponent({
 
         const link = product.landing_page_url || resolveProductCardLink(
           preparedProduct.link,
-          route => root.$router.resolve(route).href
+          route => applicationRouter.resolve(route).href
         );
 
         products.push({ ...preparedProduct, link });
@@ -106,7 +110,7 @@ export default defineComponent({
         return props.contextName;
       }
 
-      return root.$route.path;
+      return currentRoute.path;
     });
 
     function onProductCardClick (productSku: string): void {

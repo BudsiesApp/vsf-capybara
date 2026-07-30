@@ -1,4 +1,4 @@
-import { Ref } from '@vue/composition-api';
+import { Ref } from 'vue';
 
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 
@@ -8,10 +8,10 @@ export function useImageUpload (
   existingCartItem: Ref<CartItem | undefined>,
   availableCustomizations: Ref<Customization[]>,
   customizationOptionValue: Ref<Record<string, CustomizationOptionValue>>,
-  customizationOptionComponents: Ref<any[] | null>
+  getCustomizationOptionComponents: () => any[]
 ) {
   async function uploadImage (imageUrl: string): Promise<void> {
-    if (!imageUrl || existingCartItem.value || !customizationOptionComponents.value) {
+    if (!imageUrl || existingCartItem.value) {
       return;
     }
 
@@ -30,7 +30,7 @@ export function useImageUpload (
       return;
     }
 
-    const customerImageOptionComponent = customizationOptionComponents.value.find(
+    const customerImageOptionComponent = getCustomizationOptionComponents().find(
       (comp: any) => comp.customization.id === customerImageCustomizationId
     );
 

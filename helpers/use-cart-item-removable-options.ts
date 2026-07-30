@@ -1,4 +1,5 @@
-import { computed, ComputedRef, nextTick, onMounted, ref, Ref, set, SetupContext } from '@vue/composition-api';
+import { useStore } from '@vue-storefront/core/application-services';
+import { computed, ComputedRef, nextTick, onMounted, ref, Ref, set } from 'vue';
 
 import i18n from '@vue-storefront/core/i18n';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
@@ -34,9 +35,9 @@ function getErrorNotificationMessage (error: unknown): string {
 }
 
 export function useCartItemRemovableOptions (
-  existingCartItem: Ref<CartItem>,
-  context: SetupContext
+  existingCartItem: Ref<CartItem>
 ) {
+  const applicationStore = useStore();
   const productCustomizations = computed<Customization[]>(() => {
     return existingCartItem.value.customizations || [];
   });
@@ -105,7 +106,7 @@ export function useCartItemRemovableOptions (
   const quantity = computed(() => existingCartItem.value.qty);
 
   const product: ComputedRef<Product | undefined> = computed(() => {
-    return context.root.$store.getters['product/getProductBySkuDictionary'][existingCartItem.value.sku];
+    return applicationStore.getters['product/getProductBySkuDictionary'][existingCartItem.value.sku];
   });
 
   const { addToCartHandler } = useAddToCart(
@@ -114,7 +115,6 @@ export function useCartItemRemovableOptions (
     customizationState,
     bundleOptions,
     existingCartItem,
-    context,
     undefined,
     existingCartItem.value.extension_attributes?.flow,
     true,
@@ -318,7 +318,7 @@ export function useCartItemRemovableOptions (
       }
     } catch (error) {
       rollback();
-      context.root.$store.dispatch('notification/spawnNotification', {
+      applicationStore.dispatch('notification/spawnNotification', {
         type: 'danger',
         message: getErrorNotificationMessage(error),
         action1: { label: i18n.t('OK') }

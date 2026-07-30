@@ -81,7 +81,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, PropType } from '@vue/composition-api';
+import { useStore } from '@vue-storefront/core/application-services';
+import { computed, defineComponent, inject, PropType } from 'vue';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 
 import i18n from '@vue-storefront/i18n';
@@ -127,7 +128,7 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const root = context.root;
+    const applicationStore = useStore();
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
 
     if (!imageHandlerService) {
@@ -136,7 +137,7 @@ export default defineComponent({
 
     const imageService = imageHandlerService;
 
-    const { order, isLoading, isError } = useOrderDetails(context, props.orderId);
+    const { order, isLoading, isError } = useOrderDetails(props.orderId);
     const showNotFound = computed<boolean>(() => {
       return isError.value;
     });
@@ -187,7 +188,7 @@ export default defineComponent({
     function onError (error: unknown): void {
       const message = (error as Error)?.message || String(i18n.t('Something went wrong'));
 
-      root.$store.dispatch('notification/spawnNotification', {
+      applicationStore.dispatch('notification/spawnNotification', {
         type: 'danger',
         message,
         action1: { label: i18n.t('OK') }

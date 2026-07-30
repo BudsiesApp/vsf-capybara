@@ -81,7 +81,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, computed, Ref, ComputedRef } from '@vue/composition-api';
+import { useI18n, useRouter, useStore } from '@vue-storefront/core/application-services';
+import { defineComponent, ref, watch, computed, Ref, ComputedRef } from 'vue';
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfCheckbox, SfHeading } from '@storefront-ui/vue';
 
@@ -122,12 +123,14 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const root = context.root;
+    const applicationStore = useStore();
+    const applicationRouter = useRouter();
+    const applicationI18n = useI18n();
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
     const baseAddressForm: Ref<InstanceType<typeof OBaseAddressForm> | null> = ref(null);
     const wasFormSubmitted = ref(false);
 
-    const { order, isLoading, isError: showNotFound } = useOrderDetails(context, props.orderId);
+    const { order, isLoading, isError: showNotFound } = useOrderDetails(props.orderId);
     const isSubmitting = ref(false);
     const addressFormModel: Ref<BaseAddressDetails> = ref({
       firstName: '',
@@ -149,7 +152,7 @@ export default defineComponent({
       handleValidationResult,
       isValidating: isValidatingAddress,
       completeValidation: completeAddressValidation
-    } = useAddressValidation(context);
+    } = useAddressValidation();
 
     const existingExtensionAttributes: ComputedRef<AddressExtensionAttributes | undefined> = computed(() => {
       return currentShippingAddress.value?.extension_attributes;
@@ -179,13 +182,7 @@ export default defineComponent({
 
     const { validateAndGoToFirstError } = useFormValidation(
       validationObserver,
-      () => {
-        const baseAddressFormComponent = baseAddressForm.value;
-
-        return {
-          ...(baseAddressFormComponent?.$refs || {})
-        };
-      }
+      () => baseAddressForm.value?.getFormValidationRefs() || {}
     );
 
     const isFormDisabled: ComputedRef<boolean> = computed(() => {
@@ -197,7 +194,7 @@ export default defineComponent({
     });
 
     const defaultShippingAddress = computed(() => {
-      return root.$store.getters['user/defaultShippingAddress'];
+      return applicationStore.getters['user/defaultShippingAddress'];
     });
 
     function mapOrderAddressToFormModel (orderAddress: OrderAddress): BaseAddressDetails {
@@ -282,7 +279,7 @@ export default defineComponent({
     }
 
     function onFailure (message: string): void {
-      root.$store.dispatch('notification/spawnNotification', {
+      applicationStore.dispatch('notification/spawnNotification', {
         type: 'danger',
         message,
         action1: { label: i18n.t('OK') }
@@ -292,13 +289,13 @@ export default defineComponent({
     async function requestOrderShippingAddressUpdate (address: BaseAddressDetails): Promise<void> {
       const orderAddressPayload = mapBaseAddressDetailsToOrderAddress(address);
 
-      await root.$store.dispatch(REQUEST_ORDER_SHIPPING_ADDRESS_UPDATE_ACTION, {
+      await applicationStore.dispatch(REQUEST_ORDER_SHIPPING_ADDRESS_UPDATE_ACTION, {
         address: orderAddressPayload
       });
     }
 
     async function requestOrderShippingAddressConfirmation (addressId: number): Promise<void> {
-      await root.$store.dispatch(REQUEST_ORDER_SHIPPING_ADDRESS_CONFIRMATION_ACTION, {
+      await applicationStore.dispatch(REQUEST_ORDER_SHIPPING_ADDRESS_CONFIRMATION_ACTION, {
         addressId
       });
     }
@@ -327,7 +324,7 @@ export default defineComponent({
         extension_attributes: address.extension_attributes
       };
 
-      await root.$store.dispatch('budsies/updateAddress', { address: addressToUpdate });
+      await applicationStore.dispatch('budsies/updateAddress', { address: addressToUpdate });
     }
 
     async function updateAddress (address: BaseAddressDetails): Promise<void> {
@@ -340,15 +337,15 @@ export default defineComponent({
           await updateDefaultShippingAddress(address);
         }
 
-        root.$store.dispatch('notification/spawnNotification', {
+        applicationStore.dispatch('notification/spawnNotification', {
           type: 'success',
           message: i18n.t('Shipping address updated successfully'),
           action1: { label: i18n.t('OK') }
         });
 
-        root.$router.push({ name: AccountPageName.ORDERS_HISTORY });
+        applicationRouter.push({ name: AccountPageName.ORDERS_HISTORY });
       } catch (error) {
-        onFailure(root.$t('Unable to update order shipping address') as string);
+        onFailure(applicationI18n.t('Unable to update order shipping address') as string);
       } finally {
         isSubmitting.value = false;
       }
@@ -367,13 +364,13 @@ export default defineComponent({
         await requestOrderShippingAddressConfirmation(shippingAddress.entity_id);
         goToOrderHistory();
 
-        root.$store.dispatch('notification/spawnNotification', {
+        applicationStore.dispatch('notification/spawnNotification', {
           type: 'success',
           message: i18n.t('Address confirmed successfully'),
           action1: { label: i18n.t('OK') }
         });
       } catch (error) {
-        onFailure(root.$t('Unable to confirm address') as string);
+        onFailure(applicationI18n.t('Unable to confirm address') as string);
       } finally {
         isSubmitting.value = false;
       }
@@ -429,7 +426,7 @@ export default defineComponent({
     );
 
     function goToOrderHistory (): void {
-      root.$router.push({ name: AccountPageName.ORDERS_HISTORY });
+      applicationRouter.push({ name: AccountPageName.ORDERS_HISTORY });
     }
 
     async function useWithoutChanges (): Promise<void> {

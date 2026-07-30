@@ -13,6 +13,7 @@
           name="email"
           type="email"
           :label="$t('E-mail address')"
+          autocomplete="email"
           :required="true"
           :valid="!$v.email.$error"
           :error-message="

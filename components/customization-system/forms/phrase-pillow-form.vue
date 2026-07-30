@@ -125,6 +125,7 @@
 </template>
 
 <script lang="ts">
+import { useRouter, useStore } from '@vue-storefront/core/application-services';
 import {
   computed,
   defineComponent,
@@ -133,7 +134,7 @@ import {
   ref,
   toRefs,
   watch
-} from '@vue/composition-api';
+} from 'vue';
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfHeading, SfSteps } from '@storefront-ui/vue';
 
@@ -202,6 +203,8 @@ export default defineComponent({
     ValidationObserver
   },
   setup (props, context) {
+    const applicationStore = useStore();
+    const applicationRouter = useRouter();
     const { canUsePersistedCustomizationState, existingCartItem, product } = toRefs(props);
 
     const validationObserver: Ref<InstanceType<
@@ -292,8 +295,7 @@ export default defineComponent({
       customizationOptionValue,
       product,
       mergeCustomizationState,
-      removeUnavailableOptionValues,
-      context
+      removeUnavailableOptionValues
     );
 
     const { removePreservedState } =
@@ -314,9 +316,7 @@ export default defineComponent({
         updateCustomizationOptionValue
       );
 
-    const { customizationFilter } = useABTestingCustomizationsFilter(
-      context.ssrContext
-    );
+    const { customizationFilter } = useABTestingCustomizationsFilter();
 
     const { filteredCustomizations } = useCustomizationsFilter(
       availableCustomizations,
@@ -340,8 +340,7 @@ export default defineComponent({
       quantity,
       customizationState,
       bundleOptions,
-      existingCartItem,
-      context
+      existingCartItem
     );
 
     const { isUnmounted } = useComponentUnmountedChecker();
@@ -382,12 +381,12 @@ export default defineComponent({
           return;
         }
 
-        context.root.$router.push({
+        applicationRouter.push({
           name: 'cross-sells',
           params: { parentSku: product.value.sku }
         });
       } catch (error) {
-        context.root.$store.dispatch('notification/spawnNotification', {
+        applicationStore.dispatch('notification/spawnNotification', {
           type: 'danger',
           message: 'Error: ' + error,
           action1: { label: i18n.t('OK') }
@@ -434,7 +433,7 @@ export default defineComponent({
     return {
       ...customizationGroups,
       ...formSteps,
-      ...useBulkImagesUpload(context),
+      ...useBulkImagesUpload(),
       availableCustomizations,
       availableOptionValues,
       bottomStorySlug,

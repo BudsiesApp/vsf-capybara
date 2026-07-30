@@ -47,6 +47,15 @@
       {{ message }}
     </div>
 
+    <span
+      class="_screen-reader-message"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      {{ couponAppliedAnnouncement }}
+    </span>
+
     <slot
       name="bottom-helper-text"
       :is-coupon-applied="isCouponCode"
@@ -81,7 +90,8 @@ export default {
     return {
       promoCode: '',
       fMessage: undefined,
-      isSubmitting: false
+      isSubmitting: false,
+      couponAppliedAnnouncement: ''
     };
   },
   computed: {
@@ -112,6 +122,7 @@ export default {
       }
 
       this.isSubmitting = true;
+      this.couponAppliedAnnouncement = '';
 
       try {
         const result = await this.$store.dispatch('cart/applyCoupon', { couponCode: this.promoCode });
@@ -119,6 +130,8 @@ export default {
         if (result.code !== 200) {
           throw new Error(result.result.errorMessage);
         }
+
+        this.couponAppliedAnnouncement = this.$t('Coupon applied.').toString();
       } catch (error) {
         const errorMessage = error.errorMessage || `Coupon code "${this.promoCode}" is not valid.`;
         this.message = errorMessage;
@@ -179,6 +192,18 @@ export default {
     margin-top: var(--spacer-xs);
     font-size: var(--font-xs);
     color: var(--c-danger-variant);
+  }
+  ._screen-reader-message {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
   }
   ::v-deep .sf-input {
     &__wrapper {

@@ -3,6 +3,9 @@
     class="m-remind-me-about-budsies-form"
   >
     <SfHeading :title="title" :level="3" />
+    <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+      {{ reminderAnnouncement }}
+    </p>
 
     <validation-observer tag="form" v-slot="{passes}" v-if="showForm">
       <validation-provider
@@ -14,6 +17,7 @@
           v-model="email"
           name="email"
           type="email"
+          autocomplete="email"
           :disabled="isFormDisabled"
           :placeholder="inputPlaceholder"
           :valid="!errors.length"
@@ -51,8 +55,8 @@
         </SfButton>
       </div>
 
-      <template v-if="$additionalContent.formLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.formLinks" />
+      <template v-if="privacyPolicyLinks.length">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
       </template>
     </validation-observer>
 
@@ -63,13 +67,17 @@
 </template>
 
 <script lang="ts">
-import Vue, { VueConstructor } from 'vue';
+import Vue, { ref, VueConstructor } from 'vue';
 import DatePicker from 'vue2-datepicker';
 import { ValidationObserver, ValidationProvider, extend } from 'vee-validate';
 import { required, email } from 'vee-validate/dist/rules';
-import { defineComponent, ref } from '@vue/composition-api';
 
 import { SfButton, SfInput, SfHeading } from '@storefront-ui/vue';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import { usePersistedEmail } from 'src/modules/persisted-customer-data';
 
@@ -85,7 +93,7 @@ extend('email', {
   message: 'Please, provide the correct email address'
 });
 
-export default defineComponent({
+export default Vue.extend({
   name: 'MRemindMeAboutBudsiesForm',
   props: {
     buttonText: {
@@ -115,9 +123,14 @@ export default defineComponent({
   },
   setup () {
     const email = ref<string | undefined>(undefined);
+    const privacyPolicyLinks = useAdditionalContent(
+      AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+    );
 
     return {
       email,
+      privacyPolicyLinks: privacyPolicyLinks as unknown as
+        readonly AdditionalContentEntry[],
       ...usePersistedEmail(email)
     }
   },
@@ -142,6 +155,24 @@ export default defineComponent({
     },
     isFormDisabled (): boolean {
       return this.isSubmitting;
+    },
+    reminderStatus (): string {
+      if (!this.date) {
+        return '';
+      }
+
+      return this.$t('Reminder set for {date}', {
+        date: this.defaultSystemDateFormatFormatter.stringify(this.date)
+      }).toString();
+    },
+    reminderAnnouncement (): string {
+      if (!this.isSubmitted) {
+        return '';
+      }
+
+      return [this.successMessage, this.reminderStatus]
+        .filter(Boolean)
+        .join(' ');
     }
   },
   methods: {
@@ -199,5 +230,6 @@ export default defineComponent({
     color: var(--c-primary);
     margin-top: var(--spacer-sm);
   }
+
 }
 </style>

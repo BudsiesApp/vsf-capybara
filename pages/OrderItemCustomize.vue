@@ -32,12 +32,13 @@
 </template>
 
 <script lang="ts">
+import { useI18n } from '@vue-storefront/core/application-services';
 import {
   computed,
   defineComponent,
   PropType,
   toRefs
-} from '@vue/composition-api';
+} from 'vue';
 import { SfHeading } from '@storefront-ui/vue';
 
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
@@ -110,18 +111,13 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const applicationI18n = useI18n();
     const { sku, orderItemId, orderId, layout, plushieType } = toRefs(props);
 
-    const { currentProduct, isDataLoaded: isProductLoaded } = useProductPage(
-      sku,
-      context
-    );
-    const { draftOrderItem, isDataLoaded: isDraftOrderItemLoaded } = useDraftOrderItem(
-      orderItemId,
-      context
-    );
+    const { currentProduct, isDataLoaded: isProductLoaded } = useProductPage(sku);
+    const { draftOrderItem, isDataLoaded: isDraftOrderItemLoaded } = useDraftOrderItem(orderItemId);
 
-    const orderDetails = useOrderDetails(context, orderId.value || '')
+    const orderDetails = useOrderDetails(orderId.value || '')
 
     const order = computed(() => {
       return orderDetails.order.value || undefined;
@@ -153,8 +149,7 @@ export default defineComponent({
       alterationProduct
     } = useOrderItemAlterationProductLoader(
       orderItem,
-      order,
-      context
+      order
     );
 
     const additionalSteps = computed<CreationWizardFormAdditionalStep[]>(() => {
@@ -208,8 +203,8 @@ export default defineComponent({
 
       const title =
         plushieType.value === PlushieType.FOREVERS
-          ? context.root.$t('Customize Your Forevers Plush')
-          : context.root.$t('Customize Your Golf Head Covers');
+          ? applicationI18n.t('Customize Your Forevers Plush')
+          : applicationI18n.t('Customize Your Golf Head Covers');
 
       return title.toString();
     });

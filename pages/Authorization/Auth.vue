@@ -1,5 +1,11 @@
 <template>
   <div id="auth-page">
+    <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+      {{ isLoading ? $t('Authenticating...') : '' }}
+    </p>
+    <p class="sr-only" role="alert" aria-atomic="true">
+      {{ errorMessage }}
+    </p>
     <div v-if="isLoading" class="loading-message">
       <SfLoader :loading="true" />
       <p>{{ $t('Authenticating...') }}</p>
@@ -33,6 +39,7 @@
 </template>
 
 <script lang="ts">
+import { useI18n, useRoute, useRouter, useStore } from '@vue-storefront/core/application-services';
 import {
   defineComponent,
   onMounted,
@@ -41,7 +48,7 @@ import {
   onBeforeUnmount,
   watch,
   computed
-} from '@vue/composition-api';
+} from 'vue';
 import { SfLoader, SfHeading, SfButton } from '@storefront-ui/vue';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
@@ -74,7 +81,10 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const root = context.root;
+    const applicationStore = useStore();
+    const applicationRouter = useRouter();
+    const currentRoute = useRoute();
+    const applicationI18n = useI18n();
 
     const isLoading = ref<boolean>(true);
     const isSuccess = ref<boolean>(false);
@@ -88,32 +98,32 @@ export default defineComponent({
       navigateToPostAuthRedirectPath,
       persistPostAuthRedirectPath,
       getPersistedPostAuthRedirectPath
-    } = useAuthorizationRouteRestoration(context);
+    } = useAuthorizationRouteRestoration();
 
     const isUserLoggedIn = computed<boolean>(() => {
-      return root.$store.getters['user/isLoggedIn'];
+      return applicationStore.getters['user/isLoggedIn'];
     });
 
     const authenticate = async (): Promise<void> => {
       if (isUserLoggedIn.value) {
-        root.$router.push('/');
+        applicationRouter.push('/');
         return;
       }
 
       if (!props.token) {
-        errorMessage.value = root.$t('No authentication token provided').toString();
+        errorMessage.value = applicationI18n.t('No authentication token provided').toString();
         isLoading.value = false;
         return;
       }
 
       try {
-        const response = await root.$store.dispatch('user/authenticate', {
+        const response = await applicationStore.dispatch('user/authenticate', {
           email: props.email,
           token: props.token
         });
 
         if (response.code !== 200) {
-          const error = response.result.errorMessage || root.$t('Authentication failed').toString();
+          const error = response.result.errorMessage || applicationI18n.t('Authentication failed').toString();
           errorMessage.value = error;
           Logger.error('Authentication failed with response:', JSON.stringify(response.result), 'auth-page')();
           return;
@@ -126,21 +136,21 @@ export default defineComponent({
           return;
         }
 
-        root.$store.dispatch('notification/spawnNotification', {
+        applicationStore.dispatch('notification/spawnNotification', {
           type: 'success',
-          message: root.$t('Successfully logged in!'),
-          action1: { label: root.$t('OK') }
+          message: applicationI18n.t('Successfully logged in!'),
+          action1: { label: applicationI18n.t('OK') }
         });
       } catch (error) {
         Logger.error(error, 'auth-page')();
-        errorMessage.value = root.$t('Authentication failed. Please try again.').toString();
+        errorMessage.value = applicationI18n.t('Authentication failed. Please try again.').toString();
       } finally {
         isLoading.value = false;
       }
     };
 
     onMounted(() => {
-      if (!root.$store.getters['user/getIsSessionStarted']) {
+      if (!applicationStore.getters['user/getIsSessionStarted']) {
         EventBus.$once('session-after-started', authenticate);
         return;
       }
@@ -166,7 +176,7 @@ export default defineComponent({
       type RouteQueryValue = string | (string | null)[] | null | undefined;
 
       const query: Record<string, RouteQueryValue> = {};
-      const currentRouteQuery = root.$route.query as Record<string, RouteQueryValue>;
+      const currentRouteQuery = currentRoute.query as Record<string, RouteQueryValue>;
 
       for (const [key, value] of Object.entries(currentRouteQuery)) {
         if (key === 'token') {
@@ -176,7 +186,7 @@ export default defineComponent({
         query[key] = value;
       }
 
-      const existingRedirectTargetValue = root.$route.query[REDIRECT_TARGET_QUERY_KEY];
+      const existingRedirectTargetValue = currentRoute.query[REDIRECT_TARGET_QUERY_KEY];
 
       let redirectTarget = typeof existingRedirectTargetValue === 'string'
         ? existingRedirectTargetValue
@@ -191,7 +201,7 @@ export default defineComponent({
         await persistPostAuthRedirectPath(redirectTarget);
       }
 
-      root.$router.push({ name: PageName.SIGN_IN, query });
+      applicationRouter.push({ name: PageName.SIGN_IN, query });
     }
 
     return {

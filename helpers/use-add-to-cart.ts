@@ -1,4 +1,5 @@
-import { Ref, SetupContext, ref } from '@vue/composition-api';
+import { useStore } from '@vue-storefront/core/application-services';
+import { Ref, ref } from 'vue';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
@@ -14,12 +15,12 @@ export function useAddToCart (
   customizationStateItems: Ref<CustomizationStateItem[]>,
   bundleOptions: Ref<Record<number, SelectedBundleOption>>,
   existingCartItem: Ref<CartItem | undefined>,
-  { root }: SetupContext,
   existingPlushieId?: string,
   productPurchaseFlow?: ProductPurchaseFlow,
   waitForTotalsUpdate?: boolean,
   propagateAllErrors?: boolean
 ) {
+  const applicationStore = useStore();
   const isSubmitting = ref<boolean>(false);
 
   async function updateClientAndServerItem (payload: {
@@ -28,7 +29,7 @@ export function useAddToCart (
     forceClientState?: boolean,
     waitForTotalsUpdate?: boolean
   }): Promise<void> {
-    await root.$store.dispatch('cart/updateClientAndServerItem', payload);
+    await applicationStore.dispatch('cart/updateClientAndServerItem', payload);
   }
 
   async function addToCart (): Promise<void> {
@@ -68,7 +69,7 @@ export function useAddToCart (
     }
 
     try {
-      await root.$store.dispatch('cart/addItem', {
+      await applicationStore.dispatch('cart/addItem', {
         productToAdd: Object.assign({}, product.value, productToAddData)
       });
     } catch (err) {

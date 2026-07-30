@@ -14,6 +14,12 @@
     <div class="_sub-title">
       A digital copy of our exclusive children's book "Dongler's Dinner Quest"!
     </div>
+    <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+      {{ isSubmitted ? submissionSuccessMessage : '' }}
+    </p>
+    <p class="sr-only" role="alert" aria-atomic="true">
+      {{ isSubmittedWthError ? submissionErrorMessage : '' }}
+    </p>
 
     <form @submit.prevent="onSubmit" class="_form" v-show="!isSubmitted">
       <div class="_email-row">
@@ -22,6 +28,7 @@
           name="email"
           type="email"
           :label="$t('Email:')"
+          autocomplete="email"
           :required="true"
           :disabled="isSubmitting"
           :valid="!$v.email.$error"
@@ -34,7 +41,7 @@
       </div>
 
       <div class="sf-input__error-message" v-show="isSubmittedWthError">
-        <div>Something went wrong... Please, try again or contact the support.</div>
+        <div>{{ submissionErrorMessage }}</div>
       </div>
 
       <div class="_button-row">
@@ -50,15 +57,15 @@
         {{ $t('We\'ll send you a digital copy of the coloring book via email for you to download when ready!') }}
       </div>
 
-      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      <template v-if="privacyPolicyLinks.length">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
       </template>
     </form>
 
     <div class="_success-message" v-show="isSubmitted">
       <p>
         <strong>
-          {{ $t('Success! Your storybook is on it\'s way') }}
+          {{ submissionSuccessMessage }}
         </strong>
       </p>
 
@@ -75,6 +82,11 @@ import { Blok } from 'src/modules/vsf-storyblok-module/components'
 import { required, email } from 'vuelidate/lib/validators';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import { DonglerBookService } from 'src/modules/dongler-book';
 import { PERSISTED_CUSTOMER_EMAIL, SET_PERSISTED_CUSTOMER_EMAIL } from 'src/modules/persisted-customer-data';
@@ -88,6 +100,16 @@ export default Blok.extend({
     SfInput,
     SfButton
   },
+  setup () {
+    const privacyPolicyLinks = useAdditionalContent(
+      AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+    );
+
+    return {
+      privacyPolicyLinks: privacyPolicyLinks as unknown as
+        readonly AdditionalContentEntry[]
+    };
+  },
   data () {
     return {
       isSubmitting: false,
@@ -99,6 +121,12 @@ export default Blok.extend({
   computed: {
     itemData (): DonglerBookData {
       return this.item as DonglerBookData;
+    },
+    submissionErrorMessage (): string {
+      return this.$t('Something went wrong... Please, try again or contact the support.').toString();
+    },
+    submissionSuccessMessage (): string {
+      return this.$t('Success! Your storybook is on it\'s way').toString();
     }
   },
   beforeMount () {

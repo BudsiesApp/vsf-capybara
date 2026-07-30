@@ -23,6 +23,8 @@
 </template>
 
 <script lang="ts">
+import { useRoute } from '@vue-storefront/core/application-services';
+import { useRequestServices } from '@vue-storefront/core/request-services';
 import {
   computed,
   defineComponent,
@@ -30,7 +32,7 @@ import {
   ref,
   toRefs,
   watch
-} from '@vue/composition-api';
+} from 'vue';
 
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import { htmlDecode } from '@vue-storefront/core/filters';
@@ -87,9 +89,11 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const currentRoute = useRoute();
+    const requestServices = useRequestServices();
     const { existingPlushieId, sku } = toRefs(props);
 
-    const { currentProduct, isDataLoaded } = useProductPage(sku, context);
+    const { currentProduct, isDataLoaded } = useProductPage(sku);
     const canUsePersistedCustomizationState = ref<boolean>(false);
 
     const showForm = computed<boolean>(() => {
@@ -142,7 +146,7 @@ export default defineComponent({
     );
 
     const imageUrl = computed<string | undefined>(() => {
-      let url = context.root.$route.query['image-url'];
+      let url = currentRoute.query['image-url'];
 
       if (Array.isArray(url)) {
         url = url[0] || '';
@@ -156,7 +160,7 @@ export default defineComponent({
     });
 
     return {
-      ...useExistingCartItem(existingPlushieId, context),
+      ...useExistingCartItem(existingPlushieId),
       canUsePersistedCustomizationState,
       currentProduct,
       imageUrl,
@@ -164,6 +168,7 @@ export default defineComponent({
       formPlaceholderComponent,
       isLeavePage,
       onFormMounted,
+      requestServices,
       showForm,
       showPlaceholder
     };
@@ -203,7 +208,7 @@ export default defineComponent({
       link: [
         {
           rel: 'canonical',
-          href: getCanonicalUrl(this.$ssrContext, this.$router)
+          href: getCanonicalUrl(this.requestServices.host, this.$router)
         }
       ]
     };

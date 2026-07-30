@@ -1,15 +1,21 @@
 <template>
-  <div ref="loader" class="m-loader" v-show="isVisible">
-    <div class="m-loader--container">
-      <SfLoader :loading="true" />
-      <div v-if="message" class="m-loader--message">
-        {{ message }}
+  <div>
+    <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+      {{ message }}
+    </p>
+    <div ref="loader" class="m-loader" v-show="isVisible">
+      <div class="m-loader--container">
+        <SfLoader :loading="true" />
+        <div v-if="message" class="m-loader--message">
+          {{ message }}
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { mapState } from 'vuex';
 import { SfLoader } from '@storefront-ui/vue';
 import { disableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
@@ -26,14 +32,14 @@ export default {
     isVisible: state => state.ui.loader
   }),
   beforeMount () {
-    this.$bus.$on('notification-progress-start', this.show);
-    this.$bus.$on('notification-progress-stop', this.hide);
+    EventBus.$on('notification-progress-start', this.show);
+    EventBus.$on('notification-progress-stop', this.hide);
   },
   beforeDestroy () {
     this.unlockScroll();
 
-    this.$bus.$off('notification-progress-start', this.show);
-    this.$bus.$off('notification-progress-stop', this.hide);
+    EventBus.$off('notification-progress-start', this.show);
+    EventBus.$off('notification-progress-stop', this.hide);
   },
   methods: {
     lockScroll () {
@@ -49,15 +55,16 @@ export default {
       clearAllBodyScrollLocks();
     },
     show (message = null) {
-      this.message = message;
       this.$store.commit('ui/setLoader', true);
       this.$nextTick(() => {
         this.lockScroll();
+        this.message = message;
       });
     },
     hide () {
       this.unlockScroll();
       this.$store.commit('ui/setLoader', false);
+      this.message = '';
     }
   }
 };

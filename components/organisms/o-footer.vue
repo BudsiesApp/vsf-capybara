@@ -102,9 +102,9 @@
         <privacy-policy-link />
       </p>
 
-      <template v-if="$additionalContent.footerLinks">
+      <template v-if="footerLinks.length">
         <div class="_additional-links">
-          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.footerLinks" />
+          <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in footerLinks" />
         </div>
       </template>
     </div>
@@ -117,6 +117,10 @@ import { SfFooter, SfList, SfMenuItem, SfHeading } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
 import config from 'config';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
+import {
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 import get from 'lodash-es/get';
 
 import { BaseImage } from 'src/modules/budsies';
@@ -142,6 +146,13 @@ export default {
       type: String,
       default: ''
     }
+  },
+  setup () {
+    return {
+      footerLinks: useAdditionalContent(
+        AdditionalContentOutlet.FOOTER_LINKS
+      )
+    };
   },
   computed: {
 
