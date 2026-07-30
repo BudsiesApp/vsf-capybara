@@ -177,16 +177,6 @@ body,
   .o-footer {
     flex: 0 0 auto;
   }
-
-  .crt-widget, .crt-popup-manager {
-    --crt-color-post-link: var(--c-text);
-  }
-
-  .crt-widget .crt-post-fullname a,
-  .crt-widget .crt-post-text a,
-  .crt-widget .crt-post-username a {
-    color: var(--c-link);
-  }
 }
 
 @include for-desktop {
