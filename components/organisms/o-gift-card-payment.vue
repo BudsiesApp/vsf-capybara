@@ -1,10 +1,16 @@
 <template>
   <div class="gift-card-payment">
     <div class="_notice-message" v-if="showNoticeMessage">
-      Gift Cards cannot be used to purchase Gift Card products
+      {{ $t('Gift Cards cannot be used to purchase Gift Card products') }}
     </div>
+    <p class="sr-only" role="alert" aria-atomic="true">
+      {{ giftCardErrorMessage }}
+    </p>
 
     <template v-if="showContent">
+      <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {{ liveMessage }}
+      </p>
       <SfCheckbox
         :disabled="isDisabled"
         v-model="useGiftCard"
@@ -64,7 +70,7 @@
 
           <div class="_loader -gift-card" v-show="isSubmitting">
             <SfLoader class="_sf-loader" :loading="true" />
-            <span class="_loader-text"> Adding Gift Card... </span>
+            <span class="_loader-text">{{ $t('Adding Gift Card...') }}</span>
           </div>
 
           <SfButton
@@ -77,7 +83,7 @@
         </validation-observer>
 
         <div class="_grand-total-notification" v-if="showGrandTotalNotification">
-          <span> Your order’s grand total is now zero. You're all set! </span>
+          <span>{{ $t('Your order’s grand total is now zero. You\'re all set!') }}</span>
         </div>
       </div>
     </template>
@@ -111,6 +117,15 @@ export default GiftCardPayment.extend({
   computed: {
     isDisabled (): boolean {
       return this.isSubmitting || this.disabled;
+    },
+    giftCardErrorMessage (): string {
+      if (this.codeError) {
+        return this.codeError;
+      }
+
+      return this.showNoticeMessage
+        ? this.$t('Gift Cards cannot be used to purchase Gift Card products').toString()
+        : '';
     }
   }
 });

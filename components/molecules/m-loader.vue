@@ -1,9 +1,14 @@
 <template>
-  <div ref="loader" class="m-loader" v-show="isVisible">
-    <div class="m-loader--container">
-      <SfLoader :loading="true" />
-      <div v-if="message" class="m-loader--message">
-        {{ message }}
+  <div>
+    <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+      {{ message }}
+    </p>
+    <div ref="loader" class="m-loader" v-show="isVisible">
+      <div class="m-loader--container">
+        <SfLoader :loading="true" />
+        <div v-if="message" class="m-loader--message">
+          {{ message }}
+        </div>
       </div>
     </div>
   </div>
@@ -50,15 +55,16 @@ export default {
       clearAllBodyScrollLocks();
     },
     show (message = null) {
-      this.message = message;
       this.$store.commit('ui/setLoader', true);
       this.$nextTick(() => {
         this.lockScroll();
+        this.message = message;
       });
     },
     hide () {
       this.unlockScroll();
       this.$store.commit('ui/setLoader', false);
+      this.message = '';
     }
   }
 };

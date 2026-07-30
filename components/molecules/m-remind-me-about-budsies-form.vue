@@ -3,6 +3,9 @@
     class="m-remind-me-about-budsies-form"
   >
     <SfHeading :title="title" :level="3" />
+    <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+      {{ reminderAnnouncement }}
+    </p>
 
     <validation-observer tag="form" v-slot="{passes}" v-if="showForm">
       <validation-provider
@@ -137,6 +140,24 @@ export default Vue.extend({
     },
     isFormDisabled (): boolean {
       return this.isSubmitting;
+    },
+    reminderStatus (): string {
+      if (!this.date) {
+        return '';
+      }
+
+      return this.$t('Reminder set for {date}', {
+        date: this.defaultSystemDateFormatFormatter.stringify(this.date)
+      }).toString();
+    },
+    reminderAnnouncement (): string {
+      if (!this.isSubmitted) {
+        return '';
+      }
+
+      return [this.successMessage, this.reminderStatus]
+        .filter(Boolean)
+        .join(' ');
     }
   },
   methods: {
@@ -194,5 +215,6 @@ export default Vue.extend({
     color: var(--c-primary);
     margin-top: var(--spacer-sm);
   }
+
 }
 </style>
