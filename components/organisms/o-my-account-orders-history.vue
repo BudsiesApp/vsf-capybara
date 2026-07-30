@@ -2,6 +2,12 @@
   <div class="o-my-account-orders-history">
     <SfTabs :open-tab="1">
       <SfTab :title="$t('My orders')" class="_orders-tab">
+        <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          {{ ordersAnnouncement }}
+        </p>
+        <p class="sr-only" role="alert" aria-atomic="true">
+          {{ isError ? $t('Error loading orders') : '' }}
+        </p>
         <div v-if="showOrdersHistoryList" class="_content">
           <orders-history-list
             :orders="activeOrdersList"
@@ -39,6 +45,7 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
 import { SfLoader, SfTabs } from '@storefront-ui/vue';
+import { useI18n } from '@vue-storefront/core/application-services';
 
 import {
   OrdersHistoryList,
@@ -61,7 +68,8 @@ export default defineComponent({
   provide: {
     AlterationProductForm
   },
-  setup (_, context) {
+  setup (_) {
+    const applicationI18n = useI18n();
     const {
       activeOrdersList,
       completedOrdersList,
@@ -83,6 +91,21 @@ export default defineComponent({
     const showOrdersHistoryList = computed<boolean>(() => {
       return !isLoading.value && !isError.value && !showEmptyOrdersHistoryMessage.value;
     });
+    const ordersAnnouncement = computed<string>(() => {
+      if (showLoadingIndicator.value) {
+        return applicationI18n.t('Loading orders').toString();
+      }
+
+      if (showEmptyOrdersHistoryMessage.value) {
+        return applicationI18n.t('Your order history is empty').toString();
+      }
+
+      if (showOrdersHistoryList.value) {
+        return applicationI18n.t('{count} orders loaded', { count: ordersList.value.length }).toString();
+      }
+
+      return '';
+    });
 
     return {
       activeOrdersList,
@@ -90,6 +113,8 @@ export default defineComponent({
       completedOrdersList,
       isError,
       isLoading,
+      ordersList,
+      ordersAnnouncement,
       showLoadingIndicator,
       showEmptyOrdersHistoryMessage,
       showOrdersHistoryList

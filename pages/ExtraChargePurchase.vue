@@ -7,8 +7,14 @@
       <div class="loader" />
     </div>
 
+    <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+      {{ pageStatus }}
+    </p>
+    <p class="sr-only" role="alert" aria-atomic="true">
+      {{ errorMessage || '' }}
+    </p>
     <p class="_message">
-      {{ errorMessage ? errorMessage : pageStatus }}
+      {{ errorMessage || pageStatus }}
     </p>
   </div>
 </template>

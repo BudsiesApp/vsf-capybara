@@ -1,5 +1,12 @@
 <template>
   <div class="addresses-list">
+    <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+      {{ statusMessage }}
+    </p>
+
+    <p class="sr-only" role="alert" aria-atomic="true">
+      {{ actionError }}
+    </p>
     <section class="_default-addresses">
       <SfHeading :title="$t('Default Addresses')" :level="3" class="_title" />
 
@@ -168,31 +175,61 @@ export default {
       );
     }
   },
+  data () {
+    return {
+      actionError: '',
+      statusMessage: ''
+    };
+  },
   methods: {
-    removeAddress (address) {
-      this.$store.dispatch('budsies/removeAddress', { address: { id: address.id } });
+    clearActionMessages () {
+      this.actionError = '';
+      this.statusMessage = '';
     },
-    setAddressAsDefaultForBilling (address) {
-      this.$store.dispatch(
-        'budsies/updateAddress',
-        {
+    showActionError (error) {
+      this.actionError = error instanceof Error && error.message
+        ? error.message
+        : this.$t('Unable to update address').toString();
+    },
+    async removeAddress (address) {
+      this.clearActionMessages();
+
+      try {
+        await this.$store.dispatch('budsies/removeAddress', { address: { id: address.id } });
+        this.statusMessage = this.$t('Address removed').toString();
+      } catch (error) {
+        this.showActionError(error);
+      }
+    },
+    async setAddressAsDefaultForBilling (address) {
+      this.clearActionMessages();
+
+      try {
+        await this.$store.dispatch('budsies/updateAddress', {
           address: {
             ...address,
             default_billing: true
           }
-        }
-      );
+        });
+        this.statusMessage = this.$t('Address set as default billing').toString();
+      } catch (error) {
+        this.showActionError(error);
+      }
     },
-    setAddressAsDefaultForShipping (address) {
-      this.$store.dispatch(
-        'budsies/updateAddress',
-        {
+    async setAddressAsDefaultForShipping (address) {
+      this.clearActionMessages();
+
+      try {
+        await this.$store.dispatch('budsies/updateAddress', {
           address: {
             ...address,
             default_shipping: true
           }
-        }
-      );
+        });
+        this.statusMessage = this.$t('Address set as default shipping').toString();
+      } catch (error) {
+        this.showActionError(error);
+      }
     }
   }
 }
