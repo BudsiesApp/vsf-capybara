@@ -7,6 +7,12 @@
       v-slot="{passes}"
       slim
     >
+      <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {{ isSuccessSubscribed ? successMessage : '' }}
+      </p>
+      <p class="sr-only" role="alert" aria-atomic="true">
+        {{ submitError || '' }}
+      </p>
       <form
         @submit.prevent="() => passes(() => onSubmitForm())"
         class="_form"
@@ -23,6 +29,7 @@
             class="_input"
             :name="emailInputName"
             :label="$t('E-mail address')"
+            autocomplete="email"
             :disabled="isSubmitting"
             :valid="!errors.length && !submitError"
             :error-message="errors[0] || submitError"

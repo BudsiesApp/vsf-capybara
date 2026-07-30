@@ -63,6 +63,9 @@
           {{ $t('Our service is not responsible for local tariffs or duties on international shipments') }}
         </p>
       </div>
+      <p class="sr-only" role="alert" aria-atomic="true">
+        {{ shippingMethodsError }}
+      </p>
       <div class="form__action">
         <SfButton
           ref="submitStepButton"
@@ -160,6 +163,7 @@ export default defineComponent({
   mixins: [Shipping],
   data: () => {
     return {
+      shippingMethodsError: '',
       states: States
     };
   },
@@ -178,6 +182,20 @@ export default defineComponent({
     },
     currencyExchangeRate () {
       return this.$store.getters[GET_CURRENCY_EXCHANGE_RATE];
+    }
+  },
+  watch: {
+    isShippingMethodsSyncing (isSyncing, wasSyncing) {
+      if (isSyncing) {
+        this.shippingMethodsError = '';
+        return;
+      }
+
+      if (!wasSyncing || this.shippingMethods.length) {
+        return;
+      }
+
+      this.shippingMethodsError = this.$t('No shipping methods are available for this address.').toString();
     }
   },
   methods: {
@@ -391,6 +409,7 @@ export default defineComponent({
     font-size: var(--font-sm);
     color: var(--c-dark-variant);
   }
+
   &__label {
     display: flex;
     justify-content: flex-start;

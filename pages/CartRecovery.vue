@@ -4,6 +4,12 @@
       <div class="_loader" />
     </div>
     <SfHeading :level="1" :title="title" class="_title" />
+    <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+      {{ isLoading ? title : '' }}
+    </p>
+    <p class="sr-only" role="alert" aria-atomic="true">
+      {{ isShowError ? title : '' }}
+    </p>
     <div class="_error-action" v-if="isShowError">
       <SfButton @click="goToHomepage">
         {{ $t("Return to home") }}

@@ -1,5 +1,11 @@
 <template>
   <div id="auth-page">
+    <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+      {{ isLoading ? $t('Authenticating...') : '' }}
+    </p>
+    <p class="sr-only" role="alert" aria-atomic="true">
+      {{ errorMessage }}
+    </p>
     <div v-if="isLoading" class="loading-message">
       <SfLoader :loading="true" />
       <p>{{ $t('Authenticating...') }}</p>

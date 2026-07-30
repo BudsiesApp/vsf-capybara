@@ -278,6 +278,7 @@ export default {
 
     a {
       color: inherit;
+      text-decoration: underline;
     }
   }
 
