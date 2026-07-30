@@ -261,74 +261,76 @@ export default {
     font-size: var(--font-xs);
   }
 
+  .property {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    color: var(--property-color, var(--c-text));
+    margin: 0 0 var(--spacer-base) 0;
+
+    &__name {
+      margin: var(--property-name-margin, 0 var(--spacer-xs) 0 0);
+      color: var(--property-name-color, var(--c-secondary-variant));
+      text-transform: var(--property-name-text-transform);
+      @include font(
+        --property-name-font,
+        var(--font-normal),
+        var(--font-sm),
+        1.2,
+        var(--font-family-secondary)
+      );
+
+      &::after {
+        content: var(--property-name-content, ":");
+      }
+    }
+
+    &__value {
+      margin: 0;
+      color: var(--property-value-color);
+      @include font(
+        --property-value-font,
+        var(--font-medium),
+        var(--font-sm),
+        1.2,
+        var(--font-family-secondary)
+      );
+    }
+
+    &--large {
+      --property-name-font-size: var(--font-lg);
+      --property-value-font-size: var(--font-lg);
+      --property-value-font-weight: var(--font-semibold);
+    }
+
+    &--marked {
+      --property-name-color: var(--_c-light-primary);
+      --property-value-color: var(--_c-light-primary);
+      --property-name-font-weight: var(--font-bold);
+      --property-value-font-weight: var(--font-bold);
+    }
+
+    @include for-desktop {
+      margin: 0 0 var(--spacer-sm) 0;
+      &__total {
+        padding: var(--spacer-base) 0 0 0;
+      }
+    }
+  }
+
+  .promo-code {
+    &__button {
+      --button-height: 2rem;
+      --button-font-size: 0.6875rem;
+      margin: 1rem 0;
+    }
+  }
+
   &.-skin-budsies {
-    .sf-property.--marked {
+    .property--marked {
       --property-name-color: var(--c-accent);
       --property-value-color: var(--c-accent);
     }
-  }
-}
-
-.property {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  color: var(--property-color, var(--c-text));
-  margin: 0 0 var(--spacer-base) 0;
-
-  &__name {
-    margin: var(--property-name-margin, 0 var(--spacer-xs) 0 0);
-    color: var(--property-name-color, var(--c-secondary-variant));
-    text-transform: var(--property-name-text-transform);
-    @include font(
-      --property-name-font,
-      var(--font-normal),
-      var(--font-sm),
-      1.2,
-      var(--font-family-secondary)
-    );
-
-    &::after {
-      content: var(--property-name-content, ":");
-    }
-  }
-
-  &__value {
-    margin: 0;
-    color: var(--property-value-color);
-    @include font(
-      --property-value-font,
-      var(--font-medium),
-      var(--font-sm),
-      1.2,
-      var(--font-family-secondary)
-    );
-  }
-
-  &--large {
-    --property-name-font-size: var(--font-lg);
-    --property-value-font-size: var(--font-lg);
-    --property-value-font-weight: var(--font-semibold);
-  }
-
-  &--marked {
-    --property-name-color: var(--_c-light-primary);
-    --property-value-color: var(--_c-light-primary);
-  }
-
-  @include for-desktop {
-    margin: 0 0 var(--spacer-sm) 0;
-    &__total {
-      padding: var(--spacer-base) 0 0 0;
-    }
-  }
-}
-
-.promo-code {
-  &__button {
-    --button-height: 2rem;
-    --button-font-size: 0.6875rem;
-    margin: 1rem 0;
   }
 }
 </style>
