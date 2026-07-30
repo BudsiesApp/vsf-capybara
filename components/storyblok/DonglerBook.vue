@@ -14,6 +14,12 @@
     <div class="_sub-title">
       A digital copy of our exclusive children's book "Dongler's Dinner Quest"!
     </div>
+    <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+      {{ isSubmitted ? submissionSuccessMessage : '' }}
+    </p>
+    <p class="sr-only" role="alert" aria-atomic="true">
+      {{ isSubmittedWthError ? submissionErrorMessage : '' }}
+    </p>
 
     <form @submit.prevent="onSubmit" class="_form" v-show="!isSubmitted">
       <div class="_email-row">
@@ -35,7 +41,7 @@
       </div>
 
       <div class="sf-input__error-message" v-show="isSubmittedWthError">
-        <div>Something went wrong... Please, try again or contact the support.</div>
+        <div>{{ submissionErrorMessage }}</div>
       </div>
 
       <div class="_button-row">
@@ -59,7 +65,7 @@
     <div class="_success-message" v-show="isSubmitted">
       <p>
         <strong>
-          {{ $t('Success! Your storybook is on it\'s way') }}
+          {{ submissionSuccessMessage }}
         </strong>
       </p>
 
@@ -115,6 +121,12 @@ export default Blok.extend({
   computed: {
     itemData (): DonglerBookData {
       return this.item as DonglerBookData;
+    },
+    submissionErrorMessage (): string {
+      return this.$t('Something went wrong... Please, try again or contact the support.').toString();
+    },
+    submissionSuccessMessage (): string {
+      return this.$t('Success! Your storybook is on it\'s way').toString();
     }
   },
   beforeMount () {

@@ -1,5 +1,14 @@
 <template>
   <div id="detailed-cart" :class="{ '-loading': isLoading }">
+    <span
+      class="sr-only"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      {{ isCartSyncing ? $t('Cart is syncing') : $t('Cart is synchronized') }}
+    </span>
+
     <div class="loader-container" v-if="isLoading">
       <div class="loader" />
     </div>
@@ -105,6 +114,7 @@ import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-obser
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
+import { IS_CART_SYNCING } from '@vue-storefront/core/modules/cart';
 import { ModalList } from 'theme/store/ui/modals';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MDropdown from 'theme/components/molecules/m-dropdown.vue';
@@ -241,7 +251,8 @@ export default {
       cartIsLoaded: (state) => state.cart.cartIsLoaded
     }),
     ...mapGetters({
-      products: 'cart/getCartItems'
+      products: 'cart/getCartItems',
+      isCartSyncing: IS_CART_SYNCING
     }),
     ...mapMobileObserver(),
     totalItems () {

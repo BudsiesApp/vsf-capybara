@@ -7,6 +7,12 @@
       v-slot="{passes}"
       slim
     >
+      <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {{ isSuccessSubscribed ? successMessage : '' }}
+      </p>
+      <p class="sr-only" role="alert" aria-atomic="true">
+        {{ submitError || '' }}
+      </p>
       <form
         @submit.prevent="() => passes(() => onSubmitForm())"
         class="_form"
