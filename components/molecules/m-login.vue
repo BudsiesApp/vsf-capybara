@@ -31,8 +31,13 @@
           />
         </ValidationProvider>
 
-        <div v-if="isCodeSent" class="_code-sent-message">
-          {{ $t('Verification code sent to your email') }}
+        <div
+          class="_code-sent-message"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {{ isCodeSent ? $t('Verification code sent to your email') : "" }}
         </div>
 
         <ValidationProvider
@@ -81,8 +86,8 @@
 
           <slot
             name="submit-button"
-            :isDisabled="isSubmitting"
-            :submitButtonText="submitButtonText"
+            :is-disabled="isSubmitting"
+            :submit-button-text="submitButtonText"
           >
             <SfButton
               class="sf-button _submit-button"

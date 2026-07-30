@@ -136,6 +136,7 @@
             <SfInput
               name="recipient_email"
               v-model.trim="recipientEmail"
+              autocomplete="email"
               :disabled="isDisabled"
               :required="true"
               :valid="!errors.length"
