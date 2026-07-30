@@ -29,6 +29,7 @@
             class="_input"
             :name="emailInputName"
             :label="$t('E-mail address')"
+            autocomplete="email"
             :disabled="isSubmitting"
             :valid="!errors.length && !submitError"
             :error-message="errors[0] || submitError"

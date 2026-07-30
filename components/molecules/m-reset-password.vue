@@ -9,6 +9,7 @@
           v-model="email"
           name="email"
           type="email"
+          autocomplete="email"
           :label="$t('Your email')"
           :required="true"
           :valid="!$v.email.$error"

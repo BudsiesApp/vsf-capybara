@@ -27,6 +27,7 @@
         type="email"
         name="email"
         :label="$t('Your e-mail')"
+        autocomplete="email"
         required
         :valid="!$v.email.$error"
         :error-message="
