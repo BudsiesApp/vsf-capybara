@@ -45,16 +45,11 @@ $font-family-intro: "Gotham Rounded", "Helvetica", sans-serif;
     --button-border-radius-size: 10px;
 
     // Colors
-    // @include generate-color-variants(--c-black, #535353);
-    // @include generate-color-variants(--c-black, #4d546c);
     @include generate-color-variants(--c-black, #232631);
     @include generate-color-variants(--c-white, #ffffff);
     @include generate-color-variants(--c-blue, #303b40);
-    // @include generate-color-variants(--_c-green-primary, #18ae0c);
-    // @include generate-color-variants(--_c-green-primary, #8eba4c);
     @include generate-color-variants(--_c-green-primary, #618031);
     @include generate-color-variants(--_c-green-primary-darken, #536B12);
-    // @include generate-color-variants(--_c-green-secondary, #81d57b);
     @include generate-color-variants(--_c-green-secondary, #e9f0d8);
     @include generate-color-variants(--_c-dark-primary, #535353);
     @include generate-color-variants(--_c-dark-secondary, #767676);
@@ -62,14 +57,12 @@ $font-family-intro: "Gotham Rounded", "Helvetica", sans-serif;
     @include generate-color-variants(--_c-gray-primary, #72757E);
     @include generate-color-variants(--_c-gray-secondary, #747683);
     @include generate-color-variants(--_c-gray-accent, #e0e0e1);
-    // @include generate-color-variants(--_c-light-primary, #F24B63);
     @include generate-color-variants(--_c-light-primary, #F24B63);
     @include generate-color-variants(--_c-light-secondary, #e5f9ff);
     @include generate-color-variants(--_c-red-primary, #EC0C18);
     @include generate-color-variants(--_c-red-secondary, #f9a284);
     @include generate-color-variants(--_c-yellow-primary, #ecc713);
     @include generate-color-variants(--_c-yellow-secondary, #f6e389);
-    // @include generate-color-variants(--_c-blue-primary, #43c5e4);
     @include generate-color-variants(--_c-blue-primary, #007FA9);
     @include generate-color-variants(--_c-blue-secondary, #c3e8fd);
 
@@ -78,7 +71,6 @@ $font-family-intro: "Gotham Rounded", "Helvetica", sans-serif;
     --c-text-muted: var(--_c-gray-secondary);
     --c-text-disabled: var(--_c-gray-secondary-lighten);
     --c-link: #6060DB;
-    // --c-link: var(--_c-blue-primary);
     --c-link-hover: var(--_c-blue-primary);
     --c-footer: transparent;
     --property-name-color: var(--property-color, var(--c-text));
@@ -86,11 +78,8 @@ $font-family-intro: "Gotham Rounded", "Helvetica", sans-serif;
     --c-blockquote-border: var(--_c-gray-accent);
     --c-divider: var(--_c-gray-accent);
     --c-footer-gray: #585858;
-    // --c-accent: #7AA13E;
     --c-accent: var(--_c-green-primary);
     --c-gray-light: var(--_c-gray-light);
-
-    // --button-font-weight: var(--font-bold);
 
     --widget-error-message-font: var(--font-normal) var(--font-xs) var(--font-family-secondary);
     --widget-error-message-color: var(--c-danger-variant);
