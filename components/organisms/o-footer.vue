@@ -68,6 +68,7 @@
           href="https://support.budsies.com/support/home"
           target="_blank"
           rel="noopener noreferrer"
+          :aria-label="$t('Contact Us') + ' ' + $t('opens in new tab')"
         >
           {{ $t('Contact Us') }}
         </a>
@@ -90,6 +91,7 @@
         </div>
       </template>
     </div>
+    </sffooter>
   </div>
 </template>
 

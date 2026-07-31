@@ -62,6 +62,7 @@
           <sb-router-link
             class="_button sf-button"
             :link="itemData.button_link"
+            :aria-label="itemData.button_text"
             v-if="itemData.button_text"
           >
             {{ itemData.button_text }}
