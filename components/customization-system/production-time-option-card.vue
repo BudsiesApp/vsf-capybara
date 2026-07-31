@@ -23,11 +23,11 @@
 
     <div class="_content">
       <span class="_title">
-        {{ shipTitle }}
+        {{ optionDurationTitle }}
       </span>
 
       <p class="_subtitle">
-        {{ optionWeeksTitle }}
+        {{ shipTitle }}
       </p>
 
       <span
@@ -144,12 +144,11 @@ export default defineComponent({
       return applicationI18n.t('Ships {date}', { date: formatShortDate(shipDate.value) }).toString();
     });
 
-    const optionWeeksTitle = computed<string>(() => {
-      const title = weeks.value === 1
-        ? applicationI18n.t('{optionName} - 1 week', { optionName: props.optionName })
-        : applicationI18n.t('{optionName} - {weeks} weeks', { optionName: props.optionName, weeks: weeks.value });
-
-      return title.toString();
+    const optionDurationTitle = computed<string>(() => {
+      return applicationI18n.t(
+        '{weeks} Week {optionName}',
+        { optionName: props.optionName, weeks: weeks.value }
+      ).toString();
     });
 
     const iconSrc = computed<string>(() => {
@@ -225,7 +224,7 @@ export default defineComponent({
       hasInfiniteSlots,
       iconStyle,
       isSoldOut,
-      optionWeeksTitle,
+      optionDurationTitle,
       priceTitle,
       shipTitle,
       slotsLeftClasses,
