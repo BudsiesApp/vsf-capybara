@@ -200,11 +200,11 @@ export default defineComponent({
       return [...values.value].sort((a, b) => {
         const firstCardData = cardDataByOptionValueId[a.id];
         const secondCardData = cardDataByOptionValueId[b.id];
-        const firstTurnaroundTime = firstCardData && firstCardData.turnaroundTime;
-        const secondTurnaroundTime = secondCardData && secondCardData.turnaroundTime;
+        const firstTurnaroundTime = firstCardData?.turnaroundTime;
+        const secondTurnaroundTime = secondCardData?.turnaroundTime;
 
         if (firstTurnaroundTime !== undefined && secondTurnaroundTime !== undefined) {
-          return firstTurnaroundTime - secondTurnaroundTime;
+          return secondTurnaroundTime - firstTurnaroundTime;
         }
 
         if (firstTurnaroundTime !== undefined) {
@@ -229,13 +229,26 @@ export default defineComponent({
       }
 
       const cardDataByOptionValueId = productionTimeOptionCardDataByOptionValueId.value;
-      const optionValue = sortedValues.value.find((value) => {
-        const cardData = cardDataByOptionValueId[value.id];
+      let fastestAvailableOption: OptionValue | undefined;
+      let fastestAvailableTurnaroundTime: number | undefined;
 
-        return !!cardData && cardData.slotsLeft !== 0;
-      });
+      for (const optionValue of values.value) {
+        const cardData = cardDataByOptionValueId[optionValue.id];
 
-      return optionValue && optionValue.id;
+        if (!cardData || cardData.slotsLeft === 0) {
+          continue;
+        }
+
+        if (
+          fastestAvailableTurnaroundTime === undefined ||
+          cardData.turnaroundTime < fastestAvailableTurnaroundTime
+        ) {
+          fastestAvailableOption = optionValue;
+          fastestAvailableTurnaroundTime = cardData.turnaroundTime;
+        }
+      }
+
+      return fastestAvailableOption?.id;
     });
 
     function isOptionValueSoldOut (optionValue: OptionValue): boolean {

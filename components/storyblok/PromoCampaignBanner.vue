@@ -77,14 +77,17 @@ export default Blok.extend({
 
       return true;
     },
-    wrapperAttributes (): Record<string, string> {
+    wrapperAttributes (): Record<string, string | undefined> {
       if (!this.imageBannerContent?.link_url) {
         return {};
       }
 
       return {
         to: this.imageBannerContent.link_url,
-        target: this.imageBannerContent.target_blank ? '_blank' : '_self'
+        target: this.imageBannerContent.target_blank ? '_blank' : '_self',
+        'aria-label': this.imageBannerContent.target_blank
+          ? `${this.$t('Promotional campaign banner')} ${this.$t('opens in new tab')}`
+          : undefined
       };
     },
     wrapperComponent (): string {

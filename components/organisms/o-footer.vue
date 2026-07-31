@@ -14,6 +14,7 @@
               :to="localizedRoute(link.link)"
               :target="link.target"
               :rel="link.target === '_blank' ? 'noopener noreferrer' : null"
+              :aria-label="link.target === '_blank' ? (link.name + ' ' + $t('opens in new tab')) : null"
               :event="link.event ? link.event : 'click'"
               @click.native="onLinkClick(link)"
               exact
