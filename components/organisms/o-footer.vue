@@ -21,7 +21,7 @@
               :to="localizedRoute(link.link)"
               :target="link.target"
               :rel="link.target === '_blank' ? 'noopener noreferrer' : null"
-              :aria-label="link.target === '_blank' ? link.name + ' ' + $t('opens in new tab') : null"
+              :aria-label="link.target === '_blank' ? (link.name + ' ' + $t('opens in new tab')) : null"
               :event="link.event ? link.event : 'click'"
               @click.native="onLinkClick(link)"
               exact
@@ -86,6 +86,7 @@
           href="https://support.budsies.com/support/home"
           target="_blank"
           rel="noopener noreferrer"
+          :aria-label="$t('Contact Us') + ' ' + $t('opens in new tab')"
         >
           {{ $t('Contact Us') }}
         </a>
@@ -108,6 +109,7 @@
         </div>
       </template>
     </div>
+    </sffooter>
   </div>
 </template>
 
