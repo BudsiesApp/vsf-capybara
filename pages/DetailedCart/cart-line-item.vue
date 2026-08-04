@@ -1,5 +1,9 @@
 <template>
-  <div class="cart-line-item">
+  <div
+    ref="cartItem"
+    class="cart-line-item"
+    tabindex="-1"
+  >
     <div class="_product-grid">
       <div class="_aside">
         <SfImage
@@ -96,7 +100,7 @@
 
             <SfButton
               class="-small color-secondary _action-button"
-              :disabled="isCartSyncing"
+              :aria-disabled="isCartSyncing.toString()"
               @click="removeHandler"
             >
               {{ $t('Remove') }}
@@ -111,7 +115,7 @@
 <script lang="ts">
 import { useI18n, useRouter, useStore } from '@vue-storefront/core/application-services';
 import debounce from 'lodash-es/debounce';
-import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, ref, toRef } from 'vue';
+import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, Ref, ref, toRef } from 'vue';
 import {
   SfImage,
   SfPrice,
@@ -226,6 +230,7 @@ export default defineComponent({
     const isCartSyncing = computed<boolean>(() => applicationStore.getters[IS_CART_SYNCING]);
 
     const cartItemKey = computed<string>(() => getCartItemKey(props.product));
+    const cartItem: Ref<HTMLElement | null> = ref(null);
 
     const title = computed<string>(() => getCartItemTitle(props.product));
 
@@ -334,7 +339,26 @@ export default defineComponent({
         return;
       }
 
-      await applicationStore.dispatch('cart/removeItem', { product: props.product });
+      context.emit('removing', cartItemKey.value);
+
+      const removeItemPromise = applicationStore.dispatch('cart/removeItem', { product: props.product });
+
+      context.emit('removed');
+      await removeItemPromise;
+    }
+
+    function getItemKey (): string {
+      return cartItemKey.value;
+    }
+
+    function focusCartItem (): boolean {
+      if (!cartItem.value) {
+        return false;
+      }
+
+      cartItem.value.focus();
+
+      return true;
     }
 
     function editHandler (): void {
@@ -417,6 +441,7 @@ export default defineComponent({
     return {
       ...cartItemRemovableOptions,
       cartItemPrice,
+      cartItem,
       customizationGroups,
       formattedPrice,
       hasCustomizableProperties,
@@ -432,6 +457,8 @@ export default defineComponent({
       title,
       changeProductQuantity,
       editHandler,
+      focusCartItem,
+      getItemKey,
       removeHandler
     };
   }
