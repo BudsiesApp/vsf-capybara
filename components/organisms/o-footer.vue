@@ -17,6 +17,7 @@
               :to="localizedRoute(link.link)"
               :target="link.target"
               :rel="link.target === '_blank' ? 'noopener noreferrer' : null"
+              :aria-label="link.target === '_blank' ? (link.name + ' ' + $t('opens in new tab')) : null"
               :event="link.event ? link.event : 'click'"
               @click.native="onLinkClick(link)"
               exact
@@ -67,7 +68,12 @@
       <MBudsiesBrands />
 
       <div class="_additional-information">
-        <a href="https://support.mypetsies.com/support/home" target="_blank" rel="noopener noreferrer">
+        <a
+          href="https://support.mypetsies.com/support/home"
+          target="_blank"
+          rel="noopener noreferrer"
+          :aria-label="$t('Contact Us') + ' ' + $t('opens in new tab')"
+        >
           <SfMenuItem
             class="sf-footer__menu-item"
             :label="$t('Contact Us')"

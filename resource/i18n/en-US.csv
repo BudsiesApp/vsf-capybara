@@ -1026,6 +1026,7 @@
 "{optionName} - 1 week","{optionName} - 1 week"
 "{optionName} - {weeks} weeks","{optionName} - {weeks} weeks"
 "{slotsLeft} rush slots left","{slotsLeft} rush slots left"
+"{weeks} Week {optionName}","{weeks} Week {optionName}"
 
 "Address removed","Address removed"
 "Address set as default billing","Address set as default billing"
@@ -1043,5 +1044,4 @@
 "Your order’s grand total is now zero. You're all set!","Your order’s grand total is now zero. You're all set!"
 "Order More","Order More"
 "Product removed from cart.","Product removed from cart."
-
 "Your cart is empty","Your cart is empty"

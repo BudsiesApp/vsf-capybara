@@ -20,8 +20,6 @@ const FUR_COLOR_CUSTOMIZATION_OPTION_LABEL = 'Fur';
 const COLOR_PALLETE_CUSTOMIZATION_OPTION_LABEL = 'Optional: Color Palette';
 const DESCRIPTION_CUSTOMIZATION_OPTION_LABEL = 'Describe Your Pet\'s Physical Features';
 const UPGRADES_CUSTOMIZATION_OPTION_LABEL = 'Upgrade Your Plush (optional)';
-const PRODUCTION_TIME_CUSTOMIZATION_OPTION_LABEL = 'Production Time';
-
 const DESCRIPTION_TEXT = 'Test description';
 const UPDATED_DESCRIPTION_TEXT = 'Updated description';
 const TEST_EMAIL = 'test@test.test';
@@ -50,11 +48,6 @@ async function fillCustomizeStepRequiredFields (customizableProductPage: Customi
   await customizableProductPage.fillCustomizationThumbnailValueByIndex(FUR_COLOR_CUSTOMIZATION_OPTION_LABEL, 0);
   await customizableProductPage.fillCustomizationTextValue(DESCRIPTION_CUSTOMIZATION_OPTION_LABEL, DESCRIPTION_TEXT);
 
-  const productionTimeWidget = customizableProductPage.getCustomizationWidgetByLabel(PRODUCTION_TIME_CUSTOMIZATION_OPTION_LABEL);
-
-  if (await productionTimeWidget.isVisible()) {
-    await customizableProductPage.fillCustomizationSelectValueByIndex(PRODUCTION_TIME_CUSTOMIZATION_OPTION_LABEL, 1);
-  }
 }
 
 async function fillAllStepsRequiredFields (customizableProductPage: CustomizableProductPage, plushieProductPage: PlushieProductPage) {
