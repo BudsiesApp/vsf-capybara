@@ -130,7 +130,6 @@ export default {
     const focusCouponInput = () => {
       const inputElement = couponInput.value?.$el?.querySelector('input');
 
-      debugger;
       if (!(inputElement instanceof HTMLInputElement)) {
         return false;
       }
