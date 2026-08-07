@@ -384,11 +384,23 @@ export default {
       }
 
       &.-instagram {
-        background-position: -30px -1px;
+        background-image: url(../../assets/instagram_icon.png);
       }
 
       &.-twitter {
-        background-position: -60px -1px;
+        background-image: url(../../assets/x_icon.png);
+      }
+
+      &.-youtube {
+        background-image: url(../../assets/youtube_icon.png);
+      }
+
+      &.-instagram,
+      &.-twitter,
+      &.-youtube {
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: contain;
       }
 
       &.-pinterest {
@@ -514,14 +526,6 @@ export default {
         background-image: url(../../assets/footer-socials.png);
         height: 42px;
         width: 42px;
-
-        &.-instagram {
-          background-position: -45px -1px;
-        }
-
-        &.-twitter {
-          background-position: -89px -1px;
-        }
 
         &.-pinterest {
           background-position: -133px -1px;
