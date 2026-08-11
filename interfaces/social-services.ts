@@ -11,8 +11,8 @@ export const socialServices: { name: string, url: string, serviceLabel: string }
   },
   {
     name: 'twitter',
-    url: 'https://twitter.com/petsiesofficial/',
-    serviceLabel: 'Twitter'
+    url: 'https://x.com/petsiesofficial',
+    serviceLabel: 'X'
   },
   {
     name: 'pinterest',
