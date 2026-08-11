@@ -5,6 +5,8 @@
         <router-link
           :to="breadcrumb.route.link"
           class="sf-breadcrumbs__breadcrumb"
+          tabindex="-1"
+          aria-hidden="true"
         >
           {{ breadcrumb.text }}
         </router-link>
@@ -14,6 +16,8 @@
         <router-link
           :to="breadcrumb.route.link"
           class="sf-breadcrumbs__breadcrumb sf-breadcrumbs__breadcrumb--current"
+          tabindex="-1"
+          aria-hidden="true"
         >
           {{ breadcrumb.text }}
         </router-link>
@@ -25,9 +29,11 @@
     >
       <nav class="_navigation desktop-only">
         <SfHeading
+          ref="heading"
           :title="$t('My Account')"
           :level="1"
           class="_title desktop-only"
+          tabindex="-1"
         />
 
         <SfList class="_items-list">
@@ -71,6 +77,7 @@ import MyAccount from '@vue-storefront/core/pages/MyAccount';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 
 import { AccountPageName } from './page-name';
+import { useHeadingFocus } from '../helpers/use-heading-focus';
 
 export default {
   components: {
@@ -79,6 +86,9 @@ export default {
     SfList
   },
   mixins: [MyAccount],
+  setup () {
+    return useHeadingFocus();
+  },
   data () {
     return {
       AccountPageName
