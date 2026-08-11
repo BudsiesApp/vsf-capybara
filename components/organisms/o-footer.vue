@@ -373,42 +373,35 @@ export default {
     }
 
     &__link {
-      background-image: url(../../assets/footer-socials-mobile.png);
+      background-image: url(../../assets/footer-socials.png);
+      background-size: 180px 30px;
       display: block;
       height: 30px;
       width: 30px;
       margin-right: var(--spacer-base);
 
       &.-facebook {
-        background-position: -1px -1px;
+        background-position: 0 0;
       }
 
       &.-instagram {
-        background-image: url(../../assets/instagram_icon.png);
+        background-position: -30px 0;
       }
 
       &.-twitter {
-        background-image: url(../../assets/x_icon.png);
-      }
-
-      &.-youtube {
-        background-image: url(../../assets/youtube_icon.png);
-      }
-
-      &.-instagram,
-      &.-twitter,
-      &.-youtube {
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: contain;
+        background-position: -60px 0;
       }
 
       &.-pinterest {
-        background-position: -90px -1px;
+        background-position: -90px 0;
       }
 
       &.-tiktok {
-        background-position: -120px -1px;
+        background-position: -120px 0;
+      }
+
+      &.-youtube {
+        background-position: -150px 0;
       }
 
       &:last-child {
@@ -524,8 +517,21 @@ export default {
 
       &__link {
         background-image: url(../../assets/footer-socials.png);
+        background-size: auto;
         height: 42px;
         width: 42px;
+
+        &.-facebook {
+          background-position: -1px -1px;
+        }
+
+        &.-instagram {
+          background-position: -45px -1px;
+        }
+
+        &.-twitter {
+          background-position: -89px -1px;
+        }
 
         &.-pinterest {
           background-position: -133px -1px;
@@ -533,6 +539,10 @@ export default {
 
         &.-tiktok {
           background-position: -177px -1px;
+        }
+
+        &.-youtube {
+          background-position: -221px -1px;
         }
       }
     }
