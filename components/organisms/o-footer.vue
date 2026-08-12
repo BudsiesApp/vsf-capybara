@@ -305,30 +305,35 @@ export default {
     }
 
     &__link {
-      background-image: url(../../assets/footer-socials-mobile.png);
+      background-image: url(../../assets/footer-socials.png);
+      background-size: 180px 30px;
       display: block;
       height: 30px;
       width: 30px;
       margin-right: var(--spacer-base);
 
       &.-facebook {
-        background-position: -1px -1px;
+        background-position: 0 0;
       }
 
       &.-instagram {
-        background-position: -30px -1px;
+        background-position: -30px 0;
       }
 
       &.-twitter {
-        background-position: -60px -1px;
+        background-position: -60px 0;
       }
 
       &.-pinterest {
-        background-position: -90px -1px;
+        background-position: -90px 0;
       }
 
       &.-tiktok {
-        background-position: -120px -1px;
+        background-position: -120px 0;
+      }
+
+      &.-youtube {
+        background-position: -150px 0;
       }
 
       &:last-child {
@@ -399,8 +404,13 @@ export default {
     .social-icon {
       &__link {
         background-image: url(../../assets/footer-socials.png);
+        background-size: auto;
         height: 42px;
         width: 42px;
+
+        &.-facebook {
+          background-position: -1px -1px;
+        }
 
         &.-instagram {
           background-position: -45px -1px;
@@ -416,6 +426,10 @@ export default {
 
         &.-tiktok {
           background-position: -177px -1px;
+        }
+
+        &.-youtube {
+          background-position: -221px -1px;
         }
       }
     }
