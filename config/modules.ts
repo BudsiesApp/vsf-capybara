@@ -13,6 +13,7 @@ import { OrdersHistoryModule } from 'src/modules/orders-history';
 import { CurrencyModule } from 'src/modules/currency';
 import { FeraModule } from 'src/modules/fera';
 import { TrafficAttributionModule } from 'src/modules/traffic-attribution';
+import { CouponActivationModule } from 'src/modules/coupon-activation'
 
 import registerStoryblokComponents from 'theme/components/storyblok'
 
@@ -32,6 +33,7 @@ export function registerClientModules () {
   registerModule(CurrencyModule)
   registerApplicationModule(FeraModule)
   registerModule(TrafficAttributionModule)
+  registerModule(CouponActivationModule)
 }
 
 // Deprecated API, will be removed in 2.0
