@@ -4,13 +4,13 @@
       <SfTab :title="$t('Personal data')">
         <MUpdatePersonalData />
 
-        <router-link
+        <button
+          type="button"
           class="sf-button color-secondary _logout-button mobile-only"
-          to="/"
-          @click.native="logout"
+          @click="logout"
         >
           {{ $t('Log out') }}
-        </router-link>
+        </button>
       </SfTab>
     </SfTabs>
   </div>

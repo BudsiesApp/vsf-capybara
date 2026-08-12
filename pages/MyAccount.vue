@@ -45,12 +45,13 @@
           </SfListItem>
 
           <SfListItem class="_menu-item">
-            <router-link
-              to="/"
-              @click.native="logout"
+            <button
+              type="button"
+              class="_logout-button"
+              @click="logout"
             >
               {{ $t('Log out') }}
-            </router-link>
+            </button>
           </SfListItem>
         </SfList>
       </nav>
@@ -252,11 +253,23 @@ export default {
       font-size: var(--font-base);
       margin-top: var(--spacer-base);
 
-      a {
+      a,
+      ._logout-button {
         color: var(--c-dark-variant);
         width: 100%;
         display: inline-block;
+      }
 
+      ._logout-button {
+        padding: 0;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        font: inherit;
+        text-align: start;
+      }
+
+      a {
         &.router-link-exact-active {
           color: var(--c-primary);
         }
@@ -273,7 +286,8 @@ export default {
       &:hover {
         cursor: pointer;
 
-        a {
+        a,
+        ._logout-button {
           color: var(--c-black);
         }
       }

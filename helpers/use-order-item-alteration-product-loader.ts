@@ -74,7 +74,7 @@ export function useOrderItemAlterationProductLoader (
         await applicationStore.dispatch('product/findProducts', {
           query: getSearchQuery(sku),
           options: {
-            prefetchGroupProducts: false
+            prefetchGroupProducts: true
           }
         });
       }
