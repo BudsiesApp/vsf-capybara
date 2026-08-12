@@ -121,7 +121,7 @@ export function useAlterationProductsLoader (
         applicationStore.dispatch('product/findProducts', {
           query: getSearchQuery(notLoadedSkus),
           options: {
-            prefetchGroupProducts: false
+            prefetchGroupProducts: true
           }
         }),
         applicationStore.dispatch(
