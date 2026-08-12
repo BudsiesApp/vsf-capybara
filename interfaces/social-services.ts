@@ -23,5 +23,10 @@ export const socialServices: { name: string, url: string, serviceLabel: string }
     name: 'tiktok',
     url: 'https://www.tiktok.com/@budsies',
     serviceLabel: 'TikTok'
+  },
+  {
+    name: 'youtube',
+    url: 'https://www.youtube.com/@Petsies',
+    serviceLabel: 'YouTube'
   }
 ];
