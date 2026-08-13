@@ -34,7 +34,7 @@
     "vue-cool-lightbox": "^2.7.4",
     "vue-croppie": "https://github.com/BudsiesApp/vue-croppie.git#optimuspro",
     "vue-filepond": "https://github.com/BudsiesApp/vue-filepond.git#budsies",
-    "vue-multiselect": "https://github.com/BudsiesApp/vue-multiselect/archive/14bffb09762ad97c076cc32d05d61d840614f299.tar.gz",
+    "vue-multiselect": "https://github.com/BudsiesApp/vue-multiselect/archive/a7474acd009fefe9d114db23d5b92581323464f8.tar.gz",
     "vue-no-ssr": "^0.2.2",
     "vue-star-rating": "^1.7.0",
     "vue2-datepicker": "3.11.1",
