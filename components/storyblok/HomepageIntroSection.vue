@@ -81,7 +81,8 @@ import { BreakpointValue, InjectType } from 'src/modules/shared';
 
 import {
   Blok,
-  ComponentWidthCalculator
+  ComponentWidthCalculator,
+  resolveStoryblokAssetUrl
 } from 'src/modules/vsf-storyblok-module';
 
 import {
@@ -134,12 +135,12 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     desktopVideoUrl (): string {
       const selector = this.itemData.background_video;
 
-      return selector && selector.asset ? selector.asset.filename : '';
+      return selector && selector.asset ? resolveStoryblokAssetUrl(selector.asset.filename) : '';
     },
     mobileVideoUrl (): string {
       const selector = this.itemData.mobile_background_video;
 
-      return selector && selector.asset ? selector.asset.filename : '';
+      return selector && selector.asset ? resolveStoryblokAssetUrl(selector.asset.filename) : '';
     },
     videoContainerClasses (): Record<string, boolean> {
       return {

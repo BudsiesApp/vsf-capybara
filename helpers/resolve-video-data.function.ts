@@ -1,6 +1,7 @@
 import { AspectRatio } from 'src/modules/shared/types/aspect-ratio.value';
 import { VideoProvider } from 'src/modules/shared/types/video-provider.value';
-import { VideoSelectorField } from 'src/modules/vsf-storyblok-module';
+import { resolveStoryblokAssetUrl } from 'src/modules/vsf-storyblok-module';
+import { VideoSelectorField } from 'src/modules/vsf-storyblok-module/types/video-selector-field.interface';
 
 import VideoData from '../components/storyblok/interfaces/video-data.interface';
 
@@ -43,7 +44,7 @@ export function resolveVideoSelectorField (selector?: VideoSelectorField | null)
   if (asset && asset.filename) {
     return {
       sourceType: ResolvedVideoSourceType.ASSET,
-      assetUrl: asset.filename,
+      assetUrl: resolveStoryblokAssetUrl(asset.filename),
       aspectRatio: selector.aspect_ratio as number,
       autoplay: options.autoplay === true,
       muted: options.muted === true,

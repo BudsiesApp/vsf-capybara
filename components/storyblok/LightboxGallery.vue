@@ -33,6 +33,7 @@ import { LightboxGalleryData } from './interfaces/lightbox-gallery-data.interfac
 import generateBreakpointsSpecs from './generate-breakpoints-specs';
 import generateImageSourcesList from './generate-image-sources-list';
 import { ModalList } from 'theme/store/ui/modals';
+import { resolveStoryblokAssetFields } from 'theme/helpers/storyblok-asset-sink-values';
 
 interface InjectedServices {
   componentWidthCalculator: ComponentWidthCalculator,
@@ -81,7 +82,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
       this.$store.dispatch('ui/openModal', {
         name: ModalList.ImagesGallery,
         payload: {
-          images: this.itemData.images_list
+          images: resolveStoryblokAssetFields(this.itemData.images_list)
         }
       });
     }
