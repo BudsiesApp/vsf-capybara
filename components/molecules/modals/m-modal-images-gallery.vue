@@ -44,6 +44,7 @@ import { AssetField } from 'src/modules/vsf-storyblok-module';
 
 import { OCarouselItem } from 'theme/components/interfaces/o-carousel-item.interface';
 import OCarousel from 'theme/components/organisms/o-carousel.vue';
+import { resolveStoryblokAssetFields } from 'theme/helpers/storyblok-asset-sink-values';
 
 export default Vue.extend({
   name: 'MModalImagesGallery',
@@ -72,7 +73,9 @@ export default Vue.extend({
       }));
     },
     images (): AssetField[] {
-      return this.modalData?.payload?.images || [];
+      const images: AssetField[] = this.modalData?.payload?.images || [];
+
+      return resolveStoryblokAssetFields(images);
     }
   },
   methods: {
