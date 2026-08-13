@@ -33,7 +33,7 @@ import CoolLightBox from 'vue-cool-lightbox';
 import 'vue-cool-lightbox/dist/vue-cool-lightbox.min.css';
 
 import { InjectType } from 'src/modules/shared';
-import { ComponentWidthCalculator } from 'src/modules/vsf-storyblok-module';
+import { ComponentWidthCalculator, resolveStoryblokAssetUrl } from 'src/modules/vsf-storyblok-module';
 import { BaseImage, ImageSourceItem } from 'src/modules/budsies';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
 
@@ -129,7 +129,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     getLightboxItems (): LightboxItemValue[] {
       const result: LightboxItemValue[] = [
         {
-          src: this.itemData.image.filename,
+          src: resolveStoryblokAssetUrl(this.itemData.image.filename),
           title: this.itemData.title_tag ? this.itemData.title_tag : undefined
         }
       ];
@@ -143,7 +143,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
       }
 
       return [{
-        src: this.itemData.mobile_image.filename,
+        src: resolveStoryblokAssetUrl(this.itemData.mobile_image.filename),
         title: this.itemData.title_tag ? this.itemData.title_tag : undefined
       }];
     },
