@@ -43,6 +43,7 @@
 import Vue, { PropType } from 'vue';
 
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
+import { buildPinterestShareUrl } from 'theme/helpers/storyblok-asset-sink-values';
 
 export default Vue.extend({
   name: 'MSocialSharing',
@@ -70,23 +71,21 @@ export default Vue.extend({
   },
   computed: {
     shareEmailHref (): string {
-      const lineBreak = encodeURIComponent('\r\n');
-      const emailText = this.sharingDescription + lineBreak + lineBreak + 'Link:' + lineBreak + this.sharingUrl;
-      return `mailto:?subject=${this.eMailSubject}&body=${emailText}`;
+      const emailText = `${this.sharingDescription}\r\n\r\nLink:\r\n${this.sharingUrl}`;
+      return `mailto:?subject=${encodeURIComponent(this.eMailSubject)}&body=${encodeURIComponent(emailText)}`;
     },
     sharePinterestHref (): string | undefined {
       if (!this.image) {
         return;
       }
 
-      return `https://pinterest.com/pin/create/button/?media=${this.image}` +
-      `&description=${this.sharingDescription}&url=${this.sharingUrl}`;
+      return buildPinterestShareUrl(this.image, this.sharingDescription, this.sharingUrl);
     },
     shareTwitterHref (): string {
-      return `https://twitter.com/share?text=${this.twitterDescription}&url=${this.sharingUrl}`;
+      return `https://twitter.com/share?text=${encodeURIComponent(this.twitterDescription)}&url=${encodeURIComponent(this.sharingUrl)}`;
     },
     shareFacebookHref (): string {
-      return `https://www.facebook.com/sharer.php?u=${this.sharingUrl}`;
+      return `https://www.facebook.com/sharer.php?u=${encodeURIComponent(this.sharingUrl)}`;
     },
     skinClass (): string {
       return getCurrentThemeClass();
