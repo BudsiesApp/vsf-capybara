@@ -32,7 +32,6 @@
         ref="multiselect"
         @open="onOpen"
         @close="onClose"
-        @search-change="onSearchChange"
         @autocomplete-option-not-found="onAutocompleteOptionNotFound"
       >
         <template #caret="{ toggle }">
@@ -42,7 +41,6 @@
             @click.native.stop="toggle"
           />
         </template>
-
         <template #noResult>
           <slot name="noResult" />
         </template>
@@ -321,48 +319,9 @@ export default Vue.extend({
     onAutocompleteOptionNotFound (value: string): void {
       logAutocompleteOptionNotFound(this.autocomplete, value);
     },
-    getSelectedOptionLabel (): string {
-      const option = this.selectedOption;
-
-      if (!option) {
-        return '';
-      }
-
-      if (typeof option === 'object' && this.labelField) {
-        return (option as Record<string, any>)[this.labelField] || '';
-      }
-
-      return String(option);
-    },
     onOpen (): void {
       this.isOpen = true;
-
-      const searchInput = this.getMultiselectInput();
-
-      if (!searchInput) {
-        return;
-      }
-
-      const label = this.getSelectedOptionLabel();
-
-      if (label) {
-        searchInput.setAttribute('aria-label', label);
-      }
-
       this.syncInputAccessibilityAttributes();
-    },
-    onSearchChange (value: string): void {
-      if (!value) {
-        return;
-      }
-
-      const searchInput = this.getMultiselectInput();
-
-      if (!searchInput) {
-        return;
-      }
-
-      searchInput.removeAttribute('aria-label');
     },
     enableBodyScroll (): void {
       const scrollableContainer = this.getMultiselectScrollableContainer();
@@ -414,13 +373,6 @@ export default Vue.extend({
     },
     onClose (): void {
       this.isOpen = false;
-
-      const searchInput = this.getMultiselectInput();
-
-      if (searchInput) {
-        searchInput.removeAttribute('aria-label');
-      }
-
       this.syncInputAccessibilityAttributes();
 
       if (!this.allowFreeText) {
@@ -603,7 +555,7 @@ export default Vue.extend({
       }
     }
 
-    &:focus-visible {
+    &:has(.multiselect__input:focus-visible) {
       outline: var(--c-black) auto 1px;
       outline: -webkit-focus-ring-color auto 1px;
       outline: AccentColor auto 1px;
