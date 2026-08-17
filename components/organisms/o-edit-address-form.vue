@@ -164,6 +164,12 @@ export default defineComponent({
       try {
         await updateAddress();
 
+        await applicationStore.dispatch('notification/spawnNotification', {
+          type: 'success',
+          message: applicationI18n.t('Address updated successfully') as string,
+          action1: { label: i18n.t('OK') }
+        });
+
         emit('address-update');
       } catch (error) {
         onFailure(applicationI18n.t('Unable to update address') as string);

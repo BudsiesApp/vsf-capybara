@@ -1,6 +1,6 @@
 <template>
   <div class="m-address-item">
-    <div class="_content">
+    <address class="_content">
       <p class="_address">
         <span class="_client-name">{{ address.firstname }} {{ address.lastname }}</span><br>
         {{ street }}<br>
@@ -11,7 +11,7 @@
       <p class="_address">
         {{ formatPhoneNumber(address.telephone, address.country_id) }}
       </p>
-    </div>
+    </address>
 
     <div class="_actions">
       <slot name="actions" />
@@ -47,8 +47,13 @@ export default Vue.extend({
     }
   },
   methods: {
+    focusFirstAction (): void {
+      const action = this.$el.querySelector('._actions a, ._actions button') as HTMLElement | null;
+
+      action?.focus();
+    },
     getCountryById (id: string): string {
-      let countryObject = Countries.filter((country: any) => country.code === id)
+      const countryObject = Countries.filter((country: any) => country.code === id)
       return countryObject.length > 0 ? countryObject[0].name : id
     },
     formatPhoneNumber (phoneNumber: string, countryId: string): string {
@@ -64,7 +69,7 @@ export default Vue.extend({
       );
     }
   }
-})
+});
 
 </script>
 

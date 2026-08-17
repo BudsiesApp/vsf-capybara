@@ -11,6 +11,7 @@
         required
         :valid="!$v.firstName.$error"
         :error-message="!$v.firstName.required ? $t('Field is required.') : $t('Name must have at least 2 letters.')"
+        :class="{ [vuelidateErrorClassName]: $v.firstName.$error }"
         class="form__element form__element--half"
       />
       <SfInput
@@ -20,6 +21,7 @@
         required
         :valid="!$v.lastName.$error"
         :error-message="$t('Field is required.')"
+        :class="{ [vuelidateErrorClassName]: $v.lastName.$error }"
         class="form__element form__element--half form__element--half-even"
       />
       <SfInput
@@ -35,6 +37,7 @@
             ? $t('Field is required.')
             : $t('Please provide valid e-mail address.')
         "
+        :class="{ [vuelidateErrorClassName]: $v.email.$error }"
         class="form__element"
       />
       <SfButton
@@ -68,6 +71,10 @@ import {
 } from '@vue-storefront/core/additional-content';
 
 import { PrivacyPolicyLink } from 'src/modules/shared';
+import {
+  vuelidateErrorClassName,
+  vuelidateScrollToFirstError
+} from 'theme/helpers/vuelidate-scroll-to-first-error.function';
 
 export default {
   name: 'MUpdatePersonalData',
@@ -88,20 +95,20 @@ export default {
       firstName: '',
       lastName: '',
       email: '',
-      isDataUpdating: false
+      isDataUpdating: false,
+      vuelidateErrorClassName
     }
   },
   methods: {
-    updatePersonalData () {
+    async updatePersonalData () {
       this.$v.$touch();
+
       if (this.$v.$invalid) {
-        this.$store.dispatch('notification/spawnNotification', {
-          type: 'danger',
-          message: this.$t('Please fix the validation errors'),
-          action1: { label: this.$t('OK') }
-        });
+        await this.$nextTick();
+        vuelidateScrollToFirstError(this.$el);
         return;
       }
+
       let updatedProfile = pick(JSON.parse(JSON.stringify(this.$store.state.user.current)), config.users.allowModification)
       updatedProfile.firstname = this.firstName
       updatedProfile.lastname = this.lastName
