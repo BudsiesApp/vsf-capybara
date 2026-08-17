@@ -67,7 +67,10 @@ export default Vue.extend({
         let cartToken: string | undefined;
         const payload = {
           recoveryId: this.$route.params.id,
-          recoveryCode: this.$route.params.code
+          recoveryCode: this.$route.params.code,
+          ...(typeof this.$route.query.applyPromoCode === 'string'
+            ? { applyPromoCode: this.$route.query.applyPromoCode }
+            : {})
         };
 
         try {
