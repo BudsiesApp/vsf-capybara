@@ -104,7 +104,7 @@ export class GiftCardProductPage {
     this.leftSidePreview = new GiftCardTemplate(page.locator('._col.-left'));
     this.modalPreview = new GiftCardTemplate(page.locator('.sf-modal__content'));
 
-    this.addToCartButton = page.locator('button[type="submit"]');
+    this.addToCartButton = page.locator('button._add-to-cart');
   }
 
   public async goto (): Promise<void> {

@@ -1,5 +1,7 @@
-import { ImageSourceItem } from 'src/modules/budsies';
-import { BreakpointValue, MimeTypeValue } from 'src/modules/shared';
+import ImageSourceItem from 'src/modules/budsies/types/image-source-item.interface';
+import { BreakpointValue } from 'src/modules/shared/types/breakpoint.value';
+import { MimeTypeValue } from 'src/modules/shared/types/mime-type.value';
+import { buildStoryblokImageUrl } from 'src/modules/vsf-storyblok-module';
 
 import BreakpointSpec from './interfaces/breakpoint-spec.interface';
 import parseImageDimensions from './parse-image-dimensions';
@@ -19,10 +21,7 @@ export default function generateImageSourcesList (
   let fallbackSourceItem: ImageSourceItem | undefined;
 
   for (const spec of breakpointsSpecs) {
-    // "https://s3.amazonaws.com/a.storyblok.com/f/109999/500x500/c01cfb137f/pet_socks.png"
-    // "https://a.storyblok.com/f/109999/1080x1080/485ba42bde/petsies_homepage_images_1_.png"
-    const [, resource] = spec.src.split('/a.storyblok.com');
-    let dimensions = parseImageDimensions(spec.src);
+    const dimensions = parseImageDimensions(spec.src);
     const ratio = forcedAspectRation || (dimensions.height / dimensions.width);
 
     const webpSourceItem: ImageSourceItem = {
@@ -60,9 +59,9 @@ export default function generateImageSourcesList (
       let mod = '/m/fit-in';
       mod += `/${adjustedWidth}x${adjustedHeight}`;
 
-      const webpResizedUrl = 'https://sb-assets.budsies.com' + resource + mod + webpFilter;
-      const avifResizedUrl = 'https://sb-assets.budsies.com' + resource + mod + avifFilter;
-      const defaultResizedUrl = 'https://sb-assets.budsies.com' + resource + mod;
+      const webpResizedUrl = buildStoryblokImageUrl(spec.src, mod + webpFilter);
+      const avifResizedUrl = buildStoryblokImageUrl(spec.src, mod + avifFilter);
+      const defaultResizedUrl = buildStoryblokImageUrl(spec.src, mod);
 
       webpSourceItem.srcset.push(`${webpResizedUrl}${density > 1 ? ' ' + density + 'x' : ''}`);
       avifSourceItem.srcset.push(`${avifResizedUrl}${density > 1 ? ' ' + density + 'x' : ''}`);

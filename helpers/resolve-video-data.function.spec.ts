@@ -10,6 +10,12 @@ import {
   ResolvedVideoSourceType
 } from './resolve-video-data.function';
 
+jest.mock('src/modules/vsf-storyblok-module', () => ({
+  resolveStoryblokAssetUrl: (url: string) => url.includes('a.storyblok.com')
+    ? url.replace('a.storyblok.com', 'sb-assets.budsies.com')
+    : url
+}));
+
 jest.mock('src/modules/shared', () => ({
   VideoProvider: {
     youtube: 'youtube',

@@ -11,13 +11,14 @@
       :sharing-description="itemData.sharing_description"
       :e-mail-subject="itemData.sharing_email_subject"
       :twitter-description="itemData.twitter_description"
-      :image="itemData.sharing_image.filename"
+      :image="sharingImage"
     />
   </div>
 </template>
 
 <script lang="ts">
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
+import { resolveStoryblokAssetUrl } from 'src/modules/vsf-storyblok-module';
 import SharingData from './interfaces/sharing-data.interface';
 
 import MSocialSharing from 'theme/components/molecules/m-social-sharing.vue';
@@ -30,6 +31,9 @@ export default Blok.extend({
   computed: {
     itemData (): SharingData {
       return this.item as SharingData;
+    },
+    sharingImage (): string {
+      return resolveStoryblokAssetUrl(this.itemData.sharing_image.filename);
     }
   }
 })

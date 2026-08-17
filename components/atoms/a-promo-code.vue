@@ -6,10 +6,12 @@
 
     <div v-if="!isCouponCode" class="a-promo-code__form">
       <SfInput
+        ref="couponInput"
         v-model="promoCode"
         name="promoCode"
         :placeholder="$t('Add a discount code')"
-        :disabled="isInteractionDisabled"
+        :disabled="false"
+        :aria-disabled="isInteractionDisabled"
         :aria-label="$t('Add a discount code')"
         class="sf-input--filled a-promo-code__input"
         @keyup.enter="applyCoupon"
@@ -43,7 +45,13 @@
       {{ $t('Delete discount code') }}
     </MSpinnerButton>
 
-    <div class="a-promo-code__message" v-if="message" aria-live="polite">
+    <div
+      class="a-promo-code__message"
+      v-if="message"
+      role="alert"
+      aria-live="polite"
+      aria-atomic="true"
+    >
       {{ message }}
     </div>
 
@@ -64,6 +72,7 @@
 </template>
 
 <script>
+import { ref } from 'vue';
 import { SfIcon, SfInput } from '@storefront-ui/vue';
 import { IS_COUPON_INTERACTION_BLOCKED } from '@vue-storefront/core/modules/cart';
 
@@ -115,6 +124,26 @@ export default {
       }
     }
   },
+  setup () {
+    const couponInput = ref(null);
+
+    const focusCouponInput = () => {
+      const inputElement = couponInput.value?.$el?.querySelector('input');
+
+      if (!(inputElement instanceof HTMLInputElement)) {
+        return false;
+      }
+
+      inputElement.focus();
+
+      return true;
+    };
+
+    return {
+      couponInput,
+      focusCouponInput
+    };
+  },
   methods: {
     async applyCoupon () {
       if (this.isInteractionDisabled) {
@@ -123,21 +152,31 @@ export default {
 
       this.isSubmitting = true;
       this.couponAppliedAnnouncement = '';
+      let isCouponApplied = false;
 
       try {
-        const result = await this.$store.dispatch('cart/applyCoupon', { couponCode: this.promoCode });
+        const result = await this.$store.dispatch('cart/applyCoupon', { couponCode: this.promoCode, silent: true });
 
         if (result.code !== 200) {
           throw new Error(result.result.errorMessage);
         }
 
         this.couponAppliedAnnouncement = this.$t('Coupon applied.').toString();
+        isCouponApplied = true;
       } catch (error) {
         const errorMessage = error.errorMessage || `Coupon code "${this.promoCode}" is not valid.`;
         this.message = errorMessage;
+
+        this.$nextTick(() => {
+          this.focusCouponInput();
+        });
       } finally {
         this.isSubmitting = false;
         this.promoCode = '';
+      }
+
+      if (isCouponApplied) {
+        this.$emit('coupon-applied');
       }
     },
     async removeCoupon () {
