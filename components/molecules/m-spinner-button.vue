@@ -1,12 +1,13 @@
 <template>
   <div class="m-spinner-button">
     <SfButton
+      ref="button"
       :class="buttonClass"
-      :disabled="isDisabled"
+      :aria-disabled="isDisabled"
       :title="title"
       :type="buttonType"
       :aria-label="ariaLabel"
-      @click="$emit('click')"
+      @click="onClick"
     >
       <ALoadingSpinner v-show="showSpinner" />
       <span :style="{visibility: showSpinner ? 'hidden' : 'visible'}">
@@ -17,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import Vue, { Ref, ref } from 'vue';
 import { SfButton } from '@storefront-ui/vue';
 import ALoadingSpinner from 'theme/components/atoms/a-loading-spinner.vue';
 
@@ -53,9 +54,38 @@ export default Vue.extend({
     ALoadingSpinner,
     SfButton
   },
+  setup () {
+    const button: Ref<InstanceType<typeof SfButton> | null> = ref(null);
+
+    function focus (): boolean {
+      const buttonElement = button.value?.$el;
+
+      if (!(buttonElement instanceof HTMLElement)) {
+        return false;
+      }
+
+      buttonElement.focus();
+
+      return true;
+    }
+
+    return {
+      button,
+      focus
+    };
+  },
   computed: {
     isDisabled (): boolean {
       return this.showSpinner || this.disabled;
+    }
+  },
+  methods: {
+    onClick() {
+      if (this.isDisabled) {
+        return;
+      }
+
+      this.$emit('click');
     }
   }
 });

@@ -215,6 +215,12 @@ export default defineComponent({
         persistLastUsedCustomerPhoneNumber(phoneNumber.value);
         persistLastUsedCustomerVatId(vatId.value);
 
+        await applicationStore.dispatch('notification/spawnNotification', {
+          type: 'success',
+          message: applicationI18n.t('Address added successfully') as string,
+          action1: { label: i18n.t('OK') }
+        });
+
         emit('address-added');
       } catch (error) {
         onFailure(applicationI18n.t('Unable to add new address') as string);

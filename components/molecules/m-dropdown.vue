@@ -1,9 +1,9 @@
-
 <template>
   <SfDropdown
     class="m-dropdown"
     :is-open="isOpen"
     :title="title"
+    :close-on-outside-click="closeOnOutsideClick"
     ref="dropdown"
     @click:close="$emit('click:close')"
   >
@@ -35,6 +35,10 @@ export default Vue.extend({
     title: {
       type: String,
       default: ''
+    },
+    closeOnOutsideClick: {
+      type: Boolean,
+      default: true
     }
   },
   components: {
