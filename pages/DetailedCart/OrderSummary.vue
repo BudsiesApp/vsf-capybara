@@ -5,10 +5,18 @@
       :level="2"
       class="sf-heading--left sf-heading--no-underline title"
     />
-    <MPriceSummary :is-large="true" />
+    <MPriceSummary
+      ref="priceSummary"
+      :is-large="true"
+      @coupon-removed="focusCouponInput"
+    />
 
     <div class="actions">
-      <APromoCode :allow-promo-code-removal="false">
+      <APromoCode
+        ref="promoCode"
+        :allow-promo-code-removal="false"
+        @coupon-applied="focusCouponRemovalButton"
+      >
         <template #bottom-helper-text="{ isCouponApplied }">
           <p class="_helper-text" v-if="!isCouponApplied">
             {{ $t('Please apply gift certificates during checkout (next step)') }}
@@ -30,6 +38,7 @@
   </div>
 </template>
 <script>
+import { nextTick, ref } from 'vue';
 import {
   SfLoader,
   SfHeading,
@@ -58,6 +67,29 @@ export default {
   },
   beforeMount () {
     registerModule(Braintree)
+  },
+  setup () {
+    const priceSummary = ref(null);
+    const promoCode = ref(null);
+
+    const focusCouponRemovalButton = () => {
+      nextTick(() => {
+        priceSummary.value?.focusCouponRemovalButton();
+      });
+    };
+
+    const focusCouponInput = () => {
+      nextTick(() => {
+        promoCode.value?.focusCouponInput();
+      });
+    };
+
+    return {
+      priceSummary,
+      promoCode,
+      focusCouponRemovalButton,
+      focusCouponInput
+    };
   },
   computed: {
     ...mapGetters({

@@ -3,6 +3,13 @@
     class="default-layout"
     :class="{ 'storyblok-preview-mode': isStoryblokPreviewMode }"
   >
+    <a
+      class="sr-only"
+      href="#main-content"
+    >
+      {{ $t('Skip to Content') }}
+    </a>
+
     <MLoader />
 
     <LazyHydrate
@@ -24,7 +31,7 @@
         </LazyHydrate>
       </div>
 
-      <main ref="main" tabindex="-1" class="content">
+      <main id="main-content" ref="main" tabindex="-1" class="content">
         <slot />
       </main>
 

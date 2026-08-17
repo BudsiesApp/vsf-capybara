@@ -81,6 +81,7 @@
                 --button-color: var(--c-link-hover);
             }
 
+            &[aria-disabled],
             &[disabled] {
                 --button-color: var(--c-text-muted);
 
