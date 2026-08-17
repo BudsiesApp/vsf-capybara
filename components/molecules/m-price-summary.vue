@@ -1,5 +1,14 @@
 <template>
   <div class="m-price-summary" :class="skinClass">
+    <span
+      class="sr-only"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      {{ totalsAnnouncement }}
+    </span>
+
     <dl class="m-price-summary__list">
       <div
         v-for="row in summaryRows"
@@ -18,6 +27,7 @@
     </dl>
 
     <MSpinnerButton
+      ref="couponRemovalButton"
       v-if="isCouponCode"
       class="promo-code__button"
       button-class="color-secondary"
@@ -32,8 +42,6 @@
     <dl class="m-price-summary__list">
       <div
         class="property"
-        aria-live="polite"
-        aria-atomic="true"
         :class="{'property--large': isLarge}"
       >
         <dt class="property__name" v-text="$t('Grand Total')" />
@@ -61,7 +69,8 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { ref } from 'vue';
+import { mapGetters, mapState } from 'vuex';
 import { SfDivider } from '@storefront-ui/vue';
 import { IS_COUPON_INTERACTION_BLOCKED } from '@vue-storefront/core/modules/cart';
 
@@ -84,15 +93,29 @@ export default {
       default: false
     }
   },
+  setup () {
+    const couponRemovalButton = ref(null);
+
+    const focusCouponRemovalButton = () => couponRemovalButton.value?.focus() || false;
+
+    return {
+      couponRemovalButton,
+      focusCouponRemovalButton
+    };
+  },
   data () {
     return {
-      isCouponRemoving: false
+      isCouponRemoving: false,
+      totalsAnnouncement: ''
     }
   },
   computed: {
     ...mapGetters({
       totals: 'cart/getTotals',
       productsInCart: 'cart/getCartItems'
+    }),
+    ...mapState({
+      platformTotalSegments: (state) => state.cart.platformTotalSegments
     }),
     discount () {
       return this.totals.find((total) => total.code === 'discount');
@@ -185,6 +208,26 @@ export default {
 
       return rows;
     },
+    totalsAnnouncementText () {
+      const rows = [
+        {
+          name: this.$t('Grand Total'),
+          value: this.formatPrice(this.prices.grand_total)
+        }
+      ];
+
+      if (this.showDefaultCurrencyGrandTotal) {
+        rows.push({
+          name: this.$t('Grand Total(USD)'),
+          value: this.formatDefaultCurrencyPrice(this.prices.grand_total)
+        });
+      }
+
+      return rows
+        .concat(this.summaryRows.slice().reverse())
+        .map(({ name, value }) => `${name}: ${value}`)
+        .join('. ');
+    },
     totalItems () {
       return this.productsInCart.reduce((result, product) => {
         return result + product.qty;
@@ -218,18 +261,32 @@ export default {
       return this.$store.getters[GET_CURRENCY_EXCHANGE_RATE];
     }
   },
+  watch: {
+    platformTotalSegments () {
+      this.announceTotals();
+    }
+  },
   methods: {
+    announceTotals () {
+      this.totalsAnnouncement = this.totalsAnnouncementText;
+    },
     async removeCoupon () {
       if (this.isCouponRemovalDisabled) {
         return;
       }
 
       this.isCouponRemoving = true;
+      let isCouponRemoved = false;
 
       try {
-        await this.$store.dispatch('cart/removeCoupon');
+        const result = await this.$store.dispatch('cart/removeCoupon');
+        isCouponRemoved = Boolean(result);
       } finally {
         this.isCouponRemoving = false;
+      }
+
+      if (isCouponRemoved) {
+        this.$emit('coupon-removed');
       }
     },
     formatPrice (price) {
@@ -237,6 +294,9 @@ export default {
         price * this.exchangeRate,
         this.selectedCurrency.symbol
       );
+    },
+    formatDefaultCurrencyPrice (price) {
+      return PriceHelper.formatPrice(price, DEFAULT_CURRENCY.symbol);
     }
   }
 };
