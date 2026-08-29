@@ -34,7 +34,8 @@ export function useCreationWizardProductTypeStep (
           applicationStore.dispatch('product/loadProduct', {
             parentSku: sku,
             childSku: null,
-            setCurrent: false
+            setCurrent: false,
+            prefetchGroupProducts: false
           }),
           applicationStore.dispatch(
             'budsies/loadProductsRushAddons',
