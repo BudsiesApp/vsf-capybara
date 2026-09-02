@@ -1,4 +1,5 @@
 import { ADDRESS_VALIDATION_MODAL_NAME } from 'src/modules/address';
+import { FERA_MEDIA_CONSENT_MODAL_NAME } from 'src/modules/fera/types/modal-name';
 import { Component } from 'vue';
 
 type ModalComponentLoader = () => Promise<{ default: Component }>;
@@ -35,6 +36,7 @@ export const modalComponents = new Map<string, ModalComponentLoader>([
   [ModalList.WebsiteLeaving, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-website-leaving.vue')],
   [ModalList.OrderError, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-order-error.vue')],
   [ModalList.ImagesGallery, () => import(/* webpackChunkName: "vsf-modals" */ 'theme/components/molecules/modals/m-modal-images-gallery.vue')],
+  [FERA_MEDIA_CONSENT_MODAL_NAME, () => import(/* webpackChunkName: "vsf-modals" */ 'src/modules/fera/components/fera-media-consent-modal.vue')],
   [ADDRESS_VALIDATION_MODAL_NAME, () => import(/* webpackChunkName: "vsf-modals" */ 'src/modules/address/components/modal-address-validation.vue')]
 ])
 
