@@ -69,14 +69,24 @@
       >
         <SfLoader :loading="true" />
       </div>
-      <p
+      <div
         v-else-if="isShippingMethodsSyncingError"
         class="shipping__feedback"
-        role="alert"
-        aria-atomic="true"
       >
-        {{ $t('Error while loading shipping methods') }}
-      </p>
+        <p
+          role="alert"
+          aria-atomic="true"
+        >
+          {{ $t('Error while loading shipping methods') }}
+        </p>
+        <SfButton
+          type="button"
+          class="-small shipping__retry"
+          @click="retryShippingMethods"
+        >
+          {{ $t('Retry') }}
+        </SfButton>
+      </div>
       <p
         v-else
         class="shipping__feedback"
@@ -268,6 +278,11 @@ export default defineComponent({
     onZipCodeBlur () {
       EventBus.$emit('checkout-before-shippingMethods', this.shipping.country)
     },
+    retryShippingMethods () {
+      return this.$store.dispatch('cart/syncShippingMethods', {
+        forceServerSync: true
+      }).catch(() => undefined);
+    },
     async saveDataToCheckout () {
       const isFormValid = await this.validateAndGoToFirstError();
 
@@ -453,6 +468,14 @@ export default defineComponent({
 
   &__feedback {
     margin: var(--spacer-sm) 0;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  &__retry {
+    margin-top: var(--spacer-sm);
   }
 
   &__note {
