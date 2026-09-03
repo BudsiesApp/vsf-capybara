@@ -1051,13 +1051,10 @@
 "Address {address} set as default billing","Address {address} set as default billing"
 "Address {address} set as default shipping","Address {address} set as default shipping"
 "Removing address {address}","Removing address {address}"
-
 "Skip to Content","Skip to Content"
 "Address added successfully","Address added successfully"
 "Address updated successfully","Address updated successfully"
 "(current step)","(current step)"
 "{action}: {item}","{action}: {item}"
-
 "Error while loading shipping methods","Error while loading shipping methods"
-
 "Retry","Retry"

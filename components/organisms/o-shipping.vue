@@ -230,7 +230,7 @@ export default defineComponent({
       return this.shippingMethodsDisplayState === 'available';
     },
     isContinueButtonDisabled () {
-      return !this.shippingMethods.length || this.isShippingMethodsSyncing || this.isValidatingAddress;
+      return !this.shippingMethods.length || this.isShippingMethodsSyncing || this.isShippingMethodsSyncingError || this.isValidatingAddress;
     },
     isAddressFormDisabled () {
       return this.shipToMyAddress;
