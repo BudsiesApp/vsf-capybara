@@ -1057,3 +1057,5 @@
 "Address updated successfully","Address updated successfully"
 "(current step)","(current step)"
 "{action}: {item}","{action}: {item}"
+
+"Error while loading shipping methods","Error while loading shipping methods"
