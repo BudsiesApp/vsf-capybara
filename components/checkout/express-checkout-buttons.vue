@@ -62,6 +62,7 @@ import {
   useExpressCheckoutTotals
 } from 'src/modules/shared';
 import { useAddressValidation } from 'src/modules/address';
+import { PERSISTED_CUSTOMER_EMAIL } from 'src/modules/persisted-customer-data';
 import { resolveExpressCheckoutCustomerData } from 'theme/helpers/express-checkout-customer-data';
 
 type AllSupportedMethodsCodes = BraintreeSupportedMethodCodes | AmazonPaySupportedMethodCodes;
@@ -203,12 +204,8 @@ export default defineComponent({
       return applicationStore.getters['checkout/getShippingMethods'];
     });
 
-    const authenticatedCustomerEmail = computed<string | undefined>(() => {
-      if (!applicationStore.getters['user/isLoggedIn']) {
-        return undefined;
-      }
-
-      return applicationStore.state.user.current?.email;
+    const persistedCustomerEmail = computed<string>(() => {
+      return applicationStore.getters[PERSISTED_CUSTOMER_EMAIL];
     });
 
     async function updateCustomerData (data: ExpressCheckoutAuthorizedCallbackData['customer']): Promise<void> {
@@ -216,7 +213,7 @@ export default defineComponent({
         return;
       }
 
-      const customerData = resolveExpressCheckoutCustomerData(data, authenticatedCustomerEmail.value);
+      const customerData = resolveExpressCheckoutCustomerData(data, persistedCustomerEmail.value);
 
       await applicationStore.dispatch('checkout/savePersonalDetails', customerData);
 

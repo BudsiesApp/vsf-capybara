@@ -8,20 +8,20 @@ function normalizeEmail (email?: string | null): string {
 
 export function resolveExpressCheckoutCustomerData (
   customerData: ExpressCheckoutCustomerData,
-  authenticatedCustomerEmail?: string | null
+  persistedCustomerEmail?: string | null
 ): ExpressCheckoutCustomerData {
-  const accountEmail = authenticatedCustomerEmail?.trim();
+  const customerEmail = persistedCustomerEmail?.trim();
 
-  if (!accountEmail) {
+  if (!customerEmail) {
     return customerData;
   }
 
-  if (normalizeEmail(customerData.emailAddress) === normalizeEmail(accountEmail)) {
+  if (normalizeEmail(customerData.emailAddress) === normalizeEmail(customerEmail)) {
     return customerData;
   }
 
   return {
     ...customerData,
-    emailAddress: accountEmail
+    emailAddress: customerEmail
   };
 }
