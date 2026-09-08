@@ -62,6 +62,7 @@ import {
   useExpressCheckoutTotals
 } from 'src/modules/shared';
 import { useAddressValidation } from 'src/modules/address';
+import { resolveExpressCheckoutCustomerData } from 'theme/helpers/express-checkout-customer-data';
 
 type AllSupportedMethodsCodes = BraintreeSupportedMethodCodes | AmazonPaySupportedMethodCodes;
 
@@ -202,15 +203,25 @@ export default defineComponent({
       return applicationStore.getters['checkout/getShippingMethods'];
     });
 
+    const authenticatedCustomerEmail = computed<string | undefined>(() => {
+      if (!applicationStore.getters['user/isLoggedIn']) {
+        return undefined;
+      }
+
+      return applicationStore.state.user.current?.email;
+    });
+
     async function updateCustomerData (data: ExpressCheckoutAuthorizedCallbackData['customer']): Promise<void> {
       if (!data) {
         return;
       }
 
-      await applicationStore.dispatch('checkout/savePersonalDetails', data);
+      const customerData = resolveExpressCheckoutCustomerData(data, authenticatedCustomerEmail.value);
 
-      if (data.firstName && data.lastName && data.emailAddress) {
-        await applicationStore.dispatch('budsies/updatePersonalDetails', data);
+      await applicationStore.dispatch('checkout/savePersonalDetails', customerData);
+
+      if (customerData.firstName && customerData.lastName && customerData.emailAddress) {
+        await applicationStore.dispatch('budsies/updatePersonalDetails', customerData);
       }
     }
 
