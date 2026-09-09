@@ -20,6 +20,7 @@
 
 <script lang="ts">
 import { useI18n, useStore } from '@vue-storefront/core/application-services';
+import { CouponButtonState, useCouponButton } from '@vue-storefront/core/modules/cart';
 import { computed, ComputedRef, defineComponent, PropType, ref } from 'vue';
 
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
@@ -29,7 +30,6 @@ import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
 
 import MCouponItem from 'theme/components/molecules/m-coupon-item.vue';
-import { CouponButtonState, useCouponButton } from 'theme/helpers/use-coupon-button';
 
 import CouponOfferData from './interfaces/coupon-offer-data.interface';
 
