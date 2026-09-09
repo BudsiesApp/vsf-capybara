@@ -22,7 +22,7 @@ import {
   CartLineCouponOffer,
   resolveCartLineCouponOffer
 } from 'theme/helpers/cart-line-coupon-offer';
-import { useCouponButton } from 'theme/helpers/use-coupon-button';
+import { useCouponButton } from '@vue-storefront/core/modules/cart';
 
 export default defineComponent({
   name: 'MCartLineCouponOffer',
