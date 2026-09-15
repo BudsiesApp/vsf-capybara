@@ -203,7 +203,7 @@ export default defineComponent({
         return '';
       }
 
-      return `forevers_customize_later_page_top`;
+      return 'petsies_creation_page_top';
     });
 
     const showPlaceholder = computed<boolean>(() => {
