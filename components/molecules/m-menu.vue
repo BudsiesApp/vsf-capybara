@@ -202,6 +202,10 @@ export default Vue.extend({
       ],
       educatorsItems: [
         {
+          label: this.$t('Education Program'),
+          url: '/teachers/'
+        },
+        {
           label: this.$t('Classroom Budsies'),
           url: {
             name: 'simple-product',
