@@ -6,7 +6,8 @@
     />
 
     <SfHeading
-      :title="$t('Budsies Pals Kit')"
+      v-if="getCurrentProduct"
+      :title="getCurrentProduct.name"
       :level="1"
     />
 
@@ -24,7 +25,8 @@
 
       <div class="_form-container">
         <SfHeading
-          :title="$t('Purchase a Budsies Pals Kit')"
+          v-if="getCurrentProduct"
+          :title="`${$t('Purchase')} ${getCurrentProduct.name}`"
           :level="3"
         />
         <div
