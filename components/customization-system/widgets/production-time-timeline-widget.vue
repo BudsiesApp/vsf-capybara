@@ -210,7 +210,7 @@ export default defineComponent({
         dictionary[optionValue.id] = {
           isInTimeForChristmas: props.isHolidayPeriod && addon.isInTimeForChristmas,
           isHolidayPeriod: props.isHolidayPeriod,
-          optionName: optionValue.name || addon.text,
+          optionName: props.isHolidayPeriod ? addon.text : optionValue.name || addon.text,
           optionValueSku: optionValue.sku || '',
           price,
           slotsLeft: typeof addon.slotsLeft === 'number' ? addon.slotsLeft : Infinity,

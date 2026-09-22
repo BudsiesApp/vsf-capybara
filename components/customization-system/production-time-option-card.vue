@@ -259,7 +259,6 @@ export default defineComponent({
       optionDurationTitle,
       optionSubtitleTitle,
       priceTitle,
-      shipTitle,
       slotsLeftClasses,
       slotsLeftTitle
     };
