@@ -321,16 +321,20 @@ export default defineComponent({
       );
     }
 
-    watch([sortedValues, value], ([visibleValues, selectedValue]) => {
-      const selectedOptionValueId = typeof selectedValue === 'string' ? selectedValue : undefined;
+    watch(
+      [sortedValues, value],
+      ([visibleValues, selectedValue]) => {
+        const selectedOptionValueId = typeof selectedValue === 'string' ? selectedValue : undefined;
 
-      if (!props.isHolidayPeriod || !visibleValues.length || visibleValues.some(({ id }) => id === selectedOptionValueId)) {
-        return;
-      }
+        if (!props.isHolidayPeriod || !visibleValues.length || visibleValues.some(({ id }) => id === selectedOptionValueId)) {
+          return;
+        }
 
-      const standardValue = visibleValues.find(({ id }) => id === PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID);
-      if (standardValue) context.emit('input', standardValue.id);
-    });
+        const standardValue = visibleValues.find(({ id }) => id === PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID);
+        if (standardValue) context.emit('input', standardValue.id);
+      },
+      { immediate: true }
+    );
 
     const { ariaDescribedby, ariaInvalid, errorMessageId } = useErrorAccessibility(
       'production-time-timeline-widget',
@@ -345,7 +349,6 @@ export default defineComponent({
       isFastestAvailable,
       isOptionValueDisabled,
       isDomesticHolidayLocation,
-      holidayLocation,
       onInputClick,
       productionTimeOptionCardDataByOptionValueId,
       radioInputName,

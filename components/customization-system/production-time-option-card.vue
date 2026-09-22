@@ -230,11 +230,7 @@ export default defineComponent({
       }
 
       if (props.isHolidayPeriod) {
-        if (props.optionValueSku.toLowerCase().includes('rush') && Number.isFinite(props.slotsLeft)) {
-          return applicationI18n.t('Only {slotsLeft} holiday slots left', { slotsLeft: props.slotsLeft }).toString();
-        }
-
-        return '';
+        return applicationI18n.t('Only {slotsLeft} holiday slots left', { slotsLeft: props.slotsLeft }).toString();
       }
 
       if (props.slotsLeft === 0) {
