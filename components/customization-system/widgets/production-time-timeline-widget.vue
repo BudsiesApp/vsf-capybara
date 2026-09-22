@@ -4,6 +4,19 @@
     :role="groupRole"
     :aria-labelledby="ariaLabelledby"
   >
+    <p
+      v-if="isHolidayPeriod"
+      class="_location-selector"
+      :class="{ '-single-option': sortedValues.length === 1 }"
+    >
+      {{ $t('Delivery location:') }}
+      <strong>{{ isDomesticHolidayLocation ? $t('United States') : $t('International') }}</strong>
+      <span>·</span>
+      <button type="button" @click="toggleHolidayLocation">
+        {{ isDomesticHolidayLocation ? $t("I'm outside the U.S.") : $t("I'm in the U.S.") }}
+      </button>
+    </p>
+
     <ul class="_options-list">
       <li
         v-for="optionValue in sortedValues"
@@ -15,6 +28,7 @@
         }"
       >
         <span
+          v-if="sortedValues.length > 1"
           class="_timeline"
           :class="{
             '-selected': isSelected(optionValue),
@@ -65,7 +79,8 @@ import {
   computed,
   defineComponent,
   PropType,
-  toRefs
+  toRefs,
+  watch
 } from 'vue';
 
 import { RushAddon } from 'src/modules/budsies';
@@ -73,6 +88,8 @@ import {
   ListWidgetInputType,
   OptionValue,
   PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID,
+  HolidayDeliveryLocation,
+  useHolidayDeliveryLocation,
   useListWidget,
   useOptionValuesPrice
 } from 'src/modules/customization-system';
@@ -115,6 +132,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    isHolidayPeriod: {
+      type: Boolean,
+      default: false
+    },
     maxValuesCount: {
       type: Number as PropType<number | undefined>,
       default: undefined
@@ -139,6 +160,7 @@ export default defineComponent({
   setup (props, context) {
     const applicationStore = useStore();
     const { maxValuesCount, radioGroupName, value, values } = toRefs(props);
+    const { location: holidayLocation, setLocation } = useHolidayDeliveryLocation();
     const hasError = computed<boolean>(() => !!props.error);
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
     const { optionValuePriceDictionary } = useOptionValuesPrice(values);
@@ -161,10 +183,13 @@ export default defineComponent({
 
     const productionTimeOptionCardDataByOptionValueId = computed<Record<string, ProductionTimeOptionCardData>>(() => {
       const dictionary: Record<string, ProductionTimeOptionCardData> = {};
-      const standardAddon = productRushAddons.value.find((addon) => !addon.id);
+      const matchingAddons = props.isHolidayPeriod
+        ? productRushAddons.value.filter((addon) => addon.isDomestic === (holidayLocation.value === HolidayDeliveryLocation.DOMESTIC))
+        : productRushAddons.value;
+      const standardAddon = matchingAddons.find((addon) => !addon.id);
       const addonBySku: Record<string, RushAddon> = {};
 
-      for (const addon of productRushAddons.value) {
+      for (const addon of matchingAddons) {
         if (addon.id) {
           addonBySku[addon.id] = addon;
         }
@@ -183,6 +208,8 @@ export default defineComponent({
         }
 
         dictionary[optionValue.id] = {
+          isInTimeForChristmas: props.isHolidayPeriod && addon.isInTimeForChristmas,
+          isHolidayPeriod: props.isHolidayPeriod,
           optionName: optionValue.name || addon.text,
           optionValueSku: optionValue.sku || '',
           price,
@@ -196,8 +223,13 @@ export default defineComponent({
 
     const sortedValues = computed<OptionValue[]>(() => {
       const cardDataByOptionValueId = productionTimeOptionCardDataByOptionValueId.value;
+      let locationValues = values.value;
 
-      return [...values.value].sort((a, b) => {
+      if (props.isHolidayPeriod) {
+        locationValues = values.value.filter((optionValue) => !!cardDataByOptionValueId[optionValue.id]);
+      }
+
+      return [...locationValues].sort((a, b) => {
         const firstCardData = cardDataByOptionValueId[a.id];
         const secondCardData = cardDataByOptionValueId[b.id];
         const firstTurnaroundTime = firstCardData?.turnaroundTime;
@@ -277,6 +309,29 @@ export default defineComponent({
       context.emit('input', undefined);
     }
 
+    const isDomesticHolidayLocation = computed<boolean>(() => {
+      return holidayLocation.value === HolidayDeliveryLocation.DOMESTIC;
+    });
+
+    function toggleHolidayLocation (): void {
+      setLocation(
+        isDomesticHolidayLocation.value
+          ? HolidayDeliveryLocation.INTERNATIONAL
+          : HolidayDeliveryLocation.DOMESTIC
+      );
+    }
+
+    watch([sortedValues, value], ([visibleValues, selectedValue]) => {
+      const selectedOptionValueId = typeof selectedValue === 'string' ? selectedValue : undefined;
+
+      if (!props.isHolidayPeriod || !visibleValues.length || visibleValues.some(({ id }) => id === selectedOptionValueId)) {
+        return;
+      }
+
+      const standardValue = visibleValues.find(({ id }) => id === PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID);
+      if (standardValue) context.emit('input', standardValue.id);
+    });
+
     const { ariaDescribedby, ariaInvalid, errorMessageId } = useErrorAccessibility(
       'production-time-timeline-widget',
       hasError
@@ -289,10 +344,13 @@ export default defineComponent({
       groupRole,
       isFastestAvailable,
       isOptionValueDisabled,
+      isDomesticHolidayLocation,
+      holidayLocation,
       onInputClick,
       productionTimeOptionCardDataByOptionValueId,
       radioInputName,
       sortedValues,
+      toggleHolidayLocation,
       ...listWidgetFields
     };
   }
@@ -319,6 +377,34 @@ export default defineComponent({
     padding: 0;
     margin: 0;
     list-style: none;
+  }
+
+  ._location-selector {
+    display: flex;
+    gap: 0.35rem;
+    align-items: baseline;
+    justify-content: center;
+    margin-bottom: var(--spacer-sm);
+    color: var(--c-text-muted);
+    font-size: var(--font-sm);
+
+    strong {
+      color: var(--c-text);
+    }
+
+    button {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--c-primary);
+      font: inherit;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    &.-single-option {
+      margin-bottom: var(--spacer-base);
+    }
   }
 
   ._option {
