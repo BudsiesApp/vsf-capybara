@@ -1,6 +1,9 @@
 import { test, expect } from '../../fixtures/checkout-page';
 import { getRandomEmail } from '../../helpers/get-random-email';
 import { AddressData, COUNTRY_WITH_STATES_DEFAULT_STATE, COUNTRY_WITH_STATES_LIST, COUNTRY_WITH_STATES_LIST_CODE } from '../../page-model/cart/checkout';
+import { CartPage } from '../../page-model/cart/cart';
+import { GiftCardProductPage } from '../../page-model/product/gift-card-product';
+import { SimpleProductPage } from '../../page-model/product/simple-product';
 
 const simpleProductUrl = '/p/voice-recorder/';
 
@@ -164,6 +167,73 @@ test('shipping step is visible if cart contains virtual gift card and other prod
   await cartPage.goto();
   await checkoutPage.goto();
   await checkoutPage.expectStepToBeVisible(checkoutPage.stepsName.shipping);
+});
+
+test('checkout returns to Contact when another tab replaces a physical cart with a virtual gift card', async ({ page, context, cartPage, checkoutPage, simpleProductPage }) => {
+  await page.goto(simpleProductUrl);
+  await simpleProductPage.waitPageToBeVisible();
+  await simpleProductPage.addToCartAndVerifyResponse();
+
+  await cartPage.goto();
+  await expect(cartPage.cartItems).toHaveCount(1);
+  const physicalName = await cartPage.getCartItemProductName(cartPage.cartItems.first());
+
+  await checkoutPage.goto();
+  await checkoutPage.personalDetailsStep.fillPersonalDetails();
+  await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.shipping);
+
+  const secondPage = await context.newPage();
+  const secondCart = new CartPage(secondPage);
+  const giftCard = new GiftCardProductPage(secondPage);
+  await secondCart.goto();
+  await expect(secondCart.cartItems).toHaveCount(1);
+
+  await giftCard.goto();
+  await giftCard.fillFormData();
+  await giftCard.addToCartButton.click();
+  await secondCart.goto();
+  await expect(secondCart.cartItems).toHaveCount(2);
+  await secondCart.removeCartItem(secondCart.getCartItemByProductName(physicalName));
+  await expect(secondCart.cartItems).toHaveCount(1);
+
+  const checkoutTitles = page.locator('.checkout__aside .o-order-content .product-title');
+  await expect(checkoutTitles).toHaveText([giftCard.PRODUCT_NAME]);
+  await checkoutPage.expectStepToBeHidden(checkoutPage.stepsName.shipping);
+  await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.personalDetails);
+  await expect(page).toHaveURL(/#personalDetails$/);
+});
+
+test('checkout returns to Contact when another tab adds a physical item to a virtual cart', async ({ page, context, cartPage, checkoutPage, giftCardProductPage }) => {
+  await giftCardProductPage.goto();
+  await giftCardProductPage.fillFormData();
+  await giftCardProductPage.addToCartButton.click();
+
+  await cartPage.goto();
+  await expect(cartPage.cartItems).toHaveCount(1);
+  await checkoutPage.goto();
+  await checkoutPage.personalDetailsStep.fillPersonalDetails();
+  await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.billing);
+
+  const secondPage = await context.newPage();
+  const secondCart = new CartPage(secondPage);
+  const secondSimpleProduct = new SimpleProductPage(secondPage);
+  await secondCart.goto();
+  await expect(secondCart.cartItems).toHaveCount(1);
+
+  await secondPage.goto(simpleProductUrl);
+  await secondSimpleProduct.waitPageToBeVisible();
+  await secondPage.waitForTimeout(2000);
+  await secondSimpleProduct.addToCartAndVerifyResponse();
+  await secondCart.goto();
+  await expect(secondCart.cartItems).toHaveCount(2);
+  const physicalItem = secondCart.cartItems.filter({ hasNotText: giftCardProductPage.PRODUCT_NAME }).first();
+  const physicalName = await secondCart.getCartItemProductName(physicalItem);
+
+  const checkoutTitles = page.locator('.checkout__aside .o-order-content .product-title');
+  await expect(checkoutTitles).toContainText([giftCardProductPage.PRODUCT_NAME, physicalName]);
+  await checkoutPage.expectStepToBeVisible(checkoutPage.stepsName.shipping);
+  await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.personalDetails);
+  await expect(page).toHaveURL(/#personalDetails$/);
 });
 
 // Currently "Send physical" option is disabled

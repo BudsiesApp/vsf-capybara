@@ -34,6 +34,12 @@ export class CartPage {
     await expect(this.page.locator('#detailed-cart')).toBeVisible();
   }
 
+  public async getCartItemProductName (cartItem: Locator): Promise<string> {
+    const title = cartItem.locator('._details > ._title');
+    await expect(title).toBeVisible();
+    return (await title.innerText()).trim();
+  }
+
   public async expectCartItemToHaveProperties (cartItem: Locator, properties: string[]) {
     const expandableHeader = cartItem.locator('.m-expandable-section ._header');
     if (await expandableHeader.isVisible()) {

@@ -137,7 +137,7 @@ export default {
       return this.steps;
     },
     isReviewStep () {
-      return this.availableSteps[this.currentStep].key === orderReviewStepKey;
+      return this.availableSteps[this.currentStep]?.key === orderReviewStepKey;
     },
     canShowProductionSpotCountdown () {
       return this.productsInCart.some((product) => Boolean(product.is_custom_product));
@@ -222,6 +222,9 @@ export default {
     }
   },
   watch: {
+    isVirtualCart () {
+      this.activateSection('personalDetails');
+    },
     showSuccessOrderPage (value) {
       if (!value && !this.productsInCart.length) {
         this.$router.push({ name: 'detailed-cart' });
