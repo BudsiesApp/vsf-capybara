@@ -24,7 +24,8 @@
         class="_option"
         :class="{
           '-selected': isSelected(optionValue),
-          '-disabled': isOptionValueDisabled(optionValue)
+          '-disabled': isOptionValueDisabled(optionValue),
+          '-single-option': sortedValues.length === 1
         }"
       >
         <span
@@ -416,6 +417,10 @@ export default defineComponent({
     display: grid;
     grid-template-columns: $timeline-mark-size 1fr;
     column-gap: var(--spacer-sm);
+
+    &.-single-option {
+      grid-template-columns: 1fr;
+    }
 
     &.-disabled {
       ._label {
