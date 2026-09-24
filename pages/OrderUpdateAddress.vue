@@ -296,7 +296,8 @@ export default defineComponent({
 
     async function requestOrderShippingAddressConfirmation (addressId: number): Promise<void> {
       await applicationStore.dispatch(REQUEST_ORDER_SHIPPING_ADDRESS_CONFIRMATION_ACTION, {
-        addressId
+        addressId,
+        orderId: order.value?.entity_id
       });
     }
 
@@ -345,7 +346,7 @@ export default defineComponent({
 
         applicationRouter.push({ name: AccountPageName.ORDERS_HISTORY });
       } catch (error) {
-        onFailure(applicationI18n.t('Unable to update order shipping address') as string);
+        onFailure(error?.message || applicationI18n.t('Unable to update order shipping address').toString());
       } finally {
         isSubmitting.value = false;
       }
@@ -370,7 +371,7 @@ export default defineComponent({
           action1: { label: i18n.t('OK') }
         });
       } catch (error) {
-        onFailure(applicationI18n.t('Unable to confirm address') as string);
+        onFailure(error?.message || applicationI18n.t('Unable to confirm address').toString());
       } finally {
         isSubmitting.value = false;
       }
