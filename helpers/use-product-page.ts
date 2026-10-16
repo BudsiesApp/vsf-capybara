@@ -32,7 +32,8 @@ export function useProductPage (
       [
         applicationStore.dispatch('product/loadProduct', {
           parentSku: sku.value,
-          setCurrent: false
+          setCurrent: false,
+          prefetchGroupProducts: false
         }),
         applicationStore.dispatch(
           'budsies/loadProductsRushAddons',

@@ -71,7 +71,7 @@ export function useMultiProductsPage (
       applicationStore.dispatch('product/findProducts', {
         query: getSearchQuery(skus.value),
         options: {
-          prefetchGroupProducts: true
+          prefetchGroupProducts: false
         }
       }),
       applicationStore.dispatch(
