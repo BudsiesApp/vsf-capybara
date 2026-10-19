@@ -2,8 +2,9 @@ import { useStore } from '@vue-storefront/core/application-services';
 import { computed, ref, Ref } from 'vue';
 
 import { useMobileObserver, PriceHelper } from 'src/modules/shared';
-import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
-import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
+import { GET_ACTIVE_CURRENCY, GET_CURRENCY_EXCHANGE_RATE } from 'src/modules/currency';
+import { PRODUCT_DISCOUNTED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';
+import type { ProductDiscountedPrice } from '@vue-storefront/core/modules/catalog';
 import {
   CartItemConfigurationGroup,
   CartItemConfigurationProperty,
@@ -94,15 +95,15 @@ export function useCartItemConfiguration (
   });
 
   const customizationGroups = computed<CartItemConfigurationGroup[]>(() => {
-    const productBySkuDictionary = showPrices.value
-      ? applicationStore.getters['product/getProductBySkuDictionary']
-      : {};
-    const productPriceDictionary = showPrices.value
-      ? applicationStore.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY]
+    const productDiscountedPriceDictionary: Record<string, ProductDiscountedPrice> = showPrices.value
+      ? applicationStore.getters[PRODUCT_DISCOUNTED_PRICE_DICTIONARY] || {}
       : {};
     const currency = showPrices.value
       ? applicationStore.getters[GET_ACTIVE_CURRENCY]
       : null;
+    const exchangeRate: number = showPrices.value
+      ? applicationStore.getters[GET_CURRENCY_EXCHANGE_RATE] || 1
+      : 1;
 
     const groupMap: Record<string, CartItemConfigurationGroup> = {};
 
@@ -177,7 +178,7 @@ export function useCartItemConfiguration (
         }
 
         let optionPrice = showPrices.value
-          ? getOptionValuePrice(selectedOptionValue, productBySkuDictionary, productPriceDictionary)
+          ? getOptionValuePrice(selectedOptionValue, productDiscountedPriceDictionary, exchangeRate)
           : undefined;
 
         if (optionPrice?.regular === 0) {
