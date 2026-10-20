@@ -2,7 +2,7 @@
   <div class="o-header">
     <SfOverlay
       class="overlay"
-      :visible="isAboutMenuHovered || isHoveredMenu || isFocusedMenu || isSearchPanelVisible"
+      :visible="isAboutMenuOpen || isMainMenuOpen || isSearchPanelVisible"
       @click="$store.commit('ui/setSearchpanel', false)"
     />
     <SfHeader
@@ -20,47 +20,56 @@
 
       <template #navigation>
         <SfHeaderNavigationItem
-          ref="aboutNavItem"
+          :class="{
+            '_expanded': isAboutMenuExpanded,
+            '_hover-dismissed': isAboutMenuHoverDismissed
+          }"
           @mouseover="onAboutMenuMouseOver"
-          @mouseleave="isAboutMenuHovered = false"
-          @focusin="onAboutMenuFocusIn"
+          @mouseleave="onAboutMenuMouseLeave"
           @focusout="onAboutMenuFocusOut"
-          @keydown.esc="onAboutMenuEscapeKey"
         >
-          <div
-            class="o-header__submenu"
-            :aria-expanded="isAboutMenuHovered || isAboutMenuFocused"
-            tabindex="0"
-            role="menuitem"
+          <button
+            ref="aboutMenuToggle"
+            type="button"
+            class="o-header__submenu o-header__submenu-button"
+            :aria-expanded="isAboutMenuOpen ? 'true' : 'false'"
+            aria-controls="o-header-about-menu"
+            @click="onAboutMenuToggleClick"
           >
             {{ $t('About') }}
-          </div>
+          </button>
 
           <MAboutMenu
-            :visible="(isAboutMenuHovered || isAboutMenuFocused) && !isSearchPanelVisible"
+            id="o-header-about-menu"
+            :visible="isAboutMenuOpen && !isSearchPanelVisible"
             @transitionend.native="onAboutMenuTransitionEnd"
             @close="onAboutMenuClose"
           />
         </SfHeaderNavigationItem>
 
         <SfHeaderNavigationItem
+          :class="{
+            '_expanded': isMainMenuExpanded,
+            '_hover-dismissed': isMainMenuHoverDismissed
+          }"
           @mouseover="onMainMenuMouseOver"
-          @mouseleave="isHoveredMenu = false"
-          @focusin="onMainMenuFocusIn"
+          @mouseleave="onMainMenuMouseLeave"
           @focusout="onMainMenuFocusOut"
-          @keydown.esc="onMainMenuEscapeKey"
         >
-          <div
-            class="o-header__submenu"
-            :aria-expanded="isHoveredMenu || isFocusedMenu"
-            tabindex="0"
-            role="menuitem"
+          <button
+            ref="mainMenuToggle"
+            type="button"
+            class="o-header__submenu o-header__submenu-button"
+            :aria-expanded="isMainMenuOpen ? 'true' : 'false'"
+            aria-controls="o-header-products-menu"
+            @click="onMainMenuToggleClick"
           >
             {{ $t('Products') }}
-          </div>
+          </button>
 
           <MMenu
-            :visible="(isHoveredMenu || isFocusedMenu) && !isSearchPanelVisible"
+            id="o-header-products-menu"
+            :visible="isMainMenuOpen && !isSearchPanelVisible"
             @transitionend.native="onMainMenuTransitionEnd"
             @close="onMainMenuClose"
           />
@@ -102,7 +111,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import Vue, { ref } from 'vue';
 import { SfHeader, SfOverlay } from '@storefront-ui/vue';
 import { mapState, mapGetters } from 'vuex';
 
@@ -128,13 +137,21 @@ export default Vue.extend({
     MCtaButton,
     CurrencySelector
   },
+  setup () {
+    return {
+      aboutMenuToggle: ref<HTMLButtonElement | null>(null),
+      mainMenuToggle: ref<HTMLButtonElement | null>(null)
+    };
+  },
   data () {
     return {
       isAboutMenuHovered: false,
-      isAboutMenuFocused: false,
+      isAboutMenuExpanded: false,
+      isAboutMenuHoverDismissed: false,
       isAboutMouseOverLocked: false,
       isHoveredMenu: false,
-      isFocusedMenu: false,
+      isMainMenuExpanded: false,
+      isMainMenuHoverDismissed: false,
       isMouseOverLocked: false
     };
   },
@@ -145,61 +162,106 @@ export default Vue.extend({
     ...mapGetters('user', ['isLoggedIn']),
     activeIcon () {
       return this.isLoggedIn ? 'account' : '';
+    },
+    isAboutMenuOpen (): boolean {
+      return this.isAboutMenuHovered || this.isAboutMenuExpanded;
+    },
+    isMainMenuOpen (): boolean {
+      return this.isHoveredMenu || this.isMainMenuExpanded;
     }
   },
+  mounted () {
+    document.addEventListener('keydown', this.onDocumentKeyDown);
+  },
+  beforeDestroy () {
+    document.removeEventListener('keydown', this.onDocumentKeyDown);
+  },
   methods: {
+    closeAboutMenu () {
+      if (this.isAboutMenuHovered) {
+        this.isAboutMenuHoverDismissed = true;
+      }
+
+      this.isAboutMenuHovered = false;
+      this.isAboutMenuExpanded = false;
+    },
     onAboutMenuClose () {
       this.isAboutMenuHovered = false;
-      this.isAboutMenuFocused = false;
+      this.isAboutMenuExpanded = false;
       this.isAboutMouseOverLocked = true;
     },
+    onAboutMenuToggleClick () {
+      if (this.isAboutMenuOpen) {
+        this.closeAboutMenu();
+        return;
+      }
+
+      this.isAboutMenuHoverDismissed = false;
+      this.isAboutMenuExpanded = true;
+    },
     onAboutMenuMouseOver () {
-      if (this.isAboutMouseOverLocked) {
+      if (this.isAboutMouseOverLocked || this.isAboutMenuHoverDismissed) {
         return;
       }
 
       this.isAboutMenuHovered = true;
     },
+    onAboutMenuMouseLeave () {
+      this.isAboutMenuHovered = false;
+      this.isAboutMenuHoverDismissed = false;
+    },
     async onAboutMenuTransitionEnd () {
       await this.$nextTick();
       this.isAboutMouseOverLocked = false;
     },
-    onAboutMenuFocusIn () {
-      this.isAboutMenuFocused = true;
-    },
-    onAboutMenuFocusOut (event) {
+    onAboutMenuFocusOut (event: FocusEvent) {
+      const aboutNavElement = event.currentTarget as HTMLElement | null;
+
       if (
         event.relatedTarget !== null &&
-        this.$refs.aboutNavItem.$el.contains(event.relatedTarget)
+        aboutNavElement?.contains(event.relatedTarget as Node)
       ) {
         return;
       }
 
-      this.isAboutMenuFocused = false;
+      this.isAboutMenuExpanded = false;
     },
-    onAboutMenuEscapeKey () {
-      this.isAboutMenuFocused = false;
-      this.isAboutMenuHovered = false;
-      this.$refs.aboutNavItem.$el.querySelector('a').focus();
+    closeMainMenu () {
+      if (this.isHoveredMenu) {
+        this.isMainMenuHoverDismissed = true;
+      }
+
+      this.isHoveredMenu = false;
+      this.isMainMenuExpanded = false;
     },
     onMainMenuClose () {
       this.isHoveredMenu = false;
-      this.isFocusedMenu = false;
+      this.isMainMenuExpanded = false;
       this.isMouseOverLocked = true;
     },
+    onMainMenuToggleClick () {
+      if (this.isMainMenuOpen) {
+        this.closeMainMenu();
+        return;
+      }
+
+      this.isMainMenuHoverDismissed = false;
+      this.isMainMenuExpanded = true;
+    },
     onMainMenuMouseOver () {
-      if (this.isMouseOverLocked) {
+      if (this.isMouseOverLocked || this.isMainMenuHoverDismissed) {
         return;
       }
 
       this.isHoveredMenu = true;
     },
+    onMainMenuMouseLeave () {
+      this.isHoveredMenu = false;
+      this.isMainMenuHoverDismissed = false;
+    },
     async onMainMenuTransitionEnd () {
       await this.$nextTick();
       this.isMouseOverLocked = false;
-    },
-    onMainMenuFocusIn () {
-      this.isFocusedMenu = true;
     },
     onMainMenuFocusOut (event: FocusEvent) {
       const productsNavElement = event.currentTarget as HTMLElement | null;
@@ -211,16 +273,29 @@ export default Vue.extend({
         return;
       }
 
-      this.isFocusedMenu = false;
+      this.isMainMenuExpanded = false;
     },
-    onMainMenuEscapeKey (event: KeyboardEvent) {
-      this.isFocusedMenu = false;
-      this.isHoveredMenu = false;
+    onDocumentKeyDown (event: KeyboardEvent) {
+      if (event.key !== 'Escape') {
+        return;
+      }
 
-      const productsNavElement = event.currentTarget as HTMLElement | null;
-      const menuTrigger = productsNavElement?.querySelector('a') as HTMLAnchorElement | null;
+      if (this.isAboutMenuOpen) {
+        this.closeMenuOnEscape(this.aboutMenuToggle as HTMLButtonElement | null, this.closeAboutMenu);
+      }
 
-      menuTrigger?.focus();
+      if (this.isMainMenuOpen) {
+        this.closeMenuOnEscape(this.mainMenuToggle as HTMLButtonElement | null, this.closeMainMenu);
+      }
+    },
+    closeMenuOnEscape (menuToggle: HTMLButtonElement | null, closeMenu: () => void) {
+      const isFocusInsideMenu = !!menuToggle?.parentElement?.contains(document.activeElement);
+
+      closeMenu();
+
+      if (isFocusInsideMenu) {
+        menuToggle?.focus();
+      }
     }
   }
 });
@@ -256,6 +331,12 @@ export default Vue.extend({
     cursor: pointer;
   }
 
+  &__submenu-button {
+    background: none;
+    border-radius: 0;
+    appearance: none;
+  }
+
   a {
     &.active {
       font-weight: bold;
@@ -284,7 +365,7 @@ export default Vue.extend({
     }
 
     &:hover,
-    &:focus-within {
+    &._expanded {
       .m-about-menu,
       .m-menu {
         opacity: 1;
@@ -293,6 +374,18 @@ export default Vue.extend({
 
       &::after {
         width: 100%;
+      }
+    }
+
+    &._hover-dismissed:hover:not(._expanded) {
+      .m-about-menu,
+      .m-menu {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      &::after {
+        width: 0;
       }
     }
   }
