@@ -131,10 +131,6 @@ describe('Header menus keyboard disclosure', () => {
     const findTitleButton = () => findItem().find('.o-header__submenu-button');
     const findMenu = () => getWrapper().find(menuClass);
     const isMenuVisible = () => findMenu().attributes('data-visible') === 'true';
-    const clickTitleWithPointer = async () => {
-      findTitleButton().element.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
-      await Vue.nextTick();
-    };
 
     it('uses the title as the disclosure button and keeps the menu closed on focus', async () => {
       const titleButton = findTitleButton();
@@ -190,36 +186,6 @@ describe('Header menus keyboard disclosure', () => {
       await item.trigger('mouseleave');
       await item.trigger('mouseover');
       expect(isMenuVisible()).toBe(true);
-    });
-
-    it('keeps a mouse-clicked menu open only while the pointer is over the item', async () => {
-      const item = findItem();
-
-      await item.trigger('mouseover');
-      await clickTitleWithPointer();
-
-      expect(isMenuVisible()).toBe(true);
-      expect(item.classes()).not.toContain('_expanded');
-
-      await clickTitleWithPointer();
-      expect(isMenuVisible()).toBe(true);
-
-      await item.trigger('mouseleave');
-      expect(isMenuVisible()).toBe(false);
-    });
-
-    it('reopens an Escape-dismissed menu on mouse click', async () => {
-      const item = findItem();
-
-      await item.trigger('mouseover');
-      await pressEscape();
-      await clickTitleWithPointer();
-
-      expect(isMenuVisible()).toBe(true);
-      expect(item.classes()).not.toContain('_hover-dismissed');
-
-      await item.trigger('mouseleave');
-      expect(isMenuVisible()).toBe(false);
     });
 
     it('collapses the keyboard-opened menu when focus leaves the navigation item', async () => {

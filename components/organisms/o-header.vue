@@ -190,15 +190,7 @@ export default Vue.extend({
       this.isAboutMenuExpanded = false;
       this.isAboutMouseOverLocked = true;
     },
-    onAboutMenuToggleClick (event: MouseEvent) {
-      const isPointerClick = event.detail > 0;
-
-      if (isPointerClick) {
-        this.isAboutMenuHoverDismissed = false;
-        this.isAboutMenuHovered = true;
-        return;
-      }
-
+    onAboutMenuToggleClick () {
       if (this.isAboutMenuOpen) {
         this.closeAboutMenu();
         return;
@@ -247,15 +239,7 @@ export default Vue.extend({
       this.isMainMenuExpanded = false;
       this.isMouseOverLocked = true;
     },
-    onMainMenuToggleClick (event: MouseEvent) {
-      const isPointerClick = event.detail > 0;
-
-      if (isPointerClick) {
-        this.isMainMenuHoverDismissed = false;
-        this.isHoveredMenu = true;
-        return;
-      }
-
+    onMainMenuToggleClick () {
       if (this.isMainMenuOpen) {
         this.closeMainMenu();
         return;
