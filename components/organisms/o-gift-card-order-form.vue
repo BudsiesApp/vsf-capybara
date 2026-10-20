@@ -94,6 +94,7 @@
 
             <SfInput
               name="customer_name"
+              autocomplete="name"
               v-model="customerName"
               :disabled="isDisabled"
               :required="true"
