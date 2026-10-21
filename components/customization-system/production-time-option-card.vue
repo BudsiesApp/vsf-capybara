@@ -26,11 +26,16 @@
         {{ optionDurationTitle }}
       </span>
 
-      <p class="_subtitle">
-        {{ shipTitle }}
+      <p
+        v-if="optionSubtitleTitle"
+        class="_subtitle"
+        :class="{ '-holiday-promise': isHolidayPeriod && isInTimeForChristmas }"
+      >
+        {{ optionSubtitleTitle }}
       </p>
 
       <span
+        v-if="slotsLeftTitle"
         class="_slots-left -mobile"
         :class="slotsLeftClasses"
       >
@@ -44,6 +49,7 @@
       </div>
 
       <span
+        v-if="slotsLeftTitle"
         class="_slots-left -desktop"
         :class="slotsLeftClasses"
       >
@@ -112,6 +118,14 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    isHolidayPeriod: {
+      type: Boolean,
+      default: false
+    },
+    isInTimeForChristmas: {
+      type: Boolean,
+      default: false
+    },
     isSelected: {
       type: Boolean,
       default: false
@@ -145,10 +159,24 @@ export default defineComponent({
     });
 
     const optionDurationTitle = computed<string>(() => {
+      if (props.isHolidayPeriod) {
+        return props.optionName;
+      }
+
       return applicationI18n.t(
         '{weeks} Week {optionName}',
         { optionName: props.optionName, weeks: weeks.value }
       ).toString();
+    });
+
+    const optionSubtitleTitle = computed<string>(() => {
+      if (props.isHolidayPeriod) {
+        return props.isInTimeForChristmas
+          ? applicationI18n.t('In time for Christmas').toString()
+          : applicationI18n.t('After Christmas').toString();
+      }
+
+      return shipTitle.value;
     });
 
     const iconSrc = computed<string>(() => {
@@ -201,6 +229,10 @@ export default defineComponent({
         return applicationI18n.t('Always Available').toString();
       }
 
+      if (props.isHolidayPeriod) {
+        return applicationI18n.t('Only {slotsLeft} holiday slots left', { slotsLeft: props.slotsLeft }).toString();
+      }
+
       if (props.slotsLeft === 0) {
         return applicationI18n.t('Sold out').toString();
       }
@@ -225,8 +257,8 @@ export default defineComponent({
       iconStyle,
       isSoldOut,
       optionDurationTitle,
+      optionSubtitleTitle,
       priceTitle,
-      shipTitle,
       slotsLeftClasses,
       slotsLeftTitle
     };
@@ -322,6 +354,10 @@ export default defineComponent({
     margin: 0;
     color: var(--c-text-muted);
     font-size: var(--font-base);
+
+    &.-holiday-promise {
+      color: var(--c-accent);
+    }
   }
 
   ._meta {
