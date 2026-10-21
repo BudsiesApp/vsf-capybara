@@ -3,7 +3,9 @@ import { PriceHelper } from '@vue-storefront/core/helpers';
 export interface ProductionTimeOptionCardData {
   optionName: string,
   optionValueSku: string,
+  isInTimeForChristmas?: boolean,
   price: PriceHelper.ProductPrice,
   slotsLeft: number,
-  turnaroundTime: number
+  turnaroundTime: number,
+  isHolidayPeriod?: boolean
 }
