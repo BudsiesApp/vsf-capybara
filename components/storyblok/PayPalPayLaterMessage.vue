@@ -61,12 +61,19 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok>>).extend({
   beforeMount (): void {
     registerModule(Braintree)
   },
-  async created (): Promise<void> {
+  async mounted (): Promise<void> {
     await this.loadProduct();
   },
   methods: {
     async loadProduct (): Promise<void> {
       if (!this.itemData.product) {
+        return;
+      }
+
+      const loadedProduct = this.$store.getters['product/getProductByIdDictionary'][this.itemData.product];
+
+      if (loadedProduct) {
+        this.product = loadedProduct;
         return;
       }
 
