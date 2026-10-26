@@ -10,16 +10,22 @@
          v-html="noScriptHtml"
     />
 
-    <div class="_script-container" ref="script-container" />
+    <div class="_script-container" ref="scriptContainer" />
   </div>
 </template>
 
 <script lang="ts">
+import { defineComponent, PropType, computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { isServer } from '@vue-storefront/core/helpers';
+import { useI18n } from '@vue-storefront/core/application-services';
+import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module/helpers/is-storyblok-preview.function';
+import { enhanceCuratorVideos } from '../../helpers/enhance-curator-videos';
 import { Blok } from 'src/modules/vsf-storyblok-module/components'
 
 import HtmlData from './interfaces/html-data.interface';
 
-export default Blok.extend({
+export default defineComponent({
+  extends: Blok,
   name: 'StoryblokHtmlRenderer',
   computed: {
     itemData (): HtmlData {
@@ -36,29 +42,45 @@ export default Blok.extend({
       return this.itemData.html.includes('<script');
     }
   },
-  mounted (): void {
-    if (!this.doesHtmlContainScript) {
-      return;
+  props: {
+    item: {
+      type: Object as PropType<HtmlData>,
+      required: true
     }
-
-    this.setHtml(this.itemData.html);
   },
-  methods: {
-    clearScriptContainer (): void {
-      const container = this.$refs['script-container'] as HTMLElement | undefined;
-      if (!container) {
+  setup (props) {
+    const scriptContainer = ref<HTMLElement | null>(null);
+    const preview = ref(false);
+    const i18n = useI18n();
+    const html = computed(() => (props.item as HtmlData).html);
+
+    let dispose: (() => void) | undefined;
+    let stop: (() => void) | undefined;
+
+    const clear = () => {
+      dispose?.();
+      dispose = undefined;
+
+      if (scriptContainer.value) {
+        scriptContainer.value.innerHTML = '';
+      }
+    };
+
+    const render = () => {
+      clear();
+
+      const container = scriptContainer.value;
+
+      if (!container || !html.value.includes('<script')) {
         return;
       }
 
-      container.innerHTML = '';
-    },
-    setHtml (html: string): void {
-      const container = this.$refs['script-container'] as HTMLElement | undefined;
-      if (!container) {
-        return;
-      }
-
-      container.innerHTML = html;
+      container.innerHTML = html.value;
+      dispose = enhanceCuratorVideos(
+        container,
+        paused => String(paused ? i18n.t('Play video') : i18n.t('Pause video')),
+        preview.value
+      );
       const scriptTags: HTMLScriptElement[] = Array.from(container.querySelectorAll('script'));
 
       for (const oldScript of scriptTags) {
@@ -72,21 +94,26 @@ export default Blok.extend({
         newScript.appendChild(document.createTextNode(oldScript.innerHTML));
         oldScript.parentNode?.replaceChild(newScript, oldScript);
       }
-    }
-  },
-  watch: {
-    'itemData.html': {
-      handler () {
-        this.clearScriptContainer();
+    };
 
-        if (!this.doesHtmlContainScript) {
-          return;
-        }
+    onMounted(() => {
+      if (isServer) {
+        return;
+      }
 
-        this.setHtml(this.itemData.html);
-      },
-      immediate: false
-    }
+      preview.value = isStoryblokPreview();
+      render();
+      stop = watch(html, render);
+    });
+
+    onBeforeUnmount(() => {
+      stop?.();
+      clear();
+    });
+
+    return {
+      scriptContainer
+    };
   }
 })
 </script>

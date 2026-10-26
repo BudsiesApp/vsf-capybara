@@ -1,15 +1,19 @@
 <template>
   <div class="m-submit-animator">
-    <video
-      id="animation_element"
-      autoplay
-      loop
-      muted
-      playsinline
-      class="_animation"
-    >
-      <source :src="animationUrl" type="video/mp4">
-    </video>
+    <div class="_animation-frame">
+      <video
+        ref="videoElement"
+        id="animation_element"
+        autoplay
+        loop
+        muted
+        playsinline
+        class="_animation"
+      >
+        <source :src="animationUrl" type="video/mp4">
+      </video>
+      <VideoPlaybackButton :is-paused="isPaused" @activate="toggle" />
+    </div>
 
     <div class="_progress-bar">
       <div class="_inner" :style="progressBarStyle" />
@@ -22,11 +26,37 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue';
+import { defineComponent, PropType, ref } from 'vue';
+import VideoPlaybackButton from 'src/modules/shared/components/video-playback-button.vue';
+import { useVideoPlaybackToggle } from 'src/modules/shared/composables/use-video-playback-toggle';
+import { animationPlaybackKey } from 'src/modules/shared/helpers/video-playback';
+
 import SubmitAnimationStepsInterface from '../interfaces/submit-animation-steps.interface';
 
-export default Vue.extend({
+const LOADING_ANIMATION = 'loading_animation';
+
+export default defineComponent({
   name: 'MSubmitAnimator',
+  components: {
+    VideoPlaybackButton
+  },
+  setup () {
+    const videoElement = ref<HTMLVideoElement | null>(null);
+
+    return {
+      videoElement,
+      ...useVideoPlaybackToggle(
+        videoElement,
+        ref(animationPlaybackKey(LOADING_ANIMATION)),
+        ref({
+          native: true,
+          autoplay: true,
+          controls: false
+        }),
+        ref(false)
+      )
+    };
+  },
   props: {
     steps: {
       type: Array as PropType<SubmitAnimationStepsInterface[]>,
@@ -112,6 +142,12 @@ export default Vue.extend({
 $progress-bar-color: #31c1ff;
 
 .m-submit-animator {
+    ._animation-frame {
+        position: relative;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+
     ._animation {
         max-width: 300px;
     }

@@ -23,6 +23,7 @@
       />
 
       <video
+        ref="videoElement"
         class="_video-layer"
         :src="activeVideoUrl"
         poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
@@ -31,6 +32,13 @@
         loop
         playsinline
         v-if="activeVideoUrl"
+      />
+
+      <VideoPlaybackButton
+        v-if="isEnabled"
+        :is-paused="isPaused"
+        :class="{ '-desktop-video': hasDesktopVideo, '-mobile-video': hasMobileVideo }"
+        @activate="toggle"
       />
     </div>
 
@@ -74,10 +82,15 @@
 </template>
 
 <script lang="ts">
-import { VueConstructor } from 'vue';
+import { defineComponent, PropType, computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import { isServer } from '@vue-storefront/core/helpers';
+import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module/helpers/is-storyblok-preview.function';
+import VideoPlaybackButton from 'src/modules/shared/components/video-playback-button.vue';
+import { useVideoPlaybackToggle } from 'src/modules/shared/composables/use-video-playback-toggle';
+import { assetPlaybackKey } from 'src/modules/shared/helpers/video-playback';
 import { nl2br, BaseImage, ImageSourceItem } from 'src/modules/budsies';
 
-import { BreakpointValue, InjectType } from 'src/modules/shared';
+import { BreakpointValue } from 'src/modules/shared';
 
 import {
   Blok,
@@ -93,34 +106,74 @@ import HomepageIntroSectionData from './interfaces/homepage-intro-section-data.i
 import generateBreakpointsSpecs from './generate-breakpoints-specs';
 import generateImageSourcesList from './generate-image-sources-list';
 
-interface InjectedServices {
-  componentWidthCalculator: ComponentWidthCalculator,
-  window: Window
-}
-
-export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServices>).extend({
+export default defineComponent({
+  extends: Blok,
   name: 'StoryblokHomepageIntroSection',
   components: {
     BaseImage,
-    SfHeading
+    SfHeading,
+    VideoPlaybackButton
   },
-  inject: {
-    componentWidthCalculator: { },
-    window: { from: 'WindowObject' }
-  } as unknown as InjectType<InjectedServices>,
-  data () {
-    return {
-      activeVideoUrl: '',
-      desktopVideoMediaQueryList: undefined as MediaQueryList | undefined
-    };
-  },
-  watch: {
-    desktopVideoUrl () {
-      this.updateActiveVideoUrl();
-    },
-    mobileVideoUrl () {
-      this.updateActiveVideoUrl();
+  props: {
+    item: {
+      type: Object as PropType<HomepageIntroSectionData>,
+      required: true
     }
+  },
+  setup (props) {
+    const componentWidthCalculator = inject<ComponentWidthCalculator>('componentWidthCalculator') as ComponentWidthCalculator;
+    const browserWindow = inject<Window>('WindowObject');
+    const videoElement = ref<HTMLVideoElement | null>(null);
+    const preview = ref(false);
+    const desktop = ref<boolean | undefined>(undefined);
+
+    const item = computed(() => props.item as HomepageIntroSectionData);
+    const desktopAsset = computed(() => item.value.background_video?.asset);
+    const mobileAsset = computed(() => item.value.mobile_background_video?.asset);
+    const desktopVideoUrl = computed(() => resolveStoryblokAssetUrl(desktopAsset.value?.filename || ''));
+    const mobileVideoUrl = computed(() => resolveStoryblokAssetUrl(mobileAsset.value?.filename || ''));
+    const selectedAsset = computed(() => desktop.value ? desktopAsset.value : mobileAsset.value);
+    const activeVideoUrl = computed(() => desktop.value === undefined
+      ? ''
+      : desktop.value ? desktopVideoUrl.value : mobileVideoUrl.value);
+    const key = computed(() => assetPlaybackKey(selectedAsset.value || {}));
+    const configuration = computed(() => ({
+      native: !!(desktopVideoUrl.value || mobileVideoUrl.value),
+      autoplay: true,
+      controls: false
+    }));
+
+    let query: MediaQueryList | undefined;
+    const update = () => {
+      desktop.value = query?.matches;
+    };
+
+    onMounted(() => {
+      if (isServer) {
+        return;
+      }
+
+      preview.value = isStoryblokPreview();
+      query = browserWindow?.matchMedia(`(min-width: ${BreakpointValue.SMALL + 1}px)`);
+      query?.addEventListener('change', update);
+      update();
+    });
+
+    onBeforeUnmount(() => query?.removeEventListener('change', update));
+
+    return {
+      componentWidthCalculator,
+      videoElement,
+      desktopVideoUrl,
+      mobileVideoUrl,
+      activeVideoUrl,
+      ...useVideoPlaybackToggle(
+        videoElement,
+        key,
+        configuration,
+        preview
+      )
+    };
   },
   computed: {
     itemData (): HomepageIntroSectionData {
@@ -131,16 +184,6 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
     },
     hasMobileVideo (): boolean {
       return !!this.mobileVideoUrl;
-    },
-    desktopVideoUrl (): string {
-      const selector = this.itemData.background_video;
-
-      return selector && selector.asset ? resolveStoryblokAssetUrl(selector.asset.filename) : '';
-    },
-    mobileVideoUrl (): string {
-      const selector = this.itemData.mobile_background_video;
-
-      return selector && selector.asset ? resolveStoryblokAssetUrl(selector.asset.filename) : '';
     },
     videoContainerClasses (): Record<string, boolean> {
       return {
@@ -225,28 +268,7 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
       )
     }
   },
-  mounted () {
-    this.desktopVideoMediaQueryList = this.window.matchMedia(
-      `(min-width: ${BreakpointValue.SMALL + 1}px)`
-    );
-    this.desktopVideoMediaQueryList.addEventListener('change', this.updateActiveVideoUrl);
-    this.updateActiveVideoUrl();
-  },
-  beforeDestroy () {
-    if (this.desktopVideoMediaQueryList) {
-      this.desktopVideoMediaQueryList.removeEventListener('change', this.updateActiveVideoUrl);
-    }
-  },
   methods: {
-    updateActiveVideoUrl (): void {
-      if (!this.desktopVideoMediaQueryList) {
-        return;
-      }
-
-      this.activeVideoUrl = this.desktopVideoMediaQueryList.matches
-        ? this.desktopVideoUrl
-        : this.mobileVideoUrl;
-    },
     normalizePercentage (value: number | string | undefined): string | undefined {
       if (value === undefined || value === '') {
         return;
@@ -274,6 +296,12 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
 .storyblok-homepage-intro-section {
   position: relative;
   background-color: var(--intro-section-background-color, transparent);
+
+  .video-playback-toggle {
+    &:not(.-mobile-video) {
+      display: none;
+    }
+  }
 
   ._intro-column {
     line-height: 0;
@@ -352,7 +380,8 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
   }
 
   &.-editor-preview-mode {
-    ._button {
+    ._button,
+    .video-playback-toggle {
       pointer-events: none
     }
 
@@ -362,6 +391,16 @@ export default (Blok as VueConstructor<InstanceType<typeof Blok> & InjectedServi
   }
 
   @media (min-width: $tablet-min) {
+    .video-playback-toggle {
+      &.-desktop-video {
+        display: inline-flex;
+      }
+
+      &:not(.-desktop-video) {
+        display: none;
+      }
+    }
+
     ._image-column {
       &.-with-mobile-video {
         aspect-ratio: auto;

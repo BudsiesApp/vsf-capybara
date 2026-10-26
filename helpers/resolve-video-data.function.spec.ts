@@ -45,7 +45,7 @@ describe('resolveVideoData', () => {
   it('resolves uploaded selector assets and their playback options', () => {
     const videoData = createVideoData({
       aspect_ratio: 16 / 9,
-      asset: { filename: 'https://cdn.example/video.mp4' },
+      asset: { id: 42, filename: 'https://cdn.example/video.mp4' },
       options: {
         autoplay: true,
         muted: true,
@@ -57,6 +57,8 @@ describe('resolveVideoData', () => {
     expect(resolveVideoData(videoData)).toEqual({
       sourceType: ResolvedVideoSourceType.ASSET,
       assetUrl: 'https://cdn.example/video.mp4',
+      assetId: 42,
+      assetFilename: 'https://cdn.example/video.mp4',
       aspectRatio: 16 / 9,
       autoplay: true,
       muted: true,

@@ -21,6 +21,8 @@ interface ResolvedVideoDataBase {
 export interface ResolvedAssetVideoData extends ResolvedVideoDataBase {
   sourceType: ResolvedVideoSourceType.ASSET,
   assetUrl: string,
+  assetId: number | undefined,
+  assetFilename: string,
   aspectRatio: number
 }
 
@@ -45,6 +47,8 @@ export function resolveVideoSelectorField (selector?: VideoSelectorField | null)
     return {
       sourceType: ResolvedVideoSourceType.ASSET,
       assetUrl: resolveStoryblokAssetUrl(asset.filename),
+      assetId: asset.id,
+      assetFilename: asset.filename,
       aspectRatio: selector.aspect_ratio as number,
       autoplay: options.autoplay === true,
       muted: options.muted === true,
