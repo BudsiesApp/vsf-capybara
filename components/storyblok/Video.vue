@@ -7,6 +7,7 @@
     <editor-block-icons :item="itemData" />
 
     <video
+      ref="videoElement"
       class="_asset-video"
       :src="assetVideoData.assetUrl"
       :autoplay="assetVideoData.autoplay"
@@ -25,10 +26,17 @@
       :display-controls="embeddedVideoData.displayControls"
       v-else-if="embeddedVideoData"
     />
+    <VideoPlaybackButton v-if="isEnabled" :is-paused="isPaused" @activate="toggle" />
   </div>
 </template>
 
 <script lang="ts">
+import { defineComponent, PropType, computed, onMounted, ref } from 'vue';
+import { isServer } from '@vue-storefront/core/helpers';
+import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module/helpers/is-storyblok-preview.function';
+import VideoPlaybackButton from 'src/modules/shared/components/video-playback-button.vue';
+import { useVideoPlaybackToggle } from 'src/modules/shared/composables/use-video-playback-toggle';
+import { assetPlaybackKey } from 'src/modules/shared/helpers/video-playback';
 import { Blok } from 'src/modules/vsf-storyblok-module/components';
 
 import { StreamingVideo } from 'src/modules/shared';
@@ -42,10 +50,53 @@ import {
   ResolvedVideoSourceType
 } from '../../helpers/resolve-video-data.function';
 
-export default Blok.extend({
+export default defineComponent({
+  extends: Blok,
   name: 'StoryblokVideo',
   components: {
-    StreamingVideo
+    StreamingVideo,
+    VideoPlaybackButton
+  },
+  props: {
+    item: {
+      type: Object as PropType<VideoData>,
+      required: true
+    }
+  },
+  setup (props) {
+    const videoElement = ref<HTMLVideoElement | null>(null);
+    const preview = ref(false);
+
+    onMounted(() => {
+      if (!isServer) {
+        preview.value = isStoryblokPreview();
+      }
+    });
+
+    const asset = computed(() => {
+      const resolved = resolveVideoData(props.item as VideoData);
+
+      return resolved?.sourceType === ResolvedVideoSourceType.ASSET ? resolved : undefined;
+    });
+    const key = computed(() => assetPlaybackKey({
+      id: asset.value?.assetId,
+      filename: asset.value?.assetFilename
+    }));
+    const configuration = computed(() => ({
+      native: !!asset.value,
+      autoplay: !!asset.value?.autoplay,
+      controls: !!asset.value?.displayControls
+    }));
+
+    return {
+      videoElement,
+      ...useVideoPlaybackToggle(
+        videoElement,
+        key,
+        configuration,
+        preview
+      )
+    };
   },
   computed: {
     itemData (): VideoData {
@@ -73,6 +124,8 @@ export default Blok.extend({
 @import "src/modules/vsf-storyblok-module/components/defaults/mixins";
 
 .storyblok-video {
+  position: relative;
+
   ._asset-video {
     display: block;
     width: 100%;
@@ -81,7 +134,8 @@ export default Blok.extend({
 
   &.-editor-preview-mode {
     ._asset-video,
-    ._embedded-video {
+    ._embedded-video,
+    .video-playback-toggle {
       pointer-events: none
     }
   }
