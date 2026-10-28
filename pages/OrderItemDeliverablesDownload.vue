@@ -70,7 +70,7 @@
 </template>
 
 <script lang="ts">
-import { useRouter, useStore } from '@vue-storefront/core/application-services';
+import { useI18n, useRouter, useStore } from '@vue-storefront/core/application-services';
 import { computed, defineComponent, inject, onMounted, PropType, Ref, ref } from 'vue';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 import { SearchQuery } from 'storefront-query-builder';
@@ -124,6 +124,7 @@ export default defineComponent({
   },
   setup (props, context) {
     const applicationStore = useStore();
+    const applicationI18n = useI18n();
     const applicationRouter = useRouter();
     const qaPhotosHandlerService = inject<ImageHandlerService>('QaPhotosHandlerService');
 
@@ -213,17 +214,17 @@ export default defineComponent({
       !isLoading.value && !isError.value && (deliverables as Ref<Deliverable[]>).value.length > 0
     );
 
+    function getPortraitImagePath (path: string): string {
+      const prefix = 'budsies-qa-photos/';
+      return path.startsWith(prefix) ? path.slice(prefix.length) : path;
+    }
+
     function getAbsoluteImageUrl (url: string): string {
       if (!qaPhotosHandlerService) {
         throw new Error('Image Handler Service is not defined');
       }
 
-      const urlWithoutBucket = url.split('/')[1]
-      if (!urlWithoutBucket) {
-        return url;
-      }
-
-      return qaPhotosHandlerService.getOriginalImageUrl(urlWithoutBucket);
+      return qaPhotosHandlerService.getOriginalImageUrl(getPortraitImagePath(url));
     }
 
     function getProductCustomizeLink (product: any): string {
@@ -255,7 +256,15 @@ export default defineComponent({
     });
 
     async function downloadDeliverable (deliverable: Deliverable) {
-      await downloadImage(deliverable.storage_item_url, props.orderItemId.toString());
+      try {
+        await downloadImage(getPortraitImagePath(deliverable.storage_item_url), props.orderItemId.toString());
+      } catch (error) {
+        applicationStore.dispatch('notification/spawnNotification', {
+          type: 'danger',
+          message: applicationI18n.t('Something went wrong'),
+          action1: { label: applicationI18n.t('OK') }
+        });
+      }
     }
 
     function onProductCardClick (productSku: string): void {
