@@ -61,6 +61,15 @@
 
                 <div class="_step-actions-container">
                   <SfButton
+                    v-if="canCustomizeLater"
+                    class="_button _customize-later-button color-secondary"
+                    :disabled="isSubmitButtonDisabled"
+                    @click="onCustomizeLaterClick"
+                  >
+                    {{ $t("Skip & Customize Later") }}
+                  </SfButton>
+
+                  <SfButton
                     class="_button"
                     :disabled="isSubmitButtonDisabled"
                     @click="onContinueClick"
@@ -94,6 +103,19 @@
                   onEntityBusyChanged
                 "
               />
+
+              <div
+                v-if="canCustomizeLater"
+                class="_floating-customize-later"
+              >
+                <SfButton
+                  class="_customize-later-floating-button color-secondary"
+                  :disabled="isSubmitButtonDisabled"
+                  @click="onCustomizeLaterClick"
+                >
+                  {{ $t("Skip & Customize Later") }}
+                </SfButton>
+              </div>
             </sf-step>
 
             <sf-step
@@ -166,6 +188,7 @@ import ProductTypeButton from 'theme/components/interfaces/product-type-button.i
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
+import { useCreationWizardCustomizeLater } from 'theme/helpers/use-creation-wizard-customize-later';
 import { useCreationWizardFormSteps } from 'theme/helpers/use-creation-wizard-form-steps';
 import { useCreationWizardGtmEvents } from 'theme/helpers/use-creation-wizard-gtm-events';
 import { useCreationWizardPreselectedSize } from 'theme/helpers/use-creation-wizard-preselected-size';
@@ -183,6 +206,8 @@ import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MFloatingPhoto from 'theme/components/organisms/OPlushieCreationWizard/m-floating-photo.vue';
 import MProductTypeChooseStep from 'theme/components/organisms/OPlushieCreationWizard/m-product-type-choose-step.vue';
+
+const FIRST_CUSTOMIZATION_STEP_INDEX = 1;
 
 export interface CreationWizardFormAdditionalStep {
   name: string,
@@ -543,7 +568,85 @@ export default defineComponent({
       draftOrderItem
     );
 
+    const {
+      addToCartForLater,
+      canCustomizeLater,
+      isLaterFlowCustomization,
+      isLaterRequiredDataFilled,
+      isSubmittingForLater
+    } = useCreationWizardCustomizeLater(
+      currentProduct,
+      productCustomizations,
+      customizationState,
+      customizationOptionValue,
+      bundleOptions,
+      existingCartItem,
+      customizationMode
+    );
+
     const { isUnmounted } = useComponentUnmountedChecker();
+
+    function showSubmitError (error: Error): void {
+      applicationStore.dispatch('notification/spawnNotification', {
+        type: 'danger',
+        message: 'Error: ' + error.message,
+        action1: { label: i18n.t('OK') }
+      });
+    }
+
+    function goToCrossSells (product: Product): void {
+      applicationRouter.push({
+        name: 'cross-sells',
+        params: { parentSku: product.sku }
+      });
+    }
+
+    async function validateLaterFlowOptions (): Promise<boolean> {
+      const laterFlowOptions = getCustomizationOptionsInRenderedOrder().filter((option) => {
+        return isLaterFlowCustomization(option.customization);
+      });
+      const results = await Promise.all(
+        laterFlowOptions.map((option) => option.validate(false))
+      );
+      const firstInvalidOption = laterFlowOptions.find((_, index) => !results[index].valid);
+
+      if (firstInvalidOption) {
+        formValidation.goToFieldByName(firstInvalidOption.optionLabel);
+      }
+
+      return !firstInvalidOption;
+    }
+
+    async function onCustomizeLaterClick (): Promise<void> {
+      const isFirstCustomizationStep = formSteps.currentStep.value === FIRST_CUSTOMIZATION_STEP_INDEX;
+
+      if (!isFirstCustomizationStep && !isLaterRequiredDataFilled.value) {
+        await formSteps.goToStep(FIRST_CUSTOMIZATION_STEP_INDEX);
+      }
+
+      if (isFirstCustomizationStep || !isLaterRequiredDataFilled.value) {
+        const isValid = await validateLaterFlowOptions();
+
+        if (!isValid || !isLaterRequiredDataFilled.value) {
+          return;
+        }
+      }
+
+      try {
+        await addToCartForLater();
+
+        persistCustomerEmail();
+        removePreservedState();
+
+        if (isUnmounted.value || !currentProduct.value) {
+          return;
+        }
+
+        goToCrossSells(currentProduct.value);
+      } catch (error) {
+        showSubmitError(error);
+      }
+    }
 
     async function onFormSubmit (): Promise<void> {
       try {
@@ -586,22 +689,17 @@ export default defineComponent({
             name: 'orders-history'
           });
         } else {
-          applicationRouter.push({
-            name: 'cross-sells',
-            params: { parentSku: currentProduct.value.sku }
-          });
+          goToCrossSells(currentProduct.value);
         }
       } catch (error) {
-        applicationStore.dispatch('notification/spawnNotification', {
-          type: 'danger',
-          message: 'Error: ' + error.message,
-          action1: { label: i18n.t('OK') }
-        });
+        showSubmitError(error);
       }
     }
 
     const isSubmitting = computed<boolean>(() => {
-      return isSubmittingAddToCart.value || isSubmittingCustomize.value;
+      return isSubmittingAddToCart.value ||
+        isSubmittingCustomize.value ||
+        isSubmittingForLater.value;
     });
 
     const isDisabled = computed<boolean>(() => {
@@ -648,6 +746,7 @@ export default defineComponent({
       ...useFloatingPhoto(customizationState, availableCustomizations),
       ...formValidation,
       ...useBulkImagesUpload(),
+      canCustomizeLater,
       currentProduct,
       filteredCustomizationAvailableOptionValues,
       customizationOption,
@@ -657,6 +756,7 @@ export default defineComponent({
       onEntityBusyChanged,
       onCustomizationOptionInput,
       onContinueClick,
+      onCustomizeLaterClick,
       onFormSubmit,
       submitButtonText,
       quantity,
@@ -736,8 +836,36 @@ export default defineComponent({
 
   ._step-actions-container {
     display: flex;
-    justify-content: center;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: var(--spacer-sm);
     margin-top: var(--spacer-base);
+
+    @media (min-width: $tablet-min) {
+      flex-direction: row;
+      justify-content: flex-end;
+    }
+  }
+
+  ._floating-customize-later {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--spacer-base);
+    padding: var(--spacer-sm);
+    pointer-events: none;
+  }
+
+  ._customize-later-floating-button {
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    pointer-events: auto;
+
+    @media (min-width: $tablet-min) {
+      width: auto;
+    }
   }
 
   @include for-desktop {
