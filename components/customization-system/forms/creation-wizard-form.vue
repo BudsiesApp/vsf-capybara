@@ -59,7 +59,14 @@
                   @item-click="goToFieldByName"
                 />
 
-                <div class="_step-actions-container">
+                <div class="_step-actions-container" :class="{ '-with-customize-later': customizeLaterLink }">
+                  <router-link
+                    v-if="customizeLaterLink"
+                    :to="customizeLaterLink"
+                    class="sf-button color-secondary _customize-later-link"
+                  >
+                    {{ $t("Skip & Customize Later") }}
+                  </router-link>
                   <SfButton
                     class="_button"
                     :disabled="isSubmitButtonDisabled"
@@ -94,6 +101,13 @@
                   onEntityBusyChanged
                 "
               />
+              <router-link
+                v-if="customizeLaterLink"
+                :to="customizeLaterLink"
+                class="sf-button color-secondary _customize-later-link -floating"
+              >
+                {{ $t("Skip & Customize Later") }}
+              </router-link>
             </sf-step>
 
             <sf-step
@@ -166,6 +180,7 @@ import ProductTypeButton from 'theme/components/interfaces/product-type-button.i
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
+import { useCreationWizardCustomizeLaterLink } from 'theme/helpers/use-creation-wizard-customize-later-link';
 import { useCreationWizardFormSteps } from 'theme/helpers/use-creation-wizard-form-steps';
 import { useCreationWizardGtmEvents } from 'theme/helpers/use-creation-wizard-gtm-events';
 import { useCreationWizardPreselectedSize } from 'theme/helpers/use-creation-wizard-preselected-size';
@@ -441,6 +456,13 @@ export default defineComponent({
       customizationMode
     );
 
+    const { customizeLaterLink } = useCreationWizardCustomizeLaterLink(
+      plushieType,
+      currentProduct,
+      existingCartItem,
+      customizationMode
+    );
+
     const { handlePreselectedSize } = useCreationWizardPreselectedSize(
       preselectedProductSize,
       customizationOptionValue,
@@ -649,6 +671,7 @@ export default defineComponent({
       ...formValidation,
       ...useBulkImagesUpload(),
       currentProduct,
+      customizeLaterLink,
       filteredCustomizationAvailableOptionValues,
       customizationOption,
       customizationOptionValue,
@@ -738,6 +761,34 @@ export default defineComponent({
     display: flex;
     justify-content: center;
     margin-top: var(--spacer-base);
+  }
+
+  ._step-actions-container.-with-customize-later {
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: var(--spacer-sm);
+
+    @media (min-width: $tablet-min) {
+      flex-direction: row;
+      justify-content: flex-end;
+    }
+  }
+
+  ._customize-later-link {
+    --button-border-radius: 0;
+
+    box-sizing: border-box;
+    max-width: 100%;
+    border-radius: 0;
+
+    &.-floating {
+      position: sticky;
+      bottom: 0;
+      width: fit-content;
+      margin: var(--spacer-base) var(--spacer-sm) 0 auto;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      z-index: 1;
+    }
   }
 
   @include for-desktop {
