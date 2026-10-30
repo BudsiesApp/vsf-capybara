@@ -783,9 +783,9 @@ export default defineComponent({
 
     &.-floating {
       position: sticky;
-      bottom: 0;
+      bottom: var(--spacer-sm);
       width: fit-content;
-      margin: var(--spacer-base) var(--spacer-sm) 0 auto;
+      margin: var(--spacer-base) auto 0;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
       z-index: 1;
     }
