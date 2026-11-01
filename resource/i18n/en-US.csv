@@ -1058,3 +1058,13 @@
 "{action}: {item}","{action}: {item}"
 "Error while loading shipping methods","Error while loading shipping methods"
 "Retry","Retry"
+"Products submenu","Products submenu"
+
+"International","International"
+"Only {slotsLeft} holiday spots left at this price","Only {slotsLeft} holiday spots left at this price"
+"In time for Christmas","In time for Christmas"
+"After Christmas","After Christmas"
+
+"Delivery location:","Delivery location:"
+"I'm outside the U.S.","I'm outside the U.S."
+"I'm in the U.S.","I'm in the U.S."
