@@ -14,29 +14,36 @@ import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import {
   Customization,
   CustomizationAvailabilityFlow,
+  CustomizationStateItem,
   DraftOrderItem,
   fetchOrderItemCustomizationsState,
   useCustomizationState,
   useEntityBusyState,
   WidgetType
 } from 'src/modules/customization-system';
-import { FETCH_ORDERS_HISTORY_ACTION } from 'src/modules/orders-history';
-import { OrderItem } from 'src/modules/orders-history/types/order-item';
 
 import { useCustomizeAction } from 'theme/helpers/use-customize-action';
 
-export function useOrderItemPhotoUpload (orderItem: Ref<OrderItem>, validate: () => Promise<boolean>) {
+export function useOrderItemPhotoUpload (
+  orderItemId: Ref<number>,
+  productSku: Ref<string>,
+  validate: () => Promise<boolean>,
+  onSubmitted: () => void
+) {
   const applicationStore = useStore();
   const i18n = useI18n();
   const product = ref<Product>();
   const customization = ref<Customization>();
   const draftOrderItem = ref<DraftOrderItem>();
+  const savedState = ref<CustomizationStateItem[]>([]);
   const isReady = ref(false);
+  const isFormOpen = ref(false);
   const isPending = ref(false);
   const {
     customizationOptionValue,
     customizationState,
     mergeCustomizationState,
+    resetCustomizationState,
     updateCustomizationOptionValue
   } = useCustomizationState();
   const { isSomeEntityBusy, onEntityBusyChanged } = useEntityBusyState();
@@ -45,12 +52,13 @@ export function useOrderItemPhotoUpload (orderItem: Ref<OrderItem>, validate: ()
     const value = customization.value && customizationOptionValue.value[customization.value.id];
     return Array.isArray(value) ? value.length > 0 : !!value;
   });
-  const isSubmitDisabled = computed(() => isPending.value || isSomeEntityBusy.value || !hasImages.value);
+  const isCancelDisabled = computed(() => isPending.value || isSomeEntityBusy.value);
+  const isSubmitDisabled = computed(() => isCancelDisabled.value || !hasImages.value);
 
   onMounted(async () => {
     try {
       product.value = await applicationStore.dispatch('product/loadProduct', {
-        parentSku: orderItem.value.product.sku,
+        parentSku: productSku.value,
         setCurrent: false
       });
       if (!product.value) {
@@ -66,13 +74,14 @@ export function useOrderItemPhotoUpload (orderItem: Ref<OrderItem>, validate: ()
         return;
       }
 
-      draftOrderItem.value = await fetchOrderItemCustomizationsState(orderItem.value.item_id.toString());
+      draftOrderItem.value = await fetchOrderItemCustomizationsState(orderItemId.value.toString());
       if (!draftOrderItem.value) {
         throw new Error('Draft order item is not available');
       }
 
       const selectedState = draftOrderItem.value.customization_state.find(entry => entry.customization_id === customization.value.id);
-      mergeCustomizationState(selectedState ? [selectedState] : []);
+      savedState.value = selectedState ? [selectedState] : [];
+      mergeCustomizationState(savedState.value);
       isReady.value = true;
     } catch (error) {
       applicationStore.dispatch('notification/spawnNotification', {
@@ -84,6 +93,20 @@ export function useOrderItemPhotoUpload (orderItem: Ref<OrderItem>, validate: ()
     }
   });
 
+  function openForm (): void {
+    isFormOpen.value = true;
+  }
+
+  function cancel (): void {
+    if (isCancelDisabled.value) {
+      return;
+    }
+
+    resetCustomizationState();
+    mergeCustomizationState(savedState.value);
+    isFormOpen.value = false;
+  }
+
   async function submitPhotos (): Promise<void> {
     if (isSubmitDisabled.value) {
       return;
@@ -92,26 +115,29 @@ export function useOrderItemPhotoUpload (orderItem: Ref<OrderItem>, validate: ()
     isPending.value = true;
     try {
       if (!await validate()) {
+        isPending.value = false;
         return;
       }
 
       await confirmCustomization();
-      applicationStore.dispatch('notification/spawnNotification', {
-        type: 'success',
-        message: i18n.t('Your photos have been submitted.'),
-        action1: { label: i18n.t('OK') }
-      });
-      await applicationStore.dispatch(FETCH_ORDERS_HISTORY_ACTION, { filters: { excludeAlterationProducts: true } });
     } catch (error) {
+      isPending.value = false;
       applicationStore.dispatch('notification/spawnNotification', {
         type: 'danger',
         message: i18n.t('Something went wrong. Please try again.'),
         action1: { label: i18n.t('OK') }
       });
       Logger.error(error, 'order-item-photo-upload')();
-    } finally {
-      isPending.value = false;
+      return;
     }
+
+    // The item is no longer awaiting artwork, so the form stays locked until the parent removes it.
+    applicationStore.dispatch('notification/spawnNotification', {
+      type: 'success',
+      message: i18n.t('Your photos have been submitted.'),
+      action1: { label: i18n.t('OK') }
+    });
+    onSubmitted();
   }
 
   return {
@@ -119,8 +145,12 @@ export function useOrderItemPhotoUpload (orderItem: Ref<OrderItem>, validate: ()
     customization,
     customizationOptionValue,
     isReady,
+    isFormOpen,
     isPending,
+    isCancelDisabled,
     isSubmitDisabled,
+    openForm,
+    cancel,
     onEntityBusyChanged,
     updateCustomizationOptionValue,
     submitPhotos

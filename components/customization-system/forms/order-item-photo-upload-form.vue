@@ -1,40 +1,69 @@
 <template>
-  <validation-observer
+  <div
     v-if="isReady"
-    ref="validationObserver"
-    tag="div"
     class="order-item-photo-upload-form"
   >
-    <customization-option
-      :product-id="+product.id"
-      :customization="customization"
-      :value="customizationOptionValue[customization.id]"
-      :field-name-prefix="orderItem.item_id.toString()"
-      :is-disabled="isPending"
-      @input="updateCustomizationOptionValue"
-      @customization-option-busy-state-changed="onEntityBusyChanged"
-    />
-    <m-spinner-button
-      :disabled="isSubmitDisabled"
-      :show-spinner="isPending"
-      @click="submitPhotos"
-    >
-      {{ $t('Submit photos') }}
-    </m-spinner-button>
-  </validation-observer>
+    <div class="_collapsible" :class="{ '-expanded': !isFormOpen }">
+      <div class="_collapsible-inner">
+        <SfButton
+          class="_button color-secondary"
+          @click="openForm"
+        >
+          {{ $t('Upload photos') }}
+        </SfButton>
+      </div>
+    </div>
+
+    <div class="_collapsible" :class="{ '-expanded': isFormOpen }">
+      <div class="_collapsible-inner">
+        <validation-observer
+          ref="validationObserver"
+          tag="div"
+          class="_form"
+        >
+          <customization-option
+            :product-id="+product.id"
+            :customization="customization"
+            :value="customizationOptionValue[customization.id]"
+            :field-name-prefix="orderItemId.toString()"
+            :is-disabled="isPending"
+            @input="updateCustomizationOptionValue"
+            @customization-option-busy-state-changed="onEntityBusyChanged"
+          />
+
+          <div class="_actions">
+            <SfButton
+              class="_button color-secondary"
+              :disabled="isCancelDisabled"
+              @click="cancel"
+            >
+              {{ $t('Cancel') }}
+            </SfButton>
+
+            <m-spinner-button
+              class="_button _submit-button"
+              :disabled="isSubmitDisabled"
+              :show-spinner="isPending"
+              @click="submitPhotos"
+            >
+              {{ $t('Submit photos') }}
+            </m-spinner-button>
+          </div>
+        </validation-observer>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
 import {
   defineComponent,
-  PropType,
   ref,
   toRef,
   watch
 } from 'vue';
+import { SfButton } from '@storefront-ui/vue';
 import { ValidationObserver } from 'vee-validate';
-
-import { OrderItem } from 'src/modules/orders-history/types/order-item';
 
 import { useOrderItemPhotoUpload } from 'theme/helpers/use-order-item-photo-upload';
 
@@ -46,19 +75,27 @@ export default defineComponent({
   components: {
     CustomizationOption,
     MSpinnerButton,
+    SfButton,
     ValidationObserver
   },
   props: {
-    orderItem: {
-      type: Object as PropType<OrderItem>,
+    orderItemId: {
+      type: Number,
+      required: true
+    },
+    productSku: {
+      type: String,
       required: true
     }
   },
   setup (props, { emit }) {
     const validationObserver = ref<InstanceType<typeof ValidationObserver> | null>(null);
-    const photoUpload = useOrderItemPhotoUpload(toRef(props, 'orderItem'), async () => {
-      return validationObserver.value ? validationObserver.value.validate() : false;
-    });
+    const photoUpload = useOrderItemPhotoUpload(
+      toRef(props, 'orderItemId'),
+      toRef(props, 'productSku'),
+      async () => validationObserver.value ? validationObserver.value.validate() : false,
+      () => emit('submitted')
+    );
     watch(photoUpload.isReady, value => emit('ready-changed', value), { immediate: true });
 
     return {
@@ -71,8 +108,52 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .order-item-photo-upload-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacer-sm);
+  align-self: stretch;
+
+  ._button {
+    --button-font-size: var(--font-xs);
+    --button-padding: var(--spacer-xs) var(--spacer-sm);
+  }
+
+  // Matches the 2px border of the secondary action buttons so all buttons share one height.
+  ._submit-button {
+    --button-border-width: 2px;
+    --button-border-color: transparent;
+  }
+
+  ._button.color-secondary:hover {
+    color: var(--c-white);
+  }
+
+  ._collapsible {
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    transition: grid-template-rows 300ms ease-in-out, visibility 0s linear 300ms;
+    will-change: grid-template-rows;
+
+    &.-expanded {
+      grid-template-rows: 1fr;
+      visibility: visible;
+      transition: grid-template-rows 300ms ease-in-out, visibility 0s linear 0s;
+    }
+  }
+
+  ._collapsible-inner {
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  ._form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-sm);
+  }
+
+  ._actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacer-xs);
+  }
 }
 </style>

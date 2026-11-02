@@ -14,13 +14,11 @@ import {
   saveOrderItemCustomizationsState,
   submitOrderItemCustomizationsState
 } from 'src/modules/customization-system';
-import { OrderItem } from 'src/modules/orders-history/types/order-item';
 
 import { useOrderItemPhotoUpload } from './use-order-item-photo-upload';
 
 jest.mock('@vue-storefront/core/lib/logger', () => ({ Logger: { error: jest.fn(() => jest.fn()) } }));
 
-jest.mock('src/modules/orders-history', () => ({ FETCH_ORDERS_HISTORY_ACTION: 'ordersHistory/FETCH_ORDERS_HISTORY' }));
 jest.mock('src/modules/customization-system', () => ({
   ...jest.requireMock('src/modules/customization-system/helpers/order-items-customizations.service'),
   ...jest.requireActual('src/modules/customization-system/composables/use-customization-state'),
@@ -46,17 +44,12 @@ const settle = async () => { for (let i = 0; i < 10; i++) await Promise.resolve(
 
 function setup (customizations: unknown[] = [eligible]) {
   const validate = jest.fn().mockResolvedValue(true);
+  const onSubmitted = jest.fn();
   const dispatch = jest.fn().mockImplementation((action: string) => Promise.resolve(action === 'product/loadProduct' ? { id: 7, customizations } : undefined));
   let upload: ReturnType<typeof useOrderItemPhotoUpload>;
   const wrapper = mount(defineComponent({
     setup () {
-      const item: OrderItem = {
-        item_id: 42, display_id: 42, quantity: 1, estimated_shipment_date: '', shipments: [],
-        product: { id: 7, sku: 'pet', name: 'Pet', thumbnail: '', image: '', small_image: '' },
-        progress_tracker: { status_id: 4, status_list: [], cancelled: false, completed: false },
-        available_actions: ['awaiting_artwork'].map(code => ({ code, name: code, message: code, blocking_progress: true, url: null, open_in_new_tab: false }))
-      };
-      upload = useOrderItemPhotoUpload(ref(item), validate);
+      upload = useOrderItemPhotoUpload(ref(42), ref('pet'), validate, onSubmitted);
       return {};
     },
     render: h => h('div')
@@ -71,6 +64,7 @@ function setup (customizations: unknown[] = [eligible]) {
       return upload;
     },
     dispatch,
+    onSubmitted,
     validate,
     wrapper
   };
@@ -110,8 +104,8 @@ describe('order item photo upload', () => {
     expect(fetchDraft).not.toHaveBeenCalled();
   });
 
-  it('sends only the complete selected photo value, saves before submit, then notifies and refreshes', async () => {
-    const { upload, dispatch } = setup();
+  it('sends only the complete selected photo value, saves before submit, then notifies and reports submission', async () => {
+    const { upload, dispatch, onSubmitted } = setup();
     await settle();
     upload.updateCustomizationOptionValue({ customizationId: 'photos', value: [retained, added] });
     let finishSave: (value: unknown) => void;
@@ -123,10 +117,8 @@ describe('order item photo upload', () => {
     finishSave({ errors: [] });
     await pending;
     expect(submit).toHaveBeenCalledWith([42], 'token');
-    expect(dispatch.mock.calls.slice(-2)).toEqual([
-      ['notification/spawnNotification', { type: 'success', message: 'Your photos have been submitted.', action1: { label: 'OK' } }],
-      ['ordersHistory/FETCH_ORDERS_HISTORY', { filters: { excludeAlterationProducts: true } }]
-    ]);
+    expect(dispatch).toHaveBeenLastCalledWith('notification/spawnNotification', { type: 'success', message: 'Your photos have been submitted.', action1: { label: 'OK' } });
+    expect(onSubmitted).toHaveBeenCalledTimes(1);
   });
 
   it.each(['save transport', 'save item', 'submit transport', 'submit item'])('retains photos on %s failure', async failure => {
@@ -153,23 +145,47 @@ describe('order item photo upload', () => {
     expect(submit).not.toHaveBeenCalled();
   });
 
-  it('latches before asynchronous validation and through refresh', async () => {
-    const { upload, validate, dispatch } = setup();
+  it('opens the form and discards unsaved photos on cancel', async () => {
+    const { upload } = setup();
+    await settle();
+    expect(upload.isFormOpen.value).toBe(false);
+    upload.openForm();
+    upload.updateCustomizationOptionValue({ customizationId: 'photos', value: [retained, added] });
+    upload.cancel();
+    expect(upload.isFormOpen.value).toBe(false);
+    expect(upload.customizationOptionValue.value).toEqual({ photos: [retained] });
+  });
+
+  it('keeps the form open on cancel while a photo is uploading', async () => {
+    const { upload } = setup();
+    await settle();
+    upload.openForm();
+    upload.onEntityBusyChanged({ entityId: 'photos', isBusy: true });
+    upload.cancel();
+    expect(upload.isFormOpen.value).toBe(true);
+  });
+
+  it('latches before asynchronous validation and stays locked after submission', async () => {
+    const { upload, validate, onSubmitted } = setup();
     await settle();
     let finishValidation: (value: boolean) => void;
     validate.mockImplementation(() => new Promise(resolve => { finishValidation = resolve; }));
-    let finishRefresh: () => void;
-    dispatch.mockImplementation(action => action === 'ordersHistory/FETCH_ORDERS_HISTORY' ? new Promise<void>(resolve => { finishRefresh = resolve; }) : Promise.resolve());
     const pending = upload.submitPhotos();
     await upload.submitPhotos();
     expect(validate).toHaveBeenCalledTimes(1);
     finishValidation(true);
-    await settle();
+    await pending;
     await upload.submitPhotos();
     expect(save).toHaveBeenCalledTimes(1);
+    expect(onSubmitted).toHaveBeenCalledTimes(1);
     expect(upload.isPending.value).toBe(true);
-    finishRefresh();
-    await pending;
+  });
+
+  it('unlocks after failed validation', async () => {
+    const { upload, validate } = setup();
+    await settle();
+    validate.mockResolvedValue(false);
+    await upload.submitPhotos();
     expect(upload.isPending.value).toBe(false);
   });
 });
