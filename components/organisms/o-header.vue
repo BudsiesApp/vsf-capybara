@@ -2,7 +2,7 @@
   <div class="o-header">
     <SfOverlay
       class="overlay"
-      :visible="isHoveredMenu || isFocusedMenu || isEducatorsMenuHovered || isEducatorsMenuFocused || isSearchPanelVisible"
+      :visible="isMainMenuOpen || isEducatorsMenuOpen || isSearchPanelVisible"
       @click="$store.commit('ui/setSearchpanel', false)"
     />
     <SfHeader
@@ -19,46 +19,81 @@
       </template>
       <template #navigation>
         <SfHeaderNavigationItem
+          :class="{
+            '_expanded': isMainMenuExpanded,
+            '_hover-dismissed': isMainMenuHoverDismissed
+          }"
           @mouseover="onMainMenuMouseOver"
-          @mouseleave="isHoveredMenu = false"
-          @focusin="onMainMenuFocusIn"
+          @mouseleave="onMainMenuMouseLeave"
           @focusout="onMainMenuFocusOut"
-          @keydown.esc="onMainMenuEscapeKey"
         >
           <router-link
             to="/plush-services/"
             class="o-header__submenu"
-            :aria-expanded="String(isHoveredMenu || isFocusedMenu)"
           >
             Products
           </router-link>
+          <button
+            ref="mainMenuToggle"
+            type="button"
+            class="o-header__submenu-toggle"
+            :aria-expanded="isMainMenuOpen ? 'true' : 'false'"
+            aria-controls="o-header-products-menu"
+            @click="onMainMenuToggleClick"
+          >
+            <span class="sr-only">{{ $t('Products submenu') }}</span>
+            <SfIcon
+              class="o-header__submenu-toggle-icon"
+              icon="chevron_down"
+              size="xxs"
+              aria-hidden="true"
+            />
+          </button>
           <MMenu
-            :visible="(isHoveredMenu || isFocusedMenu) && !isSearchPanelVisible"
+            id="o-header-products-menu"
+            :visible="isMainMenuOpen && !isSearchPanelVisible"
             @transitionend.native="onMainMenuTransitionEnd"
             @close="onMainMenuClose"
           />
         </SfHeaderNavigationItem>
 
         <SfHeaderNavigationItem
-          ref="educatorsNavItem"
-          @mouseover="onEducatorsMenuMouseOver"
-          @mouseleave="isEducatorsMenuHovered = false"
-          @focusin="onEducatorsMenuFocusIn"
-          @focusout="onEducatorsMenuFocusOut"
-          @keydown.esc="onEducatorsMenuEscapeKey"
           class="_educators-menu"
+          :class="{
+            '_expanded': isEducatorsMenuExpanded,
+            '_hover-dismissed': isEducatorsMenuHoverDismissed
+          }"
+          @mouseover="onEducatorsMenuMouseOver"
+          @mouseleave="onEducatorsMenuMouseLeave"
+          @focusout="onEducatorsMenuFocusOut"
         >
           <router-link
             @click.native="isEducatorsMenuHovered = false"
             to="/teachers/"
             class="o-header__submenu"
-            :aria-expanded="String(isEducatorsMenuHovered || isEducatorsMenuFocused)"
           >
             Educators
           </router-link>
+          <button
+            ref="educatorsMenuToggle"
+            type="button"
+            class="o-header__submenu-toggle"
+            :aria-expanded="isEducatorsMenuOpen ? 'true' : 'false'"
+            aria-controls="o-header-educators-menu"
+            @click="onEducatorsMenuToggleClick"
+          >
+            <span class="sr-only">{{ $t('Educators submenu') }}</span>
+            <SfIcon
+              class="o-header__submenu-toggle-icon"
+              icon="chevron_down"
+              size="xxs"
+              aria-hidden="true"
+            />
+          </button>
 
           <MEducatorsMenu
-            :visible="(isEducatorsMenuHovered || isEducatorsMenuFocused) && !isSearchPanelVisible"
+            id="o-header-educators-menu"
+            :visible="isEducatorsMenuOpen && !isSearchPanelVisible"
             @close="onEducatorsMenuClose"
           />
         </SfHeaderNavigationItem>
@@ -96,8 +131,8 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import { SfHeader, SfOverlay } from '@storefront-ui/vue';
+import Vue, { ref } from 'vue';
+import { SfHeader, SfIcon, SfOverlay } from '@storefront-ui/vue';
 
 import { CurrencySelector } from 'src/modules/currency';
 
@@ -113,6 +148,7 @@ export default Vue.extend({
   name: 'OHeader',
   components: {
     SfHeader,
+    SfIcon,
     ALogo,
     AAccountIcon,
     ADetailedCartIcon,
@@ -122,13 +158,21 @@ export default Vue.extend({
     MCtaButton,
     CurrencySelector
   },
+  setup () {
+    return {
+      mainMenuToggle: ref<HTMLButtonElement | null>(null),
+      educatorsMenuToggle: ref<HTMLButtonElement | null>(null)
+    };
+  },
   data () {
     return {
       isHoveredMenu: false,
-      isFocusedMenu: false,
+      isMainMenuExpanded: false,
+      isMainMenuHoverDismissed: false,
       isMouseOverLocked: false,
       isEducatorsMenuHovered: false,
-      isEducatorsMenuFocused: false
+      isEducatorsMenuExpanded: false,
+      isEducatorsMenuHoverDismissed: false
     }
   },
   computed: {
@@ -138,31 +182,61 @@ export default Vue.extend({
     ...mapGetters('user', ['isLoggedIn']),
     activeIcon () {
       return this.isLoggedIn ? 'account' : '';
+    },
+    isMainMenuOpen (): boolean {
+      return this.isHoveredMenu || this.isMainMenuExpanded;
+    },
+    isEducatorsMenuOpen (): boolean {
+      return this.isEducatorsMenuHovered || this.isEducatorsMenuExpanded;
     }
   },
+  mounted () {
+    document.addEventListener('keydown', this.onDocumentKeyDown);
+  },
+  beforeDestroy () {
+    document.removeEventListener('keydown', this.onDocumentKeyDown);
+  },
   methods: {
+    closeMainMenu () {
+      if (this.isHoveredMenu) {
+        this.isMainMenuHoverDismissed = true;
+      }
+
+      this.isHoveredMenu = false;
+      this.isMainMenuExpanded = false;
+    },
     onMainMenuClose () {
       this.isHoveredMenu = false;
-      this.isFocusedMenu = false;
+      this.isMainMenuExpanded = false;
       this.isMouseOverLocked = true;
     },
+    onMainMenuToggleClick () {
+      if (this.isMainMenuOpen) {
+        this.closeMainMenu();
+        return;
+      }
+
+      this.isMainMenuHoverDismissed = false;
+      this.isMainMenuExpanded = true;
+      this.isEducatorsMenuHovered = false;
+      this.isEducatorsMenuExpanded = false;
+    },
     onMainMenuMouseOver () {
-      if (this.isMouseOverLocked) {
+      if (this.isMouseOverLocked || this.isMainMenuHoverDismissed) {
         return;
       }
 
       this.isHoveredMenu = true;
       this.isEducatorsMenuHovered = false;
-      this.isEducatorsMenuFocused = false;
+      this.isEducatorsMenuExpanded = false;
+    },
+    onMainMenuMouseLeave () {
+      this.isHoveredMenu = false;
+      this.isMainMenuHoverDismissed = false;
     },
     async onMainMenuTransitionEnd () {
       await this.$nextTick();
       this.isMouseOverLocked = false;
-    },
-    onMainMenuFocusIn () {
-      this.isFocusedMenu = true;
-      this.isEducatorsMenuHovered = false;
-      this.isEducatorsMenuFocused = false;
     },
     onMainMenuFocusOut (event: FocusEvent) {
       const productsNavElement = event.currentTarget as HTMLElement | null;
@@ -174,29 +248,43 @@ export default Vue.extend({
         return;
       }
 
-      this.isFocusedMenu = false;
+      this.isMainMenuExpanded = false;
     },
-    onMainMenuEscapeKey (event: KeyboardEvent) {
-      this.isFocusedMenu = false;
-      this.isHoveredMenu = false;
+    closeEducatorsMenu () {
+      if (this.isEducatorsMenuHovered) {
+        this.isEducatorsMenuHoverDismissed = true;
+      }
 
-      const productsNavElement = event.currentTarget as HTMLElement | null;
-      const menuTrigger = productsNavElement?.querySelector('a') as HTMLAnchorElement | null;
-
-      menuTrigger?.focus();
+      this.isEducatorsMenuHovered = false;
+      this.isEducatorsMenuExpanded = false;
     },
     onEducatorsMenuClose () {
       this.isEducatorsMenuHovered = false;
+      this.isEducatorsMenuExpanded = false;
+    },
+    onEducatorsMenuToggleClick () {
+      if (this.isEducatorsMenuOpen) {
+        this.closeEducatorsMenu();
+        return;
+      }
+
+      this.isEducatorsMenuHoverDismissed = false;
+      this.isEducatorsMenuExpanded = true;
+      this.isHoveredMenu = false;
+      this.isMainMenuExpanded = false;
     },
     onEducatorsMenuMouseOver () {
+      if (this.isEducatorsMenuHoverDismissed) {
+        return;
+      }
+
       this.isEducatorsMenuHovered = true;
       this.isHoveredMenu = false;
-      this.isFocusedMenu = false;
+      this.isMainMenuExpanded = false;
     },
-    onEducatorsMenuFocusIn () {
-      this.isEducatorsMenuFocused = true;
-      this.isHoveredMenu = false;
-      this.isFocusedMenu = false;
+    onEducatorsMenuMouseLeave () {
+      this.isEducatorsMenuHovered = false;
+      this.isEducatorsMenuHoverDismissed = false;
     },
     onEducatorsMenuFocusOut (event: FocusEvent) {
       const educatorsNavElement = event.currentTarget as HTMLElement | null;
@@ -208,16 +296,29 @@ export default Vue.extend({
         return;
       }
 
-      this.isEducatorsMenuFocused = false;
+      this.isEducatorsMenuExpanded = false;
     },
-    onEducatorsMenuEscapeKey (event: KeyboardEvent) {
-      this.isEducatorsMenuFocused = false;
-      this.isEducatorsMenuHovered = false;
+    onDocumentKeyDown (event: KeyboardEvent) {
+      if (event.key !== 'Escape') {
+        return;
+      }
 
-      const educatorsNavElement = event.currentTarget as HTMLElement | null;
-      const menuTrigger = educatorsNavElement?.querySelector('a') as HTMLAnchorElement | null;
+      if (this.isMainMenuOpen) {
+        this.closeMenuOnEscape(this.mainMenuToggle as HTMLButtonElement | null, this.closeMainMenu);
+      }
 
-      menuTrigger?.focus();
+      if (this.isEducatorsMenuOpen) {
+        this.closeMenuOnEscape(this.educatorsMenuToggle as HTMLButtonElement | null, this.closeEducatorsMenu);
+      }
+    },
+    closeMenuOnEscape (menuToggle: HTMLButtonElement | null, closeMenu: () => void) {
+      const isFocusInsideMenu = !!menuToggle?.parentElement?.contains(document.activeElement);
+
+      closeMenu();
+
+      if (isFocusInsideMenu) {
+        menuToggle?.focus();
+      }
     }
   }
 });
@@ -277,7 +378,7 @@ export default Vue.extend({
     }
 
     &:hover,
-    &:focus-within {
+    &._expanded {
       .m-menu,
       .m-educators-menu {
         opacity: 1;
@@ -288,6 +389,49 @@ export default Vue.extend({
         width: 100%;
       }
     }
+
+    &._hover-dismissed:hover:not(._expanded) {
+      .m-menu,
+      .m-educators-menu {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      &::after {
+        width: 0;
+      }
+    }
+
+    > .o-header__submenu-toggle {
+      position: relative;
+      flex: 0 0 1px;
+      width: 1px;
+      margin: 0 0 0 -1px;
+      padding: 0;
+      border: 0;
+      background: none;
+      overflow: visible;
+      cursor: pointer;
+
+      &:focus {
+        outline: none;
+      }
+
+      &:focus-visible .o-header__submenu-toggle-icon {
+        visibility: visible;
+      }
+    }
+  }
+
+  &__submenu-toggle-icon {
+    position: absolute;
+    top: 50%;
+    right: var(--spacer-xs);
+    padding: var(--spacer-2xs);
+    transform: translateY(-50%);
+    visibility: hidden;
+    outline: 2px solid var(--c-primary);
+    outline-offset: 1px;
   }
 
   .m-cta-button {
