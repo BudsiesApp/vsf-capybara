@@ -255,7 +255,8 @@ let routes = [
     path: '/forevers/customize-later/',
     component: ForeversCustomizeLater,
     props: (route) => ({
-      existingPlushieId: route.query.id
+      existingPlushieId: route.query.id,
+      preselectedProductType: route.query.product
     })
   },
   {
