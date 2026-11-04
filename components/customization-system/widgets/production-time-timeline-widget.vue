@@ -3,9 +3,13 @@
     class="production-time-timeline-widget"
     :role="groupRole"
     :aria-labelledby="ariaLabelledby"
+    :aria-busy="isHolidayPeriod && !holidayControlsReady ? 'true' : undefined"
   >
+    <p v-if="isHolidayPeriod && !holidayControlsReady" role="status">
+      {{ $t('Loading delivery options…') }}
+    </p>
     <p
-      v-if="isHolidayPeriod"
+      v-if="isHolidayPeriod && holidayControlsReady"
       class="_location-selector"
       :class="{ '-single-option': sortedValues.length === 1 }"
     >
@@ -17,7 +21,7 @@
       </button>
     </p>
 
-    <ul class="_options-list">
+    <ul v-if="!isHolidayPeriod || holidayControlsReady" class="_options-list">
       <li
         v-for="optionValue in sortedValues"
         :key="optionValue.id"
@@ -79,6 +83,7 @@ import { useStore } from '@vue-storefront/core/application-services';
 import {
   computed,
   defineComponent,
+  onBeforeUnmount,
   PropType,
   toRefs,
   watch
@@ -137,6 +142,14 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    restorationSettled: {
+      type: Boolean,
+      default: true
+    },
+    reportReadinessBusy: {
+      type: Boolean,
+      default: false
+    },
     maxValuesCount: {
       type: Number as PropType<number | undefined>,
       default: undefined
@@ -161,7 +174,8 @@ export default defineComponent({
   setup (props, context) {
     const applicationStore = useStore();
     const { maxValuesCount, radioGroupName, value, values } = toRefs(props);
-    const { location: holidayLocation, setLocation } = useHolidayDeliveryLocation();
+    const { location: holidayLocation, ready: holidayLocationReady, setLocation } = useHolidayDeliveryLocation();
+    const holidayControlsReady = computed(() => holidayLocationReady.value && props.restorationSettled);
     const hasError = computed<boolean>(() => !!props.error);
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
     const { optionValuePriceDictionary } = useOptionValuesPrice(values);
@@ -256,6 +270,11 @@ export default defineComponent({
       });
     });
 
+    watch([() => props.reportReadinessBusy, () => props.isHolidayPeriod, holidayControlsReady], ([report, holiday, ready]) => {
+      if (report) context.emit('widget-busy-changed', holiday && !ready);
+    }, { immediate: true, flush: 'sync' });
+    onBeforeUnmount(() => { if (props.reportReadinessBusy) context.emit('widget-busy-changed', false); });
+
     const fastestAvailableOptionValueId = computed<string | undefined>(() => {
       if (props.isDisabled) {
         return;
@@ -323,11 +342,11 @@ export default defineComponent({
     }
 
     watch(
-      [sortedValues, value],
-      ([visibleValues, selectedValue]) => {
+      [sortedValues, value, holidayLocationReady, () => props.restorationSettled],
+      ([visibleValues, selectedValue, locationReady, restorationSettled]) => {
         const selectedOptionValueId = typeof selectedValue === 'string' ? selectedValue : undefined;
 
-        if (!props.isHolidayPeriod || !visibleValues.length || visibleValues.some(({ id }) => id === selectedOptionValueId)) {
+        if (!props.isHolidayPeriod || !locationReady || !restorationSettled || !visibleValues.length || visibleValues.some(({ id }) => id === selectedOptionValueId)) {
           return;
         }
 
@@ -347,6 +366,8 @@ export default defineComponent({
       ariaInvalid,
       errorMessageId,
       groupRole,
+      holidayControlsReady,
+      holidayLocationReady,
       isFastestAvailable,
       isOptionValueDisabled,
       isDomesticHolidayLocation,

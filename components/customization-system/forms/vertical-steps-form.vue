@@ -28,6 +28,8 @@
 
           <div class="_content">
             <customization-option
+              :restoration-settled="restorationSettled"
+              :report-readiness-busy="true"
               v-for="customization in customizationRootGroupCustomizations[
                 customizationGroup.id
               ]"
@@ -334,7 +336,7 @@ export default defineComponent({
       removeUnavailableOptionValues
     );
 
-    const { removePreservedState } =
+    const { removePreservedState, restorationSettled } =
       useCustomizationStatePreservation(
         productSku,
         customizationState,
@@ -409,9 +411,10 @@ export default defineComponent({
     const { isUnmounted } = useComponentUnmountedChecker();
 
     async function onFormSubmit (): Promise<void> {
+      if (isSubmitButtonDisabled.value) return;
       const isValid = await formValidation.validateAndGoToFirstError();
 
-      if (!isValid) {
+      if (!isValid || isSubmitButtonDisabled.value) {
         return;
       }
 
@@ -475,6 +478,7 @@ export default defineComponent({
     );
 
     return {
+      restorationSettled,
       ...useCustomizationsGroups(filteredCustomizations, flowAvailableProductCustomization),
       ...useQuantityAndShippingDiscounts(),
       ...formValidation,
