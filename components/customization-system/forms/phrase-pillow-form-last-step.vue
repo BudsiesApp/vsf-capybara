@@ -1,6 +1,8 @@
 <template>
   <div class="phrase-pillow-form-last-step">
     <customization-option
+      :restoration-settled="restorationSettled"
+      :report-readiness-busy="true"
       v-show="!isSubmitting"
       v-for="customization in availableCustomizations"
       class="_customization-option"
@@ -59,7 +61,7 @@
       <SfButton
         class="color-primary _submit-button _add-to-cart"
         type="submit"
-        :disabled="isDisabled"
+        :disabled="isDisabled || isSubmitButtonDisabled"
         @click.prevent.stop="onAddToCartClick"
       >
         {{ $t("Add to Cart") }}
@@ -121,6 +123,7 @@ const submitAnimationSteps: SubmitAnimationStepsInterface[] = [
 
 export default defineComponent({
   props: {
+    restorationSettled: { type: Boolean, default: true },
     addToCartAction: {
       type: Function as PropType<() => Promise<void>>,
       required: true
@@ -174,7 +177,7 @@ export default defineComponent({
     );
 
     async function onAddToCartClick () {
-      if (props.isDisabled || isSubmitting.value) {
+      if (props.isDisabled || props.isSubmitButtonDisabled || isSubmitting.value) {
         return;
       }
 

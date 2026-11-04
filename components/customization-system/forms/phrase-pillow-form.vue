@@ -66,6 +66,8 @@
               :use-v-show="true"
             >
               <customization-option
+                :restoration-settled="restorationSettled"
+                :report-readiness-busy="true"
                 v-for="customization in customizationRootGroupCustomizations[
                   customizationGroup.id
                 ]"
@@ -94,6 +96,7 @@
 
             <sf-step :name="lastStepName">
               <phrase-pillow-form-last-step
+                :restoration-settled="restorationSettled"
                 :add-to-cart-action="onFormSubmit"
                 :available-customizations="lastStepAvailableCustomizations"
                 :customization-available-option-values="
@@ -298,7 +301,7 @@ export default defineComponent({
       removeUnavailableOptionValues
     );
 
-    const { removePreservedState } =
+    const { removePreservedState, restorationSettled } =
       useCustomizationStatePreservation(
         productSku,
         customizationState,
@@ -346,7 +349,7 @@ export default defineComponent({
     const { isUnmounted } = useComponentUnmountedChecker();
 
     async function onFormSubmit (): Promise<void> {
-      if (!validationObserver.value) {
+      if (isSubmitButtonDisabled.value || !validationObserver.value) {
         return;
       }
 
@@ -356,6 +359,8 @@ export default defineComponent({
         formSteps.activateFirstStepWithError();
         return;
       }
+
+      if (isSubmitButtonDisabled.value) return;
 
       if (!preview.value) {
         return;
@@ -367,7 +372,7 @@ export default defineComponent({
         processedImageUploadCustomizationStateItem
       );
 
-      if (isUnmounted.value) {
+      if (isUnmounted.value || isSubmitButtonDisabled.value) {
         return;
       }
 
@@ -431,6 +436,7 @@ export default defineComponent({
     });
 
     return {
+      restorationSettled,
       ...customizationGroups,
       ...formSteps,
       ...useBulkImagesUpload(),
