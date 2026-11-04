@@ -243,7 +243,7 @@ let routes = [
     props: (route) => ({
       sku: 'customBuddyPillow_bundle',
       existingPlushieId: route.query.existingPlushieId,
-      layout: 'vertical'
+      layout: 'with-images-gallery'
     })
   },
   {
