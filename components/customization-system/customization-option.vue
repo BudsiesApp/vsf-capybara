@@ -42,6 +42,8 @@
         :is-disabled="isDisabled"
         :is="widget.component"
         v-bind="widget.props"
+        :restoration-settled="widget.component === 'ProductionTimeTimelineWidget' ? restorationSettled : undefined"
+        :report-readiness-busy="widget.component === 'ProductionTimeTimelineWidget' ? reportReadinessBusy : undefined"
         v-model="selectedOption"
         @widget-busy-changed="onWidgetBusyChanged"
         @expand-clicked="(optionValueId) => $emit('expand-clicked', optionValueId)"
@@ -117,6 +119,14 @@ export default defineComponent({
     ValidationProvider
   },
   props: {
+    restorationSettled: {
+      type: Boolean,
+      default: true
+    },
+    reportReadinessBusy: {
+      type: Boolean,
+      default: false
+    },
     customization: {
       type: Object as PropType<Customization>,
       required: true
