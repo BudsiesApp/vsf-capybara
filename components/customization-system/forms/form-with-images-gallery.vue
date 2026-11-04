@@ -634,6 +634,8 @@ export default defineComponent({
   }
 
   ._short-description {
+    margin-top: var(--spacer-sm);
+
     @include font(
       --product-description-font,
       var(--font-light),
