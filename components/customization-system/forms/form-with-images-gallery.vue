@@ -62,6 +62,8 @@
         >
           <form @submit.prevent="onFormSubmit">
             <customization-option
+              :restoration-settled="restorationSettled"
+              :report-readiness-busy="true"
               v-for="customization in filteredCustomizations"
               class="_customization-option"
               ref="customizationOption"
@@ -391,7 +393,7 @@ export default defineComponent({
       await uploadImage(imageUrl.value);
     }
 
-    const { removePreservedState } =
+    const { removePreservedState, restorationSettled } =
       useCustomizationStatePreservation(
         preservationStorageKey,
         customizationState,
@@ -491,9 +493,10 @@ export default defineComponent({
     );
 
     async function onFormSubmit (): Promise<void> {
+      if (isSubmitButtonDisabled.value) return;
       const isValid = await formValidation.validateAndGoToFirstError();
 
-      if (!isValid) return;
+      if (!isValid || isSubmitButtonDisabled.value) return;
 
       try {
         if (isCustomizeMode.value) {
@@ -558,6 +561,7 @@ export default defineComponent({
     });
 
     return {
+      restorationSettled,
       ...useProductGallery(
         product,
         flowAvailableCustomizations,
@@ -630,6 +634,8 @@ export default defineComponent({
   }
 
   ._short-description {
+    margin-top: var(--spacer-sm);
+
     @include font(
       --product-description-font,
       var(--font-light),

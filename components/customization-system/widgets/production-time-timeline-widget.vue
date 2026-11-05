@@ -3,18 +3,37 @@
     class="production-time-timeline-widget"
     :role="groupRole"
     :aria-labelledby="ariaLabelledby"
+    :aria-busy="isHolidayPeriod && !holidayControlsReady ? 'true' : undefined"
   >
-    <ul class="_options-list">
+    <p v-if="isHolidayPeriod && !holidayControlsReady" role="status">
+      {{ $t('Loading delivery options…') }}
+    </p>
+    <p
+      v-if="isHolidayPeriod && holidayControlsReady"
+      class="_location-selector"
+      :class="{ '-single-option': sortedValues.length === 1 }"
+    >
+      {{ $t('Delivery location:') }}
+      <strong>{{ isDomesticHolidayLocation ? $t('United States') : $t('International') }}</strong>
+      <span>·</span>
+      <button type="button" @click="toggleHolidayLocation">
+        {{ isDomesticHolidayLocation ? $t("I'm outside the U.S.") : $t("I'm in the U.S.") }}
+      </button>
+    </p>
+
+    <ul v-if="!isHolidayPeriod || holidayControlsReady" class="_options-list">
       <li
         v-for="optionValue in sortedValues"
         :key="optionValue.id"
         class="_option"
         :class="{
           '-selected': isSelected(optionValue),
-          '-disabled': isOptionValueDisabled(optionValue)
+          '-disabled': isOptionValueDisabled(optionValue),
+          '-single-option': sortedValues.length === 1
         }"
       >
         <span
+          v-if="sortedValues.length > 1"
           class="_timeline"
           :class="{
             '-selected': isSelected(optionValue),
@@ -64,8 +83,10 @@ import { useStore } from '@vue-storefront/core/application-services';
 import {
   computed,
   defineComponent,
+  onBeforeUnmount,
   PropType,
-  toRefs
+  toRefs,
+  watch
 } from 'vue';
 
 import { RushAddon } from 'src/modules/budsies';
@@ -73,6 +94,8 @@ import {
   ListWidgetInputType,
   OptionValue,
   PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID,
+  HolidayDeliveryLocation,
+  useHolidayDeliveryLocation,
   useListWidget,
   useOptionValuesPrice
 } from 'src/modules/customization-system';
@@ -115,6 +138,18 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    isHolidayPeriod: {
+      type: Boolean,
+      default: false
+    },
+    restorationSettled: {
+      type: Boolean,
+      default: true
+    },
+    reportReadinessBusy: {
+      type: Boolean,
+      default: false
+    },
     maxValuesCount: {
       type: Number as PropType<number | undefined>,
       default: undefined
@@ -139,6 +174,8 @@ export default defineComponent({
   setup (props, context) {
     const applicationStore = useStore();
     const { maxValuesCount, radioGroupName, value, values } = toRefs(props);
+    const { location: holidayLocation, ready: holidayLocationReady, setLocation } = useHolidayDeliveryLocation();
+    const holidayControlsReady = computed(() => holidayLocationReady.value && props.restorationSettled);
     const hasError = computed<boolean>(() => !!props.error);
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
     const { optionValuePriceDictionary } = useOptionValuesPrice(values);
@@ -161,10 +198,13 @@ export default defineComponent({
 
     const productionTimeOptionCardDataByOptionValueId = computed<Record<string, ProductionTimeOptionCardData>>(() => {
       const dictionary: Record<string, ProductionTimeOptionCardData> = {};
-      const standardAddon = productRushAddons.value.find((addon) => !addon.id);
+      const matchingAddons = props.isHolidayPeriod
+        ? productRushAddons.value.filter((addon) => addon.isDomestic === (holidayLocation.value === HolidayDeliveryLocation.DOMESTIC))
+        : productRushAddons.value;
+      const standardAddon = matchingAddons.find((addon) => !addon.id);
       const addonBySku: Record<string, RushAddon> = {};
 
-      for (const addon of productRushAddons.value) {
+      for (const addon of matchingAddons) {
         if (addon.id) {
           addonBySku[addon.id] = addon;
         }
@@ -183,7 +223,9 @@ export default defineComponent({
         }
 
         dictionary[optionValue.id] = {
-          optionName: optionValue.name || addon.text,
+          isInTimeForChristmas: props.isHolidayPeriod && addon.isInTimeForChristmas,
+          isHolidayPeriod: props.isHolidayPeriod,
+          optionName: props.isHolidayPeriod ? addon.text : optionValue.name || addon.text,
           optionValueSku: optionValue.sku || '',
           price,
           slotsLeft: typeof addon.slotsLeft === 'number' ? addon.slotsLeft : Infinity,
@@ -196,8 +238,13 @@ export default defineComponent({
 
     const sortedValues = computed<OptionValue[]>(() => {
       const cardDataByOptionValueId = productionTimeOptionCardDataByOptionValueId.value;
+      let locationValues = values.value;
 
-      return [...values.value].sort((a, b) => {
+      if (props.isHolidayPeriod) {
+        locationValues = values.value.filter((optionValue) => !!cardDataByOptionValueId[optionValue.id]);
+      }
+
+      return [...locationValues].sort((a, b) => {
         const firstCardData = cardDataByOptionValueId[a.id];
         const secondCardData = cardDataByOptionValueId[b.id];
         const firstTurnaroundTime = firstCardData?.turnaroundTime;
@@ -222,6 +269,11 @@ export default defineComponent({
         return a.id.localeCompare(b.id);
       });
     });
+
+    watch([() => props.reportReadinessBusy, () => props.isHolidayPeriod, holidayControlsReady], ([report, holiday, ready]) => {
+      if (report) context.emit('widget-busy-changed', holiday && !ready);
+    }, { immediate: true, flush: 'sync' });
+    onBeforeUnmount(() => { if (props.reportReadinessBusy) context.emit('widget-busy-changed', false); });
 
     const fastestAvailableOptionValueId = computed<string | undefined>(() => {
       if (props.isDisabled) {
@@ -277,6 +329,33 @@ export default defineComponent({
       context.emit('input', undefined);
     }
 
+    const isDomesticHolidayLocation = computed<boolean>(() => {
+      return holidayLocation.value === HolidayDeliveryLocation.DOMESTIC;
+    });
+
+    function toggleHolidayLocation (): void {
+      setLocation(
+        isDomesticHolidayLocation.value
+          ? HolidayDeliveryLocation.INTERNATIONAL
+          : HolidayDeliveryLocation.DOMESTIC
+      );
+    }
+
+    watch(
+      [sortedValues, value, holidayLocationReady, () => props.restorationSettled],
+      ([visibleValues, selectedValue, locationReady, restorationSettled]) => {
+        const selectedOptionValueId = typeof selectedValue === 'string' ? selectedValue : undefined;
+
+        if (!props.isHolidayPeriod || !locationReady || !restorationSettled || !visibleValues.length || visibleValues.some(({ id }) => id === selectedOptionValueId)) {
+          return;
+        }
+
+        const standardValue = visibleValues.find(({ id }) => id === PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID);
+        if (standardValue) context.emit('input', standardValue.id);
+      },
+      { immediate: true }
+    );
+
     const { ariaDescribedby, ariaInvalid, errorMessageId } = useErrorAccessibility(
       'production-time-timeline-widget',
       hasError
@@ -287,12 +366,16 @@ export default defineComponent({
       ariaInvalid,
       errorMessageId,
       groupRole,
+      holidayControlsReady,
+      holidayLocationReady,
       isFastestAvailable,
       isOptionValueDisabled,
+      isDomesticHolidayLocation,
       onInputClick,
       productionTimeOptionCardDataByOptionValueId,
       radioInputName,
       sortedValues,
+      toggleHolidayLocation,
       ...listWidgetFields
     };
   }
@@ -321,12 +404,44 @@ export default defineComponent({
     list-style: none;
   }
 
+  ._location-selector {
+    display: flex;
+    gap: 0.35rem;
+    align-items: baseline;
+    justify-content: center;
+    margin-bottom: var(--spacer-sm);
+    color: var(--c-text-muted);
+    font-size: var(--font-sm);
+
+    strong {
+      color: var(--c-text);
+    }
+
+    button {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--c-primary);
+      font: inherit;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    &.-single-option {
+      margin-bottom: var(--spacer-base);
+    }
+  }
+
   ._option {
     position: relative;
     width: 100%;
     display: grid;
     grid-template-columns: $timeline-mark-size 1fr;
     column-gap: var(--spacer-sm);
+
+    &.-single-option {
+      grid-template-columns: 1fr;
+    }
 
     &.-disabled {
       ._label {

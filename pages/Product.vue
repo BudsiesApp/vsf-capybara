@@ -43,7 +43,7 @@
 import { mapGetters, mapState } from 'vuex';
 import LazyHydrate from 'vue-lazy-hydration';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
-import { useRequestServices } from '@vue-storefront/core/request-services';
+import { setServerRedirect, useRequestServices } from '@vue-storefront/core/request-services';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { ProductVisibility } from '@vue-storefront/core/modules/catalog/types/product-visibility.value';
 import { onlineHelper, isServer } from '@vue-storefront/core/helpers';
@@ -195,7 +195,10 @@ export default {
 
     if (!product || product.visibility === ProductVisibility.NOT_VISIBLE) {
       if (context) {
-        return context.server.response.redirect('/404');
+        // A missing product must not stay cached as a redirect once the product becomes available.
+        context.output.cacheTags.add('no-cache');
+        setServerRedirect(context, '/404');
+        return;
       }
     }
 
