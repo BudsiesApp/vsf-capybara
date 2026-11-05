@@ -297,9 +297,11 @@ export default {
     const store = useStore();
     const isMounted = ref(false);
     const trackingKey = computed(() => isMounted.value && store.state.cart.cartIsLoaded ? 'cart' : undefined);
-    const totalItems = computed(() => store.getters['cart/getCartItems'].reduce(
-      (totalItems, product) => totalItems + parseInt(product.qty, 10), 0
-    ));
+    const totalItems = computed(() => {
+      return store.getters['cart/getCartItems'].reduce(
+      (items, product) => items + parseInt(product.qty, 10), 0
+      );
+    });
     const storyDependencies = computed(() => totalItems.value
       ? ['blocks/cart_shipping_handling'] : []);
     const { onStoryRendered } = useStoryblokReadinessTracker(trackingKey, storyDependencies, emitPageRenderedEvent);

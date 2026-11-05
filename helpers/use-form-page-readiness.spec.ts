@@ -1,4 +1,5 @@
-import Vue, { ref } from 'vue';
+import Vue, { computed, ref } from 'vue';
+import Vuex from 'vuex';
 import { mount } from '@vue/test-utils';
 import { useFormPageReadiness } from './use-form-page-readiness';
 
@@ -114,6 +115,61 @@ it('requires a defined key and mount while an absent top story completes from th
   signals.onFormReady();
 
   expect(onReady).toHaveBeenCalledTimes(1);
+
+  wrapper.destroy();
+});
+
+it('keeps computed inputs over Vuex getters fresh after the store rebuilds its getters', async () => {
+  Vue.use(Vuex);
+
+  const store = new Vuex.Store({
+    modules: {
+      product: {
+        namespaced: true,
+        state: { current: { sku: 'A' } },
+        getters: { current: state => state.current },
+        mutations: {
+          setCurrent (state, product) {
+            state.current = product;
+          }
+        }
+      }
+    }
+  });
+  const onReady = jest.fn();
+  let trackingKey!: { value: string | undefined };
+  let signals!: ReturnType<typeof useFormPageReadiness>;
+  const wrapper = mount(
+    Vue.extend({
+      setup() {
+        trackingKey = computed(() => store.getters['product/current']?.sku);
+        signals = useFormPageReadiness(trackingKey, ref([]), onReady);
+
+        return {};
+      },
+      render: h => h('div')
+    })
+  );
+
+  signals.onFormReady();
+  await Vue.nextTick();
+
+  expect(onReady).toHaveBeenCalledTimes(1);
+
+  store.registerModule('lazy', { state: {} });
+  // A later reader, such as a mapGetters computed during render, evaluates the rebuilt getter
+  // and subscribes it after the readiness watchers' existing subscriptions.
+  expect(store.getters['product/current'].sku).toBe('A');
+  await Vue.nextTick();
+  store.commit('product/setCurrent', { sku: 'B' });
+  await Vue.nextTick();
+
+  expect(trackingKey.value).toBe('B');
+
+  signals.onFormReady();
+  await Vue.nextTick();
+
+  expect(onReady).toHaveBeenCalledTimes(2);
 
   wrapper.destroy();
 });

@@ -29,8 +29,7 @@ export function useFormPageReadiness (
       }
 
       hasEmitted = false;
-    },
-    { flush: 'sync' }
+    }
   );
 
   const { onStoryRendered } = useStoryblokReadinessTracker(trackingKey, storyDependencies, () => {
