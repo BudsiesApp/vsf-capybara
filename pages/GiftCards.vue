@@ -45,7 +45,6 @@
           :price-amount-list="priceAmountList"
           :custom-amount-values="customAmountValues"
           :gift-card-type="baseGiftCardType"
-          @hook:mounted="onFormMounted"
           @submit-form="onFormSubmit"
           @show-preview="onShowPreviewModalHandler"
         />
@@ -62,7 +61,8 @@
 </template>
 
 <script lang="ts">
-import Vue, { VueConstructor } from 'vue';
+import Vue, { computed, VueConstructor } from 'vue';
+import { useStore } from '@vue-storefront/core/application-services';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { getThumbnailPath, isServer } from '@vue-storefront/core/helpers';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -77,6 +77,8 @@ import { SfModal } from '@storefront-ui/vue';
 import GiftCardTemplateComponent from 'src/modules/gift-card/components/GiftCardTemplate.vue';
 import OGiftCardOrderForm from 'theme/components/organisms/o-gift-card-order-form.vue';
 import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
+import { getProductDescriptionStoryFullSlug } from 'theme/components/molecules/helpers/get-product-description-story-full-slug';
+import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
 
 import GiftCardTemplate from 'src/modules/gift-card/types/GiftCardTemplate.interface';
 import { ImageHandlerService } from 'src/modules/file-storage';
@@ -258,15 +260,25 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       return !!this.product;
     }
   },
+  setup () {
+    const applicationStore = useStore();
+    const trackingKey = computed<string | undefined>(() => {
+      const sku = applicationStore.getters['product/getCurrentProduct']?.sku;
+
+      return sku === giftCardSku || sku === AMASTY_GIFT_CARD_SKU ? sku : undefined;
+    });
+    const storyDependencies = computed<string[]>(() => {
+      return trackingKey.value ? [getProductDescriptionStoryFullSlug(trackingKey.value)] : [];
+    });
+
+    return useStoryblokReadinessTracker(trackingKey, storyDependencies, emitPageRenderedEvent);
+  },
   data () {
     return {
       giftCardOrderFormData:
         defaultGiftCardOrderFormData as GiftCardOrderFormData,
       showPreviewModal: false,
-      isSubmitting: false,
-      isFormMounted: false,
-      isStoryRendered: false,
-      hasEmittedPageRendered: false
+      isSubmitting: false
     };
   },
   async mounted (): Promise<void> {
@@ -312,22 +324,6 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     }
   },
   methods: {
-    onFormMounted (): void {
-      this.isFormMounted = true;
-      this.emitPageRendered();
-    },
-    onStoryRendered (): void {
-      this.isStoryRendered = true;
-      this.emitPageRendered();
-    },
-    emitPageRendered (): void {
-      if (!this.product || !this.isFormMounted || !this.isStoryRendered || this.hasEmittedPageRendered) {
-        return;
-      }
-
-      this.hasEmittedPageRendered = true;
-      emitPageRenderedEvent();
-    },
     async addCartItem (): Promise<void> {
       if (!this.product || !this.giftCardOrderFormData.selectedTemplateId) {
         return;

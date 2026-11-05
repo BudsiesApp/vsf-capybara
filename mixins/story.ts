@@ -6,7 +6,6 @@ import { StoryblokStories } from 'src/modules/vsf-storyblok-module/types/State';
 
 export interface StoryLoadResult {
   fullSlugs: string[];
-  hasContent: boolean;
 }
 
 export default Vue.extend({
@@ -59,11 +58,11 @@ export default Vue.extend({
   methods: {
     async fetchStory (): Promise<StoryLoadResult> {
       const storyFullSlug = this.storyFullSlug;
-      const story = await this.$store.dispatch('storyblok/loadStory', {
+      await this.$store.dispatch('storyblok/loadStory', {
         fullSlug: storyFullSlug
       });
 
-      return { fullSlugs: [storyFullSlug], hasContent: !!story?.content };
+      return { fullSlugs: [storyFullSlug] };
     },
     async loadStory (): Promise<void> {
       if (!this.storyFullSlug) {
@@ -72,7 +71,7 @@ export default Vue.extend({
 
       const loadId = ++this.storyLoadId;
       const fallbackFullSlugs = [this.storyFullSlug];
-      let result: StoryLoadResult = { fullSlugs: fallbackFullSlugs, hasContent: false };
+      let result: StoryLoadResult = { fullSlugs: fallbackFullSlugs };
 
       try {
         result = await this.fetchStory();
@@ -84,7 +83,7 @@ export default Vue.extend({
         return;
       }
 
-      if (result.hasContent) {
+      if (this.showStory) {
         await waitForStoryblokContentRender();
 
         if (loadId !== this.storyLoadId) {

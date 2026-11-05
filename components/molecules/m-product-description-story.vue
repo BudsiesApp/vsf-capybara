@@ -67,14 +67,14 @@ export default StoryMixin.extend({
       const fullSlugs = [primaryFullSlug];
       const backupFullSlug = this.backupProductSku ? this.getStoryFullSlug(this.backupProductSku) : undefined;
 
-      let story = await this.$store.dispatch('storyblok/loadStory', { fullSlug: primaryFullSlug });
+      const story = await this.$store.dispatch('storyblok/loadStory', { fullSlug: primaryFullSlug });
 
       if (!story?.content && backupFullSlug) {
         fullSlugs.push(backupFullSlug);
-        story = await this.$store.dispatch('storyblok/loadStory', { fullSlug: backupFullSlug });
+        await this.$store.dispatch('storyblok/loadStory', { fullSlug: backupFullSlug });
       }
 
-      return { fullSlugs, hasContent: !!story?.content };
+      return { fullSlugs };
     }
   }
 })

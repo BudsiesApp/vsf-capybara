@@ -114,6 +114,41 @@ it('reports cached fallback on mount and backup-only changes once each', async (
   wrapper.destroy();
 });
 
+it('waits for the chunk when the primary request fails while a cached backup is rendered', async () => {
+  let resolveChunk!: () => void;
+
+  (loadStoryblokComponentGroup as jest.Mock).mockReturnValueOnce(
+    new Promise<void>(resolve => { resolveChunk = resolve; })
+  );
+
+  const storyStore = store([slug('parent')]);
+
+  storyStore.dispatch.mockImplementation((_, { fullSlug }) => fullSlug === slug('variant')
+    ? Promise.reject(new Error('request failed'))
+    : Promise.resolve(storyStore.state.storyblok.stories[fullSlug]?.story));
+
+  const wrapper = shallowMount(ProductDescription, {
+    propsData: { productSku: 'variant', backupProductSku: 'parent' },
+    mocks: { $store: storyStore }
+  });
+
+  await flushRenderQueue();
+  jest.runOnlyPendingTimers();
+  await flushRenderQueue();
+
+  expect(loadStoryblokComponentGroup).toHaveBeenCalled();
+  expect(wrapper.emitted('story-rendered')).toBeUndefined();
+
+  resolveChunk();
+  await flushRenderQueue();
+  jest.runOnlyPendingTimers();
+  await flushRenderQueue();
+
+  expect(wrapper.emitted('story-rendered')).toEqual([[[slug('variant')]]]);
+
+  wrapper.destroy();
+});
+
 it('reports changed block slugs including cached stories without duplicate dispatch', async () => {
   const storyStore = store(['blocks/cached']);
   const wrapper = shallowMount(BlockStory, {

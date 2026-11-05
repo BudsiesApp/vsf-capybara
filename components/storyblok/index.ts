@@ -36,8 +36,4 @@ export default function registerComponents () {
   add('product_list', () => import(/* webpackChunkName: "vsf-storyblok" */ './ProductList.vue'), { group: StoryblokComponentGroup.CORE })
 
   add('paypal_pay_later_message', () => import(/* webpackChunkName: "vsf-storyblok" */ './PayPalPayLaterMessage.vue'), { group: StoryblokComponentGroup.CORE })
-
-  // add('ciLink', () => import('./Link.vue'))
-  // Overwrite an existing component
-  // add('tile', () => import('./Tile.vue'), { force: true })
 }

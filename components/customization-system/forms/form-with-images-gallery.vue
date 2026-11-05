@@ -150,8 +150,7 @@ import {
   ref,
   Ref,
   toRefs,
-  watch,
-  onMounted
+  watch
 } from 'vue';
 import { SfButton } from '@storefront-ui/vue';
 import { ValidationObserver, ValidationProvider } from 'vee-validate';
