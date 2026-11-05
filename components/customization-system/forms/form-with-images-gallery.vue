@@ -62,6 +62,8 @@
         >
           <form @submit.prevent="onFormSubmit">
             <customization-option
+              :restoration-settled="restorationSettled"
+              :report-readiness-busy="true"
               v-for="customization in filteredCustomizations"
               class="_customization-option"
               ref="customizationOption"
@@ -118,8 +120,8 @@
 
                 <m-order-submit-agreement />
 
-                <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-                  <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+                <template v-if="privacyPolicyLinks.length">
+                  <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
                 </template>
               </div>
             </div>
@@ -139,6 +141,7 @@
 </template>
 
 <script lang="ts">
+import { useRouter, useStore } from '@vue-storefront/core/application-services';
 import {
   computed,
   defineComponent,
@@ -148,7 +151,7 @@ import {
   Ref,
   toRefs,
   watch
-} from '@vue/composition-api';
+} from 'vue';
 import { SfButton } from '@storefront-ui/vue';
 import { ValidationObserver, ValidationProvider } from 'vee-validate';
 
@@ -182,13 +185,19 @@ import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow } from 'src/modules/
 import i18n from '@vue-storefront/core/i18n';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import { useCustomizeAction } from 'theme/helpers/use-customize-action';
 import { useImageUpload } from 'theme/helpers/use-image-upload';
-import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
+import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
 import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
 import { useProductGallery } from 'theme/helpers/use-product-gallery';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
@@ -202,22 +211,6 @@ import MProductDescriptionStory from 'theme/components/molecules/m-product-descr
 import { getProductDescriptionStoryFullSlug } from 'theme/components/molecules/helpers/get-product-description-story-full-slug';
 import MZoomGallery from 'theme/components/molecules/m-zoom-gallery.vue';
 
-function getAllFormRefs (
-  refs: Record<string, Vue | Element | Vue[] | Element[]>
-): Record<string, Vue | Element | Vue[] | Element[]> {
-  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = {};
-  const customizationOptions = refs['customizationOption'] as InstanceType<
-    typeof CustomizationOption
-  >[];
-
-  for (const customizationOption of customizationOptions) {
-    for (const key in customizationOption.$refs) {
-      refsDictionary[key] = customizationOption.$refs[key];
-    }
-  }
-
-  return refsDictionary;
-}
 export default defineComponent({
   name: 'FormWithImagesGallery',
   props: {
@@ -267,6 +260,11 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
+    const privacyPolicyLinks = useAdditionalContent(
+      AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+    );
+    const applicationStore = useStore();
+    const applicationRouter = useRouter();
     const {
       canUsePersistedCustomizationState,
       existingCartItem,
@@ -286,7 +284,10 @@ export default defineComponent({
       return customizationMode.value === ProductCustomizationMode.CUSTOMIZE;
     });
 
-    const customizationOption = ref<InstanceType<typeof CustomizationOption>[] | null>(null);
+    const {
+      templateRef: customizationOption,
+      getRefsInRenderedOrder: getCustomizationOptionsInRenderedOrder
+    } = useRenderedOrderTemplateRefs<InstanceType<typeof CustomizationOption>>();
 
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
@@ -368,8 +369,7 @@ export default defineComponent({
       customizationOptionValue,
       product,
       mergeCustomizationState,
-      removeUnavailableOptionValues,
-      context
+      removeUnavailableOptionValues
     );
 
     const preservationStorageKey = computed<string>(() => {
@@ -383,7 +383,7 @@ export default defineComponent({
       existingCartItem,
       availableCustomizations,
       customizationOptionValue,
-      customizationOption
+      getCustomizationOptionsInRenderedOrder
     );
 
     async function onCustomizationStateRestored (): Promise<void> {
@@ -394,7 +394,7 @@ export default defineComponent({
       await uploadImage(imageUrl.value);
     }
 
-    const { removePreservedState } =
+    const { removePreservedState, restorationSettled } =
       useCustomizationStatePreservation(
         preservationStorageKey,
         customizationState,
@@ -439,7 +439,7 @@ export default defineComponent({
     );
 
     const formValidation = useFormValidation(validationObserver, () =>
-      getAllFormRefs(context.refs)
+      getNestedFormRefs(getCustomizationOptionsInRenderedOrder())
     );
 
     const { quantity } = useProductQuantity(existingCartItem);
@@ -462,7 +462,6 @@ export default defineComponent({
       customizationState,
       bundleOptions,
       existingCartItem,
-      context,
       undefined,
       productPurchaseFlow.value
     );
@@ -487,20 +486,18 @@ export default defineComponent({
       [lockedOptionValuesFilter]
     );
 
-    const { customizationFilter } = useABTestingCustomizationsFilter(
-      context.ssrContext
-    );
+    const { customizationFilter } = useABTestingCustomizationsFilter();
 
     const { confirmCustomization, isSubmitting: isSubmittingCustomize } = useCustomizeAction(
       customizationState,
-      draftOrderItem,
-      context
+      draftOrderItem
     );
 
     async function onFormSubmit (): Promise<void> {
+      if (isSubmitButtonDisabled.value) return;
       const isValid = await formValidation.validateAndGoToFirstError();
 
-      if (!isValid) return;
+      if (!isValid || isSubmitButtonDisabled.value) return;
 
       try {
         if (isCustomizeMode.value) {
@@ -517,16 +514,16 @@ export default defineComponent({
         };
 
         if (isCustomizeMode.value) {
-          context.root.$router.push({ name: 'orders-history' });
+          applicationRouter.push({ name: 'orders-history' });
           return;
         }
 
-        context.root.$router.push({
+        applicationRouter.push({
           name: 'cross-sells',
           params: { parentSku: product.value.sku }
         });
       } catch (error) {
-        context.root.$store.dispatch('notification/spawnNotification', {
+        applicationStore.dispatch('notification/spawnNotification', {
           type: 'danger',
           message: 'Error: ' + error,
           action1: { label: i18n.t('OK') }
@@ -579,6 +576,7 @@ export default defineComponent({
     );
 
     return {
+      restorationSettled,
       ...useProductGallery(
         product,
         flowAvailableCustomizations,
@@ -587,11 +585,10 @@ export default defineComponent({
       descriptionProductSku,
       ...useCustomizationsPrice(
         flowAvailableCustomizations,
-        customizationOptionValue,
-        context
+        customizationOptionValue
       ),
       ...formValidation,
-      ...useBulkImagesUpload(context),
+      ...useBulkImagesUpload(),
       availableCustomizations,
       availableOptionCustomizations,
       customizationAvailableOptionValues,
@@ -602,6 +599,8 @@ export default defineComponent({
       isDisabled,
       isCustomizeMode,
       isSubmitButtonDisabled,
+      privacyPolicyLinks: privacyPolicyLinks as unknown as
+        readonly AdditionalContentEntry[],
       lockedCustomizationDictionary,
       onStoryReady,
       onEntityBusyChanged,
@@ -647,6 +646,8 @@ export default defineComponent({
   }
 
   ._short-description {
+    margin-top: var(--spacer-sm);
+
     @include font(
       --product-description-font,
       var(--font-light),
@@ -677,6 +678,12 @@ export default defineComponent({
   ._price,
   ._product-rating {
     margin-top: var(--spacer-base);
+  }
+
+  ._customization-option {
+    &.-compact-spacing {
+      margin-top: 0;
+    }
   }
 
   &.-align-center {

@@ -1,8 +1,8 @@
 <template>
   <div
     class="customization-option"
-    :class="'-widget-' + widget.component"
-    :ref="validationRef"
+    :class="customizationOptionClasses"
+    ref="validationAnchor"
   >
     <template
       v-if="showLabel"
@@ -42,6 +42,8 @@
         :is-disabled="isDisabled"
         :is="widget.component"
         v-bind="widget.props"
+        :restoration-settled="widget.component === 'ProductionTimeTimelineWidget' ? restorationSettled : undefined"
+        :report-readiness-busy="widget.component === 'ProductionTimeTimelineWidget' ? reportReadinessBusy : undefined"
         v-model="selectedOption"
         @widget-busy-changed="onWidgetBusyChanged"
         @expand-clicked="(optionValueId) => $emit('expand-clicked', optionValueId)"
@@ -63,7 +65,7 @@ import {
   ref,
   PropType,
   toRefs
-} from '@vue/composition-api';
+} from 'vue';
 import { ValidationProvider } from 'vee-validate';
 
 import {
@@ -85,6 +87,7 @@ import SearchFieldWidget from './widgets/search-field-widget.vue';
 import TextAreaWidget from './widgets/textarea-widget.vue';
 import TextInputWidget from './widgets/text-input-widget.vue';
 import ThumbnailsListWidget from './widgets/thumbnails-list-widget.vue';
+import ProductionTimeTimelineWidget from './widgets/production-time-timeline-widget.vue';
 
 type WidgetComponent = InstanceType<typeof CardsListWidget> |
 InstanceType<typeof CheckboxWidget> |
@@ -94,7 +97,8 @@ InstanceType<typeof ImageUploadWidget> |
 InstanceType<typeof SearchFieldWidget> |
 InstanceType<typeof TextAreaWidget> |
 InstanceType<typeof TextInputWidget> |
-InstanceType<typeof ThumbnailsListWidget>;
+InstanceType<typeof ThumbnailsListWidget> |
+InstanceType<typeof ProductionTimeTimelineWidget>;
 
 const customizationWidgetBusyStateChangedEventName =
   'customization-option-busy-state-changed';
@@ -111,9 +115,18 @@ export default defineComponent({
     TextAreaWidget,
     TextInputWidget,
     ThumbnailsListWidget,
+    ProductionTimeTimelineWidget,
     ValidationProvider
   },
   props: {
+    restorationSettled: {
+      type: Boolean,
+      default: true
+    },
+    reportReadinessBusy: {
+      type: Boolean,
+      default: false
+    },
     customization: {
       type: Object as PropType<Customization>,
       required: true
@@ -127,7 +140,7 @@ export default defineComponent({
       default: () => []
     },
     productId: {
-      type: Number,
+      type: [Number, String] as PropType<number | string>,
       required: true
     },
     value: {
@@ -161,6 +174,16 @@ export default defineComponent({
   setup (props, context) {
     const { customization, disableValidation, fieldNamePrefix, optionValues, productId, value, addedToCartOptionValueId, expandConfig, hiddenOptionValues } = toRefs(props);
 
+    const normalizedProductId = computed<number>(() => {
+      const result = Number(productId.value);
+
+      if (!Number.isFinite(result)) {
+        throw new Error(`Invalid customization product ID: ${productId.value}`);
+      }
+
+      return result;
+    });
+
     const optionLabel = computed<string>(() => {
       return customization.value.title || customization.value.name;
     });
@@ -181,23 +204,39 @@ export default defineComponent({
     });
 
     const widgetComponent = ref<null | WidgetComponent>(null);
+    const validationAnchor = ref<HTMLElement | null>(null);
+    const validationState = useCustomizationOptionValidation(
+      customization,
+      disableValidation,
+      fieldNamePrefix
+    );
+    function getFormValidationRefs () {
+      if (!validationAnchor.value) {
+        return {};
+      }
+
+      return {
+        [validationState.validationRef.value]: validationAnchor.value
+      };
+    }
+    const widgetState = useCustomizationOptionWidget(
+      value,
+      customization,
+      optionValues,
+      normalizedProductId,
+      context,
+      addedToCartOptionValueId,
+      expandConfig,
+      hiddenOptionValues
+    );
+    const customizationOptionClasses = computed(() => ({
+      ['-widget-' + widgetState.widget.value.component]: true,
+      '-compact-spacing': widgetState.useCompactSpacing.value
+    }));
 
     return {
-      ...useCustomizationOptionValidation(
-        customization,
-        disableValidation,
-        fieldNamePrefix
-      ),
-      ...useCustomizationOptionWidget(
-        value,
-        customization,
-        optionValues,
-        productId,
-        context,
-        addedToCartOptionValueId,
-        expandConfig,
-        hiddenOptionValues
-      ),
+      ...validationState,
+      ...widgetState,
       ...useWidgetBusyState(
         customization,
         customizationWidgetBusyStateChangedEventName,
@@ -206,7 +245,10 @@ export default defineComponent({
       optionDescription,
       optionHint,
       optionLabel,
+      customizationOptionClasses,
+      getFormValidationRefs,
       showLabel,
+      validationAnchor,
       widgetComponent
     };
   }
@@ -265,6 +307,10 @@ export default defineComponent({
 
   ._widget {
     margin: var(--customization-option-widget-margin, var(--spacer-sm) 0 0);
+  }
+
+  > :first-child {
+    margin-top: 0;
   }
 }
 </style>

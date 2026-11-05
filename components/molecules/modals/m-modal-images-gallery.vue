@@ -24,8 +24,9 @@
           >
             <BaseImage
               class="_image"
-              :src="image"
+              :alt="image.alt"
               :lazy="true"
+              :src="image.filename"
             />
           </div>
         </template>
@@ -39,9 +40,11 @@ import Vue from 'vue';
 import { SfModal } from '@storefront-ui/vue';
 
 import { BaseImage } from 'src/modules/budsies';
+import { AssetField } from 'src/modules/vsf-storyblok-module';
 
 import { OCarouselItem } from 'theme/components/interfaces/o-carousel-item.interface';
 import OCarousel from 'theme/components/organisms/o-carousel.vue';
+import { resolveStoryblokAssetFields } from 'theme/helpers/storyblok-asset-sink-values';
 
 export default Vue.extend({
   name: 'MModalImagesGallery',
@@ -65,12 +68,14 @@ export default Vue.extend({
   computed: {
     carouselItems (): OCarouselItem[] {
       return this.images.map((image) => ({
-        key: image,
+        key: image.filename,
         data: image
       }));
     },
-    images (): string[] {
-      return this.modalData?.payload?.images || [];
+    images (): AssetField[] {
+      const images: AssetField[] = this.modalData?.payload?.images || [];
+
+      return resolveStoryblokAssetFields(images);
     }
   },
   methods: {

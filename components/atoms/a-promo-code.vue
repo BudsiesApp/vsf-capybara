@@ -6,10 +6,13 @@
 
     <div v-if="!isCouponCode" class="a-promo-code__form">
       <SfInput
+        ref="couponInput"
         v-model="promoCode"
         name="promoCode"
         :placeholder="$t('Add a discount code')"
-        :disabled="isInteractionDisabled"
+        :disabled="false"
+        :aria-disabled="isInteractionDisabled"
+        :aria-label="$t('Add a discount code')"
         class="sf-input--filled a-promo-code__input"
         @keyup.enter="applyCoupon"
       />
@@ -18,6 +21,7 @@
         :show-spinner="isSubmitting"
         :disabled="isInteractionDisabled"
         :title="$t('Apply coupon')"
+        :aria-label="$t('Apply coupon')"
         class="_circle-button"
         button-class="sf-button -icon-button"
         @click="applyCoupon"
@@ -41,9 +45,24 @@
       {{ $t('Delete discount code') }}
     </MSpinnerButton>
 
-    <div class="a-promo-code__message" v-if="message">
+    <div
+      class="a-promo-code__message"
+      v-if="message"
+      role="alert"
+      aria-live="polite"
+      aria-atomic="true"
+    >
       {{ message }}
     </div>
+
+    <span
+      class="_screen-reader-message"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      {{ couponAppliedAnnouncement }}
+    </span>
 
     <slot
       name="bottom-helper-text"
@@ -53,7 +72,8 @@
 </template>
 
 <script>
-import { SfIcon, SfInput, SfCircleIcon } from '@storefront-ui/vue';
+import { ref } from 'vue';
+import { SfIcon, SfInput } from '@storefront-ui/vue';
 import { IS_COUPON_INTERACTION_BLOCKED } from '@vue-storefront/core/modules/cart';
 
 import MSpinnerButton from 'theme/components/molecules/m-spinner-button.vue';
@@ -79,7 +99,8 @@ export default {
     return {
       promoCode: '',
       fMessage: undefined,
-      isSubmitting: false
+      isSubmitting: false,
+      couponAppliedAnnouncement: ''
     };
   },
   computed: {
@@ -103,6 +124,26 @@ export default {
       }
     }
   },
+  setup () {
+    const couponInput = ref(null);
+
+    const focusCouponInput = () => {
+      const inputElement = couponInput.value?.$el?.querySelector('input');
+
+      if (!(inputElement instanceof HTMLInputElement)) {
+        return false;
+      }
+
+      inputElement.focus();
+
+      return true;
+    };
+
+    return {
+      couponInput,
+      focusCouponInput
+    };
+  },
   methods: {
     async applyCoupon () {
       if (this.isInteractionDisabled) {
@@ -110,19 +151,32 @@ export default {
       }
 
       this.isSubmitting = true;
+      this.couponAppliedAnnouncement = '';
+      let isCouponApplied = false;
 
       try {
-        const result = await this.$store.dispatch('cart/applyCoupon', this.promoCode);
+        const result = await this.$store.dispatch('cart/applyCoupon', { couponCode: this.promoCode, silent: true });
 
         if (result.code !== 200) {
           throw new Error(result.result.errorMessage);
         }
+
+        this.couponAppliedAnnouncement = this.$t('Coupon applied.').toString();
+        isCouponApplied = true;
       } catch (error) {
         const errorMessage = error.errorMessage || `Coupon code "${this.promoCode}" is not valid.`;
         this.message = errorMessage;
+
+        this.$nextTick(() => {
+          this.focusCouponInput();
+        });
       } finally {
         this.isSubmitting = false;
         this.promoCode = '';
+      }
+
+      if (isCouponApplied) {
+        this.$emit('coupon-applied');
       }
     },
     async removeCoupon () {
@@ -177,6 +231,18 @@ export default {
     margin-top: var(--spacer-xs);
     font-size: var(--font-xs);
     color: var(--c-danger-variant);
+  }
+  ._screen-reader-message {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
   }
   ::v-deep .sf-input {
     &__wrapper {

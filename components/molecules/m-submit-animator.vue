@@ -5,7 +5,7 @@
       autoplay
       loop
       muted
-      playsinline="autoplay loop muted playsinline"
+      playsinline
       class="_animation"
     >
       <source :src="animationUrl" type="video/mp4">

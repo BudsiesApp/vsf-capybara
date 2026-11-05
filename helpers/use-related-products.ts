@@ -1,4 +1,4 @@
-import { Ref, computed } from '@vue/composition-api';
+import { Ref, computed } from 'vue';
 import config from 'config';
 import { SearchQuery } from 'storefront-query-builder';
 

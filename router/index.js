@@ -317,13 +317,21 @@ let routes = [
     })
   },
   {
+    name: 'pillow-product-public-url',
+    path: '/pet-pillow/',
+    redirect: (route) => ({
+      name: 'pillow-product',
+      query: route.query
+    })
+  },
+  {
     name: 'pillow-product',
     path: '/pillows/create/',
     component: CustomizableProduct,
     props: (route) => ({
       sku: 'customPillow_bundle',
       existingPlushieId: route.query.existingPlushieId,
-      layout: 'vertical'
+      layout: 'with-images-gallery'
     })
   },
   {

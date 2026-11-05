@@ -11,6 +11,7 @@
         required
         :valid="!$v.firstName.$error"
         :error-message="!$v.firstName.required ? $t('Field is required.') : $t('Name must have at least 2 letters.')"
+        :class="{ [vuelidateErrorClassName]: $v.firstName.$error }"
         class="form__element form__element--half"
       />
       <SfInput
@@ -20,6 +21,7 @@
         required
         :valid="!$v.lastName.$error"
         :error-message="$t('Field is required.')"
+        :class="{ [vuelidateErrorClassName]: $v.lastName.$error }"
         class="form__element form__element--half form__element--half-even"
       />
       <SfInput
@@ -27,6 +29,7 @@
         type="email"
         name="email"
         :label="$t('Your e-mail')"
+        autocomplete="email"
         required
         :valid="!$v.email.$error"
         :error-message="
@@ -34,6 +37,7 @@
             ? $t('Field is required.')
             : $t('Please provide valid e-mail address.')
         "
+        :class="{ [vuelidateErrorClassName]: $v.email.$error }"
         class="form__element"
       />
       <SfButton
@@ -48,20 +52,29 @@
       {{ $t('At Budsies, we attach great importance to privacy issues and are committed to protecting the personal data of our users. Learn more about how we care and use your personal data in the') }}
       <privacy-policy-link />
     </p>
-    <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+    <template v-if="privacyPolicyLinks.length">
+      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
     </template>
   </div>
 </template>
 
 <script>
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import config from 'config';
 import pick from 'lodash-es/pick';
 import { SfInput, SfButton } from '@storefront-ui/vue';
 import { required, minLength, email } from 'vuelidate/lib/validators';
 import { unicodeAlpha } from '@vue-storefront/core/helpers/validators';
+import {
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import { PrivacyPolicyLink } from 'src/modules/shared';
+import {
+  vuelidateErrorClassName,
+  vuelidateScrollToFirstError
+} from 'theme/helpers/vuelidate-scroll-to-first-error.function';
 
 export default {
   name: 'MUpdatePersonalData',
@@ -70,30 +83,37 @@ export default {
     SfInput,
     SfButton
   },
+  setup () {
+    return {
+      privacyPolicyLinks: useAdditionalContent(
+        AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+      )
+    };
+  },
   data () {
     return {
       firstName: '',
       lastName: '',
       email: '',
-      isDataUpdating: false
+      isDataUpdating: false,
+      vuelidateErrorClassName
     }
   },
   methods: {
-    updatePersonalData () {
+    async updatePersonalData () {
       this.$v.$touch();
+
       if (this.$v.$invalid) {
-        this.$store.dispatch('notification/spawnNotification', {
-          type: 'danger',
-          message: this.$t('Please fix the validation errors'),
-          action1: { label: this.$t('OK') }
-        });
+        await this.$nextTick();
+        vuelidateScrollToFirstError(this.$el);
         return;
       }
+
       let updatedProfile = pick(JSON.parse(JSON.stringify(this.$store.state.user.current)), config.users.allowModification)
       updatedProfile.firstname = this.firstName
       updatedProfile.lastname = this.lastName
       updatedProfile.email = this.email
-      this.$bus.$emit('myAccount-before-updateUser', updatedProfile)
+      EventBus.$emit('myAccount-before-updateUser', updatedProfile)
     },
     onBeforeUpdateUser () {
       this.isDataUpdating = true;
@@ -116,12 +136,12 @@ export default {
       { immediate: true });
 
     this.$once('hook:beforeDestroy', unsubscribeFromStoreWatch)
-    this.$bus.$on('myAccount-before-updateUser', this.onBeforeUpdateUser)
-    this.$bus.$on('myAccount-after-updateUser', this.onAfterUpdateUser)
+    EventBus.$on('myAccount-before-updateUser', this.onBeforeUpdateUser)
+    EventBus.$on('myAccount-after-updateUser', this.onAfterUpdateUser)
   },
   beforeDestroy () {
-    this.$bus.$off('myAccount-before-updateUser', this.onBeforeUpdateUser)
-    this.$bus.$off('myAccount-after-updateUser', this.onAfterUpdateUser)
+    EventBus.$off('myAccount-before-updateUser', this.onBeforeUpdateUser)
+    EventBus.$off('myAccount-after-updateUser', this.onAfterUpdateUser)
   },
   validations: {
     firstName: {

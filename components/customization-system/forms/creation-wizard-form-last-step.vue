@@ -26,6 +26,7 @@
     </div>
 
     <customization-option
+      :restoration-settled="restorationSettled"
       v-for="customization in availableCustomizations"
       class="_customization-option"
       ref="customizationOption"
@@ -98,8 +99,8 @@
 
       <m-order-submit-agreement />
 
-      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      <template v-if="privacyPolicyLinks.length">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
       </template>
     </div>
 
@@ -112,7 +113,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, Ref } from '@vue/composition-api';
+import { computed, defineComponent, PropType, ref, Ref } from 'vue';
 import { SfButton, SfHeading, SfInput, SfModal } from '@storefront-ui/vue';
 import { ValidationObserver, ValidationProvider } from 'vee-validate';
 
@@ -122,8 +123,14 @@ import {
   OptionValue
 } from 'src/modules/customization-system';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
-import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
+import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
 import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
 
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
@@ -132,26 +139,10 @@ import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MOrderSubmitAgreement from 'theme/components/molecules/m-order-submit-agreement.vue';
 
-function getAllFormRefs (
-  refs: Record<string, Vue | Element | Vue[] | Element[]>
-): Record<string, Vue | Element | Vue[] | Element[]> {
-  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = {};
-  const customizationOptions = refs['customizationOption'] as InstanceType<
-    typeof CustomizationOption
-  >[];
-
-  for (const customizationOption of customizationOptions) {
-    for (const key in customizationOption.$refs) {
-      refsDictionary[key] = customizationOption.$refs[key];
-    }
-  }
-
-  return refsDictionary;
-}
-
 export default defineComponent({
   name: 'CreationWizardFormLastStep',
   props: {
+    restorationSettled: { type: Boolean, default: true },
     submitAction: {
       type: Function as PropType<() => Promise<void>>,
       required: true
@@ -211,12 +202,19 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
+    const privacyPolicyLinks = useAdditionalContent(
+      AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+    );
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
     > | null> = ref(null);
+    const {
+      templateRef: customizationOption,
+      getRefsInRenderedOrder: getCustomizationOptionsInRenderedOrder
+    } = useRenderedOrderTemplateRefs<InstanceType<typeof CustomizationOption>>();
 
     const formValidation = useFormValidation(validationObserver, () =>
-      getAllFormRefs(context.refs)
+      getNestedFormRefs(getCustomizationOptionsInRenderedOrder())
     );
 
     const productType = computed<string>(() => {
@@ -235,9 +233,10 @@ export default defineComponent({
       return firstCategory.name;
     });
     async function onSubmitClick () {
+      if (props.isSubmitButtonDisabled) return;
       const isValid = await formValidation.validateAndGoToFirstError();
 
-      if (!isValid) {
+      if (!isValid || props.isSubmitButtonDisabled) {
         return;
       }
 
@@ -246,7 +245,10 @@ export default defineComponent({
     return {
       ...useQuantityAndShippingDiscounts(),
       ...formValidation,
+      customizationOption,
       onSubmitClick,
+      privacyPolicyLinks: privacyPolicyLinks as unknown as
+        readonly AdditionalContentEntry[],
       productType,
       validationObserver
     };
@@ -273,6 +275,10 @@ export default defineComponent({
     --customization-option-hint-align: center;
 
     margin-top: var(--spacer-lg);
+
+    &.-compact-spacing {
+      margin-top: 0;
+    }
 
     &.-widget-CardsListWidget {
       --customization-option-widget-margin: var(--spacer-sm) calc(var(--spacer-sm) * -1) 0;

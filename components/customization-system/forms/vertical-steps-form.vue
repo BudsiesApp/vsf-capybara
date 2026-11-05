@@ -29,6 +29,8 @@
 
           <div class="_content">
             <customization-option
+              :restoration-settled="restorationSettled"
+              :report-readiness-busy="true"
               v-for="customization in customizationRootGroupCustomizations[
                 customizationGroup.id
               ]"
@@ -111,8 +113,8 @@
 
           <m-order-submit-agreement class="_agreement" />
 
-          <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-            <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+          <template v-if="privacyPolicyLinks.length">
+            <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
           </template>
         </div>
 
@@ -133,6 +135,7 @@
 </template>
 
 <script lang="ts">
+import { useRouter, useStore } from '@vue-storefront/core/application-services';
 import {
   computed,
   defineComponent,
@@ -140,7 +143,7 @@ import {
   ref,
   Ref,
   toRefs
-} from '@vue/composition-api';
+} from 'vue';
 import {
   SfButton,
   SfDivider,
@@ -174,11 +177,17 @@ import i18n from '@vue-storefront/core/i18n';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
-import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
+import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
 import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
@@ -188,23 +197,6 @@ import CustomizationOption from 'theme/components/customization-system/customiza
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MOrderSubmitAgreement from 'theme/components/molecules/m-order-submit-agreement.vue';
-
-function getAllFormRefs (
-  refs: Record<string, Vue | Element | Vue[] | Element[]>
-): Record<string, Vue | Element | Vue[] | Element[]> {
-  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = {};
-  const customizationOptions = refs['customizationOption'] as InstanceType<
-    typeof CustomizationOption
-  >[];
-
-  for (const customizationOption of customizationOptions) {
-    for (const key in customizationOption.$refs) {
-      refsDictionary[key] = customizationOption.$refs[key];
-    }
-  }
-
-  return refsDictionary;
-}
 
 export default defineComponent({
   name: 'VerticalStepsForm',
@@ -245,6 +237,11 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props, context) {
+    const privacyPolicyLinks = useAdditionalContent(
+      AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+    );
+    const applicationStore = useStore();
+    const applicationRouter = useRouter();
     const {
       canUsePersistedCustomizationState,
       customizationMode,
@@ -256,6 +253,10 @@ export default defineComponent({
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
     > | null> = ref(null);
+    const {
+      templateRef: customizationOption,
+      getRefsInRenderedOrder: getCustomizationOptionsInRenderedOrder
+    } = useRenderedOrderTemplateRefs<InstanceType<typeof CustomizationOption>>();
 
     const productSku = computed<string>(() => {
       return product.value.sku;
@@ -336,11 +337,10 @@ export default defineComponent({
       customizationOptionValue,
       product,
       mergeCustomizationState,
-      removeUnavailableOptionValues,
-      context
+      removeUnavailableOptionValues
     );
 
-    const { removePreservedState } =
+    const { removePreservedState, restorationSettled } =
       useCustomizationStatePreservation(
         productSku,
         customizationState,
@@ -372,7 +372,7 @@ export default defineComponent({
     );
 
     const formValidation = useFormValidation(validationObserver, () =>
-      getAllFormRefs(context.refs)
+      getNestedFormRefs(getCustomizationOptionsInRenderedOrder())
     );
 
     const { quantity } = useProductQuantity(existingCartItem);
@@ -382,7 +382,6 @@ export default defineComponent({
       customizationState,
       bundleOptions,
       existingCartItem,
-      context,
       undefined,
       productPurchaseFlow.value
     );
@@ -406,7 +405,7 @@ export default defineComponent({
         timeToLive: 5 * 1000
       });
 
-      context.root.$store.dispatch(
+      applicationStore.dispatch(
         'notification/spawnNotification',
         notification,
         { root: true }
@@ -416,9 +415,10 @@ export default defineComponent({
     const { isUnmounted } = useComponentUnmountedChecker();
 
     async function onFormSubmit (): Promise<void> {
+      if (isSubmitButtonDisabled.value) return;
       const isValid = await formValidation.validateAndGoToFirstError();
 
-      if (!isValid) {
+      if (!isValid || isSubmitButtonDisabled.value) {
         return;
       }
 
@@ -433,7 +433,7 @@ export default defineComponent({
         }
 
         if (!shouldMakeAnother.value) {
-          context.root.$router.push({
+          applicationRouter.push({
             name: 'cross-sells',
             params: { parentSku: product.value.sku }
           });
@@ -443,7 +443,7 @@ export default defineComponent({
 
         onSuccessAndMakeAnother();
       } catch (error) {
-        context.root.$store.dispatch('notification/spawnNotification', {
+        applicationStore.dispatch('notification/spawnNotification', {
           type: 'danger',
           message: 'Error: ' + error,
           action1: { label: i18n.t('OK') }
@@ -482,9 +482,7 @@ export default defineComponent({
       () => context.emit('form-ready')
     );
 
-    const { customizationFilter } = useABTestingCustomizationsFilter(
-      context.ssrContext
-    );
+    const { customizationFilter } = useABTestingCustomizationsFilter();
 
     const { filteredCustomizations } = useCustomizationsFilter(
       availableCustomizations,
@@ -493,15 +491,17 @@ export default defineComponent({
     );
 
     return {
+      restorationSettled,
       ...useCustomizationsGroups(filteredCustomizations, flowAvailableProductCustomization),
       ...useQuantityAndShippingDiscounts(),
       ...formValidation,
-      ...useBulkImagesUpload(context),
+      ...useBulkImagesUpload(),
       availableCustomizations,
       availableOptionCustomizations,
       bottomStorySlug,
       customizationAvailableOptionValues,
       customizationOptionValue,
+      customizationOption,
       isDisabled,
       isSubmitButtonDisabled,
       onEntityBusyChanged,
@@ -509,6 +509,8 @@ export default defineComponent({
       onFormSubmit,
       onStoryReady,
       pageTitle,
+      privacyPolicyLinks: privacyPolicyLinks as unknown as
+        readonly AdditionalContentEntry[],
       shouldMakeAnother,
       submitButtonText,
       quantity,
@@ -560,6 +562,10 @@ export default defineComponent({
     --customization-option-hint-align: center;
 
     margin-top: var(--spacer-base);
+
+    &.-compact-spacing {
+      margin-top: 0;
+    }
 
     ::v-deep {
       .cards-list-widget {

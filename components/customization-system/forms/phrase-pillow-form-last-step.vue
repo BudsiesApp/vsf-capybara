@@ -1,10 +1,11 @@
 <template>
   <div class="phrase-pillow-form-last-step">
     <customization-option
+      :restoration-settled="restorationSettled"
+      :report-readiness-busy="true"
       v-show="!isSubmitting"
       v-for="customization in availableCustomizations"
       class="_customization-option"
-      ref="customizationOption"
       :key="customization.id"
       :customization="customization"
       :is-disabled="isDisabled"
@@ -56,7 +57,7 @@
       <SfButton
         class="color-primary _submit-button _add-to-cart"
         type="submit"
-        :disabled="isDisabled"
+        :disabled="isDisabled || isSubmitButtonDisabled"
         @click.prevent.stop="onAddToCartClick"
       >
         {{ $t("Add to Cart") }}
@@ -68,8 +69,8 @@
 
       <m-order-submit-agreement />
 
-      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      <template v-if="privacyPolicyLinks.length">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
       </template>
     </div>
 
@@ -86,9 +87,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from '@vue/composition-api';
+import { defineComponent, PropType, ref } from 'vue';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 import { ValidationProvider } from 'vee-validate';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 
 import Product from 'core/modules/catalog/types/Product';
 import {
@@ -113,6 +119,7 @@ const submitAnimationSteps: SubmitAnimationStepsInterface[] = [
 
 export default defineComponent({
   props: {
+    restorationSettled: { type: Boolean, default: true },
     addToCartAction: {
       type: Function as PropType<() => Promise<void>>,
       required: true
@@ -157,13 +164,16 @@ export default defineComponent({
     ValidationProvider
   },
   setup (props) {
+    const privacyPolicyLinks = useAdditionalContent(
+      AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+    );
     const isSubmitting = ref<boolean>(false);
     const submitAnimator = ref<InstanceType<typeof MSubmitAnimator> | null>(
       null
     );
 
     async function onAddToCartClick () {
-      if (props.isDisabled || isSubmitting.value) {
+      if (props.isDisabled || props.isSubmitButtonDisabled || isSubmitting.value) {
         return;
       }
 
@@ -185,6 +195,8 @@ export default defineComponent({
     return {
       isSubmitting,
       onAddToCartClick,
+      privacyPolicyLinks: privacyPolicyLinks as unknown as
+        readonly AdditionalContentEntry[],
       submitAnimationSteps,
       submitAnimator
     };

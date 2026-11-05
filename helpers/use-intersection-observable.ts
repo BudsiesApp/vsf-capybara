@@ -1,4 +1,4 @@
-import { Ref, onMounted, onUnmounted, unref } from '@vue/composition-api';
+import { Ref, onMounted, onUnmounted, unref } from 'vue';
 
 export function useIntersectionObservable (
   observableElement: Ref<Element | null>,

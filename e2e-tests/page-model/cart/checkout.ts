@@ -221,7 +221,7 @@ export class BillingStep {
   }
 
   public async fillAddress (
-    useShippingAddress: boolean = true,
+    useShippingAddress = true,
     address?: string,
     country?: string,
     state?: string,
@@ -338,7 +338,7 @@ export class CheckoutPage {
   }
 
   public async fillBillingAddress (
-    useShippingAddress: boolean = true,
+    useShippingAddress = true,
     address?: string,
     country?: string,
     state?: string,

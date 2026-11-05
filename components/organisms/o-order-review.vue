@@ -17,7 +17,7 @@
 
         <SfButton
           class="sf-button--text color-secondary"
-          @click="$bus.$emit('checkout-before-edit', 'personalDetails')"
+          @click="emitCheckoutEdit('personalDetails')"
         >
           {{ $t('Edit') }}
         </SfButton>
@@ -40,7 +40,7 @@
 
         <SfButton
           class="sf-button--text color-secondary"
-          @click="$bus.$emit('checkout-before-edit', 'shipping')"
+          @click="emitCheckoutEdit('shipping')"
         >
           {{ $t('Edit') }}
         </SfButton>
@@ -71,7 +71,7 @@
 
         <SfButton
           class="sf-button--text color-secondary"
-          @click="$bus.$emit('checkout-before-edit', 'payment')"
+          @click="emitCheckoutEdit('payment')"
         >
           {{ $t('Edit') }}
         </SfButton>
@@ -92,6 +92,7 @@
   </div>
 </template>
 <script>
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { mapGetters } from 'vuex';
 import { SfHeading, SfButton } from '@storefront-ui/vue';
 import { parsePhoneNumberWithError } from 'libphonenumber-js';
@@ -137,6 +138,9 @@ export default {
     }
   },
   methods: {
+    emitCheckoutEdit (section) {
+      EventBus.$emit('checkout-before-edit', section);
+    },
     formatPhoneNumber (phoneNumber, countryId) {
       if (!phoneNumber) {
         return phoneNumber;

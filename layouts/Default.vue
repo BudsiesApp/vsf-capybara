@@ -3,6 +3,13 @@
     class="default-layout"
     :class="{ 'storyblok-preview-mode': isStoryblokPreviewMode }"
   >
+    <a
+      class="sr-only"
+      href="#main-content"
+    >
+      {{ $t('Skip to Content') }}
+    </a>
+
     <MLoader />
 
     <LazyHydrate
@@ -24,7 +31,7 @@
         </LazyHydrate>
       </div>
 
-      <main ref="main" tabindex="-1" class="content">
+      <main id="main-content" ref="main" tabindex="-1" class="content">
         <slot />
       </main>
 
@@ -50,6 +57,7 @@
 </template>
 
 <script>
+import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { mapActions, mapGetters } from 'vuex';
 import OHeader from 'theme/components/organisms/o-header';
 import OFooter from 'theme/components/organisms/o-footer';
@@ -115,7 +123,7 @@ export default {
       }
     });
 
-    this.$bus.$on('offline-order-confirmation', this.onOrderConfirmation);
+    EventBus.$on('offline-order-confirmation', this.onOrderConfirmation);
   },
   async mounted () {
     if (!isServer && this.quicklinkEnabled) {
@@ -129,7 +137,7 @@ export default {
     this.shouldHydrateMobileMenu = true;
   },
   beforeDestroy () {
-    this.$bus.$off('offline-order-confirmation', this.onOrderConfirmation);
+    EventBus.$off('offline-order-confirmation', this.onOrderConfirmation);
   },
   methods: {
     ...mapActions('ui', {

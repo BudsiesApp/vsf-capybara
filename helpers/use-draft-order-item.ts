@@ -1,4 +1,5 @@
-import { watch, Ref, ref, SetupContext } from '@vue/composition-api';
+import { useStore } from '@vue-storefront/core/application-services';
+import { watch, Ref, ref } from 'vue';
 
 import { Logger } from '@vue-storefront/core/lib/logger';
 import i18n from '@vue-storefront/core/i18n'
@@ -6,9 +7,9 @@ import i18n from '@vue-storefront/core/i18n'
 import { DraftOrderItem, fetchOrderItemCustomizationsState } from 'src/modules/customization-system';
 
 export function useDraftOrderItem (
-  orderItemId: Ref<string>,
-  { root }: SetupContext
+  orderItemId: Ref<string>
 ) {
+  const applicationStore = useStore();
   const isDataLoaded = ref<boolean>(false);
   const draftOrderItem = ref<DraftOrderItem | undefined>();
 
@@ -19,7 +20,7 @@ export function useDraftOrderItem (
       draftOrderItem.value = await fetchOrderItemCustomizationsState(orderItemId.value);
       isDataLoaded.value = true;
     } catch (error) {
-      root.$store.dispatch('notification/spawnNotification', {
+      applicationStore.dispatch('notification/spawnNotification', {
         type: 'danger',
         message: i18n.t('Failed to load draft order item data.'),
         action1: { label: i18n.t('OK') }

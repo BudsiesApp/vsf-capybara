@@ -11,7 +11,7 @@
     <button
       type="button"
       class="_handle -down"
-      :aria-label="$t('Decrease quantity, currently: {value}', { value: valueText })"
+      :aria-label="$t('Decrease quantity, currently: {value}', { value: valueText }).toString()"
       @click="decreaseQty"
     >
       -
@@ -24,7 +24,7 @@
     <button
       type="button"
       class="_handle -up"
-      :aria-label="$t('Increase quantity, currently: {value}', { value: valueText })"
+      :aria-label="$t('Increase quantity, currently: {value}', { value: valueText }).toString()"
       @click="increaseQty"
     >
       +

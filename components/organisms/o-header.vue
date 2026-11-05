@@ -2,7 +2,7 @@
   <div class="o-header">
     <SfOverlay
       class="overlay"
-      :visible="isHoveredMenu || isFocusedMenu || isSearchPanelVisible"
+      :visible="isMainMenuOpen || isSearchPanelVisible"
       @click="$store.commit('ui/setSearchpanel', false)"
     />
     <SfHeader
@@ -19,22 +19,39 @@
       </template>
       <template #navigation>
         <SfHeaderNavigationItem
-          ref="productsNavItem"
+          :class="{
+            '_expanded': isMainMenuExpanded,
+            '_hover-dismissed': isMainMenuHoverDismissed
+          }"
           @mouseover="onMainMenuMouseOver"
-          @mouseleave="isHoveredMenu = false"
-          @focusin="onMainMenuFocusIn"
+          @mouseleave="onMainMenuMouseLeave"
           @focusout="onMainMenuFocusOut"
-          @keydown.esc="onMainMenuEscapeKey"
         >
           <router-link
             to="/pet-gifts/"
             class="o-header__submenu"
-            :aria-expanded="String(isHoveredMenu || isFocusedMenu)"
           >
             Products
           </router-link>
+          <button
+            ref="mainMenuToggle"
+            type="button"
+            class="o-header__submenu-toggle"
+            :aria-expanded="isMainMenuOpen ? 'true' : 'false'"
+            aria-controls="o-header-products-menu"
+            @click="onMainMenuToggleClick"
+          >
+            <span class="sr-only">{{ $t('Products submenu') }}</span>
+            <SfIcon
+              class="o-header__submenu-toggle-icon"
+              icon="chevron_down"
+              size="xxs"
+              aria-hidden="true"
+            />
+          </button>
           <MMenu
-            :visible="(isHoveredMenu || isFocusedMenu) && !isSearchPanelVisible"
+            id="o-header-products-menu"
+            :visible="isMainMenuOpen && !isSearchPanelVisible"
             @transitionend.native="onMainMenuTransitionEnd"
             @close="onMainMenuClose"
           />
@@ -68,7 +85,7 @@
       </template>
       <template #header-icons>
         <div class="sf-header__icons">
-          <CurrencySelector />
+          <CurrencySelector label-id="desktop-currency-selector-label" />
 
           <AAccountIcon class="sf-header__action" />
           <ADetailedCartIcon class="sf-header__action" />
@@ -78,22 +95,24 @@
   </div>
 </template>
 
-<script>
-import { SfHeader, SfOverlay } from '@storefront-ui/vue';
+<script lang="ts">
+import Vue, { ref } from 'vue';
+import { SfHeader, SfIcon, SfOverlay } from '@storefront-ui/vue';
 
 import { CurrencySelector } from 'src/modules/currency';
 
-import ALogo from 'theme/components/atoms/a-logo';
-import AAccountIcon from 'theme/components/atoms/a-account-icon';
-import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon';
+import ALogo from 'theme/components/atoms/a-logo.vue';
+import AAccountIcon from 'theme/components/atoms/a-account-icon.vue';
+import ADetailedCartIcon from 'theme/components/atoms/a-detailed-cart-icon.vue';
 import { mapState, mapGetters } from 'vuex';
-import MMenu from 'theme/components/molecules/m-menu';
+import MMenu from 'theme/components/molecules/m-menu.vue';
 import MCtaButton from 'theme/components/molecules/m-cta-button.vue';
 
-export default {
+export default Vue.extend({
   name: 'OHeader',
   components: {
     SfHeader,
+    SfIcon,
     ALogo,
     AAccountIcon,
     ADetailedCartIcon,
@@ -102,10 +121,16 @@ export default {
     MCtaButton,
     CurrencySelector
   },
+  setup () {
+    return {
+      mainMenuToggle: ref<HTMLButtonElement | null>(null)
+    };
+  },
   data () {
     return {
       isHoveredMenu: false,
-      isFocusedMenu: false,
+      isMainMenuExpanded: false,
+      isMainMenuHoverDismissed: false,
       isMouseOverLocked: false
     }
   },
@@ -116,45 +141,83 @@ export default {
     ...mapGetters('user', ['isLoggedIn']),
     activeIcon () {
       return this.isLoggedIn ? 'account' : '';
+    },
+    isMainMenuOpen (): boolean {
+      return this.isHoveredMenu || this.isMainMenuExpanded;
     }
   },
+  mounted () {
+    document.addEventListener('keydown', this.onDocumentKeyDown);
+  },
+  beforeDestroy () {
+    document.removeEventListener('keydown', this.onDocumentKeyDown);
+  },
   methods: {
+    closeMainMenu () {
+      if (this.isHoveredMenu) {
+        this.isMainMenuHoverDismissed = true;
+      }
+
+      this.isHoveredMenu = false;
+      this.isMainMenuExpanded = false;
+    },
     onMainMenuClose () {
       this.isHoveredMenu = false;
-      this.isFocusedMenu = false;
+      this.isMainMenuExpanded = false;
       this.isMouseOverLocked = true;
     },
+    onMainMenuToggleClick () {
+      if (this.isMainMenuOpen) {
+        this.closeMainMenu();
+        return;
+      }
+
+      this.isMainMenuHoverDismissed = false;
+      this.isMainMenuExpanded = true;
+    },
     onMainMenuMouseOver () {
-      if (this.isMouseOverLocked) {
+      if (this.isMouseOverLocked || this.isMainMenuHoverDismissed) {
         return;
       }
 
       this.isHoveredMenu = true;
     },
+    onMainMenuMouseLeave () {
+      this.isHoveredMenu = false;
+      this.isMainMenuHoverDismissed = false;
+    },
     async onMainMenuTransitionEnd () {
       await this.$nextTick();
       this.isMouseOverLocked = false;
     },
-    onMainMenuFocusIn () {
-      this.isFocusedMenu = true;
-    },
-    onMainMenuFocusOut (event) {
+    onMainMenuFocusOut (event: FocusEvent) {
+      const productsNavElement = event.currentTarget as HTMLElement | null;
+
       if (
         event.relatedTarget !== null &&
-        this.$refs.productsNavItem.$el.contains(event.relatedTarget)
+        productsNavElement?.contains(event.relatedTarget as Node)
       ) {
         return;
       }
 
-      this.isFocusedMenu = false;
+      this.isMainMenuExpanded = false;
     },
-    onMainMenuEscapeKey () {
-      this.isFocusedMenu = false;
-      this.isHoveredMenu = false;
-      this.$refs.productsNavItem.$el.querySelector('a').focus();
+    onDocumentKeyDown (event: KeyboardEvent) {
+      if (event.key !== 'Escape' || !this.isMainMenuOpen) {
+        return;
+      }
+
+      const mainMenuToggle = this.mainMenuToggle as HTMLButtonElement | null;
+      const isFocusInsideMainMenu = !!mainMenuToggle?.parentElement?.contains(document.activeElement);
+
+      this.closeMainMenu();
+
+      if (isFocusInsideMainMenu) {
+        mainMenuToggle?.focus();
+      }
     }
   }
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -210,7 +273,7 @@ export default {
     }
 
     &:hover,
-    &:focus-within {
+    &._expanded {
       .m-menu {
         opacity: 1;
         visibility: visible;
@@ -220,6 +283,48 @@ export default {
         width: 100%;
       }
     }
+
+    &._hover-dismissed:hover:not(._expanded) {
+      .m-menu {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      &::after {
+        width: 0;
+      }
+    }
+
+    > .o-header__submenu-toggle {
+      position: relative;
+      flex: 0 0 1px;
+      width: 1px;
+      margin: 0 0 0 -1px;
+      padding: 0;
+      border: 0;
+      background: none;
+      overflow: visible;
+      cursor: pointer;
+
+      &:focus {
+        outline: none;
+      }
+
+      &:focus-visible .o-header__submenu-toggle-icon {
+        visibility: visible;
+      }
+    }
+  }
+
+  &__submenu-toggle-icon {
+    position: absolute;
+    top: 50%;
+    right: var(--spacer-xs);
+    padding: var(--spacer-2xs);
+    transform: translateY(-50%);
+    visibility: hidden;
+    outline: 2px solid var(--c-primary);
+    outline-offset: 1px;
   }
 
   .m-cta-button {

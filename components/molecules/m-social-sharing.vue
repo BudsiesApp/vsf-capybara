@@ -7,13 +7,13 @@
       :href="shareEmailHref"
       target="_blank"
       rel="noopener noreferrer"
-      :title="$t('Share via {service}', {service: 'Email'})"
+      :title="$t('Share via {service}', {service: 'Email'}).toString()"
       :aria-label="$t('Share via {service}', {service: 'Email'}) + ' ' + $t('opens in new tab')"
     />
     <a
       class="sharing-button -pinterest"
       :href="sharePinterestHref"
-      :title="$t('Share on {service}', {service: 'Pinterest'})"
+      :title="$t('Share on {service}', {service: 'Pinterest'}).toString()"
       :aria-label="$t('Share on {service}', {service: 'Pinterest'}) + ' ' + $t('opens in new tab')"
       target="_blank"
       rel="noopener noreferrer"
@@ -21,7 +21,7 @@
     <a
       class="sharing-button -twitter"
       :href="shareTwitterHref"
-      :title="$t('Share on {service}', {service: 'Twitter'})"
+      :title="$t('Share on {service}', {service: 'Twitter'}).toString()"
       :aria-label="$t('Share on {service}', {service: 'Twitter'}) + ' ' + $t('opens in new tab')"
       target="_blank"
       rel="noopener noreferrer"
@@ -29,7 +29,7 @@
     <a
       class="sharing-button -facebook"
       :href="shareFacebookHref"
-      :title="$t('Share on {service}', {service: 'Facebook'})"
+      :title="$t('Share on {service}', {service: 'Facebook'}).toString()"
       :aria-label="$t('Share on {service}', {service: 'Facebook'}) + ' ' + $t('opens in new tab')"
       target="_blank"
       rel="noopener noreferrer"
@@ -39,6 +39,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import { buildPinterestShareUrl } from 'theme/helpers/storyblok-asset-sink-values';
 
 export default Vue.extend({
   name: 'MSocialSharing',
@@ -66,19 +67,17 @@ export default Vue.extend({
   },
   computed: {
     shareEmailHref (): string {
-      const lineBreak = encodeURIComponent('\r\n');
-      const emailText = this.sharingDescription + lineBreak + lineBreak + 'Link:' + lineBreak + this.sharingUrl;
-      return `mailto:?subject=${this.eMailSubject}&body=${emailText}`;
+      const emailText = `${this.sharingDescription}\r\n\r\nLink:\r\n${this.sharingUrl}`;
+      return `mailto:?subject=${encodeURIComponent(this.eMailSubject)}&body=${encodeURIComponent(emailText)}`;
     },
     sharePinterestHref (): string {
-      return `https://pinterest.com/pin/create/button/?media=${this.image}` +
-      `&description=${this.sharingDescription}&url=${this.sharingUrl}`;
+      return buildPinterestShareUrl(this.image, this.sharingDescription, this.sharingUrl);
     },
     shareTwitterHref (): string {
-      return `https://twitter.com/share?text=${this.twitterDescription}&url=${this.sharingUrl}`;
+      return `https://twitter.com/share?text=${encodeURIComponent(this.twitterDescription)}&url=${encodeURIComponent(this.sharingUrl)}`;
     },
     shareFacebookHref (): string {
-      return `https://www.facebook.com/sharer.php?u=${this.sharingUrl}`;
+      return `https://www.facebook.com/sharer.php?u=${encodeURIComponent(this.sharingUrl)}`;
     }
   }
 })

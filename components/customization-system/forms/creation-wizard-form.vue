@@ -4,7 +4,7 @@
       <div class="_steps-container">
         <sf-steps
           :active="currentStep"
-          :can-go-back="canGoBack && !isSubmitButtonDisabled && !isCurrentStepAdditional"
+          :can-go-back="canGoBack && !isDisabled && !isSomeEntityBusy && !isCurrentStepAdditional"
           :steps="stepsList"
           @change="onStepChanged"
           class="_steps"
@@ -22,10 +22,12 @@
               v-for="customizationGroup in stepsCustomizations"
               :key="customizationGroup.id"
               :name="customizationGroup.name"
+              :use-v-show="hasHolidayTimeline(customizationRootGroupCustomizations[customizationGroup.id])"
             >
               <validation-observer
-                v-slot="{ errors: formErrors, passes }"
+                v-slot="{ errors: formErrors }"
                 ref="validationObserver"
+                :data-wizard-step="customizationGroup.name"
               >
                 <SfHeading
                   class="_step-title -required"
@@ -34,6 +36,7 @@
                 />
 
                 <customization-option
+                  :restoration-settled="restorationSettled"
                   v-for="customization in customizationRootGroupCustomizations[
                     customizationGroup.id
                   ]"
@@ -62,8 +65,8 @@
                 <div class="_step-actions-container">
                   <SfButton
                     class="_button"
-                    :disabled="isSubmitButtonDisabled"
-                    @click="(event) => passes(() => nextStep())"
+                    :disabled="isDisabled || isSomeEntityBusy"
+                    @click="onContinueClick"
                   >
                     {{ $t("Continue") }}
                   </SfButton>
@@ -73,6 +76,7 @@
 
             <sf-step :name="lastStepCustomization.name">
               <creation-wizard-form-last-step
+                :restoration-settled="restorationSettled"
                 :submit-action="onFormSubmit"
                 :available-customizations="
                   customizationRootGroupCustomizations[lastStepCustomization.id]
@@ -120,15 +124,16 @@
 </template>
 
 <script lang="ts">
-import { Component } from 'vue';
+import { useRouter, useStore } from '@vue-storefront/core/application-services';
 import {
+  Component,
   computed,
   defineComponent,
   PropType,
   Ref,
   ref,
   toRefs
-} from '@vue/composition-api';
+} from 'vue';
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfHeading, SfSteps } from '@storefront-ui/vue';
 
@@ -138,11 +143,13 @@ import i18n from '@vue-storefront/core/i18n';
 import { useABTestingCustomizationsFilter } from 'src/modules/a-b-testing';
 import {
   ProductCustomizationMode,
+  WidgetType,
   Customization,
   useCustomizationState,
   useAvailableCustomizations,
   useOptionValueActions,
   useEntityBusyState,
+  useHolidayDeliveryLocation,
   CustomizationOptionValue,
   useCustomizationsGroups,
   useCustomizationsBundleOptions,
@@ -170,7 +177,8 @@ import { useCreationWizardGtmEvents } from 'theme/helpers/use-creation-wizard-gt
 import { useCreationWizardPreselectedSize } from 'theme/helpers/use-creation-wizard-preselected-size';
 import { useCreationWizardProductTypeStep } from 'theme/helpers/use-creation-wizard-product-type-step';
 import { useFloatingPhoto } from 'theme/helpers/use-floating-photo';
-import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
+import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 import { PlushieType } from 'theme/interfaces/plushie.type';
 import { useCustomizeAction } from 'theme/helpers/use-customize-action';
@@ -181,23 +189,6 @@ import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MFloatingPhoto from 'theme/components/organisms/OPlushieCreationWizard/m-floating-photo.vue';
 import MProductTypeChooseStep from 'theme/components/organisms/OPlushieCreationWizard/m-product-type-choose-step.vue';
-
-function getAllFormRefs (
-  refs: Record<string, Vue | Element | Vue[] | Element[]>
-): Record<string, Vue | Element | Vue[] | Element[]> {
-  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = {};
-  const customizationOptions = refs['customizationOption'] as InstanceType<
-    typeof CustomizationOption
-  >[];
-
-  for (const customizationOption of customizationOptions) {
-    for (const key in customizationOption.$refs) {
-      refsDictionary[key] = customizationOption.$refs[key];
-    }
-  }
-
-  return refsDictionary;
-}
 
 export interface CreationWizardFormAdditionalStep {
   name: string,
@@ -266,6 +257,12 @@ export default defineComponent({
     ValidationObserver
   },
   setup (props, context) {
+    function hasHolidayTimeline (customizations: Customization[] = []): boolean {
+      return customizations.some(option => option.optionData?.displayWidget === WidgetType.PRODUCTION_TIME_TIMELINE && !!option.optionData?.displayWidgetOptions?.isHolidayPeriod);
+    }
+    const applicationStore = useStore();
+    const { ready: holidayLocationReady } = useHolidayDeliveryLocation();
+    const applicationRouter = useRouter();
     const {
       canUsePersistedCustomizationState,
       draftOrderItem,
@@ -283,12 +280,26 @@ export default defineComponent({
     });
 
     const currentProduct = computed<Product | undefined>(() => {
-      return context.root.$store.getters['product/getCurrentProduct'];
+      return applicationStore.getters['product/getCurrentProduct'];
     });
 
     const validationObserver: Ref<InstanceType<
       typeof ValidationObserver
-    > | null> = ref(null);
+    > | InstanceType<typeof ValidationObserver>[] | null> = ref(null);
+    const {
+      templateRef: customizationOption,
+      getRefsInRenderedOrder: getCustomizationOptionsInRenderedOrder
+    } = useRenderedOrderTemplateRefs<InstanceType<typeof CustomizationOption>>();
+    const activeValidationObserver = computed<InstanceType<
+      typeof ValidationObserver
+    > | null>(() => {
+      const observers = Array.isArray(validationObserver.value) ? validationObserver.value : [validationObserver.value];
+      const activeName = formSteps.stepsList.value[formSteps.currentStep.value];
+      return observers.find(observer => observer?.$el.getAttribute('data-wizard-step') === activeName) || null;
+    });
+    const formValidation = useFormValidation(activeValidationObserver, () =>
+      getNestedFormRefs(getCustomizationOptionsInRenderedOrder())
+    );
 
     const productCustomizations = computed<Customization[]>(() => {
       return currentProduct.value?.customizations || [];
@@ -398,9 +409,9 @@ export default defineComponent({
         updateCustomizationOptionValue
       );
 
-    const { customizationFilter: abTestingCustomizationFilter } = useABTestingCustomizationsFilter(
-      context.ssrContext
-    );
+    const {
+      customizationFilter: abTestingCustomizationFilter
+    } = useABTestingCustomizationsFilter();
 
     const { filteredCustomizations } = useCustomizationsFilter(
       availableCustomizations,
@@ -435,8 +446,7 @@ export default defineComponent({
       additionalStepNames,
       existingCartItem,
       onStepSubmit,
-      customizationMode,
-      context
+      customizationMode
     );
 
     const { handlePreselectedSize } = useCreationWizardPreselectedSize(
@@ -459,8 +469,7 @@ export default defineComponent({
       preselectedProductType,
       resetCustomizationState,
       formSteps.nextStep,
-      afterProductTypeSet,
-      context
+      afterProductTypeSet
     );
 
     const additionalPreservedData = computed<Record<string, any>>(() => {
@@ -476,8 +485,7 @@ export default defineComponent({
       customizationOptionValue,
       currentProduct,
       mergeCustomizationState,
-      removeUnavailableOptionValues,
-      context
+      removeUnavailableOptionValues
     );
 
     const showProductTypeChooseStep = computed<boolean>(() => {
@@ -509,11 +517,11 @@ export default defineComponent({
 
     const preservationStorageKey = computed<string>(() => {
       return isCustomizeMode.value && draftOrderItem.value
-        ? draftOrderItem.value.id
+        ? draftOrderItem.value.id.toString()
         : plushieType.value;
     });
 
-    const { removePreservedState } =
+    const { removePreservedState, restorationSettled } =
       useCustomizationStatePreservation(
         preservationStorageKey,
         customizationState,
@@ -534,20 +542,19 @@ export default defineComponent({
       customizationState,
       bundleOptions,
       existingCartItem,
-      context,
       undefined,
       productPurchaseFlow.value
     );
 
     const { confirmCustomization, isSubmitting: isSubmittingCustomize } = useCustomizeAction(
       customizationState,
-      draftOrderItem,
-      context
+      draftOrderItem
     );
 
     const { isUnmounted } = useComponentUnmountedChecker();
 
     async function onFormSubmit (): Promise<void> {
+      if (isSubmitButtonDisabled.value) return;
       try {
         if (isCustomizeMode.value) {
           await confirmCustomization();
@@ -584,17 +591,17 @@ export default defineComponent({
         }
 
         if (isCustomizeMode.value) {
-          context.root.$router.push({
+          applicationRouter.push({
             name: 'orders-history'
           });
         } else {
-          context.root.$router.push({
+          applicationRouter.push({
             name: 'cross-sells',
             params: { parentSku: currentProduct.value.sku }
           });
         }
       } catch (error) {
-        context.root.$store.dispatch('notification/spawnNotification', {
+        applicationStore.dispatch('notification/spawnNotification', {
           type: 'danger',
           message: 'Error: ' + error.message,
           action1: { label: i18n.t('OK') }
@@ -621,8 +628,20 @@ export default defineComponent({
     });
 
     const isSubmitButtonDisabled = computed<boolean>(() => {
-      return isDisabled.value || isSomeEntityBusy.value;
+      return isDisabled.value || isSomeEntityBusy.value ||
+        (hasHolidayTimeline(filteredCustomizations.value) && (!holidayLocationReady.value || !restorationSettled.value));
     });
+
+    async function onContinueClick (): Promise<void> {
+      if (isDisabled.value || isSomeEntityBusy.value) return;
+      const isValid = await formValidation.validateAndGoToFirstError();
+
+      if (!isValid || isDisabled.value || isSomeEntityBusy.value) {
+        return;
+      }
+
+      await formSteps.nextStep();
+    }
 
     const {
       filteredOptionValues: filteredCustomizationAvailableOptionValues
@@ -634,21 +653,24 @@ export default defineComponent({
     );
 
     return {
+      restorationSettled,
+      hasHolidayTimeline,
       ...customizationGroups,
       ...formSteps,
       ...productTypeStep,
       ...useFloatingPhoto(customizationState, availableCustomizations),
-      ...useFormValidation(validationObserver, () =>
-        getAllFormRefs(context.refs)
-      ),
-      ...useBulkImagesUpload(context),
+      ...formValidation,
+      ...useBulkImagesUpload(),
       currentProduct,
       filteredCustomizationAvailableOptionValues,
+      customizationOption,
       customizationOptionValue,
       isDisabled,
       isSubmitButtonDisabled,
+      isSomeEntityBusy,
       onEntityBusyChanged,
       onCustomizationOptionInput,
+      onContinueClick,
       onFormSubmit,
       submitButtonText,
       quantity,
@@ -716,6 +738,10 @@ export default defineComponent({
     --customization-option-hint-align: center;
 
     margin-top: var(--spacer-base);
+
+    &.-compact-spacing {
+      margin-top: 0;
+    }
   }
 
   ._form-errors {

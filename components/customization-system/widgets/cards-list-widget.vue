@@ -23,7 +23,8 @@
           :valid="isValid"
           :value="optionValue.id"
           :input-type="inputType"
-          v-model="selectedOption"
+          :selected="selectedOption"
+          @change="onSelectedOptionChange"
         >
           <template #checkmark="{ isChecked }">
             <div class="_checkmark-wrapper">
@@ -123,7 +124,7 @@ import {
   defineComponent,
   PropType,
   toRefs
-} from '@vue/composition-api';
+} from 'vue';
 import { SfChevron, SfIcon, SfPrice } from '@storefront-ui/vue';
 import { getThumbnailPath } from '@vue-storefront/core/helpers';
 
@@ -208,6 +209,10 @@ export default defineComponent({
 
     const listWidgetFields = useListWidget(value, maxValuesCount, context);
 
+    const onSelectedOptionChange = (selectedOption: string | string[] | undefined): void => {
+      listWidgetFields.selectedOption.value = selectedOption;
+    };
+
     const groupRole = computed<string>(() => {
       return listWidgetFields.inputType.value === ListWidgetInputType.RADIO
         ? 'radiogroup'
@@ -226,8 +231,9 @@ export default defineComponent({
       groupRole,
       getItemImage,
       isValid,
+      onSelectedOptionChange,
       ...listWidgetFields,
-      ...useOptionValuesPrice(values, context),
+      ...useOptionValuesPrice(values),
       ...useValuesSort(values)
     };
   }

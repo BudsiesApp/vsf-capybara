@@ -10,7 +10,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from '@vue/composition-api';
+import { useRouter, useStore } from '@vue-storefront/core/application-services';
+import { computed, defineComponent, ref, watch } from 'vue';
 
 import OEditAddressForm from 'theme/components/organisms/o-edit-address-form.vue';
 
@@ -25,9 +26,11 @@ export default defineComponent({
   components: {
     OEditAddressForm
   },
-  setup (props, { root }) {
+  setup (props) {
+    const applicationStore = useStore();
+    const applicationRouter = useRouter();
     const address = computed<any>(() => {
-      const user = root.$store.state.user.current;
+      const user = applicationStore.state.user.current;
       const addresses = user?.addresses || [];
 
       return addresses.find(
@@ -65,13 +68,13 @@ export default defineComponent({
     }
 
     const onAddressUpdate = () => {
-      root.$router.push({
+      applicationRouter.push({
         name: 'address-book-list'
       });
     };
 
     const onCancelEditing = () => {
-      root.$router.push({
+      applicationRouter.push({
         name: 'address-book-list'
       });
     };

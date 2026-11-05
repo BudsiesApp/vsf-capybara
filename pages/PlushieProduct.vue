@@ -21,13 +21,15 @@
 </template>
 
 <script lang="ts">
+import { useStore } from '@vue-storefront/core/application-services';
+import { useRequestServices } from '@vue-storefront/core/request-services';
 import {
   computed,
   defineComponent,
   PropType,
   ref,
   toRefs
-} from '@vue/composition-api';
+} from 'vue';
 import { SfHeading } from '@storefront-ui/vue';
 
 import { htmlDecode } from '@vue-storefront/core/filters';
@@ -71,10 +73,12 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const applicationStore = useStore();
+    const requestServices = useRequestServices();
     const { existingPlushieId, plushieType } = toRefs(props);
 
     const currentProduct = computed<Product | undefined>(
-      () => context.root.$store.getters[`product/getCurrentProduct`]
+      () => applicationStore.getters[`product/getCurrentProduct`]
     );
 
     const foreversProductTypeButtons = computed<ProductTypeButton[]>(() => {
@@ -148,12 +152,13 @@ export default defineComponent({
     const canUsePersistedCustomizationState = ref<boolean>(false);
 
     return {
-      ...useExistingCartItem(existingPlushieId, context),
+      ...useExistingCartItem(existingPlushieId),
       canUsePersistedCustomizationState,
       currentProduct,
       mainTitleText,
       onStoryReady,
       productTypeButtonsList,
+      requestServices,
       topStorySlug
     };
   },
@@ -196,7 +201,7 @@ export default defineComponent({
       link: [
         {
           rel: 'canonical',
-          href: getCanonicalUrl(this.$ssrContext, this.$router)
+          href: getCanonicalUrl(this.requestServices.host, this.$router)
         }
       ]
     };

@@ -2,6 +2,8 @@
   <div class="text-input-widget">
     <sf-input
       class="_input"
+      :aria-labelledby="ariaLabelledby"
+      :autocomplete="type === 'email' ? 'email' : undefined"
       :name="inputName"
       :disabled="isDisabled"
       :error-message="error"
@@ -15,7 +17,7 @@
 
 <script lang="ts">
 import { SfInput } from '@storefront-ui/vue';
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { computed, defineComponent, PropType } from 'vue';
 
 export default defineComponent({
   name: 'TextInputWidget',
@@ -23,6 +25,10 @@ export default defineComponent({
     SfInput
   },
   props: {
+    ariaLabelledby: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
     error: {
       type: String,
       default: undefined

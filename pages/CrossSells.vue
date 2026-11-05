@@ -67,7 +67,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
 import { SfButton } from '@storefront-ui/vue';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'

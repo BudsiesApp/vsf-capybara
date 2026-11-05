@@ -5,6 +5,8 @@
         <router-link
           :to="breadcrumb.route.link"
           class="sf-breadcrumbs__breadcrumb"
+          tabindex="-1"
+          aria-hidden="true"
         >
           {{ breadcrumb.text }}
         </router-link>
@@ -14,6 +16,8 @@
         <router-link
           :to="breadcrumb.route.link"
           class="sf-breadcrumbs__breadcrumb sf-breadcrumbs__breadcrumb--current"
+          tabindex="-1"
+          aria-hidden="true"
         >
           {{ breadcrumb.text }}
         </router-link>
@@ -25,9 +29,11 @@
     >
       <nav class="_navigation desktop-only">
         <SfHeading
+          ref="heading"
           :title="$t('My Account')"
           :level="1"
           class="_title desktop-only"
+          tabindex="-1"
         />
 
         <SfList class="_items-list">
@@ -45,12 +51,13 @@
           </SfListItem>
 
           <SfListItem class="_menu-item">
-            <router-link
-              to="/"
-              @click.native="logout"
+            <button
+              type="button"
+              class="_logout-button"
+              @click="logout"
             >
               {{ $t('Log out') }}
-            </router-link>
+            </button>
           </SfListItem>
         </SfList>
       </nav>
@@ -70,6 +77,7 @@ import MyAccount from '@vue-storefront/core/pages/MyAccount';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 
 import { AccountPageName } from './page-name';
+import { useHeadingFocus } from '../helpers/use-heading-focus';
 
 export default {
   components: {
@@ -78,6 +86,9 @@ export default {
     SfList
   },
   mixins: [MyAccount],
+  setup () {
+    return useHeadingFocus();
+  },
   data () {
     return {
       AccountPageName
@@ -252,11 +263,23 @@ export default {
       font-size: var(--font-base);
       margin-top: var(--spacer-base);
 
-      a {
+      a,
+      ._logout-button {
         color: var(--c-dark-variant);
         width: 100%;
         display: inline-block;
+      }
 
+      ._logout-button {
+        padding: 0;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        font: inherit;
+        text-align: start;
+      }
+
+      a {
         &.router-link-exact-active {
           color: var(--c-primary);
         }
@@ -273,7 +296,8 @@ export default {
       &:hover {
         cursor: pointer;
 
-        a {
+        a,
+        ._logout-button {
           color: var(--c-black);
         }
       }

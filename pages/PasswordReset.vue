@@ -1,6 +1,9 @@
 <template>
   <div id="password-reset-page">
     <SfHeading :level="1" :title="$t('Reset a Password')" />
+    <p class="sr-only" role="alert" aria-atomic="true">
+      {{ apiError || '' }}
+    </p>
 
     <div class="_content">
       <div class="_success" v-if="isSuccess">

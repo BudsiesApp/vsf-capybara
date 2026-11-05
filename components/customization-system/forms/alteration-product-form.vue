@@ -107,6 +107,7 @@
 </template>
 
 <script lang="ts">
+import { useI18n, useRouter, useStore } from '@vue-storefront/core/application-services';
 import {
   computed,
   defineComponent,
@@ -117,7 +118,7 @@ import {
   watch,
   toRefs,
   set
-} from '@vue/composition-api';
+} from 'vue';
 import { SfButton, SfChevron, SfHeading } from '@storefront-ui/vue';
 import { ValidationObserver } from 'vee-validate';
 
@@ -151,7 +152,8 @@ import { useOrderItemAndAlterationProductMapping } from 'theme/helpers/use-order
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useCollapsedCustomizationsView } from 'theme/helpers/use-collapsed-customizations-view';
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
-import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
+import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import OProductCard from 'theme/components/organisms/o-product-card.vue';
@@ -215,23 +217,6 @@ function useStandardProductionTimeSelectionEnforcement (
   );
 }
 
-function getAllFormRefs (
-  refs: Record<string, Vue | Element | Vue[] | Element[]>
-): Record<string, Vue | Element | Vue[] | Element[]> {
-  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = {};
-  const customizationOptions = refs['customizationOption'] as InstanceType<
-    typeof CustomizationOption
-  >[];
-
-  for (const customizationOption of customizationOptions) {
-    for (const key in customizationOption.$refs) {
-      refsDictionary[key] = customizationOption.$refs[key];
-    }
-  }
-
-  return refsDictionary;
-}
-
 export default defineComponent({
   name: 'AlterationProductForm',
   components: {
@@ -258,12 +243,19 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const applicationStore = useStore();
+    const applicationRouter = useRouter();
+    const applicationI18n = useI18n();
     const { orderItem, alterationProduct, isExpandable } = toRefs(props);
     const isExpanded = ref(false);
     const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+    const {
+      templateRef: customizationOption,
+      getRefsInRenderedOrder: getCustomizationOptionsInRenderedOrder
+    } = useRenderedOrderTemplateRefs<InstanceType<typeof CustomizationOption>>();
 
     const productBySkuDictionary = computed<Record<string, Product>>(() => {
-      return context.root.$store.getters['product/getProductBySkuDictionary'] || {};
+      return applicationStore.getters['product/getProductBySkuDictionary'] || {};
     });
 
     const plushieId = computed<string | undefined>(() => {
@@ -280,7 +272,7 @@ export default defineComponent({
       return productBySkuDictionary.value[sku];
     });
 
-    const { existingCartItem } = useExistingCartItem(plushieId, context);
+    const { existingCartItem } = useExistingCartItem(plushieId);
 
     const mapping = useOrderItemAndAlterationProductMapping(alterationProduct, extraChargesProduct);
 
@@ -356,7 +348,7 @@ export default defineComponent({
     const { isSomeEntityBusy, onEntityBusyChanged } = useEntityBusyState();
 
     const formValidation = useFormValidation(validationObserver, () =>
-      getAllFormRefs(context.refs)
+      getNestedFormRefs(getCustomizationOptionsInRenderedOrder())
     );
 
     function onCustomizationOptionInput (payload: {
@@ -413,7 +405,6 @@ export default defineComponent({
       customizationState,
       bundleOptions,
       existingCartItem,
-      context,
       plushieId.value
     );
 
@@ -448,10 +439,10 @@ export default defineComponent({
 
     const addToCartButtonText = computed<string>(() => {
       if (existingCartItem.value) {
-        return context.root.$t('Update Cart').toString();
+        return applicationI18n.t('Update Cart').toString();
       }
 
-      return context.root.$t('Add to Cart').toString();
+      return applicationI18n.t('Add to Cart').toString();
     });
 
     function onShowDetailsClick () {
@@ -492,24 +483,24 @@ export default defineComponent({
 
         const notification = {
           type: 'info',
-          message: context.root.$t('Upgrades were added to the cart').toString(),
+          message: applicationI18n.t('Upgrades were added to the cart').toString(),
           timeToLive: 10 * 1000,
-          action1: { label: context.root.$t('OK') },
+          action1: { label: applicationI18n.t('OK') },
           action2: {
-            label: context.root.$t('Proceed to checkout'),
-            action: () => context.root.$router.push({ name: 'checkout' })
+            label: applicationI18n.t('Proceed to checkout'),
+            action: () => applicationRouter.push({ name: 'checkout' })
           }
         };
 
-        context.root.$store.dispatch(
+        applicationStore.dispatch(
           'notification/spawnNotification',
           notification
         );
       } catch (error) {
-        context.root.$store.dispatch('notification/spawnNotification', {
+        applicationStore.dispatch('notification/spawnNotification', {
           type: 'danger',
           message: (error as Error).message,
-          action1: { label: context.root.$t('OK') }
+          action1: { label: applicationI18n.t('OK') }
         });
       }
     }
@@ -548,6 +539,7 @@ export default defineComponent({
       canAddToCart,
       filteredOptionValues,
       isContentExpanded,
+      customizationOption,
       customizationOptionValue,
       expandConfigByCustomization,
       onOptionValueExpandClicked,

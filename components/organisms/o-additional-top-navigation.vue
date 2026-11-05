@@ -18,7 +18,7 @@
 
 <script lang="ts">
 import { SfBottomNavigation, SfIcon } from '@storefront-ui/vue';
-import { defineComponent, PropType } from '@vue/composition-api';
+import { defineComponent, PropType } from 'vue';
 
 import { AdditionalTopNavigationItem } from 'theme/interfaces/additional-top-navigation-item.interface';
 

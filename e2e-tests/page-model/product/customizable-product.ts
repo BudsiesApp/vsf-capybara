@@ -56,7 +56,7 @@ export class CustomizableProductPage {
     return normalizeLabel(selectedOption);
   }
 
-  public async fillCustomizationSelectValueByIndex (label: string, index: number = 0) {
+  public async fillCustomizationSelectValueByIndex (label: string, index = 0) {
     const widget = this.getCustomizationWidgetByLabel(label);
     await widget.click();
 
@@ -71,7 +71,7 @@ export class CustomizableProductPage {
     await expect(uploadStatus).toHaveText('Upload complete');
   }
 
-  public fillCustomizationThumbnailValueByIndex (label: string, index: number = 0) {
+  public fillCustomizationThumbnailValueByIndex (label: string, index = 0) {
     const widget = this.getCustomizationWidgetByLabel(label);
     const thumbnail = widget.locator('._option').nth(index);
     return thumbnail.click();

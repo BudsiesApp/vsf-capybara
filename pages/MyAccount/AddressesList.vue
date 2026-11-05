@@ -1,5 +1,12 @@
 <template>
   <div class="addresses-list">
+    <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+      {{ statusMessage }}
+    </p>
+
+    <p class="sr-only" role="alert" aria-atomic="true">
+      {{ actionError }}
+    </p>
     <section class="_default-addresses">
       <SfHeading :title="$t('Default Addresses')" :level="3" class="_title" />
 
@@ -14,6 +21,7 @@
             <template #actions>
               <router-link
                 class="_action-item sf-button sf-button--text"
+                :aria-label="getAddressActionLabel($t('Edit'), defaultShippingAddress)"
                 :to="{
                   name: 'address-book-edit',
                   params: {
@@ -27,6 +35,7 @@
               <SfButton
                 class="_action-item sf-button sf-button--text"
                 v-if="!defaultShippingAddress.default_billing"
+                :aria-label="getAddressActionLabel($t('Set as default Billing address'), defaultShippingAddress)"
                 @click="setAddressAsDefaultForBilling(defaultShippingAddress)"
               >
                 {{ $t('Set as default Billing address') }}
@@ -45,6 +54,7 @@
             <template #actions>
               <router-link
                 class="_action-item sf-button sf-button--text"
+                :aria-label="getAddressActionLabel($t('Edit'), defaultBillingAddress)"
                 :to="{
                   name: 'address-book-edit',
                   params: {
@@ -58,6 +68,7 @@
               <SfButton
                 class="_action-item sf-button sf-button--text"
                 v-if="!defaultBillingAddress.default_shipping"
+                :aria-label="getAddressActionLabel($t('Set as default Shipping address'), defaultBillingAddress)"
                 @click="setAddressAsDefaultForShipping(defaultBillingAddress)"
               >
                 {{ $t('Set as default Shipping address') }}
@@ -82,10 +93,13 @@
           <m-address-item
             :address="address" v-for="(address) in additionalAddresses"
             :key="address.id"
+            ref="additionalAddressItems"
+            ref-in-for
           >
             <template #actions>
               <router-link
                 class="_action-item sf-button sf-button--text"
+                :aria-label="getAddressActionLabel($t('Edit'), address)"
                 :to="{
                   name: 'address-book-edit',
                   params: {
@@ -98,6 +112,7 @@
 
               <SfButton
                 class="_action-item sf-button--text"
+                :aria-label="getAddressActionLabel($t('Remove'), address)"
                 @click="removeAddress(address)"
               >
                 {{ $t('Remove') }}
@@ -105,6 +120,7 @@
 
               <SfButton
                 class="_action-item sf-button--text"
+                :aria-label="getAddressActionLabel($t('Set as default Billing address'), address)"
                 @click="setAddressAsDefaultForBilling(address)"
               >
                 {{ $t('Set as default Billing address') }}
@@ -112,6 +128,7 @@
 
               <SfButton
                 class="_action-item sf-button--text"
+                :aria-label="getAddressActionLabel($t('Set as default Shipping address'), address)"
                 @click="setAddressAsDefaultForShipping(address)"
               >
                 {{ $t('Set as default Shipping address') }}
@@ -128,6 +145,7 @@
 
     <div class="_button-row">
       <router-link
+        ref="addAddressButton"
         :to="{name: 'address-book-add'}"
         class="sf-button--secondary sf-button"
       >
@@ -168,31 +186,104 @@ export default {
       );
     }
   },
+  data () {
+    return {
+      actionError: '',
+      statusMessage: ''
+    };
+  },
   methods: {
-    removeAddress (address) {
-      this.$store.dispatch('budsies/removeAddress', { address: { id: address.id } });
+    clearActionMessages () {
+      this.actionError = '';
+      this.statusMessage = '';
     },
-    setAddressAsDefaultForBilling (address) {
-      this.$store.dispatch(
-        'budsies/updateAddress',
-        {
+    showActionError (error) {
+      this.actionError = error instanceof Error && error.message
+        ? error.message
+        : this.$t('Unable to update address').toString();
+    },
+    getAddressIdentifier (address) {
+      const street = Array.isArray(address.street)
+        ? address.street.filter(Boolean).join(' ')
+        : address.street;
+
+      return street || this.$t('Address').toString();
+    },
+    getAddressActionLabel (action, address) {
+      return this.$t('{action}: {address}', {
+        action,
+        address: this.getAddressIdentifier(address)
+      }).toString();
+    },
+    focusClosestAddressItem (removedAddressIndex) {
+      const nextAddress = this.additionalAddresses[removedAddressIndex];
+      const previousAddress = this.additionalAddresses[removedAddressIndex - 1];
+      const addressToFocus = nextAddress || previousAddress;
+
+      if (!addressToFocus) {
+        this.$refs.addAddressButton.$el.focus();
+        return;
+      }
+
+      const addressItems = this.$refs.additionalAddressItems || [];
+      const addressItem = addressItems.find((item) => item.address.id === addressToFocus.id);
+
+      addressItem?.focusFirstAction();
+    },
+    async removeAddress (address) {
+      this.clearActionMessages();
+      const removedAddressIndex = this.additionalAddresses.findIndex(
+        (additionalAddress) => additionalAddress.id === address.id
+      );
+      const addressIdentifier = this.getAddressIdentifier(address);
+      this.statusMessage = this.$t('Removing address {address}', {
+        address: addressIdentifier
+      }).toString();
+
+      try {
+        await this.$store.dispatch('budsies/removeAddress', { address: { id: address.id } });
+        this.statusMessage = this.$t('Address {address} removed', {
+          address: addressIdentifier
+        }).toString();
+        await this.$nextTick();
+        this.focusClosestAddressItem(removedAddressIndex);
+      } catch (error) {
+        this.showActionError(error);
+      }
+    },
+    async setAddressAsDefaultForBilling (address) {
+      this.clearActionMessages();
+
+      try {
+        await this.$store.dispatch('budsies/updateAddress', {
           address: {
             ...address,
             default_billing: true
           }
-        }
-      );
+        });
+        this.statusMessage = this.$t('Address {address} set as default billing', {
+          address: this.getAddressIdentifier(address)
+        }).toString();
+      } catch (error) {
+        this.showActionError(error);
+      }
     },
-    setAddressAsDefaultForShipping (address) {
-      this.$store.dispatch(
-        'budsies/updateAddress',
-        {
+    async setAddressAsDefaultForShipping (address) {
+      this.clearActionMessages();
+
+      try {
+        await this.$store.dispatch('budsies/updateAddress', {
           address: {
             ...address,
             default_shipping: true
           }
-        }
-      );
+        });
+        this.statusMessage = this.$t('Address {address} set as default shipping', {
+          address: this.getAddressIdentifier(address)
+        }).toString();
+      } catch (error) {
+        this.showActionError(error);
+      }
     }
   }
 }

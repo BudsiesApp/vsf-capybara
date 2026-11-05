@@ -70,7 +70,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, PropType, Ref, ref } from '@vue/composition-api';
+import { useI18n, useRouter, useStore } from '@vue-storefront/core/application-services';
+import { computed, defineComponent, inject, onMounted, PropType, Ref, ref } from 'vue';
 import { SfButton, SfHeading } from '@storefront-ui/vue';
 import { SearchQuery } from 'storefront-query-builder';
 import config from 'config';
@@ -122,6 +123,9 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const applicationStore = useStore();
+    const applicationI18n = useI18n();
+    const applicationRouter = useRouter();
     const qaPhotosHandlerService = inject<ImageHandlerService>('QaPhotosHandlerService');
 
     if (!qaPhotosHandlerService) {
@@ -160,7 +164,7 @@ export default defineComponent({
         query.applyFilter({ key: 'stock.is_in_stock', value: { 'eq': true } });
       }
 
-      await context.root.$store.dispatch('product/findProducts', {
+      await applicationStore.dispatch('product/findProducts', {
         query,
         options: {
           prefetchGroupProducts: false
@@ -169,14 +173,14 @@ export default defineComponent({
     }
 
     const productBySkuDictionary = computed<Record<string, Product>>(() => {
-      return context.root.$store.getters['product/getProductBySkuDictionary'];
+      return applicationStore.getters['product/getProductBySkuDictionary'];
     });
 
     const productPriceDictionary = computed<Record<string, PriceHelper.ProductPrice>>(() => {
-      return context.root.$store.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY]
+      return applicationStore.getters[PRODUCT_LOCALIZED_PRICE_DICTIONARY]
     });
     const selectedCurrency = computed<Currency>(() => {
-      return context.root.$store.getters[GET_ACTIVE_CURRENCY];
+      return applicationStore.getters[GET_ACTIVE_CURRENCY];
     });
 
     const relatedProducts = computed<ReturnType<typeof prepareCategoryProduct>[]>(() => {
@@ -210,17 +214,17 @@ export default defineComponent({
       !isLoading.value && !isError.value && (deliverables as Ref<Deliverable[]>).value.length > 0
     );
 
+    function getPortraitImagePath (path: string): string {
+      const prefix = 'budsies-qa-photos/';
+      return path.startsWith(prefix) ? path.slice(prefix.length) : path;
+    }
+
     function getAbsoluteImageUrl (url: string): string {
       if (!qaPhotosHandlerService) {
         throw new Error('Image Handler Service is not defined');
       }
 
-      const urlWithoutBucket = url.split('/')[1]
-      if (!urlWithoutBucket) {
-        return url;
-      }
-
-      return qaPhotosHandlerService.getOriginalImageUrl(urlWithoutBucket);
+      return qaPhotosHandlerService.getOriginalImageUrl(getPortraitImagePath(url));
     }
 
     function getProductCustomizeLink (product: any): string {
@@ -232,7 +236,7 @@ export default defineComponent({
 
       const routeName = PRODUCT_SKU_ROUTE_MAPPING[product.sku];
 
-      return context.root.$router.resolve({
+      return applicationRouter.resolve({
         name: routeName,
         query: {
           'image-url': getAbsoluteImageUrl(imageUrl)
@@ -252,7 +256,15 @@ export default defineComponent({
     });
 
     async function downloadDeliverable (deliverable: Deliverable) {
-      await downloadImage(deliverable.storage_item_url, props.orderItemId.toString());
+      try {
+        await downloadImage(getPortraitImagePath(deliverable.storage_item_url), props.orderItemId.toString());
+      } catch (error) {
+        applicationStore.dispatch('notification/spawnNotification', {
+          type: 'danger',
+          message: applicationI18n.t('Something went wrong'),
+          action1: { label: applicationI18n.t('OK') }
+        });
+      }
     }
 
     function onProductCardClick (productSku: string): void {

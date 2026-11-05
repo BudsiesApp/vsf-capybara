@@ -8,7 +8,7 @@
 
     <o-product-card
       :product="preparedProduct"
-      :link="product.link"
+      :link="preparedProduct.link"
       link-tag="router-link"
       class="_product"
       :wishlist-icon="false"
@@ -29,9 +29,12 @@ import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { ProductEvent, PriceHelper } from 'src/modules/shared';
 import { Currency, GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 import { prepareCategoryProduct } from 'theme/helpers'
+import { resolveProductCardLink } from 'theme/helpers/resolve-product-card-link';
 import OProductCard from 'theme/components/organisms/o-product-card.vue';
 
 import ProductData from './interfaces/product-data.interface';
+
+type PreparedProduct = ReturnType<typeof prepareCategoryProduct> & { link: string };
 
 export default Blok.extend({
   name: 'StoryblokProductBlock',
@@ -51,7 +54,7 @@ export default Blok.extend({
     selectedCurrency (): Currency {
       return this.$store.getters[GET_ACTIVE_CURRENCY];
     },
-    preparedProduct (): ReturnType<typeof prepareCategoryProduct> | undefined {
+    preparedProduct (): PreparedProduct | undefined {
       if (!this.product) {
         return;
       }
@@ -69,13 +72,12 @@ export default Blok.extend({
         this.selectedCurrency
       );
 
-      if (this.product.landing_page_url) {
-        preparedProduct.link = this.product.landing_page_url;
-      } else if (typeof preparedProduct.link === 'object') {
-        preparedProduct.link = preparedProduct.link.fullPath || this.$router.resolve(preparedProduct.link).href;
-      }
+      const link = this.product.landing_page_url || resolveProductCardLink(
+        preparedProduct.link,
+        route => this.$router.resolve(route).href
+      );
 
-      return preparedProduct;
+      return { ...preparedProduct, link };
     }
   },
   async beforeMount (): Promise<void> {

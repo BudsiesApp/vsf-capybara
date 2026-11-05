@@ -1,12 +1,13 @@
-import { ref, Ref, SetupContext } from '@vue/composition-api';
+import { useStore } from '@vue-storefront/core/application-services';
+import { ref, Ref } from 'vue';
 
 import { CustomizationStateItem, DraftOrderItem, filterCustomizationState, saveOrderItemCustomizationsState, submitOrderItemCustomizationsState } from 'src/modules/customization-system';
 
 export function useCustomizeAction (
   customizationStateItems: Ref<CustomizationStateItem[]>,
-  draftOrderItem: Ref<DraftOrderItem | undefined>,
-  { root }: SetupContext
+  draftOrderItem: Ref<DraftOrderItem | undefined>
 ) {
+  const applicationStore = useStore();
   const isSubmitting = ref(false);
 
   async function confirmCustomization () {
@@ -19,7 +20,7 @@ export function useCustomizeAction (
     }
 
     isSubmitting.value = true;
-    const userToken = root.$store.getters['user/getUserToken'];
+    const userToken = applicationStore.getters['user/getUserToken'];
 
     try {
       const saveResult = await saveOrderItemCustomizationsState(

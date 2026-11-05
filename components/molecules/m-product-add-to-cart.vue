@@ -1,5 +1,8 @@
 <template>
   <div class="m-product-add-to-cart">
+    <p class="sr-only" role="alert" aria-atomic="true">
+      {{ alert ? alert.message : '' }}
+    </p>
     <SfAlert
       v-if="alert"
       class="alert"

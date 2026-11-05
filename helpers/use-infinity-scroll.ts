@@ -1,4 +1,4 @@
-import { ComputedRef, Ref, computed, onMounted, onUnmounted, ref } from '@vue/composition-api';
+import { ComputedRef, Ref, computed, onMounted, onUnmounted, ref } from 'vue';
 
 import { isServer } from '@vue-storefront/core/helpers';
 

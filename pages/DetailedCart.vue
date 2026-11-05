@@ -1,5 +1,23 @@
 <template>
   <div id="detailed-cart" :class="{ '-loading': isLoading }">
+    <span
+      class="sr-only"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      {{ cartItemRemovalAnnouncement }}
+    </span>
+
+    <span
+      class="sr-only"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      {{ isCartSyncing ? $t('Cart is syncing') : $t('Cart is synchronized') }}
+    </span>
+
     <div class="loader-container" v-if="isLoading">
       <div class="loader" />
     </div>
@@ -10,7 +28,11 @@
           class="_production-spot-countdown"
         />
 
-        <transition name="fade" mode="out-in">
+        <transition
+          name="fade"
+          mode="out-in"
+          @after-enter="onCartTransitionComplete"
+        >
           <div
             v-if="totalItems"
             key="detailed-cart"
@@ -19,39 +41,57 @@
               name="fade"
               tag="div"
               class="collected-product-list"
+              @after-leave="onCartItemLeaveComplete"
             >
               <CartLineItem
                 v-for="product in products"
+                ref="cartLineItems"
                 :key="getCartItemKey(product)"
                 :product="product"
+                @removing="onItemRemoving"
+                @removed="onItemRemoved"
               />
             </transition-group>
 
-            <div class="_dropdown-container">
+            <div
+              class="_dropdown-container"
+              v-click-outside="() => isDropdownOpen = false"
+            >
               <SfButton
+                id="order-more-toggle"
                 class="color-secondary"
-                @click.prevent.self="isDropdownOpen = !isDropdownOpen"
+                :aria-expanded="isDropdownOpen.toString()"
+                aria-controls="order-more-options"
+                type="button"
+                @click="isDropdownOpen = !isDropdownOpen"
               >
-                Order More
+                {{ $t('Order More') }}
               </SfButton>
 
               <MDropdown
                 :is-open="isDropdownOpen"
+                :title="$t('Order More')"
+                :close-on-outside-click="false"
                 @click:close="isDropdownOpen = false"
               >
-                <SfList>
-                  <SfListItem
-                    v-for="action in dropdownActions"
-                    :key="action.label"
-                  >
-                    <router-link
-                      :to="action.url"
-                      @click.native="onDropdownActionClick(action)"
+                <div
+                  id="order-more-options"
+                  aria-labelledby="order-more-toggle"
+                >
+                  <SfList>
+                    <SfListItem
+                      v-for="action in dropdownActions"
+                      :key="action.label"
                     >
-                      {{ action.label }}
-                    </router-link>
-                  </SfListItem>
-                </SfList>
+                      <router-link
+                        :to="action.url"
+                        @click.native="onDropdownActionClick(action)"
+                      >
+                        {{ action.label }}
+                      </router-link>
+                    </SfListItem>
+                  </SfList>
+                </div>
               </MDropdown>
             </div>
           </div>
@@ -62,17 +102,26 @@
             class="empty-cart"
           >
             <SfHeading
-              title="Your cart is empty"
               :level="2"
               subtitle="Looks like you haven’t added any items to the cart yet. Start
                 shopping to fill it in."
-            />
+            >
+              <template #title>
+                <h2
+                  ref="emptyCartHeading"
+                  class="sf-heading__title sf-heading__title--h2"
+                  tabindex="-1"
+                >
+                  {{ $t('Your cart is empty') }}
+                </h2>
+              </template>
+            </SfHeading>
 
             <SfButton
               class="sf-button--full-width color-primary empty-cart__button"
               @click="processStartShopping"
             >
-              Start shopping
+              {{ $t('Start shopping') }}
             </SfButton>
           </div>
         </transition>
@@ -94,6 +143,9 @@ import {
   SfButton,
   SfHeading
 } from '@storefront-ui/vue';
+
+import { clickOutside } from '@storefront-ui/vue/src/utilities/directives'
+
 import { OrderSummary } from './DetailedCart/index.js';
 import CartLineItem from './DetailedCart/cart-line-item.vue';
 import { mapGetters, mapState } from 'vuex';
@@ -102,12 +154,15 @@ import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-i
 import CartEvents from 'src/modules/shared/types/cart-events';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
+import { nextTick, ref } from 'vue';
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
+import { IS_CART_SYNCING } from '@vue-storefront/core/modules/cart';
 import { ModalList } from 'theme/store/ui/modals';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MDropdown from 'theme/components/molecules/m-dropdown.vue';
+import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
 import { emitPageRenderedEvent } from 'src/modules/shared';
 
 export default {
@@ -122,9 +177,15 @@ export default {
     OrderSummary,
     ProductionSpotCountdown
   },
+  directives: {
+    clickOutside
+  },
   data () {
     return {
       isDropdownOpen: false,
+      cartItemRemovalAnnouncement: '',
+      pendingCartItemFocusKey: null,
+      shouldFocusEmptyCart: false,
       dropdownActions: [
         {
           label: this.$t('Forevers Pet'),
@@ -231,6 +292,38 @@ export default {
       isMounted: false
     };
   },
+  setup () {
+    const emptyCartHeading = ref(null);
+    const {
+      templateRef: cartLineItems,
+      getRefsInRenderedOrder: getCartLineItemsInRenderedOrder
+    } = useRenderedOrderTemplateRefs();
+
+    const focusCartLineItem = (cartItemKey) => {
+      const cartLineItem = getCartLineItemsInRenderedOrder().find(
+        (cartLineItem) => cartLineItem.getItemKey() === cartItemKey
+      );
+
+      return cartLineItem?.focusCartItem() || false;
+    };
+
+    const focusEmptyCartHeading = () => {
+      const emptyCartHeadingElement = emptyCartHeading.value;
+
+      if (!(emptyCartHeadingElement instanceof HTMLElement)) {
+        return;
+      }
+
+      emptyCartHeadingElement.focus();
+    };
+
+    return {
+      cartLineItems,
+      emptyCartHeading,
+      focusCartLineItem,
+      focusEmptyCartHeading
+    };
+  },
   props: {
     isActive: {
       type: Boolean,
@@ -242,7 +335,8 @@ export default {
       cartIsLoaded: (state) => state.cart.cartIsLoaded
     }),
     ...mapGetters({
-      products: 'cart/getCartItems'
+      products: 'cart/getCartItems',
+      isCartSyncing: IS_CART_SYNCING
     }),
     ...mapMobileObserver(),
     totalItems () {
@@ -269,6 +363,51 @@ export default {
     EventBus.$off(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
   },
   methods: {
+    onItemRemoving (cartItemKey) {
+      this.cartItemRemovalAnnouncement = '';
+
+      nextTick(() => {
+        this.cartItemRemovalAnnouncement = this.$t('Product removed from cart.').toString();
+      });
+
+      const cartItemIndex = this.products.findIndex(
+        (product) => this.getCartItemKey(product) === cartItemKey
+      );
+      const nextCartItem = this.products[cartItemIndex + 1];
+      const previousCartItem = this.products[cartItemIndex - 1];
+      const focusCartItem = nextCartItem || previousCartItem;
+
+      this.pendingCartItemFocusKey = focusCartItem
+        ? this.getCartItemKey(focusCartItem)
+        : null;
+    },
+    onItemRemoved () {
+      if (this.totalItems) {
+        return;
+      }
+
+      this.pendingCartItemFocusKey = null;
+      this.shouldFocusEmptyCart = true;
+    },
+    onCartItemLeaveComplete () {
+      const cartItemFocusKey = this.pendingCartItemFocusKey;
+
+      this.pendingCartItemFocusKey = null;
+
+      if (!cartItemFocusKey) {
+        return;
+      }
+
+      this.focusCartLineItem(cartItemFocusKey);
+    },
+    onCartTransitionComplete () {
+      if (!this.shouldFocusEmptyCart || this.totalItems) {
+        return;
+      }
+
+      this.shouldFocusEmptyCart = false;
+      this.focusEmptyCartHeading();
+    },
     onDropdownActionClick (action) {
       EventBus.$emit(CartEvents.MAKE_ANOTHER_FROM_CART, action.label);
     },

@@ -4,7 +4,7 @@ import actions from './actions'
 import mutations from './mutations'
 import CartState from './types/CartState'
 
-export const module: Module<CartState, any> = {
+const storeModule: Module<CartState, any> = {
   namespaced: true,
   state: {
     editMode: null
@@ -13,3 +13,5 @@ export const module: Module<CartState, any> = {
   actions,
   mutations
 }
+
+export { storeModule as module }

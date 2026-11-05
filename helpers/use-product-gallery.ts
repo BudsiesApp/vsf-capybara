@@ -1,4 +1,4 @@
-import { ComputedRef, Ref, computed } from '@vue/composition-api';
+import { ComputedRef, Ref, computed } from 'vue';
 
 import config from 'config';
 import { getThumbnailPath } from '@vue-storefront/core/helpers';

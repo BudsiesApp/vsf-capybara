@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, toRef } from '@vue/composition-api';
+import { computed, defineComponent, PropType, toRef } from 'vue';
 
 import { OptionValue } from 'src/modules/customization-system';
 
@@ -58,7 +58,7 @@ export default defineComponent({
   setup (props, { emit }) {
     const hasError = computed<boolean>(() => !!props.error);
     const sortedValues = computed<OptionValue[]>(() => {
-      return props.values.sort((a, b) => a.sn - b.sn);
+      return [...props.values].sort((a, b) => a.sn - b.sn);
     });
 
     const valueIdForSelectedState = computed<string>(() => {

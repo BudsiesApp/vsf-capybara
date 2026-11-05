@@ -56,15 +56,15 @@
             sf-button--full-width sf-button--text
             form__action-button form__action-button--secondary
           "
-          @click="$bus.$emit('checkout-before-edit', isVirtualCart ? 'personalDetails' :'shipping')"
+          @click="emitCheckoutEdit(isVirtualCart ? 'personalDetails' : 'shipping')"
         >
           {{ isVirtualCart ? $t('Edit contact') : $t('Edit shipping') }}
         </SfButton>
       </div>
     </div>
 
-    <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+    <template v-if="privacyPolicyLinks.length">
+      <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
     </template>
     <!-- This dummy container below is needed because src\modules\payment-cash-on-delivery\index.ts
          tries to inject here a component with payment description -->
@@ -72,11 +72,15 @@
   </validation-observer>
 </template>
 <script>
-import { defineComponent, ref, toRef } from '@vue/composition-api';
+import { defineComponent, ref, toRef } from 'vue';
 import { mapGetters } from 'vuex';
 import { ValidationObserver } from 'vee-validate';
 
 import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
+import {
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 import {
   SfInput,
   SfButton,
@@ -110,20 +114,17 @@ export default defineComponent({
     const validationObserver = ref(null);
     const baseAddressForm = ref(null);
 
-    const { validateAddress, isValidating: isValidatingAddress, completeValidation: completeAddressValidation } = useAddressValidation(context);
+    const { validateAddress, isValidating: isValidatingAddress, completeValidation: completeAddressValidation } = useAddressValidation();
 
     const { validateAndGoToFirstError } = useFormValidation(
       validationObserver,
-      () => {
-        const baseAddressFormComponent = baseAddressForm.value;
-        return {
-          ...context.refs,
-          ...(baseAddressFormComponent?.$refs || {})
-        };
-      }
+      () => baseAddressForm.value?.getFormValidationRefs() || {}
     );
 
     return {
+      privacyPolicyLinks: useAdditionalContent(
+        AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+      ),
       validationObserver,
       baseAddressForm,
       validateAddress,
@@ -184,6 +185,9 @@ export default defineComponent({
     EventBus.$off('user-after-loggedin', this.fillLastUsedCustomerData);
   },
   methods: {
+    emitCheckoutEdit (section) {
+      EventBus.$emit('checkout-before-edit', section);
+    },
     focusSubmitStepButton () {
       const submitStepButton = this.$refs.submitStepButton;
 

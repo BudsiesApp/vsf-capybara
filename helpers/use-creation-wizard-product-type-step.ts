@@ -1,4 +1,5 @@
-import { onMounted, ref, Ref, SetupContext } from '@vue/composition-api';
+import { useStore } from '@vue-storefront/core/application-services';
+import { onMounted, ref, Ref } from 'vue';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
@@ -18,24 +19,24 @@ export function useCreationWizardProductTypeStep (
   preselectedProductType: Ref<string | undefined>,
   resetCustomizationState: () => void,
   nextStep: () => Promise<void>,
-  afterProductTypeSet: () => void,
-  { root }: SetupContext
+  afterProductTypeSet: () => void
 ) {
+  const applicationStore = useStore();
   const isProductLoading = ref<boolean>(false);
 
   async function loadProduct (sku: string): Promise<void> {
     isProductLoading.value = true;
-    root.$store.commit(`product/${PRODUCT_UNSET_CURRENT}`);
+    applicationStore.commit(`product/${PRODUCT_UNSET_CURRENT}`);
 
     try {
       let [product] = await Promise.all(
         [
-          root.$store.dispatch('product/loadProduct', {
+          applicationStore.dispatch('product/loadProduct', {
             parentSku: sku,
             childSku: null,
             setCurrent: false
           }),
-          root.$store.dispatch(
+          applicationStore.dispatch(
             'budsies/loadProductsRushAddons',
             { productSku: sku }
           )
@@ -44,10 +45,10 @@ export function useCreationWizardProductTypeStep (
 
       product = updateProductProductionTimeCustomizationData(
         product,
-        root.$store
+        applicationStore
       );
 
-      await root.$store.dispatch('product/setCurrent', product);
+      await applicationStore.dispatch('product/setCurrent', product);
 
       void nextStep();
     } finally {

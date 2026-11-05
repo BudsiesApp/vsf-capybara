@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent, onBeforeMount, onServerPrefetch, toRefs } from '@vue/composition-api';
+import { PropType, defineComponent, onBeforeMount, onServerPrefetch, toRefs } from 'vue';
 import { SfHeading } from '@storefront-ui/vue';
 
 import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/catalog';

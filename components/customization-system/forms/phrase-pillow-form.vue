@@ -63,6 +63,8 @@
               :use-v-show="true"
             >
               <customization-option
+                :restoration-settled="restorationSettled"
+                :report-readiness-busy="true"
                 v-for="customization in customizationRootGroupCustomizations[
                   customizationGroup.id
                 ]"
@@ -91,6 +93,7 @@
 
             <sf-step :name="lastStepName">
               <phrase-pillow-form-last-step
+                :restoration-settled="restorationSettled"
                 :add-to-cart-action="onFormSubmit"
                 :available-customizations="lastStepAvailableCustomizations"
                 :customization-available-option-values="
@@ -123,6 +126,7 @@
 </template>
 
 <script lang="ts">
+import { useRouter, useStore } from '@vue-storefront/core/application-services';
 import {
   computed,
   defineComponent,
@@ -131,7 +135,7 @@ import {
   ref,
   toRefs,
   watch
-} from '@vue/composition-api';
+} from 'vue';
 import { ValidationObserver } from 'vee-validate';
 import { SfButton, SfHeading, SfSteps } from '@storefront-ui/vue';
 
@@ -201,6 +205,8 @@ export default defineComponent({
     ValidationObserver
   },
   setup (props, context) {
+    const applicationStore = useStore();
+    const applicationRouter = useRouter();
     const { canUsePersistedCustomizationState, existingCartItem, product } = toRefs(props);
 
     const validationObserver: Ref<InstanceType<
@@ -291,11 +297,10 @@ export default defineComponent({
       customizationOptionValue,
       product,
       mergeCustomizationState,
-      removeUnavailableOptionValues,
-      context
+      removeUnavailableOptionValues
     );
 
-    const { removePreservedState } =
+    const { removePreservedState, restorationSettled } =
       useCustomizationStatePreservation(
         productSku,
         customizationState,
@@ -313,9 +318,7 @@ export default defineComponent({
         updateCustomizationOptionValue
       );
 
-    const { customizationFilter } = useABTestingCustomizationsFilter(
-      context.ssrContext
-    );
+    const { customizationFilter } = useABTestingCustomizationsFilter();
 
     const { filteredCustomizations } = useCustomizationsFilter(
       availableCustomizations,
@@ -339,14 +342,13 @@ export default defineComponent({
       quantity,
       customizationState,
       bundleOptions,
-      existingCartItem,
-      context
+      existingCartItem
     );
 
     const { isUnmounted } = useComponentUnmountedChecker();
 
     async function onFormSubmit (): Promise<void> {
-      if (!validationObserver.value) {
+      if (isSubmitButtonDisabled.value || !validationObserver.value) {
         return;
       }
 
@@ -356,6 +358,8 @@ export default defineComponent({
         formSteps.activateFirstStepWithError();
         return;
       }
+
+      if (isSubmitButtonDisabled.value) return;
 
       if (!preview.value) {
         return;
@@ -367,7 +371,7 @@ export default defineComponent({
         processedImageUploadCustomizationStateItem
       );
 
-      if (isUnmounted.value) {
+      if (isUnmounted.value || isSubmitButtonDisabled.value) {
         return;
       }
 
@@ -381,12 +385,12 @@ export default defineComponent({
           return;
         }
 
-        context.root.$router.push({
+        applicationRouter.push({
           name: 'cross-sells',
           params: { parentSku: product.value.sku }
         });
       } catch (error) {
-        context.root.$store.dispatch('notification/spawnNotification', {
+        applicationStore.dispatch('notification/spawnNotification', {
           type: 'danger',
           message: 'Error: ' + error,
           action1: { label: i18n.t('OK') }
@@ -440,9 +444,10 @@ export default defineComponent({
     });
 
     return {
+      restorationSettled,
       ...customizationGroups,
       ...formSteps,
-      ...useBulkImagesUpload(context),
+      ...useBulkImagesUpload(),
       availableCustomizations,
       availableOptionValues,
       bottomStorySlug,

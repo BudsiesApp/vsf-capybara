@@ -1,5 +1,6 @@
 import parseImageDimensions from './parse-image-dimensions';
 import { WebpQuality } from './images-quality';
+import { buildStoryblokImageUrl } from 'src/modules/vsf-storyblok-module';
 
 export default function getResizedImageUrl (
   imageUrl: string,
@@ -7,10 +8,7 @@ export default function getResizedImageUrl (
 ): string {
   const filters = `/filters:format(webp):quality(${WebpQuality})`;
 
-  // "https://s3.amazonaws.com/a.storyblok.com/f/109999/500x500/c01cfb137f/pet_socks.png"
-  // "https://a.storyblok.com/f/109999/1080x1080/485ba42bde/petsies_homepage_images_1_.png"
-  const [, resource] = imageUrl.split('/a.storyblok.com');
-  let dimensions = parseImageDimensions(imageUrl);
+  const dimensions = parseImageDimensions(imageUrl);
   const ratio = dimensions.height / dimensions.width;
 
   const height = Math.round(width * ratio);
@@ -19,7 +17,5 @@ export default function getResizedImageUrl (
   mod += `/${width}x${height}`;
   mod += filters;
 
-  const resizedUrl = 'https://sb-assets.budsies.com' + resource + mod;
-
-  return resizedUrl;
+  return buildStoryblokImageUrl(imageUrl, mod);
 }

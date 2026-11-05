@@ -1,4 +1,4 @@
-import { computed, Ref } from '@vue/composition-api';
+import { computed, Ref } from 'vue';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { Customization, CustomizationOptionValue, FileUploadValue, isFileUploadValue, WidgetType } from 'src/modules/customization-system';

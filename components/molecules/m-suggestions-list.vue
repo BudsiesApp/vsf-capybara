@@ -59,7 +59,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref, computed, watch } from '@vue/composition-api';
+import { defineComponent, PropType, ref, computed, watch } from 'vue';
 import { SfInput } from '@storefront-ui/vue';
 
 import { AutocompleteSuggestion } from 'src/modules/address/types/autocomplete';

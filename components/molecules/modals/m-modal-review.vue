@@ -20,6 +20,7 @@
           name="email"
           type="email"
           :label="$t('Email address')"
+          autocomplete="email"
           :required="true"
           :valid="!$v.formData.email.$error"
           :error-message="

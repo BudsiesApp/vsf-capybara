@@ -13,7 +13,11 @@ import { NewsletterModule } from '@vue-storefront/core/modules/newsletter'
 import { StoryblokModule } from 'src/modules/vsf-storyblok-module'
 import { forStoryblok } from 'src/modules/vsf-storyblok-module/mappingFallback'
 import { extendStore } from '@vue-storefront/core/helpers'
-import { StorefrontModule, registerModule } from '@vue-storefront/core/lib/modules'
+import {
+  StorefrontModule,
+  registerApplicationModule,
+  registerModule
+} from '@vue-storefront/core/lib/modules'
 import { ABTesting } from 'src/modules/a-b-testing'
 import { BudsiesModule } from 'src/modules/budsies'
 import { PromotionPlatformModule } from 'src/modules/promotion-platform'
@@ -32,6 +36,7 @@ import { CurrencyModule } from 'src/modules/currency';
 import { FeraModule } from 'src/modules/fera';
 import { TrafficAttributionModule } from 'src/modules/traffic-attribution';
 import { MaestraModule } from 'src/modules/maestra';
+import { CouponActivationModule } from 'src/modules/coupon-activation'
 
 import registerStoryblokComponents from 'theme/components/storyblok'
 import { KlaviyoModule, ModuleConfig } from 'src/modules/klaviyo'
@@ -61,7 +66,7 @@ const extendUrlModule: StorefrontModule = function ({ store }) {
 // TODO:distributed across proper pages BEFORE 1.11
 export function registerClientModules () {
   registerStoryblokComponents()
-  registerModule(TrueVaultModule)
+  registerApplicationModule(TrueVaultModule)
   registerModule(PageLoadingIndicatorModule)
   registerModule(UrlModule)
   registerModule(CatalogModule)
@@ -76,7 +81,7 @@ export function registerClientModules () {
   registerModule(extendUrlModule)
   registerModule(BudsiesModule)
   registerModule(GoogleTagManagerModule)
-  registerModule(ABTesting)
+  registerApplicationModule(ABTesting)
   registerModule(PromotionPlatformModule)
   registerModule(GiftCardModule)
   registerModule(PaymentBackendMethodsModule)
@@ -88,7 +93,7 @@ export function registerClientModules () {
   registerModule(PersistedCustomerDataModule)
   registerModule(OrdersHistoryModule)
   registerModule(CurrencyModule)
-  registerModule(FeraModule)
+  registerApplicationModule(FeraModule)
   registerModule(AmazonPay)
   registerModule(TrafficAttributionModule)
   registerModule(MaestraModule)
@@ -98,6 +103,7 @@ export function registerClientModules () {
     updatePhoneNumberMutation: SET_PERSISTED_CUSTOMER_PHONE_NUMBER
   };
   registerModule(KlaviyoModule, klaviyoModuleConfig);
+  registerModule(CouponActivationModule)
 }
 
 // Deprecated API, will be removed in 2.0

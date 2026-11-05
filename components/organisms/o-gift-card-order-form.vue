@@ -57,7 +57,7 @@
           </SfSelect>
 
           <validation-provider
-            v-slot="{ errors }"
+            v-slot="{ errors: customPriceErrors }"
             slim
             :rules="customPriceAmountRules"
             name="'Price Amount'"
@@ -73,8 +73,8 @@
               v-model.number="customPriceAmount"
               :disabled="isDisabled"
               :required="true"
-              :valid="!errors.length"
-              :error-message="errors[0]"
+              :valid="!customPriceErrors.length"
+              :error-message="customPriceErrors[0]"
             />
           </validation-provider>
         </div>
@@ -94,6 +94,7 @@
 
             <SfInput
               name="customer_name"
+              autocomplete="name"
               v-model="customerName"
               :disabled="isDisabled"
               :required="true"
@@ -136,6 +137,7 @@
             <SfInput
               name="recipient_email"
               v-model.trim="recipientEmail"
+              autocomplete="email"
               :disabled="isDisabled"
               :required="true"
               :valid="!errors.length"
@@ -217,8 +219,8 @@
         {{ $t('Add to Cart') }}
       </SfButton>
 
-      <template v-if="$additionalContent.privacyPolicyAdditionalLinks">
-        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in $additionalContent.privacyPolicyAdditionalLinks" />
+      <template v-if="privacyPolicyLinks.length">
+        <component :is="linkComponent.component" :key="linkComponent.key" v-for="linkComponent in privacyPolicyLinks" />
       </template>
     </div>
   </validation-observer>
@@ -234,6 +236,11 @@ import {
 } from '@storefront-ui/vue/src/utilities/mobile-observer';
 
 import { SfCheckbox, SfButton, SfInput, SfSelect } from '@storefront-ui/vue';
+import {
+  AdditionalContentEntry,
+  AdditionalContentOutlet,
+  useAdditionalContent
+} from '@vue-storefront/core/additional-content';
 import { AmGiftCardType } from 'src/modules/gift-card';
 
 import GiftCardOrderFormData from 'theme/components/interfaces/gift-card-order-form-data.interface';
@@ -304,6 +311,16 @@ export default Vue.extend({
       type: Number as PropType<AmGiftCardType>,
       default: () => AmGiftCardType.VIRTUAL
     }
+  },
+  setup () {
+    const privacyPolicyLinks = useAdditionalContent(
+      AdditionalContentOutlet.PRIVACY_POLICY_LINKS
+    );
+
+    return {
+      privacyPolicyLinks: privacyPolicyLinks as unknown as
+        readonly AdditionalContentEntry[]
+    };
   },
   computed: {
     ...mapMobileObserver(),

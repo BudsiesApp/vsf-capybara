@@ -1,5 +1,9 @@
 <template>
-  <div class="cart-line-item">
+  <div
+    ref="cartItem"
+    class="cart-line-item"
+    tabindex="-1"
+  >
     <div class="_product-grid">
       <div class="_aside">
         <SfImage
@@ -44,16 +48,21 @@
             class="_customizations-section"
           >
             <template #title>
-              <div class="_title-container">
+              <span class="_title-container">
                 <span class="_customizations-label">{{ $t('Customizations') }}</span>
                 <span class="_selections-count">{{ selectionsCountLabel }}</span>
-              </div>
+              </span>
             </template>
 
             <cart-item-configuration-extended
               :customization-groups="customizationGroups"
               :has-customizable-properties="hasCustomizableProperties"
               :product-options="productOptions"
+              :removable-options="removableOptions"
+              :removed-options="removedOptions"
+              :is-options-manage-disabled="isCartSyncing"
+              @remove-option="removeOption"
+              @restore-option="restoreOption"
             />
           </m-expandable-section>
 
@@ -77,7 +86,7 @@
             />
 
             <div v-else class="_quantity">
-              {{ product.qty }}
+              {{ $t('Quantity') }}: {{ product.qty }}
             </div>
 
             <SfButton
@@ -91,7 +100,7 @@
 
             <SfButton
               class="-small color-secondary _action-button"
-              :disabled="isCartSyncing"
+              :aria-disabled="isCartSyncing.toString()"
               @click="removeHandler"
             >
               {{ $t('Remove') }}
@@ -104,8 +113,9 @@
 </template>
 
 <script lang="ts">
+import { useI18n, useRouter, useStore } from '@vue-storefront/core/application-services';
 import debounce from 'lodash-es/debounce';
-import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, ref } from '@vue/composition-api';
+import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, Ref, ref, toRef } from 'vue';
 import {
   SfImage,
   SfPrice,
@@ -127,6 +137,7 @@ import CartItem from '@vue-storefront/core/modules/cart/types/CartItem';
 
 import { normalizeProductPurchaseFlow, ProductPurchaseFlow, PriceHelper } from 'src/modules/shared';
 import { getProductMaxSaleQuantity } from 'theme/helpers/get-product-max-sale-quantity.function';
+import { useCartItemRemovableOptions } from 'theme/helpers/use-cart-item-removable-options';
 
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
 import MCartLineCouponOffer from 'theme/components/molecules/m-cart-line-coupon-offer.vue';
@@ -209,25 +220,32 @@ export default defineComponent({
     }
   },
   setup (props, context) {
+    const applicationStore = useStore();
+    const applicationRouter = useRouter();
+    const applicationI18n = useI18n();
     const imageHandlerService = inject<ImageHandlerService>('ImageHandlerService');
 
     let syncQuantityDebounced: ReturnType<typeof debounce> | undefined;
 
-    const isCartSyncing = computed<boolean>(() => context.root.$store.getters[IS_CART_SYNCING]);
+    const isCartSyncing = computed<boolean>(() => applicationStore.getters[IS_CART_SYNCING]);
 
     const cartItemKey = computed<string>(() => getCartItemKey(props.product));
+    const cartItem: Ref<HTMLElement | null> = ref(null);
 
     const title = computed<string>(() => getCartItemTitle(props.product));
 
     const cartItemPrice = computed(() =>
-      context.root.$store.getters[CART_ITEM_LOCALIZED_PRICE_DICTIONARY][cartItemKey.value]
+      applicationStore.getters[CART_ITEM_LOCALIZED_PRICE_DICTIONARY][cartItemKey.value]
     );
 
     const productCustomizations = computed(() => props.product.customizations || []);
-    const productCustomizationState = computed(() => props.product.extension_attributes?.customization_state || []);
     const productQty = computed(() => props.product.qty);
     const showPrices = ref(true);
     const showCouponOfferSection = ref(false);
+
+    const cartItemRemovableOptions = useCartItemRemovableOptions(
+      toRef(props, 'product')
+    );
 
     const {
       customizationGroups,
@@ -236,18 +254,17 @@ export default defineComponent({
       selectionsCount: customizationGroupsCount
     } = useCartItemConfiguration(
       productCustomizations,
-      productCustomizationState,
+      cartItemRemovableOptions.initialCustomizationState,
       cartItemPrice,
       productQty,
       showPrices,
-      context,
       ref(true)
     );
 
     const formattedPrice = computed(() =>
       PriceHelper.formatProductPrice(
         cartItemPrice.value,
-        context.root.$store.getters[GET_ACTIVE_CURRENCY].symbol
+        applicationStore.getters[GET_ACTIVE_CURRENCY].symbol
       )
     );
 
@@ -293,8 +310,8 @@ export default defineComponent({
 
     const selectionsCountLabel = computed<string>(() => {
       return selectionsCount.value === 1
-        ? `1 ${context.root.$t('selection')}`
-        : `${selectionsCount.value} ${context.root.$t('selections')}`;
+        ? `1 ${applicationI18n.t('selection')}`
+        : `${selectionsCount.value} ${applicationI18n.t('selections')}`;
     });
 
     function syncQuantity (): Promise<any> | void {
@@ -302,7 +319,7 @@ export default defineComponent({
         return;
       }
 
-      return context.root.$store.dispatch('cart/sync', { forceClientState: true });
+      return applicationStore.dispatch('cart/sync', { forceClientState: true });
     }
 
     async function changeProductQuantity (qty: number): Promise<void> {
@@ -310,9 +327,9 @@ export default defineComponent({
         return;
       }
 
-      context.root.$store.commit(`cart/${CART_UPD_ITEM}`, { product: props.product, qty });
+      applicationStore.commit(`cart/${CART_UPD_ITEM}`, { product: props.product, qty });
 
-      if (context.root.$store.getters['cart/isCartSyncEnabled']) {
+      if (applicationStore.getters['cart/isCartSyncEnabled']) {
         syncQuantityDebounced?.();
       }
     }
@@ -322,7 +339,26 @@ export default defineComponent({
         return;
       }
 
-      await context.root.$store.dispatch('cart/removeItem', { product: props.product });
+      context.emit('removing', cartItemKey.value);
+
+      const removeItemPromise = applicationStore.dispatch('cart/removeItem', { product: props.product });
+
+      context.emit('removed');
+      await removeItemPromise;
+    }
+
+    function getItemKey (): string {
+      return cartItemKey.value;
+    }
+
+    function focusCartItem (): boolean {
+      if (!cartItem.value) {
+        return false;
+      }
+
+      cartItem.value.focus();
+
+      return true;
     }
 
     function editHandler (): void {
@@ -330,45 +366,45 @@ export default defineComponent({
       const productFlow = normalizeProductPurchaseFlow(product.extension_attributes?.flow);
 
       if (product.sku === customPetsiesHuggablesSku) {
-        context.root.$router.push({
+        applicationRouter.push({
           name: 'huggables-creation-page',
           query: { existingPlushieId: product.extension_attributes?.plushie_id }
         });
       } else if (product.sku === customTumblersSku) {
-        context.root.$router.push({
+        applicationRouter.push({
           name: 'tumblers-creation',
           query: { existingPlushieId: product.extension_attributes?.plushie_id }
         });
       } else if (product.sku === customPhotoPortraitsSku) {
-        context.root.$router.push({
+        applicationRouter.push({
           name: 'photo-portraits-creation-page',
           query: { existingPlushieId: product.extension_attributes?.plushie_id }
         });
       } else if (product.sku === customPillowSku) {
-        context.root.$router.push({
+        applicationRouter.push({
           name: 'pillow-product',
           query: { existingPlushieId: product.extension_attributes?.plushie_id }
         });
       } else if (Object.keys(clothesProductSkuRouteNameDictionary).includes(product.sku)) {
-        context.root.$router.push({
+        applicationRouter.push({
           name: clothesProductSkuRouteNameDictionary[product.sku],
           params: { sku: product.sku },
           query: { existingPlushieId: product.extension_attributes?.plushie_id }
         });
       } else if (golfHeadCoversProductsSkus.includes(product.sku)) {
-        context.root.$router.push({
+        applicationRouter.push({
           name: 'golf-covers-create',
           query: { id: product.extension_attributes?.plushie_id }
         });
       } else if (foreversProductsSkus.includes(product.sku)) {
-        context.root.$router.push({
+        applicationRouter.push({
           name: productFlow === ProductPurchaseFlow.CUSTOMIZE_LATER
             ? 'forevers-customize-later'
             : 'forevers-create',
           query: { id: product.extension_attributes?.plushie_id }
         });
       } else if (Object.keys(printedProductSkuRouteNameDictionary).includes(product.sku)) {
-        context.root.$router.push({
+        applicationRouter.push({
           name: printedProductSkuRouteNameDictionary[product.sku],
           params: { sku: product.sku },
           query: { existingPlushieId: product.extension_attributes?.plushie_id }
@@ -378,7 +414,7 @@ export default defineComponent({
           ? 'cut-out-blankets'
           : 'renaissance-blankets';
 
-        context.root.$router.push({
+        applicationRouter.push({
           name: routeName,
           query: { existingPlushieId: product.extension_attributes?.plushie_id }
         });
@@ -387,7 +423,7 @@ export default defineComponent({
           ? 'bobbleheads-creation'
           : 'figurines-creation';
 
-        context.root.$router.push({
+        applicationRouter.push({
           name: routeName,
           query: { existingPlushieId: product.extension_attributes?.plushie_id }
         });
@@ -403,7 +439,9 @@ export default defineComponent({
     });
 
     return {
+      ...cartItemRemovableOptions,
       cartItemPrice,
+      cartItem,
       customizationGroups,
       formattedPrice,
       hasCustomizableProperties,
@@ -419,6 +457,8 @@ export default defineComponent({
       title,
       changeProductQuantity,
       editHandler,
+      focusCartItem,
+      getItemKey,
       removeHandler
     };
   }
@@ -566,8 +606,7 @@ export default defineComponent({
   ._quantity {
     line-height: initial;
     text-align: center;
-    margin-top: var(--spacer-sm);
-    font-size: var(--font-lg);
+    font-size: var(--font-sm);
   }
 
   @media (max-width: $tablet-min) {

@@ -1,4 +1,4 @@
-import { computed, ComputedRef, SetupContext } from '@vue/composition-api';
+import { computed, ComputedRef } from 'vue';
 
 import { Customization, CustomizationOptionValue, isFileUploadValue, OptionValue, WidgetType } from 'src/modules/customization-system';
 

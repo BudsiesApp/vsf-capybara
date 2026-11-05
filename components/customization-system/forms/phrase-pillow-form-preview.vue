@@ -15,6 +15,7 @@
               class="_background"
               :style="smallBackgroundImageStyle"
               :src="croppedBackground"
+              alt=""
               v-if="croppedBackground"
             >
 
@@ -111,12 +112,13 @@ import {
   inject,
   nextTick,
   PropType,
+  CSSProperties,
   Ref,
   ref,
   toRef,
   toRefs,
   watch
-} from '@vue/composition-api';
+} from 'vue';
 import { SfHeading } from '@storefront-ui/vue';
 
 import config from 'config';
@@ -145,7 +147,7 @@ import MDesignImages from 'theme/components/molecules/m-design-images.vue';
 import MLivePreview from 'theme/components/molecules/m-live-preview.vue';
 import { useBackendProductId } from 'theme/helpers/use-backend-product-id';
 
-interface SmallBackgroundImageStyle {
+interface SmallBackgroundImageStyle extends CSSProperties {
   width: string,
   height: string,
   top: string,
@@ -486,9 +488,7 @@ export default defineComponent({
       customizations
     } = toRefs(props);
 
-    const backgroundEditor = ref<InstanceType<typeof MBackgroundEditor> | null>(
-      null
-    );
+    const backgroundEditor: Ref<InstanceType<typeof MBackgroundEditor> | null> = ref(null);
 
     const isCustomizerPreviewBackSideFocused = ref<boolean>(false);
 

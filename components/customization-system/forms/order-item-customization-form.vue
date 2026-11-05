@@ -5,6 +5,7 @@
     ref="validationObserver"
   >
     <customization-option
+      :restoration-settled="restorationSettled"
       v-for="customization in filteredCustomizations"
       class="_customization-option"
       ref="customizationOption"
@@ -27,10 +28,11 @@ import {
   computed,
   defineComponent,
   PropType,
+  Ref,
   ref,
   toRefs,
   watch
-} from '@vue/composition-api';
+} from 'vue';
 import { ValidationObserver } from 'vee-validate';
 
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -49,26 +51,10 @@ import {
   useCustomizationStatePreservation
 } from 'src/modules/customization-system';
 
-import { useFormValidation } from 'theme/helpers/use-form-validation';
+import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
+import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
 
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
-
-function getAllFormRefs (
-  refs: Record<string, Vue | Element | Vue[] | Element[]>
-): Record<string, Vue | Element | Vue[] | Element[]> {
-  let refsDictionary: Record<string, Vue | Element | Vue[] | Element[]> = {};
-  const customizationOptions = refs['customizationOption'] as InstanceType<
-    typeof CustomizationOption
-  >[];
-
-  for (const customizationOption of customizationOptions) {
-    for (const key in customizationOption.$refs) {
-      refsDictionary[key] = customizationOption.$refs[key];
-    }
-  }
-
-  return refsDictionary;
-}
 
 export default defineComponent({
   name: 'OrderItemCustomizationForm',
@@ -97,8 +83,11 @@ export default defineComponent({
   setup (props, context) {
     const { draftOrderItem, product } = toRefs(props);
 
-    const validationObserver = ref<InstanceType<typeof ValidationObserver> | null>(null);
-    const customizationOption = ref<InstanceType<typeof CustomizationOption>[] | null>(null);
+    const validationObserver: Ref<InstanceType<typeof ValidationObserver> | null> = ref(null);
+    const {
+      templateRef: customizationOption,
+      getRefsInRenderedOrder: getCustomizationOptionsInRenderedOrder
+    } = useRenderedOrderTemplateRefs<InstanceType<typeof CustomizationOption>>();
 
     const productCustomizations = computed<Customization[]>(() => {
       return product.value.customizations || [];
@@ -212,13 +201,13 @@ export default defineComponent({
 
     const formValidation = useFormValidation(
       validationObserver,
-      () => getAllFormRefs(context.refs),
+      () => getNestedFormRefs(getCustomizationOptionsInRenderedOrder()),
       props.draftOrderItem.id.toString()
     );
 
     const orderItemKey = computed<string>(() => `orderItemCustomization:${draftOrderItem.value.id}`);
 
-    const { removePreservedState } = useCustomizationStatePreservation(
+    const { removePreservedState, restorationSettled } = useCustomizationStatePreservation(
       orderItemKey,
       customizationState,
       ref(undefined),
@@ -258,6 +247,7 @@ export default defineComponent({
     );
 
     return {
+      restorationSettled,
       filteredCustomizations,
       customizationAvailableOptionValues,
       customizationOption,

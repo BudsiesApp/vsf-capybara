@@ -4,6 +4,12 @@
       <div class="_loader" />
     </div>
     <SfHeading :level="1" :title="title" class="_title" />
+    <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+      {{ isLoading ? title : '' }}
+    </p>
+    <p class="sr-only" role="alert" aria-atomic="true">
+      {{ isShowError ? title : '' }}
+    </p>
     <div class="_error-action" v-if="isShowError">
       <SfButton @click="goToHomepage">
         {{ $t("Return to home") }}
@@ -61,7 +67,10 @@ export default Vue.extend({
         let cartToken: string | undefined;
         const payload = {
           recoveryId: this.$route.params.id,
-          recoveryCode: this.$route.params.code
+          recoveryCode: this.$route.params.code,
+          ...(typeof this.$route.query.applyPromoCode === 'string'
+            ? { applyPromoCode: this.$route.query.applyPromoCode }
+            : {})
         };
 
         try {
