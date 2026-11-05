@@ -135,7 +135,7 @@
       :product-sku="descriptionProductSku"
       :backup-product-sku="product.parentSku"
       :title="$t('Product Details').toString()"
-      @story-ready="onStoryReady"
+      @story-rendered="onStoryRendered"
     />
   </div>
 </template>
@@ -150,7 +150,8 @@ import {
   ref,
   Ref,
   toRefs,
-  watch
+  watch,
+  onMounted
 } from 'vue';
 import { SfButton } from '@storefront-ui/vue';
 import { ValidationObserver, ValidationProvider } from 'vee-validate';
@@ -569,7 +570,7 @@ export default defineComponent({
     const descriptionStoryDependencies = computed<string[]>(() => {
       return [getProductDescriptionStoryFullSlug(descriptionProductSku.value)];
     });
-    const { onStoryReady } = useStoryblokReadinessTracker(
+    const { onStoryRendered } = useStoryblokReadinessTracker(
       productSku,
       descriptionStoryDependencies,
       () => context.emit('form-ready')
@@ -602,7 +603,7 @@ export default defineComponent({
       privacyPolicyLinks: privacyPolicyLinks as unknown as
         readonly AdditionalContentEntry[],
       lockedCustomizationDictionary,
-      onStoryReady,
+      onStoryRendered,
       onEntityBusyChanged,
       onCustomizationOptionInput,
       onFormSubmit,

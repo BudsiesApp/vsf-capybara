@@ -1,8 +1,22 @@
 import Vue from 'vue';
+import { Logger } from '@vue-storefront/core/lib/logger';
+import { isServer } from '@vue-storefront/core/helpers';
+import { waitForStoryblokContentRender } from 'src/modules/vsf-storyblok-module';
 import { StoryblokStories } from 'src/modules/vsf-storyblok-module/types/State';
 
+export interface StoryLoadResult {
+  fullSlugs: string[];
+  hasContent: boolean;
+}
+
 export default Vue.extend({
+  data () {
+    return { storyLoadId: 0 };
+  },
   computed: {
+    storyLoadInputs (): (string | undefined)[] {
+      return [this.storyFullSlug];
+    },
     storyData (): StoryblokStories | undefined {
       if (!this.storyFullSlug) {
         return;
@@ -31,38 +45,54 @@ export default Vue.extend({
     return (this as any).loadStory();
   },
   async mounted () {
-    if (this.story) {
-      this.$emit('story-ready', (this as any).getStoryReadyPayload());
-      return;
-    }
-
     await this.loadStory();
   },
-  methods: {
-    getStoryReadyPayload (): string[] {
-      return this.storyFullSlug ? [this.storyFullSlug] : [];
-    },
-    async executeStoryLoad (
-      loadStoryHandler: () => Promise<void>
-    ): Promise<void> {
-      try {
-        await loadStoryHandler();
-      } finally {
-        this.$emit('story-ready', this.getStoryReadyPayload());
+  watch: {
+    storyLoadInputs ([storyFullSlug]: (string | undefined)[]) {
+      if (!storyFullSlug) {
+        return;
       }
+
+      this.loadStory();
+    }
+  },
+  methods: {
+    async fetchStory (): Promise<StoryLoadResult> {
+      const storyFullSlug = this.storyFullSlug;
+      const story = await this.$store.dispatch('storyblok/loadStory', {
+        fullSlug: storyFullSlug
+      });
+
+      return { fullSlugs: [storyFullSlug], hasContent: !!story?.content };
     },
     async loadStory (): Promise<void> {
       if (!this.storyFullSlug) {
         throw new Error('\'storyFullSlug\' property is not defined');
       }
 
-      const storyFullSlug = this.storyFullSlug;
+      const loadId = ++this.storyLoadId;
+      const fallbackFullSlugs = [this.storyFullSlug];
+      let result: StoryLoadResult = { fullSlugs: fallbackFullSlugs, hasContent: false };
 
-      await this.executeStoryLoad(async () => {
-        await this.$store.dispatch(`storyblok/loadStory`, {
-          fullSlug: storyFullSlug
-        });
-      });
+      try {
+        result = await this.fetchStory();
+      } catch (error) {
+        Logger.error(error, 'storyblok')();
+      }
+
+      if (isServer || loadId !== this.storyLoadId) {
+        return;
+      }
+
+      if (result.hasContent) {
+        await waitForStoryblokContentRender();
+
+        if (loadId !== this.storyLoadId) {
+          return;
+        }
+      }
+
+      this.$emit('story-rendered', result.fullSlugs);
     }
   }
 });

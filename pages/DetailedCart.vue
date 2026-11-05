@@ -131,7 +131,7 @@
         <OrderSummary />
 
         <div class="_shipping-handling-block">
-          <MBlockStory story-slug="cart_shipping_handling" />
+          <MBlockStory story-slug="cart_shipping_handling" @story-rendered="onStoryRendered" />
         </div>
       </div>
     </div>
@@ -154,7 +154,9 @@ import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-i
 import CartEvents from 'src/modules/shared/types/cart-events';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
-import { nextTick, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
+import { useStore } from '@vue-storefront/core/application-services';
+import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
@@ -288,11 +290,19 @@ export default {
             name: 'tumblers-creation'
           }
         }
-      ],
-      isMounted: false
+      ]
     };
   },
   setup () {
+    const store = useStore();
+    const isMounted = ref(false);
+    const trackingKey = computed(() => isMounted.value && store.state.cart.cartIsLoaded ? 'cart' : undefined);
+    const totalItems = computed(() => store.getters['cart/getCartItems'].reduce(
+      (totalItems, product) => totalItems + parseInt(product.qty, 10), 0
+    ));
+    const storyDependencies = computed(() => totalItems.value
+      ? ['blocks/cart_shipping_handling'] : []);
+    const { onStoryRendered } = useStoryblokReadinessTracker(trackingKey, storyDependencies, emitPageRenderedEvent);
     const emptyCartHeading = ref(null);
     const {
       templateRef: cartLineItems,
@@ -318,6 +328,9 @@ export default {
     };
 
     return {
+      isMounted,
+      totalItems,
+      onStoryRendered,
       cartLineItems,
       emptyCartHeading,
       focusCartLineItem,
@@ -339,12 +352,6 @@ export default {
       isCartSyncing: IS_CART_SYNCING
     }),
     ...mapMobileObserver(),
-    totalItems () {
-      return this.products.reduce(
-        (totalItems, product) => totalItems + parseInt(product.qty, 10),
-        0
-      );
-    },
     isLoading () {
       return !this.isMounted || !this.cartIsLoaded;
     },
@@ -431,8 +438,6 @@ export default {
         products: this.products,
         platformTotals: this.$store.state.cart.platformTotals
       });
-
-      emitPageRenderedEvent();
     }
   },
   metaInfo () {

@@ -6,7 +6,7 @@
       <div class="_notes">
         <MBlockStory
           :story-slug="topStorySlug"
-          @story-ready="onStoryReady"
+          @story-rendered="onStoryRendered"
           v-if="topStorySlug"
         />
       </div>
@@ -118,7 +118,7 @@
     <div class="_notes">
       <MBlockStory
         :story-slug="bottomStorySlug"
-        @story-ready="onStoryReady"
+        @story-rendered="onStoryRendered"
         v-if="bottomStorySlug"
       />
     </div>
@@ -413,9 +413,9 @@ export default defineComponent({
     });
 
     const storyDependencies = computed<string[]>(() => {
-      return [`blocks/${topStorySlug.value}`, `blocks/${bottomStorySlug.value}`];
+      return [topStorySlug.value, bottomStorySlug.value].filter(Boolean).map(slug => `blocks/${slug}`);
     });
-    const { onStoryReady } = useStoryblokReadinessTracker(
+    const { onStoryRendered } = useStoryblokReadinessTracker(
       productSku,
       storyDependencies,
       () => context.emit('form-ready')
@@ -458,7 +458,7 @@ export default defineComponent({
       onEntityBusyChanged,
       onCustomizationOptionInput,
       onFormSubmit,
-      onStoryReady,
+      onStoryRendered,
       preview,
       svgPath,
       submitButtonText,

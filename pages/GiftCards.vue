@@ -55,7 +55,7 @@
         v-if="showStory"
         class="_giftcard-detailed-information"
         :product-sku="product.sku"
-        @story-ready="onStoryReady"
+        @story-rendered="onStoryRendered"
       />
     </div>
   </div>
@@ -265,7 +265,8 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       showPreviewModal: false,
       isSubmitting: false,
       isFormMounted: false,
-      isStoryReady: false
+      isStoryRendered: false,
+      hasEmittedPageRendered: false
     };
   },
   async mounted (): Promise<void> {
@@ -315,15 +316,16 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
       this.isFormMounted = true;
       this.emitPageRendered();
     },
-    onStoryReady (): void {
-      this.isStoryReady = true;
+    onStoryRendered (): void {
+      this.isStoryRendered = true;
       this.emitPageRendered();
     },
     emitPageRendered (): void {
-      if (!this.product || !this.isFormMounted || !this.isStoryReady) {
+      if (!this.product || !this.isFormMounted || !this.isStoryRendered || this.hasEmittedPageRendered) {
         return;
       }
 
+      this.hasEmittedPageRendered = true;
       emitPageRenderedEvent();
     },
     async addCartItem (): Promise<void> {

@@ -5,7 +5,7 @@
     <MBlockStory
       :story-slug="topStorySlug"
       class="_top-block"
-      @story-ready="onStoryReady"
+      @story-rendered="onStoryRendered"
       v-if="topStorySlug"
     />
 
@@ -120,7 +120,7 @@
 
         <MBlockStory
           :story-slug="bottomStorySlug"
-          @story-ready="onStoryReady"
+          @story-rendered="onStoryRendered"
           v-if="bottomStorySlug"
         />
       </form>
@@ -474,9 +474,9 @@ export default defineComponent({
     });
 
     const storyDependencies = computed<string[]>(() => {
-      return [`blocks/${topStorySlug.value}`, `blocks/${bottomStorySlug.value}`];
+      return [topStorySlug.value, bottomStorySlug.value].filter(Boolean).map(slug => `blocks/${slug}`);
     });
-    const { onStoryReady } = useStoryblokReadinessTracker(
+    const { onStoryRendered } = useStoryblokReadinessTracker(
       productSku,
       storyDependencies,
       () => context.emit('form-ready')
@@ -507,7 +507,7 @@ export default defineComponent({
       onEntityBusyChanged,
       onCustomizationOptionInput,
       onFormSubmit,
-      onStoryReady,
+      onStoryRendered,
       pageTitle,
       privacyPolicyLinks: privacyPolicyLinks as unknown as
         readonly AdditionalContentEntry[],

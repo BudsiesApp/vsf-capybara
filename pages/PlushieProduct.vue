@@ -5,7 +5,7 @@
     <MBlockStory
       :story-slug="topStorySlug"
       class="_top-block"
-      @story-ready="onStoryReady"
+      @story-rendered="onStoryRendered"
       v-if="topStorySlug"
     />
 
@@ -143,7 +143,7 @@ export default defineComponent({
       return [`blocks/${topStorySlug.value}`];
     });
 
-    const { onStoryReady } = useStoryblokReadinessTracker(
+    const { onStoryRendered } = useStoryblokReadinessTracker(
       plushieType,
       storyDependencies,
       () => emitPageRenderedEvent()
@@ -156,7 +156,7 @@ export default defineComponent({
       canUsePersistedCustomizationState,
       currentProduct,
       mainTitleText,
-      onStoryReady,
+      onStoryRendered,
       productTypeButtonsList,
       requestServices,
       topStorySlug
