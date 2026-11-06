@@ -44,6 +44,7 @@
         v-bind="widget.props"
         :restoration-settled="widget.component === 'ProductionTimeTimelineWidget' ? restorationSettled : undefined"
         :report-readiness-busy="widget.component === 'ProductionTimeTimelineWidget' ? reportReadinessBusy : undefined"
+        :appearance="widget.component === 'ImageUploadWidget' ? imageUploadAppearance : undefined"
         v-model="selectedOption"
         @widget-busy-changed="onWidgetBusyChanged"
         @expand-clicked="(optionValueId) => $emit('expand-clicked', optionValueId)"
@@ -168,6 +169,10 @@ export default defineComponent({
     },
     hiddenOptionValues: {
       type: Object as PropType<Record<string, boolean> | undefined>,
+      default: undefined
+    },
+    imageUploadAppearance: {
+      type: String as PropType<'order-history' | undefined>,
       default: undefined
     }
   },
