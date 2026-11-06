@@ -1,7 +1,8 @@
 <template>
-  <div class="image-upload-widget">
+  <div class="image-upload-widget" :class="{ '-appearance-order-history': appearance === 'order-history' }">
     <m-artwork-upload
       ref="artworkUpload"
+      :appearance="appearance"
       :aria-describedby="ariaDescribedby"
       :aria-invalid="ariaInvalid"
       :aria-labelledby="ariaLabelledby"
@@ -21,6 +22,7 @@
       :id="errorMessageId"
       aria-live="polite"
       class="_error-message"
+      :class="{ '-has-error': !!error }"
     >
       {{ error }}
     </div>
@@ -55,6 +57,10 @@ export default defineComponent({
     MArtworkUpload
   },
   props: {
+    appearance: {
+      type: String as PropType<'order-history' | undefined>,
+      default: undefined
+    },
     ariaLabelledby: {
       type: String,
       default: undefined
@@ -171,6 +177,16 @@ export default defineComponent({
       1.2,
       var(--font-family-secondary)
     );
+  }
+
+  // Opt-in: the live region stays in the DOM but takes no space until there is an error, which then wraps naturally.
+  &.-appearance-order-history ._error-message {
+    height: auto;
+    margin-top: 0;
+
+    &.-has-error {
+      margin-top: var(--spacer-xs);
+    }
   }
 }
 </style>
