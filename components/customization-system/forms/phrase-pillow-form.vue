@@ -10,6 +10,7 @@
       <div class="_notes">
         <MBlockStory
           :story-slug="topStorySlug"
+          @story-rendered="onStoryRendered"
           v-if="topStorySlug"
         />
       </div>
@@ -121,6 +122,7 @@
     <div class="_notes">
       <MBlockStory
         :story-slug="bottomStorySlug"
+        @story-rendered="onStoryRendered"
         v-if="bottomStorySlug"
       />
     </div>
@@ -166,6 +168,7 @@ import {
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
+import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
 import { usePhrasePillowFormSteps } from 'theme/helpers/use-phrase-pillow-form-steps';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 
@@ -413,6 +416,15 @@ export default defineComponent({
       return isDisabled.value || isSomeEntityBusy.value;
     });
 
+    const storyDependencies = computed<string[]>(() => {
+      return [topStorySlug.value, bottomStorySlug.value].filter(Boolean).map(slug => `blocks/${slug}`);
+    });
+    const { onStoryRendered } = useStoryblokReadinessTracker(
+      productSku,
+      storyDependencies,
+      () => context.emit('form-ready')
+    );
+
     watch(formSteps.currentStep, (val, oldVal) => {
       if (val === oldVal) {
         return;
@@ -450,6 +462,7 @@ export default defineComponent({
       onEntityBusyChanged,
       onCustomizationOptionInput,
       onFormSubmit,
+      onStoryRendered,
       preview,
       svgPath,
       submitButtonText,
