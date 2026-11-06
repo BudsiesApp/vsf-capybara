@@ -5,6 +5,7 @@
     <MBlockStory
       :story-slug="topStorySlug"
       class="_top-block"
+      @story-rendered="onStoryRendered"
       v-if="topStorySlug"
     />
 
@@ -117,7 +118,11 @@
           </template>
         </div>
 
-        <MBlockStory :story-slug="bottomStorySlug" v-if="bottomStorySlug" />
+        <MBlockStory
+          :story-slug="bottomStorySlug"
+          @story-rendered="onStoryRendered"
+          v-if="bottomStorySlug"
+        />
       </form>
     </validation-observer>
 
@@ -183,6 +188,7 @@ import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
 import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
 import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
+import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
 
@@ -191,7 +197,6 @@ import CustomizationOption from 'theme/components/customization-system/customiza
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MOrderSubmitAgreement from 'theme/components/molecules/m-order-submit-agreement.vue';
-import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
 
 export default defineComponent({
   name: 'VerticalStepsForm',
@@ -223,7 +228,6 @@ export default defineComponent({
     MBlockStory,
     MFormErrors,
     MOrderSubmitAgreement,
-    MProductDescriptionStory,
     SfButton,
     SfDivider,
     SfHeading,
@@ -469,6 +473,15 @@ export default defineComponent({
       ).toString();
     });
 
+    const storyDependencies = computed<string[]>(() => {
+      return [topStorySlug.value, bottomStorySlug.value].filter(Boolean).map(slug => `blocks/${slug}`);
+    });
+    const { onStoryRendered } = useStoryblokReadinessTracker(
+      productSku,
+      storyDependencies,
+      () => context.emit('form-ready')
+    );
+
     const { customizationFilter } = useABTestingCustomizationsFilter();
 
     const { filteredCustomizations } = useCustomizationsFilter(
@@ -494,6 +507,7 @@ export default defineComponent({
       onEntityBusyChanged,
       onCustomizationOptionInput,
       onFormSubmit,
+      onStoryRendered,
       pageTitle,
       privacyPolicyLinks: privacyPolicyLinks as unknown as
         readonly AdditionalContentEntry[],
