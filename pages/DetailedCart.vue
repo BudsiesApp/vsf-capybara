@@ -118,7 +118,10 @@ import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-i
 import CartEvents from 'src/modules/shared/types/cart-events';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
-import { nextTick, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
+import { useStore } from '@vue-storefront/core/application-services';
+import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
+import { emitPageRenderedEvent } from 'src/modules/shared';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { IS_CART_SYNCING } from '@vue-storefront/core/modules/cart';
@@ -137,11 +140,17 @@ export default {
     return {
       cartItemRemovalAnnouncement: '',
       pendingCartItemFocusKey: null,
-      shouldFocusEmptyCart: false,
-      isMounted: false
+      shouldFocusEmptyCart: false
     };
   },
   setup () {
+    const store = useStore();
+    const isMounted = ref(false);
+    const trackingKey = computed(() => isMounted.value && store.state.cart.cartIsLoaded ? 'cart' : undefined);
+    const totalItems = computed(() => store.getters['cart/getCartItems'].reduce(
+      (items, product) => items + parseInt(product.qty, 10), 0
+    ));
+    useStoryblokReadinessTracker(trackingKey, computed(() => []), emitPageRenderedEvent);
     const emptyCartHeading = ref(null);
     const {
       templateRef: cartLineItems,
@@ -167,6 +176,8 @@ export default {
     };
 
     return {
+      isMounted,
+      totalItems,
       cartLineItems,
       emptyCartHeading,
       focusCartLineItem,
@@ -188,12 +199,6 @@ export default {
       isCartSyncing: IS_CART_SYNCING
     }),
     ...mapMobileObserver(),
-    totalItems () {
-      return this.products.reduce(
-        (totalItems, product) => totalItems + parseInt(product.qty, 10),
-        0
-      );
-    },
     isLoading () {
       return !this.isMounted || !this.cartIsLoaded;
     }

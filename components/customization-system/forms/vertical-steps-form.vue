@@ -5,6 +5,7 @@
     <MBlockStory
       :story-slug="topStorySlug"
       class="_top-block"
+      @story-rendered="onStoryRendered"
       v-if="topStorySlug"
     />
 
@@ -114,7 +115,11 @@
           </template>
         </div>
 
-        <MBlockStory :story-slug="bottomStorySlug" v-if="bottomStorySlug" />
+        <MBlockStory
+          :story-slug="bottomStorySlug"
+          @story-rendered="onStoryRendered"
+          v-if="bottomStorySlug"
+        />
       </form>
     </validation-observer>
   </div>
@@ -179,6 +184,7 @@ import {
   useFormValidation
 } from 'theme/helpers/use-form-validation';
 import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
+import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 import { useQuantityAndShippingDiscounts } from 'theme/helpers/use-quantity-and-shipping-discounts';
 
@@ -465,6 +471,15 @@ export default defineComponent({
       ).toString();
     });
 
+    const storyDependencies = computed<string[]>(() => {
+      return [topStorySlug.value, bottomStorySlug.value].filter(Boolean).map(slug => `blocks/${slug}`);
+    });
+    const { onStoryRendered } = useStoryblokReadinessTracker(
+      productSku,
+      storyDependencies,
+      () => context.emit('form-ready')
+    );
+
     const { customizationFilter } = useABTestingCustomizationsFilter();
 
     const { filteredCustomizations } = useCustomizationsFilter(
@@ -492,6 +507,7 @@ export default defineComponent({
       onEntityBusyChanged,
       onCustomizationOptionInput,
       onFormSubmit,
+      onStoryRendered,
       pageTitle,
       privacyPolicyLinks: privacyPolicyLinks as unknown as
         readonly AdditionalContentEntry[],

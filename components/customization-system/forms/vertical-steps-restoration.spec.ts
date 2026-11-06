@@ -22,6 +22,9 @@ const mockOption = { id: 'production', name: 'Production', type: 'option', sn: 0
 jest.mock('@vue-storefront/core/lib/storage-manager', () => ({ StorageManager: { get: () => mockStorage } }));
 jest.mock('@vue-storefront/core/application-services', () => ({ useStore: () => mockStore, useRoute: () => ({ query: {} }), useRouter: () => ({ push: mockPush, replace: mockReplace }), useI18n: () => ({ t: value => value }) }));
 jest.mock('@vue-storefront/core/request-services', () => ({ useRequestServices: () => ({ getCookie: () => 'FR' }) }));
+jest.mock('src/modules/vsf-storyblok-module', () => ({
+  useStoryblokReadinessTracker: () => ({ onStoryRendered: jest.fn() })
+}));
 jest.mock('src/modules/persisted-customer-data', () => ({ PERSISTED_CUSTOMER_SHIPPING_COUNTRY: 'country', PERSISTED_CUSTOMER_SHIPPING_COUNTRY_SETTLED: 'settled' }));
 jest.mock('@storefront-ui/vue', () => ({ SfIcon: { render: h => h('i') } }));
 jest.mock('vee-validate', () => ({
