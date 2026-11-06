@@ -543,6 +543,23 @@ describe('OShipping', () => {
       expect(findButton(wrapper, 'Continue to payment').attributes('disabled')).toBeUndefined();
     });
 
+    it('does not advance after the customer leaves the shipping step during submission', async () => {
+      const { store, setNextLookupOutcome } = createStore();
+      const wrapper = mountShipping(store);
+      let finishTotalsSync: () => void;
+      const remainingTotalsSync = new Promise<void>((resolve) => {
+        finishTotalsSync = resolve;
+      });
+      setNextLookupOutcome({ shippingMethods: [flatRate], remainingTotalsSync });
+
+      await continueToPayment(wrapper);
+      wrapper.destroy();
+      finishTotalsSync();
+      await flushPromises();
+
+      expect(hasAdvancedCheckout()).toBe(false);
+    });
+
     it('stays on the shipping step while a newer lookup is pending', async () => {
       const { store, setNextLookupOutcome } = createStore();
       const wrapper = mountShipping(store);

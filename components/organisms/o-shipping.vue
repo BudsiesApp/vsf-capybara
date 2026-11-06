@@ -203,7 +203,8 @@ export default defineComponent({
     return {
       states: States,
       isSavingShippingDetails: false,
-      isShippingAddressLocked: false
+      isShippingAddressLocked: false,
+      hasLeftShippingStep: false
     };
   },
   computed: {
@@ -318,7 +319,8 @@ export default defineComponent({
       });
     },
     canAdvanceWithShippingMethod (selectedShippingMethod, submittedAddress) {
-      return this.isDisplayedAddress(submittedAddress) &&
+      return !this.hasLeftShippingStep &&
+        this.isDisplayedAddress(submittedAddress) &&
         !this.isShippingMethodsSyncing &&
         !this.isShippingMethodsSyncingError &&
         this.isSelectedShippingMethodAvailable(selectedShippingMethod);
@@ -447,6 +449,7 @@ export default defineComponent({
     EventBus.$on('user-after-loggedin', this.fillLastUsedCustomerData);
   },
   beforeDestroy () {
+    this.hasLeftShippingStep = true;
     EventBus.$off('user-after-loggedin', this.fillLastUsedCustomerData);
   }
 });
