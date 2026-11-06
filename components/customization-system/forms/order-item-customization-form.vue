@@ -5,6 +5,7 @@
     ref="validationObserver"
   >
     <customization-option
+      :restoration-settled="restorationSettled"
       v-for="customization in filteredCustomizations"
       class="_customization-option"
       ref="customizationOption"
@@ -206,7 +207,7 @@ export default defineComponent({
 
     const orderItemKey = computed<string>(() => `orderItemCustomization:${draftOrderItem.value.id}`);
 
-    const { removePreservedState } = useCustomizationStatePreservation(
+    const { removePreservedState, restorationSettled } = useCustomizationStatePreservation(
       orderItemKey,
       customizationState,
       ref(undefined),
@@ -246,6 +247,7 @@ export default defineComponent({
     );
 
     return {
+      restorationSettled,
       filteredCustomizations,
       customizationAvailableOptionValues,
       customizationOption,

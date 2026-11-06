@@ -10,10 +10,12 @@
         :product="currentProduct"
         :show-gallery="false"
         @hook:mounted="onFormMounted"
+        @form-ready="onFormReady"
       >
         <template #description>
           <MBlockStory
             :story-slug="topStorySlug"
+            @story-rendered="onStoryRendered"
             class="_top-block"
             v-if="topStorySlug"
           />
@@ -71,9 +73,11 @@ import {
   FOREVERS_DOG_BUNDLE_SKU,
   FOREVERS_OTHER_BUNDLE_SKU,
   getCanonicalUrl,
+  emitPageRenderedEvent,
   ProductPurchaseFlow
 } from 'src/modules/shared';
 
+import { useFormPageReadiness } from 'theme/helpers/use-form-page-readiness';
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 import { useMultiProductsPage } from 'theme/helpers/use-multi-products-page';
 
@@ -203,8 +207,12 @@ export default defineComponent({
         return '';
       }
 
-      return `forevers_customize_later_page_top`;
+      return 'petsies_creation_page_top';
     });
+
+    const trackingKey = computed(() => showForm.value ? currentProduct.value?.sku : undefined);
+    const storyDependencies = computed(() => topStorySlug.value ? [`blocks/${topStorySlug.value}`] : []);
+    const { onStoryRendered, onFormReady } = useFormPageReadiness(trackingKey, storyDependencies, emitPageRenderedEvent);
 
     const showPlaceholder = computed<boolean>(() => {
       return !isLeavePage.value && (!showForm.value || !isFormMounted.value);
@@ -240,6 +248,8 @@ export default defineComponent({
     }
 
     return {
+      onStoryRendered,
+      onFormReady,
       canUsePersistedCustomizationState,
       currentProductId,
       currentProduct,
