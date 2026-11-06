@@ -95,6 +95,7 @@ describe('artwork upload default presentation', () => {
     (wrapper.vm as unknown as { showMaxFilesLimitWarning: () => void }).showMaxFilesLimitWarning();
     await wrapper.vm.$nextTick();
     expect(wrapper.find('._error-text').text()).toBe('You can only upload {count} files');
+    expect(wrapper.find('._error-text').attributes('aria-live')).toBeUndefined();
     wrapper.destroy();
   });
 });
@@ -142,10 +143,20 @@ describe('artwork upload order history appearance', () => {
     expect(pondAttrs(wrapper).maxFiles).toBe(maxFiles ?? null);
   });
 
-  it('keeps room for the max files warning without showing text', () => {
+  it('keeps the max files warning as an empty polite live region until it is shown', async () => {
     const wrapper = mountUpload({ appearance: 'order-history', allowMultiple: true, maxFiles: 3 });
-    expect(wrapper.find('._error-text').exists()).toBe(true);
-    expect(wrapper.find('._error-text').text()).toBe('');
+    const warning = wrapper.find('._error-text');
+    expect(warning.exists()).toBe(true);
+    expect(warning.attributes('aria-live')).toBe('polite');
+    expect(warning.text()).toBe('');
+    expect(warning.classes()).not.toContain('-active');
+
+    (wrapper.vm as unknown as { showMaxFilesLimitWarning: () => void }).showMaxFilesLimitWarning();
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('._error-text').text()).toBe('You can only upload {count} files');
+    expect(wrapper.find('._error-text').classes()).toContain('-active');
+    expect(wrapper.find('._error-text').attributes('aria-live')).toBe('polite');
+    wrapper.destroy();
   });
 
   it('keeps the single image options for a single image field', () => {
@@ -197,6 +208,14 @@ describe('artwork upload order history responsive contract', () => {
       expect(scopedStyle).toContain(`${property}:`);
       expect(scopedStyle).toContain(`var(${property})`);
     }
+  });
+
+  it('reserves no blank height or margin for the empty warning, only while it is shown', () => {
+    const appearance = scopedStyle.slice(scopedStyle.indexOf('&.-appearance-order-history'));
+    const warning = appearance.slice(appearance.indexOf('._error-text'), appearance.indexOf('::v-deep'));
+    expect(warning).not.toMatch(/min-height|min-block-size|height:/);
+    expect(warning).toMatch(/margin-top:\s*0;/);
+    expect(warning).toMatch(/&\.-active\s*\{[^}]*margin-top:\s*var\(--spacer-xs\)/);
   });
 
   it('applies the narrow rule only to the opt-in appearance', () => {

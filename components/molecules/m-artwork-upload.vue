@@ -39,6 +39,8 @@
 
       <div
         class="_error-text"
+        :class="{ '-active': isMaxFilesLimitWarningShow }"
+        :aria-live="isOrderHistoryAppearance ? 'polite' : undefined"
         v-if="isMaxFilesLimitWarningShow || isOrderHistoryAppearance"
       >
         <template v-if="isMaxFilesLimitWarningShow">
@@ -973,10 +975,13 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         border-color: var(--c-primary);
       }
 
+      // Kept in the DOM as a live region, but takes no space until the warning is shown.
       ._error-text {
-        min-height: calc(var(--font-sm) * 1.4);
-        margin-top: var(--spacer-xs);
-        line-height: 1.4;
+        margin-top: 0;
+
+        &.-active {
+          margin-top: var(--spacer-xs);
+        }
       }
 
       ::v-deep {

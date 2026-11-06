@@ -348,6 +348,16 @@ describe('order item photo upload form', () => {
       }
     });
 
+    it('keeps one compact status line and a single gap above the actions', () => {
+      const status = scopedStyle.slice(scopedStyle.indexOf('._status {'), scopedStyle.indexOf('._actions {'));
+      expect(status).toMatch(/min-height:\s*calc\(var\(--font-sm\) \* 1\.4\);/);
+      expect(scopedStyle).not.toContain('--photo-form-status-lines');
+      expect(containerStyle).not.toContain('--photo-form-status-lines');
+      const actions = scopedStyle.slice(scopedStyle.indexOf('._actions {'), scopedStyle.indexOf('._submit-button,'));
+      expect(actions).not.toMatch(/margin/);
+      expect(scopedStyle).toMatch(/\._form\s*\{[^}]*gap:\s*var\(--spacer-xs\)/);
+    });
+
     it('wraps the action row instead of clipping it when container queries are unavailable', () => {
       expect(scopedStyle).toMatch(/\._actions\s*\{[^}]*flex-wrap:\s*wrap/);
     });

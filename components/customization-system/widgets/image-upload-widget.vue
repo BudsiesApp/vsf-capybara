@@ -22,6 +22,7 @@
       :id="errorMessageId"
       aria-live="polite"
       class="_error-message"
+      :class="{ '-has-error': !!error }"
     >
       {{ error }}
     </div>
@@ -178,13 +179,13 @@ export default defineComponent({
     );
   }
 
-  // Opt-in: let validation text wrap, with room for the lines it normally needs, so it does not move the controls below.
+  // Opt-in: the live region stays in the DOM but takes no space until there is an error, which then wraps naturally.
   &.-appearance-order-history ._error-message {
     height: auto;
-    min-height: calc(var(--font-xs) * 1.2);
+    margin-top: 0;
 
-    @media (max-width: 425px) {
-      min-height: calc(var(--font-xs) * 1.2 * 2);
+    &.-has-error {
+      margin-top: var(--spacer-xs);
     }
   }
 }

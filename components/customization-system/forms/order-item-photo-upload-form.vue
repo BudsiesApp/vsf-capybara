@@ -378,8 +378,8 @@ export default defineComponent({
   }
 
   ._status {
-    // Reserves the lines the count, progress and error text normally need so they do not move the actions.
-    min-height: calc(var(--font-sm) * 1.4 * var(--photo-form-status-lines, 2));
+    // One line for the count, progress and error text; a longer message wraps and takes the room it needs.
+    min-height: calc(var(--font-sm) * 1.4);
     margin: 0;
     font-size: var(--font-sm);
     line-height: 1.4;
@@ -398,7 +398,6 @@ export default defineComponent({
     justify-content: flex-start;
     align-items: stretch;
     gap: var(--spacer-xs);
-    margin-top: var(--spacer-xs);
   }
 
   ._submit-button,
@@ -416,7 +415,6 @@ export default defineComponent({
     --photo-form-header-columns: auto minmax(0, 1fr) auto;
     --photo-form-open-column: auto;
     --photo-form-open-width: auto;
-    --photo-form-status-lines: 1;
   }
 }
 

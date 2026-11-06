@@ -1,3 +1,6 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
 import { mount } from '@vue/test-utils';
 
 import ImageUploadWidget from './image-upload-widget.vue';
@@ -90,12 +93,42 @@ describe('image upload widget', () => {
     expect(wrapper.emitted('widget-busy-changed')).toEqual([[true]]);
   });
 
-  it('associates the validation error with the uploader without changing the message element', () => {
-    const wrapper = mountWidget({ appearance: 'order-history', error: 'Photos are required' });
+  it.each([[undefined], ['order-history']])('associates a real validation error with the uploader for appearance %s', (appearance) => {
+    const wrapper = mountWidget({ appearance, error: 'Photos are required' });
     const message = wrapper.find('._error-message');
     expect(message.text()).toBe('Photos are required');
     expect(message.attributes('aria-live')).toBe('polite');
+    expect(message.classes()).toContain('-has-error');
     expect(upload(wrapper).props('ariaInvalid')).toBe('true');
     expect(upload(wrapper).props('ariaDescribedby')).toBe(message.attributes('id'));
+  });
+
+  it.each([[undefined], ['order-history']])('keeps an empty polite live region without the error modifier for appearance %s', (appearance) => {
+    const wrapper = mountWidget({ appearance });
+    const message = wrapper.find('._error-message');
+    expect(message.text()).toBe('');
+    expect(message.attributes('aria-live')).toBe('polite');
+    expect(message.classes()).not.toContain('-has-error');
+    expect(upload(wrapper).props('ariaInvalid')).toBe('false');
+    expect(upload(wrapper).props('ariaDescribedby')).toBeUndefined();
+  });
+
+  describe('spacing contract', () => {
+    const source = readFileSync(join(__dirname, 'image-upload-widget.vue'), 'utf8');
+    const style = (source.match(/<style lang="scss" scoped>([\s\S]*?)<\/style>/) || [])[1] || '';
+    const appearance = style.slice(style.indexOf('&.-appearance-order-history'));
+    const defaults = style.slice(style.indexOf('._error-message'), style.indexOf('&.-appearance-order-history'));
+
+    it('reserves no blank height or margin for an empty message in the opt-in appearance', () => {
+      expect(appearance).not.toMatch(/min-height|min-block-size/);
+      expect(appearance).toMatch(/height:\s*auto;/);
+      expect(appearance).toMatch(/margin-top:\s*0;/);
+      expect(appearance).toMatch(/&\.-has-error\s*\{[^}]*margin-top:\s*var\(--spacer-xs\)/);
+    });
+
+    it('keeps the default fixed one-line message and spacing for other upload fields', () => {
+      expect(defaults).toMatch(/height:\s*calc\(var\(--font-xs\) \* 1\.2\);/);
+      expect(defaults).toMatch(/margin-top:\s*var\(--spacer-xs\);/);
+    });
   });
 });
