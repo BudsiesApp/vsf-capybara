@@ -40,6 +40,7 @@ export function useOrderItemPhotoUpload (
   const isFormOpen = ref(false);
   const isPending = ref(false);
   const isSubmitted = ref(false);
+  const submissionError = ref('');
   const {
     customizationOptionValue,
     customizationState,
@@ -49,10 +50,16 @@ export function useOrderItemPhotoUpload (
   } = useCustomizationState();
   const { isSomeEntityBusy, onEntityBusyChanged } = useEntityBusyState();
   const { confirmCustomization } = useCustomizeAction(customizationState, draftOrderItem);
-  const hasImages = computed(() => {
+  const imageCount = computed(() => {
     const value = customization.value && customizationOptionValue.value[customization.value.id];
-    return Array.isArray(value) ? value.length > 0 : !!value;
+    if (Array.isArray(value)) {
+      return value.length;
+    }
+
+    return value ? 1 : 0;
   });
+  const hasImages = computed(() => imageCount.value > 0);
+  const isUploading = computed(() => isSomeEntityBusy.value);
   const isCancelDisabled = computed(() => isPending.value || isSubmitted.value || isSomeEntityBusy.value);
   const isSubmitDisabled = computed(() => isCancelDisabled.value || !hasImages.value);
 
@@ -109,6 +116,7 @@ export function useOrderItemPhotoUpload (
 
     resetCustomizationState();
     mergeCustomizationState(savedState.value);
+    submissionError.value = '';
     isFormOpen.value = false;
   }
 
@@ -118,6 +126,7 @@ export function useOrderItemPhotoUpload (
     }
 
     isPending.value = true;
+    submissionError.value = '';
     try {
       if (!await validate()) {
         isPending.value = false;
@@ -127,11 +136,7 @@ export function useOrderItemPhotoUpload (
       await confirmCustomization();
     } catch (error) {
       isPending.value = false;
-      applicationStore.dispatch('notification/spawnNotification', {
-        type: 'danger',
-        message: i18n.t('Something went wrong. Please try again.'),
-        action1: { label: i18n.t('OK') }
-      });
+      submissionError.value = i18n.t('Something went wrong. Please try again.').toString();
       Logger.error(error, 'order-item-photo-upload')();
       return;
     }
@@ -150,6 +155,9 @@ export function useOrderItemPhotoUpload (
     isFormOpen,
     isPending,
     isSubmitted,
+    isUploading,
+    imageCount,
+    submissionError,
     isCancelDisabled,
     isSubmitDisabled,
     openForm,

@@ -9,6 +9,8 @@ import {
   storeInjectionKey
 } from '@vue-storefront/core/application-services';
 
+import { Logger } from '@vue-storefront/core/lib/logger';
+
 import {
   fetchOrderItemCustomizationsState,
   saveOrderItemCustomizationsState,
@@ -154,7 +156,7 @@ describe('order item photo upload', () => {
     expect(upload.isFormOpen.value).toBe(false);
   });
 
-  it.each(['save transport', 'save item', 'submit transport', 'submit item'])('retains photos on %s failure', async failure => {
+  it.each(['save transport', 'save item', 'submit transport', 'submit item'])('retains photos and reports an inline error on %s failure', async failure => {
     const { upload, dispatch } = setup();
     await settle();
     const request = failure.startsWith('save') ? save : submit;
@@ -162,19 +164,23 @@ describe('order item photo upload', () => {
     else request.mockResolvedValue({ errors: [{ errorMessage: 'failed' }] });
     await upload.submitPhotos();
     if (failure.startsWith('save')) expect(submit).not.toHaveBeenCalled();
-    expect(dispatch).toHaveBeenLastCalledWith('notification/spawnNotification', expect.objectContaining({ type: 'danger', message: 'Something went wrong. Please try again.' }));
+    expect(upload.submissionError.value).toBe('Something went wrong. Please try again.');
+    expect(dispatch).not.toHaveBeenCalledWith('notification/spawnNotification', expect.anything());
+    expect(Logger.error).toHaveBeenCalledWith(expect.anything(), 'order-item-photo-upload');
     expect(upload.customizationOptionValue.value.photos).toEqual([retained]);
     expect(upload.isPending.value).toBe(false);
     expect(upload.isSubmitted.value).toBe(false);
   });
 
-  it('allows a legitimate retry after a failed submission', async () => {
+  it('allows a legitimate retry after a failed submission and clears the inline error', async () => {
     const { upload, onSubmitted } = setup();
     await settle();
     submit.mockResolvedValueOnce({ errors: [{ errorMessage: 'failed' }] });
     await upload.submitPhotos();
     expect(onSubmitted).not.toHaveBeenCalled();
+    expect(upload.submissionError.value).not.toBe('');
     await upload.submitPhotos();
+    expect(upload.submissionError.value).toBe('');
     expect(save).toHaveBeenCalledTimes(2);
     expect(submit).toHaveBeenCalledTimes(2);
     expect(upload.isSubmitted.value).toBe(true);
@@ -203,6 +209,52 @@ describe('order item photo upload', () => {
     expect(upload.customizationOptionValue.value).toEqual({ photos: [retained] });
   });
 
+  it('restores saved photos on cancel after adding and removing photos, then reopens with them', async () => {
+    const { upload } = setup();
+    await settle();
+    upload.openForm();
+    upload.updateCustomizationOptionValue({ customizationId: 'photos', value: [added] });
+    expect(upload.imageCount.value).toBe(1);
+    upload.updateCustomizationOptionValue({ customizationId: 'photos', value: [] });
+    expect(upload.imageCount.value).toBe(0);
+    upload.cancel();
+    expect(upload.isFormOpen.value).toBe(false);
+    expect(upload.customizationOptionValue.value.photos).toEqual([retained]);
+    upload.openForm();
+    expect(upload.isFormOpen.value).toBe(true);
+    expect(upload.customizationOptionValue.value.photos).toEqual([retained]);
+    expect(upload.imageCount.value).toBe(1);
+  });
+
+  it('clears the inline error on cancel without clearing the selection', async () => {
+    const { upload } = setup();
+    await settle();
+    submit.mockResolvedValueOnce({ errors: [{ errorMessage: 'failed' }] });
+    upload.openForm();
+    upload.updateCustomizationOptionValue({ customizationId: 'photos', value: [retained, added] });
+    await upload.submitPhotos();
+    expect(upload.submissionError.value).not.toBe('');
+    expect(upload.customizationOptionValue.value.photos).toEqual([retained, added]);
+    upload.cancel();
+    expect(upload.submissionError.value).toBe('');
+  });
+
+  it('counts scalar and array image values and derives the uploading state from busy entities', async () => {
+    const { upload } = setup([{ ...eligible, optionData: { displayWidget: 'image_upload', maxValuesCount: 1 } }]);
+    expect(upload.imageCount.value).toBe(0);
+    await settle();
+    expect(upload.imageCount.value).toBe(1);
+    upload.updateCustomizationOptionValue({ customizationId: 'photos', value: retained });
+    expect(upload.imageCount.value).toBe(1);
+    upload.updateCustomizationOptionValue({ customizationId: 'photos', value: [retained, added, { id: 'x', url: '/x.jpg' }] });
+    expect(upload.imageCount.value).toBe(3);
+    expect(upload.isUploading.value).toBe(false);
+    upload.onEntityBusyChanged({ entityId: 'photos', isBusy: true });
+    expect(upload.isUploading.value).toBe(true);
+    upload.onEntityBusyChanged({ entityId: 'photos', isBusy: false });
+    expect(upload.isUploading.value).toBe(false);
+  });
+
   it('keeps the form open on cancel while a photo is uploading', async () => {
     const { upload } = setup();
     await settle();
@@ -227,6 +279,7 @@ describe('order item photo upload', () => {
     expect(onSubmitted).toHaveBeenCalledTimes(1);
     expect(upload.isPending.value).toBe(false);
     expect(upload.isSubmitted.value).toBe(true);
+    expect(upload.submissionError.value).toBe('');
   });
 
   it('unlocks after failed validation', async () => {

@@ -1,7 +1,8 @@
 <template>
-  <div class="image-upload-widget">
+  <div class="image-upload-widget" :class="{ '-appearance-order-history': appearance === 'order-history' }">
     <m-artwork-upload
       ref="artworkUpload"
+      :appearance="appearance"
       :aria-describedby="ariaDescribedby"
       :aria-invalid="ariaInvalid"
       :aria-labelledby="ariaLabelledby"
@@ -55,6 +56,10 @@ export default defineComponent({
     MArtworkUpload
   },
   props: {
+    appearance: {
+      type: String as PropType<'order-history' | undefined>,
+      default: undefined
+    },
     ariaLabelledby: {
       type: String,
       default: undefined
@@ -171,6 +176,16 @@ export default defineComponent({
       1.2,
       var(--font-family-secondary)
     );
+  }
+
+  // Opt-in: let validation text wrap, with room for the lines it normally needs, so it does not move the controls below.
+  &.-appearance-order-history ._error-message {
+    height: auto;
+    min-height: calc(var(--font-xs) * 1.2);
+
+    @media (max-width: 425px) {
+      min-height: calc(var(--font-xs) * 1.2 * 2);
+    }
   }
 }
 </style>
