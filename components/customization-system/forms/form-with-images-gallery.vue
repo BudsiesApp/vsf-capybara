@@ -135,6 +135,7 @@
       :product-sku="descriptionProductSku"
       :backup-product-sku="product.parentSku"
       :title="$t('Product Details').toString()"
+      @story-rendered="onStoryRendered"
     />
   </div>
 </template>
@@ -197,16 +198,17 @@ import { useCustomizeAction } from 'theme/helpers/use-customize-action';
 import { useImageUpload } from 'theme/helpers/use-image-upload';
 import { getNestedFormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
 import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
+import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
 import { useProductGallery } from 'theme/helpers/use-product-gallery';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 
 import ACustomPrice from 'theme/components/atoms/a-custom-price.vue';
 import ACustomProductQuantity from 'theme/components/atoms/a-custom-product-quantity.vue';
 import CustomizationOption from 'theme/components/customization-system/customization-option.vue';
-import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 import MOrderSubmitAgreement from 'theme/components/molecules/m-order-submit-agreement.vue';
 import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
+import { getProductDescriptionStoryFullSlug } from 'theme/components/molecules/helpers/get-product-description-story-full-slug';
 import MZoomGallery from 'theme/components/molecules/m-zoom-gallery.vue';
 
 export default defineComponent({
@@ -249,7 +251,6 @@ export default defineComponent({
     ACustomPrice,
     ACustomProductQuantity,
     CustomizationOption,
-    MBlockStory,
     MFormErrors,
     MOrderSubmitAgreement,
     MProductDescriptionStory,
@@ -543,6 +544,11 @@ export default defineComponent({
       customizationAvailableOptionValues,
       [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter, lockedCustomizationsFilter]
     );
+    const { descriptionProductSku } = useCustomizationProductDescription(
+      product,
+      flowAvailableCustomizations,
+      customizationOptionValue
+    );
 
     const isSubmitButtonDisabled = computed<boolean>(() => {
       return isSomeEntityBusy.value || isDisabled.value;
@@ -560,6 +566,15 @@ export default defineComponent({
       return i18n.t('Add to Cart').toString();
     });
 
+    const descriptionStoryDependencies = computed<string[]>(() => {
+      return [getProductDescriptionStoryFullSlug(descriptionProductSku.value)];
+    });
+    const { onStoryRendered } = useStoryblokReadinessTracker(
+      productSku,
+      descriptionStoryDependencies,
+      () => context.emit('form-ready')
+    );
+
     return {
       restorationSettled,
       ...useProductGallery(
@@ -567,11 +582,7 @@ export default defineComponent({
         flowAvailableCustomizations,
         selectedOptionValuesIds
       ),
-      ...useCustomizationProductDescription(
-        product,
-        flowAvailableCustomizations,
-        customizationOptionValue
-      ),
+      descriptionProductSku,
       ...useCustomizationsPrice(
         flowAvailableCustomizations,
         customizationOptionValue
@@ -591,6 +602,7 @@ export default defineComponent({
       privacyPolicyLinks: privacyPolicyLinks as unknown as
         readonly AdditionalContentEntry[],
       lockedCustomizationDictionary,
+      onStoryRendered,
       onEntityBusyChanged,
       onCustomizationOptionInput,
       onFormSubmit,

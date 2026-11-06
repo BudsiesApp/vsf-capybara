@@ -5,6 +5,7 @@
     <MBlockStory
       :story-slug="topStorySlug"
       class="_top-block"
+      @story-rendered="onStoryRendered"
       v-if="topStorySlug"
     />
 
@@ -35,12 +36,13 @@ import { htmlDecode } from '@vue-storefront/core/filters';
 import i18n from '@vue-storefront/core/i18n';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 import Product from 'core/modules/catalog/types/Product';
-import { getCanonicalUrl } from 'src/modules/shared';
+import { emitPageRenderedEvent, getCanonicalUrl } from 'src/modules/shared';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
 import PlushieProductType from 'theme/interfaces/plushie-product-type';
 import { PlushieType } from 'theme/interfaces/plushie.type';
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
+import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
 
 import CreationWizardForm from 'theme/components/customization-system/forms/creation-wizard-form.vue';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
@@ -137,6 +139,16 @@ export default defineComponent({
         : 'golf_cover_creation_page_top';
     });
 
+    const storyDependencies = computed<string[]>(() => {
+      return [`blocks/${topStorySlug.value}`];
+    });
+
+    const { onStoryRendered } = useStoryblokReadinessTracker(
+      plushieType,
+      storyDependencies,
+      () => emitPageRenderedEvent()
+    );
+
     const canUsePersistedCustomizationState = ref<boolean>(false);
 
     return {
@@ -144,6 +156,7 @@ export default defineComponent({
       canUsePersistedCustomizationState,
       currentProduct,
       mainTitleText,
+      onStoryRendered,
       productTypeButtonsList,
       requestServices,
       topStorySlug
