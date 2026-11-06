@@ -18,6 +18,7 @@
         class="_product-full-description"
         :product-sku="getCurrentProduct.sku"
         :backup-product-sku="getCurrentProduct.parentSku"
+        @story-rendered="onStoryRendered"
         :title="$t('Additional Details').toString()"
       />
 
@@ -40,6 +41,10 @@
 </template>
 
 <script>
+import { computed } from 'vue';
+import { useStore } from '@vue-storefront/core/application-services';
+import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
+import { getProductDescriptionStoryFullSlug } from 'theme/components/molecules/helpers/get-product-description-story-full-slug';
 import { mapGetters, mapState } from 'vuex';
 import LazyHydrate from 'vue-lazy-hydration';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
@@ -55,7 +60,7 @@ import { getMediaGallery } from '@vue-storefront/core/modules/catalog/helpers';
 import { PRODUCT_UNSET_CURRENT } from '@vue-storefront/core/modules/catalog/store/product/mutation-types';
 
 import { ProductStructuredData } from 'src/modules/budsies';
-import { ProductEvent } from 'src/modules/shared';
+import { emitPageRenderedEvent, ProductEvent } from 'src/modules/shared';
 
 import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
 
@@ -73,7 +78,13 @@ const getSkusFromRoute = (route) => {
 export default {
   name: 'Product',
   setup () {
+    const store = useStore();
+    const trackingKey = computed(() => store.getters['product/getCurrentProduct']?.sku);
+    const storyDependencies = computed(() => trackingKey.value ? [getProductDescriptionStoryFullSlug(trackingKey.value)] : []);
+    const { onStoryRendered } = useStoryblokReadinessTracker(trackingKey, storyDependencies, emitPageRenderedEvent);
+
     return {
+      onStoryRendered,
       requestServices: useRequestServices()
     };
   },
