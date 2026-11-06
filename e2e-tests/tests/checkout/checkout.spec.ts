@@ -197,7 +197,9 @@ async function replacePhysicalCartWithGiftCardInNewTab (context: BrowserContext,
   await giftCard.addToCartButton.click();
   await secondCart.goto();
   await expect(secondCart.cartItems).toHaveCount(2);
+  const deletion = secondCart.waitForDeleteResponse();
   await secondCart.removeCartItem(secondCart.getCartItemByProductName(physicalName));
+  await deletion;
   await expect(secondCart.cartItems).toHaveCount(1);
   await secondPage.close();
 
