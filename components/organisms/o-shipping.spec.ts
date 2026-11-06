@@ -73,12 +73,13 @@ jest.mock('./o-base-address-form.vue', () => ({
     methods: { getFormValidationRefs: () => ({}) }
   }
 }));
+const mockValidateAddress = jest.fn(async () => true);
 jest.mock('src/modules/address', () => {
   const { ref } = jest.requireActual('vue');
 
   return {
     useAddressValidation: () => ({
-      validateAddress: jest.fn(async () => true),
+      validateAddress: (...args) => mockValidateAddress(...args),
       isValidating: ref(false),
       completeValidation: jest.fn()
     })
@@ -558,6 +559,30 @@ describe('OShipping', () => {
       await flushPromises();
 
       expect(hasAdvancedCheckout()).toBe(false);
+    });
+
+    it('keeps a newer address after the customer leaves during address validation', async () => {
+      const { store, lookupAddresses } = createStore();
+      let finishAddressValidation: (shouldProceed: boolean) => void;
+      mockValidateAddress.mockImplementationOnce(() => new Promise<boolean>((resolve) => {
+        finishAddressValidation = resolve;
+      }));
+      const abandonedWrapper = mountShipping(store);
+
+      await continueToPayment(abandonedWrapper);
+      abandonedWrapper.destroy();
+
+      const wrapper = mountShipping(store);
+      editAddress(wrapper, { streetAddress: '9 New St' });
+      await continueToPayment(wrapper);
+
+      finishAddressValidation(true);
+      await flushPromises();
+
+      expect(store.state.checkout.shippingDetails.streetAddress).toBe('9 New St');
+      expect(lookupAddresses).toHaveLength(1);
+      expect(lookupAddresses[0]).toMatchObject({ streetAddress: '9 New St' });
+      expect(countCheckoutAdvances()).toBe(1);
     });
 
     it('stays on the shipping step while a newer lookup is pending', async () => {

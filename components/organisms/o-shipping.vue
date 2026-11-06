@@ -335,12 +335,16 @@ export default defineComponent({
       try {
         const isFormValid = await this.validateAndGoToFirstError();
 
-        if (!isFormValid) {
+        if (this.hasLeftShippingStep || !isFormValid) {
           return;
         }
 
         const shippingRef = toRef(this, 'shipping');
         const shouldProceed = await this.validateAddress(shippingRef);
+
+        if (this.hasLeftShippingStep) {
+          return;
+        }
 
         if (!shouldProceed) {
           this.isSavingShippingDetails = false;
