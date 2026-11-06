@@ -157,7 +157,7 @@ import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-obser
 import { nextTick, ref } from 'vue';
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
 import { htmlDecode } from '@vue-storefront/core/filters';
-import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
+import { ORDER_ERROR_EVENT, useRedirectedSectionHashRemoval } from '@vue-storefront/core/modules/checkout';
 import { IS_CART_SYNCING } from '@vue-storefront/core/modules/cart';
 import { ModalList } from 'theme/store/ui/modals';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
@@ -292,6 +292,8 @@ export default {
     };
   },
   setup () {
+    useRedirectedSectionHashRemoval();
+
     const emptyCartHeading = ref(null);
     const {
       templateRef: cartLineItems,

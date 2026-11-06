@@ -155,9 +155,20 @@ export default {
   },
   methods: {
     activateHashSection () {
-      if (!this.showSuccessOrderPage) {
-        Checkout.methods.activateHashSection.bind(this)();
+      if (this.showSuccessOrderPage) {
+        return;
       }
+
+      const hashSection = this.$route.hash.replace('#', '');
+      const isUnavailableSection = hashSection in this.activeSection &&
+        !this.availableSteps.some(step => step.key === hashSection);
+
+      if (isUnavailableSection) {
+        this.activateSection('personalDetails', { replaceHistoryEntry: true });
+        return;
+      }
+
+      Checkout.methods.activateHashSection.bind(this)();
     },
     changeStep (newStepIndex) {
       if (newStepIndex < this.currentStep) {
