@@ -1,5 +1,5 @@
 <template>
-  <div ref="dropzone" class="m-artwork-upload _drop-zone" :class="classes">
+  <div ref="dropzone" class="m-artwork-upload _drop-zone" :class="classes" :style="reservedRowsStyle">
     <div ref="dropzoneOverlay" class="_dropzone-overlay" />
 
     <slot />
@@ -14,7 +14,8 @@
         accepted-file-types="image/gif, image/jpeg, image/png, image/heic, image/heif, application/pdf"
         image-transform-output-mime-type="image/jpeg"
         max-file-size="20MB"
-        label-idle="Drag + Drop or <span class='filepond--label-action' tabindex='0' role='button'> Select File </span>"
+        :label-idle="labelIdle"
+        v-bind="appearanceOptions"
         :max-files="maxFiles"
         :files="files"
         :allow-multiple="allowMultiple"
@@ -38,9 +39,13 @@
 
       <div
         class="_error-text"
-        v-if="isMaxFilesLimitWarningShow"
+        :class="{ '-active': isMaxFilesLimitWarningShow }"
+        :aria-live="isOrderHistoryAppearance ? 'polite' : undefined"
+        v-if="isMaxFilesLimitWarningShow || isOrderHistoryAppearance"
       >
-        {{ $t('You can only upload {count} files', {count: maxFiles}) }}
+        <template v-if="isMaxFilesLimitWarningShow">
+          {{ $t('You can only upload {count} files', {count: maxFiles}) }}
+        </template>
       </div>
     </div>
   </div>
@@ -111,6 +116,19 @@ interface InjectedServices {
 
 const MAX_FILES_LIMIT_WARNING_SHOW_TIME = 3000;
 const MAX_FILES_COUNT = 20;
+const DEFAULT_LABEL_IDLE = "Drag + Drop or <span class='filepond--label-action' tabindex='0' role='button'> Select File </span>";
+// Layout reserve only: the number of tiles the opt-in appearance keeps room for, never an upload limit.
+const RESERVED_TILES_COUNT = 3;
+const MOBILE_COLUMNS_COUNT = 2;
+
+function escapeHtml (text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
   name: 'MArtworkUpload',
@@ -158,6 +176,10 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     ariaLabelledby: {
       type: String as PropType<string | undefined>,
       default: undefined
+    },
+    appearance: {
+      type: String as PropType<'order-history' | undefined>,
+      default: undefined
     }
   },
   setup () {
@@ -203,7 +225,43 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
         result.push('-multiple-items');
       }
 
+      if (this.isOrderHistoryAppearance) {
+        result.push('-appearance-order-history');
+      }
+
       return result;
+    },
+    isOrderHistoryAppearance (): boolean {
+      return this.appearance === 'order-history';
+    },
+    labelIdle (): string {
+      if (!this.isOrderHistoryAppearance) {
+        return DEFAULT_LABEL_IDLE;
+      }
+
+      const text = escapeHtml(this.$t('Drag + Drop photos or').toString());
+      const action = escapeHtml(this.$t('Select Photos').toString());
+
+      return `${text} <span class='filepond--label-action' tabindex='0' role='button'>${action}</span>`;
+    },
+    appearanceOptions (): Record<string, string> {
+      if (!this.isOrderHistoryAppearance) {
+        return {};
+      }
+
+      return { styleItemPanelAspectRatio: '1' };
+    },
+    reservedRowsStyle (): Record<string, number> | undefined {
+      if (!this.isOrderHistoryAppearance) {
+        return undefined;
+      }
+
+      const reservedTilesCount = Math.min(this.maxFiles || RESERVED_TILES_COUNT, RESERVED_TILES_COUNT);
+
+      return {
+        '--artwork-upload-reserved-rows': Math.ceil(reservedTilesCount / RESERVED_TILES_COUNT),
+        '--artwork-upload-reserved-rows-mobile': Math.ceil(reservedTilesCount / MOBILE_COLUMNS_COUNT)
+      };
     },
     isBusy (): boolean {
       return this.fIsBusy || this.fRemoveRequestsCount > 0;
@@ -886,5 +944,103 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
             }
         }
     }
+
+    // Opt-in (`appearance="order-history"`): a bordered upload stage that keeps room for the
+    // native FilePond browse label plus one row of three tiles (two rows of two on small
+    // screens), so 0..3 photos do not move the controls below. More photos grow the stage.
+    &.-appearance-order-history {
+      --artwork-upload-columns: 3;
+      --artwork-upload-rows: var(--artwork-upload-reserved-rows, 1);
+      --artwork-upload-gap: 0.5rem;
+      --artwork-upload-label-band: 4.75rem;
+      --artwork-upload-stage-border: 2px;
+      --artwork-upload-stage-inner-width: calc(
+        100cqw - 2 * (var(--artwork-upload-gap) + var(--artwork-upload-stage-border))
+      );
+
+      container: artwork-upload / inline-size;
+
+      ._uploader {
+        box-sizing: border-box;
+        padding: var(--artwork-upload-gap);
+        border: var(--artwork-upload-stage-border) dashed var(--c-divider);
+        background-color: var(--c-white);
+        // Stage padding and border, the browse label, the tile rows, and the native list's bottom
+        // margin (1rem) less the tile margins it replaces (one gap), plus a small rounding allowance.
+        min-block-size: calc(
+          2 * (var(--artwork-upload-gap) + var(--artwork-upload-stage-border)) +
+          var(--artwork-upload-label-band) +
+          var(--artwork-upload-rows) * var(--artwork-upload-stage-inner-width) / var(--artwork-upload-columns) +
+          1.25rem - var(--artwork-upload-gap)
+        );
+
+        &:focus-within {
+          border-color: var(--c-primary);
+        }
+      }
+
+      &.-drag-hover ._uploader {
+        border-color: var(--c-primary);
+      }
+
+      // Kept in the DOM as a live region, but takes no space until the warning is shown.
+      ._error-text {
+        margin-top: 0;
+
+        &.-active {
+          margin-top: var(--spacer-xs);
+        }
+      }
+
+      ::v-deep {
+        .filepond--root {
+          .filepond--panel {
+            border: 0 !important;
+          }
+
+          .filepond--panel-root {
+            background-color: transparent;
+          }
+
+          .filepond--list {
+            left: 0;
+            right: 0;
+          }
+
+          // The stock label has a fixed zero height, so a wrapped label would overflow it.
+          .filepond--drop-label {
+            height: auto;
+
+            .filepond--label-action {
+              --button-display: inline-block;
+
+              margin: 0.25em 0 0.25em 0.5em;
+            }
+          }
+        }
+
+        .filepond--item {
+          width: calc(100% / var(--artwork-upload-columns) - var(--artwork-upload-gap));
+          margin: calc(var(--artwork-upload-gap) / 2);
+
+          &:nth-child(3n) {
+            margin-right: calc(var(--artwork-upload-gap) / 2);
+          }
+        }
+      }
+    }
+}
+</style>
+
+<!-- The scoped style plugin does not rewrite @container rules, so this only overrides custom properties. -->
+<style lang="scss">
+// Narrow uploader (by its own width, not the viewport): two columns, and a taller browse band
+// because the label wraps onto two lines.
+@container artwork-upload (max-width: 26rem) {
+  .m-artwork-upload.-appearance-order-history ._uploader {
+    --artwork-upload-columns: 2;
+    --artwork-upload-rows: var(--artwork-upload-reserved-rows-mobile, 2);
+    --artwork-upload-label-band: 6rem;
+  }
 }
 </style>
