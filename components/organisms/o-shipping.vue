@@ -15,6 +15,7 @@
       <SfCheckbox
         v-if="currentUser && hasDefaultShippingAddress"
         v-model="shipToMyAddress"
+        :disabled="isShippingAddressLocked"
         class="form__element form__checkbox -always-enabled"
         name="shipToMyAddress"
         :label="$t('Ship to my default address')"
@@ -22,7 +23,7 @@
       <OBaseAddressForm
         ref="baseAddressForm"
         v-model="shipping"
-        :is-form-fields-disabled="shipToMyAddress"
+        :is-form-fields-disabled="isAddressFormDisabled"
         :get-field-anchor-name="getFieldAnchorName"
         @country-changed="onChangeCountry"
         @zip-code-blur="onZipCodeBlur"
@@ -201,7 +202,8 @@ export default defineComponent({
   data: () => {
     return {
       states: States,
-      isSavingShippingDetails: false
+      isSavingShippingDetails: false,
+      isShippingAddressLocked: false
     };
   },
   computed: {
@@ -240,7 +242,7 @@ export default defineComponent({
         this.isSavingShippingDetails;
     },
     isAddressFormDisabled () {
-      return this.shipToMyAddress;
+      return this.shipToMyAddress || this.isShippingAddressLocked;
     },
     selectedCurrency () {
       return this.$store.getters[GET_ACTIVE_CURRENCY];
@@ -289,10 +291,19 @@ export default defineComponent({
       this.updateCheckoutShippingAddress();
       EventBus.$emit('checkout-before-shippingMethods', this.shipping.country)
     },
-    updateCheckoutShippingAddress () {
+    getDisplayedAddress () {
       const { shippingMethod, shippingCarrier, ...address } = this.shipping;
 
-      this.$store.commit(`checkout/${CHECKOUT_UPDATE_SHIPPING_DETAILS}`, address);
+      return address;
+    },
+    isDisplayedAddress (address) {
+      const displayedAddress = this.getDisplayedAddress();
+      const keys = new Set([...Object.keys(address), ...Object.keys(displayedAddress)]);
+
+      return [...keys].every((key) => address[key] === displayedAddress[key]);
+    },
+    updateCheckoutShippingAddress () {
+      this.$store.commit(`checkout/${CHECKOUT_UPDATE_SHIPPING_DETAILS}`, this.getDisplayedAddress());
     },
     retryShippingMethods () {
       this.updateCheckoutShippingAddress();
@@ -306,8 +317,9 @@ export default defineComponent({
         return method.method_code === shippingMethod && method.carrier_code === shippingCarrier;
       });
     },
-    canAdvanceWithShippingMethod (selectedShippingMethod) {
-      return !this.isShippingMethodsSyncing &&
+    canAdvanceWithShippingMethod (selectedShippingMethod, submittedAddress) {
+      return this.isDisplayedAddress(submittedAddress) &&
+        !this.isShippingMethodsSyncing &&
         !this.isShippingMethodsSyncingError &&
         this.isSelectedShippingMethodAvailable(selectedShippingMethod);
     },
@@ -367,6 +379,9 @@ export default defineComponent({
           shippingCarrier: this.shipping.shippingCarrier
         };
 
+        const submittedAddress = this.getDisplayedAddress();
+
+        this.isShippingAddressLocked = true;
         this.updateCheckoutShippingAddress();
 
         try {
@@ -375,7 +390,7 @@ export default defineComponent({
           Logger.error(error, 'checkout')();
         }
 
-        if (!this.canAdvanceWithShippingMethod(selectedShippingMethod)) {
+        if (!this.canAdvanceWithShippingMethod(selectedShippingMethod, submittedAddress)) {
           return;
         }
 
@@ -383,6 +398,7 @@ export default defineComponent({
         this.$store.dispatch('cart/pullEstimatedShipments');
       } finally {
         this.isSavingShippingDetails = false;
+        this.isShippingAddressLocked = false;
       }
     },
     fillLastUsedCustomerData () {

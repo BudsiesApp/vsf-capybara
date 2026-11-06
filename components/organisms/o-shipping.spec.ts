@@ -43,7 +43,12 @@ jest.mock('@storefront-ui/vue', () => ({
       return h('h3', this.title);
     }
   },
-  SfCheckbox: { render: (h) => h('input', { attrs: { type: 'checkbox' } }) },
+  SfCheckbox: {
+    props: ['disabled'],
+    render (h) {
+      return h('input', { attrs: { type: 'checkbox', disabled: this.disabled } });
+    }
+  },
   SfLoader: { render: (h) => h('div', { class: 'sf-loader-stub' }) }
 }));
 jest.mock('vee-validate', () => ({
@@ -63,7 +68,7 @@ jest.mock('./o-base-address-form.vue', () => ({
   __esModule: true,
   default: {
     name: 'OBaseAddressForm',
-    props: ['value'],
+    props: ['value', 'isFormFieldsDisabled'],
     render: (h) => h('div'),
     methods: { getFormValidationRefs: () => ({}) }
   }
@@ -487,6 +492,54 @@ describe('OShipping', () => {
       await flushPromises();
 
       expect(countCheckoutAdvances()).toBe(1);
+      expect(findButton(wrapper, 'Continue to payment').attributes('disabled')).toBeUndefined();
+    });
+
+    it('locks the address while the final lookup is pending', async () => {
+      const { store, setNextLookupOutcome } = createStore({
+        default_shipping: 7,
+        addresses: [defaultShippingAddress]
+      });
+      const wrapper = mountShipping(store);
+      let finishTotalsSync: () => void;
+      const remainingTotalsSync = new Promise<void>((resolve) => {
+        finishTotalsSync = resolve;
+      });
+      setNextLookupOutcome({ shippingMethods: [flatRate], remainingTotalsSync });
+      const addressForm = wrapper.findComponent({ name: 'OBaseAddressForm' });
+
+      expect(addressForm.props('isFormFieldsDisabled')).toBe(false);
+      expect(wrapper.find('input[type="checkbox"]').attributes('disabled')).toBeUndefined();
+
+      await continueToPayment(wrapper);
+
+      expect(addressForm.props('isFormFieldsDisabled')).toBe(true);
+      expect(wrapper.find('input[type="checkbox"]').attributes('disabled')).toBeDefined();
+
+      finishTotalsSync();
+      await flushPromises();
+
+      expect(addressForm.props('isFormFieldsDisabled')).toBe(false);
+      expect(wrapper.find('input[type="checkbox"]').attributes('disabled')).toBeUndefined();
+    });
+
+    it('stays on the shipping step when the address changes during the final lookup', async () => {
+      const { store, lookupAddresses, setNextLookupOutcome } = createStore();
+      const wrapper = mountShipping(store);
+      let finishTotalsSync: () => void;
+      const remainingTotalsSync = new Promise<void>((resolve) => {
+        finishTotalsSync = resolve;
+      });
+      setNextLookupOutcome({ shippingMethods: [flatRate], remainingTotalsSync });
+
+      await continueToPayment(wrapper);
+      editAddress(wrapper, { streetAddress: '9 Changed St', city: 'Albany' });
+      finishTotalsSync();
+      await flushPromises();
+
+      expect(lookupAddresses).toHaveLength(1);
+      expect(lookupAddresses[0]).toMatchObject({ streetAddress: '1 Old St', city: 'New York' });
+      expect(hasAdvancedCheckout()).toBe(false);
       expect(findButton(wrapper, 'Continue to payment').attributes('disabled')).toBeUndefined();
     });
 
