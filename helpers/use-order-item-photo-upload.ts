@@ -39,6 +39,7 @@ export function useOrderItemPhotoUpload (
   const isReady = ref(false);
   const isFormOpen = ref(false);
   const isPending = ref(false);
+  const isSubmitted = ref(false);
   const {
     customizationOptionValue,
     customizationState,
@@ -52,7 +53,7 @@ export function useOrderItemPhotoUpload (
     const value = customization.value && customizationOptionValue.value[customization.value.id];
     return Array.isArray(value) ? value.length > 0 : !!value;
   });
-  const isCancelDisabled = computed(() => isPending.value || isSomeEntityBusy.value);
+  const isCancelDisabled = computed(() => isPending.value || isSubmitted.value || isSomeEntityBusy.value);
   const isSubmitDisabled = computed(() => isCancelDisabled.value || !hasImages.value);
 
   onMounted(async () => {
@@ -94,6 +95,10 @@ export function useOrderItemPhotoUpload (
   });
 
   function openForm (): void {
+    if (isSubmitted.value) {
+      return;
+    }
+
     isFormOpen.value = true;
   }
 
@@ -131,12 +136,9 @@ export function useOrderItemPhotoUpload (
       return;
     }
 
-    // The item is no longer awaiting artwork, so the form stays locked until the parent removes it.
-    applicationStore.dispatch('notification/spawnNotification', {
-      type: 'success',
-      message: i18n.t('Your photos have been submitted.'),
-      action1: { label: i18n.t('OK') }
-    });
+    // Submission is final: the order refresh is only background synchronization and must not unlock the form.
+    isSubmitted.value = true;
+    isPending.value = false;
     onSubmitted();
   }
 
@@ -147,6 +149,7 @@ export function useOrderItemPhotoUpload (
     isReady,
     isFormOpen,
     isPending,
+    isSubmitted,
     isCancelDisabled,
     isSubmitDisabled,
     openForm,

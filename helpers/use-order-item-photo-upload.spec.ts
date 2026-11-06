@@ -104,7 +104,7 @@ describe('order item photo upload', () => {
     expect(fetchDraft).not.toHaveBeenCalled();
   });
 
-  it('sends only the complete selected photo value, saves before submit, then notifies and reports submission', async () => {
+  it('sends only the complete selected photo value, saves before submit, then marks submitted and reports submission', async () => {
     const { upload, dispatch, onSubmitted } = setup();
     await settle();
     upload.updateCustomizationOptionValue({ customizationId: 'photos', value: [retained, added] });
@@ -117,8 +117,41 @@ describe('order item photo upload', () => {
     finishSave({ errors: [] });
     await pending;
     expect(submit).toHaveBeenCalledWith([42], 'token');
-    expect(dispatch).toHaveBeenLastCalledWith('notification/spawnNotification', { type: 'success', message: 'Your photos have been submitted.', action1: { label: 'OK' } });
+    expect(upload.isSubmitted.value).toBe(true);
+    expect(upload.isPending.value).toBe(false);
+    expect(dispatch).not.toHaveBeenCalledWith('notification/spawnNotification', expect.anything());
     expect(onSubmitted).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps submission final without waiting for the parent refresh', async () => {
+    const { upload, onSubmitted } = setup();
+    await settle();
+    let refreshFailure: Error | undefined;
+    onSubmitted.mockImplementation(() => {
+      Promise.reject(new Error('refresh failed')).catch(error => { refreshFailure = error; });
+    });
+    upload.openForm();
+    await upload.submitPhotos();
+    await settle();
+    expect(refreshFailure).toBeDefined();
+    expect(upload.isPending.value).toBe(false);
+    expect(upload.isSubmitted.value).toBe(true);
+    expect(upload.isSubmitDisabled.value).toBe(true);
+    expect(upload.isCancelDisabled.value).toBe(true);
+    await upload.submitPhotos();
+    upload.cancel();
+    expect(save).toHaveBeenCalledTimes(1);
+    expect(submit).toHaveBeenCalledTimes(1);
+    expect(onSubmitted).toHaveBeenCalledTimes(1);
+    expect(upload.customizationOptionValue.value.photos).toEqual([retained]);
+  });
+
+  it('does not reopen the form after submission', async () => {
+    const { upload } = setup();
+    await settle();
+    await upload.submitPhotos();
+    upload.openForm();
+    expect(upload.isFormOpen.value).toBe(false);
   });
 
   it.each(['save transport', 'save item', 'submit transport', 'submit item'])('retains photos on %s failure', async failure => {
@@ -132,6 +165,20 @@ describe('order item photo upload', () => {
     expect(dispatch).toHaveBeenLastCalledWith('notification/spawnNotification', expect.objectContaining({ type: 'danger', message: 'Something went wrong. Please try again.' }));
     expect(upload.customizationOptionValue.value.photos).toEqual([retained]);
     expect(upload.isPending.value).toBe(false);
+    expect(upload.isSubmitted.value).toBe(false);
+  });
+
+  it('allows a legitimate retry after a failed submission', async () => {
+    const { upload, onSubmitted } = setup();
+    await settle();
+    submit.mockResolvedValueOnce({ errors: [{ errorMessage: 'failed' }] });
+    await upload.submitPhotos();
+    expect(onSubmitted).not.toHaveBeenCalled();
+    await upload.submitPhotos();
+    expect(save).toHaveBeenCalledTimes(2);
+    expect(submit).toHaveBeenCalledTimes(2);
+    expect(upload.isSubmitted.value).toBe(true);
+    expect(onSubmitted).toHaveBeenCalledTimes(1);
   });
 
   it.each(['empty', 'invalid', 'busy'])('blocks %s submission', async guard => {
@@ -178,7 +225,8 @@ describe('order item photo upload', () => {
     await upload.submitPhotos();
     expect(save).toHaveBeenCalledTimes(1);
     expect(onSubmitted).toHaveBeenCalledTimes(1);
-    expect(upload.isPending.value).toBe(true);
+    expect(upload.isPending.value).toBe(false);
+    expect(upload.isSubmitted.value).toBe(true);
   });
 
   it('unlocks after failed validation', async () => {

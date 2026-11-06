@@ -3,7 +3,17 @@
     v-if="isReady"
     class="order-item-photo-upload-form"
   >
-    <div class="_collapsible" :class="{ '-expanded': !isFormOpen }">
+    <div role="status" aria-live="polite" aria-atomic="true">
+      <p v-if="isSubmitted" class="_submitted">
+        {{ $t('Your photos have been submitted.') }}
+      </p>
+    </div>
+
+    <div
+      v-if="!isSubmitted"
+      class="_collapsible"
+      :class="{ '-expanded': !isFormOpen }"
+    >
       <div class="_collapsible-inner">
         <SfButton
           class="_button color-secondary"
@@ -14,7 +24,11 @@
       </div>
     </div>
 
-    <div class="_collapsible" :class="{ '-expanded': isFormOpen }">
+    <div
+      v-if="!isSubmitted"
+      class="_collapsible"
+      :class="{ '-expanded': isFormOpen }"
+    >
       <div class="_collapsible-inner">
         <validation-observer
           ref="validationObserver"
@@ -109,6 +123,13 @@ export default defineComponent({
 <style lang="scss" scoped>
 .order-item-photo-upload-form {
   align-self: stretch;
+
+  ._submitted {
+    margin: 0;
+    padding: var(--spacer-xs) var(--spacer-sm);
+    background-color: var(--c-success);
+    color: var(--c-white);
+  }
 
   ._button {
     --button-font-size: var(--font-xs);
