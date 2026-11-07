@@ -230,7 +230,7 @@ export default defineComponent({
       }
 
       if (props.isHolidayPeriod) {
-        return applicationI18n.t('Only {slotsLeft} holiday slots left', { slotsLeft: props.slotsLeft }).toString();
+        return applicationI18n.t('Only {slotsLeft} holiday spots left at this price', { slotsLeft: props.slotsLeft }).toString();
       }
 
       if (props.slotsLeft === 0) {
