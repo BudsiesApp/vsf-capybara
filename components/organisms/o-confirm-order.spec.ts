@@ -110,11 +110,6 @@ jest.mock('theme/helpers/get-cart-item-title.function', () => ({ getCartItemTitl
 jest.mock('theme/components/atoms/a-promo-code', () => ({ render: (h) => h('div') }));
 jest.mock('theme/components/molecules/m-price-summary', () => ({ render: (h) => h('div') }));
 jest.mock('theme/components/organisms/o-cart-items-table', () => ({ render: (h) => h('div') }));
-jest.mock('theme/components/organisms/o-gift-card-payment.vue', () => ({
-  __esModule: true,
-  default: { render: (h) => h('div') }
-}));
-
 Vue.use(Vuex);
 Vue.filter('htmlDecode', (value: string) => value);
 Element.prototype.scrollIntoView = jest.fn();
