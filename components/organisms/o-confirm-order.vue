@@ -214,6 +214,23 @@
       </div>
     </div>
 
+    <div
+      v-if="isShippingMethodUnavailable"
+      class="shipping-notice"
+      role="alert"
+      aria-atomic="true"
+    >
+      <p>
+        {{ $t('The selected shipping method is no longer available. Please review your shipping details.') }}
+      </p>
+      <SfButton
+        type="button"
+        class="-small"
+        @click="emitCheckoutEdit('shipping')"
+      >
+        {{ $t('Edit shipping') }}
+      </SfButton>
+    </div>
     <div class="actions">
       <SfButton
         ref="placeOrderButton"
@@ -271,7 +288,14 @@ import {
   useAdditionalContent
 } from '@vue-storefront/core/additional-content';
 import { CartItemConfiguration, getCustomizationSystemThumbnail } from 'src/modules/customization-system';
-import { IS_COUPON_PROCESSING, IS_TOTALS_SYNCING, IS_PAYMENT_METHODS_SYNCING, CART_ITEM_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules/cart';
+import {
+  IS_COUPON_PROCESSING,
+  IS_TOTALS_SYNCING,
+  IS_PAYMENT_METHODS_SYNCING,
+  IS_SHIPPING_METHODS_SYNCING,
+  IS_SHIPPING_METHODS_SYNCING_ERROR,
+  CART_ITEM_LOCALIZED_PRICE_DICTIONARY
+} from '@vue-storefront/core/modules/cart';
 import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-item-key.function';
 
 import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
@@ -384,8 +408,30 @@ export default {
     isBraintreeMethodSelected () {
       return Object.values(braintreeSupportedMethodsCodes).includes(this.paymentDetails.paymentMethod);
     },
+    isSelectedShippingMethodAvailable () {
+      const { shippingCarrier, shippingMethod } = this.shippingDetails;
+
+      return this.shippingMethods.some((method) => {
+        return method.carrier_code === shippingCarrier && method.method_code === shippingMethod;
+      });
+    },
+    isShippingMethodConfirmed () {
+      if (this.isVirtualCart) {
+        return true;
+      }
+
+      return !this.$store.getters[IS_SHIPPING_METHODS_SYNCING] &&
+        !this.$store.getters[IS_SHIPPING_METHODS_SYNCING_ERROR] &&
+        this.isSelectedShippingMethodAvailable;
+    },
+    isShippingMethodUnavailable () {
+      return !!this.productsInCart.length &&
+        !this.$store.getters[IS_SHIPPING_METHODS_SYNCING] &&
+        !this.isShippingMethodConfirmed;
+    },
     isPlaceOrderButtonDisabled () {
       return !this.productsInCart.length ||
+        !this.isShippingMethodConfirmed ||
         this.isCheckoutInProgress ||
         this.isGiftCardProcessing ||
         !this.paymentDetails.paymentMethod ||
@@ -525,8 +571,16 @@ export default {
 
       placeOrderButton.scrollIntoView({ behavior: 'smooth', block: 'end' });
     },
+    placeOrder () {
+      if (!this.isShippingMethodConfirmed) {
+        this.isCheckoutInProgress = false;
+        return;
+      }
+
+      OrderReview.methods.placeOrder.call(this);
+    },
     onPlaceOrder () {
-      if (this.isCheckoutInProgress) {
+      if (this.isCheckoutInProgress || !this.isShippingMethodConfirmed) {
         return;
       }
 
@@ -575,6 +629,14 @@ export default {
    margin-right: var(--spacer-sm);
    align-self: flex-start;
  }
+}
+
+.shipping-notice {
+  margin: var(--spacer-base) 0 0;
+
+  p {
+    margin: 0 0 var(--spacer-sm);
+  }
 }
 
 .totals {
