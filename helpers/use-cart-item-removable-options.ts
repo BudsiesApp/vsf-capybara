@@ -8,6 +8,7 @@ import Product from '@vue-storefront/core/modules/catalog/types/Product';
 import { Customization, CustomizationOptionValue, CustomizationStateItem, getOptionValueId, isFileUploadValue, OptionValue, toOptionValueArray, useAvailableCustomizations, useCustomizationsBundleOptions, useCustomizationState } from 'src/modules/customization-system';
 import { CartEvents } from 'src/modules/shared';
 
+import { getCartItemOptionErrorMessage } from './get-cart-item-option-error-message';
 import { useAddToCart } from './use-add-to-cart';
 
 interface RemovedOptionReference {
@@ -28,10 +29,6 @@ function getRemovedOptionKey (customizationId: string, optionValue: Customizatio
   }
 
   return `${customizationId}-${optionValueIds.sort().join('__')}`;
-}
-
-function getErrorNotificationMessage (error: unknown): string {
-  return (error as Error)?.message || i18n.t('Something went wrong').toString();
 }
 
 export function useCartItemRemovableOptions (
@@ -320,7 +317,7 @@ export function useCartItemRemovableOptions (
       rollback();
       applicationStore.dispatch('notification/spawnNotification', {
         type: 'danger',
-        message: getErrorNotificationMessage(error),
+        message: getCartItemOptionErrorMessage(error),
         action1: { label: i18n.t('OK') }
       });
     }
