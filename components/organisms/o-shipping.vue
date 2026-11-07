@@ -15,6 +15,7 @@
       <SfCheckbox
         v-if="currentUser && hasDefaultShippingAddress"
         v-model="shipToMyAddress"
+        :disabled="isShippingAddressLocked"
         class="form__element form__checkbox -always-enabled"
         name="shipToMyAddress"
         :label="$t('Ship to my default address')"
@@ -22,7 +23,7 @@
       <OBaseAddressForm
         ref="baseAddressForm"
         v-model="shipping"
-        :is-form-fields-disabled="shipToMyAddress"
+        :is-form-fields-disabled="isAddressFormDisabled"
         :get-field-anchor-name="getFieldAnchorName"
         @country-changed="onChangeCountry"
         @zip-code-blur="onZipCodeBlur"
@@ -137,10 +138,12 @@ import {
 import { ValidationObserver } from 'vee-validate';
 
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
+import { Logger } from '@vue-storefront/core/lib/logger';
 import {
   IS_SHIPPING_METHODS_SYNCING,
   IS_SHIPPING_METHODS_SYNCING_ERROR
 } from '@vue-storefront/core/modules/cart';
+import { CHECKOUT_UPDATE_SHIPPING_DETAILS } from '@vue-storefront/core/modules/checkout/store/checkout/mutation-types';
 import { Shipping } from '@vue-storefront/core/modules/checkout/components/Shipping';
 import {
   AdditionalContentOutlet,
@@ -198,7 +201,10 @@ export default defineComponent({
   mixins: [Shipping],
   data: () => {
     return {
-      states: States
+      states: States,
+      isSavingShippingDetails: false,
+      isShippingAddressLocked: false,
+      hasLeftShippingStep: false
     };
   },
   computed: {
@@ -230,10 +236,14 @@ export default defineComponent({
       return this.shippingMethodsDisplayState === 'available';
     },
     isContinueButtonDisabled () {
-      return !this.shippingMethods.length || this.isShippingMethodsSyncing || this.isShippingMethodsSyncingError || this.isValidatingAddress;
+      return !this.shippingMethods.length ||
+        this.isShippingMethodsSyncing ||
+        this.isShippingMethodsSyncingError ||
+        this.isValidatingAddress ||
+        this.isSavingShippingDetails;
     },
     isAddressFormDisabled () {
-      return this.shipToMyAddress;
+      return this.shipToMyAddress || this.isShippingAddressLocked;
     },
     selectedCurrency () {
       return this.$store.getters[GET_ACTIVE_CURRENCY];
@@ -276,58 +286,126 @@ export default defineComponent({
       this.changeCountry();
     },
     onZipCodeBlur () {
+      this.changeCountry();
+    },
+    changeCountry () {
+      this.updateCheckoutShippingAddress();
       EventBus.$emit('checkout-before-shippingMethods', this.shipping.country)
     },
+    getDisplayedAddress () {
+      const { shippingMethod, shippingCarrier, ...address } = this.shipping;
+
+      return address;
+    },
+    isDisplayedAddress (address) {
+      const displayedAddress = this.getDisplayedAddress();
+      const keys = new Set([...Object.keys(address), ...Object.keys(displayedAddress)]);
+
+      return [...keys].every((key) => address[key] === displayedAddress[key]);
+    },
+    updateCheckoutShippingAddress () {
+      this.$store.commit(`checkout/${CHECKOUT_UPDATE_SHIPPING_DETAILS}`, this.getDisplayedAddress());
+    },
     retryShippingMethods () {
+      this.updateCheckoutShippingAddress();
+
       return this.$store.dispatch('cart/syncShippingMethods', {
         forceServerSync: true
       }).catch(() => undefined);
     },
+    isSelectedShippingMethodAvailable ({ shippingMethod, shippingCarrier }) {
+      return this.shippingMethods.some((method) => {
+        return method.method_code === shippingMethod && method.carrier_code === shippingCarrier;
+      });
+    },
+    canAdvanceWithShippingMethod (selectedShippingMethod, submittedAddress) {
+      return !this.hasLeftShippingStep &&
+        this.isDisplayedAddress(submittedAddress) &&
+        !this.isShippingMethodsSyncing &&
+        !this.isShippingMethodsSyncingError &&
+        this.isSelectedShippingMethodAvailable(selectedShippingMethod);
+    },
     async saveDataToCheckout () {
-      const isFormValid = await this.validateAndGoToFirstError();
-
-      if (!isFormValid) {
+      if (this.isSavingShippingDetails) {
         return;
       }
 
-      const shippingRef = toRef(this, 'shipping');
-      const shouldProceed = await this.validateAddress(shippingRef);
+      this.isSavingShippingDetails = true;
 
-      if (!shouldProceed) {
-        this.focusSubmitStepButton();
-        return;
+      try {
+        const isFormValid = await this.validateAndGoToFirstError();
+
+        if (this.hasLeftShippingStep || !isFormValid) {
+          return;
+        }
+
+        const shippingRef = toRef(this, 'shipping');
+        const shouldProceed = await this.validateAddress(shippingRef);
+
+        if (this.hasLeftShippingStep) {
+          return;
+        }
+
+        if (!shouldProceed) {
+          this.isSavingShippingDetails = false;
+          await this.$nextTick();
+          this.focusSubmitStepButton();
+          return;
+        }
+
+        this.completeAddressValidation();
+
+        this.$store.commit(
+          SET_PERSISTED_CUSTOMER_FIRST_NAME,
+          this.shipping.firstName
+        );
+
+        this.$store.commit(
+          SET_PERSISTED_CUSTOMER_LAST_NAME,
+          this.shipping.lastName
+        );
+
+        this.$store.commit(
+          SET_PERSISTED_CUSTOMER_PHONE_NUMBER,
+          this.shipping.phoneNumber
+        );
+
+        this.$store.commit(
+          SET_PERSISTED_CUSTOMER_SHIPPING_COUNTRY,
+          this.shipping.country
+        );
+
+        this.$store.commit(
+          SET_PERSISTED_CUSTOMER_VAT_ID,
+          this.shipping.vat_id
+        );
+
+        const selectedShippingMethod = {
+          shippingMethod: this.shipping.shippingMethod,
+          shippingCarrier: this.shipping.shippingCarrier
+        };
+
+        const submittedAddress = this.getDisplayedAddress();
+
+        this.isShippingAddressLocked = true;
+        this.updateCheckoutShippingAddress();
+
+        try {
+          await this.$store.dispatch('cart/syncTotals', { forceServerSync: true });
+        } catch (error) {
+          Logger.error(error, 'checkout')();
+        }
+
+        if (!this.canAdvanceWithShippingMethod(selectedShippingMethod, submittedAddress)) {
+          return;
+        }
+
+        this.sendDataToCheckout();
+        this.$store.dispatch('cart/pullEstimatedShipments');
+      } finally {
+        this.isSavingShippingDetails = false;
+        this.isShippingAddressLocked = false;
       }
-
-      this.completeAddressValidation();
-
-      this.$store.commit(
-        SET_PERSISTED_CUSTOMER_FIRST_NAME,
-        this.shipping.firstName
-      );
-
-      this.$store.commit(
-        SET_PERSISTED_CUSTOMER_LAST_NAME,
-        this.shipping.lastName
-      );
-
-      this.$store.commit(
-        SET_PERSISTED_CUSTOMER_PHONE_NUMBER,
-        this.shipping.phoneNumber
-      );
-
-      this.$store.commit(
-        SET_PERSISTED_CUSTOMER_SHIPPING_COUNTRY,
-        this.shipping.country
-      );
-
-      this.$store.commit(
-        SET_PERSISTED_CUSTOMER_VAT_ID,
-        this.shipping.vat_id
-      );
-
-      this.sendDataToCheckout();
-      await this.$store.dispatch('cart/syncTotals', { forceServerSync: true });
-      this.$store.dispatch('cart/pullEstimatedShipments');
     },
     fillLastUsedCustomerData () {
       const customerFirstName = this.$store
@@ -375,6 +453,7 @@ export default defineComponent({
     EventBus.$on('user-after-loggedin', this.fillLastUsedCustomerData);
   },
   beforeDestroy () {
+    this.hasLeftShippingStep = true;
     EventBus.$off('user-after-loggedin', this.fillLastUsedCustomerData);
   }
 });
