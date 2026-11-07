@@ -217,13 +217,13 @@ export default defineComponent({
 
         await applicationStore.dispatch('notification/spawnNotification', {
           type: 'success',
-          message: applicationI18n.t('Address added successfully') as string,
+          message: applicationI18n.t('Address added successfully').toString(),
           action1: { label: i18n.t('OK') }
         });
 
         emit('address-added');
       } catch (error) {
-        onFailure(applicationI18n.t('Unable to add new address') as string);
+        onFailure(error?.message || applicationI18n.t('Unable to add new address').toString());
       } finally {
         isSubmitting.value = false;
       }
