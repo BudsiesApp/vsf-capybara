@@ -130,7 +130,7 @@ export default {
       return this.steps;
     },
     isReviewStep () {
-      return this.availableSteps[this.currentStep].key === orderReviewStepKey;
+      return this.availableSteps[this.currentStep]?.key === orderReviewStepKey;
     }
   },
   beforeMount () {
@@ -145,9 +145,20 @@ export default {
   },
   methods: {
     activateHashSection () {
-      if (!this.showSuccessOrderPage) {
-        Checkout.methods.activateHashSection.bind(this)();
+      if (this.showSuccessOrderPage) {
+        return;
       }
+
+      const hashSection = this.$route.hash.replace('#', '');
+      const isUnavailableSection = hashSection in this.activeSection &&
+        !this.availableSteps.some(step => step.key === hashSection);
+
+      if (isUnavailableSection) {
+        this.activateSection('personalDetails', { replaceHistoryEntry: true });
+        return;
+      }
+
+      Checkout.methods.activateHashSection.bind(this)();
     },
     changeStep (newStepIndex) {
       if (newStepIndex < this.currentStep) {
@@ -212,6 +223,9 @@ export default {
     }
   },
   watch: {
+    isVirtualCart () {
+      this.activateSection('personalDetails');
+    },
     showSuccessOrderPage (value) {
       if (!value && !this.productsInCart.length) {
         this.$router.push({ name: 'detailed-cart' });

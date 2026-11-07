@@ -123,7 +123,7 @@ import { useStore } from '@vue-storefront/core/application-services';
 import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
 import { emitPageRenderedEvent } from 'src/modules/shared';
 import { htmlDecode } from '@vue-storefront/core/filters';
-import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
+import { ORDER_ERROR_EVENT, useRedirectedSectionHashRemoval } from '@vue-storefront/core/modules/checkout';
 import { IS_CART_SYNCING } from '@vue-storefront/core/modules/cart';
 import { ModalList } from 'theme/store/ui/modals';
 import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
@@ -144,6 +144,8 @@ export default {
     };
   },
   setup () {
+    useRedirectedSectionHashRemoval();
+
     const store = useStore();
     const isMounted = ref(false);
     const trackingKey = computed(() => isMounted.value && store.state.cart.cartIsLoaded ? 'cart' : undefined);
