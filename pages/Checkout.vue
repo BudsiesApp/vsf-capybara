@@ -52,7 +52,6 @@ import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
 import { registerModule } from '@vue-storefront/core/lib/modules'
 
 import { Braintree } from 'src/modules/payment-braintree';
-import { CartEvents } from 'src/modules/shared';
 
 import OBillingAddress from 'theme/components/organisms/o-billing-address';
 import OShipping from 'theme/components/organisms/o-shipping';
@@ -64,6 +63,7 @@ import OPersonalDetails from 'theme/components/organisms/o-personal-details';
 import OCartItemsTable from 'theme/components/organisms/o-cart-items-table';
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
 import { ModalList } from 'theme/store/ui/modals';
+import { useBeginCheckoutEvent } from 'theme/helpers/use-begin-checkout-event';
 
 const successParamValue = 'success';
 const orderReviewStepKey = 'orderReview';
@@ -89,6 +89,9 @@ export default {
     ProductionSpotCountdown
   },
   mixins: [Checkout],
+  setup () {
+    useBeginCheckoutEvent();
+  },
   data () {
     return {
       steps: [
@@ -147,7 +150,6 @@ export default {
     registerModule(Braintree)
     EventBus.$on('order-after-placed', this.onOrderAfterPlacedHandler);
     EventBus.$on(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
-    EventBus.$emit(CartEvents.BEGIN_CHECKOUT);
   },
   beforeDestroy () {
     EventBus.$off('order-after-placed', this.onOrderAfterPlacedHandler);
