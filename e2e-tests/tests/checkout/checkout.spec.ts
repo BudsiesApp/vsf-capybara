@@ -1,6 +1,11 @@
+import { BrowserContext, Page } from '@playwright/test';
+
 import { test, expect } from '../../fixtures/checkout-page';
 import { getRandomEmail } from '../../helpers/get-random-email';
-import { AddressData, COUNTRY_WITH_STATES_DEFAULT_STATE, COUNTRY_WITH_STATES_LIST, COUNTRY_WITH_STATES_LIST_CODE } from '../../page-model/cart/checkout';
+import { AddressData, CheckoutPage, COUNTRY_WITH_STATES_DEFAULT_STATE, COUNTRY_WITH_STATES_LIST, COUNTRY_WITH_STATES_LIST_CODE } from '../../page-model/cart/checkout';
+import { CartPage } from '../../page-model/cart/cart';
+import { GiftCardProductPage } from '../../page-model/product/gift-card-product';
+import { SimpleProductPage } from '../../page-model/product/simple-product';
 
 const simpleProductUrl = '/p/voice-recorder/';
 
@@ -164,6 +169,167 @@ test('shipping step is visible if cart contains virtual gift card and other prod
   await cartPage.goto();
   await checkoutPage.goto();
   await checkoutPage.expectStepToBeVisible(checkoutPage.stepsName.shipping);
+});
+
+async function addPhysicalProductAndOpenCart ({ page, simpleProductPage, cartPage }: {
+  page: Page,
+  simpleProductPage: SimpleProductPage,
+  cartPage: CartPage
+}): Promise<string> {
+  await page.goto(simpleProductUrl);
+  await simpleProductPage.waitPageToBeVisible();
+  await simpleProductPage.addToCartAndVerifyResponse();
+
+  await cartPage.goto();
+  await expect(cartPage.cartItems).toHaveCount(1);
+  return cartPage.getCartItemProductName(cartPage.cartItems.first());
+}
+
+async function replacePhysicalCartWithGiftCardInNewTab (context: BrowserContext, physicalName: string): Promise<string> {
+  const secondPage = await context.newPage();
+  const secondCart = new CartPage(secondPage);
+  const giftCard = new GiftCardProductPage(secondPage);
+  await secondCart.goto();
+  await expect(secondCart.cartItems).toHaveCount(1);
+
+  await giftCard.goto();
+  await giftCard.fillFormData();
+  await giftCard.addToCartButton.click();
+  await secondCart.goto();
+  await expect(secondCart.cartItems).toHaveCount(2);
+  const deletion = secondCart.waitForDeleteResponse();
+  await secondCart.removeCartItem(secondCart.getCartItemByProductName(physicalName));
+  await deletion;
+  await expect(secondCart.cartItems).toHaveCount(1);
+  await secondPage.close();
+
+  return giftCard.PRODUCT_NAME;
+}
+
+async function expectVirtualCartCheckoutOnContact (page: Page, checkoutPage: CheckoutPage, giftCardName: string) {
+  const checkoutTitles = page.locator('.checkout__aside .o-order-content .product-title');
+  await expect(checkoutTitles).toHaveText([giftCardName]);
+  await checkoutPage.expectStepToBeHidden(checkoutPage.stepsName.shipping);
+  await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.personalDetails);
+  await expect(page).toHaveURL(/#personalDetails$/);
+}
+
+test('checkout URL identifies Contact on entry and the cart drops the step hash after reload', async ({ page, cartPage, checkoutPage, simpleProductPage }) => {
+  await addPhysicalProductAndOpenCart({ page, simpleProductPage, cartPage });
+  await checkoutPage.goto();
+  await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.personalDetails);
+  await expect(page).toHaveURL(/\/checkout\/onepage\/#personalDetails$/);
+
+  await page.goBack();
+  await expect(page).toHaveURL(/\/checkout\/cart\/$/);
+
+  await checkoutPage.goto();
+  await checkoutPage.personalDetailsStep.fillPersonalDetails();
+  await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.shipping);
+  await expect(page).toHaveURL(/#shipping$/);
+
+  await page.reload();
+  await expect(cartPage.cartItems).toHaveCount(1);
+  await expect(page).toHaveURL(/\/checkout\/cart\/$/);
+});
+
+test('checkout returns to Contact when another tab replaces a physical cart with a virtual gift card', async ({ page, context, cartPage, checkoutPage, simpleProductPage }) => {
+  const physicalName = await addPhysicalProductAndOpenCart({ page, simpleProductPage, cartPage });
+  await checkoutPage.goto();
+  await checkoutPage.personalDetailsStep.fillPersonalDetails();
+  await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.shipping);
+
+  const giftCardName = await replacePhysicalCartWithGiftCardInNewTab(context, physicalName);
+
+  await expectVirtualCartCheckoutOnContact(page, checkoutPage, giftCardName);
+  await checkoutPage.personalDetailsStep.fillPersonalDetails();
+  await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.billing);
+});
+
+test('checkout keeps Contact active when browser Back restores an unavailable Shipping step', async ({ page, context, cartPage, checkoutPage, simpleProductPage }) => {
+  const physicalName = await addPhysicalProductAndOpenCart({ page, simpleProductPage, cartPage });
+  await checkoutPage.goto();
+  await checkoutPage.personalDetailsStep.fillPersonalDetails();
+  await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.shipping);
+  await expect(page).toHaveURL(/#shipping$/);
+
+  const giftCardName = await replacePhysicalCartWithGiftCardInNewTab(context, physicalName);
+  await expectVirtualCartCheckoutOnContact(page, checkoutPage, giftCardName);
+
+  await page.goBack();
+
+  await expectVirtualCartCheckoutOnContact(page, checkoutPage, giftCardName);
+  await expect(checkoutPage.personalDetailsStep.continueButton).toBeVisible();
+  await checkoutPage.personalDetailsStep.fillPersonalDetails();
+  await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.billing);
+});
+
+test('checkout keeps its query string and stays open when cart virtuality changes in another tab', async ({ page, context, cartPage, checkoutPage, simpleProductPage }) => {
+  const physicalName = await addPhysicalProductAndOpenCart({ page, simpleProductPage, cartPage });
+
+  const checkoutUrl = '/checkout/onepage/?utm_source=review#personalDetails';
+  await page.evaluate((url) => {
+    window.history.pushState({}, '', url);
+    window.dispatchEvent(new PopStateEvent('popstate', { state: {} }));
+  }, checkoutUrl);
+  await checkoutPage.personalDetailsStep.waitToBeVisible();
+  await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.personalDetails);
+
+  const documentRequests: string[] = [];
+  page.on('request', (request) => {
+    if (request.isNavigationRequest() && request.frame() === page.mainFrame()) {
+      documentRequests.push(request.url());
+    }
+  });
+
+  const giftCardName = await replacePhysicalCartWithGiftCardInNewTab(context, physicalName);
+
+  await expectVirtualCartCheckoutOnContact(page, checkoutPage, giftCardName);
+  await expect(page).toHaveURL(/\/checkout\/onepage\/\?utm_source=review#personalDetails$/);
+  expect(documentRequests).toEqual([]);
+  await checkoutPage.personalDetailsStep.fillPersonalDetails();
+  await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.billing);
+  await expect(page).toHaveURL(/\/checkout\/onepage\/\?utm_source=review#payment$/);
+  expect(documentRequests).toEqual([]);
+});
+
+test('checkout returns to Contact when another tab adds a physical item to a virtual cart', async ({ page, context, cartPage, checkoutPage, giftCardProductPage }) => {
+  await giftCardProductPage.goto();
+  await giftCardProductPage.fillFormData();
+  await giftCardProductPage.addToCartButton.click();
+
+  await cartPage.goto();
+  await expect(cartPage.cartItems).toHaveCount(1);
+  await checkoutPage.goto();
+  await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.personalDetails);
+  // Gift card virtuality is known only after server cart sync
+  await checkoutPage.expectStepToBeHidden(checkoutPage.stepsName.shipping);
+  await checkoutPage.personalDetailsStep.fillPersonalDetails();
+  await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.billing);
+
+  const secondPage = await context.newPage();
+  const secondCart = new CartPage(secondPage);
+  const secondSimpleProduct = new SimpleProductPage(secondPage);
+  await secondCart.goto();
+  await expect(secondCart.cartItems).toHaveCount(1);
+
+  await secondPage.goto(simpleProductUrl);
+  await secondSimpleProduct.waitPageToBeVisible();
+  await secondPage.waitForTimeout(2000);
+  await secondSimpleProduct.addToCartAndVerifyResponse();
+  await secondCart.goto();
+  await expect(secondCart.cartItems).toHaveCount(2);
+  const physicalItem = secondCart.cartItems.filter({ hasNotText: giftCardProductPage.PRODUCT_NAME }).first();
+  const physicalName = await secondCart.getCartItemProductName(physicalItem);
+
+  const checkoutTitles = page.locator('.checkout__aside .o-order-content .product-title');
+  await expect(checkoutTitles).toContainText([giftCardProductPage.PRODUCT_NAME, physicalName]);
+  await checkoutPage.expectStepToBeVisible(checkoutPage.stepsName.shipping);
+  await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.personalDetails);
+  await expect(page).toHaveURL(/#personalDetails$/);
+
+  await checkoutPage.personalDetailsStep.fillPersonalDetails();
+  await checkoutPage.waitStepToBeActive(checkoutPage.stepsName.shipping);
 });
 
 // Currently "Send physical" option is disabled

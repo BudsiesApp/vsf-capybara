@@ -62,7 +62,8 @@ jest.mock('src/modules/promotion-platform/components/ProductionSpotCountdown.vue
 jest.mock('@vue-storefront/core/modules/checkout', () => ({
   __esModule: true,
   default: {},
-  ORDER_ERROR_EVENT: jest.fn(() => ({}))
+  ORDER_ERROR_EVENT: jest.fn(() => ({})),
+  useRedirectedSectionHashRemoval: jest.fn()
 }));
 jest.mock('@vue-storefront/core/modules/cart', () => ({
   __esModule: true,
