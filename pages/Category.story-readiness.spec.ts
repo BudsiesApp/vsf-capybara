@@ -2,6 +2,7 @@ import Vue from 'vue';
 import { shallowMount } from '@vue/test-utils';
 import { useStore } from '@vue-storefront/core/application-services';
 import { emitPageRenderedEvent } from 'src/modules/shared';
+import { mappingFallbackForUrlRewrite } from 'src/modules/url-rewrite';
 
 import Page from './Category.vue';
 
@@ -60,8 +61,9 @@ jest.mock('theme/helpers', () => ({
   prepareCategoryMenuItem: jest.fn(() => ({})),
   prepareCategoryProduct: jest.fn(() => ({}))
 }));
-jest.mock('query-string', () => ({ __esModule: true, default: {} }));
+jest.mock('query-string', () => ({ __esModule: true, default: jest.requireActual('query-string') }));
 jest.mock('@vue-storefront/core/store', () => ({ __esModule: true, default: {} }));
+jest.mock('@vue-storefront/core/modules/url/helpers', () => ({ normalizeUrlPath: value => value }));
 jest.mock('@storefront-ui/vue/src/utilities/mobile-observer', () => ({
   __esModule: true,
   default: {},
@@ -95,6 +97,29 @@ jest.mock('src/modules/currency', () => ({
   default: {},
   GET_ACTIVE_CURRENCY: jest.fn(() => ({}))
 }));
+
+it('checks Category rewrites during serverPrefetch with the shared normalized tag', async () => {
+  const store = require('@vue-storefront/core/store').default;
+  store.getters = { 'category-next/getCategoryByParams': () => ({}) };
+  store.dispatch = jest.fn(async () => ({ targetPath: 'target', redirectCode: 301 }));
+  (mappingFallbackForUrlRewrite as jest.Mock).mockImplementation(require('src/modules/url-rewrite/mappingFallback').mappingFallbackForUrlRewrite);
+  const redirect = jest.fn();
+  const tags = new Set();
+  Vue.prototype.$cacheTags = tags;
+  const onCategoryChangedHandler = jest.fn();
+  try {
+    await (Page as any).serverPrefetch.call({
+      $route: { path: '/Old-Path/', query: { step: '2' }, params: {} },
+      requestServices: { redirect }, onCategoryChangedHandler
+    });
+    expect(onCategoryChangedHandler).toHaveBeenCalledTimes(1);
+    expect(redirect).toHaveBeenCalledWith('/target/?step=2', 301);
+    expect(tags).toEqual(new Set(['url_rewrite', 'url_rewrite_old-path']));
+  } finally {
+    delete Vue.prototype.$cacheTags;
+    (mappingFallbackForUrlRewrite as jest.Mock).mockReset();
+  }
+});
 
 it('uses the category record and normalized description while products are still loading, including missing/failed reports', async () => {
   const category = Vue.observable({ value: { id: 1, url_path: 'a/b/c' } as any });
