@@ -1,5 +1,4 @@
 import { VueStorefrontModule } from '@vue-storefront/core/lib/module'
-import { LocalizedRoute } from '@vue-storefront/core/lib/types'
 import { CatalogModule } from '@vue-storefront/core/modules/catalog'
 import { CatalogNextModule } from '@vue-storefront/core/modules/catalog-next'
 import { CartModule } from '@vue-storefront/core/modules/cart'
@@ -11,10 +10,7 @@ import { GoogleTagManagerModule } from 'src/modules/google-tag-manager';
 import { UserModule } from '@vue-storefront/core/modules/user'
 import { NewsletterModule } from '@vue-storefront/core/modules/newsletter'
 import { StoryblokModule } from 'src/modules/vsf-storyblok-module'
-import { forStoryblok } from 'src/modules/vsf-storyblok-module/mappingFallback'
-import { extendStore } from '@vue-storefront/core/helpers'
 import {
-  StorefrontModule,
   registerApplicationModule,
   registerModule
 } from '@vue-storefront/core/lib/modules'
@@ -24,7 +20,7 @@ import { PromotionPlatformModule } from 'src/modules/promotion-platform'
 import { GiftCardModule } from 'src/modules/gift-card'
 import { PaymentBackendMethodsModule } from 'src/modules/payment-backend-methods'
 import { PaymentAffirm } from 'src/modules/payment-affirm';
-import { UrlRewriteModule, mappingFallbackForUrlRewrite } from 'src/modules/url-rewrite';
+import { UrlRewriteModule } from 'src/modules/url-rewrite';
 import { BackendSettings } from 'src/modules/backend-settings';
 import { ErrorLoggingModule } from 'src/modules/error-logging';
 import { PageLoadingIndicatorModule } from 'src/modules/page-loading-indicator';
@@ -41,27 +37,7 @@ import { CouponActivationModule } from 'src/modules/coupon-activation'
 import registerStoryblokComponents from 'theme/components/storyblok'
 import { KlaviyoModule, ModuleConfig } from 'src/modules/klaviyo'
 import { AmazonPay } from 'src/modules/vsf-amazon-pay'
-
-const extendUrlVuex = {
-  actions: {
-    async mapFallbackUrl (context, payload: any): Promise<LocalizedRoute | undefined> {
-      const result = await forStoryblok(context, payload);
-
-      if (result) {
-        return result
-      }
-
-      const redirectRoute = await mappingFallbackForUrlRewrite(context, payload);
-
-      if (redirectRoute) {
-        return redirectRoute;
-      }
-    }
-  }
-}
-const extendUrlModule: StorefrontModule = function ({ store }) {
-  extendStore('url', extendUrlVuex);
-}
+import { extendUrlModule } from './extend-url-module'
 
 // TODO:distributed across proper pages BEFORE 1.11
 export function registerClientModules () {
@@ -78,7 +54,7 @@ export function registerClientModules () {
   registerModule(BreadcrumbsModule)
   registerModule(NewsletterModule)
   registerModule(StoryblokModule)
-  registerModule(extendUrlModule)
+  registerApplicationModule(extendUrlModule)
   registerModule(BudsiesModule)
   registerModule(GoogleTagManagerModule)
   registerApplicationModule(ABTesting)
