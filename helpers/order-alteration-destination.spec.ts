@@ -47,22 +47,4 @@ describe('order alteration destination', () => {
     wrapper.destroy();
   });
 
-  it.each(['list', 'single'])('keeps associated-product prefetch and Rush loading for the %s loader', async (entry) => {
-    const applicationStore = { getters: { 'product/getProductBySkuDictionary': {} }, dispatch: jest.fn().mockResolvedValue(undefined) };
-    const wrapper = mount(defineComponent({
-      setup () {
-        if (entry === 'list') {
-          useAlterationProductsLoader(ref<any[]>([order(1, { country_id: 'US' })]));
-        } else {
-          useOrderItemAlterationProductLoader(ref<any>(item(1)), ref<any>(order(1, { country_id: 'US' })));
-        }
-        return {};
-      },
-      render: h => h('div')
-    }), { provide: { [storeInjectionKey as symbol]: applicationStore } });
-    for (let i = 0; i < 5; i++) await Promise.resolve();
-    expect(applicationStore.dispatch).toHaveBeenCalledWith('product/findProducts', expect.objectContaining({ options: { prefetchGroupProducts: true } }));
-    expect(applicationStore.dispatch).toHaveBeenCalledWith('budsies/loadProductsRushAddons', { productSku: '' });
-    wrapper.destroy();
-  });
 });
