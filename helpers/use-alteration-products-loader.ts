@@ -59,28 +59,31 @@ export function useAlterationProductsLoader (
   const alterationProductByOrderItemId = computed<Record<number, Product>>(() => {
     const dictionary: Record<number, Product> = {};
 
-    for (const orderItem of allOrderItems.value) {
-      const alterationSku = orderItem.extension_attributes?.alteration_product?.sku;
+    for (const order of orders.value) {
+      for (const orderItem of order.items) {
+        const alterationSku = orderItem.extension_attributes?.alteration_product?.sku;
 
-      if (!alterationSku) {
-        continue;
-      }
-
-      const product = productBySkuDictionary.value[alterationSku];
-
-      if (!product) {
-        continue;
-      }
-
-      const updatedProduct = updateProductProductionTimeCustomizationData(
-        product,
-        applicationStore,
-        {
-          makeProductionTimeRequired: false
+        if (!alterationSku) {
+          continue;
         }
-      );
 
-      dictionary[orderItem.item_id] = updatedProduct;
+        const product = productBySkuDictionary.value[alterationSku];
+
+        if (!product) {
+          continue;
+        }
+
+        const updatedProduct = updateProductProductionTimeCustomizationData(
+          product,
+          applicationStore,
+          {
+            makeProductionTimeRequired: false,
+            isDomestic: order.shipping_address?.country_id === 'US'
+          }
+        );
+
+        dictionary[orderItem.item_id] = updatedProduct;
+      }
     }
 
     return dictionary;
