@@ -23,20 +23,14 @@ export function useAlterationProductsLoader (
   const applicationStore = useStore();
   const isLoading = ref<boolean>(false);
 
-  const allOrderItems = computed<OrderItem[]>(() => {
-    const items: OrderItem[] = [];
-
-    for (const order of orders.value) {
-      items.push(...order.items);
-    }
-
-    return items;
-  });
+  const allOrderItems = computed<{ order: Order; item: OrderItem }[]>(() =>
+    orders.value.flatMap(order => order.items.map(item => ({ order, item })))
+  );
 
   const alterationProductSkus = computed<string[]>(() => {
     const skus = new Set<string>();
 
-    for (const item of allOrderItems.value) {
+    for (const { item } of allOrderItems.value) {
       const alterationSku = item.extension_attributes?.alteration_product?.sku;
       const manufacturingExtraChargeSku = item.extension_attributes?.manufacturing_extra_charge_product?.sku;
 
@@ -59,31 +53,29 @@ export function useAlterationProductsLoader (
   const alterationProductByOrderItemId = computed<Record<number, Product>>(() => {
     const dictionary: Record<number, Product> = {};
 
-    for (const order of orders.value) {
-      for (const orderItem of order.items) {
-        const alterationSku = orderItem.extension_attributes?.alteration_product?.sku;
+    for (const { order, item } of allOrderItems.value) {
+      const alterationSku = item.extension_attributes?.alteration_product?.sku;
 
-        if (!alterationSku) {
-          continue;
-        }
-
-        const product = productBySkuDictionary.value[alterationSku];
-
-        if (!product) {
-          continue;
-        }
-
-        const updatedProduct = updateProductProductionTimeCustomizationData(
-          product,
-          applicationStore,
-          {
-            makeProductionTimeRequired: false,
-            isDomestic: order.shipping_address?.country_id === 'US'
-          }
-        );
-
-        dictionary[orderItem.item_id] = updatedProduct;
+      if (!alterationSku) {
+        continue;
       }
+
+      const product = productBySkuDictionary.value[alterationSku];
+
+      if (!product) {
+        continue;
+      }
+
+      const updatedProduct = updateProductProductionTimeCustomizationData(
+        product,
+        applicationStore,
+        {
+          makeProductionTimeRequired: false,
+          isDomestic: order.shipping_address?.country_id === 'US'
+        }
+      );
+
+      dictionary[item.item_id] = updatedProduct;
     }
 
     return dictionary;

@@ -27,6 +27,11 @@ describe('order alteration destination', () => {
     orders.value[1].shipping_address.country_id = 'US';
     await nextTick();
     expect((loader.alterationProductByOrderItemId.value[2] as any).destination).toBe(true);
+    orders.value.reverse();
+    orders.value[0].items.push(item(6));
+    await nextTick();
+    expect((loader.alterationProductByOrderItemId.value[1] as any).destination).toBe(true);
+    expect((loader.alterationProductByOrderItemId.value[6] as any).destination).toBe(false);
     wrapper.destroy();
   });
 
