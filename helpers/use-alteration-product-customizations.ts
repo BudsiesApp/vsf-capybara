@@ -7,6 +7,7 @@ import {
   CustomizationOptionValue,
   isFileUploadValue,
   PRODUCTION_TIME_SELECTOR_STANDARD_OPTION_VALUE_ID,
+  OptionType,
   OptionValue
 } from 'src/modules/customization-system';
 
@@ -194,6 +195,11 @@ export function useAlterationProductCustomizations (
 
   function customizationsFilter (customization: Customization, availableOptionValues?: OptionValue[]): boolean {
     const value = orderItemOptionValue.value[customization.id];
+
+    if (customization.optionData?.type === OptionType.PRODUCTION_TIME &&
+      !availableOptionValues?.some((item) => optionValuesFilter(customization.id, item))) {
+      return false;
+    }
 
     if (!value) {
       return true;
