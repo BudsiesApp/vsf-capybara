@@ -53,15 +53,16 @@
       <MProductDescriptionStory
         v-if="showStory"
         class="_giftcard-detailed-information"
-        :product="product"
         :product-sku="product.sku"
+        @story-rendered="onStoryRendered"
       />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import Vue, { VueConstructor } from 'vue';
+import Vue, { computed, VueConstructor } from 'vue';
+import { useStore } from '@vue-storefront/core/application-services';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { getThumbnailPath, isServer } from '@vue-storefront/core/helpers';
 import Product from '@vue-storefront/core/modules/catalog/types/Product';
@@ -76,10 +77,12 @@ import { SfModal } from '@storefront-ui/vue';
 import GiftCardTemplateComponent from 'src/modules/gift-card/components/GiftCardTemplate.vue';
 import OGiftCardOrderForm from 'theme/components/organisms/o-gift-card-order-form.vue';
 import MProductDescriptionStory from 'theme/components/molecules/m-product-description-story.vue';
+import { getProductDescriptionStoryFullSlug } from 'theme/components/molecules/helpers/get-product-description-story-full-slug';
+import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
 
 import GiftCardTemplate from 'src/modules/gift-card/types/GiftCardTemplate.interface';
 import { ImageHandlerService } from 'src/modules/file-storage';
-import { InjectType, ProductEvent } from 'src/modules/shared';
+import { emitPageRenderedEvent, InjectType, ProductEvent } from 'src/modules/shared';
 import {
   AMASTY_GIFT_CARD_SKU,
   AmGiftCardType,
@@ -256,6 +259,19 @@ export default (Vue as VueConstructor<Vue & InjectedServices>).extend({
     showStory (): boolean {
       return !!this.product;
     }
+  },
+  setup () {
+    const applicationStore = useStore();
+    const trackingKey = computed<string | undefined>(() => {
+      const sku = applicationStore.getters['product/getCurrentProduct']?.sku;
+
+      return sku === giftCardSku || sku === AMASTY_GIFT_CARD_SKU ? sku : undefined;
+    });
+    const storyDependencies = computed<string[]>(() => {
+      return trackingKey.value ? [getProductDescriptionStoryFullSlug(trackingKey.value)] : [];
+    });
+
+    return useStoryblokReadinessTracker(trackingKey, storyDependencies, emitPageRenderedEvent);
   },
   data () {
     return {

@@ -26,6 +26,7 @@
     </div>
 
     <customization-option
+      :restoration-settled="restorationSettled"
       v-for="customization in availableCustomizations"
       class="_customization-option"
       ref="customizationOption"
@@ -141,6 +142,7 @@ import MOrderSubmitAgreement from 'theme/components/molecules/m-order-submit-agr
 export default defineComponent({
   name: 'CreationWizardFormLastStep',
   props: {
+    restorationSettled: { type: Boolean, default: true },
     submitAction: {
       type: Function as PropType<() => Promise<void>>,
       required: true
@@ -231,9 +233,10 @@ export default defineComponent({
       return firstCategory.name;
     });
     async function onSubmitClick () {
+      if (props.isSubmitButtonDisabled) return;
       const isValid = await formValidation.validateAndGoToFirstError();
 
-      if (!isValid) {
+      if (!isValid || props.isSubmitButtonDisabled) {
         return;
       }
 

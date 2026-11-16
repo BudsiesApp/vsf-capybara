@@ -31,6 +31,7 @@ import {
 } from '@storefront-ui/vue';
 import { getPathForStaticPage } from 'theme/helpers';
 import CmsPage from '@vue-storefront/core/pages/CmsPage';
+import { emitPageRenderedEvent } from 'src/modules/shared';
 import AStatic from 'theme/components/atoms/a-static';
 
 export default {
@@ -104,7 +105,8 @@ export default {
   async mounted () {
     await Promise.all([
       this.$store.dispatch('defaultContent/updateDefaultContent')
-    ])
+    ]);
+    emitPageRenderedEvent();
   }
 };
 </script>

@@ -22,7 +22,7 @@ import DescriptionStoryMixin from 'theme/mixins/description-story';
 import { SfHeading } from '@storefront-ui/vue';
 import { components } from 'src/modules/vsf-storyblok-module/components';
 
-const storyParentFolderName = 'category-descriptions';
+import { getCategoryDescriptionStoryFullSlug } from './helpers/get-category-description-story-full-slug';
 
 export default DescriptionStoryMixin.extend({
   name: 'MCategoryDescriptionStory',
@@ -45,17 +45,7 @@ export default DescriptionStoryMixin.extend({
         return undefined;
       }
 
-      const normalizedPath = this.category.url_path.replace('/', '_');
-      return `${storyParentFolderName}/${normalizedPath}`;
-    }
-  },
-  watch: {
-    'category.url_path' (value?: string): void {
-      if (!value) {
-        return;
-      }
-
-      this.loadStory();
+      return getCategoryDescriptionStoryFullSlug(this.category.url_path);
     }
   }
 })

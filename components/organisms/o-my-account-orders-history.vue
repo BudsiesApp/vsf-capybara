@@ -63,6 +63,7 @@ import {
 import { useAlterationProductsLoader } from 'theme/helpers/use-alteration-products-loader';
 import { useHeadingFocus } from 'theme/helpers/use-heading-focus';
 
+import OrderItemPhotoUploadForm from 'theme/components/customization-system/forms/order-item-photo-upload-form.vue';
 import AlterationProductForm from 'theme/components/customization-system/forms/alteration-product-form.vue';
 import OrdersHistorySuggestedItems from 'theme/components/orders-history/orders-history-suggested-items.vue';
 
@@ -75,7 +76,8 @@ export default defineComponent({
     OrdersHistorySuggestedItems
   },
   provide: {
-    AlterationProductForm
+    AlterationProductForm,
+    OrderItemPhotoUploadForm
   },
   setup () {
     const applicationI18n = useI18n();

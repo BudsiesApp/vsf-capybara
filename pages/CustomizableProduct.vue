@@ -9,6 +9,7 @@
       :existing-cart-item="existingCartItem"
       :image-url="imageUrl"
       @hook:mounted="onFormMounted"
+      @form-ready="onFormReady"
       v-if="showForm"
     />
 
@@ -39,7 +40,7 @@ import { htmlDecode } from '@vue-storefront/core/filters';
 import { isServer } from '@vue-storefront/core/helpers';
 
 import { ProductStructuredData } from 'src/modules/budsies';
-import { getCanonicalUrl } from 'src/modules/shared';
+import { emitPageRenderedEvent, getCanonicalUrl } from 'src/modules/shared';
 
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 import { useProductPage } from 'theme/helpers/use-product-page';
@@ -129,6 +130,10 @@ export default defineComponent({
       isFormMounted.value = true;
     }
 
+    function onFormReady () {
+      emitPageRenderedEvent();
+    }
+
     const showPlaceholder = computed<boolean>(() => {
       return !isLeavePage.value && (!showForm.value || !isFormMounted.value);
     });
@@ -168,6 +173,7 @@ export default defineComponent({
       formPlaceholderComponent,
       isLeavePage,
       onFormMounted,
+      onFormReady,
       requestServices,
       showForm,
       showPlaceholder

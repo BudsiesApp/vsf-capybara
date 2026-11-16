@@ -16,11 +16,10 @@ import { PropType } from 'vue';
 import { StoryblokStories } from 'src/modules/vsf-storyblok-module/types/State';
 import { components } from 'src/modules/vsf-storyblok-module/components';
 
-import StoryMixin from 'theme/mixins/story';
+import StoryMixin, { StoryLoadResult } from 'theme/mixins/story';
+import { getProductDescriptionStoryFullSlug } from './helpers/get-product-description-story-full-slug';
 
 import ACustomHeading from '../atoms/a-custom-heading.vue';
-
-const storyParentFolderName = 'product-descriptions';
 
 export default StoryMixin.extend({
   name: 'MProductDescriptionStory',
@@ -43,6 +42,12 @@ export default StoryMixin.extend({
     Blok: components.block
   },
   computed: {
+    storyFullSlug (): string {
+      return this.getStoryFullSlug(this.productSku);
+    },
+    storyLoadInputs (): (string | undefined)[] {
+      return [this.productSku, this.backupProductSku];
+    },
     storyData (): StoryblokStories | undefined {
       let productStory = this.$store.state.storyblok.stories[this.getStoryFullSlug(this.productSku)];
 
@@ -55,19 +60,21 @@ export default StoryMixin.extend({
   },
   methods: {
     getStoryFullSlug (productSku: string): string {
-      return `${storyParentFolderName}/${productSku}`;
+      return getProductDescriptionStoryFullSlug(productSku);
     },
-    async loadStory (): Promise<void> {
-      const story = await this.$store.dispatch(`storyblok/loadStory`, { fullSlug: this.getStoryFullSlug(this.productSku) });
+    async fetchStory (): Promise<StoryLoadResult> {
+      const primaryFullSlug = this.storyFullSlug;
+      const fullSlugs = [primaryFullSlug];
+      const backupFullSlug = this.backupProductSku ? this.getStoryFullSlug(this.backupProductSku) : undefined;
 
-      if (!story?.content && this.backupProductSku) {
-        await this.$store.dispatch(`storyblok/loadStory`, { fullSlug: this.getStoryFullSlug(this.backupProductSku) });
+      const story = await this.$store.dispatch('storyblok/loadStory', { fullSlug: primaryFullSlug });
+
+      if (!story?.content && backupFullSlug) {
+        fullSlugs.push(backupFullSlug);
+        await this.$store.dispatch('storyblok/loadStory', { fullSlug: backupFullSlug });
       }
-    }
-  },
-  watch: {
-    productSku (): void {
-      this.loadStory();
+
+      return { fullSlugs };
     }
   }
 })

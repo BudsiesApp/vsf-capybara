@@ -197,10 +197,20 @@ export default {
       this.actionError = '';
       this.statusMessage = '';
     },
-    showActionError (error) {
-      this.actionError = error instanceof Error && error.message
+    getActionErrorMessage (error) {
+      return error instanceof Error && error.message
         ? error.message
         : this.$t('Unable to update address').toString();
+    },
+    showActionError (error) {
+      this.actionError = this.getActionErrorMessage(error);
+    },
+    notifyActionError (error) {
+      this.$store.dispatch('notification/spawnNotification', {
+        type: 'danger',
+        message: this.getActionErrorMessage(error),
+        action1: { label: this.$t('OK') }
+      });
     },
     getAddressIdentifier (address) {
       const street = Array.isArray(address.street)
@@ -265,7 +275,7 @@ export default {
           address: this.getAddressIdentifier(address)
         }).toString();
       } catch (error) {
-        this.showActionError(error);
+        this.notifyActionError(error);
       }
     },
     async setAddressAsDefaultForShipping (address) {
@@ -282,7 +292,7 @@ export default {
           address: this.getAddressIdentifier(address)
         }).toString();
       } catch (error) {
-        this.showActionError(error);
+        this.notifyActionError(error);
       }
     }
   }

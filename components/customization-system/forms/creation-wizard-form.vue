@@ -4,7 +4,7 @@
       <div class="_steps-container">
         <sf-steps
           :active="currentStep"
-          :can-go-back="canGoBack && !isSubmitButtonDisabled && !isCurrentStepAdditional"
+          :can-go-back="canGoBack && !isDisabled && !isSomeEntityBusy && !isCurrentStepAdditional"
           :steps="stepsList"
           @change="onStepChanged"
           class="_steps"
@@ -22,10 +22,12 @@
               v-for="customizationGroup in stepsCustomizations"
               :key="customizationGroup.id"
               :name="customizationGroup.name"
+              :use-v-show="hasHolidayTimeline(customizationRootGroupCustomizations[customizationGroup.id])"
             >
               <validation-observer
                 v-slot="{ errors: formErrors }"
                 ref="validationObserver"
+                :data-wizard-step="customizationGroup.name"
               >
                 <SfHeading
                   class="_step-title -required"
@@ -34,6 +36,7 @@
                 />
 
                 <customization-option
+                  :restoration-settled="restorationSettled"
                   v-for="customization in customizationRootGroupCustomizations[
                     customizationGroup.id
                   ]"
@@ -69,7 +72,7 @@
                   </router-link>
                   <SfButton
                     class="_button"
-                    :disabled="isSubmitButtonDisabled"
+                    :disabled="isDisabled || isSomeEntityBusy"
                     @click="onContinueClick"
                   >
                     {{ $t("Continue") }}
@@ -80,6 +83,7 @@
 
             <sf-step :name="lastStepCustomization.name">
               <creation-wizard-form-last-step
+                :restoration-settled="restorationSettled"
                 :submit-action="onFormSubmit"
                 :available-customizations="
                   customizationRootGroupCustomizations[lastStepCustomization.id]
@@ -153,11 +157,13 @@ import i18n from '@vue-storefront/core/i18n';
 import { useABTestingCustomizationsFilter } from 'src/modules/a-b-testing';
 import {
   ProductCustomizationMode,
+  WidgetType,
   Customization,
   useCustomizationState,
   useAvailableCustomizations,
   useOptionValueActions,
   useEntityBusyState,
+  useHolidayDeliveryLocation,
   CustomizationOptionValue,
   useCustomizationsGroups,
   useCustomizationsBundleOptions,
@@ -266,7 +272,11 @@ export default defineComponent({
     ValidationObserver
   },
   setup (props, context) {
+    function hasHolidayTimeline (customizations: Customization[] = []): boolean {
+      return customizations.some(option => option.optionData?.displayWidget === WidgetType.PRODUCTION_TIME_TIMELINE && !!option.optionData?.displayWidgetOptions?.isHolidayPeriod);
+    }
     const applicationStore = useStore();
+    const { ready: holidayLocationReady } = useHolidayDeliveryLocation();
     const applicationRouter = useRouter();
     const {
       canUsePersistedCustomizationState,
@@ -298,11 +308,9 @@ export default defineComponent({
     const activeValidationObserver = computed<InstanceType<
       typeof ValidationObserver
     > | null>(() => {
-      if (Array.isArray(validationObserver.value)) {
-        return validationObserver.value[0] || null;
-      }
-
-      return validationObserver.value;
+      const observers = Array.isArray(validationObserver.value) ? validationObserver.value : [validationObserver.value];
+      const activeName = formSteps.stepsList.value[formSteps.currentStep.value];
+      return observers.find(observer => observer?.$el.getAttribute('data-wizard-step') === activeName) || null;
     });
     const formValidation = useFormValidation(activeValidationObserver, () =>
       getNestedFormRefs(getCustomizationOptionsInRenderedOrder())
@@ -535,7 +543,7 @@ export default defineComponent({
         : plushieType.value;
     });
 
-    const { removePreservedState } =
+    const { removePreservedState, restorationSettled } =
       useCustomizationStatePreservation(
         preservationStorageKey,
         customizationState,
@@ -568,6 +576,7 @@ export default defineComponent({
     const { isUnmounted } = useComponentUnmountedChecker();
 
     async function onFormSubmit (): Promise<void> {
+      if (isSubmitButtonDisabled.value) return;
       try {
         if (isCustomizeMode.value) {
           await confirmCustomization();
@@ -641,13 +650,15 @@ export default defineComponent({
     });
 
     const isSubmitButtonDisabled = computed<boolean>(() => {
-      return isDisabled.value || isSomeEntityBusy.value;
+      return isDisabled.value || isSomeEntityBusy.value ||
+        (hasHolidayTimeline(filteredCustomizations.value) && (!holidayLocationReady.value || !restorationSettled.value));
     });
 
     async function onContinueClick (): Promise<void> {
+      if (isDisabled.value || isSomeEntityBusy.value) return;
       const isValid = await formValidation.validateAndGoToFirstError();
 
-      if (!isValid) {
+      if (!isValid || isDisabled.value || isSomeEntityBusy.value) {
         return;
       }
 
@@ -664,6 +675,8 @@ export default defineComponent({
     );
 
     return {
+      restorationSettled,
+      hasHolidayTimeline,
       ...customizationGroups,
       ...formSteps,
       ...productTypeStep,
@@ -677,6 +690,7 @@ export default defineComponent({
       customizationOptionValue,
       isDisabled,
       isSubmitButtonDisabled,
+      isSomeEntityBusy,
       onEntityBusyChanged,
       onCustomizationOptionInput,
       onContinueClick,

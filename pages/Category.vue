@@ -217,6 +217,7 @@
       <MCategoryDescriptionStory
         :category="getCurrentCategory"
         v-if="showCategoryDescription"
+        @story-rendered="onStoryRendered"
       />
     </div>
   </div>
@@ -225,7 +226,9 @@
 <script>
 import LazyHydrate from 'vue-lazy-hydration';
 import { mapGetters } from 'vuex';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { useStore } from '@vue-storefront/core/application-services';
+import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
 import castArray from 'lodash-es/castArray';
 import config from 'config';
 import { isServer } from '@vue-storefront/core/helpers';
@@ -259,7 +262,7 @@ import { PRODUCT_LOCALIZED_PRICE_DICTIONARY } from '@vue-storefront/core/modules
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
 import { useRequestServices } from '@vue-storefront/core/request-services';
 
-import { ProductEvent } from 'src/modules/shared';
+import { emitPageRenderedEvent, ProductEvent } from 'src/modules/shared';
 import { mappingFallbackForUrlRewrite } from 'src/modules/url-rewrite';
 
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
@@ -267,6 +270,7 @@ import isObjectEmpty from 'theme/helpers/is-object-empty.function';
 import { useInfinityScroll } from 'theme/helpers/use-infinity-scroll';
 
 import ASortIcon from 'theme/components/atoms/a-sort-icon';
+import { getCategoryDescriptionStoryFullSlug } from 'theme/components/molecules/helpers/get-category-description-story-full-slug';
 import MCategoryDescriptionStory from 'theme/components/molecules/m-category-description-story.vue';
 import OProductCard from 'theme/components/organisms/o-product-card';
 import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
@@ -353,6 +357,13 @@ export default {
     SfLoader
   },
   setup () {
+    const applicationStore = useStore();
+    const category = computed(() => applicationStore.getters['category-next/getCurrentCategory']);
+    const trackingKey = computed(() => category.value?.id === undefined ? undefined : String(category.value.id));
+    const showCategoryDescription = computed(() => !isObjectEmpty(category.value) && !!category.value.url_path);
+    const storyDependencies = computed(() => showCategoryDescription.value
+      ? [getCategoryDescriptionStoryFullSlug(category.value.url_path)] : []);
+    const { onStoryRendered } = useStoryblokReadinessTracker(trackingKey, storyDependencies, emitPageRenderedEvent);
     const requestServices = useRequestServices();
     const nextPageLoadingThreshold = ref(null);
     const isProductsLoading = ref(false);
@@ -365,6 +376,8 @@ export default {
     );
 
     return {
+      showCategoryDescription,
+      onStoryRendered,
       nextPageLoadingThreshold,
       requestServices,
       isInfinityScrollingEnabled,
@@ -503,9 +516,6 @@ export default {
         castArray(this.getCurrentFilters[filter.type]).find(
           variant => variant && variant.id === filter.id
         ) !== undefined;
-    },
-    showCategoryDescription () {
-      return !isObjectEmpty(this.getCurrentCategory) && !!this.getCurrentCategory.url_path;
     },
     skinClass () {
       return getCurrentThemeClass();

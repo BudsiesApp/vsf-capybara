@@ -4,6 +4,7 @@
 
     <MBlockStory
       :story-slug="topStorySlug"
+      @story-rendered="onStoryRendered"
       class="_top-block"
       v-if="topStorySlug"
     />
@@ -18,7 +19,8 @@
       :draft-order-item="draftOrderItem"
       :additional-steps="additionalSteps"
       :load-additional-steps-data="loadAdditionalStepsData"
-      @hook:mounted="onFormMounted"
+      @hook:mounted="onSelectedFormMounted"
+      @form-ready="onFormReady"
     />
 
     <template v-if="formPlaceholderComponent">
@@ -32,6 +34,8 @@
 </template>
 
 <script lang="ts">
+import { useFormPageReadiness } from 'theme/helpers/use-form-page-readiness';
+import { emitPageRenderedEvent } from 'src/modules/shared';
 import { useI18n } from '@vue-storefront/core/application-services';
 import {
   computed,
@@ -219,7 +223,23 @@ export default defineComponent({
         : 'golf_cover_creation_page_top';
     });
 
+    const trackingKey = computed(() => showForm.value
+      ? orderItemId.value
+      : undefined);
+    const storyDependencies = computed(() => topStorySlug.value ? [`blocks/${topStorySlug.value}`] : []);
+    const { onStoryRendered, onFormReady } = useFormPageReadiness(trackingKey, storyDependencies, emitPageRenderedEvent);
+
+    function onSelectedFormMounted (): void {
+      onFormMounted();
+      if (layout.value === LayoutType.CREATION_WIZARD) {
+        onFormReady();
+      }
+    }
+
     return {
+      onStoryRendered,
+      onFormReady,
+      onSelectedFormMounted,
       LayoutType,
       ProductCustomizationMode,
       currentProduct,

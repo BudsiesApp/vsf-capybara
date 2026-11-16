@@ -6,6 +6,7 @@
       <div class="_notes">
         <MBlockStory
           :story-slug="topStorySlug"
+          @story-rendered="onStoryRendered"
           v-if="topStorySlug"
         />
       </div>
@@ -62,6 +63,8 @@
               :use-v-show="true"
             >
               <customization-option
+                :restoration-settled="restorationSettled"
+                :report-readiness-busy="true"
                 v-for="customization in customizationRootGroupCustomizations[
                   customizationGroup.id
                 ]"
@@ -90,6 +93,7 @@
 
             <sf-step :name="lastStepName">
               <phrase-pillow-form-last-step
+                :restoration-settled="restorationSettled"
                 :add-to-cart-action="onFormSubmit"
                 :available-customizations="lastStepAvailableCustomizations"
                 :customization-available-option-values="
@@ -114,6 +118,7 @@
     <div class="_notes">
       <MBlockStory
         :story-slug="bottomStorySlug"
+        @story-rendered="onStoryRendered"
         v-if="bottomStorySlug"
       />
     </div>
@@ -159,6 +164,7 @@ import {
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
 import { useBulkImagesUpload } from 'theme/helpers/use-bulk-images-upload';
 import { useComponentUnmountedChecker } from 'theme/helpers/use-component-unmounted-checker';
+import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
 import { usePhrasePillowFormSteps } from 'theme/helpers/use-phrase-pillow-form-steps';
 import { useProductQuantity } from 'theme/helpers/use-product-quantity';
 
@@ -294,7 +300,7 @@ export default defineComponent({
       removeUnavailableOptionValues
     );
 
-    const { removePreservedState } =
+    const { removePreservedState, restorationSettled } =
       useCustomizationStatePreservation(
         productSku,
         customizationState,
@@ -342,7 +348,7 @@ export default defineComponent({
     const { isUnmounted } = useComponentUnmountedChecker();
 
     async function onFormSubmit (): Promise<void> {
-      if (!validationObserver.value) {
+      if (isSubmitButtonDisabled.value || !validationObserver.value) {
         return;
       }
 
@@ -352,6 +358,8 @@ export default defineComponent({
         formSteps.activateFirstStepWithError();
         return;
       }
+
+      if (isSubmitButtonDisabled.value) return;
 
       if (!preview.value) {
         return;
@@ -363,7 +371,7 @@ export default defineComponent({
         processedImageUploadCustomizationStateItem
       );
 
-      if (isUnmounted.value) {
+      if (isUnmounted.value || isSubmitButtonDisabled.value) {
         return;
       }
 
@@ -404,6 +412,15 @@ export default defineComponent({
       return isDisabled.value || isSomeEntityBusy.value;
     });
 
+    const storyDependencies = computed<string[]>(() => {
+      return [topStorySlug.value, bottomStorySlug.value].filter(Boolean).map(slug => `blocks/${slug}`);
+    });
+    const { onStoryRendered } = useStoryblokReadinessTracker(
+      productSku,
+      storyDependencies,
+      () => context.emit('form-ready')
+    );
+
     watch(formSteps.currentStep, (val, oldVal) => {
       if (val === oldVal) {
         return;
@@ -427,6 +444,7 @@ export default defineComponent({
     });
 
     return {
+      restorationSettled,
       ...customizationGroups,
       ...formSteps,
       ...useBulkImagesUpload(),
@@ -440,6 +458,7 @@ export default defineComponent({
       onEntityBusyChanged,
       onCustomizationOptionInput,
       onFormSubmit,
+      onStoryRendered,
       preview,
       svgPath,
       submitButtonText,
