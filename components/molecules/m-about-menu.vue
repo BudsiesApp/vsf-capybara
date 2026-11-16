@@ -78,6 +78,10 @@ export default defineComponent({
         link: '/about/'
       },
       {
+        label: applicationI18n.t('How to Order').toString(),
+        link: '/how-to-order/'
+      },
+      {
         label: applicationI18n.t('Fulfillment').toString(),
         link: '/fulfillment/'
       },
