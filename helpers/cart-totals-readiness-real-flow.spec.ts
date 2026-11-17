@@ -233,6 +233,58 @@ describe.each([
     expectSettled();
   });
 
+  describe('after a refresh that failed', () => {
+    const failures = [
+      ['an error response', () => jest.mocked(CartService.getTotals).mockResolvedValue({ resultCode: 500, result: 'error' } as any)],
+      ['a rejected request', () => jest.mocked(CartService.getTotals).mockRejectedValue(new Error('network'))],
+      ['a response that cannot be applied', () => jest.mocked(CartService.getTotals).mockResolvedValue({ resultCode: 200, result: { total_segments: [] } } as any)]
+    ] as const;
+
+    async function refreshAndFail () {
+      await store.dispatch('cart/syncTotals', { forceServerSync: true }).catch(() => undefined);
+    }
+
+    it.each(failures)('does not treat the old totals as synchronized after %s', async (_, failRequest) => {
+      failRequest();
+
+      await refreshAndFail();
+
+      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(0);
+      expect(store.getters['cart/isTotalsSyncRequired']).toBe(true);
+
+      mountPage();
+      await Vue.nextTick();
+
+      expect(emitted).toEqual([]);
+      expectSettled();
+    });
+
+    it.each(failures)('reports once with the refreshed totals when a retry succeeds after %s', async (_, failRequest) => {
+      failRequest();
+      mountPage();
+      await refreshAndFail();
+      await Vue.nextTick();
+
+      expect(emitted).toEqual([]);
+
+      jest.mocked(CartService.getTotals).mockReset().mockResolvedValue(totalsResponse(90, 180) as any);
+      await store.dispatch('cart/syncTotals');
+      await Vue.nextTick();
+
+      expect(emitted).toEqual([{ finalPrice: 90, grandTotal: 180 }]);
+      expect(store.getters['cart/isTotalsSyncRequired']).toBe(false);
+      expectSettled();
+    });
+
+    it('keeps the totals synchronized when the cart is not found and cleared', async () => {
+      jest.mocked(CartService.getTotals).mockResolvedValue({ resultCode: 404, result: 'No such entity with cartId = 1' } as any);
+
+      await store.dispatch('cart/syncTotals', { forceServerSync: true });
+
+      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(PREVIOUS_SYNC_DATE);
+    });
+  });
+
   it('does not hold the syncing state when no refresh is needed', async () => {
     await store.dispatch('cart/syncTotals', { forceServerSync: false });
 
