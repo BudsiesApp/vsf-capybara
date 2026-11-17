@@ -85,7 +85,7 @@ function deferred<T> () {
 }
 
 // A cart that is fully synchronized: the stored hash matches the items and a totals sync happened before.
-function createSynchronizedStore () {
+function createSynchronizedStore (pullMethods: () => Promise<void> = async () => undefined) {
   const item = createItem();
 
   return new Store<any>({
@@ -111,6 +111,7 @@ function createSynchronizedStore () {
           isCartSyncing: false,
           isTotalsSyncing: false,
           totalsSyncDepth: 0,
+          totalsRefreshId: 0,
           isCouponProcessing: false,
           platformTotals: { grand_total: 200 },
           platformTotalSegments: [],
@@ -120,7 +121,7 @@ function createSynchronizedStore () {
         mutations: cartMutations,
         actions: {
           ...totalsActions,
-          pullMethods: async () => undefined,
+          pullMethods,
           updateItem: ({ commit }, payload) => commit(types.CART_UPD_ITEM_PROPS, payload),
           clear: jest.fn()
         }
@@ -237,7 +238,8 @@ describe.each([
     const failures = [
       ['an error response', () => jest.mocked(CartService.getTotals).mockResolvedValue({ resultCode: 500, result: 'error' } as any)],
       ['a rejected request', () => jest.mocked(CartService.getTotals).mockRejectedValue(new Error('network'))],
-      ['a response that cannot be applied', () => jest.mocked(CartService.getTotals).mockResolvedValue({ resultCode: 200, result: { total_segments: [] } } as any)]
+      ['a response that cannot be applied', () => jest.mocked(CartService.getTotals).mockResolvedValue({ resultCode: 200, result: { total_segments: [] } } as any)],
+      ['a response without a result', () => jest.mocked(CartService.getTotals).mockResolvedValue({ resultCode: 200, result: null } as any)]
     ] as const;
 
     async function refreshAndFail () {
@@ -290,5 +292,164 @@ describe.each([
 
     expect(CartService.getTotals).not.toHaveBeenCalled();
     expectSettled();
+  });
+  describe('when the methods pull fails before the totals request', () => {
+    let failMethods: boolean;
+
+    beforeEach(() => {
+      failMethods = true;
+      store = createSynchronizedStore(async () => {
+        if (failMethods) {
+          throw new Error('methods');
+        }
+      });
+      jest.mocked(useStore).mockReturnValue(store);
+    });
+
+    it('does not treat the old totals as synchronized', async () => {
+      await expect(store.dispatch('cart/syncTotals', { forceServerSync: true })).rejects.toThrow('methods');
+
+      expect(CartService.getTotals).not.toHaveBeenCalled();
+      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(0);
+      expect(store.getters['cart/isTotalsSyncRequired']).toBe(true);
+
+      mountPage();
+      await Vue.nextTick();
+
+      expect(emitted).toEqual([]);
+      expectSettled();
+    });
+
+    it('reports once with the refreshed totals when a retry succeeds', async () => {
+      mountPage();
+      await expect(store.dispatch('cart/syncTotals', { forceServerSync: true })).rejects.toThrow('methods');
+      await Vue.nextTick();
+
+      expect(emitted).toEqual([]);
+
+      failMethods = false;
+      jest.mocked(CartService.getTotals).mockResolvedValue(totalsResponse(90, 180) as any);
+      await store.dispatch('cart/syncTotals');
+      await Vue.nextTick();
+
+      expect(emitted).toEqual([{ finalPrice: 90, grandTotal: 180 }]);
+    });
+
+    it('keeps the totals of a newer refresh that already succeeded', async () => {
+      const methods = deferred<void>();
+
+      store = createSynchronizedStore(() => methods.promise);
+      jest.mocked(useStore).mockReturnValue(store);
+      jest.mocked(CartService.getTotals).mockResolvedValue(totalsResponse(90, 180) as any);
+
+      const olderSync = store.dispatch('cart/syncTotals', { forceServerSync: true });
+
+      await store.dispatch('cart/overrideServerTotals', { hasShippingInformation: false });
+      methods.reject(new Error('methods'));
+      await expect(olderSync).rejects.toThrow('methods');
+
+      expect(store.state.cart.cartServerLastTotalsSyncDate).toBeGreaterThan(PREVIOUS_SYNC_DATE);
+
+      mountPage();
+      await Vue.nextTick();
+
+      expect(emitted).toEqual([{ finalPrice: 90, grandTotal: 180 }]);
+      expectSettled();
+    });
+  });
+
+  describe('when refreshes overlap', () => {
+    const olderResponse = () => totalsResponse(95, 190) as any;
+    const newerResponse = () => totalsResponse(90, 180) as any;
+    let older: ReturnType<typeof deferred<any>>;
+    let newer: ReturnType<typeof deferred<any>>;
+    let olderRefresh: Promise<unknown>;
+    let newerRefresh: Promise<unknown>;
+
+    function startOverlappingRefreshes () {
+      older = deferred<any>();
+      newer = deferred<any>();
+      jest.mocked(CartService.getTotals).mockReturnValueOnce(older.promise).mockReturnValueOnce(newer.promise);
+
+      olderRefresh = store.dispatch('cart/overrideServerTotals', { hasShippingInformation: false });
+      newerRefresh = store.dispatch('cart/overrideServerTotals', { hasShippingInformation: false });
+      // The caller of the older refresh sees its failure, which these tests assert separately.
+      olderRefresh.catch(() => undefined);
+    }
+
+    function itemFinalPrice () {
+      return store.state.cart.cartItems[0].extension_attributes.budsies_quote_item_totals.final_price;
+    }
+
+    it('keeps the totals of the newer refresh when the older response arrives last', async () => {
+      startOverlappingRefreshes();
+      mountPage();
+
+      newer.resolve(newerResponse());
+      await newerRefresh;
+      await Vue.nextTick();
+
+      // The older request is still in flight, so nothing is reported yet.
+      expect(emitted).toEqual([]);
+
+      older.resolve(olderResponse());
+      await olderRefresh;
+      await Vue.nextTick();
+
+      expect(itemFinalPrice()).toBe(90);
+      expect(store.state.cart.platformTotals.grand_total).toBe(180);
+      expect(emitted).toEqual([{ finalPrice: 90, grandTotal: 180 }]);
+      expectSettled();
+    });
+
+    it('ignores the response of the older refresh when it arrives first', async () => {
+      startOverlappingRefreshes();
+      mountPage();
+
+      older.resolve(olderResponse());
+      await olderRefresh;
+      await Vue.nextTick();
+
+      expect(itemFinalPrice()).toBe(100);
+      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(PREVIOUS_SYNC_DATE);
+      expect(emitted).toEqual([]);
+
+      newer.resolve(newerResponse());
+      await newerRefresh;
+      await Vue.nextTick();
+
+      expect(emitted).toEqual([{ finalPrice: 90, grandTotal: 180 }]);
+    });
+
+    it('does not invalidate the newer totals when the older request fails last', async () => {
+      startOverlappingRefreshes();
+      mountPage();
+
+      newer.resolve(newerResponse());
+      await newerRefresh;
+      older.reject(new Error('late'));
+      await expect(olderRefresh).rejects.toThrow('late');
+      await Vue.nextTick();
+
+      expect(store.state.cart.cartServerLastTotalsSyncDate).toBeGreaterThan(PREVIOUS_SYNC_DATE);
+      expect(emitted).toEqual([{ finalPrice: 90, grandTotal: 180 }]);
+      expectSettled();
+    });
+
+    it('invalidates the totals when the newer request fails and the older response was ignored', async () => {
+      startOverlappingRefreshes();
+      mountPage();
+
+      older.resolve(olderResponse());
+      await olderRefresh;
+      newer.reject(new Error('network'));
+      await expect(newerRefresh).rejects.toThrow('network');
+      await Vue.nextTick();
+
+      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(0);
+      expect(store.getters['cart/isTotalsSyncRequired']).toBe(true);
+      expect(emitted).toEqual([]);
+      expectSettled();
+    });
   });
 });
