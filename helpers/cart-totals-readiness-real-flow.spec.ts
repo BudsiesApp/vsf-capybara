@@ -43,6 +43,9 @@ jest.mock('@vue-storefront/core/modules/cart', () => ({
 Vue.use(Vuex);
 
 const TOKEN = 'quote';
+const NEW_TOKEN = 'reconnected-quote';
+const NOT_FOUND = { resultCode: 404, result: 'No such entity with cartId = 1' };
+const clearCart = jest.fn();
 const PREVIOUS_SYNC_DATE = 1000;
 
 function createItem () {
@@ -123,7 +126,7 @@ function createSynchronizedStore (pullMethods: () => Promise<void> = async () =>
           ...totalsActions,
           pullMethods,
           updateItem: ({ commit }, payload) => commit(types.CART_UPD_ITEM_PROPS, payload),
-          clear: jest.fn()
+          clear: clearCart
         }
       }
     }
@@ -279,7 +282,7 @@ describe.each([
     });
 
     it('keeps the totals synchronized when the cart is not found and cleared', async () => {
-      jest.mocked(CartService.getTotals).mockResolvedValue({ resultCode: 404, result: 'No such entity with cartId = 1' } as any);
+      jest.mocked(CartService.getTotals).mockResolvedValue(NOT_FOUND as any);
 
       await store.dispatch('cart/syncTotals', { forceServerSync: true });
 
@@ -450,6 +453,61 @@ describe.each([
       expect(store.getters['cart/isTotalsSyncRequired']).toBe(true);
       expect(emitted).toEqual([]);
       expectSettled();
+    });
+  });
+  describe('when a refresh answers that the cart was not found', () => {
+    it('clears and disconnects the cart that was requested', async () => {
+      jest.mocked(CartService.getTotals).mockResolvedValue(NOT_FOUND as any);
+
+      await store.dispatch('cart/overrideServerTotals', { hasShippingInformation: false });
+
+      expect(clearCart).toHaveBeenCalledTimes(1);
+      expect(clearCart.mock.calls[0][1]).toEqual({ disconnect: true, sync: false });
+    });
+
+    it('does not clear a cart that replaced the requested one in the meantime', async () => {
+      const older = deferred<any>();
+      const newer = deferred<any>();
+
+      jest.mocked(CartService.getTotals).mockReturnValueOnce(older.promise).mockReturnValueOnce(newer.promise);
+      mountPage();
+
+      const olderRefresh = store.dispatch('cart/overrideServerTotals', { hasShippingInformation: false });
+
+      // The customer's cart is connected again: another quote, which the newer refresh reads.
+      store.commit(`cart/${types.CART_LOAD_CART_SERVER_TOKEN}`, NEW_TOKEN);
+      store.commit(`cart/${types.CART_SET_ITEMS_HASH}`, store.getters['cart/getCurrentCartHash']);
+
+      const newerRefresh = store.dispatch('cart/overrideServerTotals', { hasShippingInformation: false });
+
+      newer.resolve(totalsResponse(90, 180));
+      await newerRefresh;
+
+      // The old quote has expired, so the late response of the older refresh is "not found".
+      older.resolve(NOT_FOUND);
+      await olderRefresh;
+      await Vue.nextTick();
+
+      // Counted, not matched: a failure message would serialize the store getters of the action context.
+      expect(clearCart).toHaveBeenCalledTimes(0);
+      expect(store.state.cart.cartServerToken).toBe(NEW_TOKEN);
+      expect(store.state.cart.cartServerLastTotalsSyncDate).toBeGreaterThan(PREVIOUS_SYNC_DATE);
+      expect(emitted).toEqual([{ finalPrice: 90, grandTotal: 180 }]);
+      expectSettled();
+    });
+
+    it('still clears the cart when only a newer refresh of the same cart was started', async () => {
+      const older = deferred<any>();
+
+      jest.mocked(CartService.getTotals).mockReturnValueOnce(older.promise).mockReturnValueOnce(new Promise(() => undefined));
+
+      const olderRefresh = store.dispatch('cart/overrideServerTotals', { hasShippingInformation: false });
+
+      store.dispatch('cart/overrideServerTotals', { hasShippingInformation: false });
+      older.resolve(NOT_FOUND);
+      await olderRefresh;
+
+      expect(clearCart).toHaveBeenCalledTimes(1);
     });
   });
 });
