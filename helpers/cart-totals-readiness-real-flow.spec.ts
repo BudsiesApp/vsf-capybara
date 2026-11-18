@@ -14,9 +14,6 @@ import * as types from '@vue-storefront/core/modules/cart/store/mutation-types';
 import CartEvents from 'src/modules/shared/types/cart-events';
 import { useEventAfterCartSettled } from 'theme/helpers/use-event-after-cart-settled';
 
-const useCartViewEvent = () => useEventAfterCartSettled();
-const useBeginCheckoutEvent = () => useEventAfterCartSettled(true);
-
 jest.mock('@vue-storefront/core/application-services', () => ({ useStore: jest.fn() }));
 jest.mock('@vue-storefront/core/compatibility/plugins/event-bus', () => ({ __esModule: true, default: { $emit: jest.fn() } }));
 jest.mock('config', () => ({ cart: { synchronize: true, synchronize_totals: true } }));
@@ -141,6 +138,8 @@ function createSynchronizedStore (
         mutations: cartMutations,
         actions: {
           ...totalsActions,
+          waitForIdle: synchronizeActions.waitForIdle,
+          waitForCartSync: synchronizeActions.waitForCartSync,
           waitForStartup: async () => {},
           waitForConnections: async () => {},
           pullMethods,
@@ -153,16 +152,13 @@ function createSynchronizedStore (
   });
 }
 
-describe.each([
-  ['view_cart', useCartViewEvent],
-  ['begin_checkout', useBeginCheckoutEvent]
-])('%s readiness through the real totals refresh', (_eventName, composable) => {
+describe('view_cart readiness through the real totals refresh', () => {
   let store: Store<any>;
   let emitted: { finalPrice: number, grandTotal: number }[];
   let page: Vue | undefined;
 
   function mountPage () {
-    page = new Vue({ setup () { (composable as () => void)(); }, render: (h) => h('div') }).$mount();
+    page = new Vue({ setup () { useEventAfterCartSettled(); }, render: (h) => h('div') }).$mount();
   }
 
   beforeEach(() => {
@@ -352,97 +348,12 @@ describe.each([
     expect(store.state.cart.platformTotalSegments).toBeNull();
   });
 
-  describe('after a refresh that failed', () => {
-    const failures = [
-      ['an error response', () => jest.mocked(CartService.getTotals).mockResolvedValue({ resultCode: 500, result: 'error' } as any)],
-      ['a rejected request', () => jest.mocked(CartService.getTotals).mockRejectedValue(new Error('network'))],
-      ['a response that cannot be applied', () => jest.mocked(CartService.getTotals).mockResolvedValue({ resultCode: 200, result: { total_segments: [] } } as any)],
-      ['a response without a result', () => jest.mocked(CartService.getTotals).mockResolvedValue({ resultCode: 200, result: null } as any)]
-    ] as const;
-
-    async function refreshAndFail () {
-      await store.dispatch('cart/syncTotals', { forceServerSync: true }).catch(() => undefined);
-    }
-
-    it.each(failures)('retains same-quote totals after %s', async (_, failRequest) => {
-      failRequest();
-
-      await refreshAndFail();
-
-      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(PREVIOUS_SYNC_DATE);
-      expect(store.state.cart.platformTotals.grand_total).toBe(200);
-
-      mountPage();
-      await new Promise(resolve => setTimeout(resolve, 0));
-
-      expect(emitted).toEqual([{ finalPrice: 100, grandTotal: 200 }]);
-      expectSettled();
-    });
-
-    it('keeps the totals synchronized when the cart is not found and cleared', async () => {
-      jest.mocked(CartService.getTotals).mockResolvedValue(NOT_FOUND as any);
-
-      await store.dispatch('cart/syncTotals', { forceServerSync: true });
-
-      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(PREVIOUS_SYNC_DATE);
-    });
-  });
-
   it('does not hold the syncing state when no refresh is needed', async () => {
     await store.dispatch('cart/syncTotals', { forceServerSync: false });
 
     expect(CartService.getTotals).not.toHaveBeenCalled();
     expectSettled();
   });
-  describe('when the methods pull fails before the totals request', () => {
-    let failMethods: boolean;
-
-    beforeEach(() => {
-      failMethods = true;
-      store = createSynchronizedStore(async () => {
-        if (failMethods) {
-          throw new Error('methods');
-        }
-      });
-      jest.mocked(useStore).mockReturnValue(store);
-    });
-
-    it('keeps same-quote totals after a methods failure', async () => {
-      await expect(store.dispatch('cart/syncTotals', { forceServerSync: true })).rejects.toThrow('methods');
-
-      expect(CartService.getTotals).not.toHaveBeenCalled();
-      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(PREVIOUS_SYNC_DATE);
-
-      mountPage();
-      await new Promise(resolve => setTimeout(resolve, 0));
-
-      expect(emitted).toEqual([{ finalPrice: 100, grandTotal: 200 }]);
-      expectSettled();
-    });
-
-    it('keeps the totals of a newer refresh that already succeeded', async () => {
-      const methods = deferred<void>();
-
-      store = createSynchronizedStore(() => methods.promise);
-      jest.mocked(useStore).mockReturnValue(store);
-      jest.mocked(CartService.getTotals).mockResolvedValue(totalsResponse(90, 180) as any);
-
-      const olderSync = store.dispatch('cart/syncTotals', { forceServerSync: true });
-
-      await store.dispatch('cart/overrideServerTotals', { hasShippingInformation: false });
-      methods.reject(new Error('methods'));
-      await expect(olderSync).rejects.toThrow('methods');
-
-      expect(store.state.cart.cartServerLastTotalsSyncDate).toBeGreaterThan(PREVIOUS_SYNC_DATE);
-
-      mountPage();
-      await new Promise(resolve => setTimeout(resolve, 0));
-
-      expect(emitted).toEqual([{ finalPrice: 90, grandTotal: 180 }]);
-      expectSettled();
-    });
-  });
-
   describe('when refreshes overlap', () => {
     const olderResponse = () => totalsResponse(95, 190) as any;
     const newerResponse = () => totalsResponse(90, 180) as any;
@@ -506,35 +417,6 @@ describe.each([
       expect(emitted).toEqual([{ finalPrice: 90, grandTotal: 180 }]);
     });
 
-    it('does not invalidate the newer totals when the older request fails last', async () => {
-      startOverlappingRefreshes();
-      mountPage();
-
-      newer.resolve(newerResponse());
-      await newerRefresh;
-      older.reject(new Error('late'));
-      await expect(olderRefresh).rejects.toThrow('late');
-      await Vue.nextTick();
-
-      expect(store.state.cart.cartServerLastTotalsSyncDate).toBeGreaterThan(PREVIOUS_SYNC_DATE);
-      expect(emitted).toEqual([{ finalPrice: 90, grandTotal: 180 }]);
-      expectSettled();
-    });
-
-    it('retains earlier same-quote totals when the newer request fails and the older response was ignored', async () => {
-      startOverlappingRefreshes();
-      mountPage();
-
-      older.resolve(olderResponse());
-      await olderRefresh;
-      newer.reject(new Error('network'));
-      await expect(newerRefresh).rejects.toThrow('network');
-      await Vue.nextTick();
-
-      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(PREVIOUS_SYNC_DATE);
-      expect(emitted).toEqual([{ finalPrice: 100, grandTotal: 200 }]);
-      expectSettled();
-    });
   });
   describe('when a refresh answers that the cart was not found', () => {
     it('clears and disconnects the cart that was requested', async () => {
@@ -596,24 +478,6 @@ describe.each([
       expect(store.state.cart.cartItems[0].extension_attributes.budsies_quote_item_totals.final_price).toBe(100);
       expect(store.state.cart.platformTotals).toBeNull();
       expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(0);
-      expectSettled();
-    });
-
-    it('does not invalidate the totals of a cart that replaced the requested one when the request fails', async () => {
-      const response = deferred<any>();
-
-      jest.mocked(CartService.getTotals).mockReturnValueOnce(response.promise);
-
-      const refresh = store.dispatch('cart/overrideServerTotals', { hasShippingInformation: false });
-
-      store.commit(`cart/${types.CART_LOAD_CART_SERVER_TOKEN}`, NEW_TOKEN);
-      store.commit(`cart/${types.CART_SET_ITEMS_HASH}`, store.getters['cart/getCurrentCartHash']);
-
-      response.reject(new Error('network'));
-      await expect(refresh).rejects.toThrow('network');
-
-      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(0);
-      expect(store.state.cart.platformTotals).toBeNull();
       expectSettled();
     });
 

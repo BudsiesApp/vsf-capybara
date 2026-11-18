@@ -23,7 +23,7 @@ function createStore (overrides = {}) {
     cart: {
       namespaced: true,
       state: { cartItems: [item], platformTotals: totals, timestamp: 1, connectionPromises: [],
-        startup: Promise.resolve(), connection: Promise.resolve(), busy: false, canSync: true, ...overrides },
+        startup: Promise.resolve(), idle: Promise.resolve(), busy: false, canSync: true, ...overrides },
       getters: {
         getCartItems: state => state.cartItems, getLastTotalsSyncDate: state => state.timestamp,
         canSyncTotals: state => state.canSync, getIsAdding: state => state.busy,
@@ -32,7 +32,7 @@ function createStore (overrides = {}) {
       mutations: { update: (state, values) => Object.assign(state, values) },
       actions: {
         waitForStartup: ({ state }) => state.startup,
-        waitForConnections: ({ state }) => state.connection,
+        waitForIdle: ({ state }) => state.idle,
         syncTotals: jest.fn(({ state }) => { if (state.failRefresh) throw new Error('network'); })
       }
     }
@@ -49,18 +49,15 @@ afterEach(() => jest.clearAllMocks());
 describe.each([false, true])('settled cart visit (checkout: %s)', checkout => {
   it('waits for startup, connection and active work, and emits only once', async () => {
     const startup = deferred();
-    const connection = deferred();
-    const store = createStore({ startup: startup.promise, connection: connection.promise, busy: true });
+    const idle = deferred();
+    const store = createStore({ startup: startup.promise, idle: idle.promise });
     const page = mount(store, checkout);
     await flush();
     expect(EventBus.$emit).not.toHaveBeenCalled();
     startup.resolve();
     await flush();
     expect(EventBus.$emit).not.toHaveBeenCalled();
-    connection.resolve();
-    await flush();
-    expect(EventBus.$emit).not.toHaveBeenCalled();
-    store.commit('cart/update', { busy: false });
+    idle.resolve();
     await flush();
     expect(EventBus.$emit).toHaveBeenCalledTimes(1);
     store.commit('cart/update', { busy: true });

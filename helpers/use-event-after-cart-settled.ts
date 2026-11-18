@@ -1,4 +1,4 @@
-import { onBeforeUnmount, onMounted, watch } from 'vue';
+import { onBeforeUnmount, onMounted } from 'vue';
 import { useStore } from '@vue-storefront/core/application-services';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import CartEvents from 'src/modules/shared/types/cart-events';
@@ -6,32 +6,6 @@ import CartEvents from 'src/modules/shared/types/cart-events';
 export function useEventAfterCartSettled (checkout = false, eligible: () => boolean = () => true): void {
   const store = useStore();
   let active = false;
-  let stopWatching: (() => void) | undefined;
-  let releaseWait: (() => void) | undefined;
-
-  const isBusy = () => store.getters['cart/getIsAdding'] || store.getters['cart/IS_CART_SYNCING'] ||
-    store.getters['cart/IS_TOTALS_SYNCING'] || store.getters['cart/IS_COUPON_PROCESSING'];
-
-  async function waitForWork (): Promise<void> {
-    do {
-      await store.dispatch('cart/waitForConnections');
-      if (!active) return;
-      if (isBusy()) {
-        await new Promise<void>(resolve => {
-          releaseWait = resolve;
-          stopWatching = watch(isBusy, busy => {
-            if (!busy) {
-              stopWatching?.();
-              stopWatching = undefined;
-              releaseWait = undefined;
-              resolve();
-            }
-          });
-        });
-      }
-    } while (active && (isBusy() || store.state.cart.connectionPromises.length));
-  }
-
   onMounted(async () => {
     active = true;
     await store.dispatch('cart/waitForStartup');
@@ -40,7 +14,7 @@ export function useEventAfterCartSettled (checkout = false, eligible: () => bool
       try { await store.state.checkout.entryPromise; } catch { /* Settlement is sufficient. */ }
     }
     if (!active) return;
-    await waitForWork();
+    await store.dispatch('cart/waitForIdle');
     if (!active || !eligible()) return;
 
     const items = store.getters['cart/getCartItems'];
@@ -48,7 +22,7 @@ export function useEventAfterCartSettled (checkout = false, eligible: () => bool
       !(checkout && store.state.checkout.entryRefreshAttempted)) {
       try { await store.dispatch('cart/syncTotals', { forceServerSync: true }); } catch { /* Use local data. */ }
       if (!active) return;
-      await waitForWork();
+      await store.dispatch('cart/waitForIdle');
     }
     if (!active || !eligible()) return;
 
@@ -65,7 +39,5 @@ export function useEventAfterCartSettled (checkout = false, eligible: () => bool
 
   onBeforeUnmount(() => {
     active = false;
-    stopWatching?.();
-    releaseWait?.();
   });
 }

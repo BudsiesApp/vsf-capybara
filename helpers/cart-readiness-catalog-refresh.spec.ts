@@ -3,6 +3,7 @@ import Vuex, { Store } from 'vuex';
 import { useStore } from '@vue-storefront/core/application-services';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import mergeActions from '@vue-storefront/core/modules/cart/store/actions/mergeActions';
+import synchronizeActions from '@vue-storefront/core/modules/cart/store/actions/synchronizeActions';
 import cartGetters from '@vue-storefront/core/modules/cart/store/getters';
 import cartMutations from '@vue-storefront/core/modules/cart/store/mutations';
 import * as types from '@vue-storefront/core/modules/cart/store/mutation-types';
@@ -12,6 +13,8 @@ jest.mock('@vue-storefront/core/application-services', () => ({ useStore: jest.f
 jest.mock('@vue-storefront/core/compatibility/plugins/event-bus', () => ({ __esModule: true, default: { $emit: jest.fn() } }));
 jest.mock('config', () => ({ cart: { synchronize: true, synchronize_totals: true } }));
 jest.mock('@vue-storefront/core/lib/logger', () => ({ Logger: { info: () => () => {}, debug: () => () => {} } }));
+jest.mock('@vue-storefront/core/lib/storage-manager', () => ({ StorageManager: { get: jest.fn() } }));
+jest.mock('@vue-storefront/i18n', () => ({ __esModule: true, default: { t: (text: string) => text } }));
 jest.mock('@vue-storefront/core/data-resolver', () => ({ CartService: {} }));
 jest.mock('@vue-storefront/core/modules/cart/helpers', () => ({
   productsEquals: (a, b) => a.sku === b.sku,
@@ -72,6 +75,7 @@ describe('cart readiness after a catalog refresh', () => {
       getters: cartGetters, mutations: cartMutations,
       actions: { ...mergeActions,
         waitForStartup: async () => {}, waitForConnections: async () => {},
+        waitForCartSync: synchronizeActions.waitForCartSync, waitForIdle: synchronizeActions.waitForIdle,
         mergeClientItems: () => new (require('@vue-storefront/core/modules/cart/helpers/createDiffLog').DiffLog)(),
         mergeServerItems: () => new (require('@vue-storefront/core/modules/cart/helpers/createDiffLog').DiffLog)(),
         syncTotals: async ({ commit }) => { await totals.promise; commit(types.CART_SET_TOTALS_SYNC); totalsApplied.resolve(); },
