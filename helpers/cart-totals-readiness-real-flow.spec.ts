@@ -4,6 +4,9 @@ import { useStore } from '@vue-storefront/core/application-services';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { CartService } from '@vue-storefront/core/data-resolver';
 import { calcItemsHmac } from '@vue-storefront/core/helpers/calc-items-hmac';
+import { DiffLog } from '@vue-storefront/core/modules/cart/helpers/createDiffLog';
+import connectActions from '@vue-storefront/core/modules/cart/store/actions/connectActions';
+import synchronizeActions from '@vue-storefront/core/modules/cart/store/actions/synchronizeActions';
 import totalsActions from '@vue-storefront/core/modules/cart/store/actions/totalsActions';
 import cartGetters from '@vue-storefront/core/modules/cart/store/getters';
 import cartMutations from '@vue-storefront/core/modules/cart/store/mutations';
@@ -15,6 +18,8 @@ import { useBeginCheckoutEvent } from 'theme/helpers/use-begin-checkout-event';
 jest.mock('@vue-storefront/core/application-services', () => ({ useStore: jest.fn() }));
 jest.mock('@vue-storefront/core/compatibility/plugins/event-bus', () => ({ __esModule: true, default: { $emit: jest.fn() } }));
 jest.mock('config', () => ({ cart: { synchronize: true, synchronize_totals: true } }));
+jest.mock('@vue-storefront/core/lib/storage-manager', () => ({ StorageManager: { get: jest.fn() } }));
+jest.mock('@vue-storefront/i18n', () => ({ __esModule: true, default: { t: (text: string) => text } }));
 jest.mock('@vue-storefront/core/lib/logger', () => ({
   Logger: { info: () => () => {}, debug: () => () => {}, warn: () => () => {}, error: () => () => {} }
 }));
@@ -88,11 +93,18 @@ function deferred<T> () {
 }
 
 // A cart that is fully synchronized: the stored hash matches the items and a totals sync happened before.
-function createSynchronizedStore (pullMethods: () => Promise<void> = async () => undefined) {
+function createSynchronizedStore (
+  pullMethods: () => Promise<void> = async () => undefined,
+  actionOverrides: Record<string, any> = {}
+) {
   const item = createItem();
 
   return new Store<any>({
     modules: {
+      user: {
+        namespaced: true,
+        getters: { getUserToken: () => null }
+      },
       checkout: {
         namespaced: true,
         getters: {
@@ -111,6 +123,7 @@ function createSynchronizedStore (pullMethods: () => Promise<void> = async () =>
           cartServerToken: TOKEN,
           cartItemsHash: calcItemsHmac([item] as any, TOKEN),
           cartServerLastTotalsSyncDate: PREVIOUS_SYNC_DATE,
+          syncPromise: null,
           isCartSyncing: false,
           isTotalsSyncing: false,
           totalsSyncDepth: 0,
@@ -126,7 +139,8 @@ function createSynchronizedStore (pullMethods: () => Promise<void> = async () =>
           ...totalsActions,
           pullMethods,
           updateItem: ({ commit }, payload) => commit(types.CART_UPD_ITEM_PROPS, payload),
-          clear: clearCart
+          clear: clearCart,
+          ...actionOverrides
         }
       }
     }
@@ -496,6 +510,48 @@ describe.each([
       expectSettled();
     });
 
+    it('does not apply the totals of a cart that was replaced during the request', async () => {
+      const response = deferred<any>();
+
+      jest.mocked(CartService.getTotals).mockReturnValueOnce(response.promise);
+      mountPage();
+
+      const refresh = store.dispatch('cart/overrideServerTotals', { hasShippingInformation: false });
+
+      // The cart is connected to another quote, which keeps its own items and totals.
+      store.commit(`cart/${types.CART_LOAD_CART_SERVER_TOKEN}`, NEW_TOKEN);
+      store.commit(`cart/${types.CART_SET_ITEMS_HASH}`, store.getters['cart/getCurrentCartHash']);
+
+      response.resolve(totalsResponse(90, 180));
+      await refresh;
+      await Vue.nextTick();
+
+      expect(store.state.cart.cartItems[0].extension_attributes.budsies_quote_item_totals.final_price).toBe(100);
+      expect(store.state.cart.platformTotals.grand_total).toBe(200);
+      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(PREVIOUS_SYNC_DATE);
+      // The page reports the current cart as it is, not with the totals of the quote that was requested.
+      expect(emitted).toEqual([{ finalPrice: 100, grandTotal: 200 }]);
+      expectSettled();
+    });
+
+    it('does not invalidate the totals of a cart that replaced the requested one when the request fails', async () => {
+      const response = deferred<any>();
+
+      jest.mocked(CartService.getTotals).mockReturnValueOnce(response.promise);
+
+      const refresh = store.dispatch('cart/overrideServerTotals', { hasShippingInformation: false });
+
+      store.commit(`cart/${types.CART_LOAD_CART_SERVER_TOKEN}`, NEW_TOKEN);
+      store.commit(`cart/${types.CART_SET_ITEMS_HASH}`, store.getters['cart/getCurrentCartHash']);
+
+      response.reject(new Error('network'));
+      await expect(refresh).rejects.toThrow('network');
+
+      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(PREVIOUS_SYNC_DATE);
+      expect(store.getters['cart/isTotalsSyncRequired']).toBe(false);
+      expectSettled();
+    });
+
     it('still clears the cart when only a newer refresh of the same cart was started', async () => {
       const older = deferred<any>();
 
@@ -508,6 +564,54 @@ describe.each([
       await olderRefresh;
 
       expect(clearCart).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('when the cart is not found during a cart synchronization that waits for the totals', () => {
+    // The real actions of the synchronization and of the cart clearing run; only the read and merge of the
+    // cart items are replaced, by a step that waits for the totals refresh like the merge does.
+    function createSynchronizingStore (reconnected: ReturnType<typeof deferred<boolean>>) {
+      let synchronizations = 0;
+
+      return createSynchronizedStore(undefined, {
+        sync: synchronizeActions.sync,
+        synchronizeCart: synchronizeActions.synchronizeCart,
+        waitForCartSync: synchronizeActions.waitForCartSync,
+        clear: connectActions.clear,
+        disconnect: connectActions.disconnect,
+        applyPendingCouponInCartTransaction: async () => undefined,
+        performSync: async ({ dispatch }) => {
+          // The synchronization of the reconnected cart finds nothing to refresh.
+          if (synchronizations++ === 0) {
+            await dispatch('syncTotals', { forceServerSync: true });
+          }
+
+          return new DiffLog();
+        },
+        create: ({ state }) => reconnected.resolve(state.syncPromise === null)
+      });
+    }
+
+    it('finishes the synchronization and reconnects the cart afterwards', async () => {
+      const reconnected = deferred<boolean>();
+
+      store = createSynchronizingStore(reconnected);
+      jest.mocked(useStore).mockReturnValue(store);
+      jest.mocked(CartService.getTotals).mockResolvedValue(NOT_FOUND as any);
+
+      const outcome = await Promise.race([
+        store.dispatch('cart/sync', { forceSync: true }).then(() => 'finished'),
+        new Promise((resolve) => setTimeout(() => resolve('hung'), 500))
+      ]);
+
+      expect(outcome).toBe('finished');
+      expect(store.state.cart.cartItems).toEqual([]);
+      expect(store.state.cart.cartServerToken).toBeNull();
+
+      // The reconnect ran after the synchronization was over.
+      await expect(reconnected.promise).resolves.toBe(true);
+      expect(store.state.cart.syncPromise).toBeNull();
+      expectSettled();
     });
   });
 });
