@@ -77,6 +77,8 @@ import {
   ProductPurchaseFlow
 } from 'src/modules/shared';
 
+import PlushieProductType from 'theme/interfaces/plushie-product-type';
+import getForeversSkuByType from 'theme/helpers/get-forevers-sku-by-type.function';
 import { useFormPageReadiness } from 'theme/helpers/use-form-page-readiness';
 import { useExistingCartItem } from 'theme/helpers/use-existing-cart-item';
 import { useMultiProductsPage } from 'theme/helpers/use-multi-products-page';
@@ -96,6 +98,10 @@ export default defineComponent({
     ProductStructuredData
   },
   props: {
+    preselectedProductType: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
     existingPlushieId: {
       type: String as PropType<string | undefined>,
       default: undefined
@@ -103,7 +109,7 @@ export default defineComponent({
   },
   setup (props, context) {
     const request = useRequestServices();
-    const { existingPlushieId } = toRefs(props);
+    const { existingPlushieId, preselectedProductType } = toRefs(props);
     const canUsePersistedCustomizationState = ref<boolean>(false);
     const productPurchaseFlow = ref<ProductPurchaseFlow>(
       ProductPurchaseFlow.CUSTOMIZE_LATER
@@ -192,11 +198,21 @@ export default defineComponent({
       return customization;
     });
 
+    const initialSku = computed<string | undefined>(() => {
+      const type = preselectedProductType.value;
+
+      if (typeof type !== 'string' || !Object.values(PlushieProductType).some((productType) => productType === type)) {
+        return;
+      }
+
+      return getForeversSkuByType(type);
+    });
+
     const {
       currentProduct,
       isDataLoaded,
       selectProduct
-    } = useMultiProductsPage(productSkus);
+    } = useMultiProductsPage(productSkus, initialSku);
 
     const showForm = computed<boolean>(() => {
       return isDataLoaded.value && !!currentProduct.value;
