@@ -1,11 +1,13 @@
 import { useStore } from '@vue-storefront/core/application-services';
 import { ref, Ref } from 'vue';
 
-import { CustomizationStateItem, DraftOrderItem, filterCustomizationState, saveOrderItemCustomizationsState, submitOrderItemCustomizationsState } from 'src/modules/customization-system';
+import { BudsieStatus } from 'src/modules/shared';
+import { Customization, CustomizationStateItem, DraftOrderItem, filterCustomizationState, isImageUploadCustomization, saveOrderItemCustomizationsState, submitOrderItemCustomizationsState } from 'src/modules/customization-system';
 
 export function useCustomizeAction (
   customizationStateItems: Ref<CustomizationStateItem[]>,
-  draftOrderItem: Ref<DraftOrderItem | undefined>
+  draftOrderItem: Ref<DraftOrderItem | undefined>,
+  productCustomizations: Ref<Customization[]>
 ) {
   const applicationStore = useStore();
   const isSubmitting = ref(false);
@@ -23,10 +25,16 @@ export function useCustomizeAction (
     const userToken = applicationStore.getters['user/getUserToken'];
 
     try {
+      let state = customizationStateItems.value;
+      if (draftOrderItem.value.status_id === BudsieStatus.AWAITING_ARTWORK) {
+        const imageIds = new Set(productCustomizations.value.filter(isImageUploadCustomization).map(customization => customization.id));
+        state = state.filter(entry => imageIds.has(entry.customization_id));
+      }
+
       const saveResult = await saveOrderItemCustomizationsState(
         [{
           id: draftOrderItem.value.id,
-          customization_state: filterCustomizationState(customizationStateItems.value),
+          customization_state: filterCustomizationState(state),
           status_id: draftOrderItem.value.status_id
         }],
         userToken

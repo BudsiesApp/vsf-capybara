@@ -45,11 +45,16 @@ jest.mock('theme/components/customization-system/customization-option.vue', () =
 jest.mock('vee-validate', () => ({
   ValidationObserver: { name: 'ValidationObserver', methods: { validate: () => Promise.resolve(true) }, render (h) { return h('div', this.$slots.default); } }
 }));
+jest.mock('src/modules/shared', () => ({
+  ...jest.requireActual('src/modules/shared/types/budsie-status')
+}));
+
 jest.mock('src/modules/customization-system', () => ({
   ...jest.requireMock('src/modules/customization-system/helpers/order-items-customizations.service'),
   ...jest.requireActual('src/modules/customization-system/composables/use-customization-state'),
   ...jest.requireActual('src/modules/customization-system/composables/use-entity-busy-state'),
   ...jest.requireActual('src/modules/customization-system/helpers/filter-customization-state'),
+  ...jest.requireActual('src/modules/customization-system/helpers/is-image-upload-customization'),
   ...jest.requireActual('src/modules/customization-system/types/widget-type'),
   ...jest.requireActual('src/modules/customization-system/types/customization-availability-flow.type')
 }));

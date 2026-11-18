@@ -164,7 +164,8 @@ import {
   DraftOrderItem,
   CustomizationStateItem,
   useAvailableOptionsValuesFilter,
-  usePurchaseFlowCustomizations
+  usePurchaseFlowCustomizations,
+  useAwaitingArtworkCustomizationsFilter
 } from 'src/modules/customization-system';
 import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow } from 'src/modules/shared';
 
@@ -381,11 +382,14 @@ export default defineComponent({
       customizationMode
     );
 
+    const { customizationsFilter: awaitingArtworkCustomizationsFilter } = useAwaitingArtworkCustomizationsFilter(draftOrderItem);
+
     const { filteredCustomizations: filteredSelectedLockedCustomizations } = useCustomizationsFilter(
       selectedLockedCustomizations,
       customizationAvailableOptionValues,
       [
-        requiredCustomizationsFilter
+        requiredCustomizationsFilter,
+        awaitingArtworkCustomizationsFilter
       ]
     );
 
@@ -420,7 +424,8 @@ export default defineComponent({
         emailCustomizationFilter,
         requiredCustomizationsFilter,
         abTestingCustomizationFilter,
-        lockedCustomizationsFilter
+        lockedCustomizationsFilter,
+        awaitingArtworkCustomizationsFilter
       ]
     );
 
@@ -548,7 +553,8 @@ export default defineComponent({
 
     const { confirmCustomization, isSubmitting: isSubmittingCustomize } = useCustomizeAction(
       customizationState,
-      draftOrderItem
+      draftOrderItem,
+      productCustomizations
     );
 
     const { isUnmounted } = useComponentUnmountedChecker();

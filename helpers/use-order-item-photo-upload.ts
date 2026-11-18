@@ -49,7 +49,8 @@ export function useOrderItemPhotoUpload (
     updateCustomizationOptionValue
   } = useCustomizationState();
   const { isSomeEntityBusy, onEntityBusyChanged } = useEntityBusyState();
-  const { confirmCustomization } = useCustomizeAction(customizationState, draftOrderItem);
+  const selectedCustomizations = computed(() => customization.value ? [customization.value] : []);
+  const { confirmCustomization } = useCustomizeAction(customizationState, draftOrderItem, selectedCustomizations);
   const imageCount = computed(() => {
     const value = customization.value && customizationOptionValue.value[customization.value.id];
     if (Array.isArray(value)) {

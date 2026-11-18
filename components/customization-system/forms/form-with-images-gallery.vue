@@ -179,7 +179,8 @@ import {
   LockedCustomizationsFilterType,
   usePurchaseFlowCustomizations,
   useLockedCustomizations,
-  useAvailableOptionsValuesFilter
+  useAvailableOptionsValuesFilter,
+  useAwaitingArtworkCustomizationsFilter
 } from 'src/modules/customization-system';
 import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow } from 'src/modules/shared';
 import i18n from '@vue-storefront/core/i18n';
@@ -487,10 +488,12 @@ export default defineComponent({
     );
 
     const { customizationFilter } = useABTestingCustomizationsFilter();
+    const { customizationsFilter: awaitingArtworkCustomizationsFilter } = useAwaitingArtworkCustomizationsFilter(draftOrderItem);
 
     const { confirmCustomization, isSubmitting: isSubmittingCustomize } = useCustomizeAction(
       customizationState,
-      draftOrderItem
+      draftOrderItem,
+      productCustomizations
     );
 
     async function onFormSubmit (): Promise<void> {
@@ -542,7 +545,7 @@ export default defineComponent({
     const { filteredCustomizations } = useCustomizationsFilter(
       availableOptionCustomizations,
       customizationAvailableOptionValues,
-      [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter, lockedCustomizationsFilter]
+      [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter, lockedCustomizationsFilter, awaitingArtworkCustomizationsFilter]
     );
     const { descriptionProductSku } = useCustomizationProductDescription(
       product,
