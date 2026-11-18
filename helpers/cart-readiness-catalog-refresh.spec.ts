@@ -6,8 +6,7 @@ import mergeActions from '@vue-storefront/core/modules/cart/store/actions/mergeA
 import cartGetters from '@vue-storefront/core/modules/cart/store/getters';
 import cartMutations from '@vue-storefront/core/modules/cart/store/mutations';
 import * as types from '@vue-storefront/core/modules/cart/store/mutation-types';
-import { useCartViewEvent } from 'theme/helpers/use-cart-view-event';
-import { useBeginCheckoutEvent } from 'theme/helpers/use-begin-checkout-event';
+import { useEventAfterCartSettled } from 'theme/helpers/use-event-after-cart-settled';
 
 jest.mock('@vue-storefront/core/application-services', () => ({ useStore: jest.fn() }));
 jest.mock('@vue-storefront/core/compatibility/plugins/event-bus', () => ({ __esModule: true, default: { $emit: jest.fn() } }));
@@ -44,10 +43,10 @@ function deferred () {
 
 describe('cart readiness after a catalog refresh', () => {
   it.each([
-  ['view_cart / catalog last', useCartViewEvent, 'cartViewed', 'catalog'],
-  ['begin_checkout / catalog last', useBeginCheckoutEvent, 'beginCheckout', 'catalog'],
-  ['view_cart / totals last', useCartViewEvent, 'cartViewed', 'totals'],
-  ['begin_checkout / totals last', useBeginCheckoutEvent, 'beginCheckout', 'totals']
+  ['view_cart / catalog last', false, 'cartViewed', 'catalog'],
+  ['begin_checkout / catalog last', true, 'beginCheckout', 'catalog'],
+  ['view_cart / totals last', false, 'cartViewed', 'totals'],
+  ['begin_checkout / totals last', true, 'beginCheckout', 'totals']
 ])('%s fires after synchronization', async (_name, composable, eventName, last) => {
   jest.clearAllMocks();
   const catalog = deferred();
@@ -66,11 +65,13 @@ describe('cart readiness after a catalog refresh', () => {
       mutations: { loaded: (state) => { Vue.set(state.dictionary, item.sku, hydratedProduct); } },
       actions: { findProducts: async ({ commit }) => { await catalog.promise; commit('loaded'); productLoaded.resolve(); } }
     },
+    checkout: { namespaced: true, state: { entryPromise: Promise.resolve(), entryRefreshAttempted: true } },
     cart: { namespaced: true,
       state: { cartItems: [item], cartIsLoaded: true, cartServerToken: 'quote', cartItemsHash: null,
-        cartServerLastTotalsSyncDate: 0, isCartSyncing: true, isTotalsSyncing: false, isCouponProcessing: false },
+        cartServerLastTotalsSyncDate: 0, isCartSyncing: true, isTotalsSyncing: false, isCouponProcessing: false, connectionPromises: [] },
       getters: cartGetters, mutations: cartMutations,
       actions: { ...mergeActions,
+        waitForStartup: async () => {}, waitForConnections: async () => {},
         mergeClientItems: () => new (require('@vue-storefront/core/modules/cart/helpers/createDiffLog').DiffLog)(),
         mergeServerItems: () => new (require('@vue-storefront/core/modules/cart/helpers/createDiffLog').DiffLog)(),
         syncTotals: async ({ commit }) => { await totals.promise; commit(types.CART_SET_TOTALS_SYNC); totalsApplied.resolve(); },
@@ -79,7 +80,7 @@ describe('cart readiness after a catalog refresh', () => {
     }
   } });
   jest.mocked(useStore).mockReturnValue(store);
-  const page = new Vue({ setup () { (composable as () => void)(); }, render: (h) => h('div') }).$mount();
+  const page = new Vue({ setup () { useEventAfterCartSettled(composable as boolean); }, render: (h) => h('div') }).$mount();
   try {
     const sync = store.dispatch('cart/merge', { serverItems: [], clientItems: store.state.cart.cartItems });
     if (last === 'catalog') {
@@ -97,7 +98,7 @@ describe('cart readiness after a catalog refresh', () => {
     }
     await sync;
     store.commit('cart/' + types.SET_IS_CART_SYNCING, false);
-    await Vue.nextTick();
+    await new Promise(resolve => setTimeout(resolve, 0));
     expect(store.state.cart.cartServerLastTotalsSyncDate).toBeGreaterThan(0);
     expect(store.state.cart.cartItems[0].category).toEqual(hydratedProduct.category);
     expect(store.getters['cart/isTotalsSyncRequired']).toBe(false);

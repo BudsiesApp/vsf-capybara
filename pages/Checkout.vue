@@ -63,7 +63,7 @@ import OPersonalDetails from 'theme/components/organisms/o-personal-details';
 import OCartItemsTable from 'theme/components/organisms/o-cart-items-table';
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
 import { ModalList } from 'theme/store/ui/modals';
-import { useBeginCheckoutEvent } from 'theme/helpers/use-begin-checkout-event';
+import { useEventAfterCartSettled } from 'theme/helpers/use-event-after-cart-settled';
 
 const successParamValue = 'success';
 const orderReviewStepKey = 'orderReview';
@@ -89,8 +89,8 @@ export default {
     ProductionSpotCountdown
   },
   mixins: [Checkout],
-  setup () {
-    useBeginCheckoutEvent();
+  setup (props) {
+    useEventAfterCartSettled(true, () => props.success !== successParamValue);
   },
   data () {
     return {

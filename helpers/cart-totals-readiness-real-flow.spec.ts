@@ -12,8 +12,10 @@ import cartGetters from '@vue-storefront/core/modules/cart/store/getters';
 import cartMutations from '@vue-storefront/core/modules/cart/store/mutations';
 import * as types from '@vue-storefront/core/modules/cart/store/mutation-types';
 import CartEvents from 'src/modules/shared/types/cart-events';
-import { useCartViewEvent } from 'theme/helpers/use-cart-view-event';
-import { useBeginCheckoutEvent } from 'theme/helpers/use-begin-checkout-event';
+import { useEventAfterCartSettled } from 'theme/helpers/use-event-after-cart-settled';
+
+const useCartViewEvent = () => useEventAfterCartSettled();
+const useBeginCheckoutEvent = () => useEventAfterCartSettled(true);
 
 jest.mock('@vue-storefront/core/application-services', () => ({ useStore: jest.fn() }));
 jest.mock('@vue-storefront/core/compatibility/plugins/event-bus', () => ({ __esModule: true, default: { $emit: jest.fn() } }));
@@ -24,7 +26,7 @@ jest.mock('@vue-storefront/core/lib/logger', () => ({
   Logger: { info: () => () => {}, debug: () => () => {}, warn: () => () => {}, error: () => () => {} }
 }));
 jest.mock('@vue-storefront/core/data-resolver', () => ({
-  CartService: { getTotals: jest.fn(), setShippingInfo: jest.fn() }
+  CartService: { getTotals: jest.fn(), setShippingInfo: jest.fn(), getCartToken: jest.fn() }
 }));
 jest.mock('@vue-storefront/core/modules/cart/helpers', () => ({
   prepareShippingInfoForUpdateTotals: jest.requireActual('@vue-storefront/core/modules/cart/helpers/prepareShippingInfoForUpdateTotals').default,
@@ -103,10 +105,11 @@ function createSynchronizedStore (
     modules: {
       user: {
         namespaced: true,
-        getters: { getUserToken: () => null }
+        getters: { getUserToken: () => null, getToken: () => null }
       },
       checkout: {
         namespaced: true,
+        state: { entryPromise: Promise.resolve(), entryRefreshAttempted: true },
         getters: {
           getShippingDetails: () => ({}),
           getShippingMethods: () => [],
@@ -124,6 +127,7 @@ function createSynchronizedStore (
           cartItemsHash: calcItemsHmac([item] as any, TOKEN),
           cartServerLastTotalsSyncDate: PREVIOUS_SYNC_DATE,
           syncPromise: null,
+          connectionPromises: [],
           isCartSyncing: false,
           isTotalsSyncing: false,
           totalsSyncDepth: 0,
@@ -137,6 +141,8 @@ function createSynchronizedStore (
         mutations: cartMutations,
         actions: {
           ...totalsActions,
+          waitForStartup: async () => {},
+          waitForConnections: async () => {},
           pullMethods,
           updateItem: ({ commit }, payload) => commit(types.CART_UPD_ITEM_PROPS, payload),
           clear: clearCart,
@@ -169,7 +175,7 @@ describe.each([
       if (eventName === CartEvents.CART_VIEWED || eventName === CartEvents.BEGIN_CHECKOUT) {
         emitted.push({
           finalPrice: store.state.cart.cartItems[0].extension_attributes.budsies_quote_item_totals.final_price,
-          grandTotal: store.state.cart.platformTotals.grand_total
+          grandTotal: store.state.cart.platformTotals?.grand_total
         });
       }
 
@@ -196,10 +202,20 @@ describe.each([
     expect(store.getters['cart/isTotalsSyncRequired']).toBe(false);
 
     mountPage();
-    await Vue.nextTick();
+    await new Promise(resolve => setTimeout(resolve, 0));
 
     expect(emitted).toEqual([{ finalPrice: 90, grandTotal: 180 }]);
     expectSettled();
+  });
+
+  it('reuses current totals when shipment metadata changes the cart hash', async () => {
+    Vue.set(store.state.cart.cartItems[0].extension_attributes, 'estimated_shipment', { date: '2027-01-01' });
+    expect(store.getters['cart/isTotalsSyncRequired']).toBe(true);
+    jest.mocked(CartService.getTotals).mockClear();
+    mountPage();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(emitted).toEqual([{ finalPrice: 100, grandTotal: 200 }]);
+    expect(CartService.getTotals).not.toHaveBeenCalled();
   });
 
   it('waits for the response of a forced refresh that started before the page was mounted', async () => {
@@ -251,6 +267,91 @@ describe.each([
     expectSettled();
   });
 
+  it('waits for token acquisition and a server-cart pull before reporting an empty-cache customer cart', async () => {
+    const token = deferred<any>();
+    const pull = deferred<void>();
+    store = createSynchronizedStore(undefined, {
+      connect: connectActions.connect,
+      performConnect: connectActions.performConnect,
+      trackConnection: synchronizeActions.trackConnection,
+      waitForConnections: synchronizeActions.waitForConnections,
+      sync: synchronizeActions.sync,
+      performSync: async ({ commit }) => {
+        await pull.promise;
+        commit(types.CART_LOAD_CART, [createItem()]);
+        return new DiffLog();
+      },
+      applyPendingCouponInCartTransaction: async () => undefined
+    });
+    store.commit(`cart/${types.CART_LOAD_CART}`, []);
+    store.state.checkout.entryRefreshAttempted = false;
+    jest.mocked(useStore).mockReturnValue(store);
+    jest.mocked(CartService.getCartToken).mockReturnValue(token.promise);
+    jest.mocked(CartService.getTotals).mockResolvedValue(totalsResponse(90, 180) as any);
+    const connection = store.dispatch('cart/connect');
+    mountPage();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(emitted).toEqual([]);
+    token.resolve({ resultCode: 200, result: NEW_TOKEN });
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(emitted).toEqual([]);
+    pull.resolve();
+    await connection;
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(emitted).toEqual([{ finalPrice: 90, grandTotal: 180 }]);
+  });
+
+  it('releases the startup boundary after restoration rejects', async () => {
+    store = createSynchronizedStore(undefined, { waitForStartup: synchronizeActions.waitForStartup });
+    const startup = Promise.reject(new Error('storage unavailable'));
+    startup.catch(() => undefined);
+    store.state.cart.startupPromise = startup;
+    jest.mocked(useStore).mockReturnValue(store);
+    mountPage();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(emitted).toEqual([{ finalPrice: 100, grandTotal: 200 }]);
+  });
+
+  it('releases a connection boundary after token acquisition rejects', async () => {
+    const token = deferred<any>();
+    store = createSynchronizedStore(undefined, {
+      connect: connectActions.connect,
+      performConnect: connectActions.performConnect,
+      trackConnection: synchronizeActions.trackConnection,
+      waitForConnections: synchronizeActions.waitForConnections
+    });
+    jest.mocked(useStore).mockReturnValue(store);
+    jest.mocked(CartService.getCartToken).mockReturnValue(token.promise);
+    const connection = store.dispatch('cart/connect');
+    connection.catch(() => undefined);
+    mountPage();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(emitted).toEqual([]);
+    token.reject(new Error('token unavailable'));
+    await expect(connection).rejects.toThrow('token unavailable');
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(emitted).toEqual([{ finalPrice: 100, grandTotal: 200 }]);
+  });
+
+  it('invalidates totals only when the quote identity changes', () => {
+    store.commit(`cart/${types.CART_LOAD_CART_SERVER_TOKEN}`, TOKEN);
+    expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(PREVIOUS_SYNC_DATE);
+    expect(store.state.cart.platformTotals.grand_total).toBe(200);
+    store.commit(`cart/${types.CART_LOAD_CART_SERVER_TOKEN}`, NEW_TOKEN);
+    expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(0);
+    expect(store.state.cart.platformTotals).toBeNull();
+    expect(store.state.cart.platformTotalSegments).toBeNull();
+  });
+
+  it('does not fall back to quote A when the first refresh for quote B fails', async () => {
+    store.commit(`cart/${types.CART_LOAD_CART_SERVER_TOKEN}`, NEW_TOKEN);
+    jest.mocked(CartService.getTotals).mockRejectedValue(new Error('network'));
+    await expect(store.dispatch('cart/syncTotals', { forceServerSync: true })).rejects.toThrow('network');
+    expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(0);
+    expect(store.state.cart.platformTotals).toBeNull();
+    expect(store.state.cart.platformTotalSegments).toBeNull();
+  });
+
   describe('after a refresh that failed', () => {
     const failures = [
       ['an error response', () => jest.mocked(CartService.getTotals).mockResolvedValue({ resultCode: 500, result: 'error' } as any)],
@@ -263,35 +364,18 @@ describe.each([
       await store.dispatch('cart/syncTotals', { forceServerSync: true }).catch(() => undefined);
     }
 
-    it.each(failures)('does not treat the old totals as synchronized after %s', async (_, failRequest) => {
+    it.each(failures)('retains same-quote totals after %s', async (_, failRequest) => {
       failRequest();
 
       await refreshAndFail();
 
-      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(0);
-      expect(store.getters['cart/isTotalsSyncRequired']).toBe(true);
+      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(PREVIOUS_SYNC_DATE);
+      expect(store.state.cart.platformTotals.grand_total).toBe(200);
 
       mountPage();
-      await Vue.nextTick();
+      await new Promise(resolve => setTimeout(resolve, 0));
 
-      expect(emitted).toEqual([]);
-      expectSettled();
-    });
-
-    it.each(failures)('reports once with the refreshed totals when a retry succeeds after %s', async (_, failRequest) => {
-      failRequest();
-      mountPage();
-      await refreshAndFail();
-      await Vue.nextTick();
-
-      expect(emitted).toEqual([]);
-
-      jest.mocked(CartService.getTotals).mockReset().mockResolvedValue(totalsResponse(90, 180) as any);
-      await store.dispatch('cart/syncTotals');
-      await Vue.nextTick();
-
-      expect(emitted).toEqual([{ finalPrice: 90, grandTotal: 180 }]);
-      expect(store.getters['cart/isTotalsSyncRequired']).toBe(false);
+      expect(emitted).toEqual([{ finalPrice: 100, grandTotal: 200 }]);
       expectSettled();
     });
 
@@ -323,33 +407,17 @@ describe.each([
       jest.mocked(useStore).mockReturnValue(store);
     });
 
-    it('does not treat the old totals as synchronized', async () => {
+    it('keeps same-quote totals after a methods failure', async () => {
       await expect(store.dispatch('cart/syncTotals', { forceServerSync: true })).rejects.toThrow('methods');
 
       expect(CartService.getTotals).not.toHaveBeenCalled();
-      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(0);
-      expect(store.getters['cart/isTotalsSyncRequired']).toBe(true);
+      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(PREVIOUS_SYNC_DATE);
 
       mountPage();
-      await Vue.nextTick();
+      await new Promise(resolve => setTimeout(resolve, 0));
 
-      expect(emitted).toEqual([]);
+      expect(emitted).toEqual([{ finalPrice: 100, grandTotal: 200 }]);
       expectSettled();
-    });
-
-    it('reports once with the refreshed totals when a retry succeeds', async () => {
-      mountPage();
-      await expect(store.dispatch('cart/syncTotals', { forceServerSync: true })).rejects.toThrow('methods');
-      await Vue.nextTick();
-
-      expect(emitted).toEqual([]);
-
-      failMethods = false;
-      jest.mocked(CartService.getTotals).mockResolvedValue(totalsResponse(90, 180) as any);
-      await store.dispatch('cart/syncTotals');
-      await Vue.nextTick();
-
-      expect(emitted).toEqual([{ finalPrice: 90, grandTotal: 180 }]);
     });
 
     it('keeps the totals of a newer refresh that already succeeded', async () => {
@@ -368,7 +436,7 @@ describe.each([
       expect(store.state.cart.cartServerLastTotalsSyncDate).toBeGreaterThan(PREVIOUS_SYNC_DATE);
 
       mountPage();
-      await Vue.nextTick();
+      await new Promise(resolve => setTimeout(resolve, 0));
 
       expect(emitted).toEqual([{ finalPrice: 90, grandTotal: 180 }]);
       expectSettled();
@@ -453,7 +521,7 @@ describe.each([
       expectSettled();
     });
 
-    it('invalidates the totals when the newer request fails and the older response was ignored', async () => {
+    it('retains earlier same-quote totals when the newer request fails and the older response was ignored', async () => {
       startOverlappingRefreshes();
       mountPage();
 
@@ -463,9 +531,8 @@ describe.each([
       await expect(newerRefresh).rejects.toThrow('network');
       await Vue.nextTick();
 
-      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(0);
-      expect(store.getters['cart/isTotalsSyncRequired']).toBe(true);
-      expect(emitted).toEqual([]);
+      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(PREVIOUS_SYNC_DATE);
+      expect(emitted).toEqual([{ finalPrice: 100, grandTotal: 200 }]);
       expectSettled();
     });
   });
@@ -513,7 +580,7 @@ describe.each([
     it('does not apply the totals of a cart that was replaced during the request', async () => {
       const response = deferred<any>();
 
-      jest.mocked(CartService.getTotals).mockReturnValueOnce(response.promise);
+      jest.mocked(CartService.getTotals).mockResolvedValue({ resultCode: 500, result: 'error' } as any).mockReturnValueOnce(response.promise);
       mountPage();
 
       const refresh = store.dispatch('cart/overrideServerTotals', { hasShippingInformation: false });
@@ -524,13 +591,11 @@ describe.each([
 
       response.resolve(totalsResponse(90, 180));
       await refresh;
-      await Vue.nextTick();
+      await new Promise(resolve => setTimeout(resolve, 0));
 
       expect(store.state.cart.cartItems[0].extension_attributes.budsies_quote_item_totals.final_price).toBe(100);
-      expect(store.state.cart.platformTotals.grand_total).toBe(200);
-      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(PREVIOUS_SYNC_DATE);
-      // The page reports the current cart as it is, not with the totals of the quote that was requested.
-      expect(emitted).toEqual([{ finalPrice: 100, grandTotal: 200 }]);
+      expect(store.state.cart.platformTotals).toBeNull();
+      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(0);
       expectSettled();
     });
 
@@ -547,8 +612,8 @@ describe.each([
       response.reject(new Error('network'));
       await expect(refresh).rejects.toThrow('network');
 
-      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(PREVIOUS_SYNC_DATE);
-      expect(store.getters['cart/isTotalsSyncRequired']).toBe(false);
+      expect(store.state.cart.cartServerLastTotalsSyncDate).toBe(0);
+      expect(store.state.cart.platformTotals).toBeNull();
       expectSettled();
     });
 
@@ -577,6 +642,7 @@ describe.each([
         sync: synchronizeActions.sync,
         synchronizeCart: synchronizeActions.synchronizeCart,
         waitForCartSync: synchronizeActions.waitForCartSync,
+        trackConnection: synchronizeActions.trackConnection,
         clear: connectActions.clear,
         disconnect: connectActions.disconnect,
         applyPendingCouponInCartTransaction: async () => undefined,

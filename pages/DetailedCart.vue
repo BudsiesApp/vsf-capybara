@@ -165,7 +165,7 @@ import { ModalList } from 'theme/store/ui/modals';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MDropdown from 'theme/components/molecules/m-dropdown.vue';
 import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
-import { useCartViewEvent } from 'theme/helpers/use-cart-view-event';
+import { useEventAfterCartSettled } from 'theme/helpers/use-event-after-cart-settled';
 import { emitPageRenderedEvent } from 'src/modules/shared';
 
 export default {
@@ -295,7 +295,7 @@ export default {
     };
   },
   setup () {
-    useCartViewEvent();
+    useEventAfterCartSettled();
     useRedirectedSectionHashRemoval();
 
     const store = useStore();
