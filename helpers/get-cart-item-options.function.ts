@@ -1,5 +1,6 @@
 import { onlineHelper } from '@vue-storefront/core/helpers';
 import CartItem from 'core/modules/cart/types/CartItem';
+import { htmlDecode } from '@vue-storefront/core/filters/html-decode';
 
 export function getCartItemOptions (cartItem: CartItem): {
   isCustom: boolean,
@@ -16,7 +17,7 @@ export function getCartItemOptions (cartItem: CartItem): {
 
   return options.map((option) => {
     return {
-      value: option.value,
+      value: htmlDecode(option.value),
       label: option.label,
       isCustom: !!cartItem.custom_options?.find((customOption) => customOption.title === option.label)
     }
