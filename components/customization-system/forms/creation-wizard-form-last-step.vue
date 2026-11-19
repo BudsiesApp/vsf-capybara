@@ -8,7 +8,7 @@
     <SfHeading
       class="_step-title -required"
       :level="2"
-      :title="$t('Customize your {productType}', { productType })"
+      :title="title || $t('Customize your {productType}', { productType })"
     />
 
     <div v-if="lockedCustomizations.length" class="_pre-selected-customizations">
@@ -142,6 +142,10 @@ import MOrderSubmitAgreement from 'theme/components/molecules/m-order-submit-agr
 export default defineComponent({
   name: 'CreationWizardFormLastStep',
   props: {
+    title: {
+      type: String as PropType<string | undefined>,
+      default: undefined
+    },
     restorationSettled: { type: Boolean, default: true },
     submitAction: {
       type: Function as PropType<() => Promise<void>>,

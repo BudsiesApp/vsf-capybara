@@ -35,7 +35,7 @@
 
 <script lang="ts">
 import { useFormPageReadiness } from 'theme/helpers/use-form-page-readiness';
-import { emitPageRenderedEvent } from 'src/modules/shared';
+import { BudsieStatus, emitPageRenderedEvent } from 'src/modules/shared';
 import { useI18n } from '@vue-storefront/core/application-services';
 import {
   computed,
@@ -203,6 +203,12 @@ export default defineComponent({
     const mainTitleText = computed<string | undefined>(() => {
       if (!plushieType.value) {
         return;
+      }
+
+      if (draftOrderItem.value?.status_id === BudsieStatus.AWAITING_ARTWORK) {
+        return (plushieType.value === PlushieType.FOREVERS
+          ? applicationI18n.t('Upload Photos for Your Forevers Plush')
+          : applicationI18n.t('Upload Photos for Your Golf Head Covers')).toString();
       }
 
       const title =

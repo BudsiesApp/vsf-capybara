@@ -33,7 +33,7 @@ jest.mock('vee-validate', () => ({
   ValidationObserver: { props: ['tag'], data: () => ({ errors: {} }), methods: { validate () { return mockWizardMode.value ? this.$refs.real.validate() : mockValidate(); }, reset: jest.fn() }, render (h) { if (mockWizardMode.value) return h(jest.requireActual('vee-validate').ValidationObserver, { ref: 'real', attrs: this.$attrs, props: { tag: this.tag || 'div' }, scopedSlots: this.$scopedSlots }, this.$slots.default); return h(this.tag || 'div', this.$scopedSlots.default ? this.$scopedSlots.default({ errors: {} }) : this.$slots.default); } },
   ValidationProvider: { render (h) { return h('div', this.$scopedSlots.default({ errors: [], classes: {} })); } }
 }));
-jest.mock('src/modules/shared', () => ({ ...jest.requireActual('src/modules/shared/types/product-purchase-flow.type'), BudsieStatus: { AWAITING_CUSTOMIZATION: 1 }, PriceHelper: { getFinalPrice: price => price.special !== null && price.special < price.regular ? price.special : price.regular, getTotalPriceForProductPrices: prices => { const regular = prices.reduce((sum, price) => sum + price.regular, 0); const special = prices.reduce((sum, price) => sum + (price.special === null ? price.regular : price.special), 0); return { regular, special: special < regular ? special : null }; } } }));
+jest.mock('src/modules/shared', () => ({ ...jest.requireActual('src/modules/shared/types/product-purchase-flow.type'), BudsieStatus: { AWAITING_CUSTOMIZATION: 1, AWAITING_ARTWORK: 7 }, PriceHelper: { getFinalPrice: price => price.special !== null && price.special < price.regular ? price.special : price.regular, getTotalPriceForProductPrices: prices => { const regular = prices.reduce((sum, price) => sum + price.regular, 0); const special = prices.reduce((sum, price) => sum + (price.special === null ? price.regular : price.special), 0); return { regular, special: special < regular ? special : null }; } } }));
 jest.mock('@vue-storefront/core/modules/catalog', () => ({ PRODUCT_LOCALIZED_PRICE_DICTIONARY: 'localized-prices' }));
 jest.mock('src/modules/currency', () => ({ GET_ACTIVE_CURRENCY: 'currency' }));
 jest.mock('src/modules/a-b-testing', () => ({ useABTestingCustomizationsFilter: () => ({ customizationFilter: () => true }) }));
@@ -82,6 +82,7 @@ jest.mock('src/modules/customization-system', () => {
   const { computed, ref } = require('vue');
   return {
     ...require('src/modules/customization-system/composables/use-holiday-delivery-location'),
+    ...require('src/modules/customization-system/composables/use-awaiting-artwork-customizations-filter'),
     ...require('src/modules/customization-system/composables/use-customization-state-preservation'),
     ...require('src/modules/customization-system/composables/use-list-widget'),
     ...require('src/modules/customization-system/types/list-widget-input-type'),

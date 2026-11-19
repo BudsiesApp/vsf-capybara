@@ -179,7 +179,8 @@ import {
   LockedCustomizationsFilterType,
   usePurchaseFlowCustomizations,
   useLockedCustomizations,
-  useAvailableOptionsValuesFilter
+  useAvailableOptionsValuesFilter,
+  useAwaitingArtworkCustomizationsFilter
 } from 'src/modules/customization-system';
 import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow } from 'src/modules/shared';
 import i18n from '@vue-storefront/core/i18n';
@@ -299,13 +300,19 @@ export default defineComponent({
     const productSku = computed<string>(() => {
       return product.value.sku;
     });
-    const productCustomizations = computed<Customization[]>(() => {
+    const rawProductCustomizations = computed<Customization[]>(() => {
       return product.value.customizations || [];
     });
 
-    const initialCustomizationState = computed<CustomizationStateItem[]>(() => {
+    const rawInitialCustomizationState = computed<CustomizationStateItem[]>(() => {
       return draftOrderItem.value?.customization_state || [];
     });
+
+    const { productCustomizations, initialCustomizationState } = useAwaitingArtworkCustomizationsFilter(
+      rawProductCustomizations,
+      rawInitialCustomizationState,
+      draftOrderItem
+    );
 
     const {
       addCustomizationOptionValue,
