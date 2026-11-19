@@ -76,6 +76,7 @@
 
             <sf-step :name="lastStepCustomization.name">
               <creation-wizard-form-last-step
+                :title="lastStepTitle"
                 :restoration-settled="restorationSettled"
                 :submit-action="onFormSubmit"
                 :available-customizations="
@@ -167,7 +168,7 @@ import {
   usePurchaseFlowCustomizations,
   useAwaitingArtworkCustomizationsFilter
 } from 'src/modules/customization-system';
-import { DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow } from 'src/modules/shared';
+import { BudsieStatus, DEFAULT_PRODUCT_PURCHASE_FLOW, ProductPurchaseFlow } from 'src/modules/shared';
 
 import ProductTypeButton from 'theme/components/interfaces/product-type-button.interface';
 import { useAddToCart } from 'theme/helpers/use-add-to-cart';
@@ -302,13 +303,19 @@ export default defineComponent({
       getNestedFormRefs(getCustomizationOptionsInRenderedOrder())
     );
 
-    const productCustomizations = computed<Customization[]>(() => {
+    const rawProductCustomizations = computed<Customization[]>(() => {
       return currentProduct.value?.customizations || [];
     });
 
-    const initialCustomizationState = computed<CustomizationStateItem[]>(() => {
+    const rawInitialCustomizationState = computed<CustomizationStateItem[]>(() => {
       return draftOrderItem.value?.customization_state || [];
     });
+
+    const { productCustomizations, initialCustomizationState } = useAwaitingArtworkCustomizationsFilter(
+      rawProductCustomizations,
+      rawInitialCustomizationState,
+      draftOrderItem
+    );
 
     const {
       addCustomizationOptionValue,
@@ -382,14 +389,11 @@ export default defineComponent({
       customizationMode
     );
 
-    const { customizationsFilter: awaitingArtworkCustomizationsFilter } = useAwaitingArtworkCustomizationsFilter(draftOrderItem);
-
     const { filteredCustomizations: filteredSelectedLockedCustomizations } = useCustomizationsFilter(
       selectedLockedCustomizations,
       customizationAvailableOptionValues,
       [
-        requiredCustomizationsFilter,
-        awaitingArtworkCustomizationsFilter
+        requiredCustomizationsFilter
       ]
     );
 
@@ -424,8 +428,7 @@ export default defineComponent({
         emailCustomizationFilter,
         requiredCustomizationsFilter,
         abTestingCustomizationFilter,
-        lockedCustomizationsFilter,
-        awaitingArtworkCustomizationsFilter
+        lockedCustomizationsFilter
       ]
     );
 
@@ -553,8 +556,7 @@ export default defineComponent({
 
     const { confirmCustomization, isSubmitting: isSubmittingCustomize } = useCustomizeAction(
       customizationState,
-      draftOrderItem,
-      productCustomizations
+      draftOrderItem
     );
 
     const { isUnmounted } = useComponentUnmountedChecker();
@@ -623,6 +625,14 @@ export default defineComponent({
       return isSubmitting.value || productTypeStep.isProductLoading.value || isAdditionalStepsDataLoading.value;
     });
 
+    const lastStepTitle = computed<string | undefined>(() => {
+      if (draftOrderItem.value?.status_id === BudsieStatus.AWAITING_ARTWORK) {
+        return i18n.t('Upload Photos of Your Pet').toString();
+      }
+
+      return undefined;
+    });
+
     const submitButtonText = computed<string>(() => {
       if (isCustomizeMode.value) {
         return i18n.t('Confirm Customization').toString();
@@ -659,6 +669,7 @@ export default defineComponent({
     );
 
     return {
+      lastStepTitle,
       restorationSettled,
       hasHolidayTimeline,
       ...customizationGroups,

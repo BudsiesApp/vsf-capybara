@@ -24,17 +24,22 @@ jest.mock('@vue-storefront/core/i18n', () => ({ t: (key: string) => key }));
 jest.mock('@vue-storefront/core/lib/sync', () => ({ TaskQueue: { execute: jest.fn() } }));
 jest.mock('@vue-storefront/core/modules/catalog/store/product/mutation-types', () => ({ PRODUCT_UNSET_CURRENT: 'PRODUCT_UNSET_CURRENT' }));
 jest.mock('@storefront-ui/vue', () => {
-  const passthrough = (name: string) => ({ name, render (h: any) { return h('div', this.$slots.default); } });
+  const passthrough = (name: string) => ({ name, render (h: any) { return h('div', { on: this.$listeners }, this.$slots.default); } });
   return {
     SfButton: passthrough('SfButton'),
-    SfHeading: { name: 'SfHeading', props: { title: String }, render (h: any) { return h('h2', this.title); } },
-    SfSteps: passthrough('SfSteps'),
-    SfStep: passthrough('SfStep')
+    SfHeading: { name: 'SfHeading', props: { title: String, level: Number }, render (h: any) { return h(`h${this.level || 2}`, this.title); } },
+    SfSteps: {
+      name: 'SfSteps', props: { steps: Array, active: Number },
+      provide () { return { stepsState: this }; },
+      render (h: any) { return h('div', this.$slots.default); }
+    },
+    SfModal: passthrough('SfModal'),
+    SfInput: passthrough('SfInput')
   };
 });
 jest.mock('vee-validate', () => ({
   extend: jest.fn(),
-  ValidationObserver: { name: 'ValidationObserver', render (h: any) { return h('div', this.$scopedSlots.default ? this.$scopedSlots.default({ errors: {} }) : this.$slots.default); } },
+  ValidationObserver: { name: 'ValidationObserver', methods: { validate: () => Promise.resolve(true) }, render (h: any) { return h('div', this.$scopedSlots.default ? this.$scopedSlots.default({ errors: {} }) : this.$slots.default); } },
   ValidationProvider: { name: 'ValidationProvider', render (h: any) { return h('div'); } }
 }));
 jest.mock('@vue-storefront/core/helpers', () => ({ isServer: false }));
@@ -68,7 +73,7 @@ jest.mock('src/modules/customization-system', () => {
     LockedCustomizationsFilterType: jest.requireActual(`${base}/composables/use-locked-customizations`).FilterType,
     useHolidayDeliveryLocation: () => ({ ready: Promise.resolve() }),
     useCustomizationsBundleOptions: () => ({ bundleOptions: ref([]) }),
-    useCustomizationsOptionsDefaultValue: () => undefined,
+    ...jest.requireActual(`${base}/composables/use-customizations-options-default-value`),
     useCustomizationsPrice: () => ({ totalPrice: ref({}) }),
     useCustomizationProductDescription: () => ({ descriptionProductSku: ref('pet') }),
     useCustomizationStatePreservation: () => ({ removePreservedState: jest.fn(), restorationSettled: ref(true) }),
@@ -105,22 +110,14 @@ jest.mock('theme/helpers/use-creation-wizard-product-type-step', () => ({ useCre
 jest.mock('theme/helpers/use-customize-action', () => ({
   useCustomizeAction: (...args: unknown[]) => {
     mockCustomizeActionArgs.push(args);
-    return { confirmCustomization: jest.fn(), isSubmitting: ref(false) };
+    return { confirmCustomization: jest.fn().mockResolvedValue(undefined), isSubmitting: ref(false) };
   }
 }));
 
 jest.mock('theme/components/customization-system/customization-option.vue', () => ({
   name: 'CustomizationOption',
-  props: { customization: Object },
-  render (h: any) { return h('div', { class: '_field', attrs: { 'data-field': this.customization.id } }); }
-}));
-jest.mock('theme/components/customization-system/forms/creation-wizard-form-last-step.vue', () => ({
-  name: 'CreationWizardFormLastStep',
-  props: { availableCustomizations: Array, lockedCustomizations: Array },
-  render (h: any) {
-    const fields = (list: any[] = [], source: string) => list.map(item => h('div', { class: '_field', attrs: { 'data-field': item.id, 'data-source': source } }));
-    return h('div', [...fields(this.availableCustomizations, 'last'), ...fields(this.lockedCustomizations, 'locked')]);
-  }
+  props: { customization: Object, value: [Array, String] },
+  render (h: any) { return h('div', { class: '_field', attrs: { 'data-field': this.customization.id, 'data-value': JSON.stringify(this.value), 'data-source': this.$attrs['is-disabled'] ? 'locked' : 'last' } }); }
 }));
 jest.mock('theme/components/customization-system/forms/order-item-customize-upgrades-step.vue', () => ({ name: 'Upgrades', render: (h: any) => h('div', { class: '_upgrades' }) }));
 jest.mock('theme/components/molecules/m-block-story.vue', () => ({ name: 'MBlockStory', render: (h: any) => h('div') }));
@@ -178,7 +175,39 @@ function makeProduct (imageIds: string[]) {
   };
 }
 
-async function render (layout: LayoutType, statusId: number, imageIds: string[]) {
+const photoGroupId = '01b4f3aa-a1bc-4707-9dff-85cbf8e672ec';
+const petInfoGroupId = '81cbfa57-121e-499e-afba-9c21cee59f37';
+const nameId = '25dcd8a5-d67e-4151-b17c-85badd061f24';
+const imageId = 'f6971232-0087-4f14-9823-5f9bbfe32cff';
+const uploadMethodId = '0e5ef79e-1d82-414c-96a8-004a4f836442';
+const noId = '2479f37d-b3f6-4f0c-be13-c5688b0bbb62';
+const yesId = '2ba58d1b-e8a2-48f0-aede-0f901186e828';
+
+const foreversCustomizations = [
+  { ...group(photoGroupId), name: 'Photo', sn: 1 },
+  {
+    ...option(imageId, 'image_upload', photoGroupId), name: 'Customer Image',
+    availabilityRules: { forActivatedOptionValueIds: [noId] },
+    optionData: { displayWidget: 'image_upload', isRequired: true, values: [] }
+  },
+  {
+    ...option(uploadMethodId, 'checkbox', photoGroupId), name: 'Send Later Upload Method', sn: 2,
+    optionData: {
+      displayWidget: 'checkbox', isRequired: true,
+      values: [
+        { id: noId, name: 'No', isDefault: true, isEnabled: true, sn: 2 },
+        { id: yesId, name: 'Yes', isDefault: false, isEnabled: true, sn: 1 }
+      ]
+    }
+  },
+  { ...group(petInfoGroupId), name: 'Pet Info', sn: 2 },
+  {
+    ...option(nameId, 'text_input', petInfoGroupId), name: 'Name', sn: 4,
+    optionData: { displayWidget: 'text_input', isRequired: true, values: [] }
+  }
+];
+
+async function render (layout: LayoutType, statusId: number, imageIds: string[], forevers = false, plushieType = 'forevers') {
   mockProduct = makeProduct(imageIds);
   mockDraft = {
     id: 42,
@@ -189,6 +218,13 @@ async function render (layout: LayoutType, statusId: number, imageIds: string[])
       ...imageIds.map(id => ({ customization_id: id, value: [photo], quantity: 1 }))
     ]
   };
+  if (forevers) {
+    mockProduct.customizations = JSON.parse(JSON.stringify(foreversCustomizations));
+    mockDraft.customization_state = [
+      { customization_id: uploadMethodId, value: yesId, quantity: 1 },
+      { customization_id: imageId, value: [photo], quantity: 1 }
+    ];
+  }
   const store = {
     dispatch: jest.fn().mockResolvedValue(undefined),
     commit: jest.fn(),
@@ -196,10 +232,16 @@ async function render (layout: LayoutType, statusId: number, imageIds: string[])
   };
   const localVue = createLocalVue();
   localVue.use(Vuex);
-  localVue.component('SfStep', { name: 'SfStep', render (h: any) { return h('div', this.$slots.default); } });
+  localVue.component('SfStep', {
+    name: 'SfStep', props: { name: { type: String, required: true } }, inject: ['stepsState'],
+    render (h: any) {
+      const state = this.stepsState as any;
+      return state.steps[state.active] === this.name ? h('div', { attrs: { 'data-active-step': this.name } }, this.$slots.default) : h();
+    }
+  });
   const wrapper = mount(OrderItemCustomize, {
     localVue,
-    propsData: { sku: 'pet', orderItemId: '42', orderId: '1', layout, plushieType: 'forevers' },
+    propsData: { sku: 'pet', orderItemId: '42', orderId: '1', layout, plushieType },
     provide: {
       [storeInjectionKey as symbol]: store,
       [routerInjectionKey as symbol]: { push: jest.fn(), replace: jest.fn() },
@@ -217,6 +259,7 @@ const fieldIds = (wrapper: any, selector = '._field') =>
 
 beforeEach(() => {
   mockCustomizeActionArgs.length = 0;
+  jest.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
 });
 
 const groupedFields = (imageIds: string[]) => [...imageIds].sort();
@@ -238,20 +281,13 @@ describe.each([
     expect(mockDraft.customization_state).toHaveLength(imageIds.length + 2);
   });
 
-  it('passes the product customizations to the save helper', async () => {
-    await render(layout, BudsieStatus.AWAITING_ARTWORK, ['photos']);
-
-    const productCustomizations = mockCustomizeActionArgs[0][2] as { value: { id: string }[] };
-    expect(productCustomizations.value.map(item => item.id)).toEqual(mockProduct.customizations.map((item: { id: string }) => item.id));
-  });
-
   it('keeps all fields for Awaiting customization', async () => {
     const wrapper = await render(layout, BudsieStatus.AWAITING_CUSTOMIZATION, ['photos']);
 
     const expected = isWizard
       ? ['name', 'photos', 'size']
       : ['locked-size', 'loose-name', 'loose-photo', 'name', 'photos', 'size'];
-    expect(fieldIds(wrapper, '._field:not([data-source="locked"])').sort()).toEqual(expected);
+    expect(fieldIds(wrapper, isWizard ? '._field:not([data-source="locked"])' : '._field').sort()).toEqual(expected);
     if (isWizard) {
       expect(fieldIds(wrapper, '[data-source="locked"]')).toEqual(['locked-size']);
     }
@@ -261,7 +297,50 @@ describe.each([
     it('keeps the Upgrades step for Awaiting artwork', async () => {
       const wrapper = await render(layout, BudsieStatus.AWAITING_ARTWORK, ['photos']);
 
-      expect(wrapper.find('._upgrades').exists()).toBe(true);
+      expect(wrapper.findComponent({ name: 'SfSteps' }).props('steps')).toContain('Upgrades');
     });
+  }
+});
+
+it.each([LayoutType.CREATION_WIZARD, LayoutType.WITH_IMAGES_GALLERY])('retains the draft photo in %s', async layout => {
+  const errors = jest.spyOn(console, 'error');
+  const wrapper = await render(layout, BudsieStatus.AWAITING_ARTWORK, [], true);
+  const productBefore = JSON.stringify(mockProduct);
+  const draftBefore = JSON.stringify(mockDraft);
+  expect(fieldIds(wrapper)).toEqual([imageId]);
+  expect(JSON.parse(wrapper.find(`[data-field="${imageId}"]`).attributes('data-value'))).toEqual([photo]);
+  if (layout === LayoutType.CREATION_WIZARD) {
+    expect(wrapper.findComponent({ name: 'SfSteps' }).props('steps')).toEqual(['Photo', 'Upgrades']);
+    expect(wrapper.find('[data-active-step="Photo"]').exists()).toBe(true);
+    await wrapper.find('._add-to-cart').trigger('click');
+    for (let i = 0; i < 10; i++) await Vue.nextTick();
+    expect(wrapper.find('[data-active-step="Upgrades"] ._upgrades').exists()).toBe(true);
+    expect(wrapper.find('[data-active-step="Photo"]').exists()).toBe(false);
+    const state = mockCustomizeActionArgs[0][0] as { value: unknown };
+    expect(state.value).toEqual([{ customization_id: imageId, value: [photo], quantity: 1 }]);
+  }
+  expect(JSON.stringify(mockProduct)).toBe(productBefore);
+  expect(JSON.stringify(mockDraft)).toBe(draftBefore);
+  expect(mockDraft.customization_state).toEqual([
+    { customization_id: uploadMethodId, value: yesId, quantity: 1 },
+    { customization_id: imageId, value: [photo], quantity: 1 }
+  ]);
+  expect(mockProduct.customizations).toEqual(foreversCustomizations);
+  expect(errors).not.toHaveBeenCalled();
+  errors.mockRestore();
+  wrapper.destroy();
+});
+
+it.each([
+  ['forevers', 'Forevers Plush'],
+  ['golf-head-covers', 'Golf Head Covers']
+])('uses status-specific headings for %s', async (type, label) => {
+  for (const status of [BudsieStatus.AWAITING_ARTWORK, BudsieStatus.AWAITING_CUSTOMIZATION]) {
+    const wrapper = await render(LayoutType.CREATION_WIZARD, status, ['photos'], false, type);
+    const artwork = status === BudsieStatus.AWAITING_ARTWORK;
+    expect(wrapper.find('h1').text()).toBe(`${artwork ? 'Upload Photos for Your' : 'Customize Your'} ${label}`);
+    expect(wrapper.findComponent({ name: 'CreationWizardFormLastStep' }).props('title')).toBe(artwork ? 'Upload Photos of Your Pet' : undefined);
+    expect(wrapper.find('._step-title').text()).toBe(artwork ? 'Upload Photos of Your Pet' : 'Customize your {productType}');
+    wrapper.destroy();
   }
 });

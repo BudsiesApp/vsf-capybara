@@ -300,13 +300,19 @@ export default defineComponent({
     const productSku = computed<string>(() => {
       return product.value.sku;
     });
-    const productCustomizations = computed<Customization[]>(() => {
+    const rawProductCustomizations = computed<Customization[]>(() => {
       return product.value.customizations || [];
     });
 
-    const initialCustomizationState = computed<CustomizationStateItem[]>(() => {
+    const rawInitialCustomizationState = computed<CustomizationStateItem[]>(() => {
       return draftOrderItem.value?.customization_state || [];
     });
+
+    const { productCustomizations, initialCustomizationState } = useAwaitingArtworkCustomizationsFilter(
+      rawProductCustomizations,
+      rawInitialCustomizationState,
+      draftOrderItem
+    );
 
     const {
       addCustomizationOptionValue,
@@ -488,12 +494,10 @@ export default defineComponent({
     );
 
     const { customizationFilter } = useABTestingCustomizationsFilter();
-    const { customizationsFilter: awaitingArtworkCustomizationsFilter } = useAwaitingArtworkCustomizationsFilter(draftOrderItem);
 
     const { confirmCustomization, isSubmitting: isSubmittingCustomize } = useCustomizeAction(
       customizationState,
-      draftOrderItem,
-      productCustomizations
+      draftOrderItem
     );
 
     async function onFormSubmit (): Promise<void> {
@@ -545,7 +549,7 @@ export default defineComponent({
     const { filteredCustomizations } = useCustomizationsFilter(
       availableOptionCustomizations,
       customizationAvailableOptionValues,
-      [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter, lockedCustomizationsFilter, awaitingArtworkCustomizationsFilter]
+      [emailCustomizationFilter, requiredCustomizationsFilter, customizationFilter, lockedCustomizationsFilter]
     );
     const { descriptionProductSku } = useCustomizationProductDescription(
       product,

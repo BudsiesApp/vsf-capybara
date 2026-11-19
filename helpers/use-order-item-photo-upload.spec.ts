@@ -21,16 +21,11 @@ import { useOrderItemPhotoUpload } from './use-order-item-photo-upload';
 
 jest.mock('@vue-storefront/core/lib/logger', () => ({ Logger: { error: jest.fn(() => jest.fn()) } }));
 
-jest.mock('src/modules/shared', () => ({
-  ...jest.requireActual('src/modules/shared/types/budsie-status')
-}));
-
 jest.mock('src/modules/customization-system', () => ({
   ...jest.requireMock('src/modules/customization-system/helpers/order-items-customizations.service'),
   ...jest.requireActual('src/modules/customization-system/composables/use-customization-state'),
   ...jest.requireActual('src/modules/customization-system/composables/use-entity-busy-state'),
   ...jest.requireActual('src/modules/customization-system/helpers/filter-customization-state'),
-  ...jest.requireActual('src/modules/customization-system/helpers/is-image-upload-customization'),
   ...jest.requireActual('src/modules/customization-system/types/widget-type'),
   ...jest.requireActual('src/modules/customization-system/types/customization-availability-flow.type')
 }));

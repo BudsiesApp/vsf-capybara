@@ -83,8 +83,6 @@ jest.mock('src/modules/customization-system', () => {
   return {
     ...require('src/modules/customization-system/composables/use-holiday-delivery-location'),
     ...require('src/modules/customization-system/composables/use-awaiting-artwork-customizations-filter'),
-    ...require('src/modules/customization-system/helpers/is-image-upload-customization'),
-    ...require('src/modules/customization-system/types/customization-type'),
     ...require('src/modules/customization-system/composables/use-customization-state-preservation'),
     ...require('src/modules/customization-system/composables/use-list-widget'),
     ...require('src/modules/customization-system/types/list-widget-input-type'),
