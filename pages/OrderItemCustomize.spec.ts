@@ -1,5 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils';
-import Vue, { ref } from 'vue';
+import Vue, { onMounted, ref } from 'vue';
 import Vuex from 'vuex';
 
 import {
@@ -10,6 +10,8 @@ import {
 } from '@vue-storefront/core/application-services';
 
 import { BudsieStatus } from 'src/modules/shared';
+import { saveOrderItemCustomizationsState, submitOrderItemCustomizationsState } from 'src/modules/customization-system';
+import { PersistedData } from 'src/modules/customization-system/types/persisted-data.interface';
 
 import { LayoutType } from 'theme/helpers/use-product-form-layout';
 
@@ -17,7 +19,7 @@ import OrderItemCustomize from './OrderItemCustomize.vue';
 
 let mockProduct: any;
 let mockDraft: any;
-const mockCustomizeActionArgs: unknown[][] = [];
+let mockRestoredData: PersistedData | undefined;
 
 jest.mock('@vue-storefront/core/lib/logger', () => ({ Logger: { error: jest.fn(() => jest.fn()), warn: jest.fn(() => jest.fn()), info: jest.fn(() => jest.fn()) } }));
 jest.mock('@vue-storefront/core/i18n', () => ({ t: (key: string) => key }));
@@ -64,6 +66,9 @@ jest.mock('src/modules/customization-system', () => {
     ...jest.requireActual(`${base}/composables/use-customization-state`),
     ...jest.requireActual(`${base}/composables/use-option-value-actions`),
     ...jest.requireActual(`${base}/helpers/required-customizations-filter`),
+    ...jest.requireActual(`${base}/helpers/filter-customization-state`),
+    saveOrderItemCustomizationsState: jest.fn().mockResolvedValue({ errors: [] }),
+    submitOrderItemCustomizationsState: jest.fn().mockResolvedValue({ errors: [] }),
     ...jest.requireActual(`${base}/helpers/is-image-upload-customization`),
     ...jest.requireActual(`${base}/types/customization-type`),
     ...jest.requireActual(`${base}/types/is-file-upload-value.typeguard`),
@@ -76,7 +81,17 @@ jest.mock('src/modules/customization-system', () => {
     ...jest.requireActual(`${base}/composables/use-customizations-options-default-value`),
     useCustomizationsPrice: () => ({ totalPrice: ref({}) }),
     useCustomizationProductDescription: () => ({ descriptionProductSku: ref('pet') }),
-    useCustomizationStatePreservation: () => ({ removePreservedState: jest.fn(), restorationSettled: ref(true) }),
+    useCustomizationStatePreservation: (...args: Parameters<typeof import('src/modules/customization-system/composables/use-customization-state-preservation').useCustomizationStatePreservation>) => {
+      const restoredData = mockRestoredData;
+      if (restoredData) {
+        onMounted(() => {
+          args[5](restoredData.customizationState);
+          args[6]();
+          args[8](restoredData);
+        });
+      }
+      return { removePreservedState: jest.fn(), restorationSettled: ref(true) };
+    },
     useSelectedOptionValueUrlQuery: () => ({ unhandledCustomizationsFilter: () => true }),
     useEmailCustomization: () => ({ emailCustomizationFilter: () => true, persistCustomerEmail: jest.fn(), emailValue: ref('') })
   };
@@ -107,13 +122,6 @@ jest.mock('theme/helpers/use-floating-photo', () => ({ useFloatingPhoto: () => (
 jest.mock('theme/helpers/use-creation-wizard-gtm-events', () => ({ useCreationWizardGtmEvents: () => ({ onStepSubmit: jest.fn() }) }));
 jest.mock('theme/helpers/use-creation-wizard-preselected-size', () => ({ useCreationWizardPreselectedSize: () => ({ handlePreselectedSize: jest.fn() }) }));
 jest.mock('theme/helpers/use-creation-wizard-product-type-step', () => ({ useCreationWizardProductTypeStep: () => ({ isProductLoading: ref(false), loadProduct: jest.fn(), setProductType: jest.fn() }) }));
-jest.mock('theme/helpers/use-customize-action', () => ({
-  useCustomizeAction: (...args: unknown[]) => {
-    mockCustomizeActionArgs.push(args);
-    return { confirmCustomization: jest.fn().mockResolvedValue(undefined), isSubmitting: ref(false) };
-  }
-}));
-
 jest.mock('theme/components/customization-system/customization-option.vue', () => ({
   name: 'CustomizationOption',
   props: { customization: Object, value: [Array, String] },
@@ -258,7 +266,9 @@ const fieldIds = (wrapper: any, selector = '._field') =>
   wrapper.findAll(selector).wrappers.map((field: any) => field.attributes('data-field'));
 
 beforeEach(() => {
-  mockCustomizeActionArgs.length = 0;
+  mockRestoredData = undefined;
+  jest.mocked(saveOrderItemCustomizationsState).mockClear();
+  jest.mocked(submitOrderItemCustomizationsState).mockClear();
   jest.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
 });
 
@@ -316,8 +326,16 @@ it.each([LayoutType.CREATION_WIZARD, LayoutType.WITH_IMAGES_GALLERY])('retains t
     for (let i = 0; i < 10; i++) await Vue.nextTick();
     expect(wrapper.find('[data-active-step="Upgrades"] ._upgrades').exists()).toBe(true);
     expect(wrapper.find('[data-active-step="Photo"]').exists()).toBe(false);
-    const state = mockCustomizeActionArgs[0][0] as { value: unknown };
-    expect(state.value).toEqual([{ customization_id: imageId, value: [photo], quantity: 1 }]);
+    expect(saveOrderItemCustomizationsState).toHaveBeenCalledTimes(1);
+    expect(saveOrderItemCustomizationsState).toHaveBeenCalledWith([{
+      id: 42,
+      customization_state: [{ customization_id: imageId, value: [photo], quantity: 1 }],
+      status_id: BudsieStatus.AWAITING_ARTWORK
+    }], 'token');
+    expect(submitOrderItemCustomizationsState).toHaveBeenCalledTimes(1);
+    expect(submitOrderItemCustomizationsState).toHaveBeenCalledWith([42], 'token');
+    expect(jest.mocked(saveOrderItemCustomizationsState).mock.invocationCallOrder[0])
+      .toBeLessThan(jest.mocked(submitOrderItemCustomizationsState).mock.invocationCallOrder[0]);
   }
   expect(JSON.stringify(mockProduct)).toBe(productBefore);
   expect(JSON.stringify(mockDraft)).toBe(draftBefore);
@@ -328,6 +346,20 @@ it.each([LayoutType.CREATION_WIZARD, LayoutType.WITH_IMAGES_GALLERY])('retains t
   expect(mockProduct.customizations).toEqual(foreversCustomizations);
   expect(errors).not.toHaveBeenCalled();
   errors.mockRestore();
+  wrapper.destroy();
+});
+
+it('opens Awaiting artwork on Photo with its restored photo despite a saved later position', async () => {
+  const restoredPhoto = { id: 'restored-photo', url: '/restored-photo.jpg' };
+  mockRestoredData = {
+    customizationState: [{ customization_id: imageId, value: [restoredPhoto], quantity: 1 }],
+    additionalData: { stepIndex: 1 }
+  };
+  const wrapper = await render(LayoutType.CREATION_WIZARD, BudsieStatus.AWAITING_ARTWORK, [], true);
+
+  expect(wrapper.find('[data-active-step="Photo"]').exists()).toBe(true);
+  expect(wrapper.find('[data-active-step="Upgrades"]').exists()).toBe(false);
+  expect(JSON.parse(wrapper.find(`[data-field="${imageId}"]`).attributes('data-value'))).toEqual([restoredPhoto]);
   wrapper.destroy();
 });
 

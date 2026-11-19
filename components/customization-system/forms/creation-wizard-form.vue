@@ -125,7 +125,7 @@
 </template>
 
 <script lang="ts">
-import { useRouter, useStore } from '@vue-storefront/core/application-services';
+import { useI18n, useRouter, useStore } from '@vue-storefront/core/application-services';
 import {
   Component,
   computed,
@@ -263,6 +263,7 @@ export default defineComponent({
       return customizations.some(option => option.optionData?.displayWidget === WidgetType.PRODUCTION_TIME_TIMELINE && !!option.optionData?.displayWidgetOptions?.isHolidayPeriod);
     }
     const applicationStore = useStore();
+    const applicationI18n = useI18n();
     const { ready: holidayLocationReady } = useHolidayDeliveryLocation();
     const applicationRouter = useRouter();
     const {
@@ -276,6 +277,8 @@ export default defineComponent({
       preselectedProductSize,
       preselectedProductType
     } = toRefs(props);
+
+    const isAwaitingArtwork = computed<boolean>(() => draftOrderItem.value?.status_id === BudsieStatus.AWAITING_ARTWORK);
 
     const isCustomizeMode = computed<boolean>(() => {
       return customizationMode.value === ProductCustomizationMode.CUSTOMIZE;
@@ -516,7 +519,7 @@ export default defineComponent({
     };
 
     const afterCustomizationStateMerge = (persistedData: PersistedData) => {
-      if (!persistedData.additionalData?.stepIndex) {
+      if (isAwaitingArtwork.value || !persistedData.additionalData?.stepIndex) {
         return;
       }
 
@@ -626,8 +629,8 @@ export default defineComponent({
     });
 
     const lastStepTitle = computed<string | undefined>(() => {
-      if (draftOrderItem.value?.status_id === BudsieStatus.AWAITING_ARTWORK) {
-        return i18n.t('Upload Photos of Your Pet').toString();
+      if (isAwaitingArtwork.value) {
+        return applicationI18n.t('Upload Photos of Your Pet').toString();
       }
 
       return undefined;
