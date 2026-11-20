@@ -27,32 +27,10 @@
       </SfFooterColumn>
 
       <SfFooterColumn :title="$t('Social')" class="social-column desktop-only">
-        <div class="social-icon">
-          <a
-            :href="item.url"
-            v-for="item in social"
-            :key="item.name + ';' + item.url"
-            :aria-label="item.label"
-            class="social-icon__link"
-            :class="'-' + item.name"
-            target="_blank"
-            rel="noopener noreferrer"
-          />
-        </div>
+        <social-profiles icon-set="plain" />
       </SfFooterColumn>
 
-      <div class="social-icon mobile-only">
-        <a
-          :href="item.url"
-          v-for="item in social"
-          :key="item.name + ';' + item.url"
-          :aria-label="item.label"
-          class="social-icon__link"
-          :class="'-' + item.name"
-          target="_blank"
-          rel="noopener noreferrer"
-        />
-      </div>
+      <social-profiles class="mobile-only" icon-set="plain" />
 
       <div class="_contact-us">
         <div class="_title">
@@ -97,7 +75,6 @@
 <script>
 import { mapGetters } from 'vuex';
 import { SfFooter, SfList, SfMenuItem, SfHeading } from '@storefront-ui/vue';
-import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import {
   AdditionalContentOutlet,
   useAdditionalContent
@@ -107,11 +84,12 @@ import { BaseImage } from 'src/modules/budsies';
 import { PrivacyPolicyLink } from 'src/modules/shared';
 
 import MBudsiesBrands from '../molecules/m-budsies-brands';
-import { socialServices } from 'theme/interfaces/social-services';
+import SocialProfiles from '../social-profiles.vue';
 
 export default {
   name: 'OFooterMinimal',
   components: {
+    SocialProfiles,
     PrivacyPolicyLink,
     MBudsiesBrands,
     SfFooter,
@@ -135,18 +113,7 @@ export default {
   },
   computed: {
 
-    ...mapGetters('user', ['isLoggedIn']),
-    social () {
-      const { name } = currentStoreView();
-
-      return socialServices.map((service) => {
-        return {
-          name: service.name,
-          url: service.url,
-          label: this.$t('{brand} {service} page', { brand: name, service: service.serviceLabel }) + ' ' + this.$t('opens in new tab')
-        };
-      });
-    }
+    ...mapGetters('user', ['isLoggedIn'])
   }
 };
 </script>
@@ -155,7 +122,7 @@ export default {
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
 .o-footer {
-  $brand-icons-path: '../../assets/brands';
+  --social-profiles-icon-size: 16px;
 
   background-color: var(--c-footer);
   // padding-bottom: var(--spacer-lg);
@@ -298,53 +265,6 @@ export default {
     row-gap: var(--spacer-xs);
   }
 
-  .social-icon {
-    display: flex;
-    justify-content: flex-start;
-    padding: var(--spacer-sm) 0;
-
-    &.mobile-only {
-      justify-content: center;
-      padding-bottom: 0;
-    }
-
-    &__link {
-      display: block;
-      height: 16px;
-      width: 16px;
-      margin-right: var(--spacer-base);
-      background-repeat: no-repeat;
-
-      &.-facebook {
-        background-image: url('#{$brand-icons-path}/facebook.svg');
-      }
-
-      &.-google-plus {
-        background-image: url('#{$brand-icons-path}/google-plus.svg');
-      }
-
-      &.-instagram {
-        background-image: url('#{$brand-icons-path}/instagram.svg');
-      }
-
-      &.-linkedin {
-        background-image: url('#{$brand-icons-path}/linkedin.svg');
-      }
-
-      &.-tiktok {
-        background-image: url('#{$brand-icons-path}/tiktok.svg');
-      }
-
-      &.-twitter {
-        background-image: url('#{$brand-icons-path}/twitter.svg');
-      }
-
-      &:last-child {
-        margin-right: 0;
-      }
-    }
-  }
-
   .sf-footer {
     background-image: url(../../assets/footer-bg-mobile.png);
     background-size: cover;
@@ -398,6 +318,8 @@ export default {
     }
 
     max-width: 100%;
+    --social-profiles-justify-items: start;
+
     ::v-deep .sf-footer-column__content {
       padding: 0;
     }
