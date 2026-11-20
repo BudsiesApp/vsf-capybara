@@ -1,5 +1,5 @@
 <template>
-  <div v-if="profiles.length" class="social-profiles">
+  <div v-if="profiles.length" class="social-profiles" :class="`social-profiles--${iconSet}`">
     <a
       v-for="profile in profiles"
       :key="profile.id"
@@ -128,7 +128,7 @@ $single-row-min-width: 390px;
 
   &__link {
     display: flex;
-    align-items: center;
+    align-items: var(--social-profiles-justify-items, center);
     flex-direction: column;
     color: var(--c-light-variant);
     font-size: var(--font-xs);
@@ -170,12 +170,12 @@ $single-row-min-width: 390px;
     .social-profiles__icon {
       width: var(--social-profiles-icon-size, 42px);
       height: var(--social-profiles-icon-size, 42px);
+    }
 
-      img {
-        width: calc(100% + 2px);
-        height: calc(100% + 2px);
-        margin: -1px;
-      }
+    &--circled .social-profiles__icon img {
+      width: calc(100% + 2px);
+      height: calc(100% + 2px);
+      margin: -1px;
     }
   }
 }
