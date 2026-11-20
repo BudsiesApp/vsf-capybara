@@ -23,6 +23,7 @@ import { isStoryblokPreview } from 'src/modules/vsf-storyblok-module';
 import { SN_PROMOTION_PLATFORM } from 'src/modules/promotion-platform/types/StoreMutations';
 import { FETCH_AVAILABLE_CURRENCIES_ACTION, FETCH_CURRENCY_RATES_ACTION } from 'src/modules/currency';
 import { createGoogleAddressValidationProvider } from 'src/modules/address';
+import { LOAD_SOCIAL_PROFILES_ACTION } from 'src/modules/social-profiles';
 
 const windowObject = isServer ? {} : window;
 const errorConverterService = new ErrorConverterService();
@@ -52,6 +53,7 @@ export default {
     try {
       const loadingPromises = [
         this.$store.dispatch('backend-settings/fetchSettings'),
+        this.$store.dispatch(LOAD_SOCIAL_PROFILES_ACTION),
         this.$store.dispatch(FETCH_AVAILABLE_CURRENCIES_ACTION),
         this.$store.dispatch(FETCH_CURRENCY_RATES_ACTION)
       ];
