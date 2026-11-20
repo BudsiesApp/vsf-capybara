@@ -128,7 +128,7 @@ $single-row-min-width: 390px;
 
   &__link {
     display: flex;
-    align-items: center;
+    align-items: var(--social-profiles-justify-items, center);
     flex-direction: column;
     color: var(--c-light-variant);
     font-size: var(--font-xs);

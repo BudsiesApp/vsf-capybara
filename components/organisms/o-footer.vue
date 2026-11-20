@@ -479,6 +479,8 @@ export default {
     }
 
     max-width: 100%;
+    --social-profiles-justify-items: start;
+
     ::v-deep .sf-footer-column__content {
       padding: 0;
     }
