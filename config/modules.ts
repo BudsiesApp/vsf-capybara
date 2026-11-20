@@ -6,6 +6,7 @@ import { StoryblokModule } from 'src/modules/vsf-storyblok-module'
 import { registerApplicationModule, registerModule } from '@vue-storefront/core/lib/modules'
 import { ABTesting } from 'src/modules/a-b-testing'
 import { BackendSettings } from 'src/modules/backend-settings';
+import { SocialProfilesModule } from 'src/modules/social-profiles';
 import { ErrorLoggingModule } from 'src/modules/error-logging';
 import { PageLoadingIndicatorModule } from 'src/modules/page-loading-indicator';
 import { TrueVaultModule } from 'src/modules/true-vault';
@@ -29,6 +30,7 @@ export function registerClientModules () {
   registerModule(StoryblokModule)
   registerApplicationModule(ABTesting)
   registerModule(BackendSettings)
+  registerModule(SocialProfilesModule)
   registerModule(ErrorLoggingModule)
   registerModule(OrdersHistoryModule)
   registerModule(CurrencyModule)
