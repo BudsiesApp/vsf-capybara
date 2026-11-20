@@ -38,32 +38,10 @@
           </div>
           <MNewsletterSubscription />
         </div>
-        <div class="social-icon desktop-only">
-          <a
-            :href="item.url"
-            v-for="item in social"
-            :key="item.name + ';' + item.url"
-            :aria-label="item.label"
-            class="social-icon__link"
-            :class="'-' + item.name"
-            target="_blank"
-            rel="noopener noreferrer"
-          />
-        </div>
+        <social-profiles class="desktop-only" icon-set="circled" />
       </SfFooterColumn>
 
-      <div class="social-icon mobile-only">
-        <a
-          :href="item.url"
-          v-for="item in social"
-          :key="item.name + ';' + item.url"
-          :aria-label="item.label"
-          class="social-icon__link"
-          :class="'-' + item.name"
-          target="_blank"
-          rel="noopener noreferrer"
-        />
-      </div>
+      <social-profiles class="mobile-only" icon-set="circled" />
 
       <MBudsiesBrands />
 
@@ -117,11 +95,12 @@ import { PrivacyPolicyLink } from 'src/modules/shared';
 import { PageName } from 'theme/pages/page-name';
 
 import MBudsiesBrands from '../molecules/m-budsies-brands.vue';
-import { socialServices } from 'theme/interfaces/social-services';
+import SocialProfiles from '../social-profiles.vue';
 
 export default {
   name: 'OFooter',
   components: {
+    SocialProfiles,
     PrivacyPolicyLink,
     MBudsiesBrands,
     MNewsletterSubscription,
@@ -145,17 +124,6 @@ export default {
   computed: {
 
     ...mapGetters('user', ['isLoggedIn']),
-    social () {
-      const { name } = currentStoreView();
-
-      return socialServices.map((service) => {
-        return {
-          name: service.name,
-          url: service.url,
-          label: this.$t('{brand} {service} page', { brand: name, service: service.serviceLabel }) + ' ' + this.$t('opens in new tab')
-        };
-      });
-    },
     multistoreEnabled () {
       return get(config, 'storeViews.multistore', false);
     },
@@ -362,54 +330,6 @@ export default {
   .social-column {
     flex-basis: auto;
   }
-  .social-icon {
-    display: flex;
-    justify-content: flex-start;
-    padding: var(--spacer-sm) 0;
-
-    &.mobile-only {
-      justify-content: center;
-      padding-bottom: 0;
-    }
-
-    &__link {
-      background-image: url(../../assets/footer-socials.png);
-      background-size: 180px 30px;
-      display: block;
-      height: 30px;
-      width: 30px;
-      margin-right: var(--spacer-base);
-
-      &.-facebook {
-        background-position: 0 0;
-      }
-
-      &.-instagram {
-        background-position: -30px 0;
-      }
-
-      &.-twitter {
-        background-position: -60px 0;
-      }
-
-      &.-pinterest {
-        background-position: -90px 0;
-      }
-
-      &.-tiktok {
-        background-position: -120px 0;
-      }
-
-      &.-youtube {
-        background-position: -150px 0;
-      }
-
-      &:last-child {
-        margin-right: 0;
-      }
-    }
-  }
-
   ._additional-information {
     align-items: center;
     box-sizing: border-box;
@@ -512,40 +432,6 @@ export default {
       }
     }
 
-    .social-icon {
-      padding: var(--spacer-sm) 0 var(--spacer-base);
-
-      &__link {
-        background-image: url(../../assets/footer-socials.png);
-        background-size: auto;
-        height: 42px;
-        width: 42px;
-
-        &.-facebook {
-          background-position: -1px -1px;
-        }
-
-        &.-instagram {
-          background-position: -45px -1px;
-        }
-
-        &.-twitter {
-          background-position: -89px -1px;
-        }
-
-        &.-pinterest {
-          background-position: -133px -1px;
-        }
-
-        &.-tiktok {
-          background-position: -177px -1px;
-        }
-
-        &.-youtube {
-          background-position: -221px -1px;
-        }
-      }
-    }
   }
 }
 </style>

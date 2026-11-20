@@ -26,6 +26,7 @@ import { PaymentBackendMethodsModule } from 'src/modules/payment-backend-methods
 import { PaymentAffirm } from 'src/modules/payment-affirm';
 import { UrlRewriteModule, mappingFallbackForUrlRewrite } from 'src/modules/url-rewrite';
 import { BackendSettings } from 'src/modules/backend-settings';
+import { SocialProfilesModule } from 'src/modules/social-profiles';
 import { ErrorLoggingModule } from 'src/modules/error-logging';
 import { PageLoadingIndicatorModule } from 'src/modules/page-loading-indicator';
 import { MailchimpModule } from 'src/modules/mailchimp'
@@ -88,6 +89,7 @@ export function registerClientModules () {
   registerModule(PaymentAffirm)
   registerModule(UrlRewriteModule)
   registerModule(BackendSettings)
+  registerModule(SocialProfilesModule)
   registerModule(ErrorLoggingModule)
   registerModule(MailchimpModule)
   registerModule(PersistedCustomerDataModule)
