@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import { useRoute } from '@vue-storefront/core/application-services';
+import { useRoute, useStore } from '@vue-storefront/core/application-services';
 import { useRequestServices } from '@vue-storefront/core/request-services';
 import config from 'config';
 import {
@@ -20,7 +20,8 @@ import {
 } from 'vue';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 
-import { socialServices } from 'theme/interfaces/social-services';
+import { GET_SOCIAL_PROFILES_GETTER } from 'src/modules/social-profiles';
+import type { SocialProfile } from 'src/modules/social-profiles';
 
 interface OrganizationSchema {
   '@type': 'Organization',
@@ -28,7 +29,7 @@ interface OrganizationSchema {
   name: string,
   url: string,
   logo: string,
-  sameAs: string[],
+  sameAs?: string[],
   description: string
 }
 
@@ -52,7 +53,9 @@ export default defineComponent({
   name: 'AOrganizationSchema',
   setup (_, context) {
     const currentRoute = useRoute();
+    const store = useStore();
     const request = useRequestServices();
+    const profiles = computed<SocialProfile[]>(() => store.getters[GET_SOCIAL_PROFILES_GETTER]);
     const isHomepage = computed<boolean>(() => {
       return ['', '/'].includes(currentRoute.path);
     });
@@ -81,9 +84,12 @@ export default defineComponent({
         name: storeView.name,
         url: storeUrl.value,
         logo: storeImageUrl.value,
-        sameAs: socialServices.map(service => service.url),
         description: config.seo.defaultDescription
       };
+      const urls = profiles.value.map(profile => profile.url);
+      if (urls.length) {
+        organizationSchema.sameAs = urls;
+      }
 
       const websiteSchema: WebSiteSchema = {
         '@type': 'WebSite',
@@ -103,7 +109,11 @@ export default defineComponent({
     });
 
     const schemaDataString = computed<string>(() => {
-      return schemaData.value ? JSON.stringify(schemaData.value) : '';
+      if (!schemaData.value) {
+        return '';
+      }
+
+      return JSON.stringify(schemaData.value).replace(/</g, '\\u003c');
     });
 
     const showOrganizationSchema = computed<boolean>(() => {
