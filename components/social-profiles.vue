@@ -116,7 +116,7 @@ $single-row-min-width: 390px;
   width: fit-content;
   max-width: 100%;
   gap: var(--spacer-xs);
-  margin: 0 auto;
+  margin: var(--social-profiles-margin, 0 auto);
   padding: var(--spacer-sm) 0 0;
 
   @media (max-width: $single-row-min-width - 1px) {
