@@ -106,13 +106,25 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@storefront-ui/shared/styles/helpers/breakpoints";
 
+$single-row-min-width: 390px;
+
 .social-profiles {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  justify-items: var(--social-profiles-justify-items, center);
+  width: fit-content;
   max-width: 100%;
   gap: var(--spacer-xs);
+  margin: 0 auto;
   padding: var(--spacer-sm) 0 0;
+
+  @media (max-width: $single-row-min-width - 1px) {
+    &:has(> :nth-child(6)) {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
 
   &__link {
     display: flex;
@@ -152,7 +164,6 @@ export default defineComponent({
   }
 
   @include for-desktop {
-    justify-content: flex-start;
     gap: var(--spacer-sm);
     padding: var(--spacer-sm) 0 var(--spacer-base);
 
