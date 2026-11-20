@@ -12,15 +12,17 @@
       <span class="social-profiles__icon">
         <img :src="icons[iconSet][profile.network]" alt="">
       </span>
-      <span v-if="profile.count !== null" class="social-profiles__count">
+      <div v-if="profile.count !== null" class="social-profiles__count">
+        <SfIcon class="social-profiles__count-icon" icon="profile_fill" size="0.85em" aria-hidden="true" />
         {{ profile.count }}
-      </span>
+      </div>
     </a>
   </div>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
+import { SfIcon } from '@storefront-ui/vue';
 import { useStore } from '@vue-storefront/core/application-services';
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import { GET_SOCIAL_PROFILES_GETTER, SocialNetwork } from 'src/modules/social-profiles';
@@ -71,6 +73,7 @@ const names: Record<SocialNetwork, string> = {
 
 export default defineComponent({
   name: 'SocialProfiles',
+  components: { SfIcon },
   props: {
     iconSet: {
       type: String as PropType<IconSet>,
@@ -135,6 +138,17 @@ export default defineComponent({
       width: 100%;
       height: 100%;
     }
+  }
+
+  &__count {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  &__count-icon {
+    --icon-color: currentColor;
+    flex: none;
   }
 
   @include for-desktop {

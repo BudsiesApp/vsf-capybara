@@ -14,6 +14,7 @@ jest.mock('@vue-storefront/core/application-services', () => ({
   useStore: () => ({ getters })
 }));
 jest.mock('@vue-storefront/core/lib/multistore', () => ({ currentStoreView: () => ({ name: 'Petsies' }) }));
+jest.mock('@storefront-ui/vue', () => ({ SfIcon: { name: 'SfIcon', props: ['icon', 'size'] } }));
 jest.mock('src/modules/social-profiles/store', () => ({ module: {} }));
 jest.mock('../assets/social-icons/circled/facebook.svg', () => 'circled-facebook');
 jest.mock('../assets/social-icons/circled/instagram.svg', () => 'circled-instagram');
@@ -42,6 +43,7 @@ describe('social profiles component', () => {
   });
   it('renders accessible social links', () => {
     const networks = ['facebook', 'instagram', 'pinterest', 'tiktok', 'x', 'youtube'];
+    const counts = [0, 1250, null, 1250, 1250, 1250];
     state.profiles = normalizeSocialProfiles(networks.map((network, id) => ({
       id,
       position: id,
@@ -49,7 +51,7 @@ describe('social profiles component', () => {
       profile_url: `https://example.com/${network}`,
       is_enabled: true,
       display_subscribers: true,
-      subscribers_count: id === 0 ? 0 : 1250
+      subscribers_count: counts[id]
     })));
     const wrapper = shallowMount(SocialProfiles, {
       propsData: { iconSet: 'circled' },
@@ -63,6 +65,18 @@ describe('social profiles component', () => {
     });
     expect(links.at(0).attributes('aria-label')).toBe('Petsies Facebook page, opens in new tab');
     expect(links.at(0).find('.social-profiles__count').exists()).toBe(false);
+    expect(links.at(2).find('.social-profiles__count').exists()).toBe(false);
+    expect(links.at(2).attributes('aria-label')).toBe('Petsies Pinterest page, opens in new tab');
+    [1, 3, 4, 5].forEach(index => {
+      const count = links.at(index).find('.social-profiles__count');
+      const icon = count.findComponent({ name: 'SfIcon' });
+      expect(count.findAllComponents({ name: 'SfIcon' }).length).toBe(1);
+      expect(icon.props('icon')).toBe('profile_fill');
+      expect(icon.props('size')).toBe('0.85em');
+      expect(icon.attributes('aria-hidden')).toBe('true');
+    });
+    expect(links.at(1).attributes('aria-label'))
+      .toBe('Petsies Instagram page, 1.2K followers, opens in new tab');
     expect(links.at(5).find('.social-profiles__count').text()).toBe('1.2K');
     expect(links.at(5).attributes('aria-label'))
       .toBe('Petsies YouTube page, 1.2K subscribers, opens in new tab');
