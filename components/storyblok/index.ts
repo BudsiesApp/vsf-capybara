@@ -15,6 +15,7 @@ export default function registerComponents () {
   add('textarea', () => import(/* webpackChunkName: "vsf-storyblok" */ './Textarea.vue'), { group: StoryblokComponentGroup.CORE })
   add('dongler_book', () => import(/* webpackChunkName: "vsf-storyblok" */ './DonglerBook.vue'), { group: StoryblokComponentGroup.CORE })
   add('website_rating', () => import(/* webpackChunkName: "vsf-storyblok" */ './WebsiteRating.vue'), { group: StoryblokComponentGroup.CORE })
+  add('social_profiles', () => import(/* webpackChunkName: "vsf-storyblok" */ './SocialProfiles.vue'), { group: StoryblokComponentGroup.CORE })
   add('sharing', () => import(/* webpackChunkName: "vsf-storyblok" */ './Sharing.vue'), { group: StoryblokComponentGroup.CORE })
   add('newsletter_subscribe_form', () => import(/* webpackChunkName: "vsf-storyblok" */ './NewsletterSubscribeForm.vue'), { group: StoryblokComponentGroup.CORE })
   add('expandable_text_block', () => import(/* webpackChunkName: "vsf-storyblok" */ './ExpandableText.vue'), { group: StoryblokComponentGroup.CORE })

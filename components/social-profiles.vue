@@ -9,9 +9,7 @@
       target="_blank"
       rel="noopener noreferrer"
     >
-      <span class="social-profiles__icon">
-        <img :src="icons[iconSet][profile.network]" alt="">
-      </span>
+      <span class="social-profiles__icon" aria-hidden="true" v-html="icons[iconSet][profile.network]" />
       <div v-if="profile.count !== null" class="social-profiles__count">
         <SfIcon class="social-profiles__count-icon" icon="profile_fill" size="0.85em" aria-hidden="true" />
         {{ profile.count }}
@@ -28,38 +26,40 @@ import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import { GET_SOCIAL_PROFILES_GETTER, SocialNetwork } from 'src/modules/social-profiles';
 import type { SocialProfile } from 'src/modules/social-profiles';
 
-import circledFacebook from '../assets/social-icons/circled/facebook.svg';
-import circledInstagram from '../assets/social-icons/circled/instagram.svg';
-import circledPinterest from '../assets/social-icons/circled/pinterest.svg';
-import circledTikTok from '../assets/social-icons/circled/tiktok.svg';
-import circledX from '../assets/social-icons/circled/x.svg';
-import circledYouTube from '../assets/social-icons/circled/youtube.svg';
-import plainFacebook from '../assets/social-icons/plain/facebook.svg';
-import plainInstagram from '../assets/social-icons/plain/instagram.svg';
-import plainPinterest from '../assets/social-icons/plain/pinterest.svg';
-import plainTikTok from '../assets/social-icons/plain/tiktok.svg';
-import plainX from '../assets/social-icons/plain/x.svg';
-import plainYouTube from '../assets/social-icons/plain/youtube.svg';
+import circledFacebookRaw from '../assets/social-icons/circled/facebook.svg?raw';
+import circledInstagramRaw from '../assets/social-icons/circled/instagram.svg?raw';
+import circledPinterestRaw from '../assets/social-icons/circled/pinterest.svg?raw';
+import circledTikTokRaw from '../assets/social-icons/circled/tiktok.svg?raw';
+import circledXRaw from '../assets/social-icons/circled/x.svg?raw';
+import circledYouTubeRaw from '../assets/social-icons/circled/youtube.svg?raw';
+import plainFacebookRaw from '../assets/social-icons/plain/facebook.svg?raw';
+import plainInstagramRaw from '../assets/social-icons/plain/instagram.svg?raw';
+import plainPinterestRaw from '../assets/social-icons/plain/pinterest.svg?raw';
+import plainTikTokRaw from '../assets/social-icons/plain/tiktok.svg?raw';
+import plainXRaw from '../assets/social-icons/plain/x.svg?raw';
+import plainYouTubeRaw from '../assets/social-icons/plain/youtube.svg?raw';
+
+import { prepareSocialIcon } from '../helpers/prepare-social-icon';
 
 type IconSet = 'circled' | 'plain';
 
 const icons: Record<IconSet, Record<SocialNetwork, string>> = {
   circled: {
-    [SocialNetwork.Facebook]: circledFacebook,
-    [SocialNetwork.Instagram]: circledInstagram,
-    [SocialNetwork.Pinterest]: circledPinterest,
-    [SocialNetwork.TikTok]: circledTikTok,
-    [SocialNetwork.X]: circledX,
-    [SocialNetwork.YouTube]: circledYouTube
+    [SocialNetwork.Facebook]: prepareSocialIcon(circledFacebookRaw),
+    [SocialNetwork.Instagram]: prepareSocialIcon(circledInstagramRaw),
+    [SocialNetwork.Pinterest]: prepareSocialIcon(circledPinterestRaw),
+    [SocialNetwork.TikTok]: prepareSocialIcon(circledTikTokRaw),
+    [SocialNetwork.X]: prepareSocialIcon(circledXRaw),
+    [SocialNetwork.YouTube]: prepareSocialIcon(circledYouTubeRaw),
   },
   plain: {
-    [SocialNetwork.Facebook]: plainFacebook,
-    [SocialNetwork.Instagram]: plainInstagram,
-    [SocialNetwork.Pinterest]: plainPinterest,
-    [SocialNetwork.TikTok]: plainTikTok,
-    [SocialNetwork.X]: plainX,
-    [SocialNetwork.YouTube]: plainYouTube
-  }
+    [SocialNetwork.Facebook]: prepareSocialIcon(plainFacebookRaw),
+    [SocialNetwork.Instagram]: prepareSocialIcon(plainInstagramRaw),
+    [SocialNetwork.Pinterest]: prepareSocialIcon(plainPinterestRaw),
+    [SocialNetwork.TikTok]: prepareSocialIcon(plainTikTokRaw),
+    [SocialNetwork.X]: prepareSocialIcon(plainXRaw),
+    [SocialNetwork.YouTube]: prepareSocialIcon(plainYouTubeRaw),
+  },
 };
 
 const names: Record<SocialNetwork, string> = {
@@ -130,7 +130,7 @@ $single-row-min-width: 390px;
     display: flex;
     align-items: var(--social-profiles-justify-items, center);
     flex-direction: column;
-    color: var(--c-light-variant);
+    color: var(--social-profiles-color, var(--c-light-variant));
     font-size: var(--font-xs);
 
     &:focus-visible {
@@ -144,8 +144,9 @@ $single-row-min-width: 390px;
     width: var(--social-profiles-icon-size, 30px);
     height: var(--social-profiles-icon-size, 30px);
     overflow: hidden;
+    color: var(--social-profiles-color, white);
 
-    img {
+    ::v-deep svg {
       display: block;
       width: 100%;
       height: 100%;
@@ -172,7 +173,7 @@ $single-row-min-width: 390px;
       height: var(--social-profiles-icon-size, 42px);
     }
 
-    &--circled .social-profiles__icon img {
+    &--circled .social-profiles__icon ::v-deep svg {
       width: calc(100% + 2px);
       height: calc(100% + 2px);
       margin: -1px;
