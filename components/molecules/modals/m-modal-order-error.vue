@@ -41,7 +41,7 @@
             @successfully-submitted="onFormSuccessfullySubmitted"
           />
 
-          {{ $t('We\'ll look into your error and call or email you back with an alternate method of payment.') }}
+          {{ $t('We\'ll look into your error and email you back with an alternate method of payment.') }}
         </div>
       </template>
     </SfModal>
@@ -103,11 +103,10 @@ export default Vue.extend({
       this.$emit('close', this.modalData.name);
       this.isFormSubmitted = false;
     },
-    onFormSubmit (name: string, email: string, phone?: string): Promise<void> {
+    onFormSubmit (name: string, email: string): Promise<void> {
       return this.$store.dispatch('budsies/creditCardProcessingErrorNotifications', {
         customerEmail: email,
         customerName: name,
-        customerPhone: phone,
         errorReason: this.errorReason
       })
     },

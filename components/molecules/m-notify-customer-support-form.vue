@@ -2,7 +2,6 @@
   <form @submit.prevent="onFormSubmit" class="m-notify-customer-support-form">
     <SfInput v-model="name" name="name" :placeholder="$t('Your name')" />
     <SfInput v-model="email" name="email" autocomplete="email" :placeholder="$t('Your email')" />
-    <SfInput v-model="phone" name="name" :placeholder="$t('Phone (optional)')" />
 
     <SfButton class="sf-button sf-button--outline _submit-button">
       {{ $t('Notify Customer Support') }}
@@ -39,7 +38,7 @@ export default Vue.extend({
       default: undefined
     },
     action: {
-      type: Function as PropType<(name: string, email: string, phone?: string) => Promise<void>>,
+      type: Function as PropType<(name: string, email: string) => Promise<void>>,
       required: true
     }
   },
@@ -57,7 +56,6 @@ export default Vue.extend({
     return {
       email: '',
       name: '',
-      phone: '',
       isSubmitting: false
     }
   },
@@ -74,7 +72,7 @@ export default Vue.extend({
       this.isSubmitting = true;
 
       try {
-        await this.action(this.name, this.email, this.phone);
+        await this.action(this.name, this.email);
         this.$emit('successfully-submitted');
       } finally {
         this.isSubmitting = false;

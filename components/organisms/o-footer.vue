@@ -45,7 +45,7 @@
             <router-link to="/contact/">
               <SfMenuItem
                 class="sf-footer__menu-item"
-                :label="$t('Request A Call')"
+                :label="$t('Contact us')"
                 icon=""
               />
             </router-link>
