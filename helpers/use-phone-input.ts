@@ -26,10 +26,14 @@ export function usePhoneInput (
     return countryForCallingCode(parsed.countryCallingCode, country.value);
   }
 
-  function showNationalNumber (parsed: PhoneNumber): void {
-    const resolvedCountry = resolveCountry(parsed);
+  // Switches the country and strips the calling code only for a possible number
+  // with a resolvable country; otherwise the text stays as given.
+  function showParsedNumber (parsed: PhoneNumber, textToKeep: string): void {
+    const resolvedCountry = parsed.isPossible() ? resolveCountry(parsed) : undefined;
 
     if (!resolvedCountry) {
+      text.value = textToKeep;
+
       return;
     }
 
@@ -59,12 +63,7 @@ export function usePhoneInput (
       return;
     }
 
-    if (resolveCountry(parsed)) {
-      showNationalNumber(parsed);
-    } else {
-      text.value = value;
-    }
-
+    showParsedNumber(parsed, value);
     emit('validity', parsed.isValid());
   }
 
@@ -75,8 +74,8 @@ export function usePhoneInput (
     const parsed = parsePhoneNumberFromString(text.value, country.value);
     const isValid = Boolean(parsed?.isValid());
 
-    if (isInternational && parsed?.isPossible()) {
-      showNationalNumber(parsed);
+    if (isInternational && parsed) {
+      showParsedNumber(parsed, text.value);
     }
 
     lastEmittedValue = isValid && parsed ? parsed.number : '';

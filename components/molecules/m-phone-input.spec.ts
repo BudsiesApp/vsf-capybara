@@ -187,4 +187,24 @@ describe('international phone input', () => {
 
     expect(inputElement.value).toBe('');
   });
+
+  it('keeps an incomplete parent-supplied number and the country unchanged', async () => {
+    const wrapper = mountPhone();
+    const inputElement = wrapper.find('input').element as HTMLInputElement;
+
+    await wrapper.find('select').setValue('CA');
+    await wrapper.setProps({ value: '+441234' });
+
+    expect(wrapper.find('select').element.value).toBe('CA');
+    expect(inputElement.value).toBe('+441234');
+  });
+
+  it('selects the country and shows the national number for a complete parent-supplied number', async () => {
+    const wrapper = mountPhone();
+
+    await wrapper.setProps({ value: '+14165550123' });
+
+    expect(wrapper.find('select').element.value).toBe('CA');
+    expect((wrapper.find('input').element as HTMLInputElement).value).toBe('4165550123');
+  });
 });
