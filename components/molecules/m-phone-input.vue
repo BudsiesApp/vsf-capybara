@@ -11,6 +11,7 @@
         :id="`${id}-country`"
         v-model="country"
         :aria-label="countryLabel"
+        :disabled="disabled"
         @change="update"
       >
         <option
@@ -32,6 +33,7 @@
       :label="$t('Phone number')"
       :required="required"
       :valid="!showError"
+      :disabled="disabled"
       :error-message="$t('Please enter a valid phone number')"
       @input="update"
     />
@@ -65,6 +67,10 @@ export default defineComponent({
       default: false
     },
     showError: {
+      type: Boolean,
+      default: false
+    },
+    disabled: {
       type: Boolean,
       default: false
     }

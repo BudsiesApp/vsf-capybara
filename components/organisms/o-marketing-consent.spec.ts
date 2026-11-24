@@ -19,7 +19,7 @@ const SfCheckboxStub = {
 const focusPhone = jest.fn();
 const MPhoneInputStub = {
   name: 'MPhoneInput',
-  props: ['value', 'showError'],
+  props: ['value', 'showError', 'disabled'],
   methods: { focus: focusPhone },
   template: '<div class="phone" />'
 };
@@ -29,13 +29,17 @@ const EMPTY_VALUE = {
   phone: ''
 };
 
-function mountForm (settings: Record<string, unknown> | undefined, value = EMPTY_VALUE) {
+function mountForm (
+  settings: Record<string, unknown> | undefined,
+  value = EMPTY_VALUE,
+  disabled = false
+) {
   (useStore as jest.Mock).mockReturnValue({
     getters: { 'backend-settings/getSettingByCompositeKey': () => settings }
   });
 
   return shallowMount(OMarketingConsent as any, {
-    propsData: { value },
+    propsData: { value, disabled },
     mocks: { $t: (key: string) => key },
     stubs: {
       SfCheckbox: SfCheckboxStub,
@@ -132,5 +136,13 @@ describe('marketing consent form', () => {
     await wrapper.vm.$nextTick();
 
     expect(focusPhone).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes disabled to the phone input', () => {
+    const enabled = mountForm(settings, { ...EMPTY_VALUE, smsConsent: true });
+    const disabled = mountForm(settings, { ...EMPTY_VALUE, smsConsent: true }, true);
+
+    expect(phoneInput(enabled).props('disabled')).toBe(false);
+    expect(phoneInput(disabled).props('disabled')).toBe(true);
   });
 });

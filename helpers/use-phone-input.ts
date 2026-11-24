@@ -40,9 +40,9 @@ export function usePhoneInput (
   function onValueChange (value: string): void {
     const isEcho = value === lastEmittedValue && Boolean(text.value);
 
-    if (isEcho) {
-      lastEmittedValue = null;
+    lastEmittedValue = null;
 
+    if (isEcho) {
       return;
     }
 

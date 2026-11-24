@@ -39,6 +39,7 @@
       :value="value.phone"
       :required="true"
       :show-error="isPhoneErrorVisible"
+      :disabled="disabled"
       class="o-marketing-consent__field"
       @input="onPhoneInput"
       @validity="isPhoneValid = $event"

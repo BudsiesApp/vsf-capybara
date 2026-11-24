@@ -40,6 +40,22 @@ describe('international phone input', () => {
     expect(wrapper.find('option[value="GB"]').text()).toBe('United Kingdom (+44)');
   });
 
+  it('disables both controls when disabled', () => {
+    const wrapper = shallowMount(PhoneInput, {
+      propsData: { disabled: true },
+      mocks: { $t: (key: string) => key },
+      stubs: {
+        SfInput: {
+          props: ['disabled'],
+          template: '<input class="number" :disabled="disabled">'
+        }
+      }
+    });
+
+    expect(wrapper.find('select').attributes('disabled')).toBe('disabled');
+    expect(wrapper.find('input.number').attributes('disabled')).toBe('disabled');
+  });
+
   it('accepts a shared-code national number without changing country', async () => {
     const wrapper = mountPhone();
 
@@ -152,5 +168,23 @@ describe('international phone input', () => {
 
     expect((wrapper.find('input').element as HTMLInputElement).value).toBe('123');
     expect(wrapper.find('[role="alert"]').exists()).toBe(true);
+  });
+
+  it('shows a parent reset after a stale invalid-input marker', async () => {
+    const wrapper = mountPhone();
+    const input = wrapper.find('input');
+    const inputElement = input.element as HTMLInputElement;
+
+    await input.setValue('21255');
+
+    expect(wrapper.emitted('input')?.pop()).toEqual(['']);
+
+    await wrapper.setProps({ value: '+12125550123' });
+
+    expect(inputElement.value).toBe('2125550123');
+
+    await wrapper.setProps({ value: '' });
+
+    expect(inputElement.value).toBe('');
   });
 });
