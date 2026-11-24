@@ -53,6 +53,10 @@ import { registerModule } from '@vue-storefront/core/lib/modules'
 
 import { Braintree } from 'src/modules/payment-braintree';
 import { CartEvents } from 'src/modules/shared';
+import {
+  applyConsentToOrder,
+  SELECTION_GETTER
+} from 'src/modules/checkout-marketing-consent';
 
 import OBillingAddress from 'theme/components/organisms/o-billing-address';
 import OShipping from 'theme/components/organisms/o-shipping';
@@ -154,6 +158,13 @@ export default {
     EventBus.$off(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
   },
   methods: {
+    prepareOrder () {
+      const order = Checkout.methods.prepareOrder.call(this);
+      const settings = this.$store.getters['backend-settings/getSettingByCompositeKey']('marketingConsent');
+      const selection = this.$store.getters[SELECTION_GETTER];
+
+      return applyConsentToOrder(order, settings, selection);
+    },
     activateHashSection () {
       if (this.showSuccessOrderPage) {
         return;

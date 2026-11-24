@@ -83,6 +83,12 @@
         @blur="$v.personalDetails.lastName.$touch()"
       />
 
+      <OMarketingConsent
+        ref="consentForm"
+        v-model="consentDraft"
+        :disabled="isFormDisabled"
+      />
+
       <APromoCode :allow-promo-code-removal="false" class="mobile-only">
         <template #title>
           <SfHeading
@@ -114,10 +120,10 @@
 <script>
 import { useRoute } from '@vue-storefront/core/application-services';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus'
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { required, minLength, email, sameAs } from 'vuelidate/lib/validators';
 import { PersonalDetails } from '@vue-storefront/core/modules/checkout/components/PersonalDetails';
-import { SfInput, SfButton, SfHeading, SfCheckbox } from '@storefront-ui/vue';
+import { SfInput, SfButton, SfHeading } from '@storefront-ui/vue';
 import { ModalList } from 'theme/store/ui/modals'
 import { mapActions } from 'vuex';
 
@@ -126,7 +132,16 @@ import {
   AdditionalContentOutlet,
   useAdditionalContent
 } from '@vue-storefront/core/additional-content';
-import { PERSISTED_CUSTOMER_EMAIL, PERSISTED_CUSTOMER_FIRST_NAME, PERSISTED_CUSTOMER_LAST_NAME, SET_PERSISTED_CUSTOMER_EMAIL, SET_PERSISTED_CUSTOMER_FIRST_NAME, SET_PERSISTED_CUSTOMER_LAST_NAME } from 'src/modules/persisted-customer-data';
+import {
+  PERSISTED_CUSTOMER_EMAIL,
+  PERSISTED_CUSTOMER_FIRST_NAME,
+  PERSISTED_CUSTOMER_LAST_NAME,
+  SET_PERSISTED_CUSTOMER_EMAIL,
+  SET_PERSISTED_CUSTOMER_FIRST_NAME,
+  SET_PERSISTED_CUSTOMER_LAST_NAME,
+  SET_PERSISTED_CUSTOMER_PHONE_NUMBER
+} from 'src/modules/persisted-customer-data';
+import { useCheckoutConsent } from 'src/modules/checkout-marketing-consent/composables/use-checkout-consent';
 import { PrivacyPolicyLink } from 'src/modules/shared';
 
 import { createSmoothscroll } from 'theme/helpers';
@@ -135,6 +150,7 @@ import { useAuthorizationRouteRestoration } from 'theme/helpers/use-authorizatio
 
 import APromoCode from 'theme/components/atoms/a-promo-code'
 import MLogin from 'theme/components/molecules/m-login';
+import OMarketingConsent from 'theme/components/organisms/o-marketing-consent.vue';
 
 export default defineComponent({
   name: 'OPersonalDetails',
@@ -144,11 +160,13 @@ export default defineComponent({
     SfInput,
     SfButton,
     SfHeading,
-    SfCheckbox,
-    MLogin
+    MLogin,
+    OMarketingConsent
   },
   setup (_, context) {
     const currentRoute = useRoute();
+    const consent = useCheckoutConsent();
+    const consentForm = ref(null);
     const { persistPostAuthRedirectPath, resetPostAuthRedirectPath } = useAuthorizationRouteRestoration();
 
     function onOtpRequested () {
@@ -157,6 +175,12 @@ export default defineComponent({
 
     return {
       onOtpRequested,
+      consentDraft: consent.draft,
+      consentForm,
+      consentOffered: consent.offered,
+      consentHydrated: consent.hydrated,
+      updateConsentEmail: consent.updateEmail,
+      saveConsent: consent.save,
       privacyPolicyLinks: useAdditionalContent(
         AdditionalContentOutlet.PRIVACY_POLICY_LINKS
       ),
@@ -255,6 +279,10 @@ export default defineComponent({
         return;
       }
 
+      if (!this.consentForm.validate()) {
+        return;
+      }
+
       if (this.isRegistrationRequired) {
         if (this.isRegistrationInProgress) {
           return;
@@ -305,6 +333,12 @@ export default defineComponent({
         this.personalDetails.lastName
       );
 
+      await this.saveConsent(this.personalDetails.emailAddress);
+
+      if (this.consentOffered.sms && this.consentDraft.smsConsent) {
+        this.$store.commit(SET_PERSISTED_CUSTOMER_PHONE_NUMBER, this.consentDraft.phone);
+      }
+
       this.sendDataToCheckout();
     },
     fillLastUsedCustomerData () {
@@ -329,6 +363,15 @@ export default defineComponent({
     }
   },
   watch: {
+    'personalDetails.emailAddress': {
+      immediate: true,
+      handler (email) {
+        this.updateConsentEmail(email);
+      }
+    },
+    consentHydrated () {
+      this.updateConsentEmail(this.personalDetails.emailAddress);
+    },
     currentUser (newValue) {
       if (newValue) {
         this.isRegistrationRequired = false;

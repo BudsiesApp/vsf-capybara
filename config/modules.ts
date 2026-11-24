@@ -37,6 +37,7 @@ import { FeraModule } from 'src/modules/fera';
 import { TrafficAttributionModule } from 'src/modules/traffic-attribution';
 import { MaestraModule } from 'src/modules/maestra';
 import { CouponActivationModule } from 'src/modules/coupon-activation'
+import { CheckoutMarketingConsentModule } from 'src/modules/checkout-marketing-consent'
 
 import registerStoryblokComponents from 'theme/components/storyblok'
 import { KlaviyoModule, ModuleConfig } from 'src/modules/klaviyo'
@@ -91,6 +92,7 @@ export function registerClientModules () {
   registerModule(ErrorLoggingModule)
   registerModule(MailchimpModule)
   registerModule(PersistedCustomerDataModule)
+  registerModule(CheckoutMarketingConsentModule)
   registerModule(OrdersHistoryModule)
   registerModule(CurrencyModule)
   registerApplicationModule(FeraModule)
