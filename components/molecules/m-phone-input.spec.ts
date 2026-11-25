@@ -28,6 +28,26 @@ describe('international phone input', () => {
     });
   }
 
+  it('normalizes prefills once, preserves invalid text and clears correctly', async () => {
+    const wrapper = mountPhone('+44 20 7946 0018');
+    expect(wrapper.emitted('input')).toEqual([['+442079460018']]);
+    expect(wrapper.emitted('validity')?.pop()).toEqual([true]);
+    await wrapper.setProps({ value: '+442079460018' });
+    expect(wrapper.emitted('input')).toHaveLength(1);
+    await wrapper.setProps({ value: 'not a phone' });
+    expect((wrapper.find('input').element as HTMLInputElement).value).toBe('not a phone');
+    expect(wrapper.emitted('validity')?.pop()).toEqual([false]);
+    await wrapper.setProps({ value: '' });
+    expect((wrapper.find('input').element as HTMLInputElement).value).toBe('');
+    expect(wrapper.emitted('validity')?.pop()).toEqual([false]);
+    const restored = mountPhone('+14165550123');
+    expect(restored.emitted('input')).toBeUndefined();
+    expect(restored.emitted('validity')?.pop()).toEqual([true]);
+    const national = mountPhone('212 555 0123');
+    expect(national.emitted('input')).toEqual([['+12125550123']]);
+    expect(national.emitted('validity')?.pop()).toEqual([true]);
+  });
+
   it('shows only the calling code in the collapsed selector', async () => {
     const wrapper = mountPhone();
 

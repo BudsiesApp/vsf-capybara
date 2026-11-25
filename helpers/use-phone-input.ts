@@ -60,11 +60,18 @@ export function usePhoneInput (
     const parsed = parsePhoneNumberFromString(value, country.value);
 
     if (!parsed) {
+      text.value = value;
+      emit('validity', false);
       return;
     }
 
     showParsedNumber(parsed, value);
-    emit('validity', parsed.isValid());
+    const isValid = parsed.isValid();
+    emit('validity', isValid);
+    if (isValid && parsed.number !== value) {
+      lastEmittedValue = parsed.number;
+      emit('input', parsed.number);
+    }
   }
 
   watch(getValue, onValueChange, { immediate: true });

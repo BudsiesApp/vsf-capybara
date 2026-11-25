@@ -76,6 +76,22 @@ describe('marketing consent form', () => {
     expect(wrapper.text()).toContain('Email');
   });
 
+  it('restricts offered channels and keeps an unchecked phone optional', async () => {
+    const wrapper = mountForm(settings);
+    await wrapper.setProps({ channels: { email: false, sms: true }, alwaysShowPhone: true });
+    expect(wrapper.findAll('.sf-checkbox__label')).toHaveLength(1);
+    expect(phoneInput(wrapper).exists()).toBe(true);
+    expect((wrapper.vm as any).validate()).toBe(true);
+    await wrapper.setProps({ value: { ...EMPTY_VALUE, smsConsent: true } });
+    expect((wrapper.vm as any).validate()).toBe(false);
+    await wrapper.vm.$nextTick();
+    expect(phoneInput(wrapper).props('showError')).toBe(true);
+    await wrapper.setProps({ value: EMPTY_VALUE });
+    expect(phoneInput(wrapper).props('showError')).toBe(false);
+    await wrapper.setProps({ channels: { email: true, sms: false } });
+    expect(phoneInput(wrapper).exists()).toBe(false);
+  });
+
   it('renders the labels as html and shows the phone only for checked SMS', async () => {
     const wrapper = mountForm(settings);
 

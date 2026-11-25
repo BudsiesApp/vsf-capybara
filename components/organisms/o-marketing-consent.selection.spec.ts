@@ -16,6 +16,7 @@ jest.mock('@vue-storefront/core/application-services', () => ({
   useI18n: () => ({ t: (key: string) => key })
 }));
 jest.mock('@vue-storefront/core/helpers', () => ({ isServer: false }));
+jest.mock('@vue-storefront/core/lib/sync', () => ({ TaskQueue: { execute: jest.fn() } }));
 jest.mock('@vue-storefront/core/lib/storage-manager', () => ({ StorageManager: { get: jest.fn() } }));
 jest.mock('@storefront-ui/vue', () => ({ SfCheckbox: {}, SfInput: {} }));
 
@@ -54,6 +55,8 @@ describe('saved consent selection and phone edits', () => {
       phone: SAVED_PHONE
     });
     store.commit(`checkoutMarketingConsent/${SET_HYDRATED}`);
+    const mutations: string[] = [];
+    store.subscribe(mutation => mutations.push(mutation.type));
     (useStore as jest.Mock).mockReturnValue(store);
 
     const Harness = Vue.extend({
@@ -85,6 +88,8 @@ describe('saved consent selection and phone edits', () => {
       sms: true,
       phone: SAVED_PHONE
     });
+    expect(wrapper.findComponent(OMarketingConsent).emitted('input')).toBeUndefined();
+    expect(mutations).not.toContain(`checkoutMarketingConsent/${SET_SELECTION}`);
 
     await wrapper.find('input').setValue('21255');
 
