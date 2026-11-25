@@ -22,10 +22,11 @@ jest.mock('@vue-storefront/core/lib/logger', () => ({
   Logger: { info: () => () => {}, debug: () => () => {}, warn: () => () => {}, error: () => () => {} }
 }));
 jest.mock('@vue-storefront/core/data-resolver', () => ({
-  CartService: { getTotals: jest.fn(), setShippingInfo: jest.fn(), getCartToken: jest.fn() }
+  CartService: { getTotals: jest.fn(), setShippingInfo: jest.fn(), getCartToken: jest.fn(), getItems: jest.fn() }
 }));
 jest.mock('@vue-storefront/core/modules/cart/helpers', () => ({
   prepareShippingInfoForUpdateTotals: jest.requireActual('@vue-storefront/core/modules/cart/helpers/prepareShippingInfoForUpdateTotals').default,
+  createDiffLog: () => new (jest.requireActual('@vue-storefront/core/modules/cart/helpers/createDiffLog').DiffLog)(),
   createOrderData: () => ({ country: 'US' }), createShippingInfoData: () => ({}), getAvailableShippingMethod: () => undefined
 }));
 jest.mock('@vue-storefront/core/modules/cart/helpers/productsEquals', () => ({ __esModule: true, default: (a, b) => a.sku === b.sku }));
@@ -158,9 +159,10 @@ describe('view_cart readiness through the real cart store', () => {
     const token = deferred<any>();
     const pull = deferred<void>();
     const totals = deferred<any>();
-    store = createStore({ performSync: async ({ commit }) => {
+    store = createStore({ performSync: async ({ commit, getters }) => {
       await pull.promise;
       commit(types.CART_LOAD_CART, [createItem()]);
+      commit(types.CART_SET_ITEMS_HASH, getters.getCurrentCartHash);
       return new DiffLog();
     } });
     store.commit(`cart/${types.CART_LOAD_CART}`, []);
@@ -193,6 +195,30 @@ describe('view_cart readiness through the real cart store', () => {
     expect(events).toEqual([{ price: 100, value: replaced ? undefined : 200 }]);
     expect(CartService.getTotals).toHaveBeenCalledTimes(replaced ? 2 : 1);
     expect(busy()).toEqual([false, false]);
+  });
+
+  it('keeps a quantity edit for the next cart sync while the fallback read is pending', async () => {
+    const fallback = deferred<any>();
+    const merge = jest.fn(() => new DiffLog());
+    store = createStore({ merge });
+    store.commit(`cart/${types.CART_RESET_TOTALS_SYNC}`);
+    jest.mocked(CartService.getTotals).mockRejectedValueOnce(new Error('network')).mockReturnValueOnce(fallback.promise);
+    jest.mocked(CartService.getItems).mockResolvedValue({ resultCode: 200, result: [] } as any);
+    await expect(store.dispatch('cart/overrideServerTotals', { hasShippingInformation: false })).rejects.toThrow('network');
+    mountPage();
+    await flush();
+    expect(CartService.getTotals).toHaveBeenCalledTimes(2);
+    expect(busy()).toEqual([true, false]);
+    expect(store.getters['cart/IS_CART_SYNCING']).toBe(false);
+    store.commit(`cart/${types.CART_UPD_ITEM}`, { product: store.state.cart.cartItems[0], qty: 2 });
+    fallback.resolve(totalsResponse(90, 180));
+    await flush();
+    expect(store.state.cart.cartItems[0].qty).toBe(2);
+    expect(events).toEqual([{ price: 100, value: undefined }]);
+    await store.dispatch('cart/sync', { forceClientState: true });
+    expect(merge).toHaveBeenCalledWith(expect.any(Object), expect.objectContaining({
+      forceClientState: true, clientItems: [expect.objectContaining({ qty: 2 })]
+    }));
   });
 
   it('keeps the latest-started totals when the older response arrives last', async () => {
