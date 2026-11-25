@@ -195,6 +195,7 @@ import { components } from 'src/modules/vsf-storyblok-module/components';
 import { ItemData } from 'src/modules/vsf-storyblok-module';
 import { BulkorderQuote, BulkOrderInfo, BulkOrderStatus, BulkorderQuoteProductId } from 'src/modules/budsies';
 import { FormRefs, useFormValidation } from 'theme/helpers/use-form-validation';
+import { getServerLineIds, reportQuotePrototypeAdd } from 'theme/helpers/report-quote-prototype-add';
 import MAddonsSelector from 'theme/components/molecules/m-addons-selector.vue';
 import MFormErrors from 'theme/components/molecules/m-form-errors.vue';
 
@@ -472,6 +473,8 @@ export default Vue.extend({
         (selectedAddon) => selectedAddon.addonOptionValueId === this.get3dRenderingAddonOptionValueId()
       );
 
+      const lineIdsBeforeChoice = getServerLineIds(this.$store.getters['cart/getCartItems']);
+
       try {
         await this.$store.dispatch(
           'budsies/chooseBulkOrderQuote',
@@ -482,6 +485,8 @@ export default Vue.extend({
         );
 
         await this.$store.dispatch('cart/sync', { forceSync: true });
+
+        reportQuotePrototypeAdd(lineIdsBeforeChoice, this.$store.getters['cart/getCartItems'], this.sampleProduct.sku);
 
         this.$router.push({ name: 'detailed-cart' });
       } finally {

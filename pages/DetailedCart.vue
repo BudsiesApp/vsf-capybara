@@ -115,7 +115,6 @@ import CartLineItem from './DetailedCart/cart-line-item.vue';
 import { mapGetters, mapState } from 'vuex';
 import { localizedRoute } from '@vue-storefront/core/lib/multistore';
 import getCartItemKey from '@vue-storefront/core/modules/cart/helpers/get-cart-item-key.function';
-import CartEvents from 'src/modules/shared/types/cart-events';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { mapMobileObserver } from '@storefront-ui/vue/src/utilities/mobile-observer';
 import { computed, nextTick, ref } from 'vue';
@@ -127,6 +126,7 @@ import { ORDER_ERROR_EVENT, useRedirectedSectionHashRemoval } from '@vue-storefr
 import { IS_CART_SYNCING } from '@vue-storefront/core/modules/cart';
 import { ModalList } from 'theme/store/ui/modals';
 import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
+import { useEventAfterCartSettled } from 'theme/helpers/use-event-after-cart-settled';
 
 export default {
   name: 'DetailedCart',
@@ -144,6 +144,7 @@ export default {
     };
   },
   setup () {
+    useEventAfterCartSettled();
     useRedirectedSectionHashRemoval();
 
     const store = useStore();
@@ -269,18 +270,6 @@ export default {
     },
     onOrderErrorEventHandler (payload) {
       this.$store.dispatch('ui/openModal', { name: ModalList.OrderError, payload });
-    }
-  },
-  watch: {
-    isLoading (value) {
-      if (value) {
-        return;
-      }
-
-      EventBus.$emit(CartEvents.CART_VIEWED, {
-        products: this.products,
-        platformTotals: this.$store.state.cart.platformTotals
-      });
     }
   },
   metaInfo () {

@@ -137,7 +137,18 @@ export default {
     registerModule(Braintree)
     EventBus.$on('order-after-placed', this.onOrderAfterPlacedHandler);
     EventBus.$on(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
-    EventBus.$emit(CartEvents.BEGIN_CHECKOUT);
+  },
+  async mounted () {
+    const isActive = () => this.checkoutEntryActive && !this.isSuccess;
+    if (!isActive()) return;
+    try { await this.checkoutEntry; } catch { /* Use the current cart. */ }
+    if (!isActive()) return;
+    await this.$store.dispatch('cart/waitForStartup');
+    if (!isActive()) return;
+    await this.$store.dispatch('cart/waitForIdle');
+    if (isActive() && this.productsInCart.length) {
+      EventBus.$emit(CartEvents.BEGIN_CHECKOUT);
+    }
   },
   beforeDestroy () {
     EventBus.$off('order-after-placed', this.onOrderAfterPlacedHandler);
