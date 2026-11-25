@@ -63,7 +63,7 @@ import OPersonalDetails from 'theme/components/organisms/o-personal-details';
 import OCartItemsTable from 'theme/components/organisms/o-cart-items-table';
 import ProductionSpotCountdown from 'src/modules/promotion-platform/components/ProductionSpotCountdown.vue';
 import { ModalList } from 'theme/store/ui/modals';
-import { useEventAfterCartSettled } from 'theme/helpers/use-event-after-cart-settled';
+import CartEvents from 'src/modules/shared/types/cart-events';
 
 const successParamValue = 'success';
 const orderReviewStepKey = 'orderReview';
@@ -89,9 +89,6 @@ export default {
     ProductionSpotCountdown
   },
   mixins: [Checkout],
-  setup (props) {
-    useEventAfterCartSettled(true, () => props.success !== successParamValue);
-  },
   data () {
     return {
       steps: [
@@ -150,6 +147,23 @@ export default {
     registerModule(Braintree)
     EventBus.$on('order-after-placed', this.onOrderAfterPlacedHandler);
     EventBus.$on(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
+  },
+  async mounted () {
+    if (!this.checkoutEntryActive || this.isSuccess) return;
+    try { await this.checkoutEntry; } catch { /* Use the current cart. */ }
+    if (!this.checkoutEntryActive || this.isSuccess) return;
+    await this.$store.dispatch('cart/waitForStartup');
+    if (!this.checkoutEntryActive || this.isSuccess) return;
+    await this.$store.dispatch('cart/waitForIdle');
+    if (!this.checkoutEntryActive || this.isSuccess) return;
+    if (!this.entryRefreshAttempted) {
+      try { await this.$store.dispatch('cart/fetchMissingTotals'); } catch { /* Use local data. */ }
+      if (!this.checkoutEntryActive || this.isSuccess) return;
+      await this.$store.dispatch('cart/waitForIdle');
+    }
+    if (this.checkoutEntryActive && !this.isSuccess && this.productsInCart.length) {
+      EventBus.$emit(CartEvents.BEGIN_CHECKOUT);
+    }
   },
   beforeDestroy () {
     EventBus.$off('order-after-placed', this.onOrderAfterPlacedHandler);
