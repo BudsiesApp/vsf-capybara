@@ -237,6 +237,7 @@
       </SfButton>
     </div>
     <div class="actions">
+      <CheckoutTotalsRetry />
       <SfButton
         ref="placeOrderButton"
         v-show="showPlaceOrderButton"
@@ -286,6 +287,7 @@ import { getThumbnailForProduct } from '@vue-storefront/core/modules/cart/helper
 import { registerModule } from '@vue-storefront/core/lib/modules';
 import { OrderModule, ORDER_CONFLICT_EVENT } from '@vue-storefront/core/modules/order';
 import { ORDER_ERROR_EVENT } from '@vue-storefront/core/modules/checkout';
+import { requirePaymentTotals } from '@vue-storefront/core/modules/checkout/helpers/require-payment-totals';
 import { OrderReview } from '@vue-storefront/core/modules/checkout/components/OrderReview';
 import { Payment } from '@vue-storefront/core/modules/checkout/components/Payment';
 import {
@@ -317,12 +319,14 @@ import APromoCode from 'theme/components/atoms/a-promo-code';
 import MPriceSummary from 'theme/components/molecules/m-price-summary';
 import OCartItemsTable from 'theme/components/organisms/o-cart-items-table';
 import OGiftCardPayment from 'theme/components/organisms/o-gift-card-payment.vue';
+import CheckoutTotalsRetry from 'theme/components/checkout/checkout-totals-retry.vue';
 
 export default {
   name: 'OConfirmOrder',
   components: {
     APromoCode,
     CartItemConfiguration,
+    CheckoutTotalsRetry,
     MPriceSummary,
     OCartItemsTable,
     OGiftCardPayment,
@@ -438,6 +442,7 @@ export default {
     },
     isPlaceOrderButtonDisabled () {
       return !this.productsInCart.length ||
+        !this.$store.getters['cart/getPaymentTotals'] ||
         !this.isShippingMethodConfirmed ||
         this.isCheckoutInProgress ||
         this.isGiftCardProcessing ||
@@ -587,7 +592,7 @@ export default {
       OrderReview.methods.placeOrder.call(this);
     },
     onPlaceOrder () {
-      if (this.isCheckoutInProgress || !this.isShippingMethodConfirmed) {
+      if (this.isCheckoutInProgress || !this.isShippingMethodConfirmed || !requirePaymentTotals(this.$store)) {
         return;
       }
 
