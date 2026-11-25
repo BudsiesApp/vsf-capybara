@@ -202,31 +202,6 @@ describe('view_cart readiness through the real cart store', () => {
     expect(store.state.cart.cartItems[0].extension_attributes.budsies_quote_item_totals.final_price).toBe(90);
   });
 
-  it('lets the quote prototype import finish before its totals refresh and reports the cart after the refresh', async () => {
-    const totals = deferred<any>();
-    store = createStore({
-      ...mergeActions,
-      getProductVariant: () => createItem(),
-      addItem: ({ commit }, { productToAdd }) => commit(types.CART_LOAD_CART, [productToAdd]),
-      updateItemsProductData: () => {}
-    });
-    store.commit(`cart/${types.CART_LOAD_CART}`, []);
-    store.commit(`cart/${types.CART_SET_ITEMS_HASH}`, store.getters['cart/getCurrentCartHash']);
-    jest.mocked(CartService.getItems).mockResolvedValue({ resultCode: 200, result: [{ item_id: 7, sku: 'PLUSH-1', qty: 1 }] } as any);
-    jest.mocked(CartService.getTotals).mockReturnValue(totals.promise);
-    await store.dispatch('cart/sync', { forceSync: true, waitForTotalsUpdate: false });
-    expect(store.state.cart.cartItems).toHaveLength(1);
-    expect(busy()[0]).toBe(true);
-    mountPage();
-    await flush();
-    expect(events).toEqual([]);
-    totals.resolve(totalsResponse(90, 180));
-    await flush();
-    await flush();
-    expect(events).toEqual([{ price: 90, value: 180 }]);
-    expect(CartService.getTotals).toHaveBeenCalledTimes(1);
-  });
-
   it.each([false, true])('falls back only to totals from the current quote (replaced: %s)', async replaced => {
     if (replaced) store.commit(`cart/${types.CART_LOAD_CART_SERVER_TOKEN}`, NEW_TOKEN);
     jest.mocked(CartService.getTotals).mockRejectedValue(new Error('network'));

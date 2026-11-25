@@ -50,11 +50,11 @@ describe('Get Sample Prototype', () => {
           getters: { getCartItems: state => state.cartItems },
           actions: {
             create: () => undefined,
-            // Like the core merge: the server lines are imported first, the totals refresh follows.
+            // Like the core merge: the server lines are imported first, then the totals refresh is awaited.
             async sync ({ state }, options) {
               syncOptions.push(options);
               state.cartItems = serverCart;
-              if (options.waitForTotalsUpdate !== false) await totals.promise;
+              await totals.promise;
             }
           }
         },
@@ -86,21 +86,29 @@ describe('Get Sample Prototype', () => {
 
   beforeEach(() => onAdd.mockClear());
 
-  it('opens the cart without waiting for the totals refresh and reports the new prototype line once', async () => {
+  it('opens the cart after the sync, as before, and reports the new prototype line once before routing', async () => {
     const existing = line(10);
     const unrelated = line(11, 'otherProduct_bundle');
     const restoredSameSku = line(12);
     const prototype = line(13);
-    const { submit, push, syncOptions } = setUp({
+    const { submit, push, syncOptions, totals } = setUp({
       cartBefore: [existing],
       serverCart: [existing, unrelated, restoredSameSku, prototype]
     });
 
-    await submit();
+    const submitted = submit();
+    await new Promise(resolve => setTimeout(resolve, 0));
 
-    expect(syncOptions).toEqual([{ forceSync: true, waitForTotalsUpdate: false }]);
+    expect(syncOptions).toEqual([{ forceSync: true }]);
+    expect(push).not.toHaveBeenCalled();
+    expect(onAdd).not.toHaveBeenCalled();
+
+    totals.resolve();
+    await submitted;
+
     expect(push).toHaveBeenCalledWith({ name: 'detailed-cart' });
     expect(onAdd).toHaveBeenCalledTimes(1);
+    expect(onAdd.mock.invocationCallOrder[0]).toBeLessThan(push.mock.invocationCallOrder[0]);
 
     const { cartItem, diffLog, source } = onAdd.mock.calls[0][0];
     expect(cartItem).toBe(prototype);
@@ -125,7 +133,8 @@ describe('Get Sample Prototype', () => {
 
   it('stays silent when the synchronized cart has no new prototype line', async () => {
     const existing = line(10);
-    const { submit, push } = setUp({ cartBefore: [existing], serverCart: [existing, line(14, 'otherProduct_bundle')] });
+    const { submit, push, totals } = setUp({ cartBefore: [existing], serverCart: [existing, line(14, 'otherProduct_bundle')] });
+    totals.resolve();
 
     await submit();
 

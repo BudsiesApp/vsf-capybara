@@ -484,8 +484,7 @@ export default Vue.extend({
           }
         );
 
-        // The cart page waits for the totals refresh itself; opening it does not.
-        await this.$store.dispatch('cart/sync', { forceSync: true, waitForTotalsUpdate: false });
+        await this.$store.dispatch('cart/sync', { forceSync: true });
 
         reportQuotePrototypeAdd(lineIdsBeforeChoice, this.$store.getters['cart/getCartItems'], this.sampleProduct.sku);
 
