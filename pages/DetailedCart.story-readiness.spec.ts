@@ -4,8 +4,7 @@ import { useStore } from '@vue-storefront/core/application-services';
 import { emitPageRenderedEvent } from 'src/modules/shared';
 
 import Page from './DetailedCart.vue';
-import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
-import CartEvents from 'src/modules/shared/types/cart-events';
+jest.mock('theme/helpers/use-event-after-cart-settled', () => ({ useEventAfterCartSettled: jest.fn() }));
 
 jest.mock('@vue-storefront/core/application-services', () => ({ useStore: jest.fn() }));
 jest.mock('@vue-storefront/core/request-services', () => ({
@@ -99,7 +98,6 @@ it.each([true, false])(
 
     (useStore as jest.Mock).mockReturnValue(store);
     (emitPageRenderedEvent as jest.Mock).mockClear();
-    (EventBus.$emit as jest.Mock).mockClear();
 
     const wrapper = shallowMount(Page as any, {
       mocks: { $store: store, $t: value => value, $route: {} }
@@ -111,11 +109,6 @@ it.each([true, false])(
 
     state.cart.cartIsLoaded = true;
     await flushRenderQueue();
-
-    expect(EventBus.$emit).toHaveBeenCalledWith(CartEvents.CART_VIEWED, {
-      products: state.items,
-      platformTotals: []
-    });
 
     expect(wrapper.findComponent({ name: 'MBlockStory' }).exists()).toBe(false);
     expect(emitPageRenderedEvent).toHaveBeenCalledTimes(1);
