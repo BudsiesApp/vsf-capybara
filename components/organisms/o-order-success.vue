@@ -39,6 +39,13 @@
       </p>
     </div>
 
+    <MMarketingSubscriptionForm
+      :order-id="confirmation.magentoOrderId"
+      :email="order.personalDetails.emailAddress"
+      :phone="(order.addressInformation.billingAddress || {}).telephone || ''"
+      :accepted-channels="acceptedOrderChannels(order)"
+    />
+
     <div class="_content">
       <div class="_left">
         <BaseImage
@@ -172,11 +179,13 @@ import {
 import { Order } from 'core/modules/order/types/Order';
 import { BaseImage } from 'src/modules/budsies';
 import { InjectType } from 'src/modules/shared';
+import { acceptedOrderChannels } from 'src/modules/checkout-marketing-consent';
 
 import MSocialSharing from 'theme/components/molecules/m-social-sharing.vue';
 
 import MShareSpecialStoryForm from './OOrderSuccess/m-share-special-story-form.vue';
 import MShareBirthdayForm from './OOrderSuccess/m-share-birthday-form.vue';
+import MMarketingSubscriptionForm from './OOrderSuccess/m-marketing-subscription-form.vue';
 
 interface NonReactiveState {
   sharingData: {
@@ -213,6 +222,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
     BaseImage,
     MShareSpecialStoryForm,
     MShareBirthdayForm,
+    MMarketingSubscriptionForm,
     MSocialSharing,
     SfButton,
     SfHeading
@@ -223,6 +233,7 @@ export default (Vue as VueConstructor<Vue & NonReactiveState & InjectedServices>
     );
 
     return {
+      acceptedOrderChannels,
       financialIncentiveLinks: financialIncentiveLinks as unknown as
         readonly AdditionalContentEntry[]
     };

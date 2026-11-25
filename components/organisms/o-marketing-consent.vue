@@ -34,10 +34,10 @@
     </SfCheckbox>
 
     <MPhoneInput
-      v-if="isPhoneRequired"
+      v-if="isPhoneVisible"
       ref="phoneInput"
       :value="value.phone"
-      :required="true"
+      :required="isPhoneRequired"
       :show-error="isPhoneErrorVisible"
       :disabled="disabled"
       class="o-marketing-consent__field"
@@ -78,10 +78,22 @@ export default defineComponent({
     disabled: {
       type: Boolean,
       default: false
+    },
+    channels: {
+      type: Object as PropType<{ email: boolean; sms: boolean }>,
+      default: () => ({ email: true, sms: true })
+    },
+    alwaysShowPhone: {
+      type: Boolean,
+      default: false
     }
   },
   setup (props, { emit }) {
-    const { settings, offered } = useMarketingConsentSettings();
+    const { settings, offered: available } = useMarketingConsentSettings();
+    const offered = computed(() => ({
+      email: available.value.email && props.channels.email,
+      sms: available.value.sms && props.channels.sms
+    }));
     const phoneInput = ref<PhoneInputHandle | null>(null);
     const isPhoneValid = ref(false);
     const hasValidationFailed = ref(false);
@@ -89,8 +101,9 @@ export default defineComponent({
     const isPhoneRequired = computed<boolean>(() => {
       return offered.value.sms && props.value.smsConsent;
     });
+    const isPhoneVisible = computed<boolean>(() => offered.value.sms && (props.alwaysShowPhone || props.value.smsConsent));
     const isPhoneErrorVisible = computed<boolean>(() => {
-      return hasValidationFailed.value && !isPhoneValid.value;
+      return isPhoneRequired.value && hasValidationFailed.value && !isPhoneValid.value;
     });
 
     function update (change: Partial<MarketingConsentValue>): void {
@@ -123,6 +136,7 @@ export default defineComponent({
       phoneInput,
       isPhoneValid,
       isPhoneRequired,
+      isPhoneVisible,
       isPhoneErrorVisible,
       update,
       onPhoneInput,

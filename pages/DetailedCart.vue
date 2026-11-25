@@ -165,6 +165,7 @@ import { ModalList } from 'theme/store/ui/modals';
 import MBlockStory from 'theme/components/molecules/m-block-story.vue';
 import MDropdown from 'theme/components/molecules/m-dropdown.vue';
 import { useRenderedOrderTemplateRefs } from 'theme/helpers/use-rendered-order-template-refs';
+import { useEventAfterCartSettled } from 'theme/helpers/use-event-after-cart-settled';
 import { emitPageRenderedEvent } from 'src/modules/shared';
 
 export default {
@@ -294,6 +295,7 @@ export default {
     };
   },
   setup () {
+    useEventAfterCartSettled();
     useRedirectedSectionHashRemoval();
 
     const store = useStore();
@@ -430,18 +432,6 @@ export default {
     },
     onOrderErrorEventHandler (payload) {
       this.$store.dispatch('ui/openModal', { name: ModalList.OrderError, payload });
-    }
-  },
-  watch: {
-    isLoading (value) {
-      if (value) {
-        return;
-      }
-
-      EventBus.$emit(CartEvents.CART_VIEWED, {
-        products: this.products,
-        platformTotals: this.$store.state.cart.platformTotals
-      });
     }
   },
   metaInfo () {
