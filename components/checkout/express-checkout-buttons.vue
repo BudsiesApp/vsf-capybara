@@ -1,6 +1,7 @@
 <template>
   <div class="express-checkout" v-if="braintreeClient">
-    <div class="_buttons">
+    <CheckoutTotalsRetry v-if="sorted.length && !hasPaymentTotals" />
+    <div class="_buttons" v-show="hasPaymentTotals">
       <component
         v-for="btn in sorted"
         class="_button"
@@ -64,6 +65,7 @@ import {
 import { useAddressValidation } from 'src/modules/address';
 import { PERSISTED_CUSTOMER_EMAIL } from 'src/modules/persisted-customer-data';
 import { resolveExpressCheckoutCustomerData } from 'theme/helpers/express-checkout-customer-data';
+import CheckoutTotalsRetry from 'theme/components/checkout/checkout-totals-retry.vue';
 
 type AllSupportedMethodsCodes = BraintreeSupportedMethodCodes | AmazonPaySupportedMethodCodes;
 
@@ -81,6 +83,7 @@ type ShippingDetailsChangedCallbackData = ExpressCheckoutData.ShippingDetailsCha
 export default defineComponent({
   name: 'ExpressCheckoutButtons',
   components: {
+    CheckoutTotalsRetry,
     PaymentApplePay,
     PaymentPayPal,
     PaymentGooglePay,
@@ -92,6 +95,7 @@ export default defineComponent({
     const applicationI18n = useI18n();
     const windowObj = inject<Window & typeof window>('WindowObject');
     const isPlacing = ref(false);
+    const hasPaymentTotals = computed(() => !!applicationStore.getters['cart/getPaymentTotals']);
 
     let activeShippingDetailsChangedPromise: undefined | Promise<ExpressCheckoutUpdateData>;
     let nextShippingDetailsChangedData: undefined | ShippingDetailsChangedCallbackData;
@@ -175,7 +179,8 @@ export default defineComponent({
       applicationRouter.push({ name: 'checkout', params: { success: 'success' } });
     }
 
-    function onPaymentErrorEventHandler () {
+    function onPaymentErrorEventHandler (hideNotification?: boolean) {
+      if (hideNotification) return;
       applicationStore.dispatch('notification/spawnNotification', {
         type: 'danger',
         message: applicationI18n.t('Something went wrong. Please try another payment method'),
@@ -369,21 +374,23 @@ export default defineComponent({
         const paymentMethod = applicationStore.getters['checkout/getPaymentDetails'].paymentMethod;
         const isAmazonPay = paymentMethod === AmazonPaySupportedMethodCodes.AMAZON_PAY;
 
-        const additionalData: Record<string, any> = {};
-
+        const order = prepareOrderData(isAmazonPay
+          ? { amazon_session_id: applicationStore.getters[AMAZON_SESSION_ID_GETTER] }
+          : { payment_method_nonce: applicationStore.getters['braintree/paymentMethodNonce'] }
+        );
+        if (!order) {
+          EventBus.$emit('notification-progress-stop');
+          return;
+        }
         if (isAmazonPay) {
-          const amazonSessionId = applicationStore.getters[AMAZON_SESSION_ID_GETTER];
           applicationStore.commit(CLEAR_AMAZON_SESSION_ID_MUTATION);
-          additionalData.amazon_session_id = amazonSessionId;
         } else {
-          const paymentMethodNonce = applicationStore.getters['braintree/paymentMethodNonce'];
           applicationStore.commit(SET_PAYMENT_METHOD_NONCE_MUTATION, undefined);
-          additionalData.payment_method_nonce = paymentMethodNonce;
         }
 
         await applicationStore.dispatch(
           'checkout/placeOrder',
-          { order: prepareOrderData(additionalData) }
+          { order }
         );
       } finally {
         isPlacing.value = false;
@@ -392,6 +399,7 @@ export default defineComponent({
 
     return {
       braintreeClient,
+      hasPaymentTotals,
       onShippingDetailsChanged,
       onExpressCheckoutAuthorized,
       onPaymentStarted,
