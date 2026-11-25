@@ -5,6 +5,7 @@ import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
 import { CartService } from '@vue-storefront/core/data-resolver';
 import { DiffLog } from '@vue-storefront/core/modules/cart/helpers/createDiffLog';
 import connectActions from '@vue-storefront/core/modules/cart/store/actions/connectActions';
+import mergeActions from '@vue-storefront/core/modules/cart/store/actions/mergeActions';
 import synchronizeActions from '@vue-storefront/core/modules/cart/store/actions/synchronizeActions';
 import totalsActions from '@vue-storefront/core/modules/cart/store/actions/totalsActions';
 import cartGetters from '@vue-storefront/core/modules/cart/store/getters';
@@ -15,7 +16,10 @@ import { useEventAfterCartSettled } from './use-event-after-cart-settled';
 
 jest.mock('@vue-storefront/core/application-services', () => ({ useStore: jest.fn() }));
 jest.mock('@vue-storefront/core/compatibility/plugins/event-bus', () => ({ __esModule: true, default: { $emit: jest.fn() } }));
-jest.mock('config', () => ({ cart: { synchronize: true, synchronize_totals: true } }));
+jest.mock('config', () => ({ cart: { synchronize: true, synchronize_totals: true, serverMergeByDefault: true } }));
+jest.mock('src/modules/shared', () => ({}));
+jest.mock('src/modules/customization-system', () => ({}));
+jest.mock('storefront-query-builder', () => ({}));
 jest.mock('@vue-storefront/core/lib/storage-manager', () => ({ StorageManager: { get: jest.fn() } }));
 jest.mock('@vue-storefront/i18n', () => ({ __esModule: true, default: { t: (text: string) => text } }));
 jest.mock('@vue-storefront/core/lib/logger', () => ({
@@ -54,7 +58,7 @@ function totalsResponse (finalPrice: number, grandTotal: number): any {
   return {
     resultCode: 200,
     result: {
-      grand_total: grandTotal, total_segments: [], items: [{
+      grand_total: grandTotal, base_grand_total: grandTotal, total_segments: [], items: [{
         item_id: 7, qty: 1,
         extension_attributes: { budsies_quote_item_totals: { regular_price: 100, savings_amount: 0, discount_amount: finalPrice - 100, final_price: finalPrice } }
       }]
@@ -155,18 +159,22 @@ describe('view_cart readiness through the real cart store', () => {
     expect(CartService.getTotals).toHaveBeenCalledTimes(1);
   });
 
-  it('waits for an empty-cache login, then reads totals without touching the storefront busy flag', async () => {
+  it('refreshes and applies one business totals response after an empty-cache pull brings in items', async () => {
     const token = deferred<any>();
-    const pull = deferred<void>();
+    const pull = deferred<any>();
     const totals = deferred<any>();
-    store = createStore({ performSync: async ({ commit, getters }) => {
-      await pull.promise;
-      commit(types.CART_LOAD_CART, [createItem()]);
-      commit(types.CART_SET_ITEMS_HASH, getters.getCurrentCartHash);
-      return new DiffLog();
-    } });
+    store = createStore({
+      ...mergeActions,
+      getProductVariant: () => createItem(),
+      addItem: ({ commit }, { productToAdd, forceServerSilence }) => {
+        expect(forceServerSilence).toBe(true);
+        commit(types.CART_LOAD_CART, [productToAdd]);
+      },
+      updateItemsProductData: () => {}
+    });
     store.commit(`cart/${types.CART_LOAD_CART}`, []);
     jest.mocked(CartService.getCartToken).mockReturnValue(token.promise);
+    jest.mocked(CartService.getItems).mockReturnValue(pull.promise);
     jest.mocked(CartService.getTotals).mockReturnValue(totals.promise);
     const connection = store.dispatch('cart/connect');
     mountPage();
@@ -176,14 +184,19 @@ describe('view_cart readiness through the real cart store', () => {
     await flush();
     expect(events).toEqual([]);
     expect(CartService.getTotals).not.toHaveBeenCalled();
-    pull.resolve();
+    pull.resolve({ resultCode: 200, result: [{ item_id: 7, sku: 'PLUSH-1', qty: 1 }] });
+    await flush();
+    expect(events).toEqual([]);
+    expect(busy()).toEqual([true, true]);
+    expect(pullMethods).toHaveBeenCalledTimes(1);
+    expect(CartService.getTotals).toHaveBeenCalledTimes(1);
+    totals.resolve(totalsResponse(90, 180));
     await connection;
     await flush();
-    expect(busy()).toEqual([true, false]);
-    expect(pullMethods).not.toHaveBeenCalled();
-    totals.resolve(totalsResponse(90, 180));
-    await flush();
     expect(events).toEqual([{ price: 90, value: 180 }]);
+    expect(CartService.getTotals).toHaveBeenCalledTimes(1);
+    expect(store.state.cart.platformTotals.grand_total).toBe(180);
+    expect(store.state.cart.cartItems[0].extension_attributes.budsies_quote_item_totals.final_price).toBe(90);
   });
 
   it.each([false, true])('falls back only to totals from the current quote (replaced: %s)', async replaced => {
@@ -193,32 +206,8 @@ describe('view_cart readiness through the real cart store', () => {
     mountPage();
     await flush();
     expect(events).toEqual([{ price: 100, value: replaced ? undefined : 200 }]);
-    expect(CartService.getTotals).toHaveBeenCalledTimes(replaced ? 2 : 1);
+    expect(CartService.getTotals).toHaveBeenCalledTimes(1);
     expect(busy()).toEqual([false, false]);
-  });
-
-  it('keeps a quantity edit for the next cart sync while the fallback read is pending', async () => {
-    const fallback = deferred<any>();
-    const merge = jest.fn(() => new DiffLog());
-    store = createStore({ merge });
-    store.commit(`cart/${types.CART_RESET_TOTALS_SYNC}`);
-    jest.mocked(CartService.getTotals).mockRejectedValueOnce(new Error('network')).mockReturnValueOnce(fallback.promise);
-    jest.mocked(CartService.getItems).mockResolvedValue({ resultCode: 200, result: [] } as any);
-    await expect(store.dispatch('cart/overrideServerTotals', { hasShippingInformation: false })).rejects.toThrow('network');
-    mountPage();
-    await flush();
-    expect(CartService.getTotals).toHaveBeenCalledTimes(2);
-    expect(busy()).toEqual([true, false]);
-    expect(store.getters['cart/IS_CART_SYNCING']).toBe(false);
-    store.commit(`cart/${types.CART_UPD_ITEM}`, { product: store.state.cart.cartItems[0], qty: 2 });
-    fallback.resolve(totalsResponse(90, 180));
-    await flush();
-    expect(store.state.cart.cartItems[0].qty).toBe(2);
-    expect(events).toEqual([{ price: 100, value: undefined }]);
-    await store.dispatch('cart/sync', { forceClientState: true });
-    expect(merge).toHaveBeenCalledWith(expect.any(Object), expect.objectContaining({
-      forceClientState: true, clientItems: [expect.objectContaining({ qty: 2 })]
-    }));
   });
 
   it('keeps the latest-started totals when the older response arrives last', async () => {

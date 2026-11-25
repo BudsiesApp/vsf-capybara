@@ -149,19 +149,14 @@ export default {
     EventBus.$on(ORDER_ERROR_EVENT, this.onOrderErrorEventHandler);
   },
   async mounted () {
-    if (!this.checkoutEntryActive || this.isSuccess) return;
+    const isActive = () => this.checkoutEntryActive && !this.isSuccess;
+    if (!isActive()) return;
     try { await this.checkoutEntry; } catch { /* Use the current cart. */ }
-    if (!this.checkoutEntryActive || this.isSuccess) return;
+    if (!isActive()) return;
     await this.$store.dispatch('cart/waitForStartup');
-    if (!this.checkoutEntryActive || this.isSuccess) return;
+    if (!isActive()) return;
     await this.$store.dispatch('cart/waitForIdle');
-    if (!this.checkoutEntryActive || this.isSuccess) return;
-    if (!this.entryRefreshAttempted) {
-      try { await this.$store.dispatch('cart/fetchMissingTotals'); } catch { /* Use local data. */ }
-      if (!this.checkoutEntryActive || this.isSuccess) return;
-      await this.$store.dispatch('cart/waitForIdle');
-    }
-    if (this.checkoutEntryActive && !this.isSuccess && this.productsInCart.length) {
+    if (isActive() && this.productsInCart.length) {
       EventBus.$emit(CartEvents.BEGIN_CHECKOUT);
     }
   },

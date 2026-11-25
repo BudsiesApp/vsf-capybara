@@ -137,6 +137,7 @@ function createStore ({ paymentMethod = 'checkmo', cartItems = [physicalItem] } 
     state: {
       cart: {
         cartItems,
+        paymentTotals: { base_grand_total: 10 },
         isCouponProcessing: false,
         isTotalsSyncing: false,
         isPaymentMethodsSyncing: false,
@@ -162,6 +163,7 @@ function createStore ({ paymentMethod = 'checkmo', cartItems = [physicalItem] } 
     },
     getters: {
       'cart/getCartItems': (state) => state.cart.cartItems,
+      'cart/getPaymentTotals': (state) => state.cart.paymentTotals,
       'cart/isVirtualCart': (state) => state.cart.cartItems.every((item) => item.extension_attributes.is_virtual_item),
       'cart/isCouponProcessing': (state) => state.cart.isCouponProcessing,
       'cart/isTotalsSyncing': (state) => state.cart.isTotalsSyncing,
@@ -181,7 +183,9 @@ function createStore ({ paymentMethod = 'checkmo', cartItems = [physicalItem] } 
       'currency/activeCurrency': () => ({ symbol: '$' })
     },
     actions: {
-      'braintree/createBraintreeClient': () => ({})
+      'braintree/createBraintreeClient': () => ({}),
+      'notification/spawnNotification': () => {},
+      'cart/syncTotals': ({ state }) => { state.cart.paymentTotals = { base_grand_total: 10 }; }
     }
   });
 }
@@ -236,6 +240,25 @@ describe('OConfirmOrder', () => {
     await findPlaceOrderButton(wrapper).trigger('click');
 
     expect(hasPlacedOrder()).toBe(true);
+  });
+
+  it('requires a business refresh before payment and rechecks totals before handing off the order', async () => {
+    const store = createStore();
+    const dispatch = jest.spyOn(store, 'dispatch');
+    store.state.cart.paymentTotals = null;
+    const wrapper = mountConfirmOrder(store);
+
+    expect(findPlaceOrderButton(wrapper).attributes('disabled')).toBeDefined();
+    await wrapper.findAll('button').filter(button => button.text() === 'Refresh totals').at(0).trigger('click');
+    expect(dispatch).toHaveBeenCalledWith('cart/syncTotals', { forceServerSync: true });
+    expect(hasPlacedOrder()).toBe(false);
+    expect(findPlaceOrderButton(wrapper).attributes('disabled')).toBeUndefined();
+
+    store.state.cart.paymentTotals = null;
+    wrapper.vm.placeOrder();
+    expect(hasPlacedOrder()).toBe(false);
+    expect(dispatch).toHaveBeenCalledWith('notification/spawnNotification', expect.objectContaining({ type: 'warning' }));
+    wrapper.destroy();
   });
 
   it.each([

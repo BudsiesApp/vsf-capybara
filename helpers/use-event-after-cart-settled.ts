@@ -13,14 +13,8 @@ export function useEventAfterCartSettled (): void {
     await store.dispatch('cart/waitForIdle');
     if (!active) return;
 
-    try { await store.dispatch('cart/fetchMissingTotals'); } catch { /* Use local data. */ }
-    if (!active) return;
-    await store.dispatch('cart/waitForIdle');
-    if (!active) return;
-
-    const products = store.getters['cart/getCartItems'];
     EventBus.$emit(CartEvents.CART_VIEWED, {
-      products,
+      products: store.getters['cart/getCartItems'],
       platformTotals: store.getters['cart/getLastTotalsSyncDate'] ? store.state.cart.platformTotals : null
     });
   });

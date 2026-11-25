@@ -73,7 +73,6 @@ describe('cart readiness after a catalog refresh', () => {
         mergeClientItems: () => new (require('@vue-storefront/core/modules/cart/helpers/createDiffLog').DiffLog)(),
         mergeServerItems: () => new (require('@vue-storefront/core/modules/cart/helpers/createDiffLog').DiffLog)(),
         syncTotals: async ({ commit }) => { await totals.promise; commit(types.CART_SET_TOTALS_SYNC); totalsApplied.resolve(); },
-        fetchMissingTotals: jest.fn(),
         updateItem: ({ commit }, payload) => commit(types.CART_UPD_ITEM_PROPS, payload)
       }
     }
