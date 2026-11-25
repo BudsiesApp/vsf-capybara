@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuex, { Store } from 'vuex';
 import { mount, Wrapper } from '@vue/test-utils';
 import EventBus from '@vue-storefront/core/compatibility/plugins/event-bus';
+import { storeInjectionKey } from '@vue-storefront/core/application-services/injection-keys';
 
 import OConfirmOrder from './o-confirm-order.vue';
 
@@ -194,7 +195,7 @@ function mountConfirmOrder (store: Store<any>): Wrapper<any> {
   return mount(OConfirmOrder, {
     store,
     propsData: { isActive: true },
-    provide: { ImageHandlerService: {} },
+    provide: { ImageHandlerService: {}, [storeInjectionKey]: store },
     stubs: { SfAccordionItem: true },
     mocks: { $t: (key: string) => key }
   });

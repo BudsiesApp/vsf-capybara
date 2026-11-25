@@ -190,12 +190,15 @@ describe('view_cart readiness through the real cart store', () => {
     expect(busy()).toEqual([true, true]);
     expect(pullMethods).toHaveBeenCalledTimes(1);
     expect(CartService.getTotals).toHaveBeenCalledTimes(1);
-    totals.resolve(totalsResponse(90, 180));
+    const response = totalsResponse(90, 180);
+    response.result.coupon_code = 'SAVE';
+    totals.resolve(response);
     await connection;
     await flush();
     expect(events).toEqual([{ price: 90, value: 180 }]);
     expect(CartService.getTotals).toHaveBeenCalledTimes(1);
     expect(store.state.cart.platformTotals.grand_total).toBe(180);
+    expect(store.getters['cart/getCoupon']).toMatchObject({ code: 'SAVE' });
     expect(store.state.cart.cartItems[0].extension_attributes.budsies_quote_item_totals.final_price).toBe(90);
   });
 
