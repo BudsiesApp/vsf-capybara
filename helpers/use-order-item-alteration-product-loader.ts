@@ -41,7 +41,7 @@ export function useOrderItemAlterationProductLoader (
   const alterationProduct = computed<Product | undefined>(() => {
     const sku = alterationProductSku.value;
 
-    if (!sku) {
+    if (!sku || !order.value) {
       return;
     }
 
@@ -55,7 +55,8 @@ export function useOrderItemAlterationProductLoader (
       product,
       applicationStore,
       {
-        makeProductionTimeRequired: false
+        makeProductionTimeRequired: false,
+        isDomestic: order.value.shipping_address?.country_id === 'US'
       }
     );
   });
