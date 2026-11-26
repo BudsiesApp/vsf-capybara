@@ -63,6 +63,8 @@
           </div>
 
           <m-share-birthday-form
+            :order-id="orderId"
+            :email="email"
             class="_section_content"
             :add-another-button-text="$t('Add another pet')"
             :top-helper-text="$t('Enter your pet\'s birthday so we can send you a special gift')"
