@@ -50,6 +50,8 @@
             <SfSelect
               v-model="birthMonth"
               :required="true"
+              :valid="!errors.length"
+              :error-message="errors[0]"
               :disabled="isDisabled"
               :title="$t('Month')"
               class="_select sf-select--underlined"
@@ -63,10 +65,6 @@
                 {{ monthItem.title }}
               </SfSelectOption>
             </SfSelect>
-
-            <div class="_error-text">
-              {{ errors[0] }}
-            </div>
           </validation-provider>
 
           <validation-provider
@@ -77,8 +75,11 @@
             v-slot="{ errors, classes }"
           >
             <SfSelect
+              :key="daysOptions.length"
               v-model="birthDay"
               :required="true"
+              :valid="!errors.length"
+              :error-message="errors[0]"
               :title="$t('Day')"
               :disabled="isDisabled"
               class="_select sf-select--underlined"
@@ -92,10 +93,6 @@
                 {{ dayItem.title }}
               </SfSelectOption>
             </SfSelect>
-
-            <div class="_error-text">
-              {{ errors[0] }}
-            </div>
           </validation-provider>
         </div>
 
@@ -122,8 +119,8 @@
 import { ValidationObserver, ValidationProvider, extend } from 'vee-validate';
 import { required } from 'vee-validate/dist/rules';
 import Vue, { VueConstructor } from 'vue'
-import { mapState } from 'vuex';
 import { SfButton, SfInput, SfSelect } from '@storefront-ui/vue';
+import { getDaysInMonth } from 'src/modules/budsies';
 import { notifications } from '@vue-storefront/core/modules/cart/helpers';
 import {
   AdditionalContentEntry,
@@ -165,13 +162,14 @@ interface OptionItem {
 }
 
 interface NonReactiveData {
-  monthsOptions: OptionItem[],
-  daysOptions: OptionItem[]
+  monthsOptions: OptionItem[]
 }
 
 export default (Vue as VueConstructor<Vue & NonReactiveData>).extend({
   name: 'MShareBirthdayForm',
   props: {
+    orderId: { type: Number, required: true },
+    email: { type: String, required: true },
     addAnotherButtonText: {
       type: String,
       required: true
@@ -209,20 +207,27 @@ export default (Vue as VueConstructor<Vue & NonReactiveData>).extend({
   data () {
     return {
       name: '',
-      birthMonth: undefined as number | undefined,
+      birthMonth: undefined as number | '' | undefined,
       birthDay: undefined as number | undefined,
       isDisabled: false,
       isBirthdayAdded: false
     }
   },
   computed: {
-    ...mapState({
-      customerEmail: (state: any) => state.checkout.personalDetails.emailAddress
-    })
+    daysOptions (): OptionItem[] {
+      const days = typeof this.birthMonth === 'number' ? getDaysInMonth(this.birthMonth) : 31;
+      return getOptionsList(days, this.$t('DD').toString());
+    }
+  },
+  watch: {
+    birthMonth () {
+      if (this.birthDay !== undefined && this.birthDay >= this.daysOptions.length) {
+        this.birthDay = undefined;
+      }
+    }
   },
   created () {
     this.monthsOptions = getOptionsList(12, this.$t('MM').toString());
-    this.daysOptions = getOptionsList(31, this.$t('DD').toString());
   },
   methods: {
     clearForm () {
@@ -241,7 +246,8 @@ export default (Vue as VueConstructor<Vue & NonReactiveData>).extend({
           name: this.name,
           birthMonth: this.birthMonth,
           birthDay: this.birthDay,
-          email: this.customerEmail
+          email: this.email,
+          orderId: this.orderId
         });
 
         this.isBirthdayAdded = true;
@@ -320,12 +326,6 @@ export default (Vue as VueConstructor<Vue & NonReactiveData>).extend({
     justify-content: center;
   }
 
-  ._error-text {
-    font-size: var(--font-xs);
-    margin-top: 0.5em;
-    color: var(--c-danger);
-  }
-
   ._birthday-added {
     display: flex;
     flex-direction: column;
@@ -340,6 +340,25 @@ export default (Vue as VueConstructor<Vue & NonReactiveData>).extend({
   .california-privacy-notice-link {
     --privacy-notice-link-text-align: end;
     --privacy-notice-link-width: 100%;
+  }
+
+  @include for-mobile {
+    ._fields {
+      flex-wrap: wrap;
+    }
+
+    ._field {
+      &.-input {
+        flex: 0 0 100%;
+        margin-right: 0;
+        margin-bottom: var(--spacer-xs);
+      }
+
+      &.-select {
+        flex: 1;
+        width: auto;
+      }
+    }
   }
 
   @include for-desktop {
