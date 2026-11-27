@@ -47,7 +47,7 @@ export default {
 
       context.output.cacheTags.add(`no-cache`);
 
-      if (route.name === 'page-not-found') {
+      if (route.name === 'page-not-found' || route.name === 'category-not-found') {
         context.server.response.statusCode = 404;
       } else {
         context.server.response.statusCode = 500;

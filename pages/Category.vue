@@ -323,7 +323,7 @@ const resolveCategoryRoute = async (to) => {
       params: to.query
     }
   );
-  return rewrite ? { route, rewritten: true } : { route: { name: 'page-not-found', params: { pathMatch: '/page-not-found/' } } };
+  return rewrite ? { route, rewritten: true } : { route: { name: 'category-not-found' } };
 }
 
 export default {

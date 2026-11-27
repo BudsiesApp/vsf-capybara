@@ -8,6 +8,8 @@ import { mappingFallbackForUrlRewrite } from 'src/modules/url-rewrite';
 import { serverHarness } from '@vue-storefront/core/scripts/utils/test/unit/fixtures/output-cache';
 import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { beforeEachGuard } from '@vue-storefront/core/modules/url/router/beforeEach';
+import { CategoryService } from '@vue-storefront/core/data-resolver/CategoryService';
+import { quickSearchByQuery } from '@vue-storefront/core/lib/search';
 
 import Page from './Category.vue';
 import ErrorPage from './Error.vue';
@@ -73,6 +75,7 @@ jest.mock('theme/helpers', () => ({
 }));
 jest.mock('query-string', () => ({ __esModule: true, default: {} }));
 jest.mock('@vue-storefront/core/store', () => ({ __esModule: true, default: {} }));
+jest.mock('@vue-storefront/core/lib/search', () => ({ quickSearchByQuery: jest.fn() }));
 jest.mock('@vue-storefront/core/app', () => ({}));
 jest.mock('@storefront-ui/vue/src/utilities/mobile-observer', () => ({
   __esModule: true,
@@ -194,6 +197,7 @@ describe('missing category navigation', () => {
 
   beforeEach(() => {
     dispatch = jest.fn().mockResolvedValue(null);
+    (quickSearchByQuery as jest.Mock).mockClear();
     (catalogHooksExecutors.categoryPageVisited as jest.Mock).mockClear();
     Object.assign(store, { getters: { 'category-next/getCategoryFrom': () => null }, dispatch });
     (mappingFallbackForUrlRewrite as jest.Mock).mockImplementation(async (context, payload) => {
@@ -207,7 +211,7 @@ describe('missing category navigation', () => {
       const next = jest.fn();
       await (Page as any).beforeRouteEnter(route, origin, next);
       expect(next).toHaveBeenCalledTimes(1);
-      expect(next).toHaveBeenCalledWith({ name: 'page-not-found', params: { pathMatch: '/page-not-found/' } });
+      expect(next).toHaveBeenCalledWith({ name: 'category-not-found' });
     }
     expect(dispatch.mock.calls.map(call => call[0])).toEqual([
       'category-next/loadCategory', 'urlRewrite/loadUrlRewrite',
@@ -235,7 +239,7 @@ describe('missing category navigation', () => {
     const vm = { onCategoryChangedHandler: jest.fn() };
     await (Page as any).beforeRouteUpdate.call(vm, route, { ...from, params: { slug: 'present' } }, next);
     expect(next).toHaveBeenCalledTimes(1);
-    expect(next).toHaveBeenCalledWith({ name: 'page-not-found', params: { pathMatch: '/page-not-found/' } });
+    expect(next).toHaveBeenCalledWith({ name: 'category-not-found' });
     expect(vm.onCategoryChangedHandler).not.toHaveBeenCalled();
   });
 
@@ -243,27 +247,63 @@ describe('missing category navigation', () => {
     Vue.use(VueRouter);
     const router = new VueRouter({ mode: 'abstract', routes: [
       { path: '/c/:slug/', name: 'category', component: Page as any },
+      { path: '/category-not-found/', name: 'category-not-found', component: ErrorPage as any },
       { path: '*', name: 'page-not-found', component: ErrorPage as any }
     ] });
+    dispatch.mockImplementation(async action => {
+      if (action === 'url/mapUrl') throw new Error('unexpected URL mapping');
+      return null;
+    });
     const mappings = jest.fn(beforeEachGuard);
     router.beforeEach(mappings);
     const completed = new Promise<void>(resolve => router.afterEach(() => resolve()));
     router.push(route.path).catch(() => {});
     await completed;
-    expect(router.currentRoute.name).toBe('page-not-found');
+    expect(router.currentRoute.name).toBe('category-not-found');
     expect(dispatch.mock.calls.filter(call => call[0] === 'category-next/loadCategory')).toHaveLength(1);
+    expect(dispatch.mock.calls.map(call => call[0])).toEqual(['category-next/loadCategory', 'urlRewrite/loadUrlRewrite']);
     expect(mappings).toHaveBeenCalledTimes(2);
   });
 
-  it('loads products for an existing category even when its result is empty', async () => {
-    const category = { id: 42 };
-    (store as any).getters['category-next/getCategoryFrom'] = () => category;
-    dispatch.mockResolvedValue({ items: [], total: 0 });
+  it('loads and renders an existing empty category from a cold lookup', async () => {
+    const category = { id: 42, name: 'Empty category', product_count: 0 };
+    let loadedCategory = null;
+    (store as any).getters['category-next/getCategoryFrom'] = () => loadedCategory;
+    (store as any).getters['category-next/getCurrentCategory'] = category;
+    (quickSearchByQuery as jest.Mock).mockImplementation(async ({ query }) => ({
+      items: query.getAppliedFilters().some(filter => filter.attribute === 'product_count') ? [] : [category]
+    }));
+    dispatch.mockImplementation(async (action, payload) => {
+      if (action === 'category-next/loadCategory') {
+        [loadedCategory] = await CategoryService.getCategories(payload);
+        return loadedCategory || null;
+      }
+      return { items: [], total: 0 };
+    });
     const next = jest.fn();
     await (Page as any).beforeRouteEnter({ ...route, query: {} }, from, next);
+    expect(dispatch).toHaveBeenCalledWith('category-next/loadCategory', { filters: {} });
+    expect(quickSearchByQuery).toHaveBeenCalledTimes(1);
     expect(dispatch).toHaveBeenCalledWith('category-next/loadCategoryProducts', expect.objectContaining({ category }));
+    expect(dispatch.mock.calls.map(call => call[0])).not.toContain('urlRewrite/loadUrlRewrite');
     expect(next).toHaveBeenCalledTimes(1);
     expect(next.mock.calls[0][0]).toEqual(expect.any(Function));
+
+    (useStore as jest.Mock).mockReturnValue(store);
+    const wrapper = shallowMount({ ...Page, mounted: undefined, beforeDestroy: undefined, watch: {} } as any, {
+      mocks: { $store: store, $t: value => value, $route: { query: {}, params: {} } },
+      computed: {
+        getCurrentCategory: () => category,
+        products: () => [],
+        getCategoryProductsTotal: () => 0,
+        filters: () => [],
+        breadcrumbs: () => [],
+        subcategories: () => [],
+        activeFiltersCount: () => 0
+      }
+    });
+    expect(wrapper.findAll('sfheading-stub').wrappers.some(heading => heading.attributes('title') === 'No products found!')).toBe(true);
+    wrapper.destroy();
   });
 
   it('resolves SSR misses before selecting a page, but does not replace a recorded rewrite with 404', async () => {
@@ -273,7 +313,7 @@ describe('missing category navigation', () => {
       const next = jest.fn();
       await (Page as any).beforeRouteEnter(route, { name: undefined }, next);
       expect(next).toHaveBeenCalledTimes(1);
-      expect(next).toHaveBeenCalledWith({ name: 'page-not-found', params: { pathMatch: '/page-not-found/' } });
+      expect(next).toHaveBeenCalledWith({ name: 'category-not-found' });
 
       dispatch.mockImplementation(async action => action === 'urlRewrite/loadUrlRewrite' ? { targetPath: 'target' } : null);
       (mappingFallbackForUrlRewrite as jest.Mock).mockImplementation(async context => {
