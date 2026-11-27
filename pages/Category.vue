@@ -232,6 +232,7 @@ import { useStoryblokReadinessTracker } from 'src/modules/vsf-storyblok-module';
 import castArray from 'lodash-es/castArray';
 import config from 'config';
 import { isServer } from '@vue-storefront/core/helpers';
+import { Logger } from '@vue-storefront/core/lib/logger';
 import i18n from '@vue-storefront/i18n';
 import { htmlDecode } from '@vue-storefront/core/filters';
 import { getSearchOptionsFromRouteParams } from '@vue-storefront/core/modules/catalog-next/helpers/categoryHelpers';
@@ -268,6 +269,10 @@ import { mappingFallbackForUrlRewrite } from 'src/modules/url-rewrite';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 import isObjectEmpty from 'theme/helpers/is-object-empty.function';
 import { useInfinityScroll } from 'theme/helpers/use-infinity-scroll';
+import {
+  loadMoreCategoryProducts,
+  runRecoverableProductsLoad
+} from 'theme/helpers/category-products-loading';
 
 import ASortIcon from 'theme/components/atoms/a-sort-icon';
 import { getCategoryDescriptionStoryFullSlug } from 'theme/components/molecules/helpers/get-category-description-story-full-slug';
@@ -278,44 +283,27 @@ import { GET_ACTIVE_CURRENCY } from 'src/modules/currency';
 const THEME_PAGE_SIZE = 15;
 
 const composeInitialPageState = async (store, route, forceLoad = false) => {
-  try {
-    const filters = getSearchOptionsFromRouteParams(route.params);
-    const cachedCategory = store.getters['category-next/getCategoryFrom'](
-      route.path
-    );
+  const filters = getSearchOptionsFromRouteParams(route.params);
+  const cachedCategory = store.getters['category-next/getCategoryFrom'](
+    route.path
+  );
 
-    const currentCategory =
-      cachedCategory && !forceLoad
-        ? cachedCategory
-        : await store.dispatch('category-next/loadCategory', { filters });
-    await store.dispatch('category-next/loadCategoryProducts', {
-      route,
-      category: currentCategory,
-      pageSize: THEME_PAGE_SIZE
-    });
+  const currentCategory =
+    cachedCategory && !forceLoad
+      ? cachedCategory
+      : await store.dispatch('category-next/loadCategory', { filters });
+  await store.dispatch('category-next/loadCategoryProducts', {
+    route,
+    category: currentCategory,
+    pageSize: THEME_PAGE_SIZE
+  });
 
-    catalogHooksExecutors.categoryPageVisited(currentCategory);
-  } catch (e) {
-    //
-  }
+  catalogHooksExecutors.categoryPageVisited(currentCategory);
 };
 
 const getPageFromRoute = (route) => {
   return route.query.page ? Number.parseInt(route.query.page, 10) : 1;
 };
-
-async function loadProducts (isProductsLoading) {
-  if (isProductsLoading.value) {
-    return;
-  }
-
-  try {
-    isProductsLoading.value = true;
-    await store.dispatch('category-next/loadMoreCategoryProducts');
-  } finally {
-    isProductsLoading.value = false;
-  }
-}
 
 const checkForRewriteRoute = async (to, redirect) => {
   const category = store.getters['category-next/getCategoryByParams'](to.params);
@@ -371,7 +359,7 @@ export default {
     const {
       isInfinityScrollingEnabled
     } = useInfinityScroll(
-      () => loadProducts(isProductsLoading),
+      () => loadMoreCategoryProducts(applicationStore, isProductsLoading),
       nextPageLoadingThreshold
     );
 
@@ -524,7 +512,7 @@ export default {
   watch: {
     sortOrder () {
       if (this.currentPage > 1) {
-        this.changePage();
+        runRecoverableProductsLoad(this.$store, () => this.changePage());
       }
     },
     getCurrentCategory (newValue, oldValue) {
@@ -552,27 +540,39 @@ export default {
   },
   async beforeRouteUpdate (to, from, next) {
     if (to.params.slug === from.params.slug) {
-      await this.updatePage(to);
-      next();
+      const isPageLoaded = await runRecoverableProductsLoad(
+        this.$store,
+        () => this.updatePage(to)
+      );
+
+      next(isPageLoaded ? undefined : false);
       return;
     }
 
-    await this.onCategoryChangedHandler(to);
+    try {
+      await this.onCategoryChangedHandler(to);
 
-    const rewriteRouteData = await checkForRewriteRoute(to);
+      const rewriteRouteData = await checkForRewriteRoute(to);
 
-    if (rewriteRouteData) {
-      if (rewriteRouteData.params.targetPath === from.path) {
-        await this.onCategoryChangedHandler(from);
+      if (rewriteRouteData) {
+        if (rewriteRouteData.params.targetPath === from.path) {
+          await this.onCategoryChangedHandler(from);
+        }
+
+        return next(rewriteRouteData);
       }
-
-      return next(rewriteRouteData);
+    } catch (error) {
+      Logger.error(error, 'category-page')();
+      return next({ name: 'error' });
     }
 
     next();
   },
   async beforeRouteEnter (to, from, next) {
-    if (isServer) next();
+    if (isServer) {
+      next();
+      return;
+    }
 
     const page = getPageFromRoute(to);
 
@@ -586,16 +586,21 @@ export default {
       });
     } else {
       // Pure CSR, with no initial category state
-      await composeInitialPageState(store, to);
+      try {
+        await composeInitialPageState(store, to);
 
-      const rewriteRouteData = await checkForRewriteRoute(to);
+        const rewriteRouteData = await checkForRewriteRoute(to);
 
-      if (rewriteRouteData) {
-        return next(rewriteRouteData);
-      }
+        if (rewriteRouteData) {
+          return next(rewriteRouteData);
+        }
 
-      if (page !== 1) {
-        await store.dispatch('category-next/fetchPageProducts', { page, pageSize: THEME_PAGE_SIZE, route: to });
+        if (page !== 1) {
+          await store.dispatch('category-next/fetchPageProducts', { page, pageSize: THEME_PAGE_SIZE, route: to });
+        }
+      } catch (error) {
+        Logger.error(error, 'category-page')();
+        return next({ name: 'error' });
       }
 
       next(async vm => {
