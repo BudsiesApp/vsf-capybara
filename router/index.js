@@ -213,6 +213,7 @@ let routes = [
       }
     ]
   },
+  { name: 'category-not-found', path: '/category-not-found/', component: ErrorPage },
   { name: 'page-not-found', path: '*', component: ErrorPage },
   { name: 'error', path: '/error/', component: ErrorPage, meta: { layout: 'minimal' } },
   {

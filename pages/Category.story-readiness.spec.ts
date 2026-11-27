@@ -1,11 +1,23 @@
 import Vue from 'vue';
+import VueRouter from 'vue-router';
 import { shallowMount } from '@vue/test-utils';
 import { useStore } from '@vue-storefront/core/application-services';
 import { emitPageRenderedEvent } from 'src/modules/shared';
+import store from '@vue-storefront/core/store';
+import { mappingFallbackForUrlRewrite } from 'src/modules/url-rewrite';
+import { serverHarness } from '@vue-storefront/core/scripts/utils/test/unit/fixtures/output-cache';
+import { catalogHooksExecutors } from '@vue-storefront/core/modules/catalog-next/hooks';
+import { beforeEachGuard } from '@vue-storefront/core/modules/url/router/beforeEach';
+import { CategoryService } from '@vue-storefront/core/data-resolver/CategoryService';
+import { quickSearchByQuery } from '@vue-storefront/core/lib/search';
 
 import Page from './Category.vue';
+import ErrorPage from './Error.vue';
 
-jest.mock('@vue-storefront/core/application-services', () => ({ useStore: jest.fn() }));
+jest.mock('@vue-storefront/core/application-services', () => ({
+  useStore: jest.fn(),
+  useI18n: () => ({ t: (value: string) => value })
+}));
 jest.mock('@vue-storefront/core/request-services', () => ({
   useRequestServices: () => ({ host: 'test' })
 }));
@@ -20,6 +32,7 @@ jest.mock('@vue-storefront/core/compatibility/plugins/event-bus', () => ({
 jest.mock('@vue-storefront/core/filters', () => ({ htmlDecode: value => value }));
 jest.mock('@vue-storefront/core/helpers', () => ({
   isServer: false,
+  routerHelper: { popStateDetected: false },
   onlineHelper: { isOnline: true }
 }));
 jest.mock('@vue-storefront/core/lib/multistore', () => ({ localizedRoute: value => value }));
@@ -51,7 +64,7 @@ jest.mock('@vue-storefront/core/modules/catalog-next/helpers/categoryHelpers', (
 jest.mock('@vue-storefront/core/modules/catalog-next/hooks', () => ({
   __esModule: true,
   default: {},
-  catalogHooksExecutors: jest.fn(() => ({}))
+  catalogHooksExecutors: { categoryPageVisited: jest.fn() }
 }));
 jest.mock('theme/helpers', () => ({
   __esModule: true,
@@ -62,6 +75,8 @@ jest.mock('theme/helpers', () => ({
 }));
 jest.mock('query-string', () => ({ __esModule: true, default: {} }));
 jest.mock('@vue-storefront/core/store', () => ({ __esModule: true, default: {} }));
+jest.mock('@vue-storefront/core/lib/search', () => ({ quickSearchByQuery: jest.fn() }));
+jest.mock('@vue-storefront/core/app', () => ({}));
 jest.mock('@storefront-ui/vue/src/utilities/mobile-observer', () => ({
   __esModule: true,
   default: {},
@@ -85,6 +100,7 @@ jest.mock('theme/helpers/use-infinity-scroll', () => ({
   useInfinityScroll: jest.fn(() => ({}))
 }));
 jest.mock('theme/components/atoms/a-sort-icon', () => ({ __esModule: true, default: {} }));
+jest.mock('theme/components/molecules/m-error', () => ({ __esModule: true, default: {} }));
 jest.mock('theme/components/molecules/m-category-description-story.vue', () => ({
   __esModule: true,
   default: {}
@@ -172,4 +188,181 @@ it('uses the category record and normalized description while products are still
   expect(emitPageRenderedEvent).toHaveBeenCalledTimes(4);
 
   wrapper.destroy();
+});
+
+describe('missing category navigation', () => {
+  const route = { path: '/c/missing/', params: { slug: 'missing' }, query: { page: '2' } };
+  const from = { name: 'home', path: '/' };
+  let dispatch: jest.Mock;
+
+  beforeEach(() => {
+    dispatch = jest.fn().mockResolvedValue(null);
+    (quickSearchByQuery as jest.Mock).mockClear();
+    (catalogHooksExecutors.categoryPageVisited as jest.Mock).mockClear();
+    Object.assign(store, { getters: { 'category-next/getCategoryFrom': () => null }, dispatch });
+    (mappingFallbackForUrlRewrite as jest.Mock).mockImplementation(async (context, payload) => {
+      const rewrite = await context.dispatch('urlRewrite/loadUrlRewrite', { requestPath: payload.url });
+      return rewrite ? { name: 'rewrite', params: { targetPath: rewrite.targetPath } } : undefined;
+    });
+  });
+
+  it('selects page-not-found once without loading products for browser entry and hydration', async () => {
+    for (const origin of [from, { name: undefined }]) {
+      const next = jest.fn();
+      await (Page as any).beforeRouteEnter(route, origin, next);
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith({ name: 'category-not-found' });
+    }
+    expect(dispatch.mock.calls.map(call => call[0])).toEqual([
+      'category-next/loadCategory', 'urlRewrite/loadUrlRewrite',
+      'category-next/loadCategory', 'urlRewrite/loadUrlRewrite'
+    ]);
+    expect(catalogHooksExecutors.categoryPageVisited).not.toHaveBeenCalled();
+  });
+
+  it('preserves rewrites and routes lookup failures to the error page', async () => {
+    dispatch.mockImplementation(async action => action === 'urlRewrite/loadUrlRewrite' ? { targetPath: 'target' } : null);
+    const next = jest.fn();
+    await (Page as any).beforeRouteEnter(route, from, next);
+    expect(next).toHaveBeenCalledWith({ name: 'rewrite', params: { targetPath: 'target' } });
+    expect(next).toHaveBeenCalledTimes(1);
+
+    dispatch.mockRejectedValue(new Error('lookup failed'));
+    next.mockClear();
+    await (Page as any).beforeRouteEnter(route, from, next);
+    expect(next).toHaveBeenCalledWith({ name: 'error' });
+    expect(next).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not load products when switching to a missing category', async () => {
+    const next = jest.fn();
+    const vm = { onCategoryChangedHandler: jest.fn() };
+    await (Page as any).beforeRouteUpdate.call(vm, route, { ...from, params: { slug: 'present' } }, next);
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(next).toHaveBeenCalledWith({ name: 'category-not-found' });
+    expect(vm.onCategoryChangedHandler).not.toHaveBeenCalled();
+  });
+
+  it('finishes actual router navigation without re-entering the missing category', async () => {
+    Vue.use(VueRouter);
+    const router = new VueRouter({ mode: 'abstract', routes: [
+      { path: '/c/:slug/', name: 'category', component: Page as any },
+      { path: '/category-not-found/', name: 'category-not-found', component: ErrorPage as any },
+      { path: '*', name: 'page-not-found', component: ErrorPage as any }
+    ] });
+    dispatch.mockImplementation(async action => {
+      if (action === 'url/mapUrl') throw new Error('unexpected URL mapping');
+      return null;
+    });
+    const mappings = jest.fn(beforeEachGuard);
+    router.beforeEach(mappings);
+    const completed = new Promise<void>(resolve => router.afterEach(() => resolve()));
+    router.push(route.path).catch(() => {});
+    await completed;
+    expect(router.currentRoute.name).toBe('category-not-found');
+    expect(dispatch.mock.calls.filter(call => call[0] === 'category-next/loadCategory')).toHaveLength(1);
+    expect(dispatch.mock.calls.map(call => call[0])).toEqual(['category-next/loadCategory', 'urlRewrite/loadUrlRewrite']);
+    expect(mappings).toHaveBeenCalledTimes(2);
+  });
+
+  it('loads and renders an existing empty category from a cold lookup', async () => {
+    const category = { id: 42, name: 'Empty category', product_count: 0 };
+    let loadedCategory = null;
+    (store as any).getters['category-next/getCategoryFrom'] = () => loadedCategory;
+    (store as any).getters['category-next/getCurrentCategory'] = category;
+    (quickSearchByQuery as jest.Mock).mockImplementation(async ({ query }) => ({
+      items: query.getAppliedFilters().some(filter => filter.attribute === 'product_count') ? [] : [category]
+    }));
+    dispatch.mockImplementation(async (action, payload) => {
+      if (action === 'category-next/loadCategory') {
+        [loadedCategory] = await CategoryService.getCategories(payload);
+        return loadedCategory || null;
+      }
+      return { items: [], total: 0 };
+    });
+    const next = jest.fn();
+    await (Page as any).beforeRouteEnter({ ...route, query: {} }, from, next);
+    expect(dispatch).toHaveBeenCalledWith('category-next/loadCategory', { filters: {} });
+    expect(quickSearchByQuery).toHaveBeenCalledTimes(1);
+    expect(dispatch).toHaveBeenCalledWith('category-next/loadCategoryProducts', expect.objectContaining({ category }));
+    expect(dispatch.mock.calls.map(call => call[0])).not.toContain('urlRewrite/loadUrlRewrite');
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(next.mock.calls[0][0]).toEqual(expect.any(Function));
+
+    (useStore as jest.Mock).mockReturnValue(store);
+    const wrapper = shallowMount({ ...Page, mounted: undefined, beforeDestroy: undefined, watch: {} } as any, {
+      mocks: { $store: store, $t: value => value, $route: { query: {}, params: {} } },
+      computed: {
+        getCurrentCategory: () => category,
+        products: () => [],
+        getCategoryProductsTotal: () => 0,
+        filters: () => [],
+        breadcrumbs: () => [],
+        subcategories: () => [],
+        activeFiltersCount: () => 0
+      }
+    });
+    expect(wrapper.findAll('sfheading-stub').wrappers.some(heading => heading.attributes('title') === 'No products found!')).toBe(true);
+    wrapper.destroy();
+  });
+
+  it('resolves SSR misses before selecting a page, but does not replace a recorded rewrite with 404', async () => {
+    const helpers = require('@vue-storefront/core/helpers');
+    helpers.isServer = true;
+    try {
+      const next = jest.fn();
+      await (Page as any).beforeRouteEnter(route, { name: undefined }, next);
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith({ name: 'category-not-found' });
+
+      dispatch.mockImplementation(async action => action === 'urlRewrite/loadUrlRewrite' ? { targetPath: 'target' } : null);
+      (mappingFallbackForUrlRewrite as jest.Mock).mockImplementation(async context => {
+        await context.dispatch('urlRewrite/loadUrlRewrite', {});
+        return undefined;
+      });
+      next.mockClear();
+      await (Page as any).beforeRouteEnter(route, { name: undefined }, next);
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith(undefined);
+
+      dispatch.mockRejectedValue(new Error('backend failure'));
+      next.mockClear();
+      await (Page as any).beforeRouteEnter(route, { name: undefined }, next);
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledWith({ name: 'error' });
+    } finally {
+      helpers.isServer = false;
+    }
+  });
+
+  it('does not cache a missing SSR response, allowing a newly indexed category to load', async () => {
+    const helpers = require('@vue-storefront/core/helpers');
+    helpers.isServer = true;
+    let indexed = false;
+    const harness = serverHarness(async context => {
+      (store as any).getters['category-next/getCategoryFrom'] = () => indexed ? { id: 42 } : null;
+      let destination;
+      await (Page as any).beforeRouteEnter(route, { name: undefined }, value => { destination = value; });
+      if (destination) {
+        await (ErrorPage as any).asyncData({ route: destination, context });
+        return "We can't find the page";
+      }
+      return 'Category';
+    });
+    try {
+      const missing = await harness.visit(route.path);
+      expect(missing.statusCode).toBe(404);
+      expect(missing.body).toContain("We can't find the page");
+      expect(missing.get('location')).toBeUndefined();
+      expect(missing.get('x-vs-cache-tags')).toContain('no-cache');
+      expect(harness.cache.set).not.toHaveBeenCalled();
+
+      indexed = true;
+      const found = await harness.visit(route.path);
+      expect(found.statusCode).toBe(200);
+      expect(found.body).toContain('Category');
+    } finally {
+      helpers.isServer = false;
+    }
+  });
 });
