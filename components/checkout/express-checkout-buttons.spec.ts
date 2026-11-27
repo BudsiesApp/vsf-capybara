@@ -49,9 +49,10 @@ it.each([['paypal', 'clear-nonce', 'payment_method_nonce'], ['amazon', 'clear-se
     const clearSession = jest.fn();
     const notify = jest.fn();
     const store = new Vuex.Store({
-      state: { user: { current: null }, cart: { cartItems: [], cartServerToken: 'quote', platformTotals: null } },
+      state: { user: { current: null }, cart: { cartItems: [], cartServerToken: 'quote', platformTotals: null, ready: true } },
       getters: {
         'cart/getPaymentTotals': state => state.cart.platformTotals,
+        'cart/canStartExpressCheckout': state => state.cart.ready,
         'cart/isVirtualCart': () => true,
         'checkout/getPersonalDetails': () => ({}),
         'checkout/getShippingDetails': () => ({}),
@@ -79,6 +80,17 @@ it.each([['paypal', 'clear-nonce', 'payment_method_nonce'], ['amazon', 'clear-se
     store.state.cart.platformTotals = totals;
     await Vue.nextTick();
     expect(wrapper.find('._buttons').isVisible()).toBe(true);
+    expect(wrapper.find('._buttons').attributes('inert')).toBeUndefined();
+    store.state.cart.ready = false;
+    await Vue.nextTick();
+    expect(wrapper.find('._buttons').isVisible()).toBe(true);
+    expect(wrapper.find('._buttons').attributes('inert')).toBeDefined();
+    expect(wrapper.find('._buttons').attributes('aria-disabled')).toBe('true');
+    expect(onBegin).not.toHaveBeenCalled();
+    store.state.cart.ready = true;
+    await Vue.nextTick();
+    expect(wrapper.find('._buttons').attributes('inert')).toBeUndefined();
+    expect(onBegin).not.toHaveBeenCalled();
     vm.onPaymentStarted();
     expect(onBegin).toHaveBeenCalledWith(true);
 

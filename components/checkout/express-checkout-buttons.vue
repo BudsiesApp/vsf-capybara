@@ -1,7 +1,7 @@
 <template>
   <div class="express-checkout" v-if="braintreeClient">
-    <CheckoutTotalsRetry v-if="sorted.length && !hasPaymentTotals" />
-    <div class="_buttons" v-show="hasPaymentTotals">
+    <CheckoutTotalsRetry v-if="sorted.length" class="_retry" express />
+    <div class="_buttons" v-show="hasPaymentTotals" :class="{ '-inactive': !canStartExpressCheckout }" :aria-disabled="!canStartExpressCheckout ? 'true' : null" :inert="!canStartExpressCheckout ? '' : null">
       <component
         v-for="btn in sorted"
         class="_button"
@@ -96,6 +96,7 @@ export default defineComponent({
     const windowObj = inject<Window & typeof window>('WindowObject');
     const isPlacing = ref(false);
     const hasPaymentTotals = computed(() => !!applicationStore.getters['cart/getPaymentTotals']);
+    const canStartExpressCheckout = computed(() => !!applicationStore.getters['cart/canStartExpressCheckout']);
 
     let activeShippingDetailsChangedPromise: undefined | Promise<ExpressCheckoutUpdateData>;
     let nextShippingDetailsChangedData: undefined | ShippingDetailsChangedCallbackData;
@@ -400,6 +401,7 @@ export default defineComponent({
     return {
       braintreeClient,
       hasPaymentTotals,
+      canStartExpressCheckout,
       onShippingDetailsChanged,
       onExpressCheckoutAuthorized,
       onPaymentStarted,
@@ -413,11 +415,20 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .express-checkout {
+  ._retry + ._buttons {
+    margin-top: var(--spacer-sm);
+  }
+
   ._buttons {
     display: flex;
     flex-direction: column;
     position: relative;
     z-index: 0;
+
+    &.-inactive {
+      opacity: 0.5;
+      pointer-events: none;
+    }
 
     ._button {
       margin-top: var(--spacer-sm);

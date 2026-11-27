@@ -1,7 +1,7 @@
 <template>
-  <div v-if="!hasPaymentTotals">
+  <div v-if="needsRetry">
     <p>{{ $t('Order totals are unavailable. Refresh totals to continue.') }}</p>
-    <SfButton :disabled="isRetrying || isSyncingTotals" @click="refreshTotals">
+    <SfButton :disabled="isRetrying || isBusy" @click="refreshTotals">
       {{ $t('Refresh totals') }}
     </SfButton>
   </div>
@@ -17,14 +17,17 @@ import { requirePaymentTotals } from '@vue-storefront/core/modules/checkout/help
 export default defineComponent({
   name: 'CheckoutTotalsRetry',
   components: { SfButton },
-  setup () {
+  props: { express: { type: Boolean, default: false } },
+  setup (props) {
     const store = useStore();
     const hasPaymentTotals = computed(() => !!store.getters['cart/getPaymentTotals']);
     const isSyncingTotals = computed(() => store.getters[IS_TOTALS_SYNCING]);
+    const needsRetry = computed(() => !hasPaymentTotals.value || (props.express && store.getters['cart/hasTotalsRefreshFailed']));
+    const isBusy = computed(() => props.express ? store.getters['cart/isCartBusy'] : isSyncingTotals.value);
     const isRetrying = ref(false);
 
     async function refreshTotals (): Promise<void> {
-      if (hasPaymentTotals.value || isSyncingTotals.value || isRetrying.value) return;
+      if (!needsRetry.value || isBusy.value || isRetrying.value) return;
       isRetrying.value = true;
       try {
         await store.dispatch('cart/syncTotals', { forceServerSync: true });
@@ -34,7 +37,7 @@ export default defineComponent({
       if (!hasPaymentTotals.value) requirePaymentTotals(store);
     }
 
-    return { hasPaymentTotals, isSyncingTotals, isRetrying, refreshTotals };
+    return { needsRetry, isBusy, isRetrying, refreshTotals };
   }
 });
 </script>
