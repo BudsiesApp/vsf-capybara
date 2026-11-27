@@ -269,10 +269,7 @@ import { mappingFallbackForUrlRewrite } from 'src/modules/url-rewrite';
 import getCurrentThemeClass from 'theme/helpers/get-current-theme-class';
 import isObjectEmpty from 'theme/helpers/is-object-empty.function';
 import { useInfinityScroll } from 'theme/helpers/use-infinity-scroll';
-import {
-  loadMoreCategoryProducts,
-  runRecoverableProductsLoad
-} from 'theme/helpers/category-products-loading';
+import { useCategoryProductsLoading } from 'theme/helpers/use-category-products-loading';
 
 import ASortIcon from 'theme/components/atoms/a-sort-icon';
 import { getCategoryDescriptionStoryFullSlug } from 'theme/components/molecules/helpers/get-category-description-story-full-slug';
@@ -285,13 +282,14 @@ const THEME_PAGE_SIZE = 15;
 const composeInitialPageState = async (store, route, forceLoad = false) => {
   const filters = getSearchOptionsFromRouteParams(route.params);
   const cachedCategory = store.getters['category-next/getCategoryFrom'](
-    route.path
+    route.path.replace(/\/$/, '')
   );
 
   const currentCategory =
     cachedCategory && !forceLoad
       ? cachedCategory
       : await store.dispatch('category-next/loadCategory', { filters });
+  if (!currentCategory) return false;
   await store.dispatch('category-next/loadCategoryProducts', {
     route,
     category: currentCategory,
@@ -299,29 +297,33 @@ const composeInitialPageState = async (store, route, forceLoad = false) => {
   });
 
   catalogHooksExecutors.categoryPageVisited(currentCategory);
+  return true;
 };
 
 const getPageFromRoute = (route) => {
   return route.query.page ? Number.parseInt(route.query.page, 10) : 1;
 };
 
-const checkForRewriteRoute = async (to, redirect) => {
-  const category = store.getters['category-next/getCategoryByParams'](to.params);
+const resolveCategoryRoute = async (to) => {
+  const filters = getSearchOptionsFromRouteParams(to.params);
+  const category = store.getters['category-next/getCategoryFrom'](to.path.replace(/\/$/, '')) ||
+    await store.dispatch('category-next/loadCategory', { filters });
+  if (category) return { category };
 
-  if (!isObjectEmpty(category)) {
-    return;
-  }
-
-  return mappingFallbackForUrlRewrite(
+  let rewrite;
+  const route = await mappingFallbackForUrlRewrite(
     {
-      dispatch: store.dispatch
+      dispatch: async (...args) => {
+        rewrite = await store.dispatch(...args);
+        return rewrite;
+      }
     },
     {
       url: to.path,
-      params: to.query,
-      redirect
+      params: to.query
     }
-  )
+  );
+  return rewrite ? { route, rewritten: true } : { route: { name: 'page-not-found', params: { pathMatch: '/page-not-found/' } } };
 }
 
 export default {
@@ -354,12 +356,16 @@ export default {
     const { onStoryRendered } = useStoryblokReadinessTracker(trackingKey, storyDependencies, emitPageRenderedEvent);
     const requestServices = useRequestServices();
     const nextPageLoadingThreshold = ref(null);
-    const isProductsLoading = ref(false);
+    const {
+      isProductsLoading,
+      loadMoreProducts,
+      runRecoverableProductsLoad
+    } = useCategoryProductsLoading();
 
     const {
       isInfinityScrollingEnabled
     } = useInfinityScroll(
-      () => loadMoreCategoryProducts(applicationStore, isProductsLoading),
+      loadMoreProducts,
       nextPageLoadingThreshold
     );
 
@@ -369,7 +375,8 @@ export default {
       nextPageLoadingThreshold,
       requestServices,
       isInfinityScrollingEnabled,
-      isProductsLoading
+      isProductsLoading,
+      runRecoverableProductsLoad
     }
   },
   data () {
@@ -512,7 +519,7 @@ export default {
   watch: {
     sortOrder () {
       if (this.currentPage > 1) {
-        runRecoverableProductsLoad(this.$store, () => this.changePage());
+        this.runRecoverableProductsLoad(() => this.changePage());
       }
     },
     getCurrentCategory (newValue, oldValue) {
@@ -535,13 +542,10 @@ export default {
   },
   async serverPrefetch () {
     await this.onCategoryChangedHandler(this.$route);
-
-    return checkForRewriteRoute(this.$route, this.requestServices.redirect);
   },
   async beforeRouteUpdate (to, from, next) {
     if (to.params.slug === from.params.slug) {
-      const isPageLoaded = await runRecoverableProductsLoad(
-        this.$store,
+      const isPageLoaded = await this.runRecoverableProductsLoad(
         () => this.updatePage(to)
       );
 
@@ -550,17 +554,10 @@ export default {
     }
 
     try {
+      const resolution = await resolveCategoryRoute(to);
+      if (resolution.route) return next(resolution.route);
+      if (resolution.rewritten) return next();
       await this.onCategoryChangedHandler(to);
-
-      const rewriteRouteData = await checkForRewriteRoute(to);
-
-      if (rewriteRouteData) {
-        if (rewriteRouteData.params.targetPath === from.path) {
-          await this.onCategoryChangedHandler(from);
-        }
-
-        return next(rewriteRouteData);
-      }
     } catch (error) {
       Logger.error(error, 'category-page')();
       return next({ name: 'error' });
@@ -570,11 +567,26 @@ export default {
   },
   async beforeRouteEnter (to, from, next) {
     if (isServer) {
-      next();
+      try {
+        const resolution = await resolveCategoryRoute(to);
+        next(resolution.route);
+      } catch (error) {
+        Logger.error(error, 'category-page')();
+        next({ name: 'error' });
+      }
       return;
     }
 
     const page = getPageFromRoute(to);
+
+    try {
+      const resolution = await resolveCategoryRoute(to);
+      if (resolution.route) return next(resolution.route);
+      if (resolution.rewritten) return next();
+    } catch (error) {
+      Logger.error(error, 'category-page')();
+      return next({ name: 'error' });
+    }
 
     // SSR no need to invoke SW caching here
     if (!from.name) {
@@ -588,12 +600,6 @@ export default {
       // Pure CSR, with no initial category state
       try {
         await composeInitialPageState(store, to);
-
-        const rewriteRouteData = await checkForRewriteRoute(to);
-
-        if (rewriteRouteData) {
-          return next(rewriteRouteData);
-        }
 
         if (page !== 1) {
           await store.dispatch('category-next/fetchPageProducts', { page, pageSize: THEME_PAGE_SIZE, route: to });
@@ -687,8 +693,9 @@ export default {
         : this.getCurrentCategory.path.startsWith(category.path);
     },
     async onCategoryChangedHandler (categoryRoute) {
-      await composeInitialPageState(store, categoryRoute);
-      await this.updatePage(categoryRoute);
+      if (await composeInitialPageState(store, categoryRoute)) {
+        await this.updatePage(categoryRoute);
+      }
     },
     async updatePage (route) {
       if (route.query.page) {
